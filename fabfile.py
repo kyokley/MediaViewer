@@ -90,24 +90,24 @@ server {{
 
     # Django media
     location /media  {{
-        alias {installDir}/mediaviewer/static/media;  # your Django project's media files - amend as required
+        alias {installDir}/mediaviewer/static/media;
         expires 1y;
     }}
 
     location /static {{
-        alias {installDir}/mediaviewer/static; # your Django project's static files - amend as required
+        alias {installDir}/mediaviewer/static;
         expires 1d;
     }}
 
     # Finally, send all non-media requests to the Django server.
     location /mediaviewer{{
         uwsgi_pass  django;
-        include     {installDir}/server/uwsgi_params; # the uwsgi_params file you installed
+        include     {installDir}/server/uwsgi_params;
     }}
 
     location /admin{{
         uwsgi_pass  django;
-        include     {installDir}/server/uwsgi_params; # the uwsgi_params file you installed
+        include     {installDir}/server/uwsgi_params;
     }}
 
     location /static/admin/ {{
