@@ -1,0 +1,96 @@
+{% extends "home.html" %}
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load url from future %}
+{% include title %}
+
+{% include css %}
+
+{% include navbar %}
+
+    <div class="container">
+            <div class="jumbotron">
+                {% block jumbotron %}
+                <form action="{% url 'mediaviewer:addrequests' %}" method="post">
+                <ol class="breadcrumb">
+                    <li><a href="/mediaviewer/">Home</a></li>
+                    <li class="active">Requests</li>
+                </ol>
+                <h1>Requests</h1>
+                <h3>
+                    Welcome to the requests page. Feel free to make submissions but don't be surprised when I ignore them! Votes are limited to one per request per user per day.
+                </h3>
+                    {% csrf_token %}
+                    <table>
+                        <tr>
+                            <td>New Request:</td>
+                            <td><input type="text" name="newrequest" id="request-textbox" class="form-control request-textbox" value=""></td>
+                            <td><input class='btn btn-info addrequestbutton' name="addrequestbutton" type="submit" value="Add" /></td>
+                        </tr>
+                    </table>
+                </form>
+                {% endblock %}
+            </div>
+
+            {% block main %}
+            <table id="myTable" class="table table-striped cell-border"> 
+                <thead> 
+                    <tr> 
+                        <th class="all"><center>File Name</center></th> 
+                        <th class='desktop'><center>Supporters</center></th> 
+                        <th class='min-tablet-p'><center>Vote!</center></th> 
+                        {% if user.is_staff %}
+                            <th class="desktop"><center>Added by</center></th> 
+                            <th class='desktop'><center>Done</center></th> 
+                        {% endif %}
+                        <th></th>
+                    </tr> 
+                </thead> 
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><center>{{ item.name }}</center></td>
+                        <td><center><div id='numberOfVotes-{{ item.id }}'>{{ item.numberOfVotes }}</div></center></td>
+                        {% if item.canVote %}
+                        <td><center><input class='btn btn-info vote-btn' id="vote-{{ item.id }}" name="{{ item.id }}" type="button" value="Vote" onclick="callAjaxVote('{{item.id}}', '{{csrf_token}}')"/></center></td>
+                        {% else %}
+                        <td><center>Thanks for voting!</center></td>
+                        {% endif %}
+                        {% if user.is_staff %}
+                            <td><center>{{ item.user.username }}</center></td> 
+                            <td><center><input class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" type="button" value="Done" onclick="callDoneButton('{{item.id}}', '{{csrf_token}}')" /></center></td>
+                        {% endif %}
+                        <td></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+    {% endblock %}
+
+    {% include footer %}
+
+    {% block javascript %}
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- <script src="https://code.jquery.com/jquery-1.10.2.min.js"> -->
+    <script src="{% static "assets/jquery-1.10.1.min.js" %}"></script>
+    <script src="{% static "DataTables-1.10.4/media/js/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "assets/dataTables.bootstrap.js" %}"></script>
+    <script src="{% static "assets/dataTables.responsive.min.js" %}"></script>
+    <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "assets/mediaviewer.js" %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+          preparePage($, '{{csrf_token}}');
+            prepareTableForRequests($);
+
+            prepareVoteButton($, '{{csrf_token }}');
+
+            prepareDoneButton($, '{{csrf_token }}');
+
+            prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+});
+    </script>
+{% endblock %}

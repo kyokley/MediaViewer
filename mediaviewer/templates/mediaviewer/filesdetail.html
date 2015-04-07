@@ -1,0 +1,217 @@
+{% extends "home.html" %}
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load url from future %}
+{% include title %}
+
+{% include css %}
+
+{% include navbar %}
+
+    <div class="container">
+            <div class="jumbotron">
+                {% block jumbotron %}
+                <ol class="breadcrumb">
+                {% if file.isMovie %}
+                    <li><a href="/mediaviewer/">Home</a></li>
+                    <li><a href="/mediaviewer/movies/">Movies</a></li>
+                    <li class="active">{{ file.rawSearchString }}</li>
+                {% else %}
+                    <li><a href="/mediaviewer/">Home</a></li>
+                    <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                    <li class="active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
+                {% endif %}
+                </ol>
+                <h1>File Detail</h1>
+                <h3>
+                    {% if user.is_staff %}
+                        <ul><li>File Name: {{ file.fileName }}</li></ul>
+                        <ul><li>Local Path: {{ file.path.localPath }}</li></ul>
+                        <ul><li>Remote Path: {{ file.path.remotePath }}</li></ul>
+                    {% endif %}
+                    {% if file.size %}
+                        <ul><li>Size: {{ file.size }}</li></ul>
+                    {% endif %}
+                    {% if user.is_staff %}
+                        <ul><li>Skip: {{ skip }}</li></ul>
+                        <ul><li>Finished: {{ finished }}</li></ul>
+                        <ul><li>Errors:</li></ul>
+                        <ul>
+                            <ul>
+                                <h4>
+                                    {% if file.hasErrors %}
+                                        {% for error in file.errors %}
+                                            {% if not error.ignore %}
+                                                <li>{{ error.errorStr }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>None</li>
+                                    {% endif %}
+                                </h4>
+                            </ul>
+                        </ul>
+                    {% endif %}
+                    {% if file.finished %}
+                        {% if file.isTVShow %}
+                            <ul><li>Date Downloaded: {{ file.datatransmission.date }}</li></ul>
+                        {% else %}
+                            <ul><li>Date Added: {{ file.datecreated.date }}</li></ul>
+                        {% endif %}
+                    {% endif %}
+                    {% if file.usercomment %}
+                        <ul><li>Date Edited: {{ file.usercomment.dateedited }}</li></ul>
+                    {% endif %}
+                    {% if file.finished and can_download %}
+                        <ul>
+                            <ul>
+                                <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
+                            </ul>
+                        </ul>
+                    {% endif %}
+                </h3>
+            {% endblock %}
+            </div>
+
+        {% block messages %}
+        {% endblock %}
+
+        {% block main %}
+        <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
+                    {% if user.is_staff %}
+                    <div class="jumbotron">
+                        <h1>File Admin Info</h1>
+                        <h3>
+                        <ul><li>Search:</li></ul>
+                        <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.searchString }}">
+                        <ul><li>IMDB ID:</li></ul>
+                        <input type="text" name="imdb_id" id="imdb_id-textbox" class="form-control search-textbox imdb_id-textbox" value="{{ file.imdb_id }}">
+                        <ul><li>Hide:
+                            <input type="hidden" name="hidden" value="" id="hide-checkbox-input" />
+                            <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
+                        </li></ul>
+                    </h3>
+                    </div>
+                    {% endif %}
+            <div class="well well-sm">
+                    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+                    {% csrf_token %}
+                    {% if posterfile %}
+                    <table class="description-table">
+                        <tr>
+                            <td>
+                                <h2>Genre:</h2>
+                                <ul><div id="genre">{{ posterfile.genre }}</div></ul>
+                            </td>
+                            <td rowspan="4">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="caption">
+                                                {% if file.isMovie %}
+                                                    {{ file.searchString }}
+                                                {% else %}
+                                                    {{ file.getScrapedFullName }}
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            {% if posterfile.image %}
+                                                <div id="image-holder" class="image-holder">
+                                                <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="poster"/>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if posterfile.episodename %}
+                                    <tr>
+                                        <td>
+                                            <div class="caption">
+                                                {{ posterfile.episodename }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h2>Writer:</h2>
+                                <ul><div id="writer">{{ posterfile.writer }}</div></ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h2>Director:</h2>
+                                <ul><div id="director">{{ posterfile.director }}</div></ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <h2>Actors:</h2>
+                                <ul><div id="actors">{{ posterfile.actors }}</div></ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h2>Description:</h2>
+                                <ul><div id="description">{{ posterfile.extendedplot }}</div></ul>
+                            </td>
+                        </tr>
+                    </table>
+                    {% else %}
+                    <p><ul><h2>No file data found</h2></ul></p>
+                    {% endif %}
+                    <h2>Comment:</h2>
+                    <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
+                    <p></p>
+                    <h2>
+                        <label>Viewed:</label>
+                            <input type="hidden" name="viewed" value="" id="checkbox-input" />
+                            <input type="checkbox" id="toggle-viewed" class="toggle-viewed"/>
+                    </h2>
+                    <p><input type="submit" value="Save" /></p>
+            </div>
+        </form>
+        {% endblock %}
+    </div> <!-- /container -->
+
+    {% include footer %}
+
+    {% block javascript %}
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- <script src="https://code.jquery.com/jquery-1.10.2.min.js"> -->
+    <script src="{% static "assets/jquery-1.10.1.min.js" %}"></script>
+    <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "assets/mediaviewer.js" %}"></script>
+    <script type="text/javascript">
+
+      preparePage($, '{{csrf_token}}');
+        $(document).ready(function(){
+                setFileDetailCheckboxes('{{ viewed }}', '{{ file.hide }}');
+                var input = document.getElementById('checkbox-input');
+                var viewedInput = document.getElementById('toggle-viewed')
+                if (viewedInput !== null){
+                    viewedInput.addEventListener('click', function() {
+                      input.value = this.checked;
+                    });
+                }
+
+                var hideInput = document.getElementById('hide-checkbox-input');
+                var toggleHide = document.getElementById('toggle-hide');
+                if (toggleHide !== null){
+                    toggleHide.addEventListener('click', function() {
+                      hideInput.value = this.checked;
+                    });
+                }
+
+                prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+
+        });
+    </script>
+{% endblock %}

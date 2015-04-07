@@ -1,0 +1,218 @@
+{% extends "home.html" %}
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load url from future %}
+{% include title %}
+
+{% include css %}
+
+<div class="container">
+        <div class="jumbotron">
+            {% block jumbotron %}
+            <h1>Settings</h1>
+            {% endblock %}
+        </div>
+
+        {% include messages %}
+
+        {% block main %}
+        <div class="well well-sm">
+    <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
+        {% csrf_token %}
+            <h2>Account Settings</h2>
+            <ul>
+                <input type="hidden" name="option" value="" id="btn-input" />
+                <label id="optionsRadio">IP Format:</label>
+                    <div class="input">
+                        <ul class="inputs-list">
+                            <ul>
+                                <label>
+                                    <input type="radio" checked name="optionsRadios" value="local_ip" id="local_ip"/>
+                                    <span>Internal IP</span>
+                                </label>
+                            </ul>
+                            <ul>
+                                <label>
+                                    <input type="radio" name="optionsRadios" value="bangup" id="bangup"/>
+                                    <span>bangup.dyndns.org</span>
+                                </label>
+                            </ul>
+                        </ul>
+                    </div>
+                </label>
+            </ul>
+            <ul>
+                <label>Site Theme:</label>
+                <div class="input">
+                    <ul class="inputs-list">
+                        <ul>
+                            <label>
+                                <input type="radio"  checked name="site_theme" value="default" id="default_site_theme"/>
+                                <span>Default</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="site_theme" value="darkly" id="darkly_site_theme"/>
+                                <span>Darkly</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="site_theme" value="united" id="united_site_theme"/>
+                                <span>United</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="site_theme" value="journal" id="journal_site_theme"/>
+                                <span>Journal</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="site_theme" value="readable" id="readable_site_theme"/>
+                                <span>Readable</span>
+                            </label>
+                        </ul>
+                    </ul>
+                </div>
+            </ul>
+            <ul>
+                <label>Default Sort Field:</label>
+                <div class="input">
+                    <ul class="inputs-list">
+                        <ul>
+                            <label>
+                                <input type="radio"  checked name="default_sort" value="timestamp_sort" id="timestamp_sort"/>
+                                <span>Timestamp</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="default_sort" value="filename_sort" id="filename_sort"/>
+                                <span>Filename</span>
+                            </label>
+                        </ul>
+                    </ul>
+                </div>
+            </ul>
+            <ul>
+                <div class="input">
+                    <input type='submit' value='Save Settings &raquo;' id='submit_settings' name='submit_settings' class="btn primary"/>
+                </div>
+            </ul>
+        </div>
+    </form>
+    <form action="{% url 'mediaviewer:submitsitesettings' %}" method="post">
+        {% csrf_token %}
+        {% if user.is_staff %}
+            <div class="well well-sm">
+                <h2>Site Settings</h2>
+                <label>Site Greeting:</label>
+                <textarea class="form-control site-greeting" rows="5" id="greeting" class="greeting" name="greeting">{{ greeting }}</textarea>
+                <ul>
+                    <p></p>
+                    <div class="siteinput">
+                        <input type='submit' value='Save Site Settings &raquo;' id='submit_site_settings' name='submit_site_settings' class="btn primary"/>
+                    </div>
+                </ul>
+            </div>
+        {% endif %}
+    </form>
+    <form action="{% url 'mediaviewer:submitsitewidemessage' %}" method="post">
+        {% csrf_token %}
+        {% if user.is_staff %}
+            <div class="well well-sm">
+                <h2>Sitewide Message</h2>
+                <label>Message:</label>
+                <textarea class="form-control site-message" rows="5" id="sitemessage" class="sitemessage" name="sitemessage"></textarea>
+                <div class="input">
+                    <ul class="inputs-list">
+                        <ul>
+                            <label>
+                                <input type="radio"  checked name="level" value="Info"/>
+                                <span>Info</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="level" value="Success"/>
+                                <span>Success</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="level" value="Warning"/>
+                                <span>Warning</span>
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="level" value="Error"/>
+                                <span>Error</span>
+                            </label>
+                        </ul>
+                    </ul>
+                </div>
+                <ul>
+                    <p></p>
+                    <div class="sitemessageinput">
+                        <input type='submit' value='Send Message &raquo;' id='submit_site_message' name='submit_site_message' class="btn primary"/>
+                    </div>
+                </ul>
+            </div>
+        {% endif %}
+    </form>
+</div> <!-- /container -->
+{% endblock %}
+
+{% include footer %}
+
+{% block javascript %}
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<!-- <script src="https://code.jquery.com/jquery-1.10.2.min.js"> -->
+    <script src="{% static "assets/jquery-1.10.1.min.js" %}"></script>
+    <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "assets/mediaviewer.js" %}"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function(){
+              preparePage($, '{{csrf_token}}');
+              setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
+
+              {% if site_theme == 'default' %}
+                  jQuery('#default_site_theme').prop('checked', 'checked');
+              {% elif site_theme == 'darkly' %}
+                  jQuery('#darkly_site_theme').prop('checked', 'checked');
+              {% elif site_theme == 'united' %}
+                  jQuery('#united_site_theme').prop('checked', 'checked');
+              {% elif site_theme == 'journal' %}
+                  jQuery('#journal_site_theme').prop('checked', 'checked');
+              {% elif site_theme == 'readable' %}
+                  jQuery('#readable_site_theme').prop('checked', 'checked');
+              {% endif %}
+
+              {% if default_sort == 'filename_sort' %}
+                  jQuery('#filename_sort').prop('checked', 'checked');
+              {% elif default_sort == 'timestamp_sort' %}
+                  jQuery('#timestamp_sort').prop('checked', 'checked');
+              {% endif %}
+
+            var input = document.getElementById('btn-input');
+            jQuery("#local_ip", "#bangup").change(function () {
+                    if(jQuery("#local_ip").is(":checked")) {
+                        input.value = 'local_ip';
+                    } else if(jQuery("#bangup").is(":checked")) {
+                        input.value = 'bangup';
+                    }
+                });
+
+            prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+        });
+        
+</script>
+{% endblock %}
+

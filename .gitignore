@@ -1,0 +1,4 @@
+start-uwsgi.sh
+*.log
+*.ini
+*.pyc

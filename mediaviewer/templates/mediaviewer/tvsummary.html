@@ -1,0 +1,74 @@
+{% extends "files.html" %}
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load url from future %}
+{% include title %}
+
+{% include css %}
+
+{% include navbar %}
+
+<div class="jumbotron">
+    {% block jumbotron %}
+    <ol class="breadcrumb">
+          <li><a href="/mediaviewer/">Home</a></li>
+            <li class="active">TV Shows</li>
+    </ol>
+    <h1>TV Shows</h1>
+    <h3>Select from the following TV Shows:</h3>
+    {% endblock %}
+</div>
+
+{% include messages %}
+
+{% block main %}
+<table id="myTable" class="table table-striped table-hover cell-border no-wrap dt-responsive"> 
+    <thead> 
+        <tr> 
+            <th class="all">TV Shows</th> 
+            <th class='desktop'>ID</th> 
+            <th class='min-tablet-p'>Last Show</th> 
+            <th></th>
+        </tr> 
+    </thead> 
+    <tbody> 
+        {% for path in pathSet %}
+        <tr> 
+            <td><a href='/mediaviewer/tvshows/{{ path.id }}/'>{{ path.displayName }}</a></td> 
+            <td>{{ path.id }}</td>
+            <td>{{ path.lastCreatedFileDate }}</td>
+            <td></td>
+        </tr> 
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% include footer %}
+
+{% block javascript %}
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{% static "assets/jquery-1.10.1.min.js" %}"></script>
+<script src="{% static "assets/jquery.tablesorter.js" %}"></script>
+<script src="{% static "assets/jquery.tablesorter.widgets.js" %}"></script>
+<script src="{% static "assets/jquery.tablesorter.pager.css" %}"></script>
+<script src="{% static "assets/jquery.tablesorter.pager.js" %}"></script>
+<script src="{% static "DataTables-1.10.4/media/js/jquery.dataTables.min.js" %}"></script>
+<script src="{% static "assets/dataTables.bootstrap.js" %}"></script>
+<script src="{% static "assets/dataTables.responsive.min.js" %}"></script>
+<script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
+<script src="{% static "assets/mediaviewer.js" %}"></script>
+<script type="text/javascript">
+    $(document).ready(function(){ 
+
+      preparePage($, '{{csrf_token}}');
+        prepareTableSorter($, [[2,1]]);
+
+        prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+});
+
+</script>
+{% endblock %}
