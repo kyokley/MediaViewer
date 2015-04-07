@@ -118,6 +118,8 @@ server {{
 }}
 '''
 
+virtualenvPthTemplate = '{installDir}'
+
 def create_venv(venv_home, venv_name):
     venv_location = os.path.join(venv_home, venv_name)
     fab.local('virtualenv -p python2.7 %s' % venv_location)
@@ -141,8 +143,11 @@ def run_command_list(commands, values=None):
         else:
             fab.local(command)
 
+def write_file(filename, text, use_sudo=False):
+    files.append(filename, text, use_sudo=use_sudo)
+
 def write_sudo_file(filename, text):
-    files.append(filename, text, use_sudo=True)
+    write_file(filename, text, use_sudo=True)
 
 @fab.task
 @decorators.hosts(['localhost'])
@@ -177,6 +182,13 @@ def install():
               'serverName': serverName,
               }
     run_command_list(certCommands, values=values)
+
+    virtualenvPthText = virtualenvPthTemplate.format(**values)
+    write_file(os.path.join(venv_location,
+                            'lib',
+                            'python2.7',
+                            'site-packages',
+                            'mediaviewer.pth'), virtualenvPthText)
 
     uwsgiText = uwsgiTextTemplate.format(**values)
     if os.path.exists(values['uwsgiConfLocation']):
