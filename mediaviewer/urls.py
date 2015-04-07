@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url, include
 from rest_framework import routers
 from django.shortcuts import redirect
-from site.settings import IS_SYNCING
+from mysite.settings import IS_SYNCING
 
 from mediaviewer.views import (home,
                                files,

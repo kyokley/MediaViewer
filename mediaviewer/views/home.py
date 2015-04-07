@@ -10,7 +10,7 @@ from django.shortcuts import render
 from mediaviewer.models.file import File
 from mediaviewer.utils import logAccessInfo
 from django.utils.safestring import mark_safe
-from site.settings import DEBUG
+from mysite.settings import DEBUG
 
 import json
 

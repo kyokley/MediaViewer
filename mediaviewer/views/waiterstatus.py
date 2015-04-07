@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from site.settings import (
+from mysite.settings import (
                              WAITER_STATUS_URL,
                              )
 from mediaviewer.models.waiterstatus import WaiterStatus

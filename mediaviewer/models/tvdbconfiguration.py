@@ -1,6 +1,6 @@
 import os, urllib2, json
 from mediaviewer.log import log
-from site.settings import (API_KEY,
+from mysite.settings import (API_KEY,
                              OMDB_URL,
                              OMDB_ID_URL,
                              OMDB_URL_TAIL,

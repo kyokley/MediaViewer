@@ -39,7 +39,7 @@ uwsgiTextTemplate = '''
 socket = /tmp/{programName}.sock
 chdir = {installDir}
 virtualenv = {venv_location}
-env = DJANGO_SETTINGS_MODULE=site.settings
+env = DJANGO_SETTINGS_MODULE=mysite.settings
 home = {venv_location}
 uid = {user}
 gid = {user}
@@ -179,17 +179,21 @@ def install():
     run_command_list(certCommands, values=values)
 
     uwsgiText = uwsgiTextTemplate.format(**values)
-    fab.local('sudo rm %s' % values['uwsgiConfLocation'])
+    if os.path.exists(values['uwsgiConfLocation']):
+        fab.local('sudo rm %s' % values['uwsgiConfLocation'])
     write_sudo_file(values['uwsgiConfLocation'], uwsgiText)
 
     supervisorText = supervisorTextTemplate.format(**values)
     supervisorPath = os.path.join('/etc/supervisor/conf.d', '%s.conf' % values['programName'])
-    fab.local('sudo rm %s' % supervisorPath)
+
+    if os.path.exists(supervisorPath):
+        fab.local('sudo rm %s' % supervisorPath)
     write_sudo_file(supervisorPath, supervisorText)
 
     nginxText = nginxTextTemplate.format(**values)
     nginxPath = os.path.join('/etc/nginx/sites-enabled/%s.conf' % values['programName'])
-    fab.local('sudo rm %s' % nginxPath)
+    if os.path.exists(nginxPath):
+        fab.local('sudo rm %s' % nginxPath)
     write_sudo_file(nginxPath, nginxText)
 
     fab.local('sudo supervisorctl update')

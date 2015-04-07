@@ -1,6 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler
-from site.settings import loglevel, LOG_FILE_NAME
+from mysite.settings import loglevel, LOG_FILE_NAME
 
 class LogFile(object):
     logger = None

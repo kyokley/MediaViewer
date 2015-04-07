@@ -14,7 +14,7 @@ from datetime import datetime as dateObj
 from django.utils.timezone import utc
 from dateutil import parser
 
-from site.settings import (WAITER_HEAD,
+from mysite.settings import (WAITER_HEAD,
                              LOCAL_WAITER_IP_FORMAT_MOVIES,
                              LOCAL_WAITER_IP_FORMAT_TVSHOWS,
                              BANGUP_WAITER_IP_FORMAT_MOVIES,

@@ -1,5 +1,5 @@
 import os
-from site.settings import LOG_ACCESS_TIMINGS
+from mysite.settings import LOG_ACCESS_TIMINGS
 from datetime import datetime
 from binascii import hexlify
 from functools import wraps

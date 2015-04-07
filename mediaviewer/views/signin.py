@@ -13,7 +13,7 @@ from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
                                       BANGUP_IP,
                                       )
-from site.settings import DEBUG
+from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
 
 import socket

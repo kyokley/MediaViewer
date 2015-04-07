@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from mediaviewer.views.home import generateHeader, setSiteWideContext
 from mediaviewer.models.message import Message
 from django.shortcuts import render
-from site.settings import DEBUG
+from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
 
 import json

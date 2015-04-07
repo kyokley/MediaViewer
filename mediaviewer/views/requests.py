@@ -11,7 +11,7 @@ from datetime import datetime as dateObj
 from django.utils.timezone import utc
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
-from site.settings import DEBUG
+from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
 
 import json

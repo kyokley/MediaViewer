@@ -1,6 +1,6 @@
 import sys
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "site.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
 from django.db import transaction
 from datetime import datetime as dateObj
