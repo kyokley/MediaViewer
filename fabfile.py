@@ -156,6 +156,11 @@ def write_file(filename, text, use_sudo=False):
 def write_sudo_file(filename, text):
     write_file(filename, text, use_sudo=True)
 
+def add_cronjob(text):
+    fab.local('crontab -l > /tmp/crondump')             
+    fab.local('echo "%s 2> /dev/null" >> /tmp/crondump' % text)
+    fab.local('crontab /tmp/crondump')
+
 @fab.task
 @decorators.hosts(['localhost'])
 def install():
@@ -203,7 +208,10 @@ def install():
     write_sudo_file(values['uwsgiConfLocation'], uwsgiText)
 
     dailyBash = dailyTemplate.format(**values)
-    write_file(os.path.join(installDir, 'daily.sh'), dailyBash)
+    dailyBashPath = os.path.join(installDir, 'daily.sh')
+    write_file(dailyBashPath, dailyBash)
+    fab.local('chmod a+x %s' % dailyBashPath)
+    add_cronjob('@daily {installDir}/daily.sh'.format(**values))
 
     supervisorText = supervisorTextTemplate.format(**values)
     supervisorPath = os.path.join('/etc/supervisor/conf.d', '%s.conf' % values['programName'])
