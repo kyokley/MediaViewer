@@ -118,6 +118,13 @@ server {{
 }}
 '''
 
+dailyTemplate = '''#!/bin/bash
+
+echo "Starting daily cleanup `date`"
+psql -d autodl -f {installDir}/daily.sql
+echo "Ending daily cleanup `date`"
+'''
+
 virtualenvPthTemplate = '{installDir}'
 
 def create_venv(venv_home, venv_name):
@@ -194,6 +201,9 @@ def install():
     if os.path.exists(values['uwsgiConfLocation']):
         fab.local('sudo rm %s' % values['uwsgiConfLocation'])
     write_sudo_file(values['uwsgiConfLocation'], uwsgiText)
+
+    dailyBash = dailyTemplate.format(**values)
+    write_file(os.path.join(installDir, 'daily.sh'), dailyBash)
 
     supervisorText = supervisorTextTemplate.format(**values)
     supervisorPath = os.path.join('/etc/supervisor/conf.d', '%s.conf' % values['programName'])
