@@ -1,5 +1,4 @@
 django==1.6.6
-django-debug-toolbar
 django-memcached
 sqlalchemy
 pylibmc
@@ -9,7 +8,5 @@ python-dateutil
 uwsgi
 django-ipware
 djangorestframework==2.4.2
-ipython
-ipdb
 simplejson
 pytz
