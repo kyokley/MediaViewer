@@ -3,8 +3,8 @@ from django.db import models
 #TODO: Add column to track tvdb and omdb success
 # Destroy failed posterfiles weekly to allow new attempts
 class PosterFile(models.Model):
-    file = models.ForeignKey('File', null=True, db_column='fileid', blank=True, related_name='_posterfile')
-    path = models.ForeignKey('Path', null=True, db_column='pathid', blank=True, related_name='_posterfile')
+    file = models.ForeignKey('mediaviewer.File', null=True, db_column='fileid', blank=True, related_name='_posterfile')
+    path = models.ForeignKey('mediaviewer.Path', null=True, db_column='pathid', blank=True, related_name='_posterfile')
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     dateedited = models.DateTimeField(db_column='dateedited', blank=True)
     image = models.TextField(blank=True)

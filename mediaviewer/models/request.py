@@ -9,7 +9,7 @@ class Request(models.Model):
     dateedited = models.DateTimeField(db_column='dateedited', blank=True)
     name = models.TextField(blank=True)
     done = models.BooleanField()
-    user = models.ForeignKey(User, null=False, db_column='userid', blank=False)
+    user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
 
     class Meta:
         app_label = 'mediaviewer'

@@ -16,7 +16,7 @@ class UserSettings(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     dateedited = models.DateTimeField(db_column='dateedited', blank=True)
     ip_format = models.TextField(db_column='ip_format', blank=False, null=False)
-    user = models.ForeignKey(User, null=False, db_column='userid', blank=False)
+    user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
     can_download = models.BooleanField(db_column='can_download', blank=False, null=False)
     site_theme = models.TextField(db_column='site_theme')
     default_sort = models.TextField(db_column='default_sort')

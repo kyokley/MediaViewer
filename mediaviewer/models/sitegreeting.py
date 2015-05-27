@@ -1,9 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 class SiteGreeting(models.Model):
     greeting = models.TextField(blank=True, null=False, db_column='greeting')
-    user = models.ForeignKey(User, null=False, blank=False, db_column='userid')
+    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
 
     class Meta:

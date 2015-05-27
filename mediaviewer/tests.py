@@ -4,6 +4,8 @@ from mediaviewer.views.home import (generateHeader,
                                     setSiteWideContext,
                                     )
 from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.models.path import Path
+from mediaviewer.models.datatransmission import DataTransmission
 
 
 class MockUser(object):

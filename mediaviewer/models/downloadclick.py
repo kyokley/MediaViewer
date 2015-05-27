@@ -1,12 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
-from mediaviewer.models.downloadtoken import DownloadToken
 from django.utils import timezone
 
 class DownloadClick(models.Model):
-    user = models.ForeignKey(User, null=False, blank=False, db_column='userid')
+    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
     filename = models.TextField(db_column='filename', blank=True)
-    downloadtoken = models.ForeignKey(DownloadToken,
+    downloadtoken = models.ForeignKey('mediaviewer.DownloadToken',
                                       null=False,
                                       db_column='downloadtokenid',
                                       blank=False)

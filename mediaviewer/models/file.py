@@ -32,7 +32,7 @@ punctuationRegex = re.compile('[^a-zA-Z0-9]+')
 
 
 class File(models.Model):
-    path = models.ForeignKey('Path',
+    path = models.ForeignKey('mediaviewer.Path',
                              null=True,
                              db_column='pathid',
                              blank=True,
@@ -43,7 +43,7 @@ class File(models.Model):
     size = models.IntegerField(null=True, blank=True)
     datecreatedstr = models.TextField(db_column='datecreated', blank=True)
     dateeditedstr = models.TextField(db_column='dateedited', blank=True)
-    datatransmission = models.ForeignKey('DataTransmission',
+    datatransmission = models.ForeignKey('mediaviewer.DataTransmission',
                                          null=True,
                                          db_column='datatransmissionid',
                                          blank=True)
@@ -55,7 +55,7 @@ class File(models.Model):
                                null=True)
     hide = models.BooleanField(db_column='hide')
     _ismovie = models.BooleanField(db_column='ismovie')
-    filenamescrapeformat = models.ForeignKey('FilenameScrapeFormat',
+    filenamescrapeformat = models.ForeignKey('mediaviewer.FilenameScrapeFormat',
                                              null=True,
                                              db_column='filenamescrapeformatid',
                                              blank=True)

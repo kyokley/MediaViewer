@@ -20,7 +20,7 @@ class Path(models.Model):
     localpathstr = models.TextField(blank=True)
     remotepathstr = models.TextField(blank=True)
     skip = models.IntegerField(null=True, blank=True)
-    defaultScraper = models.ForeignKey('FilenameScrapeFormat', null=True, blank=True, db_column='defaultscraperid')
+    defaultScraper = models.ForeignKey('mediaviewer.FilenameScrapeFormat', null=True, blank=True, db_column='defaultscraperid')
     tvdb_id = models.TextField(null=True, blank=True)
     server = models.TextField(blank=False, null=False)
     defaultsearchstr = models.TextField()

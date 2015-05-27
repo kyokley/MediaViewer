@@ -6,9 +6,9 @@ class Error(models.Model):
     datecreatedstr = models.DateTimeField(db_column='datecreated', blank=True)
     errorstr = models.TextField(blank=True)
     ignore = models.BooleanField(db_column='ignore')
-    file = models.ForeignKey('File', null=True, db_column='fileid', blank=True)
-    path = models.ForeignKey('Path', null=True, db_column='pathid', blank=True)
-    datatransmission = models.ForeignKey('DataTransmission', null=True, db_column='datatransmissionid', blank=True)
+    file = models.ForeignKey('mediaviewer.File', null=True, db_column='fileid', blank=True)
+    path = models.ForeignKey('mediaviewer.Path', null=True, db_column='pathid', blank=True)
+    datatransmission = models.ForeignKey('mediaviewer.DataTransmission', null=True, db_column='datatransmissionid', blank=True)
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'error'

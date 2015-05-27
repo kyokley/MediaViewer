@@ -1,8 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 class LoginEvent(models.Model):
-    user = models.ForeignKey(User, null=False, blank=False, db_column='userid')
+    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
     datecreated = models.DateTimeField(db_column='datecreated')
 
     class Meta:

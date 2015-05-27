@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from datetime import timedelta
 from datetime import datetime as dateObj
 import pytz
@@ -10,14 +9,14 @@ def _createId():
 
 class DownloadToken(models.Model):
     guid = models.CharField(max_length=32, default=_createId, unique=True)
-    user = models.ForeignKey(User, null=False, blank=False, db_column='userid')
+    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
     path = models.TextField(db_column='path')
     filename = models.TextField(db_column='filename')
     ismovie = models.BooleanField(db_column='ismovie')
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     waitertheme = models.TextField(db_column='waiter_theme')
     displayname = models.TextField(db_column='display_name')
-    file = models.ForeignKey('File',
+    file = models.ForeignKey('mediaviewer.File',
                              null=False,
                              db_column='fileid',
                              blank=True)

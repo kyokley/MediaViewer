@@ -6,7 +6,7 @@ from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
 class Message(models.Model):
-    touser = models.ForeignKey(User, null=False, blank=False, db_column='touserid')
+    touser = models.ForeignKey('auth.User', null=False, blank=False, db_column='touserid')
     body = models.TextField(db_column='body', blank=True)
     sent = models.BooleanField(db_column='sent', blank=False)
     level = models.IntegerField(db_column='level', blank=False)
