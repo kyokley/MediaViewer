@@ -1,8 +1,4 @@
 # Django settings for site project.
-import sys
-import simplejson
-
-sys.modules['json'] = simplejson
 import os
 import logging
 from django.contrib.messages import constants as message_constants

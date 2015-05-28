@@ -3,6 +3,7 @@ from mediaviewer.views.home import (generateHeader,
                                     home,
                                     setSiteWideContext,
                                     )
+from mediaviewer.models.usersettings import DEFAULT_SITE_THEME, FILENAME_SORT
 from django.contrib.auth.models import User
 
 # These imports are required to allow tests to run
@@ -12,28 +13,72 @@ from mediaviewer.models.datatransmission import DataTransmission
 import mock
 from mock import call
 
-class MockUser(object):
-    def __init__(self,
-                 is_authenticated=False,
-                 is_staff=False):
-        self._is_authenticated = is_authenticated
-        self._is_staff = is_staff
+@mock.patch('mediaviewer.views.home.Message.add_message')
+@mock.patch('mediaviewer.views.home.Message.getMessagesForUser')
+@mock.patch('mediaviewer.views.home.getLastWaiterStatus')
+class TestSetSiteWideContext(TestCase):
+    def setUp(self):
+        self.request = mock.MagicMock()
 
-    def is_authenticated(self):
-        return self._is_authenticated
+        self.user = mock.create_autospec(User)
 
-    @property
-    def is_staff(self):
-        return self._is_staff
+        self.request.user = self.user
 
-class MockRequest(object):
-    def __init__(self, user=None):
-        if user:
-            self.user = user
-        else:
-            self.user = MockUser()
+    def test_is_staff_not_logged_in(self,
+                                    mock_getLastWaiterStatus,
+                                    mock_getMessageForUser,
+                                    mock_add_message):
+        self.user.is_staff = True
+        self.user.is_authenticated.return_value = False
 
-class TestHomeView(TestCase):
+        context = dict()
+        setSiteWideContext(context, self.request, includeMessages=False)
+
+        expected = {'site_theme': DEFAULT_SITE_THEME,
+                    'loggedin': False,
+                    'is_staff': 'true'}
+        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
+        self.assertFalse(mock_getMessageForUser.called)
+        self.assertFalse(mock_add_message.called)
+
+    def test_not_staff_not_logged_in(self,
+                                    mock_getLastWaiterStatus,
+                                    mock_getMessageForUser,
+                                    mock_add_message):
+        self.user.is_staff = False
+        self.user.is_authenticated.return_value = False
+
+        context = dict()
+        setSiteWideContext(context, self.request, includeMessages=False)
+
+        expected = {'site_theme': DEFAULT_SITE_THEME,
+                    'loggedin': False,
+                    'is_staff': 'false'}
+        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
+        self.assertFalse(mock_getMessageForUser.called)
+        self.assertFalse(mock_add_message.called)
+
+    def test_is_staff_is_logged_in(self,
+                                    mock_getLastWaiterStatus,
+                                    mock_getMessageForUser,
+                                    mock_add_message):
+        self.user.is_staff = True
+        self.user.is_authenticated.return_value = True
+        self.user.settings.return_value = None
+
+        context = dict()
+        setSiteWideContext(context, self.request, includeMessages=False)
+
+        expected = {'site_theme': DEFAULT_SITE_THEME,
+                    'loggedin': True,
+                    'is_staff': 'true',
+                    'default_sort': FILENAME_SORT,
+                    'user': self.user}
+        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
+        self.assertFalse(mock_getMessageForUser.called)
+        self.assertFalse(mock_add_message.called)
+
+class TestGenerateHeaderUserIsStaff(TestCase):
     def setUp(self):
         self.request = mock.MagicMock()
 
@@ -42,21 +87,6 @@ class TestHomeView(TestCase):
         self.user.is_authenticated.return_value = False
 
         self.request.user = self.user
-
-    @mock.patch('mediaviewer.views.home.getLastWaiterStatus')
-    def test_home_view(self, mock_getLastWaiterStatus):
-        context = dict()
-        setSiteWideContext(context, self.request, includeMessages=False)
-
-        expected = {'site_theme': 'default',
-                    'loggedin': False,
-                    'is_staff': 'true'}
-        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
-
-class TestGenerateHeaderUserIsStaff(TestCase):
-    def setUp(self):
-        self.user = MockUser(is_staff=True)
-        self.request = MockRequest(user=self.user)
 
     def _removeWhiteSpaceFromTuple(self, inTup):
         
@@ -107,7 +137,8 @@ class TestGenerateHeaderUserIsStaff(TestCase):
 
     def test_generate_header_user_not_staff(self):
         page = 'home'
-        self.request.user = MockUser(is_staff=False)
+        self.request.user = mock.MagicMock()
+        self.request.user.is_staff = False
         headers = generateHeader(page, self.request)
         expected = ('\n                <li class="active"><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        \n        \n        <li class="disabled"><a href="#">Errors</a></li>\n        ')
         self.assertEqual(headers, expected)
