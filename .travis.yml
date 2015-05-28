@@ -4,6 +4,7 @@ python:
 install:
 - pip install -r dev_requirements.txt
 before_script:
-    - psql -c "create role db_user password 'db_password' superuser" -U postgres
+    - cp mysite/travis.settings mysite/local_settings.py
+    - psql -c "create database autodl;" -U postgres
 script:
 - python manage.py test mediaviewer/tests
