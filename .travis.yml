@@ -3,5 +3,7 @@ python:
 - 2.7
 install:
 - pip install -r dev_requirements.txt
+before_script:
+    - psql -c "create role db_user password 'db_password' superuser"
 script:
 - python manage.py test mediaviewer/tests
