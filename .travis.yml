@@ -4,6 +4,6 @@ python:
 install:
 - pip install -r dev_requirements.txt
 before_script:
-    - psql -c "create role db_user password 'db_password' superuser"
+    - psql -c "create role db_user password 'db_password' superuser" -U postgres
 script:
 - python manage.py test mediaviewer/tests
