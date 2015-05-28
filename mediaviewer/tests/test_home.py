@@ -3,11 +3,14 @@ from mediaviewer.views.home import (generateHeader,
                                     home,
                                     setSiteWideContext,
                                     )
+from django.contrib.auth.models import User
 
 # These imports are required to allow tests to run
 from mediaviewer.models.path import Path
 from mediaviewer.models.datatransmission import DataTransmission
 
+import mock
+from mock import call
 
 class MockUser(object):
     def __init__(self,
@@ -32,12 +35,23 @@ class MockRequest(object):
 
 class TestHomeView(TestCase):
     def setUp(self):
-        self.user = MockUser(is_staff=True)
-        self.request = MockRequest(user=self.user)
+        self.request = mock.MagicMock()
 
-    def test_home_view(self):
+        self.user = mock.create_autospec(User)
+        self.user.is_staff = True
+        self.user.is_authenticated.return_value = False
+
+        self.request.user = self.user
+
+    @mock.patch('mediaviewer.views.home.getLastWaiterStatus')
+    def test_home_view(self, mock_getLastWaiterStatus):
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
+
+        expected = {'site_theme': 'default',
+                    'loggedin': False,
+                    'is_staff': 'true'}
+        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
 
 class TestGenerateHeaderUserIsStaff(TestCase):
     def setUp(self):
