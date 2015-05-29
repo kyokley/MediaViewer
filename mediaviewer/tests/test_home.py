@@ -104,7 +104,6 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.request.user = self.user
 
     def _removeWhiteSpaceFromTuple(self, inTup):
-        
         firstString = inTup[0].replace(' ', '')
         firstString = firstString.replace('\n', '')
 

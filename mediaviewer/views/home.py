@@ -58,70 +58,100 @@ def getLastWaiterStatus(context):
     context['waiterfailurereason'] = lastStatus and lastStatus.failureReason or ''
 
 class HeaderHelper(object):
-    def __init__(self):
-        self.homePage = '<li><a href="/mediaviewer/">Home</a></li>'
-        self.activeHomePage = '<li class="active"><a href="/mediaviewer/">Home</a></li>'
-        self.activeMoviesPage = '<li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
-        self.moviesPage = '<li><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
+    def homePage(self):
+        return '<li><a href="/mediaviewer/">Home</a></li>'
 
-        self.activeTvshowsPage = '<li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
-        self.tvshowsPage = '<li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
+    def activeHomePage(self):
+        return '<li class="active"><a href="/mediaviewer/">Home</a></li>'
 
-        self.activeRequestsPage = '<li class="active"><a href="/mediaviewer/requests/">Requests</a></li>'
-        self.requestsPage = '<li><a href="/mediaviewer/requests/">Requests</a></li>'
+    def activeMoviesPage(self):
+        return '<li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
 
-        self.activeDatausagePage = '<li class="active"><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
-        self.datausagePage = '<li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+    def moviesPage(self):
+        return '<li><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
 
-        self.activeUserusagePage = '<li class="active"><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
-        self.userusagePage = '<li><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+    def activeTvshowsPage(self):
+        return '<li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
 
-        self.activeErrorsPage = '<li class="active"><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
-        self.errorsPage = '<li><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
-        self.disabledDatausagePage = ''
-        self.disabledUserusagePage = ''
-        self.disabledErrorsPage = '<li class="disabled"><a href="#">Errors</a></li>'
+    def tvshowsPage(self):
+        return '<li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
+
+    def activeRequestsPage(self):
+        return '<li class="active"><a href="/mediaviewer/requests/">Requests</a></li>'
+
+    def requestsPage(self):
+        return '<li><a href="/mediaviewer/requests/">Requests</a></li>'
+
+    def activeDatausagePage(self):
+        return '<li class="active"><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+
+    def datausagePage(self):
+        return '<li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+
+    def activeUserusagePage(self):
+        return '<li class="active"><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+
+    def userusagePage(self):
+        return '<li><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+
+    def activeErrorsPage(self):
+        return '<li class="active"><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
+
+    def errorsPage(self):
+        return '<li><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
+
+    def disabledDatausagePage(self):
+        return ''
+
+    def disabledUserusagePage(self):
+        return ''
+
+    def disabledErrorsPage(self):
+        return '<li class="disabled"><a href="#">Errors</a></li>'
+
 
 def generateHeader(page, request):
+    headers = HeaderHelper()
+
     if page == 'home':
-        homePage = '<li class="active"><a href="/mediaviewer/">Home</a></li>'
+        homePage = headers.activeHomePage()
     else:
-        homePage = '<li><a href="/mediaviewer/">Home</a></li>'
+        homePage = headers.homePage()
 
     if page == 'movies':
-        moviesPage = '<li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
+        moviesPage = headers.activeMoviesPage()
     else:
-        moviesPage = '<li><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
+        moviesPage = headers.moviesPage()
 
     if page == 'tvshows':
-        tvshowsPage = '<li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
+        tvshowsPage = headers.activeTvshowsPage()
     else:
-        tvshowsPage = '<li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
+        tvshowsPage = headers.tvshowsPage()
 
     if page == 'requests':
-        requestsPage = '<li class="active"><a href="/mediaviewer/requests/">Requests</a></li>'
+        requestsPage = headers.activeRequestsPage()
     else:
-        requestsPage = '<li><a href="/mediaviewer/requests/">Requests</a></li>'
+        requestsPage = headers.requestsPage()
 
     if request.user and request.user.is_staff:
         if page == 'datausage':
-            datausagePage = '<li class="active"><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+            datausagePage = headers.activeDatausagePage()
         else:
-            datausagePage = '<li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+            datausagePage = headers.datausagePage()
 
         if page == 'userusage':
-            userusagePage = '<li class="active"><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+            userusagePage = headers.activeUserusagePage()
         else:
-            userusagePage = '<li><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+            userusagePage = headers.userusagePage()
 
         if page == 'errors':
-            errorsPage = '<li class="active"><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
+            errorsPage = headers.activeErrorsPage()
         else:
-            errorsPage = '<li><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
+            errorsPage = headers.errorsPage()
     else:
         datausagePage = ''
         userusagePage = ''
-        errorsPage = '<li class="disabled"><a href="#">Errors</a></li>'
+        errorsPage = headers.disabledErrorsPage()
 
     header = '''
                 %(homePage)s
