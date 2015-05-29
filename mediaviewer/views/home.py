@@ -57,6 +57,31 @@ def getLastWaiterStatus(context):
     context['waiterstatus'] = lastStatus and lastStatus.status or False
     context['waiterfailurereason'] = lastStatus and lastStatus.failureReason or ''
 
+class HeaderHelper(object):
+    def __init__(self):
+        self.homePage = '<li><a href="/mediaviewer/">Home</a></li>'
+        self.activeHomePage = '<li class="active"><a href="/mediaviewer/">Home</a></li>'
+        self.activeMoviesPage = '<li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
+        self.moviesPage = '<li><a href="/mediaviewer/movies/display/0/">Movies</a></li>'
+
+        self.activeTvshowsPage = '<li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
+        self.tvshowsPage = '<li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>'
+
+        self.activeRequestsPage = '<li class="active"><a href="/mediaviewer/requests/">Requests</a></li>'
+        self.requestsPage = '<li><a href="/mediaviewer/requests/">Requests</a></li>'
+
+        self.activeDatausagePage = '<li class="active"><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+        self.datausagePage = '<li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>'
+
+        self.activeUserusagePage = '<li class="active"><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+        self.userusagePage = '<li><a href="/mediaviewer/userusage/">User Data Usage</a></li>'
+
+        self.activeErrorsPage = '<li class="active"><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
+        self.errorsPage = '<li><a href="/mediaviewer/errors/display/50/">Errors</a></li>'
+        self.disabledDatausagePage = ''
+        self.disabledUserusagePage = ''
+        self.disabledErrorsPage = '<li class="disabled"><a href="#">Errors</a></li>'
+
 def generateHeader(page, request):
     if page == 'home':
         homePage = '<li class="active"><a href="/mediaviewer/">Home</a></li>'
