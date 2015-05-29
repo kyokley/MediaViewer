@@ -2,6 +2,7 @@ from django.test import TestCase
 from mediaviewer.views.home import (generateHeader,
                                     home,
                                     setSiteWideContext,
+                                    getLastWaiterStatus,
                                     )
 from mediaviewer.models.usersettings import DEFAULT_SITE_THEME, FILENAME_SORT
 from django.contrib.auth.models import User
@@ -77,6 +78,20 @@ class TestSetSiteWideContext(TestCase):
         self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
         self.assertFalse(mock_getMessageForUser.called)
         self.assertFalse(mock_add_message.called)
+
+class TestGetLastWaiterStatus(TestCase):
+    @mock.patch('mediaviewer.views.home.WaiterStatus')
+    def test_getLastWaiterStatus(self, mock_WaiterStatus):
+        context = {}
+        mock_lastStatus = mock.MagicMock()
+        mock_lastStatus.status = True
+        mock_lastStatus.failureReason = 'test'
+        mock_WaiterStatus.getLastStatus.return_value = mock_lastStatus
+
+        getLastWaiterStatus(context)
+
+        self.assertTrue(context['waiterstatus'])
+        self.assertEquals('test', context['waiterfailurereason'])
 
 class TestGenerateHeaderUserIsStaff(TestCase):
     def setUp(self):
