@@ -111,6 +111,15 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         secondString = secondString.replace('\n', '')
         return (firstString, secondString)
 
+    @mock.patch('mediaviewer.views.home.HeaderHelper')
+    def test_home_is_active(self,
+                            mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'home'
+        generateHeader(page, self.request)
+        mock_headers.activeHomePage.assert_called_once_with()
+
     def test_generate_home_header(self):
         page = 'home'
         headers = generateHeader(page, self.request)
