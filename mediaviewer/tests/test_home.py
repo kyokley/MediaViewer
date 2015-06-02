@@ -103,65 +103,24 @@ class TestGenerateHeaderUserIsStaff(TestCase):
 
         self.request.user = self.user
 
-    def _removeWhiteSpaceFromTuple(self, inTup):
-        firstString = inTup[0].replace(' ', '')
-        firstString = firstString.replace('\n', '')
-
-        secondString = inTup[1].replace(' ', '')
-        secondString = secondString.replace('\n', '')
-        return (firstString, secondString)
-
     @mock.patch('mediaviewer.views.home.HeaderHelper')
-    def test_home_is_active(self,
-                            mock_HeaderHelper):
+    def test_home_is_active_is_staff(self,
+                                     mock_HeaderHelper):
         mock_headers = mock.MagicMock()
         mock_HeaderHelper.return_value = mock_headers
         page = 'home'
         generateHeader(page, self.request)
+
         mock_headers.activeHomePage.assert_called_once_with()
+        self.assertFalse(mock_headers.homePage.called)
+        mock_headers.moviesPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeMoviesPage.called)
+        mock_headers.requestsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeRequestsPage.called)
+        mock_headers.datausagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeDatausagePage.called)
+        mock_headers.userusagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeUserusagePage.called)
+        mock_headers.errorsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeErrorsPage.called)
 
-    def test_generate_home_header(self):
-        page = 'home'
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li class="active"><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        <li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>\n        <li><a href="/mediaviewer/userusage/">User Data Usage</a></li>\n        <li><a href="/mediaviewer/errors/display/50/">Errors</a></li>\n        ')
-        expected = self._removeWhiteSpaceFromTuple(expected)
-        headers = self._removeWhiteSpaceFromTuple(headers)
-        self.assertEqual(headers, expected)
-
-    def test_generate_movie_header(self):
-        page = 'movies'
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li><a href="/mediaviewer/">Home</a></li>\n                <li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        <li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>\n        <li><a href="/mediaviewer/userusage/">User Data Usage</a></li>\n        <li><a href="/mediaviewer/errors/display/50/">Errors</a></li>\n        ')
-        self.assertEqual(headers, expected)
-
-    def test_generate_tvshows_header(self):
-        page = 'tvshows'
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        <li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>\n        <li><a href="/mediaviewer/userusage/">User Data Usage</a></li>\n        <li><a href="/mediaviewer/errors/display/50/">Errors</a></li>\n        ')
-        self.assertEqual(headers, expected)
-
-    def test_generate_requests_header(self):
-        page = 'requests'
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li class="active"><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        <li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>\n        <li><a href="/mediaviewer/userusage/">User Data Usage</a></li>\n        <li><a href="/mediaviewer/errors/display/50/">Errors</a></li>\n        ')
-        self.assertEqual(headers, expected)
-
-    def test_generate_datausage_header(self):
-        page = 'datausage'
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        <li class="active"><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>\n        <li><a href="/mediaviewer/userusage/">User Data Usage</a></li>\n        <li><a href="/mediaviewer/errors/display/50/">Errors</a></li>\n        ')
-        self.assertEqual(headers, expected)
-
-    def test_generate_errors_header(self):
-        page = 'errors'
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        <li><a href="/mediaviewer/datausage/display/50/">Data Usage</a></li>\n        <li><a href="/mediaviewer/userusage/">User Data Usage</a></li>\n        <li class="active"><a href="/mediaviewer/errors/display/50/">Errors</a></li>\n        ')
-        self.assertEqual(headers, expected)
-
-    def test_generate_header_user_not_staff(self):
-        page = 'home'
-        self.request.user = mock.MagicMock()
-        self.request.user.is_staff = False
-        headers = generateHeader(page, self.request)
-        expected = ('\n                <li class="active"><a href="/mediaviewer/">Home</a></li>\n                <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>\n                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>\n                <li><a href="/mediaviewer/requests/">Requests</a></li>\n    ', '\n        \n        \n        <li class="disabled"><a href="#">Errors</a></li>\n        ')
-        self.assertEqual(headers, expected)
