@@ -215,3 +215,54 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.assertFalse(mock_headers.disabledErrorsPage.called)
         self.assertFalse(mock_headers.disabledUserusagePage.called)
         self.assertFalse(mock_headers.disabledDatausagePage.called)
+
+    def test_admin_headers_datausage_is_active_is_not_staff(self, mock_HeaderHelper):
+        self.user.is_staff = False
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'datausage'
+        generateHeader(page, self.request)
+
+        self.assertFalse(mock_headers.activeDatausagePage.called)
+        self.assertFalse(mock_headers.datausagePage.called)
+        self.assertFalse(mock_headers.userusagePage.called)
+        self.assertFalse(mock_headers.activeUserusagePage.called)
+        self.assertFalse(mock_headers.errorsPage.called)
+        self.assertFalse(mock_headers.activeErrorsPage.called)
+        mock_headers.disabledErrorsPage.assert_called_once_with()
+        mock_headers.disabledUserusagePage.assert_called_once_with()
+        mock_headers.disabledDatausagePage.assert_called_once_with()
+
+    def test_admin_headers_userusage_is_active_is_not_staff(self, mock_HeaderHelper):
+        self.user.is_staff = False
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'userusage'
+        generateHeader(page, self.request)
+
+        self.assertFalse(mock_headers.activeDatausagePage.called)
+        self.assertFalse(mock_headers.datausagePage.called)
+        self.assertFalse(mock_headers.userusagePage.called)
+        self.assertFalse(mock_headers.activeUserusagePage.called)
+        self.assertFalse(mock_headers.errorsPage.called)
+        self.assertFalse(mock_headers.activeErrorsPage.called)
+        mock_headers.disabledErrorsPage.assert_called_once_with()
+        mock_headers.disabledUserusagePage.assert_called_once_with()
+        mock_headers.disabledDatausagePage.assert_called_once_with()
+
+    def test_admin_headers_errors_is_active_is_not_staff(self, mock_HeaderHelper):
+        self.user.is_staff = False
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'errors'
+        generateHeader(page, self.request)
+
+        self.assertFalse(mock_headers.activeDatausagePage.called)
+        self.assertFalse(mock_headers.datausagePage.called)
+        self.assertFalse(mock_headers.userusagePage.called)
+        self.assertFalse(mock_headers.activeUserusagePage.called)
+        self.assertFalse(mock_headers.errorsPage.called)
+        self.assertFalse(mock_headers.activeErrorsPage.called)
+        mock_headers.disabledErrorsPage.assert_called_once_with()
+        mock_headers.disabledUserusagePage.assert_called_once_with()
+        mock_headers.disabledDatausagePage.assert_called_once_with()
