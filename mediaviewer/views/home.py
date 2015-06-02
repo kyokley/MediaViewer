@@ -149,8 +149,8 @@ def generateHeader(page, request):
         else:
             errorsPage = headers.errorsPage()
     else:
-        datausagePage = ''
-        userusagePage = ''
+        datausagePage = headers.disabledDatausagePage()
+        userusagePage = headers.disabledUserusagePage()
         errorsPage = headers.disabledErrorsPage()
 
     header = '''

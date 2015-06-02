@@ -93,6 +93,7 @@ class TestGetLastWaiterStatus(TestCase):
         self.assertTrue(context['waiterstatus'])
         self.assertEquals('test', context['waiterfailurereason'])
 
+@mock.patch('mediaviewer.views.home.HeaderHelper')
 class TestGenerateHeaderUserIsStaff(TestCase):
     def setUp(self):
         self.request = mock.MagicMock()
@@ -103,8 +104,7 @@ class TestGenerateHeaderUserIsStaff(TestCase):
 
         self.request.user = self.user
 
-    @mock.patch('mediaviewer.views.home.HeaderHelper')
-    def test_home_is_active_is_staff(self,
+    def test_home_is_active(self,
                                      mock_HeaderHelper):
         mock_headers = mock.MagicMock()
         mock_HeaderHelper.return_value = mock_headers
@@ -115,12 +115,103 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.assertFalse(mock_headers.homePage.called)
         mock_headers.moviesPage.assert_called_once_with()
         self.assertFalse(mock_headers.activeMoviesPage.called)
+        mock_headers.tvshowsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeTvshowsPage.called)
         mock_headers.requestsPage.assert_called_once_with()
         self.assertFalse(mock_headers.activeRequestsPage.called)
-        mock_headers.datausagePage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeDatausagePage.called)
+
+    def test_movies_is_active(self,
+                                     mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'movies'
+        generateHeader(page, self.request)
+
+        mock_headers.homePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeHomePage.called)
+        mock_headers.activeMoviesPage.assert_called_once_with()
+        self.assertFalse(mock_headers.moviesPage.called)
+        mock_headers.tvshowsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeTvshowsPage.called)
+        mock_headers.requestsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeRequestsPage.called)
+
+    def test_tvshows_is_active(self,
+                                     mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'tvshows'
+        generateHeader(page, self.request)
+
+        mock_headers.homePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeHomePage.called)
+        mock_headers.moviesPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeMoviesPage.called)
+        mock_headers.activeTvshowsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.tvshowsPage.called)
+        mock_headers.requestsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeRequestsPage.called)
+
+    def test_requests_is_active(self,
+                                     mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'requests'
+        generateHeader(page, self.request)
+
+        mock_headers.homePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeHomePage.called)
+        mock_headers.moviesPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeMoviesPage.called)
+        mock_headers.tvshowsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeTvshowsPage.called)
+        mock_headers.activeRequestsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.requestsPage.called)
+
+    def test_admin_headers_datausage_is_active_is_staff(self, mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'datausage'
+        generateHeader(page, self.request)
+
+        mock_headers.activeDatausagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.datausagePage.called)
         mock_headers.userusagePage.assert_called_once_with()
         self.assertFalse(mock_headers.activeUserusagePage.called)
         mock_headers.errorsPage.assert_called_once_with()
         self.assertFalse(mock_headers.activeErrorsPage.called)
+        self.assertFalse(mock_headers.disabledErrorsPage.called)
+        self.assertFalse(mock_headers.disabledUserusagePage.called)
+        self.assertFalse(mock_headers.disabledDatausagePage.called)
 
+    def test_admin_headers_userusage_is_active_is_staff(self, mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'userusage'
+        generateHeader(page, self.request)
+
+        mock_headers.datausagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeDatausagePage.called)
+        mock_headers.activeUserusagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.userusagePage.called)
+        mock_headers.errorsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeErrorsPage.called)
+        self.assertFalse(mock_headers.disabledErrorsPage.called)
+        self.assertFalse(mock_headers.disabledUserusagePage.called)
+        self.assertFalse(mock_headers.disabledDatausagePage.called)
+
+    def test_admin_headers_errors_is_active_is_staff(self, mock_HeaderHelper):
+        mock_headers = mock.MagicMock()
+        mock_HeaderHelper.return_value = mock_headers
+        page = 'errors'
+        generateHeader(page, self.request)
+
+        mock_headers.datausagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeDatausagePage.called)
+        mock_headers.userusagePage.assert_called_once_with()
+        self.assertFalse(mock_headers.activeUserusagePage.called)
+        mock_headers.activeErrorsPage.assert_called_once_with()
+        self.assertFalse(mock_headers.errorsPage.called)
+        self.assertFalse(mock_headers.disabledErrorsPage.called)
+        self.assertFalse(mock_headers.disabledUserusagePage.called)
+        self.assertFalse(mock_headers.disabledDatausagePage.called)
