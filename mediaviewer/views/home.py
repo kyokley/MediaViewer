@@ -180,7 +180,8 @@ def ajaxrunscraper(request):
     log.info("Running scraper")
     response = {'errmsg': ''}
     try:
-        File.inferAllScrapers()
+        if request.user.is_staff:
+            File.inferAllScrapers()
     except Exception, e:
         if DEBUG:
             response['errmsg'] = str(e)
