@@ -25,13 +25,13 @@ if not IS_SYNCING:
     from mediaviewer.api import viewset
     router.register(r'downloadtoken', viewset.DownloadTokenViewSet)
     router.register(r'downloadclick', viewset.DownloadClickViewSet)
-    router.register(r'file', viewset.FileViewSet)
-    router.register(r'movie', viewset.MovieFileViewSet)
+    router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
+    router.register(r'file', viewset.FileViewSet, base_name='file')
+    router.register(r'movie', viewset.MovieFileViewSet, base_name='movie')
     router.register(r'path', viewset.PathViewSet)
     router.register(r'datatransmission', viewset.DataTransmissionViewSet)
     router.register(r'error', viewset.ErrorViewSet)
     router.register(r'message', viewset.MessageViewSet)
-    router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet)
     router.register(r'filenamescrapeformat', viewset.FilenameScrapeFormatViewSet)
 
 urlpatterns = patterns('',

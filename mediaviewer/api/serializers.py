@@ -23,7 +23,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'waitertheme',
                   'displayname',
                   )
-    pk = serializers.Field()
     guid = serializers.CharField(required=True,
                                  max_length=32)
     userid = serializers.IntegerField(required=True, source='user.id')
@@ -39,20 +38,18 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
 class DownloadClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = DownloadClick
-        fields = ('userid',
+        fields = ('pk',
+                  'userid',
                   'filename',
                   'downloadtoken',
                   'datecreated',
-                  'size')
+                  'size',
+                  )
 
-    pk = serializers.Field()
-    guid = serializers.CharField(required=True,
-                                 max_length=32)
+    pk = serializers.ReadOnlyField()
     downloadtoken = serializers.IntegerField(required=True, source='downloadtoken.id')
     userid = serializers.IntegerField(required=True, source='user.id')
-    path = serializers.CharField(required=True)
     filename = serializers.CharField(required=True)
-    ismovie = serializers.BooleanField(required=True)
     datecreated = serializers.DateTimeField(required=True)
     size = serializers.IntegerField(required=True)
 
@@ -65,7 +62,7 @@ class PathSerializer(serializers.ModelSerializer):
                   'server',
                   'skip',
                   )
-    pk = serializers.Field()
+    pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=True, source='localpathstr')
     remotepath = serializers.CharField(required=True, source='remotepathstr')
     server = serializers.CharField(required=True)
@@ -84,7 +81,7 @@ class FileSerializer(serializers.ModelSerializer):
                   'streamable',
                   'ismovie',
                   )
-    pk = serializers.Field()
+    pk = serializers.ReadOnlyField()
     pathid = serializers.IntegerField(required=False, source='path.id')
     localpath = serializers.CharField(required=False, source='path.localpathstr')
     filename = serializers.CharField(required=False)
@@ -112,8 +109,8 @@ class DataTransmissionSerializer(serializers.ModelSerializer):
                   'date',
                   'downloaded',
                   )
-    pk = serializers.Field()
-    downloaded = serializers.DecimalField(required=True)
+    pk = serializers.ReadOnlyField()
+    downloaded = serializers.DecimalField(max_digits=12, decimal_places=0, required=True)
     date = serializers.DateTimeField(required=True)
 
 class ErrorSerializer(serializers.ModelSerializer):
@@ -127,8 +124,8 @@ class ErrorSerializer(serializers.ModelSerializer):
                   'path',
                   'datatransmission',
                   )
-    pk = serializers.Field()
-    downloaded = serializers.DecimalField(required=True)
+    pk = serializers.ReadOnlyField()
+    downloaded = serializers.DecimalField(max_digits=12, decimal_places=0, required=True)
     date = serializers.DateTimeField(required=True)
     error = serializers.CharField(required=True, source='errorstr')
     ignore = serializers.BooleanField(required=True)
@@ -146,7 +143,7 @@ class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
                   'subPeriods',
                   'useSearchTerm',
                   )
-    pk = serializers.Field()
+    pk = serializers.ReadOnlyField()
     nameRegex = serializers.CharField(required=True)
     episodeRegex = serializers.CharField(required=True)
     seasonRegex = serializers.CharField(required=True)
@@ -163,7 +160,7 @@ class MessageSerializer(serializers.ModelSerializer):
                   'level',
                   'datecreated',
                   )
-    pk = serializers.Field()
+    pk = serializers.ReadOnlyField()
     touserid = serializers.IntegerField(required=True, source='touser.id')
     body = serializers.CharField(required=True)
     sent = serializers.BooleanField(required=True)

@@ -34,8 +34,8 @@ class PathViewSet(viewsets.ModelViewSet):
     serializer_class = PathSerializer
 
     def get_queryset(self):
-        localpath = self.request.QUERY_PARAMS.get('localpath', None)
-        remotepath = self.request.QUERY_PARAMS.get('remotepath', None)
+        localpath = self.request.query_params.get('localpath', None)
+        remotepath = self.request.query_params.get('remotepath', None)
         queryset = Path.objects.all()
         if localpath and remotepath:
             queryset = queryset.filter(localpathstr=localpath)
@@ -86,7 +86,7 @@ class FileViewSet(viewsets.ModelViewSet):
     serializer_class = FileSerializer
 
     def get_queryset(self):
-        pathid = self.request.QUERY_PARAMS.get('pathid', None)
+        pathid = self.request.query_params.get('pathid', None)
         queryset = File.objects.all()
         log.debug('Returning File objects')
         if pathid:
