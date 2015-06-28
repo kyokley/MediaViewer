@@ -1,3 +1,4 @@
+from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import patterns, url, include
 from rest_framework import routers
 from django.shortcuts import redirect
@@ -21,23 +22,8 @@ from mediaviewer.views import (home,
 
 router = routers.DefaultRouter()
 
-if not IS_SYNCING:
-    from mediaviewer.api import viewset
-    router.register(r'downloadtoken', viewset.DownloadTokenViewSet)
-    router.register(r'downloadclick', viewset.DownloadClickViewSet)
-    router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
-    router.register(r'file', viewset.FileViewSet, base_name='file')
-    router.register(r'movie', viewset.MovieFileViewSet, base_name='movie')
-    router.register(r'path', viewset.PathViewSet)
-    router.register(r'datatransmission', viewset.DataTransmissionViewSet)
-    router.register(r'error', viewset.ErrorViewSet)
-    router.register(r'message', viewset.MessageViewSet)
-    router.register(r'filenamescrapeformat', viewset.FilenameScrapeFormatViewSet)
-
 urlpatterns = patterns('',
                        url(r'^$', home.home, name='home'),
-                       url(r'^api/', include(router.urls)),
-                       #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
                        url(r'^files/$', lambda x: redirect('/mediaviewer/files/display/0/')),
                        url(r'^files/display/(?P<items>\d+)/$', files.files, name='files'),
                        url(r'^paths/$', lambda x: redirect('/mediaviewer/paths/display/0/')),
@@ -75,3 +61,20 @@ urlpatterns = patterns('',
                        url(r'^ajaxreport/', files.ajaxreport, name='ajaxreport'),
                        url(r'^ajaxrunscraper/', home.ajaxrunscraper, name='ajaxrunscraper'),
                        )
+
+if not IS_SYNCING:
+    from mediaviewer.api import viewset
+    router.register(r'downloadtoken', viewset.DownloadTokenViewSet)
+    router.register(r'downloadclick', viewset.DownloadClickViewSet)
+    router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
+    router.register(r'file', viewset.FileViewSet, base_name='file')
+    router.register(r'movie', viewset.MovieFileViewSet, base_name='movie')
+    router.register(r'path', viewset.PathViewSet)
+    router.register(r'datatransmission', viewset.DataTransmissionViewSet)
+    router.register(r'error', viewset.ErrorViewSet)
+    router.register(r'message', viewset.MessageViewSet)
+    router.register(r'filenamescrapeformat', viewset.FilenameScrapeFormatViewSet)
+
+    urlpatterns += [url(r'^api/', include(router.urls)),
+                    url(r'^api/inferscrapers/', csrf_exempt(viewset.InferScrapersView.as_view())),
+                    ]

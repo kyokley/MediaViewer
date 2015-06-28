@@ -3,9 +3,10 @@ from django.contrib.auth.models import User
 from django.utils.timezone import utc
 from django.shortcuts import get_object_or_404
 from datetime import datetime as dateObj
-from rest_framework import viewsets
+from rest_framework import viewsets, views
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
+from rest_framework import permissions, authentication
 from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          DownloadClickSerializer,
                                          FileSerializer,
@@ -308,3 +309,16 @@ class MessageViewSet(viewsets.ModelViewSet):
         queryset = Message.objects.all()
         log.debug('Returning Message objects')
         return queryset
+
+class InferScrapersView(views.APIView):
+    permission_classes = (permissions.IsAdminUser,)
+    authentication_classes = (authentication.BasicAuthentication,
+                              authentication.SessionAuthentication,
+                              )
+
+    def post(self, request, *args, **kwargs):
+        try:
+            File.inferAllScrapers()
+            return RESTResponse({"success": True})
+        except Exception, e:
+            return RESTResponse({"success": False, "error": str(e)})
