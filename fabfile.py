@@ -115,6 +115,13 @@ server {{
         root {venv_location}/lib/python2.7/site-packages/django/contrib/admin/;
         expires 1y;
     }}
+
+    location /static/rest_framework/ {{
+        # this changes depending on your python version
+        root {venv_location}/local/lib/python2.7/site-packages/rest_framework;
+        expires 1y;
+    }}
+
 }}
 '''
 
