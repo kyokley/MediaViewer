@@ -92,11 +92,9 @@ def ajaxviewed(request):
 
 @csrf_exempt
 def ajaxsuperviewed(request):
-    # JSONP call
-
     errmsg = ''
-    guid = request.GET['guid']
-    viewed = request.GET['viewed'] == 'true' and True or False
+    guid = request.POST['guid']
+    viewed = request.POST['viewed'] == 'True' and True or False
 
     if viewed:
         token = (DownloadToken.objects
@@ -111,8 +109,6 @@ def ajaxsuperviewed(request):
                 'guid': guid,
                 'viewed': viewed}
     response = json.dumps(response)
-
-    response = 'jsonCallback(%s);' % (response,)
     return HttpResponse(response, content_type="application/json")
 
 @logAccessInfo
