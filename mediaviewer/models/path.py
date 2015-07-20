@@ -24,6 +24,7 @@ class Path(models.Model):
     tvdb_id = models.TextField(null=True, blank=True)
     server = models.TextField(blank=False, null=False)
     defaultsearchstr = models.TextField()
+    imdb_id = models.TextField(null=True, blank=True)
 
     class Meta:
         app_label = 'mediaviewer'

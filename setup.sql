@@ -133,3 +133,7 @@ BEGIN;
     ALTER TABLE downloadtoken ADD COLUMN fileid INTEGER;
     ALTER TABLE downloadtoken ADD CONSTRAINT downloadtoken_filefk FOREIGN KEY(fileid) REFERENCES file(id);
 COMMIT;
+
+BEGIN;
+    ALTER TABLE path ADD COLUMN imdb_id TEXT;
+COMMIT;
