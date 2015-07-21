@@ -125,7 +125,7 @@ def ajaxdownloadbutton(request):
         dt = DownloadToken()
         dt.user = user
         dt.filename = file.filename
-        dt.path = os.path.join(file.path.localpathstr, file.filename)
+        dt.path = file.path.localpathstr
         dt.ismovie = file.isMovie()
         dt.datecreated = dateObj.utcnow().replace(tzinfo=utc)
         settings = user.settings()
