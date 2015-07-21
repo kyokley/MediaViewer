@@ -98,14 +98,6 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-#Caching Settings
-#CACHES = {
-            #'default': {
-                        #'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
-                        #'LOCATION': '127.0.0.1:11211',
-                        #}
-#}
-
 MIDDLEWARE_CLASSES = (
     #'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
