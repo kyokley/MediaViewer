@@ -11,7 +11,7 @@ OS_COMMANDS = ('sudo apt-get install aptitude',
                'sudo aptitude update',
                'sudo aptitude install python-dev',
                'sudo aptitude install python-pip',
-               'sudo aptitude install python-virtualenv supervisor uwsgi uwsgi-plugin-python nginx postgresql postgresql-server-dev-9.3 memcached libmemcached-dev',
+               'sudo aptitude install python-virtualenv supervisor uwsgi uwsgi-plugin-python nginx postgresql postgresql-server-dev-9.3',
                )
 
 certCommands = (
