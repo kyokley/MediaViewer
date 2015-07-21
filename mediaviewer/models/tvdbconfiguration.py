@@ -80,6 +80,9 @@ def saveImageToDisk(url, imgName):
 
 def getDataFromIMDB(refFile, useExtendedPlot=False):
     log.debug('Getting data from IMDB using %s' % (refFile,))
+    if not refFile.imdb_id and refFile.path.imdb_id:
+        refFile.imdb_id = refFile.path.imdb_id
+
     if refFile.imdb_id and refFile.imdb_id != 'None':
         url = OMDB_ID_URL + refFile.imdb_id
     else:
