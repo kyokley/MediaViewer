@@ -164,9 +164,10 @@ def write_sudo_file(filename, text):
     write_file(filename, text, use_sudo=True)
 
 def add_cronjob(text):
-    fab.local('crontab -l > /tmp/crondump')             
-    fab.local('echo "%s 2> /dev/null" >> /tmp/crondump' % text)
-    fab.local('crontab /tmp/crondump')
+    with fab.warn_only():
+        fab.local('crontab -l > /tmp/crondump')             
+        fab.local('echo "%s 2> /dev/null" >> /tmp/crondump' % text)
+        fab.local('crontab /tmp/crondump')
 
 @fab.task
 @decorators.hosts(['localhost'])
