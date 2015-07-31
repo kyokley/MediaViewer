@@ -50,21 +50,6 @@ def signin(request):
                     le.user = request.user
                     le.datecreated = dateObj.utcnow().replace(tzinfo=utc)
                     le.save()
-
-                ip = get_ip(request)
-                if ip:
-                    log.debug("Got user's ip, %s", ip)
-                    settings = request.user.settings()
-                    if settings:
-                        bangupIP = socket.gethostbyname('bangup.dyndns.org')
-                        log.debug('bangup_ip: %s client_ip: %s', bangupIP, ip)
-                        if bangupIP == ip:
-                            log.debug('Client is accessing site from local intranet')
-                            settings.ip_format = LOCAL_IP
-                        else:
-                            log.debug('Client is accessing site across the internet')
-                            settings.ip_format = BANGUP_IP
-                        settings.save()
     except Exception, e:
         if DEBUG:
             context['error_message'] = str(e)
