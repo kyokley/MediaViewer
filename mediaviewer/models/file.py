@@ -102,7 +102,7 @@ class File(models.Model):
                 episode = episode and int(episode)
 
             log.debug('Attempt to get data from IMDB')
-            data = getDataFromIMDB(self)
+            data = getDataFromIMDB(self, useExtendedPlot=True)
 
             if not data:
                 log.debug('No data found')

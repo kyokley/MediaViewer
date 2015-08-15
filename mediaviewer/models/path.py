@@ -103,7 +103,7 @@ class Path(models.Model):
                 log.debug('Using %s for refFile' % (refFile,))
 
             imdbFailure = False
-            data = getDataFromIMDB(refFile)
+            data = getDataFromIMDB(refFile, useExtendedPlot=True)
             if data.has_key('Response') and data['Response'] == 'False':
                 imdbFailure = True
 

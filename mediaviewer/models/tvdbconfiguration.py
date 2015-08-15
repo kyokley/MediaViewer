@@ -1,4 +1,4 @@
-import os, urllib2, json
+import os, urllib2
 from mediaviewer.log import log
 from mysite.settings import (API_KEY,
                              OMDB_URL,
@@ -6,13 +6,14 @@ from mysite.settings import (API_KEY,
                              OMDB_URL_TAIL,
                              IMAGE_PATH,
                              )
+import requests
 
 def getJSONData(url):
     try:
         url = url.replace(' ','+')
         log.info('Getting json from %s' % (url,))
-        resp = urllib2.urlopen(url)
-        data = json.load(resp)
+        resp = requests.get(url)
+        data = resp.json()
         log.debug('Got %s' % (data,))
         return data
     except Exception, e:
