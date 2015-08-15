@@ -8,3 +8,4 @@ uwsgi
 django-ipware
 djangorestframework
 pytz
+requests
