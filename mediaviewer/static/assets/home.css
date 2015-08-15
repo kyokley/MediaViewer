@@ -126,3 +126,9 @@ img{
 .table.table-plain > tfoot > tr > td{
     background-color: transparent;
 }
+#file-displayName{
+    text-align: center;
+}
+#file-poster{
+    text-align: center;
+}

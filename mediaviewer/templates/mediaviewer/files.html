@@ -35,9 +35,9 @@
         <table>
             <tr>
                 <td {% if path.posterfile.image %} style="width:50%" {% endif %}>
-                    <h1>{{ path.displayName }}</h1>
+                    <h1 id="file-displayName">{{ path.displayName }}</h1>
                 </td>
-                <td rowspan="2" style="text-align: right">
+                <td id="file-poster" rowspan="2">
                     {% if path.posterfile.image %}
                         <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" /class="poster"/>
                     {% endif %}
