@@ -34,10 +34,10 @@
         </ol>
         <table>
             <tr>
-                <td>
+                <td {% if path.posterfile.image %} style="width:50%" {% endif %}>
                     <h1>{{ path.displayName }}</h1>
                 </td>
-                <td rowspan="2">
+                <td rowspan="2" style="text-align: right">
                     {% if path.posterfile.image %}
                         <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" /class="poster"/>
                     {% endif %}
@@ -45,7 +45,7 @@
             </tr>
             <tr>
                 <td>
-                    <h5>{{ path.posterfile.plot }}</h5>
+                    <h4>{{ path.posterfile.plot }}</h4>
                 </td>
             </tr>
         </table>
