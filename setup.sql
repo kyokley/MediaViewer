@@ -137,3 +137,9 @@ COMMIT;
 BEGIN;
     ALTER TABLE path ADD COLUMN imdb_id TEXT;
 COMMIT;
+
+BEGIN;
+    ALTER TABLE file ADD COLUMN override_filename TEXT;
+    ALTER TABLE file ADD COLUMN override_season TEXT;
+    ALTER TABLE file ADD COLUMN override_episode TEXT;
+COMMIT;

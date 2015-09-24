@@ -60,6 +60,9 @@ class File(models.Model):
                                              db_column='filenamescrapeformatid',
                                              blank=True)
     streamable = models.BooleanField(db_column='streamable', null=False)
+    override_filename = models.TextField()
+    override_season = models.TextField()
+    override_episode = models.TextField()
 
     class Meta:
         app_label = 'mediaviewer'
@@ -303,6 +306,9 @@ class File(models.Model):
         return searchStr
 
     def getScrapedName(self):
+        if self.override_filename:
+            return self.override_filename
+
         if not self.filenamescrapeformat:
             return self.filename
 
@@ -317,19 +323,25 @@ class File(models.Model):
                          name).strip() or self.filename
 
     def getScrapedSeason(self):
-        if not self.filenamescrapeformat:
-            return None
+        if self.override_season is not None:
+            if not self.filenamescrapeformat:
+                return None
 
-        seasonRegex = re.compile(self.filenamescrapeformat.seasonRegex).findall(self.filename)
-        season = seasonRegex and seasonRegex[0] or None
+            seasonRegex = re.compile(self.filenamescrapeformat.seasonRegex).findall(self.filename)
+            season = seasonRegex and seasonRegex[0] or None
+        else:
+            season = self.override_season
         return season and (season.isdigit() and season.zfill(2) or None) or None
 
     def getScrapedEpisode(self):
-        if not self.filenamescrapeformat:
-            return None
+        if self.override_episode is not None:
+            if not self.filenamescrapeformat:
+                return None
 
-        episodeRegex = re.compile(self.filenamescrapeformat.episodeRegex).findall(self.filename)
-        episode = episodeRegex and episodeRegex[0] or None
+            episodeRegex = re.compile(self.filenamescrapeformat.episodeRegex).findall(self.filename)
+            episode = episodeRegex and episodeRegex[0] or None
+        else:
+            episode = self.override_episode
         return episode and (episode.isdigit() and episode.zfill(2) or None) or None
 
     def getScrapedFullName(self):
