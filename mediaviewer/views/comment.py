@@ -37,12 +37,19 @@ def comment(request, file_id):
             changed = True
 
         if request.user.is_staff:
-            if file._searchString != request.POST['search'] or file.imdb_id != request.POST['imdb_id']:
+            if (file._searchString != request.POST['search'] or 
+                    file.imdb_id != request.POST['imdb_id'] or
+                    file.override_filename != request.POST['episode_name'] or
+                    file.override_season != request.POST['season'] or
+                    file.override_episode != request.POST['episode_number']):
                 file.posterfile.delete()
                 if file.path.posterfile:
                     file.path.posterfile.delete()
                 file._searchString = request.POST['search']
                 file.imdb_id = request.POST['imdb_id']
+                file.override_filename = request.POST['episode_name']
+                file.override_season = request.POST['season']
+                file.override_episode = request.POST['episode_number']
 
             file.hide = request.POST['hidden'] == 'true' or False
 

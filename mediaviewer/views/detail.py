@@ -15,7 +15,6 @@ from django.shortcuts import render, get_object_or_404
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 import json
-import os
 
 @login_required(login_url='/mediaviewer/login/')
 @logAccessInfo
