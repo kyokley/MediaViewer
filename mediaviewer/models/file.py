@@ -323,7 +323,7 @@ class File(models.Model):
                          name).strip() or self.filename
 
     def getScrapedSeason(self):
-        if self.override_season is not None:
+        if self.override_season is None:
             if not self.filenamescrapeformat:
                 return None
 
@@ -334,7 +334,7 @@ class File(models.Model):
         return season and (season.isdigit() and season.zfill(2) or None) or None
 
     def getScrapedEpisode(self):
-        if self.override_episode is not None:
+        if self.override_episode is None:
             if not self.filenamescrapeformat:
                 return None
 
