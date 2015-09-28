@@ -60,9 +60,9 @@ class File(models.Model):
                                              db_column='filenamescrapeformatid',
                                              blank=True)
     streamable = models.BooleanField(db_column='streamable', null=False)
-    override_filename = models.TextField()
-    override_season = models.TextField()
-    override_episode = models.TextField()
+    override_filename = models.TextField(blank=True)
+    override_season = models.TextField(blank=True)
+    override_episode = models.TextField(blank=True)
 
     class Meta:
         app_label = 'mediaviewer'
