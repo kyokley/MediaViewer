@@ -143,3 +143,12 @@ BEGIN;
     ALTER TABLE file ADD COLUMN override_season TEXT;
     ALTER TABLE file ADD COLUMN override_episode TEXT;
 COMMIT;
+
+BEGIN;
+    UPDATE file SET override_filename = '' WHERE override_filename IS NULL;
+    UPDATE file SET override_season = '' WHERE override_season IS NULL;
+    UPDATE file SET override_episode = '' WHERE override_episode IS NULL;
+    ALTER TABLE file ALTER COLUMN override_filename SET DEFAULT '';
+    ALTER TABLE file ALTER COLUMN override_season SET DEFAULT '';
+    ALTER TABLE file ALTER COLUMN override_episode SET DEFAULT '';
+COMMIT;

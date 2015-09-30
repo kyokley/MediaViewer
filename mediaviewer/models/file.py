@@ -60,9 +60,9 @@ class File(models.Model):
                                              db_column='filenamescrapeformatid',
                                              blank=True)
     streamable = models.BooleanField(db_column='streamable', null=False)
-    override_filename = models.TextField(blank=True, null=True)
-    override_season = models.TextField(blank=True, null=True)
-    override_episode = models.TextField(blank=True, null=True)
+    override_filename = models.TextField(blank=True)
+    override_season = models.TextField(blank=True)
+    override_episode = models.TextField(blank=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -323,7 +323,7 @@ class File(models.Model):
                          name).strip() or self.filename
 
     def getScrapedSeason(self):
-        if self.override_season is None:
+        if not self.override_season:
             if not self.filenamescrapeformat:
                 return None
 
@@ -334,7 +334,7 @@ class File(models.Model):
         return season and (season.isdigit() and season.zfill(2) or None) or None
 
     def getScrapedEpisode(self):
-        if self.override_episode is None:
+        if not self.override_episode:
             if not self.filenamescrapeformat:
                 return None
 
