@@ -23,7 +23,7 @@ class Path(models.Model):
     defaultScraper = models.ForeignKey('mediaviewer.FilenameScrapeFormat', null=True, blank=True, db_column='defaultscraperid')
     tvdb_id = models.TextField(null=True, blank=True)
     server = models.TextField(blank=False, null=False)
-    defaultsearchstr = models.TextField()
+    defaultsearchstr = models.TextField(null=True, blank=True)
     imdb_id = models.TextField(null=True, blank=True)
 
     class Meta:
