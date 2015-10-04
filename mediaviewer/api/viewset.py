@@ -345,6 +345,7 @@ class PosterViewSetByPath(viewsets.ModelViewSet):
 class PosterViewSetByFile(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()
     serializer_class = PosterFileSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def retrieve(self, request, pk=None):
         log.debug('Attempting to find poster with fileid = %s' % pk)
@@ -360,6 +361,7 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
 class UserCommentViewSet(viewsets.ModelViewSet):
     queryset = UserComment.objects.all()
     serializer_class = UserCommentSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
