@@ -75,6 +75,7 @@ if not IS_SYNCING:
     router.register(r'message', viewset.MessageViewSet)
     router.register(r'filenamescrapeformat', viewset.FilenameScrapeFormatViewSet)
     router.register(r'posterfilebypath', viewset.PosterViewSetByPath)
+    router.register(r'posterfilebyfile', viewset.PosterViewSetByFile)
 
     urlpatterns += [url(r'^api/', include(router.urls)),
                     url(r'^api/inferscrapers/', csrf_exempt(viewset.InferScrapersView.as_view())),

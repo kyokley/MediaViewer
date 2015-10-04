@@ -329,21 +329,29 @@ class InferScrapersView(views.APIView):
 class PosterViewSetByPath(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()
     serializer_class = PosterFileSerializer
-    #permission_classes = (permissions.IsAdminUser,)
-    #authentication_classes = (authentication.BasicAuthentication,
-                              #authentication.SessionAuthentication,
-                              #)
-
-    #def retrieve(self, request, *args, **kwargs):
-        #import pdb; pdb.set_trace()
-        #queryset = PosterFile.objects.all()
-        #return queryset
 
     def retrieve(self, request, pk=None):
         log.debug('Attempting to find poster with pathid = %s' % pk)
-        path = Path.objects.get(pk=pk)
-        obj = DownloadToken.objects.filter(path=path)
+        path = Path.objects.filter(pk=pk)
+        obj = PosterFile.objects.filter(path=path)
         if obj:
-            log.debug('Found token. isValid: %s' % obj.isvalid)
-        serializer = self.serializer_class(obj)
-        return RESTResponse(serializer.data)
+            serializer = self.serializer_class(obj[0])
+            return RESTResponse(serializer.data)
+        else:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_200_OK)
+
+class PosterViewSetByFile(viewsets.ModelViewSet):
+    queryset = PosterFile.objects.all()
+    serializer_class = PosterFileSerializer
+
+    def retrieve(self, request, pk=None):
+        log.debug('Attempting to find poster with fileid = %s' % pk)
+        file = File.objects.filter(pk=pk)
+        obj = PosterFile.objects.filter(file=file)
+        if obj:
+            serializer = self.serializer_class(obj[0])
+            return RESTResponse(serializer.data)
+        else:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_200_OK)
