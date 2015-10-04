@@ -7,6 +7,7 @@ from rest_framework import viewsets, views
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
 from rest_framework import permissions, authentication
+from rest_framework import generics
 from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          DownloadClickSerializer,
                                          FileSerializer,
@@ -16,6 +17,7 @@ from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          ErrorSerializer,
                                          FilenameScrapeFormatSerializer,
                                          MessageSerializer,
+                                         PosterFileSerializer,
                                          )
 from mediaviewer.models.file import File
 from mediaviewer.models.path import (Path,
@@ -27,6 +29,7 @@ from mediaviewer.models.datatransmission import DataTransmission
 from mediaviewer.models.error import Error
 from mediaviewer.models.message import Message
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
+from mediaviewer.models.posterfile import PosterFile
 
 from mediaviewer.log import log
 
@@ -322,3 +325,25 @@ class InferScrapersView(views.APIView):
             return RESTResponse({"success": True})
         except Exception, e:
             return RESTResponse({"success": False, "error": str(e)})
+
+class PosterViewSetByPath(viewsets.ModelViewSet):
+    queryset = PosterFile.objects.all()
+    serializer_class = PosterFileSerializer
+    #permission_classes = (permissions.IsAdminUser,)
+    #authentication_classes = (authentication.BasicAuthentication,
+                              #authentication.SessionAuthentication,
+                              #)
+
+    #def retrieve(self, request, *args, **kwargs):
+        #import pdb; pdb.set_trace()
+        #queryset = PosterFile.objects.all()
+        #return queryset
+
+    def retrieve(self, request, pk=None):
+        log.debug('Attempting to find poster with pathid = %s' % pk)
+        path = Path.objects.get(pk=pk)
+        obj = DownloadToken.objects.filter(path=path)
+        if obj:
+            log.debug('Found token. isValid: %s' % obj.isvalid)
+        serializer = self.serializer_class(obj)
+        return RESTResponse(serializer.data)

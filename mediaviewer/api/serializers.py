@@ -6,6 +6,7 @@ from mediaviewer.models.datatransmission import DataTransmission
 from mediaviewer.models.error import Error
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.message import Message
+from mediaviewer.models.posterfile import PosterFile
 
 from rest_framework import serializers
 
@@ -166,3 +167,25 @@ class MessageSerializer(serializers.ModelSerializer):
     sent = serializers.BooleanField(required=True)
     level = serializers.IntegerField(required=True)
     datecreated = serializers.DateTimeField(required=True)
+
+class PosterFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PosterFile
+        fields = ('pk',
+                  'image',
+                  'plot',
+                  'extendedplot',
+                  'genre',
+                  'actors',
+                  'writer',
+                  'director',
+                  'episodename')
+        pk = serializers.ReadOnlyField()
+        image = serializers.CharField()
+        plot = serializers.CharField()
+        extendedplot = serializers.CharField()
+        genre = serializers.CharField()
+        actors = serializers.CharField()
+        writer = serializers.CharField()
+        director = serializers.CharField()
+        episodename = serializers.CharField()
