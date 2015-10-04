@@ -7,7 +7,6 @@ from rest_framework import viewsets, views
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
 from rest_framework import permissions, authentication
-from rest_framework import generics
 from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          DownloadClickSerializer,
                                          FileSerializer,
@@ -18,6 +17,7 @@ from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          FilenameScrapeFormatSerializer,
                                          MessageSerializer,
                                          PosterFileSerializer,
+                                         UserCommentSerializer,
                                          )
 from mediaviewer.models.file import File
 from mediaviewer.models.path import (Path,
@@ -30,6 +30,7 @@ from mediaviewer.models.error import Error
 from mediaviewer.models.message import Message
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.posterfile import PosterFile
+from mediaviewer.models.usercomment import UserComment
 
 from mediaviewer.log import log
 
@@ -339,7 +340,7 @@ class PosterViewSetByPath(viewsets.ModelViewSet):
             return RESTResponse(serializer.data)
         else:
             return RESTResponse(None,
-                                status=RESTstatus.HTTP_200_OK)
+                                status=RESTstatus.HTTP_404_NOT_FOUND)
 
 class PosterViewSetByFile(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()
@@ -354,4 +355,27 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
             return RESTResponse(serializer.data)
         else:
             return RESTResponse(None,
-                                status=RESTstatus.HTTP_200_OK)
+                                status=RESTstatus.HTTP_404_NOT_FOUND)
+
+class UserCommentViewSet(viewsets.ModelViewSet):
+    queryset = UserComment.objects.all()
+    serializer_class = UserCommentSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = UserComment.objects.filter(user=user)
+        log.debug('Returning UserComment objects')
+        return queryset
+
+    def retrieve(self, request, pk=None):
+        user = request.user
+        file = File.objects.get(pk=pk)
+        obj = (UserComment.objects
+                          .filter(user=user)
+                          .filter(file=file))
+        if obj:
+            serializer = self.serializer_class(obj[0])
+            return RESTResponse(serializer.data)
+        else:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_404_NOT_FOUND)

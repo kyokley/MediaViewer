@@ -7,6 +7,7 @@ from mediaviewer.models.error import Error
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.message import Message
 from mediaviewer.models.posterfile import PosterFile
+from mediaviewer.models.usercomment import UserComment
 
 from rest_framework import serializers
 
@@ -189,3 +190,14 @@ class PosterFileSerializer(serializers.ModelSerializer):
         writer = serializers.CharField()
         director = serializers.CharField()
         episodename = serializers.CharField()
+
+class UserCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserComment
+        fields = ('pk',
+                  'comment',
+                  'viewed',
+                  )
+        pk = serializers.ReadOnlyField()
+        comment = serializers.CharField()
+        viewed = serializers.BooleanField(required=True)
