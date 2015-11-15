@@ -1,12 +1,12 @@
 from django.db import models
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
-                                saveImageToDisk,
-                                assignDataToPoster,
-                                searchTVDBByName,
-                                tvdbConfig,
-                                )
+from mediaviewer.models.tvdbconfiguration import (getDataFromIMDBByPath,
+                                                  saveImageToDisk,
+                                                  assignDataToPoster,
+                                                  searchTVDBByName,
+                                                  tvdbConfig,
+                                                  )
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 from dateutil import parser
@@ -57,7 +57,6 @@ class Path(models.Model):
             files = File.objects.filter(hide=False).filter(path=self).filter(finished=True).exclude(datecreatedstr=None).order_by('datecreatedstr').reverse()
             file = files and files[0]
             return file and file.datecreatedstr and parser.parse(file.datecreatedstr[:10]).date() or ''
-                
         except Exception, e:
             log.error(str(e), exc_info=True)
             return ''
@@ -93,18 +92,9 @@ class Path(models.Model):
             else:
                 poster.path = self
 
-            files = self.files()
-            refFile = files and files[0]
-
-            if not refFile:
-                log.warning('No files found associated with path. Skipping')
-                return None
-            else:
-                log.debug('Using %s for refFile' % (refFile,))
-
             imdbFailure = False
-            data = getDataFromIMDB(refFile, useExtendedPlot=True)
-            if data.has_key('Response') and data['Response'] == 'False':
+            data = getDataFromIMDBByPath(self, useExtendedPlot=False)
+            if 'Response' in data and data['Response'] == 'False':
                 imdbFailure = True
 
             if not imdbFailure:
@@ -115,11 +105,11 @@ class Path(models.Model):
 
                 assignDataToPoster(data, poster)
 
-                data = getDataFromIMDB(refFile, useExtendedPlot=True)
+                data = getDataFromIMDBByPath(self, useExtendedPlot=True)
                 assignDataToPoster(data, poster, onlyExtendedPlot=True)
             else:
                 log.info('IMDB failed. Attempting to use TVDB.')
-                tvinfo = searchTVDBByName(refFile.searchString())
+                tvinfo = searchTVDBByName(self.defaultsearchstr)
                 if tvinfo:
                     self.tvdb_id = tvinfo['results'][0]['id']
                     result = tvinfo['results'][0]
@@ -139,12 +129,9 @@ class Path(models.Model):
     def _posterfileget(self):
         try:
             posterfile = PosterFile.objects.get(path=self)
-            if posterfile:
-                found = True
         except:
-            found = False
-
-        if not found:
+            posterfile = None
+        if not posterfile:
             log.info('PosterFile not found. Creating a new one')
             poster = PosterFile()
             poster.datecreated = dateObj.utcnow().replace(tzinfo=utc)

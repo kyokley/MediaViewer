@@ -80,14 +80,43 @@ def saveImageToDisk(url, imgName):
         log.info('No image name given. Skipping')
 
 def getDataFromIMDB(refFile, useExtendedPlot=False):
-    log.debug('Getting data from IMDB using %s' % (refFile,))
     if not refFile.imdb_id and refFile.path.imdb_id:
         refFile.imdb_id = refFile.path.imdb_id
 
     if refFile.imdb_id and refFile.imdb_id != 'None':
-        url = OMDB_ID_URL + refFile.imdb_id
+        return _getDataFromIMDBByID(refFile.imdb_id, useExtendedPlot=useExtendedPlot)
     else:
-        url = OMDB_URL + refFile.searchString()
+        return _getDataFromIMDBBySearchString(refFile.searchString(), useExtendedPlot=useExtendedPlot)
+
+def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
+    if refPath.imdb_id:
+        return _getDataFromIMDBByID(refPath.imdb_id, useExtendedPlot=useExtendedPlot)
+    else:
+        files = refPath.files()
+        refFile = files and files[0]
+
+        if not refFile:
+            log.warning('No files found associated with path. Skipping')
+            return None
+        else:
+            log.debug('Using %s for refFile' % (refFile,))
+
+        return getDataFromIMDB(refFile, useExtendedPlot=useExtendedPlot)
+
+def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False):
+    log.debug('Getting data from IMDB using %s' % (imdb_id,))
+    url = OMDB_ID_URL + imdb_id
+
+    if useExtendedPlot:
+        url = url + OMDB_URL_TAIL
+
+    data = getJSONData(url)
+    data['url'] = url
+    return data
+
+def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
+    log.debug('Getting data from IMDB using %s' % (searchString,))
+    url = OMDB_URL + searchString
 
     if useExtendedPlot:
         url = url + OMDB_URL_TAIL
