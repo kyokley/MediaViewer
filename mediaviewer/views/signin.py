@@ -7,18 +7,9 @@ from django.contrib.auth import authenticate, login
 from mediaviewer.models.loginevent import LoginEvent
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
-from ipware.ip import get_ip
 from django.http import HttpResponseRedirect
-from mediaviewer.models.usersettings import (
-                                      LOCAL_IP,
-                                      BANGUP_IP,
-                                      )
 from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
-
-import socket
-
-from mediaviewer.log import log
 
 @logAccessInfo
 def signin(request):
@@ -60,4 +51,3 @@ def signin(request):
         return HttpResponseRedirect(request.POST['next'])
 
     return render(request, 'mediaviewer/signin.html', context)
-
