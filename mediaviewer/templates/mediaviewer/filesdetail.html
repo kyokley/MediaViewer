@@ -78,6 +78,7 @@
 
     {% block main %}
     <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
+        {% csrf_token %}
         {% if user.is_staff %}
         <div class="jumbotron">
             <p><h1>File Admin Info</h1></p>
@@ -105,54 +106,51 @@
                 <div class="checkbox">
                     <label>
                         <input type="hidden" name="hidden" value="" id="hide-checkbox-input" />
-                        Hide: <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
+                        Hide <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
                     </label>
                 </div>
             </h4>
         </div>
         {% endif %}
-        <div class="well well-sm">
-            {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-            {% csrf_token %}
-            <div class="container">
-                {% if posterfile %}
-                {% if posterfile.image %}
-                <div class="row">
-                    <div class=".col-xs-12">
-                        <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive center-block"/>
-                    </div>
-                </div>
-                {% endif %}
-                <div class="row">
-                    <h3>
-                        <dl class="dl-horizontal">
-                            <dt>Genre:</dt>
-                            <dd>{{ posterfile.genre }}</dd>
-                            <dt>Writer:</dt>
-                            <dd>{{ posterfile.writer }}</dd>
-                            <dt>Director:</dt>
-                            <dd>{{ posterfile.director }}</dd>
-                            <dt>Actors:</dt>
-                            <dd>{{ posterfile.actors }}</dd>
-                            <dt>Description:</dt>
-                            <dd>{{ posterfile.extendedplot }}</dd>
-                            <dt>Comment:</dt>
-                            <dd>
-                            <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
-                            </dd>
-                            <dt>Viewed</dt>
-                            <dd>
-                            <input type="hidden" name="viewed" value="" id="checkbox-input" />
-                            <input type="checkbox" id="toggle-viewed" class="toggle-viewed"/>
-                            </dd>
-                        </dl>
-                    </h3>
-                </div>
-                <p><input type="submit" value="Save" /></p>
-                {% else %}
-                <p><ul><h2>No file data found</h2></ul></p>
-                {% endif %}
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        <div class="container">
+            {% if posterfile %}
+            {% if posterfile.image %}
+            <div class="row">
+                    <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive"/>
             </div>
+            {% endif %}
+            <div class="row">
+                <h3>
+                    <dl class="dl-horizontal">
+                        <dt>Genre:</dt>
+                        <dd>{{ posterfile.genre }}</dd>
+                        <dt>Writer:</dt>
+                        <dd>{{ posterfile.writer }}</dd>
+                        <dt>Director:</dt>
+                        <dd>{{ posterfile.director }}</dd>
+                        <dt>Actors:</dt>
+                        <dd>{{ posterfile.actors }}</dd>
+                        <dt>Description:</dt>
+                        <dd>{{ posterfile.extendedplot }}</dd>
+                    </dl>
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
+                    </div>
+                    <div class="checkbox">
+                        <label for="toggle-viewed">
+                        <input type="hidden" name="viewed" value="" id="checkbox-input" />
+                        Viewed <input type="checkbox" id="toggle-viewed" class="toggle-viewed"/>
+                        </label>
+                    </div>
+                </h3>
+            </div>
+            <p><input type="submit" value="Save" /></p>
+            {% else %}
+            <p><ul><h2>No file data found</h2></ul></p>
+            {% endif %}
+        </div>
     </form>
     {% endblock %}
 
