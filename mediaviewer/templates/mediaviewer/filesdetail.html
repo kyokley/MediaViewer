@@ -80,40 +80,35 @@
     <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
         {% if user.is_staff %}
         <div class="jumbotron">
-            <div class="container">
-                <div class="row">
-                    <h1>File Admin Info</h1>
+            <p><h1>File Admin Info</h1></p>
+            <h4>
+                <div class="form-group">
+                    <label for="search-textbox">Search:</label>
+                    <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.searchString }}">
                 </div>
-                <div class="row">
-                    <dl class="dl-horizontal">
-                        <dt>Search:</dt>
-                        <dd>
-                            <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.searchString }}">
-                        </dd>
-                        <dt>Episode Name:</dt>
-                        <dd>
-                            <input type="text" name="episode_name" id="episode_name-textbox" class="form-control search-textbox" value="{{ file.override_filename }}">
-                        </dd>
-                        <dt>IMDB ID:</dt>
-                        <dd>
-                            <input type="text" name="imdb_id" id="imdb_id-textbox" class="form-control search-textbox imdb_id-textbox" value="{{ file.imdb_id }}">
-                        </dd>
-                        <dt>Season:</dt>
-                        <dd>
-                            <input type="text" name="season" id="season-textbox" class="form-control search-textbox" value="{{ file.override_season }}">
-                        </dd>
-                        <dt>Episode Number:</dt>
-                        <dd>
-                            <input type="text" name="episode_number" id="episode_number-textbox" class="form-control search-textbox" value="{{ file.override_episode }}">
-                        </dd>
-                        <dt>Hide:</dt>
-                        <dd>
-                            <input type="hidden" name="hidden" value="" id="hide-checkbox-input" />
-                            <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
-                        </dd>
-                    </dl>
+                <div class="form-group">
+                    <label for="episode_name-textbox">Episode Name:</label>
+                    <input type="text" name="episode_name" id="episode_name-textbox" class="form-control search-textbox" value="{{ file.override_filename }}">
                 </div>
-            </div>
+                <div class="form-group">
+                    <label for="imdb_id-textbox">IMDB ID:</label>
+                    <input type="text" name="imdb_id" id="imdb_id-textbox" class="form-control search-textbox imdb_id-textbox" value="{{ file.imdb_id }}">
+                </div>
+                <div class="form-group">
+                    <label for="season-textbox">Season:</label>
+                    <input type="text" name="season" id="season-textbox" class="form-control search-textbox" value="{{ file.override_season }}">
+                </div>
+                <div class="form-group">
+                    <label for="episode_number-textbox">Episode Number:</label>
+                    <input type="text" name="episode_number" id="episode_number-textbox" class="form-control search-textbox" value="{{ file.override_episode }}">
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="hidden" name="hidden" value="" id="hide-checkbox-input" />
+                        Hide: <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
+                    </label>
+                </div>
+            </h4>
         </div>
         {% endif %}
         <div class="well well-sm">

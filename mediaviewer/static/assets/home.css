@@ -47,26 +47,6 @@ body{
     padding-bottom: 24px;
 }
 
-.poster{
-    padding-left: 20px;
-}
-
-img{
-    max-width: 100%;
-}
-
-.caption { margin: 12px;
-           text-align: center;
-           font-style: italic;
-           font-size: 18px;
-           float: center; 
-}
-
-.file-comment {
-    resize: none;
-    width: 100%;
-}
-
 .form-signin {
   max-width: 330px;
   padding: 15px;
@@ -122,8 +102,5 @@ img{
     background-color: transparent;
 }
 #file-displayName{
-    text-align: center;
-}
-#file-poster{
     text-align: center;
 }
