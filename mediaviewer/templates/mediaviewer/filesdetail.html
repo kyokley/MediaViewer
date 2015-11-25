@@ -24,50 +24,59 @@
         </ol>
         <h1>File Detail</h1>
         <h3>
+            <dl class="dl-horizontal">
             {% if user.is_staff %}
-            <ul><li>File Name: {{ file.fileName }}</li></ul>
-            <ul><li>Local Path: {{ file.path.localPath }}</li></ul>
-            <ul><li>Remote Path: {{ file.path.remotePath }}</li></ul>
+                <dt>File Name:</dt>
+                <dd>{{ file.filename }}</dd>
+                <dt>Local Path:</dt>
+                <dd>{{ file.path.localPath }}</dd>
+                <dt>Remote Path:</dt>
+                <dd>{{ file.path.remotePath }}</dd>
             {% endif %}
             {% if file.size %}
-            <ul><li>Size: {{ file.size }}</li></ul>
+                <dt>Size:</dt>
+                <dd>{{ file.size }}</dd>
             {% endif %}
             {% if user.is_staff %}
-            <ul><li>Skip: {{ skip }}</li></ul>
-            <ul><li>Finished: {{ finished }}</li></ul>
-            <ul><li>Errors:</li></ul>
-            <ul>
-                <ul>
+                <dt>Skip:</dt>
+                <dd>{{ skip }}</dd>
+                <dt>Finished:</dt>
+                <dd>{{ finished }}</dd>
+                <dt>Errors:</dt>
+                <dd>
                     <h4>
-                        {% if file.hasErrors %}
+                    {% if file.hasErrors %}
                         {% for error in file.errors %}
-                        {% if not error.ignore %}
-                        <li>{{ error.errorStr }}</li>
-                        {% endif %}
+                            {% if not error.ignore %}
+                                <li>{{ error.errorStr }}</li>
+                            {% endif %}
                         {% endfor %}
-                        {% else %}
+                    {% else %}
                         <li>None</li>
-                        {% endif %}
+                    {% endif %}
                     </h4>
-                </ul>
-            </ul>
+                </dd>
             {% endif %}
             {% if file.finished %}
-            {% if file.isTVShow %}
-            <ul><li>Date Downloaded: {{ file.datatransmission.date }}</li></ul>
-            {% else %}
-            <ul><li>Date Added: {{ file.datecreated.date }}</li></ul>
-            {% endif %}
+                {% if file.isTVShow %}
+                    <dt>Date Downloaded:</dt>
+                    <dd>{{ file.datatransmission.date }}</dd>
+                {% else %}
+                    <dt>Date Added:</dt>
+                    <dd>{{ file.datecreated.date }}</dd>
+                {% endif %}
             {% endif %}
             {% if file.usercomment %}
-            <ul><li>Date Edited: {{ file.usercomment.dateedited }}</li></ul>
+                <dt>Date Edited:</dt>
+                <dd>{{ file.usercomment.dateedited }}</dd>
             {% endif %}
+            </dl>
             {% if file.finished and can_download %}
-            <ul>
-                <ul>
+            <div class="container">
+                <div class="row">
                     <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
-                </ul>
-            </ul>
+                </div>
+            </div>
             {% endif %}
         </h3>
         {% endblock %}
@@ -113,43 +122,61 @@
         </div>
         {% endif %}
         {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-        <div class="container">
-            {% if posterfile %}
-            {% if posterfile.image %}
-            <div class="row">
-                    <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive"/>
-            </div>
-            {% endif %}
-            <div class="row">
-                <h3>
-                    <dl class="dl-horizontal">
-                        <dt>Genre:</dt>
-                        <dd>{{ posterfile.genre }}</dd>
-                        <dt>Writer:</dt>
-                        <dd>{{ posterfile.writer }}</dd>
-                        <dt>Director:</dt>
-                        <dd>{{ posterfile.director }}</dd>
-                        <dt>Actors:</dt>
-                        <dd>{{ posterfile.actors }}</dd>
-                        <dt>Description:</dt>
-                        <dd>{{ posterfile.extendedplot }}</dd>
-                    </dl>
-                    <div class="form-group">
-                        <label for="comment">Comment:</label>
-                        <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
+        <div class="jumbotron">
+            <div class="container">
+                {% if posterfile %}
+                    {% if posterfile.image %}
+                    <div class="row text-center">
+                        <h4>
+                        {% if file.isMovie %}
+                            {{ file.searchString }}
+                        {% else %}
+                            {{ file.getScrapedFullName }}
+                        {% endif %}
+                        </h4>
                     </div>
-                    <div class="checkbox">
-                        <label for="toggle-viewed">
-                        <input type="hidden" name="viewed" value="" id="checkbox-input" />
-                        Viewed <input type="checkbox" id="toggle-viewed" class="toggle-viewed"/>
-                        </label>
+                    <div class="row">
+                        <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive center-block"/>
                     </div>
-                </h3>
+                        <h4>
+                        {% if posterfile.episodename %}
+                            <div class="row text-center">
+                                {{ posterfile.episodename }}
+                            </div>
+                        {% endif %}
+                        </h4>
+                    {% endif %}
+                    <div class="row">
+                        <h3>
+                            <dl class="dl-horizontal">
+                                <dt>Genre:</dt>
+                                <dd>{{ posterfile.genre }}</dd>
+                                <dt>Writer:</dt>
+                                <dd>{{ posterfile.writer }}</dd>
+                                <dt>Director:</dt>
+                                <dd>{{ posterfile.director }}</dd>
+                                <dt>Actors:</dt>
+                                <dd>{{ posterfile.actors }}</dd>
+                                <dt>Description:</dt>
+                                <dd>{{ posterfile.extendedplot }}</dd>
+                            </dl>
+                            <div class="form-group">
+                                <label for="comment">Comment:</label>
+                                <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
+                            </div>
+                            <div class="checkbox">
+                                <label for="toggle-viewed">
+                                <input type="hidden" name="viewed" value="" id="checkbox-input" />
+                                Viewed <input type="checkbox" id="toggle-viewed" class="toggle-viewed"/>
+                                </label>
+                            </div>
+                        </h3>
+                    </div>
+                    <p><input type="submit" value="Save" /></p>
+                {% else %}
+                    <p><ul><h2>No file data found</h2></ul></p>
+                {% endif %}
             </div>
-            <p><input type="submit" value="Save" /></p>
-            {% else %}
-            <p><ul><h2>No file data found</h2></ul></p>
-            {% endif %}
         </div>
     </form>
     {% endblock %}
