@@ -25,57 +25,59 @@
         <h1>File Detail</h1>
         <h4>
             <div class="row">
-                <dl class="dl-horizontal">
-                {% if user.is_staff %}
-                    <dt>File Name:</dt>
-                    <dd>{{ file.filename }}</dd>
-                    <dt>Local Path:</dt>
-                    <dd>{{ file.path.localPath }}</dd>
-                    <dt>Remote Path:</dt>
-                    <dd>{{ file.path.remotePath }}</dd>
-                {% endif %}
-                {% if file.size %}
-                    <dt>Size:</dt>
-                    <dd>{{ file.size }}</dd>
-                {% endif %}
-                {% if user.is_staff %}
-                    <dt>Skip:</dt>
-                    <dd>{{ skip }}</dd>
-                    <dt>Finished:</dt>
-                    <dd>{{ finished }}</dd>
-                    {% if file.hasErrors %}
-                    <dt>Errors:</dt>
-                    <dd>
-                        <h4>
-                            {% for error in file.errors %}
-                                {% if not error.ignore %}
-                                    <li>{{ error.errorStr }}</li>
-                                {% endif %}
-                            {% endfor %}
-                        </h4>
-                    </dd>
+                <div class="col-xs-12">
+                    <dl class="dl-horizontal">
+                    {% if user.is_staff %}
+                        <dt>File Name:</dt>
+                        <dd>{{ file.filename }}</dd>
+                        <dt>Local Path:</dt>
+                        <dd>{{ file.path.localPath }}</dd>
+                        <dt>Remote Path:</dt>
+                        <dd>{{ file.path.remotePath }}</dd>
                     {% endif %}
-                {% endif %}
-                {% if file.finished %}
-                    {% if file.isTVShow and file.datatransmission %}
-                        <dt>Date Downloaded:</dt>
-                        <dd>{{ file.datatransmission.date }}</dd>
-                    {% elif file.datecreated %}
-                        <dt>Date Added:</dt>
-                        <dd>{{ file.datecreated.date }}</dd>
+                    {% if file.size %}
+                        <dt>Size:</dt>
+                        <dd>{{ file.size }}</dd>
                     {% endif %}
-                {% endif %}
-                {% if file.usercomment and file.usercomment.dateedited %}
-                    <dt>Date Edited:</dt>
-                    <dd>{{ file.usercomment.dateedited.date }}</dd>
-                {% endif %}
-                </dl>
+                    {% if user.is_staff %}
+                        <dt>Skip:</dt>
+                        <dd>{{ skip }}</dd>
+                        <dt>Finished:</dt>
+                        <dd>{{ finished }}</dd>
+                        {% if file.hasErrors %}
+                        <dt>Errors:</dt>
+                        <dd>
+                            <h4>
+                                {% for error in file.errors %}
+                                    {% if not error.ignore %}
+                                        <li>{{ error.errorStr }}</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </h4>
+                        </dd>
+                        {% endif %}
+                    {% endif %}
+                    {% if file.finished %}
+                        {% if file.isTVShow and file.datatransmission %}
+                            <dt>Date Downloaded:</dt>
+                            <dd>{{ file.datatransmission.date }}</dd>
+                        {% elif file.datecreated %}
+                            <dt>Date Added:</dt>
+                            <dd>{{ file.datecreated.date }}</dd>
+                        {% endif %}
+                    {% endif %}
+                    {% if file.usercomment and file.usercomment.dateedited %}
+                        <dt>Date Edited:</dt>
+                        <dd>{{ file.usercomment.dateedited.date }}</dd>
+                    {% endif %}
+                    </dl>
+                </div>
             </div>
             {% if file.finished and can_download %}
             <div class="row">
                 <div class="col-xs-2"></div>
                 <div class="col-xs-2">
-                    <a class='btn btn-info vcenter' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
+                    <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
                 </div>
                 <div class="col-xs-8"></div>
             </div>
@@ -166,15 +168,18 @@
                                 <label for="comment">Comment:</label>
                                 <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
                             </div>
-                            <div class="checkbox">
-                                <label for="toggle-viewed">
+                            <div class="form-group">
                                 <input type="hidden" name="viewed" value="" id="checkbox-input" />
-                                Viewed <input type="checkbox" id="toggle-viewed" class="toggle-viewed"/>
+                                <label>
+                                    <input type="checkbox" id="toggle-viewed"/>
+                                    Viewed
                                 </label>
+                            </div>
+                            <div class="form-group">
+                                <p><input type="submit" value="Save" /></p>
                             </div>
                         </h3>
                     </div>
-                    <p><input type="submit" value="Save" /></p>
                 {% else %}
                     <p><ul><h2>No file data found</h2></ul></p>
                 {% endif %}
