@@ -43,43 +43,41 @@
                     <dd>{{ skip }}</dd>
                     <dt>Finished:</dt>
                     <dd>{{ finished }}</dd>
+                    {% if file.hasErrors %}
                     <dt>Errors:</dt>
                     <dd>
                         <h4>
-                        {% if file.hasErrors %}
                             {% for error in file.errors %}
                                 {% if not error.ignore %}
                                     <li>{{ error.errorStr }}</li>
                                 {% endif %}
                             {% endfor %}
-                        {% else %}
-                            <li>None</li>
-                        {% endif %}
                         </h4>
                     </dd>
+                    {% endif %}
                 {% endif %}
                 {% if file.finished %}
-                    {% if file.isTVShow %}
+                    {% if file.isTVShow and file.datatransmission %}
                         <dt>Date Downloaded:</dt>
                         <dd>{{ file.datatransmission.date }}</dd>
-                    {% else %}
+                    {% elif file.datecreated %}
                         <dt>Date Added:</dt>
                         <dd>{{ file.datecreated.date }}</dd>
                     {% endif %}
                 {% endif %}
-                {% if file.usercomment %}
+                {% if file.usercomment and file.usercomment.dateedited %}
                     <dt>Date Edited:</dt>
-                    <dd>{{ file.usercomment.dateedited }}</dd>
+                    <dd>{{ file.usercomment.dateedited.date }}</dd>
                 {% endif %}
                 </dl>
             </div>
             {% if file.finished and can_download %}
             <div class="row">
-                <ol>
-                <ul>
-                <a class='btn btn-info vcenter' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
-                </ul>
-                </ol>
+                <div class="col-xs-2"></div>
+                <div class="col-xs-2">
+                    <a class='btn btn-info vcenter' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
+                </div>
+                <div class="col-xs-8"></div>
             </div>
             {% endif %}
         </h4>
