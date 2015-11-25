@@ -23,62 +23,66 @@
             {% endif %}
         </ol>
         <h1>File Detail</h1>
-        <h3>
-            <dl class="dl-horizontal">
-            {% if user.is_staff %}
-                <dt>File Name:</dt>
-                <dd>{{ file.filename }}</dd>
-                <dt>Local Path:</dt>
-                <dd>{{ file.path.localPath }}</dd>
-                <dt>Remote Path:</dt>
-                <dd>{{ file.path.remotePath }}</dd>
-            {% endif %}
-            {% if file.size %}
-                <dt>Size:</dt>
-                <dd>{{ file.size }}</dd>
-            {% endif %}
-            {% if user.is_staff %}
-                <dt>Skip:</dt>
-                <dd>{{ skip }}</dd>
-                <dt>Finished:</dt>
-                <dd>{{ finished }}</dd>
-                <dt>Errors:</dt>
-                <dd>
-                    <h4>
-                    {% if file.hasErrors %}
-                        {% for error in file.errors %}
-                            {% if not error.ignore %}
-                                <li>{{ error.errorStr }}</li>
-                            {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        <li>None</li>
-                    {% endif %}
-                    </h4>
-                </dd>
-            {% endif %}
-            {% if file.finished %}
-                {% if file.isTVShow %}
-                    <dt>Date Downloaded:</dt>
-                    <dd>{{ file.datatransmission.date }}</dd>
-                {% else %}
-                    <dt>Date Added:</dt>
-                    <dd>{{ file.datecreated.date }}</dd>
+        <h4>
+            <div class="row">
+                <dl class="dl-horizontal">
+                {% if user.is_staff %}
+                    <dt>File Name:</dt>
+                    <dd>{{ file.filename }}</dd>
+                    <dt>Local Path:</dt>
+                    <dd>{{ file.path.localPath }}</dd>
+                    <dt>Remote Path:</dt>
+                    <dd>{{ file.path.remotePath }}</dd>
                 {% endif %}
-            {% endif %}
-            {% if file.usercomment %}
-                <dt>Date Edited:</dt>
-                <dd>{{ file.usercomment.dateedited }}</dd>
-            {% endif %}
-            </dl>
+                {% if file.size %}
+                    <dt>Size:</dt>
+                    <dd>{{ file.size }}</dd>
+                {% endif %}
+                {% if user.is_staff %}
+                    <dt>Skip:</dt>
+                    <dd>{{ skip }}</dd>
+                    <dt>Finished:</dt>
+                    <dd>{{ finished }}</dd>
+                    <dt>Errors:</dt>
+                    <dd>
+                        <h4>
+                        {% if file.hasErrors %}
+                            {% for error in file.errors %}
+                                {% if not error.ignore %}
+                                    <li>{{ error.errorStr }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <li>None</li>
+                        {% endif %}
+                        </h4>
+                    </dd>
+                {% endif %}
+                {% if file.finished %}
+                    {% if file.isTVShow %}
+                        <dt>Date Downloaded:</dt>
+                        <dd>{{ file.datatransmission.date }}</dd>
+                    {% else %}
+                        <dt>Date Added:</dt>
+                        <dd>{{ file.datecreated.date }}</dd>
+                    {% endif %}
+                {% endif %}
+                {% if file.usercomment %}
+                    <dt>Date Edited:</dt>
+                    <dd>{{ file.usercomment.dateedited }}</dd>
+                {% endif %}
+                </dl>
+            </div>
             {% if file.finished and can_download %}
-            <div class="container">
-                <div class="row">
-                    <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
-                </div>
+            <div class="row">
+                <ol>
+                <ul>
+                <a class='btn btn-info vcenter' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a>
+                </ul>
+                </ol>
             </div>
             {% endif %}
-        </h3>
+        </h4>
         {% endblock %}
     </div>
 
