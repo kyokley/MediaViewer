@@ -37,12 +37,20 @@
                 <div class="col-xs-12 col-sm-12">
                     <h1 id="file-displayName">{{ path.displayName }}</h1>
                 </div>
+                {% if long_plot %}
                 <div class="col-xs-12 col-sm-6">
+                {% else %}
+                <div class="col-xs-12">
+                {% endif %}
                     {% if path.posterfile.image %}
                         <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" /class="img-responsive center-block"/>
                     {% endif %}
                 </div>
+                {% if long_plot %}
                 <div class="col-xs-12 col-sm-6">
+                {% else %}
+                <div class="col-xs-12">
+                {% endif %}
                     <h4>{{ path.posterfile.plot }}</h4>
                 </div>
             </div>
@@ -55,34 +63,34 @@
 
 {% block main %}
 {% if files %}
-    <table id="myTable" class="table table-striped table-hover cell-border no-wrap dt-responsive"> 
-        <thead> 
-            <tr> 
-                <th class="all">File Name</th> 
-                <th class="desktop">Timestamp</th> 
+    <table id="myTable" class="table table-striped table-hover cell-border no-wrap dt-responsive">
+        <thead>
+            <tr>
+                <th class="all">File Name</th>
+                <th class="desktop">Timestamp</th>
                 {% if can_download %}
-                    <th class="min-tablet-p">Link</th> 
+                    <th class="min-tablet-p">Link</th>
                 {% endif %}
                 <th class="all">Viewed</th>
                 <th class='desktop'>Report Bad File</th>
                 <th></th>
-            </tr> 
-        </thead> 
-        <tbody> 
+            </tr>
+        </thead>
+        <tbody>
             {% for file in files %}
-            <tr> 
+            <tr>
                 {% if view == 'movies' %}
-                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td> 
+                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
                 {% else %}
-                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td> 
+                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
                 {% endif %}
-                <td>{{ file.datecreated.date }}</td> 
+                <td>{{ file.datecreated.date }}</td>
                 {% if waiterstatus %}
                     {% if can_download %}
                         {% if file.finished %}
                         <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a></center></td>
                         {% else %}
-                            <td>No file</td> 
+                            <td>No file</td>
                         {% endif %}
                     {% endif %}
                 {% else %}
@@ -100,9 +108,9 @@
                 {% endif %}
                 <span id="saved-{{ file.id }}"></span>
                 </td>
-                <td><input class='report' name='report-{{ file.id }}' value='Report' type='button' onclick="reportButtonClick('{{file.id}}', '{{csrf_token}}')"/></td> 
+                <td><input class='report' name='report-{{ file.id }}' value='Report' type='button' onclick="reportButtonClick('{{file.id}}', '{{csrf_token}}')"/></td>
                 <td></td>
-            </tr> 
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -124,7 +132,7 @@
 <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
 <script src="{% static "assets/mediaviewer.js" %}"></script>
 <script type="text/javascript">
-    $(document).ready(function(){ 
+    $(document).ready(function(){
       preparePage($, '{{csrf_token}}');
         {% if view == 'movies' %}
             var sortOrder = [[1,1]];
