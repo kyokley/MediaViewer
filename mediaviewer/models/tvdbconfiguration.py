@@ -128,11 +128,16 @@ def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
 def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
     if not foundNone:
         if not onlyExtendedPlot:
-            poster.plot = (not data.get('Plot', None) or data.get('Plot', None) == 'undefined') and 'Plot not found' or data.get('Plot', None)
-            poster.genre = (not data.get('Genre', None) or data.get('Genre', None) == 'undefined') and 'Genre not found' or data.get('Genre', None)
-            poster.actors = (not data.get('Actors', None) or data.get('Actors', None) == 'undefined') and 'Actors not found' or data.get('Actors', None)
-            poster.writer = (not data.get('Writer', None) or data.get('Writer', None) == 'undefined') and 'Writer not found' or data.get('Writer', None)
-            poster.director = (not data.get('Director', None) or data.get('Director', None) == 'undefined') and 'Director not found' or data.get('Director', None)
+            plot = data.get('Plot')
+            poster.plot = (not plot or plot == 'undefined') and 'Plot not found' or plot
+            genre = data.get('Genre', None)
+            poster.genre = (not genre or genre == 'undefined') and 'Genre not found' or genre
+            actors = data.get('Actors')
+            poster.actors = (not actors or actors == 'undefined') and 'Actors not found' or actors
+            writer = data.get('Writer')
+            poster.writer = (not writer or writer == 'undefined') and 'Writer not found' or writer
+            director = data.get('Director')
+            poster.director = (not director or director == 'undefined') and 'Director not found' or director
             rating = data.get('imdbRating')
             poster.rating = rating != 'undefined' and rating or None
             rated = data.get('Rated')
@@ -147,4 +152,3 @@ def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
         poster.writer = 'Writer not found'
         poster.director = 'Director not found'
         poster.extendedplot = 'Extended plot not found'
-
