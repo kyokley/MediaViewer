@@ -152,3 +152,8 @@ BEGIN;
     ALTER TABLE file ALTER COLUMN override_season SET DEFAULT '';
     ALTER TABLE file ALTER COLUMN override_episode SET DEFAULT '';
 COMMIT;
+
+BEGIN;
+    ALTER TABLE posterfile ADD COLUMN rating TEXT;
+    ALTER TABLE posterfile ADD COLUMN rated TEXT;
+COMMIT;

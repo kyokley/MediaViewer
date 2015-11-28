@@ -133,6 +133,10 @@ def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
             poster.actors = (not data.get('Actors', None) or data.get('Actors', None) == 'undefined') and 'Actors not found' or data.get('Actors', None)
             poster.writer = (not data.get('Writer', None) or data.get('Writer', None) == 'undefined') and 'Writer not found' or data.get('Writer', None)
             poster.director = (not data.get('Director', None) or data.get('Director', None) == 'undefined') and 'Director not found' or data.get('Director', None)
+            rating = data.get('imdbRating')
+            poster.rating = rating != 'undefined' and rating or None
+            rated = data.get('Rated')
+            poster.rated = rated != 'undefined' and rated or None
         else:
             poster.extendedplot = (not data.get('Plot', None) or data.get('Plot', None) == 'undefined') and 'Plot not found' or data.get('Plot', None)
     else:
