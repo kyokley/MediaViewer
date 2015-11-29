@@ -163,6 +163,14 @@
                                 <dd>{{ posterfile.actors }}</dd>
                                 <dt>Description:</dt>
                                 <dd>{{ posterfile.extendedplot }}</dd>
+                                {% if posterfile.rated %}
+                                    <dt>Rated:</dt>
+                                    <dd>{{ posterfile.rated }}</dd>
+                                {% endif %}
+                                {% if posterfile.rating %}
+                                    <dt>IMDB Rating:</dt>
+                                    <dd>{{ posterfile.rating }}/10</dd>
+                                {% endif %}
                             </dl>
                             <div class="form-group">
                                 <label for="comment">Comment:</label>
