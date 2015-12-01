@@ -196,7 +196,7 @@ class File(models.Model):
     def isMovie(self):
         if self._ismovie is None:
             from mediaviewer.models.path import MOVIE
-            self._ismovie = (self.path.localpathstr == MOVIE and 
+            self._ismovie = (self.path.localpathstr == MOVIE and
                              self.path.remotepathstr == MOVIE)
             self.save()
         return self._ismovie

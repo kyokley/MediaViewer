@@ -37,7 +37,7 @@ def comment(request, file_id):
             changed = True
 
         if request.user.is_staff:
-            if (file._searchString != request.POST['search'] or 
+            if (file._searchString != request.POST['search'] or
                     file.imdb_id != request.POST['imdb_id'] or
                     file.override_filename != request.POST['episode_name'] or
                     file.override_season != request.POST['season'] or
