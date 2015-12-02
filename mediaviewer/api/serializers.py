@@ -66,7 +66,7 @@ class PathSerializer(serializers.ModelSerializer):
     localpath = serializers.CharField(required=True, source='localpathstr')
     remotepath = serializers.CharField(required=True, source='remotepathstr')
     server = serializers.CharField(required=True)
-    skip = serializers.IntegerField(required=True)
+    skip = serializers.BooleanField(required=True)
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
