@@ -36,7 +36,7 @@
         <tr> 
             <td><a href='/mediaviewer/tvshows/{{ path.id }}/'>{{ path.displayName }}</a></td> 
             <td>{{ path.id }}</td>
-            <td>{{ path.lastCreatedFileDate }}</td>
+            <td><span>{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate }}</td>
             <td></td>
         </tr> 
         {% endfor %}

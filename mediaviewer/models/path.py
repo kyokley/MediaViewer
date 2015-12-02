@@ -9,7 +9,6 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDBByPath,
                                                   )
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
-from dateutil import parser
 
 from mediaviewer.log import log
 
@@ -54,12 +53,15 @@ class Path(models.Model):
 
     def lastCreatedFileDate(self):
         try:
-            files = File.objects.filter(hide=False).filter(path=self).filter(finished=True).exclude(datecreatedstr=None).order_by('datecreatedstr').reverse()
-            file = files and files[0]
-            return file and file.datecreatedstr and parser.parse(file.datecreatedstr[:10]).date() or ''
+            file = File.objects.filter(hide=False).filter(path=self).filter(finished=True).exclude(datecreated=None).order_by('-datecreated').first()
+            return file and file.datecreated
         except Exception, e:
             log.error(str(e), exc_info=True)
             return ''
+
+    def lastCreatedFileDateForSpan(self):
+        last_date = self.lastCreatedFileDate()
+        return last_date and last_date.isoformat()
 
     @classmethod
     def distinctShowFolders(cls):
@@ -69,10 +71,8 @@ class Path(models.Model):
         pathDict = dict()
         for path in paths:
             lastDate = path.lastCreatedFileDate()
-            if pathDict.has_key(path.shortName):
-                if not pathDict[path.shortName].lastCreatedFileDate():
-                    pathDict[path.shortName] = path
-                elif lastDate and pathDict[path.shortName].lastCreatedFileDate() < lastDate:
+            if path.shortName in pathDict:
+                if lastDate and pathDict[path.shortName].lastCreatedFileDate() < lastDate:
                     pathDict[path.shortName] = path
             else:
                 pathDict[path.shortName] = path
@@ -152,3 +152,9 @@ class Path(models.Model):
             file.delete()
         self.delete()
 
+    # TODO: Finish this method after converting datestrs to actual datetimes
+    #def unwatched_tv_shows_since_date(self, user):
+        #if self.isMovie():
+            #raise Exception('This function does not apply to movies')
+#
+        #files = (File.objects.filter(path=self)

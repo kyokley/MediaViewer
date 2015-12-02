@@ -119,10 +119,6 @@ class FileViewSet(viewsets.ModelViewSet):
                 newFile._searchString = path.defaultsearchstr
                 newFile.streamable = True
 
-                currentTimeStr = str(dateObj.now())
-                newFile.datecreatedstr = currentTimeStr
-                newFile.dateeditedstr = currentTimeStr
-
                 newFile.clean()
                 newFile.save()
                 log.info('New file record created for %s' % newFile.filename)
@@ -152,8 +148,6 @@ class FileViewSet(viewsets.ModelViewSet):
         instance._searchString = data.get('_searchString', instance._searchString)
         instance.streamable = data.get('streamable', instance.streamable)
 
-        currentTimeStr = str(dateObj.now())
-        instance.dateeditedstr = currentTimeStr
         instance.save()
 
         serializer = FileSerializer(instance, partial=True)
@@ -181,10 +175,6 @@ class MovieFileViewSet(viewsets.ModelViewSet):
                 newFile.finished = data['finished']
                 newFile.size = data['size']
                 newFile.hide = False
-
-                currentTimeStr = str(dateObj.now())
-                newFile.datecreatedstr = currentTimeStr
-                newFile.dateeditedstr = currentTimeStr
 
                 newFile.clean()
                 newFile.save()
