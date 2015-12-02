@@ -52,7 +52,7 @@ class PathViewSet(viewsets.ModelViewSet):
         return RESTResponse(serializer.data)
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
@@ -104,7 +104,7 @@ class FileViewSet(viewsets.ModelViewSet):
         return RESTResponse(serializer.data)
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
@@ -140,7 +140,7 @@ class FileViewSet(viewsets.ModelViewSet):
 
     # Implements PUT
     def update(self, request, pk=None):
-        data = request.DATA
+        data = request.data
         queryset = File.objects.filter(pk=pk)
 
         instance = get_object_or_404(queryset, pk=pk)
@@ -168,7 +168,7 @@ class MovieFileViewSet(viewsets.ModelViewSet):
     serializer_class = MovieFileSerializer
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
@@ -241,7 +241,7 @@ class DownloadClickViewSet(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
