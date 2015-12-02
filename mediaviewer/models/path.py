@@ -24,6 +24,7 @@ class Path(models.Model):
     server = models.TextField(blank=False, null=False)
     defaultsearchstr = models.TextField(null=True, blank=True)
     imdb_id = models.TextField(null=True, blank=True)
+    lastCreatedFileDate = models.DateTimeField(null=True, blank=True, db_column='lastcreatedfiledate')
 
     class Meta:
         app_label = 'mediaviewer'
@@ -51,16 +52,8 @@ class Path(models.Model):
     def __unicode__(self):
         return 'id: %s r: %s l: %s' % (self.id, self.remotePath, self.localPath)
 
-    def lastCreatedFileDate(self):
-        try:
-            file = File.objects.filter(hide=False).filter(path=self).filter(finished=True).exclude(datecreated=None).order_by('-datecreated').first()
-            return file and file.datecreated
-        except Exception, e:
-            log.error(str(e), exc_info=True)
-            return ''
-
     def lastCreatedFileDateForSpan(self):
-        last_date = self.lastCreatedFileDate()
+        last_date = self.lastCreatedFileDate
         return last_date and last_date.isoformat()
 
     @classmethod
@@ -70,9 +63,9 @@ class Path(models.Model):
         paths = set([file.path for file in refFiles])
         pathDict = dict()
         for path in paths:
-            lastDate = path.lastCreatedFileDate()
+            lastDate = path.lastCreatedFileDate
             if path.shortName in pathDict:
-                if lastDate and pathDict[path.shortName].lastCreatedFileDate() < lastDate:
+                if lastDate and pathDict[path.shortName].lastCreatedFileDate < lastDate:
                     pathDict[path.shortName] = path
             else:
                 pathDict[path.shortName] = path

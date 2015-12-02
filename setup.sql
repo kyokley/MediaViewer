@@ -157,3 +157,28 @@ BEGIN;
     ALTER TABLE posterfile ADD COLUMN rating TEXT;
     ALTER TABLE posterfile ADD COLUMN rated TEXT;
 COMMIT;
+
+BEGIN;
+ALTER TABLE file ALTER COLUMN datecreated type timestamp
+using to_timestamp(datecreated, 'YYYY-MM-DD HH24:MI:SS');
+
+ALTER TABLE file ALTER COLUMN dateedited type timestamp
+using to_timestamp(dateedited, 'YYYY-MM-DD HH24:MI:SS');
+
+ALTER TABLE file ALTER COLUMN finished DROP DEFAULT;
+ALTER TABLE file ALTER COLUMN finished TYPE bool USING CASE WHEN finished = 0 THEN FALSE ELSE TRUE END;
+ALTER TABLE file ALTER COLUMN finished SET DEFAULT FALSE;
+
+ALTER TABLE file ALTER COLUMN skip DROP DEFAULT;
+ALTER TABLE file ALTER COLUMN skip TYPE bool USING CASE WHEN skip = 0 THEN FALSE ELSE TRUE END;
+ALTER TABLE file ALTER COLUMN skip SET DEFAULT FALSE;
+
+ALTER TABLE file DROP COLUMN viewed;
+ALTER TABLE file DROP COLUMN errorid;
+
+UPDATE file SET datecreated = '2013-09-19 06:43:17' WHERE datecreated IS NULL OR datecreated < '2013-09-19 06:43:17';
+UPDATE file SET dateedited = '2013-09-19 06:43:17' WHERE dateedited IS NULL OR dateedited < '2013-09-19 06:43:17';
+
+alter table path add column lastcreatedfiledate timestamp;
+update path set lastcreatedfiledate = (select max(datecreated) from file where file.pathid = path.id);
+COMMIT;

@@ -121,6 +121,10 @@ class FileViewSet(viewsets.ModelViewSet):
 
                 newFile.clean()
                 newFile.save()
+
+                if not path.lastCreatedFileDate or path.lastCreatedFileDate < newFile.datecreated:
+                    path.lastCreatedFileDate = newFile.datecreated
+                    path.save()
                 log.info('New file record created for %s' % newFile.filename)
         except Exception, e:
             log.error(str(e))
@@ -178,6 +182,10 @@ class MovieFileViewSet(viewsets.ModelViewSet):
 
                 newFile.clean()
                 newFile.save()
+
+                if not self._MOVIE_PATH.lastCreatedFileDate or self._MOVIE_PATH.lastCreatedFileDate < newFile.datecreated:
+                    self._MOVIE_PATH.lastCreatedFileDate = newFile.datecreated
+                    self._MOVIE_PATH.save()
 
                 log.info('New moviefile record created for %s' % newFile.filename)
 
