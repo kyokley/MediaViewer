@@ -92,16 +92,16 @@
                     <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
                 {% endif %}
                 <td>{{ file.datecreated.date }}</td>
-                {% if waiterstatus %}
-                    {% if can_download %}
+                {% if can_download %}
+                    {% if waiterstatus %}
                         {% if file.finished %}
                         <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Download</a></center></td>
                         {% else %}
                             <td>No file</td>
                         {% endif %}
+                    {% else %}
+                        <td>Alfred is down</td>
                     {% endif %}
-                {% else %}
-                    <td>Alfred is down</td>
                 {% endif %}
                 <td>
                 {% if file.usercomment %}
