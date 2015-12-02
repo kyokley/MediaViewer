@@ -159,10 +159,10 @@ BEGIN;
 COMMIT;
 
 BEGIN;
-ALTER TABLE file ALTER COLUMN datecreated type timestamp
+ALTER TABLE file ALTER COLUMN datecreated type timestamptz
 using to_timestamp(datecreated, 'YYYY-MM-DD HH24:MI:SS');
 
-ALTER TABLE file ALTER COLUMN dateedited type timestamp
+ALTER TABLE file ALTER COLUMN dateedited type timestamptz
 using to_timestamp(dateedited, 'YYYY-MM-DD HH24:MI:SS');
 
 ALTER TABLE file ALTER COLUMN finished DROP DEFAULT;
@@ -179,6 +179,6 @@ ALTER TABLE file DROP COLUMN errorid;
 UPDATE file SET datecreated = '2013-09-19 06:43:17' WHERE datecreated IS NULL OR datecreated < '2013-09-19 06:43:17';
 UPDATE file SET dateedited = '2013-09-19 06:43:17' WHERE dateedited IS NULL OR dateedited < '2013-09-19 06:43:17';
 
-alter table path add column lastcreatedfiledate timestamp;
+alter table path add column lastcreatedfiledate timestamptz;
 update path set lastcreatedfiledate = (select max(datecreated) from file where file.pathid = path.id);
 COMMIT;
