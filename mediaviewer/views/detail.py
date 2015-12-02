@@ -5,12 +5,11 @@ from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.views.home import generateHeader, setSiteWideContext
-from mediaviewer.models.usersettings import (
-                                      LOCAL_IP,
-                                      BANGUP_IP,
-                                      DEFAULT_SITE_THEME,
-                                      )
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.models.usersettings import (LOCAL_IP,
+                                             BANGUP_IP,
+                                             DEFAULT_SITE_THEME,
+                                             )
+from mediaviewer.utils import logAccessInfo, humansize
 from django.shortcuts import render, get_object_or_404
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
@@ -43,7 +42,8 @@ def filesdetail(request, file_id):
                'LOCAL_IP': LOCAL_IP,
                'BANGUP_IP': BANGUP_IP,
                'viewed': viewed,
-               'can_download': settings and settings.can_download or False}
+               'can_download': settings and settings.can_download or False,
+               'file_size': file.size and humansize(file.size)}
     headers = generateHeader('filesdetail', request)
     context['header'] = headers[0]
     context['header2'] = headers[1]
