@@ -90,7 +90,7 @@ body{
 #myTable_wrapper {
     margin-bottom: 15px;
 }
-#myTable span {
+.hidden_span {
     display: none;
 }
 .no-sort {

@@ -78,6 +78,9 @@ def tvshowsummary(request):
     pathDict = Path.distinctShowFolders()
     pathSet = [path for name, path in pathDict.items()]
 
+    for path in pathSet:
+        path.numberOfUnwatchedShows = path.number_of_unwatched_shows_since_date(request.user)
+
     context = {'pathSet':pathSet}
     headers = generateHeader('tvshows', request)
     context['header'] = headers[0]

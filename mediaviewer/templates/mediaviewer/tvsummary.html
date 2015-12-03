@@ -22,23 +22,28 @@
 {% include messages %}
 
 {% block main %}
-<table id="myTable" class="table table-striped table-hover cell-border no-wrap dt-responsive"> 
-    <thead> 
-        <tr> 
-            <th class="all">TV Shows</th> 
-            <th class='desktop'>ID</th> 
-            <th class='min-tablet-p'>Last Show</th> 
+<table id="myTable" class="table table-striped table-hover cell-border no-wrap dt-responsive">
+    <thead>
+        <tr>
+            <th class="all">TV Shows</th>
+            <th class='desktop'>ID</th>
+            <th class='min-tablet-p'>Last Show</th>
             <th></th>
-        </tr> 
-    </thead> 
-    <tbody> 
+        </tr>
+    </thead>
+    <tbody>
         {% for path in pathSet %}
-        <tr> 
-            <td><a href='/mediaviewer/tvshows/{{ path.id }}/'>{{ path.displayName }}</a></td> 
+        <tr>
+            <td>
+                <a href='/mediaviewer/tvshows/{{ path.id }}/'>{{ path.displayName }}</a>
+                {% if path.numberOfUnwatchedShows %}
+                    <span class="badge alert-info">{{ path.numberOfUnwatchedShows }}</span>
+                {% endif %}
+            </td>
             <td>{{ path.id }}</td>
-            <td><span>{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate }}</td>
+            <td><span class="hidden_span">{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate }}</td>
             <td></td>
-        </tr> 
+        </tr>
         {% endfor %}
     </tbody>
 </table>
@@ -58,7 +63,7 @@
 <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
 <script src="{% static "assets/mediaviewer.js" %}"></script>
 <script type="text/javascript">
-    $(document).ready(function(){ 
+    $(document).ready(function(){
 
       preparePage($, '{{csrf_token}}');
         prepareTableSorter($, [[2,1]]);

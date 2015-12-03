@@ -8,6 +8,7 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDBByPath,
                                                   tvdbConfig,
                                                   )
 from datetime import datetime as dateObj
+from datetime import timedelta
 from django.utils.timezone import utc
 
 from mediaviewer.log import log
@@ -146,8 +147,21 @@ class Path(models.Model):
         self.delete()
 
     # TODO: Finish this method after converting datestrs to actual datetimes
-    #def unwatched_tv_shows_since_date(self, user):
-        #if self.isMovie():
-            #raise Exception('This function does not apply to movies')
-#
-        #files = (File.objects.filter(path=self)
+    def unwatched_tv_shows_since_date(self, user):
+        if self.isMovie():
+            raise Exception('This function does not apply to movies')
+
+        refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=30)
+        files = (File.objects.filter(path__localpathstr=self.localpathstr)
+                             .filter(datecreated__gt=refDate)
+                             .all())
+        unwatched_files = set()
+        for file in files:
+            comment = file.usercomment(user)
+            if not comment or not comment.viewed:
+                unwatched_files.add(file)
+
+        return unwatched_files
+
+    def number_of_unwatched_shows_since_date(self, user):
+        return len(self.unwatched_tv_shows_since_date(user))
