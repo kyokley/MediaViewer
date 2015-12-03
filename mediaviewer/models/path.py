@@ -146,12 +146,11 @@ class Path(models.Model):
             file.delete()
         self.delete()
 
-    # TODO: Finish this method after converting datestrs to actual datetimes
-    def unwatched_tv_shows_since_date(self, user):
+    def unwatched_tv_shows_since_date(self, user, daysBack=30):
         if self.isMovie():
             raise Exception('This function does not apply to movies')
 
-        refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=30)
+        refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=daysBack)
         files = (File.objects.filter(path__localpathstr=self.localpathstr)
                              .filter(datecreated__gt=refDate)
                              .all())
@@ -163,5 +162,5 @@ class Path(models.Model):
 
         return unwatched_files
 
-    def number_of_unwatched_shows_since_date(self, user):
-        return len(self.unwatched_tv_shows_since_date(user))
+    def number_of_unwatched_shows_since_date(self, user, daysBack=30):
+        return len(self.unwatched_tv_shows_since_date(user, daysBack=daysBack))
