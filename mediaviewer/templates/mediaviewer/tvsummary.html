@@ -26,7 +26,6 @@
     <thead>
         <tr>
             <th class="all">TV Shows</th>
-            <th class='desktop'>ID</th>
             <th class='min-tablet-p'>Last Show</th>
             <th></th>
         </tr>
@@ -40,7 +39,6 @@
                     <span class="badge alert-info">{{ path.numberOfUnwatchedShows }}</span>
                 {% endif %}
             </td>
-            <td>{{ path.id }}</td>
             <td><span class="hidden_span">{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate }}</td>
             <td></td>
         </tr>
@@ -66,7 +64,7 @@
     $(document).ready(function(){
 
       preparePage($, '{{csrf_token}}');
-        prepareTableSorter($, [[2,1]]);
+        prepareTableSorter($, [[1,1]]);
 
         prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
 });
