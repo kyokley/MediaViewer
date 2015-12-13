@@ -153,6 +153,7 @@ class Path(models.Model):
         refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=daysBack)
         files = (File.objects.filter(path__localpathstr=self.localpathstr)
                              .filter(datecreated__gt=refDate)
+                             .filter(hide=False)
                              .all())
         unwatched_files = set()
         for file in files:
