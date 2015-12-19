@@ -55,7 +55,7 @@ class Path(models.Model):
 
     def lastCreatedFileDateForSpan(self):
         last_date = self.lastCreatedFileDate
-        return last_date and last_date.isoformat()
+        return last_date and last_date.date().isoformat()
 
     @classmethod
     def distinctShowFolders(cls):

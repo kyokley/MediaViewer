@@ -91,7 +91,7 @@
                 {% else %}
                     <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
                 {% endif %}
-                <td>{{ file.datecreated.date }}</td>
+                <td><span class="hidden_span">{{file.dateCreatedForSpan}}</span>{{ file.datecreated.date }}</td>
                 {% if can_download %}
                     {% if waiterstatus %}
                         {% if file.finished %}

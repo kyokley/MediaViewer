@@ -39,7 +39,7 @@
                     <span class="badge alert-info">{{ path.numberOfUnwatchedShows }}</span>
                 {% endif %}
             </td>
-            <td><span class="hidden_span">{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate }}</td>
+            <td><span class="hidden_span">{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate.date }}</td>
             <td></td>
         </tr>
         {% endfor %}

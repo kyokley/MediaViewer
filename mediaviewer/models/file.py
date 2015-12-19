@@ -67,6 +67,9 @@ class File(models.Model):
         app_label = 'mediaviewer'
         db_table = 'file'
 
+    def dateCreatedForSpan(self):
+        return self.datecreated and self.datecreated.isoformat()
+
     @property
     def fileName(self):
         return self.filename
