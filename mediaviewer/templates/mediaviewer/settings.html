@@ -21,27 +21,6 @@
         {% csrf_token %}
             <h2>Account Settings</h2>
             <ul>
-                <input type="hidden" name="option" value="" id="btn-input" />
-                <label id="optionsRadio">IP Format:</label>
-                    <div class="input">
-                        <ul class="inputs-list">
-                            <ul>
-                                <label>
-                                    <input type="radio" checked name="optionsRadios" value="local_ip" id="local_ip"/>
-                                    <span>Internal IP</span>
-                                </label>
-                            </ul>
-                            <ul>
-                                <label>
-                                    <input type="radio" name="optionsRadios" value="bangup" id="bangup"/>
-                                    <span>bangup.dyndns.org</span>
-                                </label>
-                            </ul>
-                        </ul>
-                    </div>
-                </label>
-            </ul>
-            <ul>
                 <label>Site Theme:</label>
                 <div class="input">
                     <ul class="inputs-list">
@@ -212,7 +191,6 @@
 
             prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
         });
-        
 </script>
 {% endblock %}
 

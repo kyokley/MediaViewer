@@ -43,12 +43,6 @@ def submitsettings(request):
     context['header2'] = headers[1]
     setSiteWideContext(context, request)
 
-    option = request.POST.get('optionsRadios')
-    if not option:
-        option = LOCAL_IP
-
-    assert option == LOCAL_IP or option == BANGUP_IP, option
-
     default_sort = request.POST.get('default_sort')
     if not default_sort:
         default_sort = FILENAME_SORT
@@ -64,11 +58,9 @@ def submitsettings(request):
         settings.user = request.user
         changed = True
     else:
-        changed = (settings.ip_format != option or
-                   settings.default_sort != default_sort or
+        changed = (settings.default_sort != default_sort or
                    settings.site_theme != site_theme)
 
-    settings.ip_format = option
     settings.default_sort = default_sort
     settings.site_theme = site_theme
     context['site_theme'] = settings.site_theme
