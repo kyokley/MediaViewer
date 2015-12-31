@@ -167,7 +167,7 @@
                                     <dt>Rated:</dt>
                                     <dd>{{ posterfile.rated }}</dd>
                                 {% endif %}
-                                {% if posterfile.rating %}
+                                {% if posterfile.rating and posterfile.rating != 'N/A' %}
                                     <dt>IMDB Rating:</dt>
                                     <dd>{{ posterfile.rating }}/10</dd>
                                 {% endif %}
