@@ -15,9 +15,7 @@ ID_REGEX = re.compile('\d+')
 def submitsitewidemessage(request):
     user = request.user
     context = {}
-    headers = generateHeader('submitsitewidemessage', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('submitsitewidemessage', request)
     setSiteWideContext(context, request)
 
     message = request.POST.get('sitemessage')

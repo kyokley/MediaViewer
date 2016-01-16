@@ -27,9 +27,7 @@ def requests(request):
     context = {'items': items,
                'user': user,
                }
-    headers = generateHeader('requests', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('requests', request)
     context['title'] = 'Requests'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/request.html', context)

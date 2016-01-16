@@ -7,9 +7,7 @@ from mediaviewer.utils import logAccessInfo
 def signout(request):
     logout(request)
     context = {}
-    headers = generateHeader('logout', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('logout', request)
     context['loggedin'] = False
     context['title'] = 'Signed out'
     setSiteWideContext(context, request)

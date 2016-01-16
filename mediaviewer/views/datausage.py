@@ -16,9 +16,7 @@ def datausage(request, items):
               'datausage': datausage,
               'view': 'datausage',
               }
-    headers = generateHeader('datausage', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('datausage', request)
     context['title'] = 'Data Usage'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/datausage.html', context)

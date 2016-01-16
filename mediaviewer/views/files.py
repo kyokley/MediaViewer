@@ -38,9 +38,7 @@ def files(request, items):
               'BANGUP_IP': BANGUP_IP,
                'can_download': settings and settings.can_download or False
               }
-    headers = generateHeader('files', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('files', request)
     context['title'] = 'Files'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
@@ -65,9 +63,7 @@ def movies(request, items):
               'BANGUP_IP': BANGUP_IP,
                'can_download': settings and settings.can_download or False
               }
-    headers = generateHeader('movies', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('movies', request)
     context['title'] = 'Movies'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
@@ -82,9 +78,7 @@ def tvshowsummary(request):
         path.numberOfUnwatchedShows = path.number_of_unwatched_shows_since_date(request.user)
 
     context = {'pathSet':pathSet}
-    headers = generateHeader('tvshows', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('tvshows', request)
     context['title'] = 'TV Shows'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/tvsummary.html', context)
@@ -106,9 +100,7 @@ def tvshows(request, pathid):
               'BANGUP_IP': BANGUP_IP,
                'can_download': settings and settings.can_download or False
               }
-    headers = generateHeader('tvshows', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('tvshows', request)
     context['title'] = refpath.displayName
     context['long_plot'] = len(refpath.posterfile.plot) > 300
     setSiteWideContext(context, request, includeMessages=True)

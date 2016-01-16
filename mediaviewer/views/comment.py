@@ -76,9 +76,7 @@ def results(request, file_id):
               'BANGUP_IP': BANGUP_IP,
                'can_download': request.user.settings() and request.user.settings().can_download or False
             }
-    headers = generateHeader('results', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('results', request)
     context['title'] = 'Saved Successfully!'
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/filesresults.html', context)

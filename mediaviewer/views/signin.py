@@ -15,9 +15,7 @@ from mediaviewer.utils import logAccessInfo
 def signin(request):
     context = {}
     siteGreeting = SiteGreeting.latestSiteGreeting()
-    headers = generateHeader('signin', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('signin', request)
     context['greeting'] = siteGreeting and siteGreeting.greeting or "SignIn"
     setSiteWideContext(context, request)
     user = None

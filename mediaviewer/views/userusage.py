@@ -12,9 +12,7 @@ def userusage(request):
               'userusage': downloadclicks,
               'view': 'userusage',
               }
-    headers = generateHeader('userusage', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('userusage', request)
     context['title'] = 'User Usage'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/userusage.html', context)

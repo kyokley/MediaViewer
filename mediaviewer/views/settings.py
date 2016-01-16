@@ -21,9 +21,7 @@ def settings(request):
               'BANGUP_IP': BANGUP_IP,
               'greeting': siteGreeting and siteGreeting.greeting or "Check out the new downloads!",
             }
-    headers = generateHeader('settings', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('settings', request)
     settings = request.user.settings()
     if settings:
         context['ip_format'] = settings.ip_format
@@ -38,9 +36,7 @@ def settings(request):
 @logAccessInfo
 def submitsettings(request):
     context = {}
-    headers = generateHeader('submitsettings', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('submitsettings', request)
     setSiteWideContext(context, request)
 
     default_sort = request.POST.get('default_sort')
@@ -77,9 +73,7 @@ def submitsettings(request):
 def submitsitesettings(request):
     user = request.user
     context = {}
-    headers = generateHeader('submitsitesettings', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('submitsitesettings', request)
     setSiteWideContext(context, request)
 
     newGreeting = request.POST.get('greeting')
