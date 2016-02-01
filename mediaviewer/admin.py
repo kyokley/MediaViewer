@@ -4,8 +4,10 @@ from mediaviewer.models.path import Path
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.file import File
+from mediaviewer.models.posterfile import PosterFile
 
 admin.site.register(File)
 admin.site.register(Path)
 admin.site.register(FilenameScrapeFormat)
 admin.site.register(UserSettings)
+admin.site.register(PosterFile)
