@@ -1,6 +1,7 @@
 from django.db import models
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
+from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.tvdbconfiguration import (getDataFromIMDBByPath,
                                                   saveImageToDisk,
                                                   assignDataToPoster,
@@ -150,11 +151,16 @@ class Path(models.Model):
         if self.isMovie():
             raise Exception('This function does not apply to movies')
 
-        refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=daysBack)
-        files = (File.objects.filter(path__localpathstr=self.localpathstr)
-                             .filter(datecreated__gt=refDate)
-                             .filter(hide=False)
-                             .all())
+        if daysBack > 0:
+            refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=daysBack)
+            files = (File.objects.filter(path__localpathstr=self.localpathstr)
+                                 .filter(datecreated__gt=refDate)
+                                 .filter(hide=False)
+                                 .all())
+        else:
+            files = (File.objects.filter(path__localpathstr=self.localpathstr)
+                                 .filter(hide=False)
+                                 .all())
         unwatched_files = set()
         for file in files:
             comment = file.usercomment(user)
@@ -165,3 +171,13 @@ class Path(models.Model):
 
     def number_of_unwatched_shows_since_date(self, user, daysBack=30):
         return len(self.unwatched_tv_shows_since_date(user, daysBack=daysBack))
+
+    def number_of_unwatched_shows(self, user):
+        files = (File.objects.filter(path__localpathstr=self.localpathstr)
+                             .filter(hide=False))
+        file_count = files.count()
+        usercomments_count = (UserComment.objects.filter(user=user)
+                                                 .filter(file__in=files)
+                                                 .filter(viewed=True)
+                                                 .count())
+        return file_count - usercomments_count

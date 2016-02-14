@@ -61,12 +61,23 @@ class PathSerializer(serializers.ModelSerializer):
                   'remotepath',
                   'server',
                   'skip',
+                  'number_of_unwatched_shows',
                   )
     pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=True, source='localpathstr')
     remotepath = serializers.CharField(required=True, source='remotepathstr')
     server = serializers.CharField(required=True)
     skip = serializers.BooleanField(required=True)
+    number_of_unwatched_shows = serializers.SerializerMethodField('unwatched_shows')
+
+    def unwatched_shows(self, obj):
+        request = self.context.get('request')
+        if request is not None:
+            #path = Path.objects.get(pk=obj.pk)
+            #return path.number_of_unwatched_shows(request.user)
+            return obj.number_of_unwatched_shows(request.user)
+        else:
+            return None
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
