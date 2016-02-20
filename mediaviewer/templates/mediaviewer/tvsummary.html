@@ -35,9 +35,7 @@
         <tr>
             <td>
                 <a href='/mediaviewer/tvshows/{{ path.id }}/'>{{ path.displayName }}</a>
-                {% if path.numberOfUnwatchedShows %}
-                    <span class="badge alert-info">{{ path.numberOfUnwatchedShows }}</span>
-                {% endif %}
+                <span id="unwatched-show-badge-{{ path.id }}" class="badge alert-info"></span>
             </td>
             <td><span class="hidden_span">{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate.date }}</td>
             <td></td>
@@ -67,6 +65,7 @@
         prepareTableSorter($, [[1,1]]);
 
         prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+        populateUnwatchedBadges("/mediaviewer/api/path/");
 });
 
 </script>

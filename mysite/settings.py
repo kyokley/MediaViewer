@@ -146,7 +146,7 @@ REST_FRAMEWORK = {
             'rest_framework.authentication.BasicAuthentication',
             'rest_framework.authentication.SessionAuthentication',
             ),
-        'PAGINATE_BY': 10,
+        'PAGINATE_BY': 30,
 }
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
