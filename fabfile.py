@@ -165,7 +165,7 @@ def write_sudo_file(filename, text):
 
 def add_cronjob(text):
     with fab.warn_only():
-        fab.local('crontab -l > /tmp/crondump')             
+        fab.local('crontab -l > /tmp/crondump')
         fab.local('echo "%s 2> /dev/null" >> /tmp/crondump' % text)
         fab.local('crontab /tmp/crondump')
 
