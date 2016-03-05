@@ -4,9 +4,8 @@ interjections = ['Hip Hop Hooray!',
                  'Wazzzzzzzup!',
                  'Woot Woot!',
                  'Who do you love?',
-                 '',
                  "It's a celebration!",
-                 "I give this two thumbs up!",
+                 'I give this two thumbs up!',
                  'Just for you...',
                  'Holla!',
                  "Hollaback y'all!",
@@ -14,5 +13,12 @@ interjections = ['Hip Hop Hooray!',
                  "I'm a boss..."
                  ]
 
+failures = ['Sorry.',
+            'I failed.',
+            'I give up.',
+            ]
 def getInterjection():
     return random.choice(interjections)
+
+def getFailures():
+    return random.choice(failures)

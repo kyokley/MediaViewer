@@ -42,6 +42,7 @@
                         {% if user.is_staff %}
                             <th class="desktop"><center>Added by</center></th>
                             <th class='desktop'><center>Done</center></th>
+                            <th class='desktop'><center>Give up</center></th>
                         {% endif %}
                         <th></th>
                     </tr>
@@ -59,6 +60,7 @@
                         {% if user.is_staff %}
                             <td><center>{{ item.user.username }}</center></td>
                             <td><center><input class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" type="button" value="Done" onclick="callDoneButton('{{item.id}}', '{{csrf_token}}')" /></center></td>
+                            <td><center><input class='btn btn-info done-btn' id="giveup-{{ item.id }}" name="{{ item.id }}" type="button" value="Give up" onclick="callGiveUpButton('{{item.id}}', '{{csrf_token}}')" /></center></td>
                         {% endif %}
                         <td></td>
                     </tr>

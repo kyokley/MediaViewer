@@ -125,3 +125,37 @@ def ajaxdone(request):
             response['errmsg'] = 'An error has occurred'
 
     return HttpResponse(json.dumps(response), mimetype='application/javascript')
+
+@logAccessInfo
+def ajaxgiveup(request):
+    requestid = int(request.POST['requestid'])
+    requestObj = get_object_or_404(Request, pk=requestid)
+
+    response = {'errmsg': ''}
+
+    user = request.user
+    if not user.is_authenticated():
+        response['errmsg'] = 'User not authenticated'
+        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    elif not user or not user.is_staff:
+        response['errmsg'] = 'User is not a staffer'
+        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+
+    requestObj.done = True
+    requestObj.save()
+
+    response['message'] = "Give up!"
+    response['requestid'] = requestid
+
+    try:
+        notifyUsers = requestObj.getSupportingUsers()
+        for notifyUser in notifyUsers:
+            interjection = interjections.getFailures()
+            Message.createNewMessage(notifyUser, "%s I couldn't find %s" % (interjection, requestObj.name), level=Message.ERROR)
+    except Exception, e:
+        if DEBUG:
+            response['errmsg'] = str(e)
+        else:
+            response['errmsg'] = 'An error has occurred'
+
+    return HttpResponse(json.dumps(response), mimetype='application/javascript')

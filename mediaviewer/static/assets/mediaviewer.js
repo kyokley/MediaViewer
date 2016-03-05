@@ -255,6 +255,30 @@ function callDoneButton(name, token){
     });
 }
 
+function callGiveUpButton(name, token){
+    $.ajax({
+        url : "/mediaviewer/ajaxgiveup/",
+    type : "POST",
+    dataType: "json",
+    data : {
+        requestid : name,
+    csrfmiddlewaretoken: token
+    },
+    success : function(json) {
+        if(json.errmsg === ""){
+            var query = 'giveup-' + json.requestid;
+            var cell = document.getElementById(query);
+            cell.outerHTML = json.message;
+        } else {
+            alert(json.errmsg);
+        }
+    },
+    error : function(xhr,errmsg,err) {
+        alert(xhr.status + ": " + xhr.responseText);
+    }
+    });
+}
+
 function setSettingsRadioButtons(ip_format, local_ip, bangup_ip){
     if(ip_format === local_ip){
         jQuery('#local_ip').prop("checked", "checked");
