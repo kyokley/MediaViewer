@@ -80,14 +80,43 @@ def saveImageToDisk(url, imgName):
         log.info('No image name given. Skipping')
 
 def getDataFromIMDB(refFile, useExtendedPlot=False):
-    log.debug('Getting data from IMDB using %s' % (refFile,))
     if not refFile.imdb_id and refFile.path.imdb_id:
         refFile.imdb_id = refFile.path.imdb_id
 
     if refFile.imdb_id and refFile.imdb_id != 'None':
-        url = OMDB_ID_URL + refFile.imdb_id
+        return _getDataFromIMDBByID(refFile.imdb_id, useExtendedPlot=useExtendedPlot)
     else:
-        url = OMDB_URL + refFile.searchString()
+        return _getDataFromIMDBBySearchString(refFile.searchString(), useExtendedPlot=useExtendedPlot)
+
+def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
+    if refPath.imdb_id:
+        return _getDataFromIMDBByID(refPath.imdb_id, useExtendedPlot=useExtendedPlot)
+    else:
+        files = refPath.files()
+        refFile = files and files[0]
+
+        if not refFile:
+            log.warning('No files found associated with path. Skipping')
+            return None
+        else:
+            log.debug('Using %s for refFile' % (refFile,))
+
+        return getDataFromIMDB(refFile, useExtendedPlot=useExtendedPlot)
+
+def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False):
+    log.debug('Getting data from IMDB using %s' % (imdb_id,))
+    url = OMDB_ID_URL + imdb_id
+
+    if useExtendedPlot:
+        url = url + OMDB_URL_TAIL
+
+    data = getJSONData(url)
+    data['url'] = url
+    return data
+
+def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
+    log.debug('Getting data from IMDB using %s' % (searchString,))
+    url = OMDB_URL + searchString
 
     if useExtendedPlot:
         url = url + OMDB_URL_TAIL
@@ -99,11 +128,20 @@ def getDataFromIMDB(refFile, useExtendedPlot=False):
 def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
     if not foundNone:
         if not onlyExtendedPlot:
-            poster.plot = (not data.get('Plot', None) or data.get('Plot', None) == 'undefined') and 'Plot not found' or data.get('Plot', None)
-            poster.genre = (not data.get('Genre', None) or data.get('Genre', None) == 'undefined') and 'Genre not found' or data.get('Genre', None)
-            poster.actors = (not data.get('Actors', None) or data.get('Actors', None) == 'undefined') and 'Actors not found' or data.get('Actors', None)
-            poster.writer = (not data.get('Writer', None) or data.get('Writer', None) == 'undefined') and 'Writer not found' or data.get('Writer', None)
-            poster.director = (not data.get('Director', None) or data.get('Director', None) == 'undefined') and 'Director not found' or data.get('Director', None)
+            plot = data.get('Plot')
+            poster.plot = (not plot or plot == 'undefined') and 'Plot not found' or plot
+            genre = data.get('Genre', None)
+            poster.genre = (not genre or genre == 'undefined') and 'Genre not found' or genre
+            actors = data.get('Actors')
+            poster.actors = (not actors or actors == 'undefined') and 'Actors not found' or actors
+            writer = data.get('Writer')
+            poster.writer = (not writer or writer == 'undefined') and 'Writer not found' or writer
+            director = data.get('Director')
+            poster.director = (not director or director == 'undefined') and 'Director not found' or director
+            rating = data.get('imdbRating')
+            poster.rating = rating != 'undefined' and rating or None
+            rated = data.get('Rated')
+            poster.rated = rated != 'undefined' and rated or None
         else:
             poster.extendedplot = (not data.get('Plot', None) or data.get('Plot', None) == 'undefined') and 'Plot not found' or data.get('Plot', None)
     else:
@@ -114,4 +152,3 @@ def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
         poster.writer = 'Writer not found'
         poster.director = 'Director not found'
         poster.extendedplot = 'Extended plot not found'
-

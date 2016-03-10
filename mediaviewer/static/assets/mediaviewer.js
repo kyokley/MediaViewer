@@ -1,3 +1,5 @@
+var tableElement;
+
 function bindAlertMessage($, token) {
     $(".alert").bind('closed.bs.alert', function() {
         $.ajax({
@@ -31,7 +33,7 @@ function setHomeFormSubmit($) {
 }
 
 function prepareTableSorter($, sortOrder) {
-    var tableElement = $('#myTable');
+    tableElement = $('#myTable');
 
     tableElement.dataTable({
         order: sortOrder,
@@ -52,7 +54,7 @@ function prepareTableSorter($, sortOrder) {
 }
 
 function prepareTableForRequests($){
-    var tableElement = $('#myTable');
+    tableElement = $('#myTable');
 
     tableElement.dataTable({
         stateSave: true,
@@ -253,6 +255,30 @@ function callDoneButton(name, token){
     });
 }
 
+function callGiveUpButton(name, token){
+    $.ajax({
+        url : "/mediaviewer/ajaxgiveup/",
+    type : "POST",
+    dataType: "json",
+    data : {
+        requestid : name,
+    csrfmiddlewaretoken: token
+    },
+    success : function(json) {
+        if(json.errmsg === ""){
+            var query = 'giveup-' + json.requestid;
+            var cell = document.getElementById(query);
+            cell.outerHTML = json.message;
+        } else {
+            alert(json.errmsg);
+        }
+    },
+    error : function(xhr,errmsg,err) {
+        alert(xhr.status + ": " + xhr.responseText);
+    }
+    });
+}
+
 function setSettingsRadioButtons(ip_format, local_ip, bangup_ip){
     if(ip_format === local_ip){
         jQuery('#local_ip').prop("checked", "checked");
@@ -281,5 +307,29 @@ function reportButtonClick(id, token){
     error : function(xhr,errmsg,err) {
         alert(xhr.status + ": " + xhr.responseText);
     }
+    });
+}
+
+function populateUnwatchedBadges(url){
+    jQuery.ajax({url: url,
+                 type: "GET",
+                 dataType: "json",
+                 success: function(json){
+                     var i;
+                     for(i=0; i<json.results.length; i++){
+                         var number_of_shows = json.results[i].number_of_unwatched_shows;
+                         if(number_of_shows > 0){
+                             badgeSpan = tableElement.$("#unwatched-show-badge-" + json.results[i].pk);
+                             badgeSpan.html(number_of_shows);
+                         }
+                     }
+
+                     if(json.next){
+                         populateUnwatchedBadges(json.next);
+                     }
+                 },
+                 error: function(json){
+                     console.log("An error has occurred attempting to set badges");
+                 }
     });
 }

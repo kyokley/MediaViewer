@@ -63,12 +63,23 @@ class PathSerializer(serializers.ModelSerializer):
                   'remotepath',
                   'server',
                   'skip',
+                  'number_of_unwatched_shows',
                   )
     pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=True, source='localpathstr')
     remotepath = serializers.CharField(required=True, source='remotepathstr')
     server = serializers.CharField(required=True)
-    skip = serializers.IntegerField(required=True)
+    skip = serializers.BooleanField(required=True)
+    number_of_unwatched_shows = serializers.SerializerMethodField('unwatched_shows')
+
+    def unwatched_shows(self, obj):
+        request = self.context.get('request')
+        if request is not None:
+            #path = Path.objects.get(pk=obj.pk)
+            #return path.number_of_unwatched_shows(request.user)
+            return obj.number_of_unwatched_shows(request.user)
+        else:
+            return None
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -87,8 +98,8 @@ class FileSerializer(serializers.ModelSerializer):
     pathid = serializers.IntegerField(required=False, source='path.id')
     localpath = serializers.CharField(required=False, source='path.localpathstr')
     filename = serializers.CharField(required=False)
-    skip = serializers.IntegerField(required=False)
-    finished = serializers.IntegerField(required=False)
+    skip = serializers.BooleanField(required=False)
+    finished = serializers.BooleanField(required=False)
     size = serializers.IntegerField(required=False)
     streamable = serializers.BooleanField(required=False)
     ismovie = serializers.BooleanField(required=False)

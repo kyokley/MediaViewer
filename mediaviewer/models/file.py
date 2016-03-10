@@ -12,7 +12,6 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
                                                   )
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
-from dateutil import parser
 
 from mysite.settings import (WAITER_HEAD,
                              LOCAL_WAITER_IP_FORMAT_MOVIES,
@@ -38,11 +37,11 @@ class File(models.Model):
                              blank=True,
                              on_delete=models.CASCADE)
     filename = models.TextField(blank=True)
-    skip = models.IntegerField(null=True, blank=True)
-    finished = models.IntegerField(null=True, blank=True)
+    skip = models.BooleanField(blank=True)
+    finished = models.BooleanField(blank=True)
     size = models.IntegerField(null=True, blank=True)
-    datecreatedstr = models.TextField(db_column='datecreated', blank=True)
-    dateeditedstr = models.TextField(db_column='dateedited', blank=True)
+    datecreated = models.DateTimeField(auto_now_add=True)
+    dateedited = models.DateTimeField(auto_now=True)
     datatransmission = models.ForeignKey('mediaviewer.DataTransmission',
                                          null=True,
                                          db_column='datatransmissionid',
@@ -68,6 +67,9 @@ class File(models.Model):
         app_label = 'mediaviewer'
         db_table = 'file'
 
+    def dateCreatedForSpan(self):
+        return self.datecreated and self.datecreated.isoformat()
+
     @property
     def fileName(self):
         return self.filename
@@ -75,17 +77,6 @@ class File(models.Model):
     @property
     def dataTransmission(self):
         return self.datatransmission
-
-    @property
-    def datecreated(self):
-        return parser.parse(self.datecreatedstr)
-
-    def _dateeditedget(self):
-        return parser.parse(self.dateeditedstr)
-
-    def _dateeditedset(self, val):
-        self.dateeditedstr = val
-    dateedited = property(fset=_dateeditedset, fget=_dateeditedget)
 
     def _downloadPosterData(self, poster):
         log.debug('Downloading poster data')
@@ -196,7 +187,7 @@ class File(models.Model):
     def isMovie(self):
         if self._ismovie is None:
             from mediaviewer.models.path import MOVIE
-            self._ismovie = (self.path.localpathstr == MOVIE and 
+            self._ismovie = (self.path.localpathstr == MOVIE and
                              self.path.remotepathstr == MOVIE)
             self.save()
         return self._ismovie

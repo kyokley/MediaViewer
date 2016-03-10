@@ -21,9 +21,7 @@ def settings(request):
               'BANGUP_IP': BANGUP_IP,
               'greeting': siteGreeting and siteGreeting.greeting or "Check out the new downloads!",
             }
-    headers = generateHeader('settings', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('settings', request)
     settings = request.user.settings()
     if settings:
         context['ip_format'] = settings.ip_format
@@ -38,16 +36,8 @@ def settings(request):
 @logAccessInfo
 def submitsettings(request):
     context = {}
-    headers = generateHeader('submitsettings', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('submitsettings', request)
     setSiteWideContext(context, request)
-
-    option = request.POST.get('optionsRadios')
-    if not option:
-        option = LOCAL_IP
-
-    assert option == LOCAL_IP or option == BANGUP_IP, option
 
     default_sort = request.POST.get('default_sort')
     if not default_sort:
@@ -64,11 +54,9 @@ def submitsettings(request):
         settings.user = request.user
         changed = True
     else:
-        changed = (settings.ip_format != option or
-                   settings.default_sort != default_sort or
+        changed = (settings.default_sort != default_sort or
                    settings.site_theme != site_theme)
 
-    settings.ip_format = option
     settings.default_sort = default_sort
     settings.site_theme = site_theme
     context['site_theme'] = settings.site_theme
@@ -85,9 +73,7 @@ def submitsettings(request):
 def submitsitesettings(request):
     user = request.user
     context = {}
-    headers = generateHeader('submitsitesettings', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('submitsitesettings', request)
     setSiteWideContext(context, request)
 
     newGreeting = request.POST.get('greeting')

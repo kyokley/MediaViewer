@@ -56,7 +56,7 @@ class PathViewSet(viewsets.ModelViewSet):
         return RESTResponse(serializer.data)
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
@@ -108,7 +108,7 @@ class FileViewSet(viewsets.ModelViewSet):
         return RESTResponse(serializer.data)
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
@@ -123,12 +123,12 @@ class FileViewSet(viewsets.ModelViewSet):
                 newFile._searchString = path.defaultsearchstr
                 newFile.streamable = True
 
-                currentTimeStr = str(dateObj.now())
-                newFile.datecreatedstr = currentTimeStr
-                newFile.dateeditedstr = currentTimeStr
-
                 newFile.clean()
                 newFile.save()
+
+                if not path.lastCreatedFileDate or path.lastCreatedFileDate < newFile.datecreated:
+                    path.lastCreatedFileDate = newFile.datecreated
+                    path.save()
                 log.info('New file record created for %s' % newFile.filename)
         except Exception, e:
             log.error(str(e))
@@ -144,7 +144,7 @@ class FileViewSet(viewsets.ModelViewSet):
 
     # Implements PUT
     def update(self, request, pk=None):
-        data = request.DATA
+        data = request.data
         queryset = File.objects.filter(pk=pk)
 
         instance = get_object_or_404(queryset, pk=pk)
@@ -156,8 +156,6 @@ class FileViewSet(viewsets.ModelViewSet):
         instance._searchString = data.get('_searchString', instance._searchString)
         instance.streamable = data.get('streamable', instance.streamable)
 
-        currentTimeStr = str(dateObj.now())
-        instance.dateeditedstr = currentTimeStr
         instance.save()
 
         serializer = FileSerializer(instance, partial=True)
@@ -174,7 +172,7 @@ class MovieFileViewSet(viewsets.ModelViewSet):
     serializer_class = MovieFileSerializer
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():
@@ -186,12 +184,12 @@ class MovieFileViewSet(viewsets.ModelViewSet):
                 newFile.size = data['size']
                 newFile.hide = False
 
-                currentTimeStr = str(dateObj.now())
-                newFile.datecreatedstr = currentTimeStr
-                newFile.dateeditedstr = currentTimeStr
-
                 newFile.clean()
                 newFile.save()
+
+                if not self._MOVIE_PATH.lastCreatedFileDate or self._MOVIE_PATH.lastCreatedFileDate < newFile.datecreated:
+                    self._MOVIE_PATH.lastCreatedFileDate = newFile.datecreated
+                    self._MOVIE_PATH.save()
 
                 log.info('New moviefile record created for %s' % newFile.filename)
 
@@ -247,7 +245,7 @@ class DownloadClickViewSet(viewsets.ModelViewSet):
         return queryset
 
     def create(self, request):
-        data = request.DATA
+        data = request.data
 
         try:
             with transaction.atomic():

@@ -152,3 +152,41 @@ BEGIN;
     ALTER TABLE file ALTER COLUMN override_season SET DEFAULT '';
     ALTER TABLE file ALTER COLUMN override_episode SET DEFAULT '';
 COMMIT;
+
+BEGIN;
+    ALTER TABLE posterfile ADD COLUMN rating TEXT;
+    ALTER TABLE posterfile ADD COLUMN rated TEXT;
+COMMIT;
+
+BEGIN;
+ALTER TABLE file ALTER COLUMN datecreated TYPE timestamptz
+USING to_timestamp(datecreated, 'YYYY-MM-DD HH24:MI:SS');
+
+ALTER TABLE file ALTER COLUMN dateedited TYPE timestamptz
+USING to_timestamp(dateedited, 'YYYY-MM-DD HH24:MI:SS');
+
+ALTER TABLE file ALTER COLUMN finished DROP DEFAULT;
+ALTER TABLE file ALTER COLUMN finished TYPE bool USING CASE WHEN finished = 0 THEN FALSE ELSE TRUE END;
+ALTER TABLE file ALTER COLUMN finished SET DEFAULT FALSE;
+
+ALTER TABLE file ALTER COLUMN skip DROP DEFAULT;
+ALTER TABLE file ALTER COLUMN skip TYPE bool USING CASE WHEN skip = 0 THEN FALSE ELSE TRUE END;
+ALTER TABLE file ALTER COLUMN skip SET DEFAULT FALSE;
+
+ALTER TABLE file DROP COLUMN viewed;
+ALTER TABLE file DROP COLUMN errorid;
+
+UPDATE file SET datecreated = '2013-09-19 06:43:17' WHERE datecreated IS NULL OR datecreated < '2013-09-19 06:43:17';
+UPDATE file SET dateedited = '2013-09-19 06:43:17' WHERE dateedited IS NULL OR dateedited < '2013-09-19 06:43:17';
+
+ALTER TABLE file ALTER COLUMN datecreated SET DEFAULT now();
+ALTER TABLE file ALTER COLUMN datecreated SET NOT NULL;
+ALTER TABLE file ALTER COLUMN dateedited SET DEFAULT now();
+ALTER TABLE file ALTER COLUMN dateedited SET NOT NULL;
+
+ALTER TABLE path ALTER COLUMN skip DROP DEFAULT;
+ALTER TABLE path ALTER COLUMN skip TYPE bool USING CASE WHEN skip = 0 THEN FALSE ELSE TRUE END;
+ALTER TABLE path ALTER COLUMN skip SET DEFAULT FALSE;
+ALTER TABLE path ADD COLUMN lastcreatedfiledate timestamptz;
+UPDATE path SET lastcreatedfiledate = (SELECT max(datecreated) FROM file WHERE file.pathid = path.id);
+COMMIT;

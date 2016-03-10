@@ -20,9 +20,7 @@ def errors(request, items):
               'errors': errors,
               'view': 'errors',
               }
-    headers = generateHeader('errors', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('errors', request)
     context['title'] = 'Errors'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/errors.html', context)

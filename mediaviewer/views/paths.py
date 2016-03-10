@@ -16,9 +16,7 @@ def paths(request, items):
               'paths': paths,
               'view': 'paths',
               }
-    headers = generateHeader('paths', request)
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('paths', request)
     context['title'] = 'Paths'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/paths.html', context)

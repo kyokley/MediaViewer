@@ -41,10 +41,8 @@ def setSiteWideContext(context, request, includeMessages=False):
 def home(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context = {}
-    headers = generateHeader('home', request)
     context['greeting'] = siteGreeting and siteGreeting.greeting or 'Check out the new downloads!'
-    context['header'] = headers[0]
-    context['header2'] = headers[1]
+    context['header'] = generateHeader('home', request)
     files = File.objects.filter(hide=False).filter(finished=True).order_by('-id')[:10]
     context['files'] = files
     context['title'] = 'Home'
@@ -109,7 +107,6 @@ class HeaderHelper(object):
     def disabledErrorsPage(self):
         return '<li class="disabled"><a href="#">Errors</a></li>'
 
-
 def generateHeader(page, request):
     headers = HeaderHelper()
 
@@ -133,47 +130,19 @@ def generateHeader(page, request):
     else:
         requestsPage = headers.requestsPage()
 
-    if request.user and request.user.is_staff:
-        if page == 'datausage':
-            datausagePage = headers.activeDatausagePage()
-        else:
-            datausagePage = headers.datausagePage()
-
-        if page == 'userusage':
-            userusagePage = headers.activeUserusagePage()
-        else:
-            userusagePage = headers.userusagePage()
-
-        if page == 'errors':
-            errorsPage = headers.activeErrorsPage()
-        else:
-            errorsPage = headers.errorsPage()
-    else:
-        datausagePage = headers.disabledDatausagePage()
-        userusagePage = headers.disabledUserusagePage()
-        errorsPage = headers.disabledErrorsPage()
-
     header = '''
                 %(homePage)s
                 %(moviesPage)s
                 %(tvshowsPage)s
                 %(requestsPage)s
     '''
-    header2 = '''
-        %(datausagePage)s
-        %(userusagePage)s
-        %(errorsPage)s
-        '''
     params = {'homePage': homePage,
-           'moviesPage': moviesPage,
-           'tvshowsPage': tvshowsPage,
-           'requestsPage': requestsPage,
-           'datausagePage': datausagePage,
-           'userusagePage': userusagePage,
-           'errorsPage': errorsPage}
+              'moviesPage': moviesPage,
+              'tvshowsPage': tvshowsPage,
+              'requestsPage': requestsPage,
+              }
     header = header % params
-    header2 = header2 % params
-    return (mark_safe(header), mark_safe(header2))
+    return mark_safe(header)
 
 @logAccessInfo
 def ajaxrunscraper(request):

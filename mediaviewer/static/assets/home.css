@@ -15,11 +15,6 @@ body{
               padding-bottom: 50px;
     }
 }
-input.search-textbox{
-    width: 75%;
-    margin-left: 50px;
-    margin-bottom: 10px;
-}
 
 .request-textbox{
     margin-left: 5px;
@@ -50,26 +45,6 @@ input.search-textbox{
 
 .jumbotron{
     padding-bottom: 24px;
-}
-
-.poster{
-    padding-left: 20px;
-}
-
-img{
-    max-width: 100%;
-}
-
-.caption { margin: 12px;
-           text-align: center;
-           font-style: italic;
-           font-size: 18px;
-           float: center; 
-}
-
-.file-comment {
-    resize: none;
-    width: 100%;
 }
 
 .form-signin {
@@ -115,6 +90,9 @@ img{
 #myTable_wrapper {
     margin-bottom: 15px;
 }
+.hidden_span {
+    display: none;
+}
 .no-sort {
     background-image: none;
 }
@@ -129,6 +107,8 @@ img{
 #file-displayName{
     text-align: center;
 }
-#file-poster{
-    text-align: center;
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
 }

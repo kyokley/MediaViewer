@@ -15,6 +15,8 @@ class PosterFile(models.Model):
     writer = models.TextField(blank=True)
     director = models.TextField(blank=True)
     episodename = models.TextField(blank=True, null=True)
+    rated = models.TextField(blank=True, null=True)
+    rating = models.TextField(blank=True, null=True)
 
     class Meta:
         app_label = 'mediaviewer'
