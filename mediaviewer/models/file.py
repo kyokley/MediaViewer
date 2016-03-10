@@ -394,14 +394,3 @@ class File(models.Model):
             posterfile.delete()
         except:
             pass
-
-class MovieFile(File):
-    class Meta:
-        abstract = True
-
-    def __init__(self):
-        from mediaviewer.models.path import (Path,
-                                            MOVIE_PATH_ID,
-                                            )
-        moviePath = Path.objects.get(pk=MOVIE_PATH_ID)
-        self.path = moviePath

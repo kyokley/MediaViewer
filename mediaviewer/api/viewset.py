@@ -21,7 +21,6 @@ from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          )
 from mediaviewer.models.file import File
 from mediaviewer.models.path import (Path,
-                                     MOVIE_PATH_ID,
                                      )
 from mediaviewer.models.downloadclick import DownloadClick
 from mediaviewer.models.downloadtoken import DownloadToken
@@ -167,8 +166,7 @@ class FileViewSet(viewsets.ModelViewSet):
 
 
 class MovieFileViewSet(viewsets.ModelViewSet):
-    _MOVIE_PATH = Path.objects.get(pk=MOVIE_PATH_ID)
-    queryset = File.objects.filter(path=_MOVIE_PATH)
+    queryset = File.objects.filter(path__is_movie=True)
     serializer_class = MovieFileSerializer
 
     def create(self, request):
@@ -177,7 +175,7 @@ class MovieFileViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 newFile = File()
-                newFile.path = self._MOVIE_PATH
+                newFile.path = Path.objects.filter(localpathstr=data['localpathstr']).first()
                 newFile.filename = data['filename']
                 newFile.skip = data['skip']
                 newFile.finished = data['finished']
@@ -187,9 +185,9 @@ class MovieFileViewSet(viewsets.ModelViewSet):
                 newFile.clean()
                 newFile.save()
 
-                if not self._MOVIE_PATH.lastCreatedFileDate or self._MOVIE_PATH.lastCreatedFileDate < newFile.datecreated:
-                    self._MOVIE_PATH.lastCreatedFileDate = newFile.datecreated
-                    self._MOVIE_PATH.save()
+                if not newFile.path.lastCreatedFileDate or newFile.path.lastCreatedFileDate < newFile.datecreated:
+                    newFile.path.lastCreatedFileDate = newFile.datecreated
+                    newFile.path.save()
 
                 log.info('New moviefile record created for %s' % newFile.filename)
 
