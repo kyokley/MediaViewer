@@ -60,7 +60,7 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFolders(cls):
-        refFiles = File.objects.filter(is_movie=False).order_by('path').distinct('path').select_related('path')
+        refFiles = File.objects.filter(path__is_movie=False).order_by('path').distinct('path').select_related('path')
         paths = set([file.path for file in refFiles])
         pathDict = dict()
         for path in paths:

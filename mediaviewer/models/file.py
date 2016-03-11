@@ -53,7 +53,6 @@ class File(models.Model):
                                blank=True,
                                null=True)
     hide = models.BooleanField(db_column='hide')
-    _ismovie = models.BooleanField(db_column='ismovie')
     filenamescrapeformat = models.ForeignKey('mediaviewer.FilenameScrapeFormat',
                                              null=True,
                                              db_column='filenamescrapeformatid',
@@ -185,12 +184,7 @@ class File(models.Model):
     posterfile = property(fset=_posterfileset, fget=_posterfileget)
 
     def isMovie(self):
-        if self._ismovie is None:
-            from mediaviewer.models.path import MOVIE
-            self._ismovie = (self.path.localpathstr == MOVIE and
-                             self.path.remotepathstr == MOVIE)
-            self.save()
-        return self._ismovie
+        return self.path.is_movie
 
     def ismovie(self):
         return self.isMovie()

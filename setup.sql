@@ -195,3 +195,7 @@ BEGIN;
     ALTER TABLE path ADD COLUMN ismovie BOOLEAN NOT NULL DEFAULT FALSE;
     UPDATE path SET ismovie = TRUE WHERE localpathstr = 'Movies' AND remotepathstr = 'Movies';
 COMMIT;
+
+BEGIN;
+    ALTER TABLE file DROP COLUMN ismovie;
+COMMIT;
