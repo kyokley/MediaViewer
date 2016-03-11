@@ -226,17 +226,13 @@ class File(models.Model):
 
     @classmethod
     def tvshows(cls):
-        from mediaviewer.models.path import MOVIE
         return (cls.objects
-                   .exclude(path__localpathstr=MOVIE)
-                   .exclude(path__remotepathstr=MOVIE))
+                   .filter(path__is_movie=False))
 
     @classmethod
     def movies(cls):
-        from mediaviewer.models.path import MOVIE
         return (cls.objects
-                   .filter(path__localpathstr=MOVIE)
-                   .filter(path__remotepathstr=MOVIE))
+                   .filter(path__is_movie=True))
 
     def usercomment(self, user):
         usercomment = (UserComment.objects
