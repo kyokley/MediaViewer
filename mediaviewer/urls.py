@@ -79,7 +79,7 @@ if not IS_SYNCING:
     router.register(r'posterfilebyfile', viewset.PosterViewSetByFile)
     router.register(r'usercomment', viewset.UserCommentViewSet)
 
-    urlpatterns += [url(r'^api/', include(router.urls)),
+    urlpatterns += [url(r'^api/', include(router.urls, namespace='api')),
                     url(r'^api/inferscrapers/', csrf_exempt(viewset.InferScrapersView.as_view())),
                     #url(r'^api/posterviewsetbypath/', csrf_exempt(viewset.PosterViewSetByPath.as_view())),
                     ]

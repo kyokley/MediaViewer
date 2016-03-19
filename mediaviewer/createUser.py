@@ -12,16 +12,16 @@ from mediaviewer.models.usersettings import (UserSettings,
                                              FILENAME_SORT,
                                              )
 
-''' 
-    Example usage of this script is as follows.
-    ipython mediaviewer/createUser.py newUserName
-
-    Be sure to set the PYTHONPATH env var to the folder
-    containing the mediaviewer folder
-'''
 
 @transaction.atomic
 def createUser(name, can_download=True):
+    '''
+        Example usage of this script is as follows.
+        ipython mediaviewer/createUser.py newUserName
+
+        Be sure to set the PYTHONPATH env var to the folder
+        containing the mediaviewer folder
+    '''
     newUser = User()
     newUser.username = name
     newUser.is_staff = False
@@ -41,3 +41,5 @@ def createUser(name, can_download=True):
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         createUser(sys.argv[1])
+    else:
+        print('Invalid number of arguments')
