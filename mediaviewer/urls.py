@@ -70,7 +70,7 @@ if not IS_SYNCING:
     router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
     router.register(r'file', viewset.FileViewSet, base_name='file')
     router.register(r'movie', viewset.MovieFileViewSet, base_name='movie')
-    router.register(r'path', viewset.PathViewSet)
+    router.register(r'path', viewset.PathViewSet, base_name='path')
     router.register(r'datatransmission', viewset.DataTransmissionViewSet)
     router.register(r'error', viewset.ErrorViewSet)
     router.register(r'message', viewset.MessageViewSet)

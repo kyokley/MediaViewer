@@ -67,7 +67,8 @@ class PathViewSet(viewsets.ModelViewSet):
                     newPath.localpathstr = data['localpath']
                     newPath.remotepathstr = data['remotepath']
                     newPath.server = data['server']
-                    newPath.skip = data['skip']
+                    newPath.skip = True if data['skip'] == 'True' else False
+                    newPath.is_movie = False if data['is_movie'] == 'False' else True
                     newPath.clean()
                     newPath.save()
                     log.info('Created new path for %s.' % newPath.localpathstr)

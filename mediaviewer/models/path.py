@@ -43,9 +43,13 @@ class Path(models.Model):
     def localPath(self):
         return self.localpathstr
 
+    localpath = localPath
+
     @property
     def remotePath(self):
         return self.remotepathstr
+
+    remotepath = remotePath
 
     @property
     def displayName(self):
@@ -172,6 +176,9 @@ class Path(models.Model):
         return len(self.unwatched_tv_shows_since_date(user, daysBack=daysBack))
 
     def number_of_unwatched_shows(self, user):
+        if not user:
+            return 0
+
         files = (File.objects.filter(path__localpathstr=self.localpathstr)
                              .filter(hide=False))
         file_count = files.count()
