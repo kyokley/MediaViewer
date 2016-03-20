@@ -176,11 +176,12 @@ class MovieFileViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 newFile = File()
-                newFile.path = Path.objects.filter(localpathstr=data['localpathstr']).first()
+                newFile.path = Path.objects.get(pk=data['pathid'])
                 newFile.filename = data['filename']
                 newFile.skip = data['skip']
                 newFile.finished = data['finished']
                 newFile.size = data['size']
+                newFile.streamable = True if data['streamable'] == 'True' else False
                 newFile.hide = False
 
                 newFile.clean()

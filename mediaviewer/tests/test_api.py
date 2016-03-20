@@ -8,20 +8,29 @@ from mediaviewer.models.path import Path
 
 class MovieFileViewSetTests(APITestCase):
     def setUp(self):
+        self.newPath = Path()
+        self.newPath.localpathstr = 'local.path.str'
+        self.newPath.remotepathstr = 'remote.path.str'
+        self.newPath.skip = False
+        self.newPath.is_movie = False
+        self.newPath.server = 'a.server'
+        self.newPath.save()
+
         self.test_user = User.objects.create_superuser('test_user',
                                                        'test@user.com',
                                                        'password')
         self.client.login(username='test_user', password='password')
+
+    def test_create_moviefile(self):
         self.data = {'filename': 'new file',
                      'skip': False,
                      'finished': True,
                      'size': 100,
+                     'pathid': self.newPath.id,
+                     'streamable': True,
                      }
-
-    def test_create_moviefile(self):
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
-        if response.status_code == 500:
-            assert False
+        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
 
 class PathViewSetTests(APITestCase):
     def setUp(self):
