@@ -8,25 +8,44 @@ from mediaviewer.models.path import Path
 
 class MovieFileViewSetTests(APITestCase):
     def setUp(self):
-        self.newPath = Path()
-        self.newPath.localpathstr = 'local.path.str'
-        self.newPath.remotepathstr = 'remote.path.str'
-        self.newPath.skip = False
-        self.newPath.is_movie = False
-        self.newPath.server = 'a.server'
-        self.newPath.save()
+        self.tvPath = Path()
+        self.tvPath.localpathstr = '/some/local/path'
+        self.tvPath.remotepathstr = '/some/local/path'
+        self.tvPath.skip = False
+        self.tvPath.is_movie = False
+        self.tvPath.server = 'a.server'
+        self.tvPath.save()
+
+        self.moviePath = Path()
+        self.moviePath.localpathstr = '/another/local/path'
+        self.moviePath.remotepathstr = '/another/local/path'
+        self.moviePath.skip = False
+        self.moviePath.is_movie = True
+        self.moviePath.server = 'a.server'
+        self.moviePath.save()
 
         self.test_user = User.objects.create_superuser('test_user',
                                                        'test@user.com',
                                                        'password')
         self.client.login(username='test_user', password='password')
 
-    def test_create_moviefile(self):
+    def test_create_moviefile_using_tvpath(self):
         self.data = {'filename': 'new file',
                      'skip': False,
                      'finished': True,
                      'size': 100,
-                     'pathid': self.newPath.id,
+                     'pathid': self.tvPath.id,
+                     'streamable': True,
+                     }
+        response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
+        self.assertEquals(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def test_create_moviefile_using_moviepath(self):
+        self.data = {'filename': 'new file',
+                     'skip': False,
+                     'finished': True,
+                     'size': 100,
+                     'pathid': self.moviePath.id,
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)

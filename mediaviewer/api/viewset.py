@@ -176,7 +176,12 @@ class MovieFileViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 newFile = File()
-                newFile.path = Path.objects.get(pk=data['pathid'])
+                path = Path.objects.get(pk=data['pathid'])
+
+                if not path.is_movie:
+                    raise Exception('Attempting to create file for non-movie type path')
+
+                newFile.path = path
                 newFile.filename = data['filename']
                 newFile.skip = data['skip']
                 newFile.finished = data['finished']
