@@ -69,7 +69,7 @@ if not IS_SYNCING:
                                  file_viewset)
     router.register(r'downloadtoken', viewset.DownloadTokenViewSet)
     router.register(r'downloadclick', viewset.DownloadClickViewSet)
-    router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
+    router.register(r'unstreamablefile', file_viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
     #router.register(r'file', file_viewset.FileViewSet, base_name='file')
     router.register(r'movie', file_viewset.MovieFileViewSet, base_name='movie')
     router.register(r'tv', file_viewset.TvFileViewSet, base_name='tv')

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from mediaviewer.models.path import Path
 
-class PathViewSetTests(APITestCase):
+class TvPathViewSetTests(APITestCase):
     def setUp(self):
         self.test_user = User.objects.create_superuser('test_user',
                                                        'test@user.com',
@@ -33,7 +33,7 @@ class PathViewSetTests(APITestCase):
                      'server': 'a.server',
                      'skip': False,
                      }
-        response = self.client.post(reverse('mediaviewer:api:path-list'), self.data)
+        response = self.client.post(reverse('mediaviewer:api:tvpath-list'), self.data)
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
 
         expected_dict = self.data
@@ -47,7 +47,7 @@ class PathViewSetTests(APITestCase):
             self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
 
     def test_get_path_detail(self):
-        response = self.client.get(reverse('mediaviewer:api:path-detail', args=[self.tvPath.id]))
+        response = self.client.get(reverse('mediaviewer:api:tvpath-detail', args=[self.tvPath.id]))
         for k,v in response.data.items():
             actual = v
             expected = getattr(self.tvPath, k)
@@ -55,7 +55,7 @@ class PathViewSetTests(APITestCase):
             self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
 
     def test_get_path_list(self):
-        response = self.client.get(reverse('mediaviewer:api:path-list'))
+        response = self.client.get(reverse('mediaviewer:api:tvpath-list'))
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
         expected = {'count': 1,

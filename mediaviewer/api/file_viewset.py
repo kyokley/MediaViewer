@@ -91,18 +91,36 @@ class FileViewSet(viewsets.ModelViewSet):
                             status=RESTstatus.HTTP_200_OK,
                             headers=headers)
 
+class TvFileViewSet(FileViewSet):
+    queryset = File.objects.filter(path__is_movie=False)
+
+    def create(self, request):
+        try:
+            data = request.data
+            path = Path.objects.get(pk=data['pathid'])
+            if path.is_movie:
+                raise Exception('Attempting to create file for non-tv type path')
+
+            return super(TvFileViewSet, self).create(request)
+        except Exception, e:
+            log.error(str(e))
+            log.error('TvFile creation failed!')
+
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_500_INTERNAL_SERVER_ERROR,
+                                headers=None)
 
 class MovieFileViewSet(FileViewSet):
     queryset = File.objects.filter(path__is_movie=True)
     serializer_class = MovieFileSerializer
 
     def create(self, request):
-        data = request.data
-        path = Path.objects.get(pk=data['pathid'])
-        if not path.is_movie:
-            raise Exception('Attempting to create file for non-movie type path')
-
         try:
+            data = request.data
+            path = Path.objects.get(pk=data['pathid'])
+            if not path.is_movie:
+                raise Exception('Attempting to create file for non-movie type path')
+
             return super(MovieFileViewSet, self).create(request)
         except Exception, e:
             log.error(str(e))
