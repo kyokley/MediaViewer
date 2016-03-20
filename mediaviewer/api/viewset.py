@@ -34,13 +34,13 @@ from mediaviewer.models.usercomment import UserComment
 from mediaviewer.log import log
 
 class PathViewSet(viewsets.ModelViewSet):
-    queryset = Path.objects.all()
+    queryset = Path.objects.filter(is_movie=False)
     serializer_class = PathSerializer
 
     def get_queryset(self):
         localpath = self.request.query_params.get('localpath', None)
         remotepath = self.request.query_params.get('remotepath', None)
-        queryset = Path.objects.all()
+        queryset = self.queryset
         if localpath and remotepath:
             queryset = queryset.filter(localpathstr=localpath)
             queryset = queryset.filter(remotepathstr=remotepath)
@@ -68,7 +68,43 @@ class PathViewSet(viewsets.ModelViewSet):
                     newPath.remotepathstr = data['remotepath']
                     newPath.server = data['server']
                     newPath.skip = True if data['skip'] == 'True' else False
-                    newPath.is_movie = False if data['is_movie'] == 'False' else True
+                    newPath.is_movie = False
+                    newPath.clean()
+                    newPath.save()
+                    log.info('Created new path for %s.' % newPath.localpathstr)
+                else:
+                    log.info('Path for %s already exists. Skipping.' % newPath.localpathstr)
+        except Exception, e:
+            log.error(str(e))
+            log.error('Path creation failed!')
+            raise
+
+        serializer = PathSerializer(newPath)
+        headers = self.get_success_headers(serializer.data)
+
+        return RESTResponse(serializer.data,
+                            status=RESTstatus.HTTP_201_CREATED,
+                            headers=headers)
+
+class MoviePathViewSet(PathViewSet):
+    queryset = Path.objects.filter(is_movie=True)
+    serializer_class = PathSerializer
+
+    def create(self, request):
+        data = request.data
+
+        try:
+            with transaction.atomic():
+                newPath = Path.objects.filter(localpathstr=data['localpath']
+                            ).filter(remotepathstr=data['remotepath']
+                                ).first()
+                if not newPath:
+                    newPath = Path()
+                    newPath.localpathstr = data['localpath']
+                    newPath.remotepathstr = data['remotepath']
+                    newPath.server = data['server']
+                    newPath.skip = True if data['skip'] == 'True' else False
+                    newPath.is_movie = True
                     newPath.clean()
                     newPath.save()
                     log.info('Created new path for %s.' % newPath.localpathstr)
