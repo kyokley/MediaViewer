@@ -57,6 +57,12 @@ class PathViewSet(viewsets.ModelViewSet):
                 raise
         else:
             log.info('Path for %s already exists. Skipping.' % newPath.localpathstr)
+            serializer = PathSerializer(newPath)
+            headers = self.get_success_headers(serializer.data)
+
+            return RESTResponse(serializer.data,
+                                status=RESTstatus.HTTP_200_OK,
+                                headers=headers)
 
         serializer = PathSerializer(newPath)
         headers = self.get_success_headers(serializer.data)

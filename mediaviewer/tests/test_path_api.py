@@ -27,6 +27,29 @@ class TvPathViewSetTests(APITestCase):
         self.moviePath.server = 'a.server'
         self.moviePath.save()
 
+    def test_create_tv_path_exists(self):
+        self.data = {'localpath': '/some/local/path',
+                     'remotepath': '/some/local/path',
+                     'server': 'fake.server',
+                     'skip': False,
+                     }
+        response = self.client.post(reverse('mediaviewer:api:tvpath-list'), self.data)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected_dict = {'localpath': '/some/local/path',
+                         'remotepath': '/some/local/path',
+                         'skip': False,
+                         'server': 'a.server',
+                         'is_movie': False,
+                         }
+
+        pk = response.data['pk']
+        path = Path.objects.get(pk=pk)
+        for k,v in expected_dict.items():
+            expected = v
+            actual = getattr(path, k)
+            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+
     def test_create_tv_path(self):
         self.data = {'localpath': '/path/to/folder',
                      'remotepath': '/path/to/folder',
@@ -98,6 +121,29 @@ class MoviePathViewSetTests(APITestCase):
         self.moviePath.server = 'a.server'
         self.moviePath.save()
 
+    def test_create_moviepath_exists(self):
+        self.data = {'localpath': '/another/local/path',
+                     'remotepath': '/another/local/path',
+                     'server': 'fake.server',
+                     'skip': False,
+                     }
+        response = self.client.post(reverse('mediaviewer:api:moviepath-list'), self.data)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected_dict = {'localpath': '/another/local/path',
+                         'remotepath': '/another/local/path',
+                         'skip': False,
+                         'server': 'a.server',
+                         'is_movie': True,
+                         }
+
+        pk = response.data['pk']
+        path = Path.objects.get(pk=pk)
+        for k,v in expected_dict.items():
+            expected = v
+            actual = getattr(path, k)
+            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+
     def test_create_moviepath(self):
         self.data = {'localpath': '/path/to/folder',
                      'remotepath': '/path/to/folder',
@@ -126,3 +172,24 @@ class MoviePathViewSetTests(APITestCase):
             expected = getattr(self.moviePath, k)
             expected = expected(self.moviePath) if hasattr(expected, '__call__') else expected
             self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+
+    def test_get_moviepath_list(self):
+        response = self.client.get(reverse('mediaviewer:api:moviepath-list'))
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'pk': self.moviePath.id,
+                                 'localpath': '/another/local/path',
+                                 'remotepath': '/another/local/path',
+                                 'server': 'a.server',
+                                 'skip': False,
+                                 'number_of_unwatched_shows': 0,
+                                 'is_movie': True,
+                                 }],
+                    }
+        actual = dict(response.data)
+        actual['results'] = map(dict, actual['results'])
+
+        self.assertEquals(expected, actual)

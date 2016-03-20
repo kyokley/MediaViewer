@@ -36,7 +36,7 @@ class MovieFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
-        self.assertEquals(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_moviefile_using_moviepath(self):
         self.data = {'filename': 'new file',
@@ -92,4 +92,4 @@ class TvFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
-        self.assertEquals(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)

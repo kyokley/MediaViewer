@@ -99,7 +99,10 @@ class TvFileViewSet(FileViewSet):
             data = request.data
             path = Path.objects.get(pk=data['pathid'])
             if path.is_movie:
-                raise Exception('Attempting to create file for non-tv type path')
+                log.error('Attempting to create file for non-tv type path')
+                return RESTResponse(None,
+                                    status=RESTstatus.HTTP_400_BAD_REQUEST,
+                                    headers=None)
 
             return super(TvFileViewSet, self).create(request)
         except Exception, e:
@@ -119,7 +122,10 @@ class MovieFileViewSet(FileViewSet):
             data = request.data
             path = Path.objects.get(pk=data['pathid'])
             if not path.is_movie:
-                raise Exception('Attempting to create file for non-movie type path')
+                log.error('Attempting to create file for non-movie type path')
+                return RESTResponse(None,
+                                    status=RESTstatus.HTTP_400_BAD_REQUEST,
+                                    headers=None)
 
             return super(MovieFileViewSet, self).create(request)
         except Exception, e:
