@@ -74,22 +74,17 @@ class FileViewSet(viewsets.ModelViewSet):
     def update(self, request, pk=None):
         data = request.data
         instance = get_object_or_404(self.queryset, pk=pk)
-        instance.filename = data.get('filename', instance.filename)
-        instance.skip = data.get('skip', instance.skip)
-        instance.finished = data.get('finished', instance.finished)
-        instance.size = data.get('size', instance.size)
-        instance.hide = data.get('hide', instance.hide)
-        instance._searchString = data.get('_searchString', instance._searchString)
-        instance.streamable = data.get('streamable', instance.streamable)
 
-        instance.save()
+        serializer = FileSerializer(instance, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            headers = self.get_success_headers(serializer.data)
 
-        serializer = FileSerializer(instance, partial=True)
-        headers = self.get_success_headers(serializer.data)
-
-        return RESTResponse(serializer.data,
-                            status=RESTstatus.HTTP_200_OK,
-                            headers=headers)
+            return RESTResponse(serializer.data,
+                                status=RESTstatus.HTTP_200_OK,
+                                headers=headers)
+        else:
+            return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)
 
 class TvFileViewSet(FileViewSet):
     queryset = File.objects.filter(path__is_movie=False)

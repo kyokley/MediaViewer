@@ -50,7 +50,7 @@ class TvPathViewSetTests(APITestCase):
             actual = getattr(path, k)
             self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
 
-    def test_create_tv_path(self):
+    def test_create_tvpath(self):
         self.data = {'localpath': '/path/to/folder',
                      'remotepath': '/path/to/folder',
                      'server': 'a.server',

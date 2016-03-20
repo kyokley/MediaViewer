@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 from mediaviewer.models.path import Path
+from mediaviewer.models.file import File
 
 class MovieFileViewSetTests(APITestCase):
     def setUp(self):
@@ -14,6 +15,16 @@ class MovieFileViewSetTests(APITestCase):
         self.tvPath.server = 'a.server'
         self.tvPath.save()
 
+        self.tvFile = File()
+        self.tvFile.filename = 'some.tv.show'
+        self.tvFile.skip = False
+        self.tvFile.finished = True
+        self.tvFile.size = 100
+        self.tvFile.streamable = True
+        self.tvFile.path = self.tvPath
+        self.tvFile.hide = False
+        self.tvFile.save()
+
         self.moviePath = Path()
         self.moviePath.localpathstr = '/another/local/path'
         self.moviePath.remotepathstr = '/another/local/path'
@@ -21,6 +32,16 @@ class MovieFileViewSetTests(APITestCase):
         self.moviePath.is_movie = True
         self.moviePath.server = 'a.server'
         self.moviePath.save()
+
+        self.movieFile = File()
+        self.movieFile.filename = 'some.movie.show'
+        self.movieFile.skip = False
+        self.movieFile.finished = True
+        self.movieFile.size = 0
+        self.movieFile.streamable = True
+        self.movieFile.path = self.moviePath
+        self.movieFile.hide = False
+        self.movieFile.save()
 
         self.test_user = User.objects.create_superuser('test_user',
                                                        'test@user.com',
@@ -49,6 +70,32 @@ class MovieFileViewSetTests(APITestCase):
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
 
+    def test_update_valid_moviefile(self):
+        self.data = {'filename': 'new.movie.filename',
+                     'skip': True,
+                     'finished': True,
+                     'size': 0,
+                     'streamable': True,
+                     }
+        response = self.client.put(reverse('mediaviewer:api:movie-detail', args=[self.movieFile.id]), self.data)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        movieFile = File.objects.get(pk=response.data['pk'])
+        for k,v in self.data.items():
+            expected = v
+            actual = getattr(movieFile, k)
+            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+
+    def test_update_invalid_moviefile(self):
+        self.data = {'filename': 'new.movie.filename',
+                     'skip': True,
+                     'finished': True,
+                     'size': 0,
+                     'streamable': True,
+                     }
+        response = self.client.put(reverse('mediaviewer:api:movie-detail', args=[self.tvFile.id]), self.data)
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+
 class TvFileViewSetTests(APITestCase):
     def setUp(self):
         self.tvPath = Path()
@@ -59,6 +106,16 @@ class TvFileViewSetTests(APITestCase):
         self.tvPath.server = 'a.server'
         self.tvPath.save()
 
+        self.tvFile = File()
+        self.tvFile.filename = 'some.tv.show'
+        self.tvFile.skip = False
+        self.tvFile.finished = True
+        self.tvFile.size = 100
+        self.tvFile.streamable = True
+        self.tvFile.path = self.tvPath
+        self.tvFile.hide = False
+        self.tvFile.save()
+
         self.moviePath = Path()
         self.moviePath.localpathstr = '/another/local/path'
         self.moviePath.remotepathstr = '/another/local/path'
@@ -66,6 +123,16 @@ class TvFileViewSetTests(APITestCase):
         self.moviePath.is_movie = True
         self.moviePath.server = 'a.server'
         self.moviePath.save()
+
+        self.movieFile = File()
+        self.movieFile.filename = 'some.movie.show'
+        self.movieFile.skip = False
+        self.movieFile.finished = True
+        self.movieFile.size = 0
+        self.movieFile.streamable = True
+        self.movieFile.path = self.moviePath
+        self.movieFile.hide = False
+        self.movieFile.save()
 
         self.test_user = User.objects.create_superuser('test_user',
                                                        'test@user.com',
@@ -93,3 +160,29 @@ class TvFileViewSetTests(APITestCase):
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_valid_tvfile(self):
+        self.data = {'filename': 'new.tv.filename',
+                     'skip': True,
+                     'finished': True,
+                     'size': 0,
+                     'streamable': True,
+                     }
+        response = self.client.put(reverse('mediaviewer:api:tv-detail', args=[self.tvFile.id]), self.data)
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        tvFile = File.objects.get(pk=response.data['pk'])
+        for k,v in self.data.items():
+            expected = v
+            actual = getattr(tvFile, k)
+            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+
+    def test_update_invalid_tvfile(self):
+        self.data = {'filename': 'new.tv.filename',
+                     'skip': True,
+                     'finished': True,
+                     'size': 0,
+                     'streamable': True,
+                     }
+        response = self.client.put(reverse('mediaviewer:api:tv-detail', args=[self.movieFile.id]), self.data)
+        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)

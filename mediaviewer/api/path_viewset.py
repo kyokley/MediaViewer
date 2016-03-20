@@ -1,9 +1,11 @@
-from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
-from mediaviewer.api.serializers import PathSerializer
+from mediaviewer.api.serializers import (PathSerializer,
+                                         MoviePathSerializer,
+                                         TvPathSerializer,
+                                         )
 from mediaviewer.models.path import Path
 
 from mediaviewer.log import log
@@ -29,17 +31,12 @@ class PathViewSet(viewsets.ModelViewSet):
         return RESTResponse(serializer.data)
 
     def create_path_obj(self, data):
-        with transaction.atomic():
-            newPath = Path()
-            newPath.localpathstr = data['localpath']
-            newPath.remotepathstr = data['remotepath']
-            newPath.server = data['server']
-            newPath.skip = True if data['skip'].upper() == 'TRUE' else False
-            newPath.is_movie = True if data['is_movie'].upper() == 'TRUE' else False
-            newPath.clean()
-            newPath.save()
-            log.info('Created new path for %s.' % newPath.localpathstr)
-        return newPath
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return serializer
+        else:
+            raise Exception('Invalid serializer')
 
     def create(self, request):
         data = request.data
@@ -50,11 +47,16 @@ class PathViewSet(viewsets.ModelViewSet):
 
         if not newPath:
             try:
-                newPath = self.create_path_obj(data)
+                serializer = self.create_path_obj(data)
             except Exception, e:
                 log.error(str(e))
                 log.error('Path creation failed!')
-                raise
+                return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)
+
+            headers = self.get_success_headers(serializer.data)
+            return RESTResponse(serializer.data,
+                                status=RESTstatus.HTTP_201_CREATED,
+                                headers=headers)
         else:
             log.info('Path for %s already exists. Skipping.' % newPath.localpathstr)
             serializer = PathSerializer(newPath)
@@ -64,43 +66,20 @@ class PathViewSet(viewsets.ModelViewSet):
                                 status=RESTstatus.HTTP_200_OK,
                                 headers=headers)
 
-        serializer = PathSerializer(newPath)
-        headers = self.get_success_headers(serializer.data)
-
-        return RESTResponse(serializer.data,
-                            status=RESTstatus.HTTP_201_CREATED,
-                            headers=headers)
-
 class MoviePathViewSet(PathViewSet):
     queryset = Path.objects.filter(is_movie=True)
-    serializer_class = PathSerializer
+    serializer_class = MoviePathSerializer
 
     def create_path_obj(self, data):
-        with transaction.atomic():
-            newPath = Path()
-            newPath.localpathstr = data['localpath']
-            newPath.remotepathstr = data['remotepath']
-            newPath.server = data['server']
-            newPath.skip = True if data['skip'].upper() == 'TRUE' else False
-            newPath.is_movie = True
-            newPath.clean()
-            newPath.save()
-            log.info('Created new path for %s.' % newPath.localpathstr)
-        return newPath
+        if not data.get('is_movie', True):
+            raise Exception('Path must be of movie type')
+        return super(MoviePathViewSet, self).create_path_obj(data)
 
 class TvPathViewSet(PathViewSet):
     queryset = Path.objects.filter(is_movie=False)
-    serializer_class = PathSerializer
+    serializer_class = TvPathSerializer
 
     def create_path_obj(self, data):
-        with transaction.atomic():
-            newPath = Path()
-            newPath.localpathstr = data['localpath']
-            newPath.remotepathstr = data['remotepath']
-            newPath.server = data['server']
-            newPath.skip = True if data['skip'].upper() == 'TRUE' else False
-            newPath.is_movie = False
-            newPath.clean()
-            newPath.save()
-            log.info('Created new path for %s.' % newPath.localpathstr)
-        return newPath
+        if data.get('is_movie', False):
+            raise Exception('Path must be of tv type')
+        return super(TvPathViewSet, self).create_path_obj(data)

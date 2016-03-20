@@ -81,6 +81,12 @@ class PathSerializer(serializers.ModelSerializer):
         else:
             return 0
 
+class MoviePathSerializer(PathSerializer):
+    is_movie = serializers.BooleanField(default=True)
+
+class TvPathSerializer(PathSerializer):
+    is_movie = serializers.BooleanField(default=False)
+
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
@@ -102,7 +108,7 @@ class FileSerializer(serializers.ModelSerializer):
     finished = serializers.BooleanField(required=False)
     size = serializers.IntegerField(required=False)
     streamable = serializers.BooleanField(required=False)
-    ismovie = serializers.BooleanField(required=False)
+    ismovie = serializers.ReadOnlyField(source='path.is_movie')
 
 class MovieFileSerializer(FileSerializer):
     class Meta:
@@ -113,6 +119,7 @@ class MovieFileSerializer(FileSerializer):
                   'skip',
                   'finished',
                   'size',
+                  'ismovie',
                   )
 
 class DataTransmissionSerializer(serializers.ModelSerializer):
