@@ -66,6 +66,14 @@ class File(models.Model):
         app_label = 'mediaviewer'
         db_table = 'file'
 
+    def _get_pathid(self):
+        return self.path.id
+    def _set_pathid(self, val):
+        from mediaviewer.models.path import Path
+        path = Path.objects.get(pk=val)
+        self.path = path
+    pathid = property(fget=_get_pathid, fset=_set_pathid)
+
     def dateCreatedForSpan(self):
         return self.datecreated and self.datecreated.isoformat()
 

@@ -1,4 +1,3 @@
-from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework import status as RESTstatus
@@ -28,44 +27,36 @@ class FileViewSet(viewsets.ModelViewSet):
         log.debug('Attempting to find file with id = %s' % pk)
         queryset = self.queryset
         obj = get_object_or_404(queryset, pk=pk)
-        serializer = FileSerializer(obj)
+        serializer = self.serializer_class(obj)
         return RESTResponse(serializer.data)
 
     def create_file_obj(self, data):
-        with transaction.atomic():
-            path = Path.objects.get(pk=data['pathid'])
-            newFile = File()
-            newFile.path = path
-            newFile.filename = data['filename']
-            newFile.skip = data['skip']
-            newFile.finished = data['finished']
-            newFile.size = data['size']
-            newFile.hide = False
-            newFile._searchString = path.defaultsearchstr
-            newFile.streamable = True
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return serializer
+        else:
+            raise Exception('Invalid serializer')
 
-            newFile.clean()
-            newFile.save()
-
-            if not path.lastCreatedFileDate or path.lastCreatedFileDate < newFile.datecreated:
-                path.lastCreatedFileDate = newFile.datecreated
-                path.save()
-            log.info('New file record created for %s' % newFile.filename)
-        return newFile
+        newFile = serializer.instance
+        path = newFile.path
+        if not path.lastCreatedFileDate or path.lastCreatedFileDate < newFile.datecreated:
+            path.lastCreatedFileDate = newFile.datecreated
+            path.save()
+        log.info('New file record created for %s' % newFile.filename)
+        return serializer
 
     def create(self, request):
         data = request.data
 
         try:
-            newFile = self.create_file_obj(data)
+            serializer = self.create_file_obj(data)
         except Exception, e:
             log.error(str(e))
             log.error('File creation failed!')
-            raise
+            return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)
 
-        serializer = FileSerializer(newFile)
         headers = self.get_success_headers(serializer.data)
-
         return RESTResponse(serializer.data,
                             status=RESTstatus.HTTP_201_CREATED,
                             headers=headers)
@@ -75,7 +66,7 @@ class FileViewSet(viewsets.ModelViewSet):
         data = request.data
         instance = get_object_or_404(self.queryset, pk=pk)
 
-        serializer = FileSerializer(instance, data=data)
+        serializer = self.serializer_class(instance, data=data)
         if serializer.is_valid():
             serializer.save()
             headers = self.get_success_headers(serializer.data)
@@ -134,32 +125,3 @@ class MovieFileViewSet(FileViewSet):
 class UnstreamableFileViewSet(FileViewSet):
     queryset = File.objects.filter(streamable=False)
     serializer_class = FileSerializer
-
-    def create_file_obj(self, data):
-        with transaction.atomic():
-            path = Path.objects.get(pk=data['pathid'])
-            newFile = File()
-            newFile.path = path
-            newFile.filename = data['filename']
-            newFile.skip = data['skip']
-            newFile.finished = data['finished']
-            newFile.size = data['size']
-            newFile.hide = False
-            newFile._searchString = path.defaultsearchstr
-            newFile.streamable = False
-
-            newFile.clean()
-            newFile.save()
-
-            if not path.lastCreatedFileDate or path.lastCreatedFileDate < newFile.datecreated:
-                path.lastCreatedFileDate = newFile.datecreated
-                path.save()
-            log.info('New file record created for %s' % newFile.filename)
-        return newFile
-
-    def retrieve(self, request, pk=None):
-        log.debug('Attempting to find file with id = %s' % pk)
-        obj = get_object_or_404(self.queryset, pk=pk)
-        serializer = FileSerializer(obj)
-        return RESTResponse(serializer.data)
-
