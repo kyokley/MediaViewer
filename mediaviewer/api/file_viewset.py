@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 from rest_framework import viewsets
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
@@ -6,8 +7,6 @@ from mediaviewer.api.serializers import (FileSerializer,
                                          MovieFileSerializer,
                                          )
 from mediaviewer.models.file import File
-from mediaviewer.models.path import (Path,
-                                     )
 from mediaviewer.log import log
 
 class FileViewSet(viewsets.ModelViewSet):
@@ -30,10 +29,14 @@ class FileViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(obj)
         return RESTResponse(serializer.data)
 
+    def validate_path(self, serializer):
+        pass
+
     def create_file_obj(self, data):
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
             serializer.save()
+            self.validate_path(serializer)
             return serializer
         else:
             raise Exception('Invalid serializer')
@@ -50,7 +53,8 @@ class FileViewSet(viewsets.ModelViewSet):
         data = request.data
 
         try:
-            serializer = self.create_file_obj(data)
+            with transaction.atomic():
+                serializer = self.create_file_obj(data)
         except Exception, e:
             log.error(str(e))
             log.error('File creation failed!')
@@ -80,16 +84,12 @@ class FileViewSet(viewsets.ModelViewSet):
 class TvFileViewSet(FileViewSet):
     queryset = File.objects.filter(path__is_movie=False)
 
+    def validate_path(self, serializer):
+        if serializer.instance.path.is_movie:
+            raise Exception('Attempting to use a movie path with a tv obj')
+
     def create(self, request):
         try:
-            data = request.data
-            path = Path.objects.get(pk=data['pathid'])
-            if path.is_movie:
-                log.error('Attempting to create file for non-tv type path')
-                return RESTResponse(None,
-                                    status=RESTstatus.HTTP_400_BAD_REQUEST,
-                                    headers=None)
-
             return super(TvFileViewSet, self).create(request)
         except Exception, e:
             log.error(str(e))
@@ -103,16 +103,12 @@ class MovieFileViewSet(FileViewSet):
     queryset = File.objects.filter(path__is_movie=True)
     serializer_class = MovieFileSerializer
 
+    def validate_path(self, serializer):
+        if not serializer.instance.path.is_movie:
+            raise Exception('Attempting to use a tv path with a movie obj')
+
     def create(self, request):
         try:
-            data = request.data
-            path = Path.objects.get(pk=data['pathid'])
-            if not path.is_movie:
-                log.error('Attempting to create file for non-movie type path')
-                return RESTResponse(None,
-                                    status=RESTstatus.HTTP_400_BAD_REQUEST,
-                                    headers=None)
-
             return super(MovieFileViewSet, self).create(request)
         except Exception, e:
             log.error(str(e))

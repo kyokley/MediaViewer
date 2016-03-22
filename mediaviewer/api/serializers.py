@@ -91,7 +91,7 @@ class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = ('pk',
-                  'pathid',
+                  'path',
                   'localpath',
                   'filename',
                   'skip',
@@ -101,7 +101,6 @@ class FileSerializer(serializers.ModelSerializer):
                   'ismovie',
                   )
     pk = serializers.ReadOnlyField()
-    pathid = serializers.IntegerField(required=False)
     localpath = serializers.CharField(required=False, source='path.localpathstr')
     filename = serializers.CharField(required=False)
     skip = serializers.BooleanField(required=False)
@@ -114,7 +113,7 @@ class MovieFileSerializer(FileSerializer):
     class Meta:
         model = File
         fields = ('pk',
-                  'pathid',
+                  'path',
                   'filename',
                   'skip',
                   'finished',

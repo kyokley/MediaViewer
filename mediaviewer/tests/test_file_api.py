@@ -53,7 +53,7 @@ class MovieFileViewSetTests(APITestCase):
                      'skip': False,
                      'finished': True,
                      'size': 100,
-                     'pathid': self.tvPath.id,
+                     'path': self.tvPath.id,
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
@@ -64,7 +64,7 @@ class MovieFileViewSetTests(APITestCase):
                      'skip': False,
                      'finished': True,
                      'size': 100,
-                     'pathid': self.moviePath.id,
+                     'path': self.moviePath.id,
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
@@ -144,7 +144,7 @@ class TvFileViewSetTests(APITestCase):
                      'skip': False,
                      'finished': True,
                      'size': 100,
-                     'pathid': self.tvPath.id,
+                     'path': self.tvPath.id,
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
@@ -155,7 +155,7 @@ class TvFileViewSetTests(APITestCase):
                      'skip': False,
                      'finished': True,
                      'size': 100,
-                     'pathid': self.moviePath.id,
+                     'path': self.moviePath.id,
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)

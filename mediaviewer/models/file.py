@@ -52,12 +52,12 @@ class File(models.Model):
     imdb_id = models.TextField(db_column='imdb_id',
                                blank=True,
                                null=True)
-    hide = models.BooleanField(db_column='hide')
+    hide = models.BooleanField(db_column='hide', default=False)
     filenamescrapeformat = models.ForeignKey('mediaviewer.FilenameScrapeFormat',
                                              null=True,
                                              db_column='filenamescrapeformatid',
                                              blank=True)
-    streamable = models.BooleanField(db_column='streamable', null=False)
+    streamable = models.BooleanField(db_column='streamable', null=False, default=True)
     override_filename = models.TextField(blank=True)
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
