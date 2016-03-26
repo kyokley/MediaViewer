@@ -106,6 +106,14 @@ class TvFileViewSetTests(APITestCase):
         self.tvPath.server = 'a.server'
         self.tvPath.save()
 
+        self.anotherTvPath = Path()
+        self.anotherTvPath.localpathstr = '/path/to/folder'
+        self.anotherTvPath.remotepathstr = '/path/to/folder'
+        self.anotherTvPath.skip = False
+        self.anotherTvPath.is_movie = False
+        self.anotherTvPath.server = 'a.server'
+        self.anotherTvPath.save()
+
         self.tvFile = File()
         self.tvFile.filename = 'some.tv.show'
         self.tvFile.skip = False
@@ -115,6 +123,16 @@ class TvFileViewSetTests(APITestCase):
         self.tvFile.path = self.tvPath
         self.tvFile.hide = False
         self.tvFile.save()
+
+        self.anotherTvFile = File()
+        self.anotherTvFile.filename = 'another.tv.show'
+        self.anotherTvFile.skip = False
+        self.anotherTvFile.finished = True
+        self.anotherTvFile.size = 100
+        self.anotherTvFile.streamable = True
+        self.anotherTvFile.path = self.anotherTvPath
+        self.anotherTvFile.hide = False
+        self.anotherTvFile.save()
 
         self.moviePath = Path()
         self.moviePath.localpathstr = '/another/local/path'
@@ -138,6 +156,29 @@ class TvFileViewSetTests(APITestCase):
                                                        'test@user.com',
                                                        'password')
         self.client.login(username='test_user', password='password')
+
+    def test_get_tvfiles_by_pathid(self):
+        response = self.client.get(reverse('mediaviewer:api:tv-list'), {'pathid': self.tvPath.id})
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'pk': self.tvFile.id,
+                                 'path': self.tvFile.path.id,
+                                 'filename': 'some.tv.show',
+                                 'skip': False,
+                                 'finished': True,
+                                 'size': self.tvFile.size,
+                                 'streamable': True,
+                                 'localpath': self.tvFile.path.localpathstr,
+                                 'ismovie': self.tvFile.isMovie()
+                                 }],
+                    }
+        actual = dict(response.data)
+        actual['results'] = map(dict, actual['results'])
+
+        self.assertEquals(expected, actual)
 
     def test_create_tvfile_using_tvpath(self):
         self.data = {'filename': 'new file',
