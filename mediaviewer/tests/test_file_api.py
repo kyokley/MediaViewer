@@ -15,6 +15,14 @@ class MovieFileViewSetTests(APITestCase):
         self.tvPath.server = 'a.server'
         self.tvPath.save()
 
+        self.anotherTvPath = Path()
+        self.anotherTvPath.localpathstr = '/path/to/folder'
+        self.anotherTvPath.remotepathstr = '/path/to/folder'
+        self.anotherTvPath.skip = False
+        self.anotherTvPath.is_movie = False
+        self.anotherTvPath.server = 'a.server'
+        self.anotherTvPath.save()
+
         self.tvFile = File()
         self.tvFile.filename = 'some.tv.show'
         self.tvFile.skip = False
@@ -25,6 +33,16 @@ class MovieFileViewSetTests(APITestCase):
         self.tvFile.hide = False
         self.tvFile.save()
 
+        self.anotherTvFile = File()
+        self.anotherTvFile.filename = 'another.tv.show'
+        self.anotherTvFile.skip = False
+        self.anotherTvFile.finished = True
+        self.anotherTvFile.size = 100
+        self.anotherTvFile.streamable = True
+        self.anotherTvFile.path = self.anotherTvPath
+        self.anotherTvFile.hide = False
+        self.anotherTvFile.save()
+
         self.moviePath = Path()
         self.moviePath.localpathstr = '/another/local/path'
         self.moviePath.remotepathstr = '/another/local/path'
@@ -32,6 +50,14 @@ class MovieFileViewSetTests(APITestCase):
         self.moviePath.is_movie = True
         self.moviePath.server = 'a.server'
         self.moviePath.save()
+
+        self.anotherMoviePath = Path()
+        self.anotherMoviePath.localpathstr = '/path/to/some/other/movies'
+        self.anotherMoviePath.remotepathstr = '/path/to/some/other/movies'
+        self.anotherMoviePath.skip = False
+        self.anotherMoviePath.is_movie = True
+        self.anotherMoviePath.server = 'a.server'
+        self.anotherMoviePath.save()
 
         self.movieFile = File()
         self.movieFile.filename = 'some.movie.show'
@@ -43,10 +69,43 @@ class MovieFileViewSetTests(APITestCase):
         self.movieFile.hide = False
         self.movieFile.save()
 
+        self.anotherMovieFile = File()
+        self.anotherMovieFile.filename = 'another.movie.folder'
+        self.anotherMovieFile.skip = False
+        self.anotherMovieFile.finished = True
+        self.anotherMovieFile.size = 0
+        self.anotherMovieFile.streamable = True
+        self.anotherMovieFile.path = self.anotherMoviePath
+        self.anotherMovieFile.hide = False
+        self.anotherMovieFile.save()
+
         self.test_user = User.objects.create_superuser('test_user',
                                                        'test@user.com',
                                                        'password')
         self.client.login(username='test_user', password='password')
+
+    def test_get_moviefiles_by_pathid(self):
+        response = self.client.get(reverse('mediaviewer:api:movie-list'), {'pathid': self.moviePath.id})
+        self.assertEquals(response.status_code, status.HTTP_200_OK)
+
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'pk': self.movieFile.id,
+                                 'path': self.movieFile.path.id,
+                                 'filename': 'some.movie.show',
+                                 'skip': False,
+                                 'finished': True,
+                                 'size': self.movieFile.size,
+                                 'streamable': True,
+                                 'localpath': self.movieFile.path.localpathstr,
+                                 'ismovie': self.movieFile.isMovie()
+                                 }],
+                    }
+        actual = dict(response.data)
+        actual['results'] = map(dict, actual['results'])
+
+        self.assertEquals(expected, actual)
 
     def test_create_moviefile_using_tvpath(self):
         self.data = {'filename': 'new file',

@@ -114,10 +114,12 @@ class MovieFileSerializer(FileSerializer):
         model = File
         fields = ('pk',
                   'path',
+                  'localpath',
                   'filename',
                   'skip',
                   'finished',
                   'size',
+                  'streamable',
                   'ismovie',
                   )
 
