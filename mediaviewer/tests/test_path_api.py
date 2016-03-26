@@ -167,11 +167,15 @@ class MoviePathViewSetTests(APITestCase):
         response = self.client.get(reverse('mediaviewer:api:moviepath-detail', args=[self.moviePath.id]))
         self.assertEquals(response.status_code, status.HTTP_200_OK)
 
-        for k,v in response.data.items():
-            actual = v
-            expected = getattr(self.moviePath, k)
-            expected = expected(self.moviePath) if hasattr(expected, '__call__') else expected
-            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+        expected = {'skip': False,
+                    'number_of_unwatched_shows': 0,
+                    'localpath': u'/another/local/path',
+                    'server': u'a.server',
+                    'remotepath': u'/another/local/path',
+                    'pk': 23,
+                    'is_movie': True}
+
+        self.assertEquals(expected, response.data)
 
     def test_get_moviepath_list(self):
         response = self.client.get(reverse('mediaviewer:api:moviepath-list'))
