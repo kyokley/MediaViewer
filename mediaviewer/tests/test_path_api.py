@@ -172,7 +172,7 @@ class MoviePathViewSetTests(APITestCase):
                     'localpath': u'/another/local/path',
                     'server': u'a.server',
                     'remotepath': u'/another/local/path',
-                    'pk': 23,
+                    'pk': self.moviePath.id,
                     'is_movie': True}
 
         self.assertEquals(expected, response.data)
