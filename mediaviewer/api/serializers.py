@@ -8,6 +8,7 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.message import Message
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
+from mediaviewer.models.usersettings import UserSettings
 
 from rest_framework import serializers
 
@@ -24,6 +25,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'isvalid',
                   'waitertheme',
                   'displayname',
+                  'auto_download',
                   )
     guid = serializers.CharField(required=True,
                                  max_length=32)
@@ -36,6 +38,12 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     isvalid = serializers.BooleanField(required=True)
     waitertheme = serializers.CharField(required=True)
     displayname = serializers.CharField(required=True)
+    auto_download = serializers.SerializerMethodField('get_auto_download')
+
+    def get_auto_download(self, obj):
+        #user = User.objects.get(pk=obj.userid)
+        user_settings = UserSettings.getSettings(obj.user)
+        return user_settings.auto_download
 
 class DownloadClickSerializer(serializers.ModelSerializer):
     class Meta:
