@@ -38,10 +38,9 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     isvalid = serializers.BooleanField(required=True)
     waitertheme = serializers.CharField(required=True)
     displayname = serializers.CharField(required=True)
-    auto_download = serializers.SerializerMethodField('get_auto_download')
+    auto_download = serializers.SerializerMethodField()
 
     def get_auto_download(self, obj):
-        #user = User.objects.get(pk=obj.userid)
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.auto_download
 
