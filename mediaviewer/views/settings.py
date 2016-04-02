@@ -28,6 +28,7 @@ def settings(request):
     else:
         context['ip_format'] = LOCAL_IP
     context['title'] = 'Settings'
+    context['auto_download'] = settings.auto_download
     setSiteWideContext(context, request, includeMessages=True)
 
     return render(request, 'mediaviewer/settings.html', context)
@@ -47,6 +48,12 @@ def submitsettings(request):
     if not site_theme:
         site_theme = DEFAULT_SITE_THEME
 
+    auto_download = request.POST.get('auto_download')
+    if not auto_download:
+        auto_download = False
+    else:
+        auto_download = auto_download == 'true'
+
     settings = request.user.settings()
     if not settings:
         settings = UserSettings()
@@ -57,6 +64,7 @@ def submitsettings(request):
         changed = (settings.default_sort != default_sort or
                    settings.site_theme != site_theme)
 
+    settings.auto_download = auto_download
     settings.default_sort = default_sort
     settings.site_theme = site_theme
     context['site_theme'] = settings.site_theme
