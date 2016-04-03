@@ -209,6 +209,8 @@ OMDB_ID_URL = "http://www.omdbapi.com/?i="
 OMDB_URL_TAIL = "&plot=full"
 IMAGE_PATH = 'mediaviewer/static/media/'
 
+REQUEST_TIMEOUT = 3
+
 try:
     from local_settings import *
 except ImportError:
