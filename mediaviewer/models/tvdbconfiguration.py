@@ -5,14 +5,15 @@ from mysite.settings import (API_KEY,
                              OMDB_ID_URL,
                              OMDB_URL_TAIL,
                              IMAGE_PATH,
+                             REQUEST_TIMEOUT,
                              )
 import requests
 
 def getJSONData(url):
     try:
-        url = url.replace(' ','+')
+        url = url.replace(' ', '+')
         log.info('Getting json from %s' % (url,))
-        resp = requests.get(url)
+        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
         data = resp.json()
         log.debug('Got %s' % (data,))
         return data
@@ -111,7 +112,10 @@ def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False):
         url = url + OMDB_URL_TAIL
 
     data = getJSONData(url)
-    data['url'] = url
+    if data:
+        data['url'] = url
+    else:
+        return None
     return data
 
 def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
@@ -122,7 +126,10 @@ def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
         url = url + OMDB_URL_TAIL
 
     data = getJSONData(url)
-    data['url'] = url
+    if data:
+        data['url'] = url
+    else:
+        return None
     return data
 
 def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
