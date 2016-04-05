@@ -14,6 +14,7 @@ def getJSONData(url):
         url = url.replace(' ', '+')
         log.info('Getting json from %s' % (url,))
         resp = requests.get(url, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
         data = resp.json()
         log.debug('Got %s' % (data,))
         return data
@@ -71,10 +72,12 @@ def saveImageToDisk(url, imgName):
     if imgName:
         exists = os.path.isfile(IMAGE_PATH + imgName)
         if not exists:
-            image = urllib2.urlopen(url).read()
-            output = open(IMAGE_PATH + imgName, 'wb')
-            output.write(image)
-            output.close()
+            r = requests.get(url, stream=True, timeout=REQUEST_TIMEOUT)
+            r.raise_for_status()
+            if r.status_code == 200:
+                with open(IMAGE_PATH + imgName, 'wb') as f:
+                    for chunk in r.iter_content(1024):
+                        f.write(chunk)
         else:
             log.debug('File already exists. Skipping')
     else:

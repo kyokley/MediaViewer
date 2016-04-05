@@ -1,21 +1,23 @@
+from __future__ import absolute_import
 from django.http import HttpResponse
 from mysite.settings import (
                              WAITER_STATUS_URL,
+                             REQUEST_TIMEOUT,
                              )
 from mediaviewer.models.waiterstatus import WaiterStatus
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
 import json
-import urllib2
+import requests
 from mediaviewer.log import log
 
 def ajaxwaiterstatus(request):
     try:
-        url = urllib2.urlopen(WAITER_STATUS_URL, timeout=2)
-        data = json.load(url)
+        resp = requests.get(WAITER_STATUS_URL, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
 
-        log.debug(url.read())
         log.debug(data)
         if not data['status']:
             if not data['sql_status']:
@@ -26,7 +28,6 @@ def ajaxwaiterstatus(request):
             failureReason = ''
 
         response = {'status': data['status'], 'failureReason': failureReason}
-        url.close()
     except Exception, e:
         response = {'status': False, 'failureReason': 'Timedout'}
         print e
