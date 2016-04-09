@@ -190,3 +190,16 @@ ALTER TABLE path ALTER COLUMN skip SET DEFAULT FALSE;
 ALTER TABLE path ADD COLUMN lastcreatedfiledate timestamptz;
 UPDATE path SET lastcreatedfiledate = (SELECT max(datecreated) FROM file WHERE file.pathid = path.id);
 COMMIT;
+
+BEGIN;
+    ALTER TABLE path ADD COLUMN ismovie BOOLEAN NOT NULL DEFAULT FALSE;
+    UPDATE path SET ismovie = TRUE WHERE localpathstr = 'Movies' AND remotepathstr = 'Movies';
+COMMIT;
+
+BEGIN;
+    ALTER TABLE file DROP COLUMN ismovie;
+COMMIT;
+
+BEGIN;
+    ALTER TABLE usersettings ADD COLUMN auto_download BOOLEAN NOT NULL DEFAULT FALSE;
+COMMIT;

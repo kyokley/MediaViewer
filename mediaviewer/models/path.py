@@ -14,13 +14,13 @@ from django.utils.timezone import utc
 
 from mediaviewer.log import log
 
-MOVIE_PATH_ID = 57
 MOVIE = 'Movies'
 
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
     remotepathstr = models.TextField(blank=True)
     skip = models.BooleanField(blank=True)
+    is_movie = models.BooleanField(blank=False, null=False, db_column='ismovie')
     defaultScraper = models.ForeignKey('mediaviewer.FilenameScrapeFormat', null=True, blank=True, db_column='defaultscraperid')
     tvdb_id = models.TextField(null=True, blank=True)
     server = models.TextField(blank=False, null=False)
@@ -43,9 +43,13 @@ class Path(models.Model):
     def localPath(self):
         return self.localpathstr
 
+    localpath = localPath
+
     @property
     def remotePath(self):
         return self.remotepathstr
+
+    remotepath = remotePath
 
     @property
     def displayName(self):
@@ -60,8 +64,7 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFolders(cls):
-        moviePath = Path.objects.get(pk=MOVIE_PATH_ID)
-        refFiles = File.objects.exclude(path=moviePath).order_by('path').distinct('path').select_related('path')
+        refFiles = File.objects.filter(path__is_movie=False).order_by('path').distinct('path').select_related('path')
         paths = set([file.path for file in refFiles])
         pathDict = dict()
         for path in paths:
@@ -74,7 +77,7 @@ class Path(models.Model):
         return pathDict
 
     def isMovie(self):
-        return self.localpathstr == MOVIE and self.remotepathstr == MOVIE
+        return self.is_movie
 
     def isTVShow(self):
         return not self.isMovie()
@@ -173,6 +176,9 @@ class Path(models.Model):
         return len(self.unwatched_tv_shows_since_date(user, daysBack=daysBack))
 
     def number_of_unwatched_shows(self, user):
+        if not user:
+            return 0
+
         files = (File.objects.filter(path__localpathstr=self.localpathstr)
                              .filter(hide=False))
         file_count = files.count()

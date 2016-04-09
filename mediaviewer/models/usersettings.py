@@ -20,6 +20,7 @@ class UserSettings(models.Model):
     can_download = models.BooleanField(db_column='can_download', blank=False, null=False)
     site_theme = models.TextField(db_column='site_theme')
     default_sort = models.TextField(db_column='default_sort')
+    auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
 
     class Meta:
         app_label = 'mediaviewer'

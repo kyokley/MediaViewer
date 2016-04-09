@@ -64,18 +64,27 @@ urlpatterns = patterns('',
                        )
 
 if not IS_SYNCING:
-    from mediaviewer.api import viewset
-    router.register(r'downloadtoken', viewset.DownloadTokenViewSet)
+    from mediaviewer.api import (viewset,
+                                 path_viewset,
+                                 file_viewset)
+    router.register(r'downloadtoken', viewset.DownloadTokenViewSet, base_name='downloadtoken')
     router.register(r'downloadclick', viewset.DownloadClickViewSet)
-    router.register(r'unstreamablefile', viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
-    router.register(r'file', viewset.FileViewSet, base_name='file')
-    router.register(r'movie', viewset.MovieFileViewSet, base_name='movie')
-    router.register(r'path', viewset.PathViewSet)
+    router.register(r'unstreamablefile', file_viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
+    #router.register(r'file', file_viewset.FileViewSet, base_name='file')
+    router.register(r'movie', file_viewset.MovieFileViewSet, base_name='movie')
+    router.register(r'tv', file_viewset.TvFileViewSet, base_name='tv')
+    #router.register(r'path', viewset.PathViewSet, base_name='path')
+    router.register(r'tvpath', path_viewset.TvPathViewSet, base_name='tvpath')
+    router.register(r'moviepath', path_viewset.MoviePathViewSet, base_name='moviepath')
     router.register(r'datatransmission', viewset.DataTransmissionViewSet)
     router.register(r'error', viewset.ErrorViewSet)
     router.register(r'message', viewset.MessageViewSet)
     router.register(r'filenamescrapeformat', viewset.FilenameScrapeFormatViewSet)
+    router.register(r'posterfilebypath', viewset.PosterViewSetByPath)
+    router.register(r'posterfilebyfile', viewset.PosterViewSetByFile)
+    router.register(r'usercomment', viewset.UserCommentViewSet)
 
-    urlpatterns += [url(r'^api/', include(router.urls)),
+    urlpatterns += [url(r'^api/', include(router.urls, namespace='api')),
                     url(r'^api/inferscrapers/', csrf_exempt(viewset.InferScrapersView.as_view())),
+                    #url(r'^api/posterviewsetbypath/', csrf_exempt(viewset.PosterViewSetByPath.as_view())),
                     ]

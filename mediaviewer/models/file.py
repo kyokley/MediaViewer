@@ -52,13 +52,12 @@ class File(models.Model):
     imdb_id = models.TextField(db_column='imdb_id',
                                blank=True,
                                null=True)
-    hide = models.BooleanField(db_column='hide')
-    _ismovie = models.BooleanField(db_column='ismovie')
+    hide = models.BooleanField(db_column='hide', default=False)
     filenamescrapeformat = models.ForeignKey('mediaviewer.FilenameScrapeFormat',
                                              null=True,
                                              db_column='filenamescrapeformatid',
                                              blank=True)
-    streamable = models.BooleanField(db_column='streamable', null=False)
+    streamable = models.BooleanField(db_column='streamable', null=False, default=True)
     override_filename = models.TextField(blank=True)
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
@@ -66,6 +65,14 @@ class File(models.Model):
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'file'
+
+    def _get_pathid(self):
+        return self.path.id
+    def _set_pathid(self, val):
+        from mediaviewer.models.path import Path
+        path = Path.objects.get(pk=val)
+        self.path = path
+    pathid = property(fget=_get_pathid, fset=_set_pathid)
 
     def dateCreatedForSpan(self):
         return self.datecreated and self.datecreated.isoformat()
@@ -185,12 +192,7 @@ class File(models.Model):
     posterfile = property(fset=_posterfileset, fget=_posterfileget)
 
     def isMovie(self):
-        if self._ismovie is None:
-            from mediaviewer.models.path import MOVIE
-            self._ismovie = (self.path.localpathstr == MOVIE and
-                             self.path.remotepathstr == MOVIE)
-            self.save()
-        return self._ismovie
+        return self.path.is_movie
 
     def ismovie(self):
         return self.isMovie()
@@ -232,17 +234,13 @@ class File(models.Model):
 
     @classmethod
     def tvshows(cls):
-        from mediaviewer.models.path import MOVIE
         return (cls.objects
-                   .exclude(path__localpathstr=MOVIE)
-                   .exclude(path__remotepathstr=MOVIE))
+                   .filter(path__is_movie=False))
 
     @classmethod
     def movies(cls):
-        from mediaviewer.models.path import MOVIE
         return (cls.objects
-                   .filter(path__localpathstr=MOVIE)
-                   .filter(path__remotepathstr=MOVIE))
+                   .filter(path__is_movie=True))
 
     def usercomment(self, user):
         usercomment = (UserComment.objects
@@ -394,14 +392,3 @@ class File(models.Model):
             posterfile.delete()
         except:
             pass
-
-class MovieFile(File):
-    class Meta:
-        abstract = True
-
-    def __init__(self):
-        from mediaviewer.models.path import (Path,
-                                            MOVIE_PATH_ID,
-                                            )
-        moviePath = Path.objects.get(pk=MOVIE_PATH_ID)
-        self.path = moviePath

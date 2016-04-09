@@ -19,8 +19,8 @@ def ajaxwaiterstatus(request):
         data = resp.json()
 
         log.debug(data)
-        if not data['status']:
-            if not data['sql_status']:
+        if 'status' not in data or not data['status']:
+            if 'sql_status' not in data or not data['sql_status']:
                 failureReason = 'Expired SQL Connection'
             else:
                 failureReason = 'Bad Symlink'
