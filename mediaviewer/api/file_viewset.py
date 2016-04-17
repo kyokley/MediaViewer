@@ -37,7 +37,6 @@ class FileViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             self.validate_path(serializer)
-            return serializer
         else:
             raise Exception('Invalid serializer')
 

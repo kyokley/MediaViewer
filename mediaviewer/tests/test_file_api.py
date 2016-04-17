@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from mediaviewer.models.path import Path
 from mediaviewer.models.file import File
+from datetime import datetime
 
 class MovieFileViewSetTests(APITestCase):
     def setUp(self):
@@ -249,6 +250,8 @@ class TvFileViewSetTests(APITestCase):
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
         self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        updatedTvPath = Path.objects.get(pk=self.tvPath.id)
+        self.assertTrue(updatedTvPath.lastCreatedFileDate is not None)
 
     def test_create_tvfile_using_moviepath(self):
         self.data = {'filename': 'new file',
@@ -260,6 +263,8 @@ class TvFileViewSetTests(APITestCase):
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
         self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        updatedMoviePath = Path.objects.get(pk=self.moviePath.id)
+        self.assertTrue(updatedMoviePath.lastCreatedFileDate is None)
 
     def test_update_valid_tvfile(self):
         self.data = {'filename': 'new.tv.filename',
