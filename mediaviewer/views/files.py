@@ -74,7 +74,7 @@ def tvshowsummary(request):
     pathDict = Path.distinctShowFolders()
     pathSet = [path for name, path in pathDict.items()]
 
-    context = {'pathSet':pathSet}
+    context = {'pathSet': pathSet}
     context['header'] = generateHeader('tvshows', request)
     context['title'] = 'TV Shows'
     setSiteWideContext(context, request, includeMessages=True)

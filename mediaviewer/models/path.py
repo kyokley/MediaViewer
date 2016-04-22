@@ -26,6 +26,7 @@ class Path(models.Model):
     server = models.TextField(blank=False, null=False)
     defaultsearchstr = models.TextField(null=True, blank=True)
     imdb_id = models.TextField(null=True, blank=True)
+    override_display_name = models.TextField(null=True, blank=True, db_column='display_name')
     lastCreatedFileDate = models.DateTimeField(null=True, blank=True, db_column='lastcreatedfiledate')
 
     class Meta:
@@ -53,7 +54,7 @@ class Path(models.Model):
 
     @property
     def displayName(self):
-        return self.shortName.replace('.',' ').title()
+        return self.override_display_name or self.shortName.replace('.', ' ').title()
 
     def __unicode__(self):
         return 'id: %s r: %s l: %s' % (self.id, self.remotePath, self.localPath)
