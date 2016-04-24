@@ -95,7 +95,7 @@
                 {% if can_download %}
                     {% if waiterstatus %}
                         {% if file.finished %}
-                        <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Open</a></center></td>
+                        <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>
                         {% else %}
                             <td>No file</td>
                         {% endif %}
@@ -106,16 +106,16 @@
                 <td>
                 {% if file.usercomment %}
                     {% if file.usercomment.viewed %}
-                    <span class="hidden" name="hidden-{{ file.id }}">true</span><input name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{csrf_token}}', '{{file.id}}')" />
+                    <span class="hidden" name="hidden-{{ file.id }}">true</span><input name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{file.id}}')" />
                     {% else %}
-                        <span class="hidden" name="hidden-{{ file.id }}">false</span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{csrf_token}}', '{{file.id}}')" />
+                        <span class="hidden" name="hidden-{{ file.id }}">false</span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
                     {% endif %}
                 {% else %}
-                    <span class="hidden" name="hidden-{{ file.id }}">false</span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{csrf_token}}', '{{file.id}}')" />
+                    <span class="hidden" name="hidden-{{ file.id }}">false</span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
                 {% endif %}
                 <span id="saved-{{ file.id }}"></span>
                 </td>
-                <td><input class='report' name='report-{{ file.id }}' value='Report' type='button' onclick="reportButtonClick('{{file.id}}', '{{csrf_token}}')"/></td>
+                <td><input class='report' name='report-{{ file.id }}' value='Report' type='button' onclick="reportButtonClick('{{file.id}}')"/></td>
                 <td></td>
             </tr>
             {% endfor %}
@@ -140,7 +140,8 @@
 <script src="{% static "assets/mediaviewer.js" %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
-      preparePage($, '{{csrf_token}}');
+        csrf_token = '{{ csrf_token }}';
+      preparePage($);
         {% if view == 'movies' %}
             var sortOrder = [[1,1]];
         {% elif view == 'tvshows' or view == 'files' %}
@@ -158,9 +159,9 @@
         {% endif %}
         prepareTableSorter($, sortOrder);
 
-        prepareViewedCheckBoxes($, '{{ csrf_token }}');
+        prepareViewedCheckBoxes($);
 
-        prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+        prepareAjaxWaiterStatus($, '{{ is_staff }}');
 });
 
 </script>

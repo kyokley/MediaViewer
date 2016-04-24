@@ -156,10 +156,11 @@
   <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
   <script type="text/javascript">
   $(document).ready(function(){
-      preparePage($, '{{csrf_token}}');
+        csrf_token = '{{ csrf_token }}';
+      preparePage($);
       setHomeFormSubmit($);
-      prepareAjaxWaiterStatus($, '{{csrf_token}}', '{{ is_staff }}');
-      prepareScraperButton($, '{{csrf_token}}');
+      prepareAjaxWaiterStatus($, '{{ is_staff }}');
+      prepareScraperButton($);
 
   });
   </script>

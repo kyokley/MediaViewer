@@ -60,11 +60,11 @@
 <script src="{% static "assets/mediaviewer.js" %}"></script>
 <script type="text/javascript">
     $(document).ready(function(){
-
-      preparePage($, '{{csrf_token}}');
+      csrf_token = '{{ csrf_token }}';
+      preparePage($);
         prepareTableSorter($, [[1,1]]);
 
-        prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+        prepareAjaxWaiterStatus($, '{{ is_staff }}');
         populateUnwatchedBadges("/mediaviewer/api/tvpath/");
 });
 

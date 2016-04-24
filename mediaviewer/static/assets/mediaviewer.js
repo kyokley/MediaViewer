@@ -1,6 +1,7 @@
 var tableElement;
+var csrf_token;
 
-function bindAlertMessage($, token) {
+function bindAlertMessage($) {
     $(".alert").bind('closed.bs.alert', function() {
         $.ajax({
             url: '/mediaviewer/ajaxclosemessage/',
@@ -8,7 +9,7 @@ function bindAlertMessage($, token) {
         dataType: 'json',
         data: {
             messageid: this.id,
-        csrfmiddlewaretoken: token
+        csrfmiddlewaretoken: csrf_token
         },
         success: function(json){},
         error: function(xhr, errmsg, err){}
@@ -16,8 +17,8 @@ function bindAlertMessage($, token) {
     });
 }
 
-function preparePage($, token) {
-    bindAlertMessage($, token);
+function preparePage($) {
+    bindAlertMessage($);
 }
 
 function setHomeFormSubmit($) {
@@ -77,10 +78,10 @@ function prepareTableForRequests($){
     });
 }
 
-function prepareViewedCheckBoxes($, token){
+function prepareViewedCheckBoxes($){
 }
 
-function ajaxCheckBox(token, file_id){
+function ajaxCheckBox(file_id){
     var box = document.getElementsByName(file_id)[0];
     var checked = box.checked;
 
@@ -93,7 +94,7 @@ function ajaxCheckBox(token, file_id){
         data : {
             fileid : file_id,
             viewed : checked,
-            csrfmiddlewaretoken: token
+            csrfmiddlewaretoken: csrf_token
         },
         success : function(json) {
             if(json.errmsg !== ''){
@@ -114,7 +115,7 @@ function ajaxCheckBox(token, file_id){
     });
 }
 
-function prepareScraperButton($, token){
+function prepareScraperButton($){
     scrapeBtn = document.getElementById('scraper-btn');
     if(scrapeBtn === null){
         return;
@@ -126,7 +127,7 @@ function prepareScraperButton($, token){
             type : "POST",
             dataType: "json",
             data : {
-                csrfmiddlewaretoken: token
+                csrfmiddlewaretoken: csrf_token
             },
             success : function(json) {
                 if(json.errmsg !== ''){
@@ -143,17 +144,17 @@ function prepareScraperButton($, token){
     };
 }
 
-function prepareDownloadButtons($, token, waiterStatus){
+function prepareDownloadButtons($, waiterStatus){
 }
 
-function openDownloadWindow(id, token){
+function openDownloadWindow(id){
     $.ajax({
     url: '/mediaviewer/ajaxdownloadbutton/',
     type: 'POST',
     dataType: 'json',
     data: {
         fileid: id,
-        csrfmiddlewaretoken: token
+        csrfmiddlewaretoken: csrf_token
     },
     success: function(json){
         if(json.errmsg === ""){
@@ -167,13 +168,13 @@ function openDownloadWindow(id, token){
     });
 }
 
-function prepareAjaxWaiterStatus($, token, is_staffer){
+function prepareAjaxWaiterStatus($, is_staffer){
     $.ajax({
         url: '/mediaviewer/ajaxwaiterstatus/',
     type: 'POST',
     dataType: 'json',
     data: {
-        csrfmiddlewaretoken: token
+        csrfmiddlewaretoken: csrf_token
     },
     success: function(json){
         var statusLabel = document.getElementById('waiter-status');
@@ -189,7 +190,7 @@ function prepareAjaxWaiterStatus($, token, is_staffer){
             }
         }
 
-        prepareDownloadButtons($, token, json.status);
+        prepareDownloadButtons($, json.status);
     },
     error: function(xhr, errmsg, err){}
     });
@@ -204,17 +205,17 @@ function setFileDetailCheckboxes(viewed, hidden){
     }
 };
 
-function prepareVoteButton($, token){
+function prepareVoteButton($){
 }
 
-function callAjaxVote(name, token){
+function callAjaxVote(name){
     jQuery.ajax({
         url : "/mediaviewer/ajaxvote/",
         type : "POST",
         dataType: "json",
         data : {
             requestid : name,
-        csrfmiddlewaretoken: token
+        csrfmiddlewaretoken: csrf_token
         },
         success : function(json) {
             var cell = document.getElementById('vote-' + json.requestid);
@@ -228,17 +229,17 @@ function callAjaxVote(name, token){
     });
 }
 
-function prepareDoneButton($, token){
+function prepareDoneButton($){
 }
 
-function callDoneButton(name, token){
+function callDoneButton(name){
     $.ajax({
         url : "/mediaviewer/ajaxdone/",
     type : "POST",
     dataType: "json",
     data : {
         requestid : name,
-    csrfmiddlewaretoken: token
+    csrfmiddlewaretoken: csrf_token
     },
     success : function(json) {
         if(json.errmsg === ""){
@@ -255,14 +256,14 @@ function callDoneButton(name, token){
     });
 }
 
-function callGiveUpButton(name, token){
+function callGiveUpButton(name){
     $.ajax({
         url : "/mediaviewer/ajaxgiveup/",
     type : "POST",
     dataType: "json",
     data : {
         requestid : name,
-    csrfmiddlewaretoken: token
+    csrfmiddlewaretoken: csrf_token
     },
     success : function(json) {
         if(json.errmsg === ""){
@@ -287,14 +288,14 @@ function setSettingsRadioButtons(ip_format, local_ip, bangup_ip){
     }
 }
 
-function reportButtonClick(id, token){
+function reportButtonClick(id){
     jQuery.ajax({
     url : "/mediaviewer/ajaxreport/",
     type : "POST",
     dataType: "json",
     data : {
         reportid : id,
-        csrfmiddlewaretoken: token
+        csrfmiddlewaretoken: csrf_token
     },
     success : function(json) {
         if(json.errmsg !== ''){

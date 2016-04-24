@@ -77,7 +77,7 @@
             <div class="row">
                 <div class="col-xs-2"></div>
                 <div class="col-xs-2">
-                    <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}', '{{csrf_token}}')">Open</a>
+                    <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank onclick="openDownloadWindow('{{file.id}}')">Open</a>
                 </div>
                 <div class="col-xs-8"></div>
             </div>
@@ -208,8 +208,9 @@
 <script src="{% static "assets/mediaviewer.js" %}"></script>
 <script type="text/javascript">
 
-preparePage($, '{{csrf_token}}');
 $(document).ready(function(){
+    csrf_token = '{{ csrf_token }}';
+    preparePage($);
     setFileDetailCheckboxes('{{ viewed }}', '{{ file.hide }}');
     var input = document.getElementById('checkbox-input');
     var viewedInput = document.getElementById('toggle-viewed')
@@ -227,7 +228,7 @@ $(document).ready(function(){
         });
     }
 
-    prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+    prepareAjaxWaiterStatus($, '{{ is_staff }}');
 
 });
 </script>

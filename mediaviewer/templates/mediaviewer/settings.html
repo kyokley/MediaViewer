@@ -178,7 +178,8 @@
     <script type="text/javascript">
 
         $(document).ready(function(){
-              preparePage($, '{{csrf_token}}');
+            csrf_token = '{{ csrf_token }}';
+              preparePage($);
               setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
 
               {% if site_theme == 'default' %}
@@ -214,7 +215,7 @@
                     }
                 });
 
-            prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+            prepareAjaxWaiterStatus($, '{{ is_staff }}');
         });
 </script>
 {% endblock %}

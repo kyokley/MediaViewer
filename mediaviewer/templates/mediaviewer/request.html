@@ -53,14 +53,14 @@
                         <td><center>{{ item.name }}</center></td>
                         <td><center><div id='numberOfVotes-{{ item.id }}'>{{ item.numberOfVotes }}</div></center></td>
                         {% if item.canVote %}
-                        <td><center><input class='btn btn-info vote-btn' id="vote-{{ item.id }}" name="{{ item.id }}" type="button" value="Vote" onclick="callAjaxVote('{{item.id}}', '{{csrf_token}}')"/></center></td>
+                        <td><center><input class='btn btn-info vote-btn' id="vote-{{ item.id }}" name="{{ item.id }}" type="button" value="Vote" onclick="callAjaxVote('{{item.id}}')"/></center></td>
                         {% else %}
                         <td><center>Thanks for voting!</center></td>
                         {% endif %}
                         {% if user.is_staff %}
                             <td><center>{{ item.user.username }}</center></td>
-                            <td><center><input class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" type="button" value="Done" onclick="callDoneButton('{{item.id}}', '{{csrf_token}}')" /></center></td>
-                            <td><center><input class='btn btn-info done-btn' id="giveup-{{ item.id }}" name="{{ item.id }}" type="button" value="Give up" onclick="callGiveUpButton('{{item.id}}', '{{csrf_token}}')" /></center></td>
+                            <td><center><input class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" type="button" value="Done" onclick="callDoneButton('{{item.id}}')" /></center></td>
+                            <td><center><input class='btn btn-info done-btn' id="giveup-{{ item.id }}" name="{{ item.id }}" type="button" value="Give up" onclick="callGiveUpButton('{{item.id}}')" /></center></td>
                         {% endif %}
                         <td></td>
                     </tr>
@@ -85,14 +85,15 @@
     <script src="{% static "assets/mediaviewer.js" %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-          preparePage($, '{{csrf_token}}');
+            csrf_token = '{{ csrf_token }}';
+          preparePage($);
             prepareTableForRequests($);
 
-            prepareVoteButton($, '{{csrf_token }}');
+            prepareVoteButton($);
 
-            prepareDoneButton($, '{{csrf_token }}');
+            prepareDoneButton($);
 
-            prepareAjaxWaiterStatus($, '{{ csrf_token }}', '{{ is_staff }}');
+            prepareAjaxWaiterStatus($, '{{ is_staff }}');
 });
     </script>
 {% endblock %}
