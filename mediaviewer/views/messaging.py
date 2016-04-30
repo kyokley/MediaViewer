@@ -38,7 +38,7 @@ def ajaxclosemessage(request):
         user = request.user
 
         if not user.is_authenticated():
-            response = {'errmsg': 'User not authenticated'}
+            response = {'errmsg': 'User not authenticated. Refresh and try again.'}
         elif message and user:
             message.sent = True
             message.save()

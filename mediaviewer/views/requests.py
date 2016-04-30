@@ -74,7 +74,7 @@ def ajaxvote(request):
 
     user = request.user
     if not user.is_authenticated():
-        raise Exception("User not authenticated")
+        raise Exception("User not authenticated. Refresh and try again.")
     if not user:
         raise
 
@@ -99,7 +99,7 @@ def ajaxdone(request):
 
     user = request.user
     if not user.is_authenticated():
-        response['errmsg'] = 'User not authenticated'
+        response['errmsg'] = 'User not authenticated. Refresh and try again.'
         return HttpResponse(json.dumps(response), mimetype='application/javascript')
     elif not user or not user.is_staff:
         response['errmsg'] = 'User is not a staffer'
@@ -135,7 +135,7 @@ def ajaxgiveup(request):
 
     user = request.user
     if not user.is_authenticated():
-        response['errmsg'] = 'User not authenticated'
+        response['errmsg'] = 'User not authenticated. Refresh and try again.'
         return HttpResponse(json.dumps(response), mimetype='application/javascript')
     elif not user or not user.is_staff:
         response['errmsg'] = 'User is not a staffer'
