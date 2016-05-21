@@ -22,10 +22,8 @@
         <link href="{% static "assets/home.css" %}" rel="stylesheet">
         <link href="{% static "DataTables-1.10.4/media/css/jquery.dataTables.css" %}" rel="stylesheet">
         <link href="{% static "assets/dataTables.responsive.css" %}" rel="stylesheet">
-        {% if site_theme == 'default' %}
-            <link href="{% static "bootstrap-dist/css/bootstrap.min.css" %}" rel="stylesheet">
-            <link href="{% static "bootstrap-dist/css/bootstrap-theme.min.css" %}" rel="stylesheet">
-        {% elif site_theme == 'darkly' %}
+
+        {% if site_theme == 'darkly' %}
             <link href="{% static "assets/css/darkly.css" %}" rel="stylesheet">
         {% elif site_theme == 'united' %}
             <link href="{% static "assets/css/united.css" %}" rel="stylesheet">
@@ -33,6 +31,9 @@
             <link href="{% static "assets/css/journal.css" %}" rel="stylesheet">
         {% elif site_theme == 'readable' %}
             <link href="{% static "assets/css/readable.css" %}" rel="stylesheet">
+        {% else %}
+            <link href="{% static "bootstrap-dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "bootstrap-dist/css/bootstrap-theme.min.css" %}" rel="stylesheet">
         {% endif %}
     {% endblock %}
 

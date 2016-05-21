@@ -35,6 +35,9 @@
                 <input type="hidden" name="username" value="" id="username" />
                 <input type="password" id="password-textbox" class="form-control" placeholder="Password" required>
                 <input type="hidden" name="password" value="" id="password" />
+                <p style="">
+                    <a href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
+                </p>
                 <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
                 <input type="hidden" name="next" value="{{ next }}" id="next" />
               </form>

@@ -18,6 +18,7 @@ from mediaviewer.views import (home,
                                messaging,
                                requests,
                                waiterstatus,
+                               password_reset,
                                )
 
 router = routers.DefaultRouter()
@@ -61,6 +62,13 @@ urlpatterns = patterns('',
                        url(r'^ajaxclosemessage/', messaging.ajaxclosemessage, name='ajaxclosemessage'),
                        url(r'^ajaxreport/', files.ajaxreport, name='ajaxreport'),
                        url(r'^ajaxrunscraper/', home.ajaxrunscraper, name='ajaxrunscraper'),
+                       url(r'^user/reset/confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
+                           password_reset.reset_confirm,
+                           {'post_reset_redirect': '/login'},
+                           name='reset_confirm'),
+                       url(r'^user/reset/$',
+                           password_reset.reset,
+                           name='password_reset'),
                        )
 
 if not IS_SYNCING:

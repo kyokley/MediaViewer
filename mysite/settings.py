@@ -211,6 +211,16 @@ IMAGE_PATH = 'mediaviewer/static/media/'
 
 REQUEST_TIMEOUT = 3
 
+# Run the python debugging smtp server with the following
+# python -m smtpd -n -c DebuggingServer localhost:1025
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+EMAIL_FROM_ADDR = DEFAULT_FROM_EMAIL = 'testing@example.com'
+
+
 try:
     from local_settings import *
 except ImportError:
