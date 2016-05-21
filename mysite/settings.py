@@ -124,7 +124,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'axes',
@@ -196,7 +196,7 @@ WAITER_HEAD = 'http://'
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1/waiter/dir/'
 LOCAL_WAITER_IP_FORMAT_TVSHOWS = BANGUP_WAITER_IP_FORMAT_TVSHOWS = '127.0.0.1/waiter/file/'
 
-WAITER_STATUS_URL = 'http://127.0.0.1/waiter/status' # Production settings
+WAITER_STATUS_URL = 'http://127.0.0.1/waiter/status'
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
