@@ -1,3 +1,4 @@
+from django.core.urlresolvers import reverse
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
 from mediaviewer.views.home import (generateHeader,
@@ -29,7 +30,7 @@ def signin(request):
             password = request.POST['password']
             user = authenticate(username=username, password=password)
             if user is None:
-                raise Exception('Invalid User')
+                raise Exception('Incorrect username or password!')
             else:
                 if user.is_active:
                     login(request, user)
@@ -45,7 +46,10 @@ def signin(request):
         else:
             context['error_message'] = 'Incorrect username or password!'
 
-    if user and request.POST.has_key('next'):
-        return HttpResponseRedirect(request.POST['next'])
+    if user:
+        if not user.email:
+            return HttpResponseRedirect(reverse('mediaviewer:settings'))
+        elif request.POST.has_key('next'):
+            return HttpResponseRedirect(request.POST['next'])
 
     return render(request, 'mediaviewer/signin.html', context)

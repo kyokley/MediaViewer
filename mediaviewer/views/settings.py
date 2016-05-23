@@ -22,13 +22,20 @@ def settings(request):
               'greeting': siteGreeting and siteGreeting.greeting or "Check out the new downloads!",
             }
     context['header'] = generateHeader('settings', request)
-    settings = request.user.settings()
+    user = request.user
+    settings = user.settings()
     if settings:
         context['ip_format'] = settings.ip_format
     else:
-        context['ip_format'] = LOCAL_IP
+        context['ip_format'] = BANGUP_IP
     context['title'] = 'Settings'
     context['auto_download'] = settings.auto_download
+
+    if not user.email:
+        context['display_missing_email_modal'] = True
+    else:
+        context['display_missing_email_modal'] = False
+
     setSiteWideContext(context, request, includeMessages=True)
 
     return render(request, 'mediaviewer/settings.html', context)

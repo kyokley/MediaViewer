@@ -7,6 +7,7 @@
 {% include css %}
 
 <div class="container">
+
         <div class="jumbotron">
             {% block jumbotron %}
             <h1>Settings</h1>
@@ -16,7 +17,25 @@
         {% include messages %}
 
         {% block main %}
-        <div class="well well-sm">
+
+<div class="modal" id="missingEmailModal" tabindex="-1" role="dialog" aria-labelledby="missingEmailModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="missingEmailModalLabel">Missing Email Address</h4>
+      </div>
+      <div class="modal-body">
+          Looks like your email address is missing. You should enter an address on this page before continuing.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="well well-sm">
     <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
         {% csrf_token %}
             <h2>Account Settings</h2>
@@ -182,9 +201,7 @@
               preparePage($);
               setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
 
-              {% if site_theme == 'default' %}
-                  jQuery('#default_site_theme').prop('checked', 'checked');
-              {% elif site_theme == 'darkly' %}
+              {% if site_theme == 'darkly' %}
                   jQuery('#darkly_site_theme').prop('checked', 'checked');
               {% elif site_theme == 'united' %}
                   jQuery('#united_site_theme').prop('checked', 'checked');
@@ -192,6 +209,8 @@
                   jQuery('#journal_site_theme').prop('checked', 'checked');
               {% elif site_theme == 'readable' %}
                   jQuery('#readable_site_theme').prop('checked', 'checked');
+              {% else %}
+                  jQuery('#default_site_theme').prop('checked', 'checked');
               {% endif %}
 
               {% if default_sort == 'filename_sort' %}
@@ -216,6 +235,10 @@
                 });
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
+
+            {% if display_missing_email_modal %}
+                jQuery('#missingEmailModal').modal('show');
+            {% endif %}
         });
 </script>
 {% endblock %}
