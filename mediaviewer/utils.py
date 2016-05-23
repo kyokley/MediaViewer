@@ -10,11 +10,16 @@ from binascii import hexlify
 from functools import wraps
 from django.http import HttpResponse
 
-from mysite.settings import LOG_ACCESS_TIMINGS
-from mysite.settings import EMAIL_FROM_ADDR
+from mysite.settings import (LOG_ACCESS_TIMINGS,
+                             EMAIL_FROM_ADDR,
+                             EMAIL_HOST,
+                             EMAIL_PORT,
+                             BYPASS_SMTPD_CHECK,
+                             )
 
 import os
 import json
+import telnetlib
 
 from mediaviewer.log import log
 
@@ -117,3 +122,9 @@ def sendMail(to_addr, subject, text, from_addr=EMAIL_FROM_ADDR, files=None, serv
     smtp = smtplib.SMTP(server)
     smtp.sendmail(from_addr, to_addr, msg.as_string())
     smtp.close()
+
+def checkSMTPServer():
+    if not BYPASS_SMTPD_CHECK:
+        smtp_server = telnetlib.Telnet(host=EMAIL_HOST,
+                                       port=EMAIL_PORT)
+        smtp_server.close()

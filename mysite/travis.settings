@@ -27,3 +27,5 @@ INSTALLED_APPS = (
     'mediaviewer.models',
     'mediaviewer.views',
 )
+
+BYPASS_SMTPD_CHECK = True
