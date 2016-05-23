@@ -40,6 +40,12 @@
         {% csrf_token %}
             <h2>Account Settings</h2>
             <ul>
+                <label>Email Address:</label>
+                <div class="input">
+                    <input type="text" name="email_field" placeholder="Email" id="email_field" value="{{ email }}"/>
+                </div>
+            </ul>
+            <ul>
                 <label>Site Theme:</label>
                 <div class="input">
                     <ul class="inputs-list">

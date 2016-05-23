@@ -31,6 +31,7 @@ def settings(request):
     context['title'] = 'Settings'
     context['auto_download'] = settings.auto_download
 
+    context['email'] = user.email
     if not user.email:
         context['display_missing_email_modal'] = True
     else:
@@ -61,7 +62,8 @@ def submitsettings(request):
     else:
         auto_download = auto_download == 'true'
 
-    settings = request.user.settings()
+    user = request.user
+    settings = user.settings()
     if not settings:
         settings = UserSettings()
         settings.datecreated = dateObj.utcnow().replace(tzinfo=utc)
@@ -74,6 +76,7 @@ def submitsettings(request):
     settings.auto_download = auto_download
     settings.default_sort = default_sort
     settings.site_theme = site_theme
+    user.email = request.POST.get('email_field', '')
     context['site_theme'] = settings.site_theme
     context['default_sort'] = settings.default_sort
 
@@ -81,6 +84,7 @@ def submitsettings(request):
         settings.dateedited = dateObj.utcnow().replace(tzinfo=utc)
 
     settings.save()
+    user.save()
     return render(request, 'mediaviewer/settingsresults.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
