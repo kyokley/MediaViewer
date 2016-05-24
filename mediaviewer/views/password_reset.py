@@ -18,7 +18,7 @@ def reset_confirm(request, uidb64=None, token=None):
 def reset(request):
     if request.method == 'POST' and request.POST['email']:
         email = request.POST['email']
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email__iexact=email).first()
         if not user:
             return render(request, 'mediaviewer/password_reset_no_email.html', {'email': email})
 
