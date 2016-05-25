@@ -38,3 +38,14 @@ def reset_complete(request):
     return password_reset_complete(request,
                                    template_name='mediaviewer/password_reset_complete.html',
                                    )
+
+def change_password(request):
+    context = {}
+    return render(request,
+                  'mediaviewer/change_password.html',
+                  context)
+
+def change_password_submit(request):
+    return render(request,
+                  'mediaviewer/change_password_submit.html',
+                  {})

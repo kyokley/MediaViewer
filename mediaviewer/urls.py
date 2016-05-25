@@ -74,6 +74,12 @@ urlpatterns = patterns('',
                        url(r'^user/reset/complete$',
                            password_reset.reset_complete,
                            name='password_reset_complete'),
+                       url(r'^user/change_password/$',
+                           password_reset.change_password,
+                           name='change_password'),
+                       url(r'^user/change_password_submit/$',
+                           password_reset.change_password_submit,
+                           name='change_password_submit'),
                        )
 
 if not IS_SYNCING:

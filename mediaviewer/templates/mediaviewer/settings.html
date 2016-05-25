@@ -36,6 +36,14 @@
 </div>
 
     <div class="well well-sm">
+        <h2>Change Password</h2>
+        <ul>
+            <div class="input">
+                <a href='/mediaviewer/user/change_password/' id='change_password_btn' name='change_password_btn' class="btn btn-info"/>Change Password</a>
+            </div>
+        </ul>
+    </div>
+    <div class="well well-sm">
     <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
         {% csrf_token %}
             <h2>Account Settings</h2>
