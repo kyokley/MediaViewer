@@ -41,6 +41,7 @@ class UserSettings(models.Model):
                         confirm_new_password):
         if (user.check_password(old_password) and
                 new_password == confirm_new_password):
+            # Add additional password complexity checks here
             user.set_password(new_password)
             return True
         return False
