@@ -34,4 +34,15 @@ class UserSettings(models.Model):
         q = cls.objects.filter(user=user).only()
         return q and q[0] or None
 
+    @staticmethod
+    def change_password(user,
+                        old_password,
+                        new_password,
+                        confirm_new_password):
+        if (user.check_password(old_password) and
+                new_password == confirm_new_password):
+            user.set_password(new_password)
+            return True
+        return False
+
 setattr(User, 'settings', lambda x: UserSettings.getSettings(x))
