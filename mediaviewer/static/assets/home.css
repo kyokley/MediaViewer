@@ -115,3 +115,6 @@ body{
     vertical-align: middle;
     float: none;
 }
+.form-control.email-field {
+    width: 50%;
+}
