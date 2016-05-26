@@ -72,3 +72,4 @@ def change_user_password(user,
     if not _is_long_enough_validator(new_password):
         raise InvalidPasswordException('Password is too weak. Valid passwords must be at least %s characters long.' % MINIMUM_PASSWORD_LENGTH)
     user.set_password(new_password)
+    user.save()
