@@ -7,7 +7,7 @@ from django.contrib.auth.views import (password_reset,
                                        )
 from django.contrib.auth.models import User
 from mediaviewer.models.usersettings import change_user_password, InvalidPasswordException
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext, generateHeader
 
 def reset_confirm(request, uidb64=None, token=None):
     return password_reset_confirm(request,
@@ -44,6 +44,7 @@ def reset_complete(request):
 def change_password(request):
     context = {'err': ''}
     setSiteWideContext(context, request)
+    context['header'] = generateHeader('change_password', request)
     return render(request,
                   'mediaviewer/change_password.html',
                   context)
@@ -55,6 +56,8 @@ def change_password_submit(request):
 
     context = {}
     template = 'mediaviewer/change_password_submit.html'
+
+    context['header'] = generateHeader('change_password_submit', request)
 
     try:
         change_user_password(request.user,
