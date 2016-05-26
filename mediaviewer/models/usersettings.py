@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from mysite.settings import MINIMUM_PASSWORD_LENGTH
 import re
 
 LOCAL_IP = 'local_ip'
@@ -43,23 +44,31 @@ class UserSettings(models.Model):
 
 setattr(User, 'settings', lambda x: UserSettings.getSettings(x))
 
-def has_number_validator(val):
+def _has_number_validator(val):
     return bool(NUMBER_REGEX.search(val))
 
-def has_char_validator(val):
+def _has_char_validator(val):
     return bool(CHAR_REGEX.search(val))
+
+def _is_long_enough_validator(val):
+    return len(val) >= MINIMUM_PASSWORD_LENGTH
 
 def change_user_password(user,
                          old_password,
                          new_password,
                          confirm_new_password):
-    if (user.check_password(old_password) and
-            new_password == confirm_new_password):
+    if not user.check_password(old_password):
+        raise InvalidPasswordException('Incorrect password')
 
-        if (has_number_validator(new_password) and
-                has_char_validator(new_password)):
-            user.set_password(new_password)
-        else:
-            raise InvalidPasswordException('Password is too weak')
-        return True
-    return False
+    if new_password != confirm_new_password:
+        raise InvalidPasswordException('New passwords do not match')
+
+    if not _has_number_validator(new_password):
+        raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one numeric character.')
+
+    if not _has_char_validator(new_password):
+        raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one alphabetic character.')
+
+    if not _is_long_enough_validator(new_password):
+        raise InvalidPasswordException('Password is too weak. Valid passwords must be at least %s characters long.' % MINIMUM_PASSWORD_LENGTH)
+    user.set_password(new_password)
