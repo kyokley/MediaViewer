@@ -6,6 +6,7 @@ from django.contrib.auth.views import (password_reset,
                                        password_reset_complete,
                                        )
 from django.contrib.auth.models import User
+from mediaviewer.models.usersettings import change_user_password, InvalidPasswordException
 
 def reset_confirm(request, uidb64=None, token=None):
     return password_reset_confirm(request,
@@ -46,6 +47,18 @@ def change_password(request):
                   context)
 
 def change_password_submit(request):
+    currentPassword = request.POST['currentPassword']
+    newPassword = request.POST['newPassword']
+    confirmNewPassword = request.POST['confirmNewPassword']
+
+    try:
+        result = change_user_password(request.user,
+                                      currentPassword,
+                                      newPassword,
+                                      confirmNewPassword)
+    except InvalidPasswordException:
+        pass
+
     return render(request,
                   'mediaviewer/change_password_submit.html',
                   {})

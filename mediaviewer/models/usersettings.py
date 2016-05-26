@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import re
 
 LOCAL_IP = 'local_ip'
 BANGUP_IP = 'bangup'
@@ -11,6 +12,12 @@ READABLE_SITE_THEME = 'readable'
 
 TIMESTAMP_SORT = 'timestamp_sort'
 FILENAME_SORT = 'filename_sort'
+
+NUMBER_REGEX = re.compile(r'[0-9]')
+CHAR_REGEX = re.compile(r'[a-zA-Z]')
+
+class InvalidPasswordException(Exception):
+    pass
 
 class UserSettings(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
@@ -34,16 +41,25 @@ class UserSettings(models.Model):
         q = cls.objects.filter(user=user).only()
         return q and q[0] or None
 
-    @staticmethod
-    def change_password(user,
-                        old_password,
-                        new_password,
-                        confirm_new_password):
-        if (user.check_password(old_password) and
-                new_password == confirm_new_password):
-            # Add additional password complexity checks here
-            user.set_password(new_password)
-            return True
-        return False
-
 setattr(User, 'settings', lambda x: UserSettings.getSettings(x))
+
+def has_number_validator(val):
+    return bool(NUMBER_REGEX.search(val))
+
+def has_char_validator(val):
+    return bool(CHAR_REGEX.search(val))
+
+def change_user_password(user,
+                         old_password,
+                         new_password,
+                         confirm_new_password):
+    if (user.check_password(old_password) and
+            new_password == confirm_new_password):
+
+        if (has_number_validator(new_password) and
+                has_char_validator(new_password)):
+            user.set_password(new_password)
+        else:
+            raise InvalidPasswordException('Password is too weak')
+        return True
+    return False
