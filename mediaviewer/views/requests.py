@@ -12,12 +12,13 @@ from django.utils.timezone import utc
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 import json
 from mediaviewer import interjections
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def requests(request):
     items = Request.objects.filter(done=False)
@@ -33,6 +34,7 @@ def requests(request):
     return render(request, 'mediaviewer/request.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def addrequests(request):
     name = request.POST['newrequest']

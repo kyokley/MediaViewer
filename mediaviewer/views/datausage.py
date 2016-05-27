@@ -2,9 +2,10 @@ from django.contrib.auth.decorators import login_required
 from mediaviewer.models.datatransmission import DataTransmission
 from mediaviewer.views.home import generateHeader, setSiteWideContext
 from django.shortcuts import render
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def datausage(request, items):
     items = int(items)

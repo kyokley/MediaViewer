@@ -12,13 +12,14 @@ from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 import json
 import re
 ID_REGEX = re.compile('\d+')
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def files(request, items):
     user = request.user
@@ -44,6 +45,7 @@ def files(request, items):
     return render(request, 'mediaviewer/files.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def movies(request, items):
     user = request.user
@@ -69,6 +71,7 @@ def movies(request, items):
     return render(request, 'mediaviewer/files.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def tvshowsummary(request):
     pathDict = Path.distinctShowFolders()
@@ -81,6 +84,7 @@ def tvshowsummary(request):
     return render(request, 'mediaviewer/tvsummary.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def tvshows(request, pathid):
     user = request.user

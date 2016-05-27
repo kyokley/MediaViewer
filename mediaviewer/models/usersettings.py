@@ -64,6 +64,9 @@ def change_user_password(user,
     if new_password != confirm_new_password:
         raise InvalidPasswordException('New passwords do not match')
 
+    if old_password == new_password:
+        raise InvalidPasswordException('New and old passwords must be different')
+
     if not _has_number_validator(new_password):
         raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one numeric character.')
 

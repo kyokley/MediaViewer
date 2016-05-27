@@ -4,13 +4,14 @@ from mediaviewer.views.home import generateHeader, setSiteWideContext
 from mediaviewer.models.message import Message
 from django.shortcuts import render
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 import json
 import re
 ID_REGEX = re.compile('\d+')
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def submitsitewidemessage(request):
     user = request.user

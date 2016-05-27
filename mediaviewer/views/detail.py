@@ -9,13 +9,14 @@ from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
                                              DEFAULT_SITE_THEME,
                                              )
-from mediaviewer.utils import logAccessInfo, humansize
+from mediaviewer.utils import logAccessInfo, humansize, check_force_password_change
 from django.shortcuts import render, get_object_or_404
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 import json
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def filesdetail(request, file_id):
     user = request.user
@@ -50,6 +51,7 @@ def filesdetail(request, file_id):
     return render(request, 'mediaviewer/filesdetail.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def pathsdetail(request, path_id):
     path = Path.objects.get(pk=path_id)

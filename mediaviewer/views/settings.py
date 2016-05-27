@@ -10,9 +10,10 @@ from mediaviewer.views.home import generateHeader, setSiteWideContext
 from django.shortcuts import render
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def settings(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
@@ -42,6 +43,7 @@ def settings(request):
     return render(request, 'mediaviewer/settings.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def submitsettings(request):
     context = {}
@@ -88,6 +90,7 @@ def submitsettings(request):
     return render(request, 'mediaviewer/settingsresults.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def submitsitesettings(request):
     user = request.user

@@ -11,9 +11,10 @@ from mediaviewer.models.usersettings import (
                                       )
 from django.core.urlresolvers import reverse
 from mediaviewer.views.home import generateHeader, setSiteWideContext
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def comment(request, file_id):
     file = get_object_or_404(File, pk=file_id)
@@ -68,6 +69,7 @@ def comment(request, file_id):
         return HttpResponseRedirect(reverse('mediaviewer:results', args=(file.id,)))
 
 @login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
 @logAccessInfo
 def results(request, file_id):
     file = File.objects.get(pk=file_id)
