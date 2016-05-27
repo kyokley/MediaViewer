@@ -8,7 +8,7 @@ from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.waiterstatus import WaiterStatus
 from django.shortcuts import render
 from mediaviewer.models.file import File
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, check_force_password_change
 from django.utils.safestring import mark_safe
 from mysite.settings import DEBUG
 
@@ -37,6 +37,7 @@ def setSiteWideContext(context, request, includeMessages=False):
     context['is_staff'] = user.is_staff and 'true' or 'false'
     getLastWaiterStatus(context)
 
+@check_force_password_change
 @logAccessInfo
 def home(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()

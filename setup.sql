@@ -207,3 +207,7 @@ COMMIT;
 BEGIN;
     ALTER TABLE path ADD COLUMN display_name TEXT;
 COMMIT;
+
+BEGIN;
+    ALTER TABLE usersettings ADD COLUMN force_password_change BOOLEAN NOT NULL DEFAULT FALSE;
+COMMIT;

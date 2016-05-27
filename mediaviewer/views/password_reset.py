@@ -42,7 +42,8 @@ def reset_complete(request):
                                    )
 
 def change_password(request):
-    context = {'err': ''}
+    context = {'err': '',
+               'force_change': request.user.settings().force_password_change}
     setSiteWideContext(context, request)
     context['header'] = generateHeader('change_password', request)
     return render(request,

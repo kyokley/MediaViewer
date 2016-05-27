@@ -29,6 +29,7 @@ class UserSettings(models.Model):
     site_theme = models.TextField(db_column='site_theme')
     default_sort = models.TextField(db_column='default_sort')
     auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
+    force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -72,4 +73,7 @@ def change_user_password(user,
     if not _is_long_enough_validator(new_password):
         raise InvalidPasswordException('Password is too weak. Valid passwords must be at least %s characters long.' % MINIMUM_PASSWORD_LENGTH)
     user.set_password(new_password)
+    settings = user.settings()
+    settings.force_password_change = False
+    settings.save()
     user.save()
