@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from mediaviewer.models.path import Path
 from mediaviewer.models.file import File
-from datetime import datetime
 
 class MovieFileViewSetTests(APITestCase):
     def setUp(self):
