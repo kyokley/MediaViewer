@@ -38,7 +38,7 @@ def settings(request):
     else:
         context['display_missing_email_modal'] = False
 
-    setSiteWideContext(context, request, includeMessages=True)
+    setSiteWideContext(context, request, includeMessages=False)
 
     return render(request, 'mediaviewer/settings.html', context)
 
