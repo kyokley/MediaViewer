@@ -47,7 +47,8 @@ def signin(request):
             context['error_message'] = 'Incorrect username or password!'
 
     if user:
-        if not user.email:
+        settings = user.settings()
+        if not user.email or settings.force_password_change:
             return HttpResponseRedirect(reverse('mediaviewer:settings'))
         elif request.POST.has_key('next'):
             return HttpResponseRedirect(request.POST['next'])
