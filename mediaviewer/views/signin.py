@@ -36,10 +36,9 @@ def signin(request):
                     login(request, user)
                     context['loggedin'] = True
                     context['user'] = request.user
-                    le = LoginEvent()
-                    le.user = request.user
-                    le.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-                    le.save()
+                    LoginEvent.new(request.user,
+                                   dateObj.utcnow().replace(tzinfo=utc),
+                                   )
     except Exception, e:
         if DEBUG:
             context['error_message'] = str(e)

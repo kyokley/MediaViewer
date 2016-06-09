@@ -1,3 +1,4 @@
+from mysite.settings import MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS
 from django.db import models
 
 class LoginEvent(models.Model):
@@ -13,3 +14,14 @@ class LoginEvent(models.Model):
                                           self.user.username,
                                           self.datecreated)
 
+    @classmethod
+    def new(cls, user, datecreated):
+        le = cls()
+        le.user = user
+        le.datecreated = datecreated
+        le.save()
+        number_of_events = cls.objects.count()
+        if number_of_events > MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS:
+            oldest_event = cls.objects.order_by('id').first()
+            if oldest_event:
+                oldest_event.delete()
