@@ -3,6 +3,9 @@ from datetime import timedelta
 from datetime import datetime as dateObj
 import pytz
 from mediaviewer.utils import getSomewhatUniqueID
+from mediaviewer.models.usersettings import DEFAULT_SITE_THEME
+from mysite.settings import MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
+from django.utils.timezone import utc
 
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
@@ -37,3 +40,28 @@ class DownloadToken(models.Model):
         refDate = self.datecreated + timedelta(hours=3)
         return refDate > dateObj.now(pytz.timezone('US/Central'))
 
+    @classmethod
+    def new(cls,
+            user,
+            file,
+            datecreated=dateObj.utcnow().replace(tzinfo=utc),
+            ):
+        dt = cls()
+        dt.user = user
+        dt.filename = file.filename
+        dt.path = file.path.localpathstr
+        dt.ismovie = file.isMovie()
+        dt.datecreated = datecreated
+
+        settings = user.settings()
+        dt.waitertheme = settings and settings.site_theme or DEFAULT_SITE_THEME
+        dt.displayname = file.displayName()
+        dt.file = file
+        dt.save()
+
+        number_of_stored_tokens = cls.objects.count()
+        if number_of_stored_tokens > MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS:
+            old_token = cls.objects.order_by('id').first()
+            if old_token:
+                old_token.delete()
+        return dt

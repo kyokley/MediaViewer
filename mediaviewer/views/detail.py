@@ -7,12 +7,9 @@ from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.views.home import generateHeader, setSiteWideContext
 from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
-                                             DEFAULT_SITE_THEME,
                                              )
 from mediaviewer.utils import logAccessInfo, humansize, check_force_password_change
 from django.shortcuts import render, get_object_or_404
-from datetime import datetime as dateObj
-from django.utils.timezone import utc
 import json
 
 @login_required(login_url='/mediaviewer/login/')
@@ -119,17 +116,7 @@ def ajaxdownloadbutton(request):
     if not user.is_authenticated():
         response = {'errmsg': 'User not authenticated. Refresh and try again.'}
     elif file and user:
-        dt = DownloadToken()
-        dt.user = user
-        dt.filename = file.filename
-        dt.path = file.path.localpathstr
-        dt.ismovie = file.isMovie()
-        dt.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-        settings = user.settings()
-        dt.waitertheme = settings and settings.site_theme or DEFAULT_SITE_THEME
-        dt.displayname = file.displayName()
-        dt.file = file
-        dt.save()
+        dt = DownloadToken.new(user, file)
 
         downloadlink = file.downloadLink(user, dt.guid)
         response = {'guid': dt.guid,
