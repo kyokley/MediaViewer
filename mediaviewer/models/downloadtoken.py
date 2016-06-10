@@ -1,6 +1,6 @@
 from django.db import models
 from datetime import timedelta
-from datetime import datetime as dateObj
+from datetime import datetime
 import pytz
 from mediaviewer.utils import getSomewhatUniqueID
 from mediaviewer.models.usersettings import DEFAULT_SITE_THEME
@@ -38,13 +38,13 @@ class DownloadToken(models.Model):
     def isvalid(self):
         # Tokens are only valid for 3 hours
         refDate = self.datecreated + timedelta(hours=3)
-        return refDate > dateObj.now(pytz.timezone('US/Central'))
+        return refDate > datetime.now(pytz.timezone('US/Central'))
 
     @classmethod
     def new(cls,
             user,
             file,
-            datecreated=dateObj.utcnow().replace(tzinfo=utc),
+            datecreated=datetime.utcnow().replace(tzinfo=utc),
             ):
         dt = cls()
         dt.user = user
