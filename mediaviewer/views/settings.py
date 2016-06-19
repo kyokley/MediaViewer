@@ -78,7 +78,7 @@ def submitsettings(request):
     settings.auto_download = auto_download
     settings.default_sort = default_sort
     settings.site_theme = site_theme
-    user.email = request.POST.get('email_field', '')
+    user.email = request.POST.get('email_field', user.email)
     context['site_theme'] = settings.site_theme
     context['default_sort'] = settings.default_sort
 

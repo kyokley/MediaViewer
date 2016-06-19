@@ -20,6 +20,9 @@ CHAR_REGEX = re.compile(r'[a-zA-Z]')
 class InvalidPasswordException(Exception):
     pass
 
+class InvalidEmailException(Exception):
+    pass
+
 class UserSettings(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     dateedited = models.DateTimeField(db_column='dateedited', blank=True)
@@ -79,4 +82,15 @@ def change_user_password(user,
     settings = user.settings()
     settings.force_password_change = False
     settings.save()
+    user.save()
+
+def _is_email_unique(user, val):
+    return (user.email.lower() != val.lower() and
+                not User.objects.filter(email__iexact=val).exists())
+
+def set_email(user, email):
+    if not _is_email_unique(user, email):
+        raise InvalidEmailException('Email already exists on system. Please try another.')
+
+    user.email = email
     user.save()
