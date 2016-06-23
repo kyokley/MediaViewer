@@ -211,3 +211,7 @@ COMMIT;
 BEGIN;
     ALTER TABLE usersettings ADD COLUMN force_password_change BOOLEAN NOT NULL DEFAULT FALSE;
 COMMIT;
+
+BEGIN;
+    CREATE UNIQUE INDEX email_unique_idx ON auth_user(LOWER(email)) WHERE email != '';
+COMMIT;
