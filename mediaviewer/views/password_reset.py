@@ -41,9 +41,17 @@ def reset_complete(request):
                                    template_name='mediaviewer/password_reset_complete.html',
                                    )
 
+def create_new_password(request, uidb64=None, token=None):
+    return password_reset_confirm(request,
+                                  template_name='mediaviewer/password_create_confirm.html',
+                                  uidb64=uidb64,
+                                  token=token,
+                                  post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
+
 def change_password(request):
     context = {'err': '',
-               'force_change': request.user.settings().force_password_change}
+               'force_change': request.user.settings().force_password_change,
+               }
     setSiteWideContext(context, request)
     context['header'] = generateHeader('change_password', request)
     return render(request,

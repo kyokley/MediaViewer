@@ -4,7 +4,6 @@ from django.db import transaction
 from django.utils.timezone import utc
 from mysite.settings import (MINIMUM_PASSWORD_LENGTH,
                              TEMPORARY_PASSWORD,
-                             DEFAULT_FROM_EMAIL,
                              )
 from django.contrib.auth.forms import PasswordResetForm
 from datetime import datetime
@@ -91,7 +90,9 @@ class UserSettings(models.Model):
 
         if send_email:
             fake_form = FormlessPasswordReset(email)
-            fake_form.save(domain_override='mediaviewer')
+            fake_form.save(email_template_name='mediaviewer/password_create_email.html',
+                           subject_template_name='mediaviewer/password_create_subject.txt',
+                           )
 
         return newUser
 
