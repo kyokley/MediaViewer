@@ -229,3 +229,12 @@ BEGIN;
     ALTER TABLE usersettings
     ADD COLUMN can_login BOOLEAN NOT NULL DEFAULT TRUE;
 COMMIT;
+
+BEGIN;
+     ALTER TABLE loginevent
+     DROP CONSTRAINT loginevent_userid_fkey,
+     ADD CONSTRAINT loginevent_userid_fkey
+     FOREIGN KEY(userid)
+     REFERENCES auth_user(id)
+     ON DELETE CASCADE;
+COMMIT;
