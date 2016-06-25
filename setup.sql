@@ -224,3 +224,8 @@ BEGIN;
      REFERENCES auth_user(id)
      ON DELETE CASCADE;
 COMMIT;
+
+BEGIN;
+    ALTER TABLE usersettings
+    ADD COLUMN can_login BOOLEAN NOT NULL DEFAULT TRUE;
+COMMIT;

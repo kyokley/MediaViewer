@@ -2,7 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.utils.timezone import utc
-from mysite.settings import MINIMUM_PASSWORD_LENGTH
+from mysite.settings import (MINIMUM_PASSWORD_LENGTH,
+                             TEMPORARY_PASSWORD,
+                             DEFAULT_FROM_EMAIL,
+                             )
 from django.contrib.auth.forms import PasswordResetForm
 from datetime import datetime
 import re
@@ -37,6 +40,7 @@ class UserSettings(models.Model):
     default_sort = models.TextField(db_column='default_sort')
     auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
     force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
+    can_login = models.BooleanField(db_column='can_login', blank=False, null=False, default=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -69,6 +73,7 @@ class UserSettings(models.Model):
         newUser.username = name
         newUser.is_staff = is_staff
         newUser.is_superuser = is_superuser
+        newUser.set_password(TEMPORARY_PASSWORD)
         newUser.save()
 
         set_email(newUser, email)
@@ -81,11 +86,12 @@ class UserSettings(models.Model):
         newSettings.default_sort = default_sort
         newSettings.site_theme = site_theme
         newSettings.can_download = can_download
+        newSettings.can_login = False
         newSettings.save()
 
         if send_email:
             fake_form = FormlessPasswordReset(email)
-            fake_form.save()
+            fake_form.save(domain_override='mediaviewer')
 
         return newUser
 
