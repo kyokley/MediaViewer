@@ -215,3 +215,12 @@ COMMIT;
 BEGIN;
     CREATE UNIQUE INDEX email_unique_idx ON auth_user(LOWER(email)) WHERE email != '';
 COMMIT;
+
+BEGIN;
+     ALTER TABLE usersettings
+     DROP CONSTRAINT usersettings_userid_fkey,
+     ADD CONSTRAINT usersettings_userid_fkey
+     FOREIGN KEY(userid)
+     REFERENCES auth_user(id)
+     ON DELETE CASCADE;
+COMMIT;
