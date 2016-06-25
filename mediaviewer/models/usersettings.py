@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.utils.timezone import utc
 from mysite.settings import MINIMUM_PASSWORD_LENGTH
+from django.contrib.auth.forms import PasswordResetForm
+from datetime import datetime
 import re
 
 LOCAL_IP = 'local_ip'
@@ -45,6 +49,45 @@ class UserSettings(models.Model):
     def getSettings(cls, user):
         q = cls.objects.filter(user=user).only()
         return q and q[0] or None
+
+    @classmethod
+    @transaction.atomic
+    def new(cls,
+            name,
+            email,
+            is_staff=False,
+            is_superuser=False,
+            ip_format=BANGUP_IP,
+            default_sort=FILENAME_SORT,
+            site_theme=DEFAULT_SITE_THEME,
+            can_download=True,
+            send_email=True,
+            ):
+        ''' Create new User and associated UserSettings '''
+
+        newUser = User()
+        newUser.username = name
+        newUser.is_staff = is_staff
+        newUser.is_superuser = is_superuser
+        newUser.save()
+
+        set_email(newUser, email)
+
+        newSettings = cls()
+        newSettings.datecreated = datetime.utcnow().replace(tzinfo=utc)
+        newSettings.dateedited = newSettings.datecreated
+        newSettings.user = newUser
+        newSettings.ip_format = ip_format
+        newSettings.default_sort = default_sort
+        newSettings.site_theme = site_theme
+        newSettings.can_download = can_download
+        newSettings.save()
+
+        if send_email:
+            fake_form = FormlessPasswordReset(email)
+            fake_form.save()
+
+        return newUser
 
 setattr(User, 'settings', lambda x: UserSettings.getSettings(x))
 
@@ -94,3 +137,7 @@ def set_email(user, email):
 
     user.email = email
     user.save()
+
+class FormlessPasswordReset(PasswordResetForm):
+    def __init__(self, email):
+        self.cleaned_data = {'email': email}

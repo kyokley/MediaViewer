@@ -2,44 +2,25 @@ import sys
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
-from django.db import transaction
-from datetime import datetime as dateObj
-from django.utils.timezone import utc
-from django.contrib.auth.models import User
-from mediaviewer.models.usersettings import (UserSettings,
-                                             BANGUP_IP,
-                                             DEFAULT_SITE_THEME,
-                                             FILENAME_SORT,
-                                             )
+from mediaviewer.models.usersettings import UserSettings
 
 
-@transaction.atomic
-def createUser(name, can_download=True):
+def createUser(name, email, can_download=True):
     '''
         Example usage of this script is as follows.
-        ipython mediaviewer/createUser.py newUserName
+        ipython mediaviewer/createUser.py newUserName newUserEmail
 
         Be sure to set the PYTHONPATH env var to the folder
         containing the mediaviewer folder
     '''
-    newUser = User()
-    newUser.username = name
-    newUser.is_staff = False
-    newUser.is_superuser = False
-    newUser.save()
-
-    newSettings = UserSettings()
-    newSettings.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-    newSettings.dateedited = newSettings.datecreated
-    newSettings.user = newUser
-    newSettings.ip_format = BANGUP_IP
-    newSettings.default_sort = FILENAME_SORT
-    newSettings.site_theme = DEFAULT_SITE_THEME
-    newSettings.can_download = can_download
-    newSettings.save()
+    newUser = UserSettings.new(name,
+                               email,
+                               can_download=can_download,
+                               )
+    return newUser
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        createUser(sys.argv[1])
+    if len(sys.argv) == 3:
+        createUser(sys.argv[1], sys.argv[2])
     else:
         print('Invalid number of arguments')
