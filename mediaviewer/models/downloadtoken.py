@@ -5,7 +5,6 @@ import pytz
 from mediaviewer.utils import getSomewhatUniqueID
 from mediaviewer.models.usersettings import DEFAULT_SITE_THEME
 from mysite.settings import MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
-from django.utils.timezone import utc
 
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
@@ -44,7 +43,7 @@ class DownloadToken(models.Model):
     def new(cls,
             user,
             file,
-            datecreated=datetime.utcnow().replace(tzinfo=utc),
+            datecreated=datetime.utcnow().replace(tzinfo=pytz.timezone('US/Central')),
             ):
         dt = cls()
         dt.user = user
