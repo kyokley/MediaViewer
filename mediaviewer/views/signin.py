@@ -11,7 +11,9 @@ from django.utils.timezone import utc
 from django.http import HttpResponseRedirect
 from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import check_can_login_flag
 
+@check_can_login_flag
 @logAccessInfo
 def signin(request):
     context = {}
