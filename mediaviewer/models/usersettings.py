@@ -29,6 +29,9 @@ class InvalidPasswordException(Exception):
 class InvalidEmailException(Exception):
     pass
 
+class ImproperLogin(Exception):
+    pass
+
 class UserSettings(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     dateedited = models.DateTimeField(db_column='dateedited', blank=True)

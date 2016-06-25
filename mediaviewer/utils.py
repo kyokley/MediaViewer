@@ -143,18 +143,3 @@ def check_force_password_change(func):
         res = func(*args, **kwargs)
         return res
     return wrap
-
-def check_can_login_flag(func):
-    @wraps(func)
-    def wrap(*args, **kwargs):
-        res = func(*args, **kwargs)
-        request = args and args[0]
-        if request and request.user:
-            user = request.user
-            if user.is_authenticated():
-                settings = user.settings()
-                if not settings.can_login:
-                    raise Exception('You should have received an email with a link to set up your password the first time. '
-                                    'Please follow the instructions in the email.')
-        return res
-    return wrap
