@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
+from mysite.settings import MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
 from datetime import datetime, timedelta
 
 import pytz
@@ -24,9 +25,16 @@ class TestDownloadToken(TestCase):
         self.file.filename = 'some file'
         self.file.path = self.path
 
-    def test_new(self, mock_save):
+    @mock.patch('mediaviewer.models.downloadtoken.DownloadToken.objects')
+    def test_new(self, mock_objects, mock_save):
+        mock_objects.count.return_value = MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS + 1
+        mock_ordered_query = mock.MagicMock()
+        old_token = mock.create_autospec(DownloadToken)
+        mock_ordered_query.first.return_value = old_token
+        mock_objects.order_by.return_value = mock_ordered_query
         dt = DownloadToken.new(self.user,
                                self.file)
+
 
         self.assertEqual(dt.filename, 'some file')
         self.assertEqual(dt.path, '/path/to/file')
@@ -34,6 +42,8 @@ class TestDownloadToken(TestCase):
         self.assertEqual(dt.displayname, 'some file')
         self.assertEqual(dt.file, self.file)
         mock_save.assert_called_once_with()
+        self.assertTrue(mock_objects.count.called)
+        self.assertTrue(old_token.delete.called)
 
     def test_isvalid(self, mock_save):
         dt = DownloadToken.new(self.user,
