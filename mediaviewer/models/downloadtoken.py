@@ -43,7 +43,7 @@ class DownloadToken(models.Model):
     def new(cls,
             user,
             file,
-            datecreated=datetime.utcnow().replace(tzinfo=pytz.timezone('US/Central')),
+            datecreated=datetime.now(pytz.timezone('US/Central')),
             ):
         dt = cls()
         dt.user = user
