@@ -1,13 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db import transaction
-from django.utils.timezone import utc
 from mysite.settings import (MINIMUM_PASSWORD_LENGTH,
                              TEMPORARY_PASSWORD,
+                             TIME_ZONE,
                              )
 from django.contrib.auth.forms import PasswordResetForm
 from datetime import datetime
 import re
+import pytz
 
 LOCAL_IP = 'local_ip'
 BANGUP_IP = 'bangup'
@@ -81,7 +82,7 @@ class UserSettings(models.Model):
         set_email(newUser, email)
 
         newSettings = cls()
-        newSettings.datecreated = datetime.utcnow().replace(tzinfo=utc)
+        newSettings.datecreated = datetime.now(pytz.timezone(TIME_ZONE))
         newSettings.dateedited = newSettings.datecreated
         newSettings.user = newUser
         newSettings.ip_format = ip_format
