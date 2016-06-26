@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
-from mysite.settings import MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
+from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
+                             TOKEN_VALIDITY_LENGTH,
+                             TIME_ZONE)
 from datetime import datetime, timedelta
 
 import pytz
@@ -13,14 +15,12 @@ import mock
 @mock.patch('mediaviewer.models.downloadtoken.DownloadToken.save')
 class TestDownloadToken(TestCase):
     def setUp(self):
-        #self.user = mock.create_autospec(User)
         self.user = User()
 
         self.path = Path()
         self.path.localpathstr = '/path/to/file'
         self.path.is_movie = False
 
-        #self.file = mock.create_autospec(File)
         self.file = File()
         self.file.filename = 'some file'
         self.file.path = self.path
@@ -53,5 +53,5 @@ class TestDownloadToken(TestCase):
     def test_isNotValid(self, mock_save):
         dt = DownloadToken.new(self.user,
                                self.file,
-                               datecreated=datetime.now(pytz.timezone('US/Central')) - timedelta(hours=4))
+                               datecreated=datetime.now(pytz.timezone(TIME_ZONE)) - timedelta(hours=TOKEN_VALIDITY_LENGTH + 1))
         self.assertFalse(dt.isvalid)

@@ -5,7 +5,8 @@ import pytz
 from mediaviewer.utils import getSomewhatUniqueID
 from mediaviewer.models.usersettings import DEFAULT_SITE_THEME
 from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
-                             TIME_ZONE)
+                             TIME_ZONE,
+                             TOKEN_VALIDITY_LENGTH)
 
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
@@ -36,8 +37,8 @@ class DownloadToken(models.Model):
 
     @property
     def isvalid(self):
-        # Tokens are only valid for 3 hours
-        refDate = self.datecreated + timedelta(hours=3)
+        # Tokens are only valid for a certain amount of time
+        refDate = self.datecreated + timedelta(hours=TOKEN_VALIDITY_LENGTH)
         return refDate > datetime.now(pytz.timezone(TIME_ZONE))
 
     @classmethod

@@ -228,6 +228,7 @@ TEMPORARY_PASSWORD = 'password' # Throwaway password set on user creation
 MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
+TOKEN_VALIDITY_LENGTH = 3 # In hours
 try:
     from local_settings import *
 except ImportError:
