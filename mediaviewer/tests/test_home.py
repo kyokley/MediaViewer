@@ -19,9 +19,7 @@ from mock import call
 class TestSetSiteWideContext(TestCase):
     def setUp(self):
         self.request = mock.MagicMock()
-
         self.user = mock.create_autospec(User)
-
         self.request.user = self.user
 
     def test_is_staff_not_logged_in(self,
