@@ -114,7 +114,8 @@ def _is_long_enough_validator(val):
 def change_user_password(user,
                          old_password,
                          new_password,
-                         confirm_new_password):
+                         confirm_new_password,
+                         can_login=True):
     if not user.check_password(old_password):
         raise InvalidPasswordException('Incorrect password')
 
@@ -135,6 +136,7 @@ def change_user_password(user,
     user.set_password(new_password)
     settings = user.settings()
     settings.force_password_change = False
+    settings.can_login = True
     settings.save()
     user.save()
 
