@@ -136,9 +136,26 @@ def change_user_password(user,
     user.set_password(new_password)
     settings = user.settings()
     settings.force_password_change = False
-    settings.can_login = True
+    settings.can_login = can_login
     settings.save()
     user.save()
+
+def validate_reset_user_password(user,
+                                 new_password,
+                                 can_login=True
+                                 ):
+    if not _has_number_validator(new_password):
+        raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one numeric character.')
+
+    if not _has_char_validator(new_password):
+        raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one alphabetic character.')
+
+    if not _is_long_enough_validator(new_password):
+        raise InvalidPasswordException('Password is too weak. Valid passwords must be at least %s characters long.' % MINIMUM_PASSWORD_LENGTH)
+    settings = user.settings()
+    settings.force_password_change = False
+    settings.can_login = can_login
+    settings.save()
 
 def _is_email_unique(user, val):
     return (user.email.lower() != val.lower() and
