@@ -45,13 +45,16 @@ class DownloadToken(models.Model):
     def new(cls,
             user,
             file,
-            datecreated=datetime.now(pytz.timezone(TIME_ZONE)),
+            datecreated=None,
             ):
         dt = cls()
         dt.user = user
         dt.filename = file.filename
         dt.path = file.path.localpathstr
         dt.ismovie = file.isMovie()
+
+        if not datecreated:
+            datecreated = datetime.now(pytz.timezone(TIME_ZONE))
         dt.datecreated = datecreated
 
         settings = user.settings()
