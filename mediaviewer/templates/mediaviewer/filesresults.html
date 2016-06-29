@@ -23,7 +23,7 @@
                 <li class="active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
             {% endif %}
             <h1>File Saved!</h1>
-            <h3>{{ file.fileName }} has been saved successfully</h3>
+            <h3>{{ file.displayName }} has been saved successfully</h3>
             <a href="/mediaviewer/files/{{ file.id }}/">Go Back</a>
             {% if file.finished and can_download %}
                 <a href="{{ file.downloadLink }}">Download</a>
