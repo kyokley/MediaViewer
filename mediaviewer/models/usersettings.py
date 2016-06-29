@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.db import transaction
 from mysite.settings import (MINIMUM_PASSWORD_LENGTH,
                              TEMPORARY_PASSWORD,
@@ -78,6 +78,10 @@ class UserSettings(models.Model):
         newUser.is_superuser = is_superuser
         newUser.set_password(TEMPORARY_PASSWORD)
         newUser.save()
+
+        mv_group = Group.objects.get(name='MediaViewer')
+        mv_group.user_set.add(newUser)
+        mv_group.save()
 
         set_email(newUser, email)
 
