@@ -99,7 +99,7 @@ def tvshows(request, pathid):
               'view': 'tvshows',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+              'can_download': settings and settings.can_download or False
               }
     context['header'] = generateHeader('tvshows', request)
     context['title'] = refpath.displayName
