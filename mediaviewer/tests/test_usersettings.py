@@ -1,10 +1,10 @@
 from django.test import TestCase
 from django.contrib.auth.models import Group
-from mediaviewer.models.usersettings import (UserSettings,
-                                             FormlessPasswordReset,
-                                             change_user_password,
-                                             InvalidPasswordException,
-                                             )
+from mediaviewer.models.usersettings import UserSettings
+from mediaviewer.forms import (InvalidPasswordException,
+                               FormlessPasswordReset,
+                               change_user_password,
+                               )
 import mock
 
 class TestChangeUserPassword(TestCase):
@@ -166,6 +166,5 @@ class TestNewUser(TestCase):
         new_user = UserSettings.new(self.name,
                                     self.email)
         self.assertEqual(new_user.username, self.name)
-        self.assertEqual(new_user.email, self.email)
         mock_fake_form_instance.save.assert_called_once_with(email_template_name='mediaviewer/password_create_email.html',
                                                              subject_template_name='mediaviewer/password_create_subject.txt')
