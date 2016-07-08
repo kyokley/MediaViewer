@@ -48,13 +48,35 @@ def validate_email(user, email):
         raise InvalidEmailException('Email already exists on system. Please try another.')
 
 
+def change_user_password(user,
+                         old_password,
+                         new_password,
+                         confirm_new_password,
+                         can_login=True):
+    if not user.check_password(old_password):
+        raise InvalidPasswordException('Incorrect password')
+
+    if new_password != confirm_new_password:
+        raise InvalidPasswordException('New passwords do not match')
+
+    if old_password == new_password:
+        raise InvalidPasswordException('New and old passwords must be different')
+
+    validate_reset_user_password(user, new_password, can_login=can_login)
+    user.set_password(new_password)
+    settings = user.settings()
+    settings.force_password_change = False
+    settings.can_login = can_login
+    settings.save()
+    user.save()
+
 class MVSaveBase(SetPasswordForm):
     def save(self, commit=True):
         settings = self.user.settings()
         settings.force_password_change = False
         settings.can_login = True
         settings.save()
-        super(MVSaveBase, self).clean(commit=commit)
+        super(MVSaveBase, self).save()
 
 class MVSetPasswordForm(MVSaveBase):
     def clean_new_password1(self):
@@ -113,8 +135,7 @@ class FormlessPasswordReset(PasswordResetForm):
         self.user.email = self.cleaned_data['email']
         self.user.save()
 
-        super(FormlessPasswordReset, self).save(self,
-                                                domain_override=domain_override,
+        super(FormlessPasswordReset, self).save(domain_override=domain_override,
                                                 subject_template_name=subject_template_name,
                                                 email_template_name=email_template_name,
                                                 use_https=use_https,

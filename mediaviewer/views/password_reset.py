@@ -6,11 +6,11 @@ from django.contrib.auth.views import (password_reset,
                                        password_reset_complete,
                                        )
 from django.contrib.auth.models import User
-from mediaviewer.models.usersettings import (change_user_password,
-                                             InvalidPasswordException,
-                                             )
 from mediaviewer.views.home import setSiteWideContext, generateHeader
-from mediaviewer.forms import MVSetPasswordForm
+from mediaviewer.forms import (MVSetPasswordForm,
+                               change_user_password,
+                               InvalidPasswordException,
+                               )
 
 def reset_confirm(request, uidb64=None, token=None):
     return password_reset_confirm(request,

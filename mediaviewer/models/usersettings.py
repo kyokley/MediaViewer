@@ -5,9 +5,10 @@ from mysite.settings import (MINIMUM_PASSWORD_LENGTH,
                              TEMPORARY_PASSWORD,
                              TIME_ZONE,
                              )
-from mediaviewer.forms import FormlessPasswordReset
+from mediaviewer.forms import (FormlessPasswordReset,
+                               change_user_password,
+                               )
 from datetime import datetime
-import re
 import pytz
 
 LOCAL_IP = 'local_ip'
