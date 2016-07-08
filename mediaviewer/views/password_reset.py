@@ -6,24 +6,18 @@ from django.contrib.auth.views import (password_reset,
                                        password_reset_complete,
                                        )
 from django.contrib.auth.models import User
-from django.utils.http import urlsafe_base64_decode
 from mediaviewer.models.usersettings import (change_user_password,
                                              InvalidPasswordException,
-                                             validate_reset_user_password,
                                              )
 from mediaviewer.views.home import setSiteWideContext, generateHeader
+from mediaviewer.forms import MVSetPasswordForm
 
 def reset_confirm(request, uidb64=None, token=None):
-    if request.method == 'POST':
-        userid = int(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=userid)
-        validate_reset_user_password(user,
-                                     request.POST['new_password1'],
-                                     )
     return password_reset_confirm(request,
                                   template_name='mediaviewer/password_reset_confirm.html',
                                   uidb64=uidb64,
                                   token=token,
+                                  set_password_form=MVSetPasswordForm,
                                   post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
 
 
@@ -52,17 +46,12 @@ def reset_complete(request):
                                    )
 
 def create_new_password(request, uidb64=None, token=None):
-    if request.method == 'POST':
-        userid = int(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=userid)
-        validate_reset_user_password(user,
-                                     request.POST['new_password1'],
-                                     )
     return password_reset_confirm(request,
-                          template_name='mediaviewer/password_create_confirm.html',
-                          uidb64=uidb64,
-                          token=token,
-                          post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
+                                  template_name='mediaviewer/password_create_confirm.html',
+                                  uidb64=uidb64,
+                                  token=token,
+                                  set_password_form=MVSetPasswordForm,
+                                  post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
 
 def change_password(request):
     context = {'err': '',
