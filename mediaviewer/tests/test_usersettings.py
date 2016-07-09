@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import Group
 from django.db.utils import IntegrityError
+from django import forms
 from mediaviewer.models.usersettings import (UserSettings,
                                              case_insensitive_authenticate,
                                              )
@@ -154,6 +155,7 @@ class TestChangeUserPassword(TestCase):
         self.settings.save.assert_called_once_with()
         self.user.save.assert_called_once_with()
 
+@mock.patch('mediaviewer.forms.PasswordResetForm')
 class TestNewUser(TestCase):
     def setUp(self):
         self.mv_group = Group()
@@ -161,48 +163,38 @@ class TestNewUser(TestCase):
         self.mv_group.save()
         self.name = 'New User'
         self.email = 'test@user.com'
-        self.patcher = mock.patch('mediaviewer.models.usersettings.FormlessPasswordReset')
-        self.mock_form = self.patcher.start()
         self.existing_user = 'Existing User'
         self.existing_email =  'existing@user.com'
         UserSettings.new(self.existing_user, self.existing_email)
 
-    def tearDown(self):
-        self.patcher.stop()
-
-    def test_new(self):
-        mock_fake_form_instance = mock.create_autospec(FormlessPasswordReset)
-        self.mock_form.return_value = mock_fake_form_instance
+    def test_new(self, mock_form):
         new_user = UserSettings.new(self.name,
                                     self.email)
         self.assertEqual(new_user.username, self.name)
-        mock_fake_form_instance.save.assert_called_once_with(email_template_name='mediaviewer/password_create_email.html',
-                                                             subject_template_name='mediaviewer/password_create_subject.txt')
 
-    def test_existing_username(self):
+    def test_existing_username(self, mock_form):
         test_username = self.existing_user
 
         with self.assertRaises(IntegrityError):
             UserSettings.new(test_username,
                              self.email)
 
-    def test_existing_username_mixed_case(self):
+    def test_existing_username_mixed_case(self, mock_form):
         test_username = 'exIsTiNg USeR'
 
         with self.assertRaises(IntegrityError):
             UserSettings.new(test_username,
                              self.email)
 
-    def test_existing_email(self):
-        with self.assertRaises(IntegrityError):
-            import pdb; pdb.set_trace()
+    def test_existing_email(self, mock_form):
+        with self.assertRaises(forms.ValidationError):
             UserSettings.new(self.name,
                              self.existing_email)
 
-    def test_existing_email_mixed_case(self):
+    def test_existing_email_mixed_case(self, mock_form):
         test_email = 'ExIsTiNg@uSeR.CoM'
 
-        with self.assertRaises(IntegrityError):
+        with self.assertRaises(forms.ValidationError):
             UserSettings.new(self.name,
                              test_email)
 
