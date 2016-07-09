@@ -1,5 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import (User,
+                                        Group,
+                                        )
+from django.contrib.auth import authenticate
 from django.db import transaction
 from mysite.settings import (TEMPORARY_PASSWORD,
                              TIME_ZONE,
@@ -92,3 +95,11 @@ class UserSettings(models.Model):
         return newUser
 
 setattr(User, 'settings', lambda x: UserSettings.getSettings(x))
+
+def case_insensitive_authenticate(username, password):
+    try:
+        user = User.objects.get(username__iexact=username)
+    except User.DoesNotExist:
+        return None
+
+    return authenticate(username=user.username, password=password)

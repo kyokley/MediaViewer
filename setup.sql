@@ -238,3 +238,7 @@ BEGIN;
      REFERENCES auth_user(id)
      ON DELETE CASCADE;
 COMMIT;
+
+BEGIN;
+    CREATE UNIQUE INDEX username_unique_idx ON auth_user(LOWER(username));
+COMMIT;

@@ -1,6 +1,9 @@
 from django.test import TestCase
 from django.contrib.auth.models import Group
-from mediaviewer.models.usersettings import UserSettings
+from django.db.utils import IntegrityError
+from mediaviewer.models.usersettings import (UserSettings,
+                                             case_insensitive_authenticate,
+                                             )
 from mediaviewer.forms import (InvalidPasswordException,
                                FormlessPasswordReset,
                                change_user_password,
@@ -151,7 +154,6 @@ class TestChangeUserPassword(TestCase):
         self.settings.save.assert_called_once_with()
         self.user.save.assert_called_once_with()
 
-@mock.patch('mediaviewer.models.usersettings.FormlessPasswordReset')
 class TestNewUser(TestCase):
     def setUp(self):
         self.mv_group = Group()
@@ -159,12 +161,93 @@ class TestNewUser(TestCase):
         self.mv_group.save()
         self.name = 'New User'
         self.email = 'test@user.com'
+        self.patcher = mock.patch('mediaviewer.models.usersettings.FormlessPasswordReset')
+        self.mock_form = self.patcher.start()
+        self.existing_user = 'Existing User'
+        self.existing_email =  'existing@user.com'
+        UserSettings.new(self.existing_user, self.existing_email)
 
-    def test_new(self, mock_form):
+    def tearDown(self):
+        self.patcher.stop()
+
+    def test_new(self):
         mock_fake_form_instance = mock.create_autospec(FormlessPasswordReset)
-        mock_form.return_value = mock_fake_form_instance
+        self.mock_form.return_value = mock_fake_form_instance
         new_user = UserSettings.new(self.name,
                                     self.email)
         self.assertEqual(new_user.username, self.name)
         mock_fake_form_instance.save.assert_called_once_with(email_template_name='mediaviewer/password_create_email.html',
                                                              subject_template_name='mediaviewer/password_create_subject.txt')
+
+    def test_existing_username(self):
+        test_username = self.existing_user
+
+        with self.assertRaises(IntegrityError):
+            UserSettings.new(test_username,
+                             self.email)
+
+    def test_existing_username_mixed_case(self):
+        test_username = 'exIsTiNg USeR'
+
+        with self.assertRaises(IntegrityError):
+            UserSettings.new(test_username,
+                             self.email)
+
+    def test_existing_email(self):
+        with self.assertRaises(IntegrityError):
+            import pdb; pdb.set_trace()
+            UserSettings.new(self.name,
+                             self.existing_email)
+
+    def test_existing_email_mixed_case(self):
+        test_email = 'ExIsTiNg@uSeR.CoM'
+
+        with self.assertRaises(IntegrityError):
+            UserSettings.new(self.name,
+                             test_email)
+
+
+class TestCaseInsensitiveAuthenticate(TestCase):
+    def setUp(self):
+        self.mv_group = Group()
+        self.mv_group.name = 'MediaViewer'
+        self.mv_group.save()
+        self.name = 'New User'
+        self.email = 'test@user.com'
+        self.password = 'password'
+        self.new_user = UserSettings.new(self.name,
+                                         self.email)
+        self.new_user.set_password(self.password)
+        self.new_user.save()
+
+    def test_invalid_user(self):
+        test_username = 'blah'
+        test_password = self.password
+        expected = None
+        actual = case_insensitive_authenticate(test_username, test_password)
+
+        self.assertEqual(expected, actual)
+
+    def test_valid_user(self):
+        test_username = self.name
+        test_password = self.password
+        expected = self.new_user
+        actual = case_insensitive_authenticate(test_username, test_password)
+
+        self.assertEqual(expected, actual)
+
+    def test_valid_mixed_case_username(self):
+        test_username = 'NeW UsEr'
+        test_password = self.password
+        expected = self.new_user
+        actual = case_insensitive_authenticate(test_username, test_password)
+
+        self.assertEqual(expected, actual)
+
+    def test_incorrect_password(self):
+        test_username = self.name
+        test_password = 'wrong password'
+        expected = None
+        actual = case_insensitive_authenticate(test_username, test_password)
+
+        self.assertEqual(expected, actual)

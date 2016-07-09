@@ -4,14 +4,16 @@ from django.shortcuts import render
 from mediaviewer.views.home import (generateHeader,
                                     setSiteWideContext,
                                     )
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from mediaviewer.models.loginevent import LoginEvent
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 from django.http import HttpResponseRedirect
 from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
-from mediaviewer.models.usersettings import ImproperLogin
+from mediaviewer.models.usersettings import (ImproperLogin,
+                                             case_insensitive_authenticate,
+                                             )
 
 @logAccessInfo
 def signin(request):
@@ -29,7 +31,7 @@ def signin(request):
         if request.method == 'POST':
             username = request.POST['username']
             password = request.POST['password']
-            user = authenticate(username=username, password=password)
+            user = case_insensitive_authenticate(username=username, password=password)
             if user is None:
                 raise Exception('Incorrect username or password!')
             elif not user.settings().can_login:
