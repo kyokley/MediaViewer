@@ -111,18 +111,21 @@ class MVPasswordChangeForm(PasswordChangeForm, MVSaveBase):
 
 class FormlessPasswordReset(PasswordResetForm):
     def __init__(self, user, email):
-        self.cleaned_data = {'email': email}
+        self.data = {'email': email}
+        self.cleaned_data = {}
         self.user = user
 
     def clean_email(self):
-        super(FormlessPasswordReset, self).clean_email()
+        email = self.data['email']
         try:
             validate_email(self.user,
-                           self.cleaned_data['email'],
+                           email,
                            )
+            self.cleaned_data['email'] = email
         except InvalidEmailException, e:
             raise forms.ValidationError(str(e),
                                         code='email_exception')
+        return email
 
     def save(self,
              domain_override=None,
@@ -132,7 +135,7 @@ class FormlessPasswordReset(PasswordResetForm):
              token_generator=default_token_generator,
              from_email=None,
              request=None):
-        self.user.email = self.cleaned_data['email']
+        self.user.email = self.clean_email()
         self.user.save()
 
         super(FormlessPasswordReset, self).save(domain_override=domain_override,

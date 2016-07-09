@@ -1,13 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.db import transaction
-from mysite.settings import (MINIMUM_PASSWORD_LENGTH,
-                             TEMPORARY_PASSWORD,
+from mysite.settings import (TEMPORARY_PASSWORD,
                              TIME_ZONE,
                              )
-from mediaviewer.forms import (FormlessPasswordReset,
-                               change_user_password,
-                               )
+from mediaviewer.forms import FormlessPasswordReset
 from datetime import datetime
 import pytz
 
