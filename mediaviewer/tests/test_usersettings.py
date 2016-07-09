@@ -6,7 +6,6 @@ from mediaviewer.models.usersettings import (UserSettings,
                                              case_insensitive_authenticate,
                                              )
 from mediaviewer.forms import (InvalidPasswordException,
-                               FormlessPasswordReset,
                                change_user_password,
                                )
 import mock
