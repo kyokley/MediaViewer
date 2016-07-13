@@ -4,10 +4,13 @@ from django.contrib.auth.views import (password_reset,
                                        password_reset_confirm,
                                        password_reset_done,
                                        password_reset_complete,
+                                       password_change,
+                                       password_change_done,
                                        )
 from django.contrib.auth.models import User
 from mediaviewer.views.home import setSiteWideContext, generateHeader
 from mediaviewer.forms import (MVSetPasswordForm,
+                               MVPasswordChangeForm,
                                change_user_password,
                                InvalidPasswordException,
                                )
@@ -54,35 +57,56 @@ def create_new_password(request, uidb64=None, token=None):
                                   post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
 
 def change_password(request):
-    context = {'err': '',
-               'force_change': request.user.settings().force_password_change,
-               }
+    context = {'force_change': request.user.settings().force_password_change}
     setSiteWideContext(context, request)
     context['header'] = generateHeader('change_password', request)
-    return render(request,
-                  'mediaviewer/change_password.html',
-                  context)
+    return password_change(request,
+                           template_name='mediaviewer/change_password.html',
+                           post_change_redirect=reverse('mediaviewer:change_password_submit'),
+                           password_change_form=MVPasswordChangeForm,
+                           extra_context=context,
+                           )
 
 def change_password_submit(request):
-    currentPassword = request.POST['currentPassword']
-    newPassword = request.POST['newPassword']
-    confirmNewPassword = request.POST['confirmNewPassword']
-
     context = {}
-    template = 'mediaviewer/change_password_submit.html'
-
-    context['header'] = generateHeader('change_password_submit', request)
-
-    try:
-        change_user_password(request.user,
-                             currentPassword,
-                             newPassword,
-                             confirmNewPassword)
-    except InvalidPasswordException as e:
-        context = {'err': str(e)}
-        template = 'mediaviewer/change_password.html'
-
+    context['header'] = generateHeader('change_password', request)
     setSiteWideContext(context, request)
-    return render(request,
-                  template,
-                  context)
+    return password_change_done(request,
+                                template_name='mediaviewer/change_password_submit.html',
+                                extra_context={'header': generateHeader('change_password_submit', request)},
+                                )
+
+
+#def change_password(request):
+#    context = {'err': '',
+#               'force_change': request.user.settings().force_password_change,
+#               }
+#    setSiteWideContext(context, request)
+#    context['header'] = generateHeader('change_password', request)
+#    return render(request,
+#                  'mediaviewer/change_password.html',
+#                  context)
+#
+#def change_password_submit(request):
+#    currentPassword = request.POST['currentPassword']
+#    newPassword = request.POST['newPassword']
+#    confirmNewPassword = request.POST['confirmNewPassword']
+#
+#    context = {}
+#    template = 'mediaviewer/change_password_submit.html'
+#
+#    context['header'] = generateHeader('change_password_submit', request)
+#
+#    try:
+#        change_user_password(request.user,
+#                             currentPassword,
+#                             newPassword,
+#                             confirmNewPassword)
+#    except InvalidPasswordException as e:
+#        context = {'err': str(e)}
+#        template = 'mediaviewer/change_password.html'
+#
+#    setSiteWideContext(context, request)
+#    return render(request,
+#                  template,
+#                  context)
