@@ -195,6 +195,25 @@
             </div>
         {% endif %}
     </form>
+    <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
+            {% csrf_token %}
+            {% if user.is_staff %}
+                <div class="well well-sm">
+                    <h2>New User</h2>
+                    <ul>
+                        <label>Email Address:</label>
+                        <div class="input">
+                            <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
+                        </div>
+                    </ul>
+                    <ul>
+                        <div class="sitemessageinput">
+                            <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn primary"/>
+                        </div>
+                    </ul>
+                </div>
+            {% endif %}
+    </form>
 </div> <!-- /container -->
 {% endblock %}
 

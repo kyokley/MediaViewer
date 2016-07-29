@@ -87,13 +87,6 @@ def submitsettings(request):
 
     settings.save()
     user.save()
-
-    new_user_email = request.POST.get('new_user_email')
-    if user.is_staff and new_user_email:
-        UserSettings.new(new_user_email,
-                         new_user_email,
-                         can_download=True,
-                         )
     return render(request, 'mediaviewer/settingsresults.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
@@ -119,3 +112,22 @@ def submitsitesettings(request):
         raise Exception("User is not a staffer!")
     return render(request, 'mediaviewer/settingsresults.html', context)
 
+@login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
+@logAccessInfo
+def submitnewuser(request):
+    user = request.user
+    context = {}
+    context['header'] = generateHeader('submitnewuser', request)
+    setSiteWideContext(context, request)
+
+    new_user_email = request.POST.get('new_user_email')
+    if user.is_staff:
+        if new_user_email:
+            UserSettings.new(new_user_email,
+                             new_user_email,
+                             can_download=True,
+                             )
+    else:
+        raise Exception("User is not a staffer!")
+    return render(request, 'mediaviewer/settingsresults.html', context)
