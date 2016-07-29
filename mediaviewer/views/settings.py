@@ -87,6 +87,13 @@ def submitsettings(request):
 
     settings.save()
     user.save()
+
+    new_user_email = request.POST.get('new_user_email')
+    if user.is_staff and new_user_email:
+        UserSettings.new(new_user_email,
+                         new_user_email,
+                         can_download=True,
+                         )
     return render(request, 'mediaviewer/settingsresults.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
