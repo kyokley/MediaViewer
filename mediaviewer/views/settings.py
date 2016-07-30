@@ -124,6 +124,8 @@ def submitnewuser(request):
     new_user_email = request.POST.get('new_user_email')
     if user.is_staff:
         if new_user_email:
+            # TODO: Add exception handling for already existent email address
+            # Same for above
             UserSettings.new(new_user_email,
                              new_user_email,
                              can_download=True,
