@@ -135,85 +135,85 @@
             </ul>
         </div>
     </form>
+    {% if user.is_staff %}
     <form action="{% url 'mediaviewer:submitsitesettings' %}" method="post">
         {% csrf_token %}
-        {% if user.is_staff %}
-            <div class="well well-sm">
-                <h2>Site Settings</h2>
-                <label>Site Greeting:</label>
-                <textarea class="form-control site-greeting" rows="5" id="greeting" class="greeting" name="greeting">{{ greeting }}</textarea>
-                <ul>
-                    <p></p>
-                    <div class="siteinput">
-                        <input type='submit' value='Save Site Settings &raquo;' id='submit_site_settings' name='submit_site_settings' class="btn primary"/>
-                    </div>
-                </ul>
-            </div>
-        {% endif %}
+        <div class="well well-sm">
+            <h2>Site Settings</h2>
+            <label>Site Greeting:</label>
+            <textarea class="form-control site-greeting" rows="5" id="greeting" class="greeting" name="greeting">{{ greeting }}</textarea>
+            <ul>
+                <p></p>
+                <div class="siteinput">
+                    <input type='submit' value='Save Site Settings &raquo;' id='submit_site_settings' name='submit_site_settings' class="btn primary"/>
+                </div>
+            </ul>
+        </div>
     </form>
+    {% endif %}
+    {% if user.is_staff %}
     <form action="{% url 'mediaviewer:submitsitewidemessage' %}" method="post">
         {% csrf_token %}
-        {% if user.is_staff %}
-            <div class="well well-sm">
-                <h2>Sitewide Message</h2>
-                <label>Message:</label>
-                <textarea class="form-control site-message" rows="5" id="sitemessage" class="sitemessage" name="sitemessage"></textarea>
-                <div class="input">
-                    <ul class="inputs-list">
-                        <ul>
-                            <label>
-                                <input type="radio"  checked name="level" value="Info"/>
-                                <span>Info</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="level" value="Success"/>
-                                <span>Success</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="level" value="Warning"/>
-                                <span>Warning</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="level" value="Error"/>
-                                <span>Error</span>
-                            </label>
-                        </ul>
+        <div class="well well-sm">
+            <h2>Sitewide Message</h2>
+            <label>Message:</label>
+            <textarea class="form-control site-message" rows="5" id="sitemessage" class="sitemessage" name="sitemessage"></textarea>
+            <div class="input">
+                <ul class="inputs-list">
+                    <ul>
+                        <label>
+                            <input type="radio"  checked name="level" value="Info"/>
+                            <span>Info</span>
+                        </label>
                     </ul>
+                    <ul>
+                        <label>
+                            <input type="radio" name="level" value="Success"/>
+                            <span>Success</span>
+                        </label>
+                    </ul>
+                    <ul>
+                        <label>
+                            <input type="radio" name="level" value="Warning"/>
+                            <span>Warning</span>
+                        </label>
+                    </ul>
+                    <ul>
+                        <label>
+                            <input type="radio" name="level" value="Error"/>
+                            <span>Error</span>
+                        </label>
+                    </ul>
+                </ul>
+            </div>
+            <ul>
+                <p></p>
+                <div class="sitemessageinput">
+                    <input type='submit' value='Send Message &raquo;' id='submit_site_message' name='submit_site_message' class="btn primary"/>
                 </div>
+            </ul>
+        </div>
+    </form>
+    {% endif %}
+    {% if user.is_staff %}
+    <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
+            {% csrf_token %}
+            <div class="well well-sm">
+                <h2>New User</h2>
                 <ul>
-                    <p></p>
+                    <label>Email Address:</label>
+                    <div class="input">
+                        <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
+                    </div>
+                </ul>
+                <ul>
                     <div class="sitemessageinput">
-                        <input type='submit' value='Send Message &raquo;' id='submit_site_message' name='submit_site_message' class="btn primary"/>
+                        <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn primary"/>
                     </div>
                 </ul>
             </div>
-        {% endif %}
     </form>
-    <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
-            {% csrf_token %}
-            {% if user.is_staff %}
-                <div class="well well-sm">
-                    <h2>New User</h2>
-                    <ul>
-                        <label>Email Address:</label>
-                        <div class="input">
-                            <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
-                        </div>
-                    </ul>
-                    <ul>
-                        <div class="sitemessageinput">
-                            <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn primary"/>
-                        </div>
-                    </ul>
-                </div>
-            {% endif %}
-    </form>
+    {% endif %}
 </div> <!-- /container -->
 {% endblock %}
 

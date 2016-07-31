@@ -9,8 +9,14 @@
     <div class="container">
         <div class="jumbotron">
             {% block jumbotron %}
-            <h1>Settings Saved!</h1>
-            <h3>Your settings have been saved successfully</h3>
+            {% if successful %}
+                <h1>Settings Saved!</h1>
+                <h3>Your settings have been saved successfully</h3>
+            {% else %}
+                <h1>Settings Failed!</h1>
+                <h3>There was an error</h3>
+            {% endif %}
+            <h4>{{ errMsg }}</h4>
             <a href="/mediaviewer/settings/">Return to Settings</a>
             <p/>
             <a href="/mediaviewer/">Go Home</a>

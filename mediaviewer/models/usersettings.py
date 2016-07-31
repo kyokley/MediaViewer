@@ -10,6 +10,7 @@ from mysite.settings import (TEMPORARY_PASSWORD,
 from mediaviewer.forms import FormlessPasswordReset
 from datetime import datetime
 import pytz
+import re
 
 LOCAL_IP = 'local_ip'
 BANGUP_IP = 'bangup'
@@ -24,6 +25,10 @@ FILENAME_SORT = 'filename_sort'
 
 class ImproperLogin(Exception):
     pass
+class BadEmail(Exception):
+    pass
+
+EMAIL_REGEX = re.compile('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
 
 class UserSettings(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
@@ -64,6 +69,8 @@ class UserSettings(models.Model):
             ):
         ''' Create new User and associated UserSettings '''
 
+        validate_email(email)
+
         newUser = User()
         newUser.username = name
         newUser.is_staff = is_staff
@@ -103,3 +110,7 @@ def case_insensitive_authenticate(username, password):
         return None
 
     return authenticate(username=user.username, password=password)
+
+def validate_email(email):
+    if not EMAIL_REGEX.search(email):
+        raise BadEmail('Email address is not valid')

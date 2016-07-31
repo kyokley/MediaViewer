@@ -11,6 +11,8 @@ from django.shortcuts import render
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.log import log
+from django.core.exceptions import ValidationError
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -46,7 +48,7 @@ def settings(request):
 @check_force_password_change
 @logAccessInfo
 def submitsettings(request):
-    context = {}
+    context = {'successful': True}
     context['header'] = generateHeader('submitsettings', request)
     setSiteWideContext(context, request)
 
@@ -94,7 +96,7 @@ def submitsettings(request):
 @logAccessInfo
 def submitsitesettings(request):
     user = request.user
-    context = {}
+    context = {'successful': True}
     context['header'] = generateHeader('submitsitesettings', request)
     setSiteWideContext(context, request)
 
@@ -109,7 +111,9 @@ def submitsitesettings(request):
             newSiteGreeting.user = request.user
             newSiteGreeting.save()
     else:
-        raise Exception("User is not a staffer!")
+        log.error("User is not a staffer!")
+        context['errMsg'] = 'Unauthorized access attempted'
+        context['successful'] = False
     return render(request, 'mediaviewer/settingsresults.html', context)
 
 @login_required(login_url='/mediaviewer/login/')
@@ -117,19 +121,26 @@ def submitsitesettings(request):
 @logAccessInfo
 def submitnewuser(request):
     user = request.user
-    context = {}
+    context = {'successful': True}
     context['header'] = generateHeader('submitnewuser', request)
     setSiteWideContext(context, request)
 
     new_user_email = request.POST.get('new_user_email')
     if user.is_staff:
         if new_user_email:
-            # TODO: Add exception handling for already existent email address
-            # Same for above
-            UserSettings.new(new_user_email,
-                             new_user_email,
-                             can_download=True,
-                             )
+            try:
+                UserSettings.new(new_user_email,
+                                 new_user_email,
+                                 can_download=True,
+                                 )
+            except ValidationError, e:
+                context['successful'] = False
+                context['errMsg'] = e.message
+            except Exception, e:
+                context['successful'] = False
+                context['errMsg'] = str(e)
     else:
-        raise Exception("User is not a staffer!")
+        log.error("User is not a staffer!")
+        context['errMsg'] = 'Unauthorized access attempted'
+        context['successful'] = False
     return render(request, 'mediaviewer/settingsresults.html', context)
