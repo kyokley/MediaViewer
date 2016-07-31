@@ -21,7 +21,6 @@ def reset_confirm(request, uidb64=None, token=None):
                                   set_password_form=MVSetPasswordForm,
                                   post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
 
-
 def reset(request):
     if request.method == 'POST' and request.POST['email']:
         email = request.POST['email']
@@ -67,9 +66,9 @@ def change_password(request):
 
 def change_password_submit(request):
     context = {}
-    context['header'] = generateHeader('change_password', request)
+    context['header'] = generateHeader('change_password_submit', request)
     setSiteWideContext(context, request)
     return password_change_done(request,
                                 template_name='mediaviewer/change_password_submit.html',
-                                extra_context={'header': generateHeader('change_password_submit', request)},
+                                extra_context=context,
                                 )

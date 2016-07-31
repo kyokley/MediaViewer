@@ -94,6 +94,9 @@ class MVSetPasswordForm(MVSaveBase):
 
 class MVPasswordChangeForm(PasswordChangeForm, MVSaveBase):
     def clean_new_password1(self):
+        if self.errors:
+            return
+
         old_password = self.cleaned_data['old_password']
         password1 = self.cleaned_data.get('new_password1')
         if old_password == password1:
