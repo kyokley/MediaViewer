@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from mediaviewer.views.settings import submitnewuser
 from mediaviewer.models.usersettings import UserSettings
+from django.core.exceptions import ValidationError
 
 @mock.patch('mediaviewer.views.settings.UserSettings.new')
 @mock.patch('mediaviewer.views.settings.log')
@@ -45,18 +46,66 @@ class TestNewUserView(TestCase):
         self.assertFalse(mock_new.called)
 
     def test_newUserWithStaffer(self,
-                                   mock_generateHeader,
-                                   mock_setSiteWideContext,
-                                   mock_render,
-                                   mock_log,
-                                   mock_new,
-                                   ):
+                                mock_generateHeader,
+                                mock_setSiteWideContext,
+                                mock_render,
+                                mock_log,
+                                mock_new,
+                                ):
         self.user.is_staff = True
         expected_context = {'successful': True,
                             'header': 'header',
                             }
         mock_generateHeader.return_value = 'header'
         submitnewuser(self.request)
+        mock_render.assert_called_once_with(self.request,
+                                            'mediaviewer/settingsresults.html',
+                                            expected_context)
+        self.assertFalse(mock_log.error.called)
+        mock_new.assert_called_once_with(self.new_user_email,
+                                         self.new_user_email,
+                                         can_download=True)
+
+    def test_newUserRaisesValidationError(self,
+                                          mock_generateHeader,
+                                          mock_setSiteWideContext,
+                                          mock_render,
+                                          mock_log,
+                                          mock_new,
+                                          ):
+        self.user.is_staff = True
+        expected_context = {'successful': False,
+                            'header': 'header',
+                            'errMsg': 'This is an error message',
+                            }
+        mock_generateHeader.return_value = 'header'
+        mock_new.side_effect = ValidationError('This is an error message')
+        submitnewuser(self.request)
+
+        mock_render.assert_called_once_with(self.request,
+                                            'mediaviewer/settingsresults.html',
+                                            expected_context)
+        self.assertFalse(mock_log.error.called)
+        mock_new.assert_called_once_with(self.new_user_email,
+                                         self.new_user_email,
+                                         can_download=True)
+
+    def test_newUserRaisesException(self,
+                                    mock_generateHeader,
+                                    mock_setSiteWideContext,
+                                    mock_render,
+                                    mock_log,
+                                    mock_new,
+                                    ):
+        self.user.is_staff = True
+        expected_context = {'successful': False,
+                            'header': 'header',
+                            'errMsg': 'This is an error message',
+                            }
+        mock_generateHeader.return_value = 'header'
+        mock_new.side_effect = Exception('This is an error message')
+        submitnewuser(self.request)
+
         mock_render.assert_called_once_with(self.request,
                                             'mediaviewer/settingsresults.html',
                                             expected_context)
