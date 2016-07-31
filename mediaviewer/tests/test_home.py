@@ -6,10 +6,6 @@ from mediaviewer.views.home import (generateHeader,
 from mediaviewer.models.usersettings import DEFAULT_SITE_THEME, FILENAME_SORT
 from django.contrib.auth.models import User
 
-# These imports are required to allow tests to run
-from mediaviewer.models.path import Path
-from mediaviewer.models.datatransmission import DataTransmission
-
 import mock
 from mock import call
 
