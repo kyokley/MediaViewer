@@ -339,5 +339,5 @@ function validatePassword(password){
     var digit_regex = /\d/;
     var char_regex = /[^0-9]/;
     var test_string = String(password);
-    return test_string.search(digit_regex) !== -1 && test_string.search(char_regex) !== -1
+    return test_string.search(digit_regex) !== -1 && test_string.search(char_regex) !== -1 && test_string.length >= 6
 }
