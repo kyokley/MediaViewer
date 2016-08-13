@@ -308,7 +308,7 @@ class File(models.Model):
                     self.filenamescrapeformat.nameRegex).findall(self.filename)
             name = nameRegex and nameRegex[0] or None
         return name and (self.filenamescrapeformat.subPeriods and
-                         name.replace('.', ' ').title() or
+                         name.replace('.', ' ').replace('-', ' ').title() or
                          name).strip() or self.filename
 
     def getScrapedSeason(self):
