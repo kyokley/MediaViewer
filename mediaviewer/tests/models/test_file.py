@@ -38,3 +38,23 @@ class TestGetScrapedNameReplacements(TestCase):
         expected = 'This-is-a-sample-file'
         actual = self.file.getScrapedName()
         self.assertEqual(expected, actual)
+
+class TestGetScrapedNameOverrideFileName(TestCase):
+    def setUp(self):
+        self.file = File()
+
+    def test_no_override_filename(self):
+        self.file.filename = 'This.is.a.sample.file'
+        self.file.override_filename = None
+
+        expected = 'This.is.a.sample.file'
+        actual = self.file.getScrapedName()
+        self.assertEqual(expected, actual)
+
+    def test_override_filename(self):
+        self.file.filename = 'This.is.a.sample.file'
+        self.file.override_filename = 'overrided file name'
+
+        expected = 'overrided file name'
+        actual = self.file.getScrapedName()
+        self.assertEqual(expected, actual)
