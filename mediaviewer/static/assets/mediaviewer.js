@@ -158,7 +158,9 @@ function openDownloadWindow(id){
     },
     success: function(json){
         if(json.errmsg === ""){
-            var win = window.open(json.downloadLink, "_blank", "height=400, width=812, resizeable=yes");
+            var win = window.open(json.downloadLink, "_blank", "height=400, width=812, resizeable=yes, rel=noopener noreferrer");
+            win.opener = null;
+            win.location = json.downloadLink;
             win.focus();
         } else {
             alert(json.errmsg);
