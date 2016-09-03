@@ -6,6 +6,10 @@ class VideoProgress(models.Model):
     offset = models.DecimalField(max_digits=9, decimal_places=3)
     date_edited = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        app_label = 'mediaviewer'
+        db_table = 'videoprogress'
+
     @classmethod
     def new(cls,
             user,
