@@ -18,6 +18,7 @@ class VideoProgress(models.Model):
         vp = cls()
         vp.user = user
         vp.filename = filename
+        vp.offset = offset
         vp.save()
         return vp
 

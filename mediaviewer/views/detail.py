@@ -75,14 +75,14 @@ def ajaxviewed(request):
 
     if errmsg:
         response['errmsg'] = errmsg
-        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+        return HttpResponse(json.dumps(response), content_type='application/javascript')
 
     file.markFileViewed(user, viewed)
 
     response['fileid'] = fileid
     response['viewed'] = viewed
 
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')
 
 @csrf_exempt
 def ajaxsuperviewed(request):
@@ -126,4 +126,4 @@ def ajaxdownloadbutton(request):
     else:
         response = {'errmsg': 'An error has occurred'}
 
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')
