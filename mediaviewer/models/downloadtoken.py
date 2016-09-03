@@ -69,3 +69,7 @@ class DownloadToken(models.Model):
             if old_token:
                 old_token.delete()
         return dt
+
+    @classmethod
+    def getByGUID(cls, guid):
+        return cls.objects.filter(guid=guid).first()

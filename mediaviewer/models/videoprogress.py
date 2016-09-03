@@ -1,6 +1,6 @@
 from django.db import models
 
-class VideoProgress(models.model):
+class VideoProgress(models.Model):
     user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
     filename = models.TextField(db_column='filename')
     offset = models.DecimalField(max_digits=9, decimal_places=3)
@@ -15,6 +15,13 @@ class VideoProgress(models.model):
         vp.user = user
         vp.filename = filename
         vp.save()
+        return vp
+
+    @classmethod
+    def get(cls, user, filename):
+        vp = (cls.objects.filter(user=user)
+                         .filter(filename=filename)
+                         .first())
         return vp
 
     @classmethod
