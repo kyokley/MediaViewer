@@ -36,9 +36,9 @@ class TestSetSiteWideContext(TestCase):
         self.assertFalse(mock_add_message.called)
 
     def test_not_staff_not_logged_in(self,
-                                    mock_getLastWaiterStatus,
-                                    mock_getMessageForUser,
-                                    mock_add_message):
+                                     mock_getLastWaiterStatus,
+                                     mock_getMessageForUser,
+                                     mock_add_message):
         self.user.is_staff = False
         self.user.is_authenticated.return_value = False
 
@@ -53,9 +53,9 @@ class TestSetSiteWideContext(TestCase):
         self.assertFalse(mock_add_message.called)
 
     def test_is_staff_is_logged_in(self,
-                                    mock_getLastWaiterStatus,
-                                    mock_getMessageForUser,
-                                    mock_add_message):
+                                   mock_getLastWaiterStatus,
+                                   mock_getMessageForUser,
+                                   mock_add_message):
         self.user.is_staff = True
         self.user.is_authenticated.return_value = True
         self.user.settings.return_value = None
@@ -98,7 +98,7 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.request.user = self.user
 
     def test_home_is_active(self,
-                                     mock_HeaderHelper):
+                            mock_HeaderHelper):
         mock_headers = mock.MagicMock()
         mock_HeaderHelper.return_value = mock_headers
         page = 'home'
@@ -114,7 +114,7 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.assertFalse(mock_headers.activeRequestsPage.called)
 
     def test_movies_is_active(self,
-                                     mock_HeaderHelper):
+                              mock_HeaderHelper):
         mock_headers = mock.MagicMock()
         mock_HeaderHelper.return_value = mock_headers
         page = 'movies'
@@ -130,7 +130,7 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.assertFalse(mock_headers.activeRequestsPage.called)
 
     def test_tvshows_is_active(self,
-                                     mock_HeaderHelper):
+                               mock_HeaderHelper):
         mock_headers = mock.MagicMock()
         mock_HeaderHelper.return_value = mock_headers
         page = 'tvshows'
@@ -146,7 +146,7 @@ class TestGenerateHeaderUserIsStaff(TestCase):
         self.assertFalse(mock_headers.activeRequestsPage.called)
 
     def test_requests_is_active(self,
-                                     mock_HeaderHelper):
+                                mock_HeaderHelper):
         mock_headers = mock.MagicMock()
         mock_HeaderHelper.return_value = mock_headers
         page = 'requests'
