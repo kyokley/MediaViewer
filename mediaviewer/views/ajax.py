@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import json
+import os
 
 @csrf_exempt
 def ajaxvideoprogress(request, guid, filename):
@@ -17,12 +18,14 @@ def ajaxvideoprogress(request, guid, filename):
                             status=412)
 
     user = dt.user
+    if dt.ismovie:
+        filename = os.path.join(dt.filename, filename)
 
     if request.method == 'GET':
         vp = VideoProgress.get(user, filename)
         if vp:
             data['offset'] = float(vp.offset)
-            data['date_edited'] = vp.date_edited
+            data['date_edited'] = vp.date_edited.isoformat()
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=200)
