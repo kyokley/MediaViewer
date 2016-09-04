@@ -22,6 +22,7 @@ def ajaxvideoprogress(request, guid, filename):
         vp = VideoProgress.get(user, filename)
         if vp:
             data['offset'] = vp.offset
+            data['date_edited'] = vp.date_edited
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=200)
