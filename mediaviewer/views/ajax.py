@@ -21,7 +21,7 @@ def ajaxvideoprogress(request, guid, filename):
     if request.method == 'GET':
         vp = VideoProgress.get(user, filename)
         if vp:
-            data['offset'] = vp.offset
+            data['offset'] = float(vp.offset)
             data['date_edited'] = vp.date_edited
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
@@ -30,7 +30,7 @@ def ajaxvideoprogress(request, guid, filename):
         vp = VideoProgress.createOrUpdate(user,
                                           filename,
                                           request.POST['offset'])
-        data['offset'] = vp.offset
+        data['offset'] = float(vp.offset)
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=200)
