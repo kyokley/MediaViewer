@@ -90,7 +90,7 @@ def ajaxvote(request):
     response['numberOfVotes'] = requestObj.numberOfVotes()
     response['requestid'] = requestid
 
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')
 
 @logAccessInfo
 def ajaxdone(request):
@@ -102,10 +102,10 @@ def ajaxdone(request):
     user = request.user
     if not user.is_authenticated():
         response['errmsg'] = 'User not authenticated. Refresh and try again.'
-        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+        return HttpResponse(json.dumps(response), content_type='application/javascript')
     elif not user or not user.is_staff:
         response['errmsg'] = 'User is not a staffer'
-        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+        return HttpResponse(json.dumps(response), content_type='application/javascript')
 
     done = True
 
@@ -126,7 +126,7 @@ def ajaxdone(request):
         else:
             response['errmsg'] = 'An error has occurred'
 
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')
 
 @logAccessInfo
 def ajaxgiveup(request):
@@ -138,10 +138,10 @@ def ajaxgiveup(request):
     user = request.user
     if not user.is_authenticated():
         response['errmsg'] = 'User not authenticated. Refresh and try again.'
-        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+        return HttpResponse(json.dumps(response), content_type='application/javascript')
     elif not user or not user.is_staff:
         response['errmsg'] = 'User is not a staffer'
-        return HttpResponse(json.dumps(response), mimetype='application/javascript')
+        return HttpResponse(json.dumps(response), content_type='application/javascript')
 
     requestObj.done = True
     requestObj.save()
@@ -160,4 +160,4 @@ def ajaxgiveup(request):
         else:
             response['errmsg'] = 'An error has occurred'
 
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')

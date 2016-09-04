@@ -127,4 +127,4 @@ def ajaxreport(request):
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')

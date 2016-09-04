@@ -37,5 +37,5 @@ def ajaxwaiterstatus(request):
     newStatus.datecreated = dateObj.utcnow().replace(tzinfo=utc)
     newStatus.save()
 
-    return HttpResponse(json.dumps(response), mimetype='application/javascript')
+    return HttpResponse(json.dumps(response), content_type='application/javascript')
 
