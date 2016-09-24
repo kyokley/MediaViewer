@@ -43,9 +43,7 @@ def signin(request):
                     login(request, user)
                     context['loggedin'] = True
                     context['user'] = request.user
-                    LoginEvent.new(request.user,
-                                   dateObj.utcnow().replace(tzinfo=utc),
-                                   )
+                    LoginEvent.new(request.user)
 
         if user:
             settings = user.settings()

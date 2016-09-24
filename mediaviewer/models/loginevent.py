@@ -1,4 +1,8 @@
-from mysite.settings import MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS
+from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS,
+                             TIME_ZONE,
+                             )
+import pytz
+from datetime import datetime
 from django.db import models
 
 class LoginEvent(models.Model):
@@ -15,13 +19,14 @@ class LoginEvent(models.Model):
                                           self.datecreated)
 
     @classmethod
-    def new(cls, user, datecreated):
+    def new(cls, user):
         le = cls()
         le.user = user
-        le.datecreated = datecreated
+        le.datecreated = datetime.now(pytz.timezone(TIME_ZONE))
         le.save()
         number_of_events = cls.objects.count()
         if number_of_events > MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS:
             oldest_event = cls.objects.order_by('id').first()
             if oldest_event:
                 oldest_event.delete()
+        return le

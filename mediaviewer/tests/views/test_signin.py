@@ -39,6 +39,12 @@ class TestSignin(TestCase):
         self.mock_LoginEvent = self.LoginEvent_patcher.start()
         self.addCleanup(self.LoginEvent_patcher.stop)
 
+        self.httpResponseRedirect_patcher = mock.patch('mediaviewer.views.signin.HttpResponseRedirect')
+        self.mock_httpResponseRedirect = self.httpResponseRedirect_patcher.start()
+        self.mock_redirect = mock.MagicMock()
+        self.mock_httpResponseRedirect.return_value = self.mock_redirect
+        self.addCleanup(self.httpResponseRedirect_patcher.stop)
+
         self.request = mock.MagicMock()
         self.user = mock.MagicMock()
         self.settings = mock.MagicMock()
@@ -92,12 +98,11 @@ class TestSignin(TestCase):
         self.mock_login.assert_called_once_with(self.request,
                                                 self.user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
-        self.assertFalse(self.user.settings.called)
-        self.mock_render.assert_called_once_with(self.request,
-                                                 'mediaviewer/signin.html',
-                                                 expected_context)
+        self.assertTrue(self.user.settings.called)
+        self.assertFalse(self.mock_render.called)
+        self.assertTrue(self.mock_httpResponseRedirect.called)
         self.assertEqual(ret_val,
-                         self.mock_render_return)
+                         self.mock_redirect)
 
     def test_request_POST_invalid_user(self):
         expected_context = {'loggedin': False,
