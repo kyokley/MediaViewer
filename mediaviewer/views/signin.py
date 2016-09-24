@@ -21,11 +21,12 @@ def signin(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context['header'] = generateHeader('signin', request)
     context['greeting'] = siteGreeting and siteGreeting.greeting or "SignIn"
-    setSiteWideContext(context, request)
     user = None
 
     if request.GET.has_key('next'):
         context['next'] = request.GET['next']
+
+    setSiteWideContext(context, request)
 
     try:
         if request.method == 'POST':
