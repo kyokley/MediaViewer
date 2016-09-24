@@ -44,6 +44,8 @@ def signin(request):
                     context['loggedin'] = True
                     context['user'] = request.user
                     LoginEvent.new(request.user)
+                else:
+                    raise ImproperLogin('User is no longer active')
 
         if user:
             settings = user.settings()
