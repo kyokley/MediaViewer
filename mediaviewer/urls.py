@@ -1,5 +1,5 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from rest_framework import routers
 from django.shortcuts import redirect
 from mysite.settings import IS_SYNCING
@@ -24,7 +24,7 @@ from mediaviewer.views import (home,
 
 router = routers.DefaultRouter()
 
-urlpatterns = patterns('',
+urlpatterns = [
                        url(r'^$', home.home, name='home'),
                        url(r'^files/$', lambda x: redirect('/mediaviewer/files/display/0/')),
                        url(r'^files/display/(?P<items>\d+)/$', files.files, name='files'),
@@ -86,7 +86,7 @@ urlpatterns = patterns('',
                        url(r'^user/change_password_submit/$',
                            password_reset.change_password_submit,
                            name='change_password_submit'),
-                       )
+                       ]
 
 if not IS_SYNCING:
     from mediaviewer.api import (viewset,
