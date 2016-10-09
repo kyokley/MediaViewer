@@ -1,4 +1,6 @@
 start-uwsgi.sh
+daily.sh
+secret.txt
 *.log
 *.ini
 *.pyc

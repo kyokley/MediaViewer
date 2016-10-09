@@ -4,6 +4,26 @@ import logging
 from django.contrib.messages import constants as message_constants
 MESSAGE_TAGS = {message_constants.ERROR: 'danger'}
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Generate a secret key
+# Borrowed from https://gist.github.com/ndarville/3452907
+SECRET_FILE = os.path.join(BASE_DIR, 'secret.txt')
+try:
+    with open(SECRET_FILE, 'r') as secret_file:
+        SECRET_KEY = secret_file.read().strip()
+except IOError:
+    try:
+        import random
+        SECRET_KEY = ''.join([random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz'
+                                                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                                                           '0123456789!@#$%^&*(-_=+)')
+                                for i in range(50)])
+        with open(SECRET_FILE, 'w') as secret_file:
+            secret_file.write(SECRET_KEY)
+    except IOError:
+        Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
+
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 LOG_ACCESS_TIMINGS = False
@@ -88,8 +108,6 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = 'secretsecretsecret'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
