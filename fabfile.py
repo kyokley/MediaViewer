@@ -9,9 +9,10 @@ fab.env.colors = True
 
 OS_COMMANDS = ('sudo apt-get install aptitude',
                'sudo aptitude update',
-               'sudo aptitude install python-dev',
-               'sudo aptitude install python-pip',
-               'sudo aptitude install python-virtualenv supervisor uwsgi uwsgi-plugin-python nginx postgresql postgresql-server-dev-9.3',
+               'sudo aptitude install python-dev -y',
+               'sudo aptitude install python-pip -y',
+               'sudo aptitude install python-virtualenv supervisor uwsgi uwsgi-plugin-python nginx postgresql postgresql-server-dev-9.5 -y',
+               'sudo aptitude install libffi-dev postfix -y',
                )
 
 certCommands = (
