@@ -1,5 +1,6 @@
 from django.db import models
 from dateutil import parser
+from mediaviewer.models.datatransmission import DataTransmission
 
 class Error(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -8,7 +9,7 @@ class Error(models.Model):
     ignore = models.BooleanField(db_column='ignore')
     file = models.ForeignKey('mediaviewer.File', null=True, db_column='fileid', blank=True)
     path = models.ForeignKey('mediaviewer.Path', null=True, db_column='pathid', blank=True)
-    datatransmission = models.ForeignKey('mediaviewer.DataTransmission', null=True, db_column='datatransmissionid', blank=True)
+    datatransmission = models.ForeignKey(DataTransmission, null=True, db_column='datatransmissionid', blank=True)
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'error'
