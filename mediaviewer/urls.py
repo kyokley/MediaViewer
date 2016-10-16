@@ -3,6 +3,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 from django.shortcuts import redirect
 from mysite.settings import IS_SYNCING
+from axes.decorators import watch_login
 
 from mediaviewer.views import (home,
                                files,
@@ -45,7 +46,7 @@ urlpatterns = [
                        url(r'^tvshows/summary/$', files.tvshowsummary, name='tvshowsummary'),
                        url(r'^movies/$', lambda x: redirect('/mediaviewer/movies/display/0/')),
                        url(r'^movies/display/(?P<items>\d+)/$', files.movies, name='movies'),
-                       url(r'^login/', signin.signin, name='signin'),
+                       url(r'^login/', watch_login(signin.signin), name='signin'),
                        url(r'^logout/', signout.signout, name='signout'),
                        url(r'^settings/', settings.settings, name='settings'),
                        url(r'^submitsettings/', settings.submitsettings, name='submitsettings'),
