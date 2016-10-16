@@ -1,7 +1,6 @@
 {% extends "files.html" %}
 <!DOCTYPE html>
 {% load staticfiles %}
-{% load url from future %}
     {% include title %}
     {% include css %}
 
@@ -24,25 +23,25 @@
             {% block main %}
             {% if paths %}
             <ul>
-                <table id="myTable" class="tablesorter table table-hover cell-border no-wrap dt-responsive"> 
-                    <thead> 
-                        <tr> 
-                            <th class='desktop'>ID</th> 
-                            <th class='all'>Short Name</th> 
-                            <th class='min-tablet-p'>Local Path</th> 
-                            <th class='min-tablet-l'>Remote Path</th> 
+                <table id="myTable" class="tablesorter table table-hover cell-border no-wrap dt-responsive">
+                    <thead>
+                        <tr>
+                            <th class='desktop'>ID</th>
+                            <th class='all'>Short Name</th>
+                            <th class='min-tablet-p'>Local Path</th>
+                            <th class='min-tablet-l'>Remote Path</th>
                             <th></th>
-                        </tr> 
-                    </thead> 
-                    <tbody> 
+                        </tr>
+                    </thead>
+                    <tbody>
                         {% for path in paths %}
-                        <tr> 
-                            <td>{{ path.id }}</td> 
-                            <td>{{ path.displayName }}</td> 
-                            <td>{{ path.localPath }}</td> 
-                            <td>{{ path.remotePath }}</td> 
+                        <tr>
+                            <td>{{ path.id }}</td>
+                            <td>{{ path.displayName }}</td>
+                            <td>{{ path.localPath }}</td>
+                            <td>{{ path.remotePath }}</td>
                             <td></td>
-                        </tr> 
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>

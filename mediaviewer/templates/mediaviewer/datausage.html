@@ -1,7 +1,6 @@
 {% extends "files.html" %}
 <!DOCTYPE html>
 {% load staticfiles %}
-{% load url from future %}
     {% include title %}
     {% include css %}
 
@@ -24,23 +23,23 @@
 
         {% block main %}
         {% if datausage %}
-        <table id="myTable" class="table table-striped cell-border"> 
-            <thead> 
-                <tr> 
-                    <th class="desktop"><center>ID</center></th> 
-                    <th class="all"><center>Date</center></th> 
-                    <th class="min-tablet-p"><center>Bytes Transferred (in MBs)</center></th> 
+        <table id="myTable" class="table table-striped cell-border">
+            <thead>
+                <tr>
+                    <th class="desktop"><center>ID</center></th>
+                    <th class="all"><center>Date</center></th>
+                    <th class="min-tablet-p"><center>Bytes Transferred (in MBs)</center></th>
                     <th></th>
-                </tr> 
-            </thead> 
-            <tbody> 
+                </tr>
+            </thead>
+            <tbody>
                 {% for data in datausage %}
-                <tr> 
-                    <td>{{ data.id }}</td> 
-                    <td>{{ data.date }}</td> 
-                    <td>{{ data.transferredInMBs }}</td> 
+                <tr>
+                    <td>{{ data.id }}</td>
+                    <td>{{ data.date }}</td>
+                    <td>{{ data.transferredInMBs }}</td>
                     <td></td>
-                </tr> 
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

@@ -1,7 +1,6 @@
 {% extends "files.html" %}
 <!DOCTYPE html>
 {% load staticfiles %}
-{% load url from future %}
     {% include title %}
     {% include css %}
 
@@ -22,27 +21,27 @@
 
         {% block main %}
         {% if userusage %}
-        <table id="myTable" class="table table-striped cell-border"> 
-            <thead> 
-                <tr> 
-                    <th class='desktop'><center>ID</center></th> 
-                    <th class='all'><center>Username</center></th> 
-                    <th class='all'><center>Date</center></th> 
-                    <th class='min-table-p'><center>Filename</center></th> 
-                    <th class='desktop'><center>Size</center></th> 
+        <table id="myTable" class="table table-striped cell-border">
+            <thead>
+                <tr>
+                    <th class='desktop'><center>ID</center></th>
+                    <th class='all'><center>Username</center></th>
+                    <th class='all'><center>Date</center></th>
+                    <th class='min-table-p'><center>Filename</center></th>
+                    <th class='desktop'><center>Size</center></th>
                     <th></th>
-                </tr> 
-            </thead> 
-            <tbody> 
+                </tr>
+            </thead>
+            <tbody>
                 {% for data in userusage %}
-                <tr> 
-                    <td>{{ data.id }}</td> 
-                    <td>{{ data.user.username }}</td> 
-                    <td>{{ data.localdatecreated }}</td> 
-                    <td>{{ data.filename }}</td> 
-                    <td>{{ data.size }}</td> 
+                <tr>
+                    <td>{{ data.id }}</td>
+                    <td>{{ data.user.username }}</td>
+                    <td>{{ data.localdatecreated }}</td>
+                    <td>{{ data.filename }}</td>
+                    <td>{{ data.size }}</td>
                     <td></td>
-                </tr> 
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
