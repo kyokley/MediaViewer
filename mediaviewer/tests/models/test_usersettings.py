@@ -186,14 +186,14 @@ class TestNewUser(TestCase):
                              self.email)
 
     def test_existing_email(self, mock_form):
-        with self.assertRaises(forms.ValidationError):
+        with self.assertRaises(IntegrityError):
             UserSettings.new(self.name,
                              self.existing_email)
 
     def test_existing_email_mixed_case(self, mock_form):
         test_email = 'ExIsTiNg@uSeR.CoM'
 
-        with self.assertRaises(forms.ValidationError):
+        with self.assertRaises(IntegrityError):
             UserSettings.new(self.name,
                              test_email)
 

@@ -4,6 +4,7 @@ from django.contrib.auth.models import (User,
                                         )
 from django.contrib.auth import authenticate
 from django.db import transaction
+from django.db.utils import IntegrityError
 from mysite.settings import (TEMPORARY_PASSWORD,
                              TIME_ZONE,
                              )
@@ -70,6 +71,11 @@ class UserSettings(models.Model):
         ''' Create new User and associated UserSettings '''
 
         validate_email(email)
+
+        if User.objects.filter(username__iexact=name).exists():
+            raise IntegrityError('Username already exists')
+        elif User.objects.filter(email__iexact=email).exists():
+            raise IntegrityError('Email already exists')
 
         newUser = User()
         newUser.username = name
