@@ -74,7 +74,7 @@ class TvPathViewSetTests(APITestCase):
         for k,v in response.data.items():
             actual = v
             expected = getattr(self.tvPath, k)
-            expected = expected(self.tvPath) if hasattr(expected, '__call__') else expected
+            expected = expected(self.test_user) if hasattr(expected, '__call__') else expected
             self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
 
     def test_get_path_list(self):
