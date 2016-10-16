@@ -58,5 +58,4 @@ def signin(request):
         else:
             context['error_message'] = 'Incorrect username or password!'
 
-    setSiteWideContext(context, request)
     return render(request, 'mediaviewer/signin.html', context)
