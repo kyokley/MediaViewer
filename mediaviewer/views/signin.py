@@ -6,8 +6,6 @@ from mediaviewer.views.home import (generateHeader,
                                     )
 from django.contrib.auth import login
 from mediaviewer.models.loginevent import LoginEvent
-from datetime import datetime as dateObj
-from django.utils.timezone import utc
 from django.http import HttpResponseRedirect
 from mysite.settings import DEBUG
 from mediaviewer.utils import logAccessInfo
@@ -25,8 +23,6 @@ def signin(request):
 
     if request.GET.has_key('next'):
         context['next'] = request.GET['next']
-
-    setSiteWideContext(context, request)
 
     try:
         if request.method == 'POST':
@@ -49,9 +45,10 @@ def signin(request):
 
         if user:
             settings = user.settings()
+            setSiteWideContext(context, request)
             if not user.email or settings.force_password_change:
                 return HttpResponseRedirect(reverse('mediaviewer:settings'))
-            elif request.POST.has_key('next'):
+            elif 'next' in request.POST and request.POST['next']:
                 return HttpResponseRedirect(request.POST['next'])
     except ImproperLogin, e:
         context['error_message'] = str(e)
@@ -61,4 +58,5 @@ def signin(request):
         else:
             context['error_message'] = 'Incorrect username or password!'
 
+    setSiteWideContext(context, request)
     return render(request, 'mediaviewer/signin.html', context)

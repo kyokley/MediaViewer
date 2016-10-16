@@ -258,7 +258,6 @@ MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3 # In hours
 
-#TEST_RUNNER = 'mediaviewer.tests.runner.MVDiscoverRunner'
 try:
     from local_settings import *
 except ImportError:
