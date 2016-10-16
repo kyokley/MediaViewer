@@ -1,7 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import Group
 from django.db.utils import IntegrityError
-from django import forms
 from mediaviewer.models.usersettings import (UserSettings,
                                              case_insensitive_authenticate,
                                              )
