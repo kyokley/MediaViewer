@@ -260,5 +260,8 @@ TOKEN_VALIDITY_LENGTH = 3 # In hours
 
 try:
     from local_settings import *
-except ImportError:
-    pass
+except ImportError as err:
+    print(err)
+
+import django
+django.setup()

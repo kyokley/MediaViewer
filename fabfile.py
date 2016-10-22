@@ -48,7 +48,6 @@ uid = {user}
 gid = {user}
 processes = 8
 threads = 2
-plugins = python
 module = django.core.handlers.wsgi:WSGIHandler()
 chmod-socket = 666
 '''
