@@ -97,7 +97,7 @@ server {{
     }}
 
     location /static {{
-        alias {installDir}/mediaviewer/static;
+        alias {installDir}/static;
         expires 1d;
     }}
 
