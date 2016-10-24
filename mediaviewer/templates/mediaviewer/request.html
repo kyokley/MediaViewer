@@ -71,16 +71,9 @@
 
     {% include footer %}
 
+    {% include javascript_include %}
+
     {% block javascript %}
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
-    <script src="{% static "DataTables-1.10.4/media/js/jquery.dataTables.min.js" %}"></script>
-    <script src="{% static "assets/dataTables.bootstrap.js" %}"></script>
-    <script src="{% static "assets/dataTables.responsive.min.js" %}"></script>
-    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
-    <script src="{% static "assets/mediaviewer.js" %}"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
