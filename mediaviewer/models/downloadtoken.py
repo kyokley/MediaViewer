@@ -3,7 +3,6 @@ from datetime import timedelta
 from datetime import datetime
 import pytz
 from mediaviewer.utils import getSomewhatUniqueID
-from mediaviewer.models.usersettings import DEFAULT_SITE_THEME
 from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
                              TIME_ZONE,
                              TOKEN_VALIDITY_LENGTH)
@@ -18,7 +17,6 @@ class DownloadToken(models.Model):
     filename = models.TextField(db_column='filename')
     ismovie = models.BooleanField(db_column='ismovie')
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
-    waitertheme = models.TextField(db_column='waiter_theme')
     displayname = models.TextField(db_column='display_name')
     file = models.ForeignKey('mediaviewer.File',
                              null=False,
@@ -57,8 +55,6 @@ class DownloadToken(models.Model):
             datecreated = datetime.now(pytz.timezone(TIME_ZONE))
         dt.datecreated = datecreated
 
-        settings = user.settings()
-        dt.waitertheme = settings and settings.site_theme or DEFAULT_SITE_THEME
         dt.displayname = file.displayName()
         dt.file = file
         dt.save()

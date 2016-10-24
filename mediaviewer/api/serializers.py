@@ -23,7 +23,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'datecreated',
                   'tokenid',
                   'isvalid',
-                  'waitertheme',
                   'displayname',
                   'auto_download',
                   )
@@ -36,7 +35,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     datecreated = serializers.DateTimeField(required=True)
     tokenid = serializers.IntegerField(required=True, source='id')
     isvalid = serializers.BooleanField(required=True)
-    waitertheme = serializers.CharField(required=True)
     displayname = serializers.CharField(required=True)
     auto_download = serializers.SerializerMethodField()
 

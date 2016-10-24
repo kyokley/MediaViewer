@@ -15,11 +15,6 @@ import re
 
 LOCAL_IP = 'local_ip'
 BANGUP_IP = 'bangup'
-DEFAULT_SITE_THEME = 'default'
-DARK_SITE_THEME = 'darkly'
-UNITED_SITE_THEME = 'united'
-JOURNAL_SITE_THEME = 'journal'
-READABLE_SITE_THEME = 'readable'
 
 TIMESTAMP_SORT = 'timestamp_sort'
 FILENAME_SORT = 'filename_sort'
@@ -37,7 +32,6 @@ class UserSettings(models.Model):
     ip_format = models.TextField(db_column='ip_format', blank=False, null=False)
     user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
     can_download = models.BooleanField(db_column='can_download', blank=False, null=False)
-    site_theme = models.TextField(db_column='site_theme')
     default_sort = models.TextField(db_column='default_sort')
     auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
     force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
@@ -64,7 +58,6 @@ class UserSettings(models.Model):
             is_superuser=False,
             ip_format=BANGUP_IP,
             default_sort=FILENAME_SORT,
-            site_theme=DEFAULT_SITE_THEME,
             can_download=True,
             send_email=True,
             ):
@@ -94,7 +87,6 @@ class UserSettings(models.Model):
         newSettings.user = newUser
         newSettings.ip_format = ip_format
         newSettings.default_sort = default_sort
-        newSettings.site_theme = site_theme
         newSettings.can_download = can_download
         newSettings.can_login = False
         newSettings.save()

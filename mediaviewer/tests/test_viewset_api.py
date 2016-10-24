@@ -19,7 +19,6 @@ class DownloadTokenViewSetTests(APITestCase):
         self.user_settings.user = self.test_user
         self.user_settings.ip_format = 'bangup'
         self.user_settings.can_download = True
-        self.user_settings.site_theme = 'darkly'
         self.user_settings.auto_download = True
         self.user_settings.datecreated = datetime.now(pytz.timezone('US/Central'))
         self.user_settings.dateedited = datetime.now(pytz.timezone('US/Central'))
@@ -50,7 +49,6 @@ class DownloadTokenViewSetTests(APITestCase):
         self.download_token.file = self.tvFile
         self.download_token.filename = 'name.of.file'
         self.download_token.ismovie = False
-        self.download_token.waitertheme = 'default'
         self.download_token.displayname = 'Scraped Filename'
         self.download_token.datecreated = datetime.now(pytz.timezone('US/Central'))
         self.download_token.dateedited = datetime.now(pytz.timezone('US/Central'))

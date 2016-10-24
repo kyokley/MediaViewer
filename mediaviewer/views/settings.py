@@ -3,7 +3,6 @@ from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.usersettings import (UserSettings,
                                       LOCAL_IP,
                                       BANGUP_IP,
-                                      DEFAULT_SITE_THEME,
                                       FILENAME_SORT,
                                       )
 from mediaviewer.views.home import generateHeader, setSiteWideContext
@@ -56,10 +55,6 @@ def submitsettings(request):
     if not default_sort:
         default_sort = FILENAME_SORT
 
-    site_theme = request.POST.get('site_theme')
-    if not site_theme:
-        site_theme = DEFAULT_SITE_THEME
-
     auto_download = request.POST.get('auto_download')
     if not auto_download:
         auto_download = False
@@ -74,14 +69,11 @@ def submitsettings(request):
         settings.user = request.user
         changed = True
     else:
-        changed = (settings.default_sort != default_sort or
-                   settings.site_theme != site_theme)
+        changed = settings.default_sort != default_sort
 
     settings.auto_download = auto_download
     settings.default_sort = default_sort
-    settings.site_theme = site_theme
     user.email = request.POST.get('email_field', user.email)
-    context['site_theme'] = settings.site_theme
     context['default_sort'] = settings.default_sort
 
     if changed:
