@@ -22,18 +22,7 @@
         <link href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
         <link href="{% static "datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
 
-        {% if site_theme == 'darkly' %}
-            <link href="{% static "assets/css/darkly.css" %}" rel="stylesheet">
-        {% elif site_theme == 'united' %}
-            <link href="{% static "assets/css/united.css" %}" rel="stylesheet">
-        {% elif site_theme == 'journal' %}
-            <link href="{% static "assets/css/journal.css" %}" rel="stylesheet">
-        {% elif site_theme == 'readable' %}
-            <link href="{% static "assets/css/readable.css" %}" rel="stylesheet">
-        {% else %}
-            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
-            <link href="{% static "bootstrap/dist/css/bootstrap-theme.min.css" %}" rel="stylesheet">
-        {% endif %}
+        <link href="{% static "bootswatch-dist/css/bootstrap.min.css" %}" rel="stylesheet">
     {% endblock %}
 
   </head>

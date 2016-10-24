@@ -232,7 +232,9 @@ BOWER_INSTALLED_APPS = ('jquery',
                         'datatables.net',
                         'datatables.net-bs',
                         'datatables.net-responsive',
-                        'datatables.net-responsive-bs')
+                        'datatables.net-responsive-bs',
+                        'bootswatch-dist#slate',
+                        )
 
 WAITER_HEAD = 'http://'
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1/waiter/dir/'
