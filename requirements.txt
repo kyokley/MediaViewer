@@ -10,3 +10,4 @@ djangorestframework
 pytz
 requests
 django-widget-tweaks
+django-bower
