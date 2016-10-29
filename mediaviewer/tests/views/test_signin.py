@@ -64,6 +64,7 @@ class TestSignin(TestCase):
                             'next': 'next_field'}
         self.request.method = 'GET'
         self.request.GET = {'next': 'next_field'}
+        self.user.is_authenticated.side_effect = [False, False]
         ret_val = signin(self.request)
 
         self.mock_generateHeader.assert_called_once_with('signin', self.request)
@@ -94,6 +95,7 @@ class TestSignin(TestCase):
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
+        self.user.is_authenticated.side_effect = [False, True]
 
         ret_val = signin(self.request)
 
@@ -107,12 +109,10 @@ class TestSignin(TestCase):
                                                 self.user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
         self.assertTrue(self.user.settings.called)
-        self.mock_render.assert_called_once_with(self.request,
-                                                 'mediaviewer/signin.html',
-                                                 expected_context)
-        self.assertFalse(self.mock_httpResponseRedirect.called)
+        self.assertFalse(self.mock_render.called)
+        self.mock_httpResponseRedirect.assert_called_once_with(self.mock_reverse_return)
         self.assertEqual(ret_val,
-                         self.mock_render_return)
+                         self.mock_redirect)
 
     def test_request_POST_valid_user_cannot_login(self):
         expected_context = {'loggedin': False,
@@ -129,6 +129,7 @@ class TestSignin(TestCase):
         self.settings.can_login = False
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
+        self.user.is_authenticated.side_effect = [False, False]
 
         ret_val = signin(self.request)
 
@@ -161,6 +162,7 @@ class TestSignin(TestCase):
         self.settings.can_login = True
         self.settings.force_password_change = True
         self.user.email = 'a@b.c'
+        self.user.is_authenticated.side_effect = [False, True]
 
         ret_val = signin(self.request)
 
@@ -194,6 +196,7 @@ class TestSignin(TestCase):
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = None
+        self.user.is_authenticated.side_effect = [False, True]
 
         ret_val = signin(self.request)
 
@@ -228,6 +231,7 @@ class TestSignin(TestCase):
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
+        self.user.is_authenticated.side_effect = [False, True]
 
         ret_val = signin(self.request)
 
@@ -263,6 +267,7 @@ class TestSignin(TestCase):
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
         self.user.is_active = False
+        self.user.is_authenticated.side_effect = [False, True]
 
         ret_val = signin(self.request)
 
@@ -282,6 +287,7 @@ class TestSignin(TestCase):
                          self.mock_render_return)
 
     def test_request_POST_invalid_user(self):
+        self.user.is_authenticated.return_value = False
         expected_context = {'loggedin': False,
                             'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
