@@ -26,6 +26,29 @@ sample_bad_result = {u'page': 1,
                      u'total_pages': 1,
                      u'total_results': 0}
 
+sample_imdb_result = {u'Actors': u'Actors',
+                      u'Awards': u'N/A',
+                      u'Country': u'USA',
+                      u'Director': u'N/A',
+                      u'Genre': u'Action, Crime, Drama',
+                      u'Language': u'English',
+                      u'Metascore': u'N/A',
+                      u'Plot': u"plot",
+                      u'Poster': u'/path/to/image.jpg',
+                      u'Rated': u'TV-14',
+                      u'Released': u'23 Jun 2016',
+                      u'Response': u'True',
+                      u'Runtime': u'60 min',
+                      u'Title': u'Show title',
+                      u'Type': u'series',
+                      u'Writer': u'writers',
+                      u'Year': u'2016\u2013',
+                      u'imdbID': u'tt123456',
+                      u'imdbRating': u'7.4',
+                      u'imdbVotes': u'2,022',
+                      u'totalSeasons': u'1',
+                      'url': u'/path/to/omdbapi'}
+
 class TestHandleTVDB(TestCase):
     def setUp(self):
         searchTVDBByName_patcher = mock.patch('mediaviewer.models.path.searchTVDBByName')
@@ -165,3 +188,72 @@ class TestHandleIMDB(TestCase):
         self.mock_getDataFromIMDBByPath.assert_called_once_with(self.path,
                                                                 useExtendedPlot=True)
         self.mock_assignDataToPoster.assert_any_call(self.mock_getDataFromIMDBByPath.return_value, self.poster, onlyExtendedPlot=True)
+
+class TestDownloadPosterData(TestCase):
+    def setUp(self):
+        isMovie_patcher = mock.patch('mediaviewer.models.path.Path.isMovie')
+        self.mock_isMovie = isMovie_patcher.start()
+        self.addCleanup(isMovie_patcher.stop)
+        self.mock_isMovie.return_value = False
+
+        getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.path.getDataFromIMDBByPath')
+        self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
+        self.addCleanup(getDataFromIMDBByPath_patcher.stop)
+
+        handleDataFromIMDB_patcher = mock.patch('mediaviewer.models.path.Path._handleDataFromIMDB')
+        self.mock_handleDataFromIMDB = handleDataFromIMDB_patcher.start()
+        self.addCleanup(handleDataFromIMDB_patcher.stop)
+
+        handleDataFromTVDB_patcher = mock.patch('mediaviewer.models.path.Path._handleDataFromTVDB')
+        self.mock_handleDataFromTVDB = handleDataFromTVDB_patcher.start()
+        self.addCleanup(handleDataFromTVDB_patcher.stop)
+
+        assignDataToPoster_patcher = mock.patch('mediaviewer.models.path.assignDataToPoster')
+        self.mock_assignDataToPoster = assignDataToPoster_patcher.start()
+        self.addCleanup(assignDataToPoster_patcher.stop)
+
+        self.path = Path()
+
+        self.poster = mock.create_autospec(PosterFile)
+
+    def test_isMovie(self):
+        self.mock_isMovie.return_value = True
+        expected = None
+        actual = self.path._downloadPosterData(self.poster)
+        self.assertEqual(expected, actual)
+
+    def test_no_data(self):
+        self.mock_getDataFromIMDBByPath.return_value = None
+
+        expected = self.poster
+        actual = self.path._downloadPosterData(self.poster)
+
+        self.assertFalse(self.mock_handleDataFromIMDB.called)
+        self.mock_handleDataFromTVDB.assert_called_once_with(self.poster)
+        self.assertFalse(self.mock_assignDataToPoster.called)
+        self.assertEqual(expected, actual)
+        self.assertEqual(self.poster.path, self.path)
+
+    def test_bad_data(self):
+        self.mock_getDataFromIMDBByPath.return_value = {'Response': 'False'}
+
+        expected = self.poster
+        actual = self.path._downloadPosterData(self.poster)
+
+        self.assertFalse(self.mock_handleDataFromIMDB.called)
+        self.mock_handleDataFromTVDB.assert_called_once_with(self.poster)
+        self.assertFalse(self.mock_assignDataToPoster.called)
+        self.assertEqual(expected, actual)
+        self.assertEqual(self.poster.path, self.path)
+
+    def test_valid_data(self):
+        self.mock_getDataFromIMDBByPath.return_value = sample_imdb_result
+
+        expected = self.poster
+        actual = self.path._downloadPosterData(self.poster)
+
+        self.mock_handleDataFromIMDB.assert_called_once_with(sample_imdb_result, self.poster)
+        self.assertFalse(self.mock_handleDataFromTVDB.called)
+        self.assertFalse(self.mock_assignDataToPoster.called)
+        self.assertEqual(expected, actual)
+        self.assertEqual(self.poster.path, self.path)

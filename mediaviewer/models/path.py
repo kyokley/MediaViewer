@@ -93,7 +93,12 @@ class Path(models.Model):
 
             imdbFailure = False
             data = getDataFromIMDBByPath(self, useExtendedPlot=False)
-            if 'Response' in data and data['Response'] == 'False':
+            try:
+                if not data or ('Response' in data and data['Response'] == 'False'):
+                    imdbFailure = True
+            except Exception, e:
+                log.error(e)
+                log.error('Got unexpected data: %s' % data)
                 imdbFailure = True
 
             if not imdbFailure:
