@@ -1,4 +1,4 @@
-import os, urllib2
+import os
 from mediaviewer.log import log
 from mysite.settings import (API_KEY,
                              OMDB_URL,

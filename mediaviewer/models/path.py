@@ -98,32 +98,38 @@ class Path(models.Model):
 
             if not imdbFailure:
                 log.info('Using IMDB data')
-                imgName = data['Poster'].rpartition('/')[-1]
-                saveImageToDisk(data['Poster'], imgName)
-                poster.image = imgName
-
-                assignDataToPoster(data, poster)
-
-                data = getDataFromIMDBByPath(self, useExtendedPlot=True)
-                assignDataToPoster(data, poster, onlyExtendedPlot=True)
+                self._handleDataFromIMDB(data, poster)
             else:
                 log.info('IMDB failed. Attempting to use TVDB.')
-                tvinfo = searchTVDBByName(self.defaultsearchstr)
-                if tvinfo:
-                    self.tvdb_id = tvinfo['results'][0]['id']
-                    result = tvinfo['results'][0]
-                    poster_path = result.get('poster_path', None)
-                    if poster_path:
-                        imgName = poster_path.rpartition('/')[-1]
-                        posterURL = '%s/%s/%s' % (tvdbConfig.url, tvdbConfig.still_size, imgName)
-                        saveImageToDisk(posterURL, imgName)
-                        poster.image = imgName
-                assignDataToPoster({}, poster, foundNone=True)
+                self._handleDataFromTVDB(poster)
         except Exception, e:
             log.error(str(e), exc_info=True)
             assignDataToPoster({}, poster, foundNone=True)
         poster.save()
         return poster
+
+    def _handleDataFromTVDB(self, poster):
+        tvinfo = searchTVDBByName(self.defaultsearchstr)
+        if tvinfo:
+            self.tvdb_id = tvinfo['results'][0]['id']
+            result = tvinfo['results'][0]
+            poster_path = result.get('poster_path', None)
+            if poster_path:
+                imgName = poster_path.rpartition('/')[-1]
+                posterURL = '%s/%s/%s' % (tvdbConfig.url, tvdbConfig.still_size, imgName)
+                saveImageToDisk(posterURL, imgName)
+                poster.image = imgName
+        assignDataToPoster({}, poster, foundNone=True)
+
+    def _handleDataFromIMDB(self, data, poster):
+        imgName = data['Poster'].rpartition('/')[-1]
+        saveImageToDisk(data['Poster'], imgName)
+        poster.image = imgName
+
+        assignDataToPoster(data, poster)
+
+        data = getDataFromIMDBByPath(self, useExtendedPlot=True)
+        assignDataToPoster(data, poster, onlyExtendedPlot=True)
 
     def _posterfileget(self):
         try:
