@@ -138,7 +138,7 @@ def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
 def assignDataToPoster(data, poster, onlyExtendedPlot=False, foundNone=False):
     if not foundNone:
         if not onlyExtendedPlot:
-            plot = data.get('Plot')
+            plot = data.get('Plot') or data.get('overview')
             poster.plot = (not plot or plot == 'undefined') and 'Plot not found' or plot
             genre = data.get('Genre', None)
             poster.genre = (not genre or genre == 'undefined') and 'Genre not found' or genre

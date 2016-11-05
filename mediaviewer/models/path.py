@@ -110,16 +110,18 @@ class Path(models.Model):
 
     def _handleDataFromTVDB(self, poster):
         tvinfo = searchTVDBByName(self.defaultsearchstr)
-        if tvinfo:
+        if tvinfo and tvinfo.get('results'):
             self.tvdb_id = tvinfo['results'][0]['id']
             result = tvinfo['results'][0]
-            poster_path = result.get('poster_path', None)
+            poster_path = result.get('poster_path')
             if poster_path:
                 imgName = poster_path.rpartition('/')[-1]
                 posterURL = '%s/%s/%s' % (tvdbConfig.url, tvdbConfig.still_size, imgName)
                 saveImageToDisk(posterURL, imgName)
                 poster.image = imgName
-        assignDataToPoster({}, poster, foundNone=True)
+            assignDataToPoster(result, poster, foundNone=False)
+        else:
+            assignDataToPoster({}, poster, foundNone=True)
 
     def _handleDataFromIMDB(self, data, poster):
         imgName = data['Poster'].rpartition('/')[-1]

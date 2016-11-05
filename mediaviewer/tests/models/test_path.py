@@ -55,7 +55,7 @@ class TestHandleTVDB(TestCase):
                                                              self.poster,
                                                              foundNone=True)
 
-    def test_no_poster_data(self):
+    def test_bad_result(self):
         self.mock_searchTVDBByName.return_value = sample_bad_result
         self.path._handleDataFromTVDB(self.poster)
 
@@ -64,3 +64,40 @@ class TestHandleTVDB(TestCase):
         self.mock_assignDataToPoster.assert_called_once_with({},
                                                              self.poster,
                                                              foundNone=True)
+
+    def test_no_poster_data(self):
+        mock_result = {u'page': 1,
+                       u'results': [{u'backdrop_path': u'/asdfasdf.jpg',
+                                     u'first_air_date': u'2016-09-30',
+                                     u'genre_ids': [18, 10765],
+                                     u'id': 12345,
+                                     u'name': u"show name",
+                                     u'origin_country': [u'US'],
+                                     u'original_language': u'en',
+                                     u'original_name': u"show name",
+                                     u'overview': u'show description',
+                                     u'popularity': 4.278642,
+                                     u'vote_average': 6.81,
+                                     u'vote_count': 41}],
+                       u'total_pages': 1,
+                       u'total_results': 1}
+        self.mock_searchTVDBByName.return_value = mock_result
+
+        self.path._handleDataFromTVDB(self.poster)
+
+        self.mock_searchTVDBByName.assert_called_once_with('test str')
+        self.assertFalse(self.mock_saveImageToDisk.called)
+        self.mock_assignDataToPoster.assert_called_once_with({u'backdrop_path': u'/asdfasdf.jpg',
+                                                              u'first_air_date': u'2016-09-30',
+                                                              u'genre_ids': [18, 10765],
+                                                              u'id': 12345,
+                                                              u'name': u"show name",
+                                                              u'origin_country': [u'US'],
+                                                              u'original_language': u'en',
+                                                              u'original_name': u"show name",
+                                                              u'overview': u'show description',
+                                                              u'popularity': 4.278642,
+                                                              u'vote_average': 6.81,
+                                                              u'vote_count': 41},
+                                                             self.poster,
+                                                             foundNone=False)
