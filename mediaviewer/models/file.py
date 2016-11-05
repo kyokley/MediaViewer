@@ -102,23 +102,9 @@ class File(models.Model):
                 episode = self.getScrapedEpisode()
                 episode = episode and int(episode)
 
-            log.debug('Attempt to get data from IMDB')
-            data = getDataFromIMDB(self, useExtendedPlot=True)
+            data = getDataFromIMDB(self, useExtendedPlot=False) or {}
 
-            if not data:
-                log.debug('No data found')
-                assignDataToPoster({}, poster, foundNone=True)
-                poster.save()
-                return poster
-
-            log.debug('Received data from IMDB')
-            posterURL = data.get('Poster', None)
-            if posterURL:
-                imgName = posterURL.rpartition('/')[-1]
-            else:
-                log.info('Failed to get poster url from IMDB for %s' % (self,))
-
-            if self.isMovie() or not season or not episode:
+            if not season or not episode:
                 log.debug('Skipping tvdb search')
             else:
                 if not self.path.tvdb_id:
@@ -136,16 +122,16 @@ class File(models.Model):
                                             episode)
 
                 if tvinfo:
-                    still_path = tvinfo.get('still_path', None)
+                    still_path = tvinfo.get('still_path')
                     if still_path:
                         imgName = still_path.rpartition('/')[-1]
                         posterURL = '%s/%s/%s' % (tvdbConfig.url,
                                                   tvdbConfig.still_size,
                                                   imgName)
-                    poster.extendedplot = tvinfo.get('overview', None) or ''
-                    poster.episodename = tvinfo.get('name', None) or None
+                    poster.extendedplot = tvinfo.get('overview', '')
+                    poster.episodename = tvinfo.get('name')
 
-            if posterURL:
+            if posterURL and imgName:
                 data['Poster'] = posterURL
                 try:
                     saveImageToDisk(posterURL, imgName)
