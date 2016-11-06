@@ -114,7 +114,7 @@ class Path(models.Model):
         return poster
 
     def _handleDataFromTVDB(self, poster):
-        tvinfo = searchTVDBByName(self.defaultsearchstr)
+        tvinfo = searchTVDBByName(self.defaultsearchstr or self.displayName)
         if tvinfo and tvinfo.get('results'):
             self.tvdb_id = tvinfo['results'][0]['id']
             result = tvinfo['results'][0]
