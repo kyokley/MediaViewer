@@ -102,7 +102,19 @@ class File(models.Model):
                 episode = self.getScrapedEpisode()
                 episode = episode and int(episode)
 
-            data = getDataFromIMDB(self, useExtendedPlot=False) or {}
+            log.debug('Attempt to get data from IMDB')
+            data = getDataFromIMDB(self, useExtendedPlot=True)
+
+            if data:
+                log.debug('Received data from IMDB')
+                posterURL = data.get('Poster')
+            else:
+                posterURL = None
+
+            if posterURL:
+                imgName = posterURL.rpartition('/')[-1]
+            else:
+                log.info('Failed to get poster url from IMDB for %s' % (self,))
 
             if not season or not episode:
                 log.debug('Skipping tvdb search')
@@ -131,8 +143,9 @@ class File(models.Model):
                     poster.extendedplot = tvinfo.get('overview', '')
                     poster.episodename = tvinfo.get('name')
 
-            if posterURL and imgName:
-                data['Poster'] = posterURL
+            if posterURL:
+                if data:
+                    data['Poster'] = posterURL
                 try:
                     saveImageToDisk(posterURL, imgName)
                     poster.image = imgName
@@ -140,7 +153,8 @@ class File(models.Model):
                     log.error(str(e), exc_info=True)
                     log.error('Failed to download image')
 
-            assignDataToPoster(data, poster)
+            if data:
+                assignDataToPoster(data, poster)
 
             if not poster.extendedplot:
                 log.debug('No extended plot from TVDB. Getting info from IMDB')
