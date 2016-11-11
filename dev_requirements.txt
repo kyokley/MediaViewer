@@ -1,4 +1,5 @@
 -r requirements.txt
+-r test_requirements.txt
 django-debug-toolbar
 bpython
 pdbpp
