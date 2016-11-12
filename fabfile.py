@@ -177,6 +177,7 @@ def add_cronjob(text):
 @decorators.hosts(['localhost'])
 def update_bower():
     run_command_list(NODE_COMMANDS)
+    fab.local('sudo npm install -g bower')
     fab.local('python manage.py bower install')
 
 @fab.task
