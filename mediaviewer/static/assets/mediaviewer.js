@@ -38,7 +38,6 @@ function prepareTableSorter($, sortOrder) {
 
     tableElement.dataTable({
         order: sortOrder,
-        stateSave: true,
         autoWidth: false,
         responsive: {
             details: {
