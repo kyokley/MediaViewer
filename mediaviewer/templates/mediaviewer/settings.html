@@ -53,43 +53,6 @@
                 </div>
             </ul>
             <ul>
-                <label>Site Theme:</label>
-                <div class="input">
-                    <ul class="inputs-list">
-                        <ul>
-                            <label>
-                                <input type="radio"  checked name="site_theme" value="default" id="default_site_theme"/>
-                                <span>Default</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="site_theme" value="darkly" id="darkly_site_theme"/>
-                                <span>Darkly</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="site_theme" value="united" id="united_site_theme"/>
-                                <span>United</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="site_theme" value="journal" id="journal_site_theme"/>
-                                <span>Journal</span>
-                            </label>
-                        </ul>
-                        <ul>
-                            <label>
-                                <input type="radio" name="site_theme" value="readable" id="readable_site_theme"/>
-                                <span>Readable</span>
-                            </label>
-                        </ul>
-                    </ul>
-                </div>
-            </ul>
-            <ul>
                 <label>Default Sort Field:</label>
                 <div class="input">
                     <ul class="inputs-list">
@@ -218,32 +181,15 @@
 
 {% include footer %}
 
+{% include javascript_include %}
+
 {% block javascript %}
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<!-- <script src="https://code.jquery.com/jquery-1.10.2.min.js"> -->
-    <script src="{% static "assets/jquery-1.10.1.min.js" %}"></script>
-    <script src="{% static "bootstrap-dist/js/bootstrap.min.js" %}"></script>
-    <script src="{% static "assets/mediaviewer.js" %}"></script>
     <script type="text/javascript">
 
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
               preparePage($);
               setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
-
-              {% if site_theme == 'darkly' %}
-                  jQuery('#darkly_site_theme').prop('checked', 'checked');
-              {% elif site_theme == 'united' %}
-                  jQuery('#united_site_theme').prop('checked', 'checked');
-              {% elif site_theme == 'journal' %}
-                  jQuery('#journal_site_theme').prop('checked', 'checked');
-              {% elif site_theme == 'readable' %}
-                  jQuery('#readable_site_theme').prop('checked', 'checked');
-              {% else %}
-                  jQuery('#default_site_theme').prop('checked', 'checked');
-              {% endif %}
 
               {% if default_sort == 'filename_sort' %}
                   jQuery('#filename_sort').prop('checked', 'checked');

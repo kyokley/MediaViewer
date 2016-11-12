@@ -5,6 +5,9 @@ from django.contrib.messages import constants as message_constants
 MESSAGE_TAGS = {message_constants.ERROR: 'danger'}
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), ".."),
+)
 
 # Generate a secret key
 # Borrowed from https://gist.github.com/ndarville/3452907
@@ -87,7 +90,7 @@ MEDIA_URL = '/static/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -105,6 +108,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -147,6 +151,7 @@ INSTALLED_APPS = (
     'widget_tweaks',
      #'django_memcached',
     'rest_framework',
+    'djangobower',
     'mediaviewer',
     'mediaviewer.models',
     'mediaviewer.views',
@@ -220,6 +225,16 @@ TEMPLATES = [
         },
     },
 ]
+
+BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
+BOWER_INSTALLED_APPS = ('jquery',
+                        'bootstrap',
+                        'datatables.net',
+                        'datatables.net-bs',
+                        'datatables.net-responsive',
+                        'datatables.net-responsive-bs',
+                        'bootswatch-dist#slate',
+                        )
 
 WAITER_HEAD = 'http://'
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1/waiter/dir/'

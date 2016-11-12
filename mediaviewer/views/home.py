@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 from mediaviewer.models.usersettings import (
-                                      DEFAULT_SITE_THEME,
                                       FILENAME_SORT,
                                       )
 from mediaviewer.models.message import Message
@@ -22,7 +21,6 @@ def setSiteWideContext(context, request, includeMessages=False):
         settings = user.settings()
         context['loggedin'] = True
         context['user'] = user
-        context['site_theme'] = settings and settings.site_theme or DEFAULT_SITE_THEME
         context['default_sort'] = settings and settings.default_sort or FILENAME_SORT
         if includeMessages:
             for message in Message.getMessagesForUser(request.user):
@@ -32,7 +30,6 @@ def setSiteWideContext(context, request, includeMessages=False):
                         extra_tags=str(message.id))
     else:
         context['loggedin'] = False
-        context['site_theme'] = DEFAULT_SITE_THEME
 
     context['is_staff'] = user.is_staff and 'true' or 'false'
     getLastWaiterStatus(context)

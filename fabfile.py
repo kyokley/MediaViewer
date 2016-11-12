@@ -15,6 +15,10 @@ OS_COMMANDS = ('sudo apt-get install aptitude',
                'sudo aptitude install libffi-dev postfix -y',
                )
 
+NODE_COMMANDS = (
+                 'sudo aptitude install npm',
+                 )
+
 certCommands = (
 'openssl genrsa -aes256 -out {installDir}/server/server.key 4096',
 'openssl req -new -key {installDir}/server/server.key -out {installDir}/server/server.csr',
@@ -97,7 +101,7 @@ server {{
     }}
 
     location /static {{
-        alias {installDir}/mediaviewer/static;
+        alias {installDir}/static;
         expires 1d;
     }}
 
@@ -149,8 +153,6 @@ def install_venv_requirements(installDir, venv_location, prefix):
                                           os.path.join(venv_location, 'bin', 'pip'),
                                           os.path.join(installDir, 'requirements.txt')))
 
-def deactivate_venv():
-    fab.local('deactivate')
 
 def run_command_list(commands, values=None):
     for command in commands:
@@ -170,6 +172,12 @@ def add_cronjob(text):
         fab.local('crontab -l > /tmp/crondump')
         fab.local('echo "%s 2> /dev/null" >> /tmp/crondump' % text)
         fab.local('crontab /tmp/crondump')
+
+@fab.task
+@decorators.hosts(['localhost'])
+def update_bower():
+    run_command_list(NODE_COMMANDS)
+    fab.local('python manage.py bower install')
 
 @fab.task
 @decorators.hosts(['localhost'])

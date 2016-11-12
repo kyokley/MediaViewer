@@ -3,7 +3,7 @@ from mediaviewer.views.home import (generateHeader,
                                     setSiteWideContext,
                                     getLastWaiterStatus,
                                     )
-from mediaviewer.models.usersettings import DEFAULT_SITE_THEME, FILENAME_SORT
+from mediaviewer.models.usersettings import FILENAME_SORT
 from django.contrib.auth.models import User
 
 import mock
@@ -28,8 +28,7 @@ class TestSetSiteWideContext(TestCase):
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {'site_theme': DEFAULT_SITE_THEME,
-                    'loggedin': False,
+        expected = {'loggedin': False,
                     'is_staff': 'true'}
         self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
         self.assertFalse(mock_getMessageForUser.called)
@@ -45,8 +44,7 @@ class TestSetSiteWideContext(TestCase):
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {'site_theme': DEFAULT_SITE_THEME,
-                    'loggedin': False,
+        expected = {'loggedin': False,
                     'is_staff': 'false'}
         self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
         self.assertFalse(mock_getMessageForUser.called)
@@ -63,8 +61,7 @@ class TestSetSiteWideContext(TestCase):
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {'site_theme': DEFAULT_SITE_THEME,
-                    'loggedin': True,
+        expected = {'loggedin': True,
                     'is_staff': 'true',
                     'default_sort': FILENAME_SORT,
                     'user': self.user}
