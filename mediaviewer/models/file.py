@@ -298,6 +298,9 @@ class File(models.Model):
         if self.override_filename:
             return self.override_filename
 
+        if self.path.override_display_name:
+            return self.path.override_display_name
+
         if not self.filenamescrapeformat:
             return self.filename
 
