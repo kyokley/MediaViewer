@@ -19,7 +19,7 @@ from mysite.settings import (LOG_ACCESS_TIMINGS,
 
 import os
 import json
-import telnetlib
+import telnetlib #nosec
 
 from mediaviewer.log import log
 
@@ -125,7 +125,7 @@ def sendMail(to_addr, subject, text, from_addr=EMAIL_FROM_ADDR, files=None, serv
 
 def checkSMTPServer():
     if not BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(host=EMAIL_HOST,
+        smtp_server = telnetlib.Telnet(host=EMAIL_HOST, #nosec
                                        port=EMAIL_PORT)
         smtp_server.close()
 
