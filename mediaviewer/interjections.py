@@ -18,7 +18,7 @@ failures = ['Sorry.',
             'I give up.',
             ]
 def getInterjection():
-    return random.choice(interjections)
+    return random.choice(interjections) #nosec
 
 def getFailures():
-    return random.choice(failures)
+    return random.choice(failures) #nosec

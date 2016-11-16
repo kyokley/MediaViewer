@@ -393,5 +393,6 @@ class File(models.Model):
             log.debug('Destroying PosterFile for %s' % (self,))
             posterfile = PosterFile.objects.get(file=self)
             posterfile.delete()
-        except:
-            pass
+        except Exception, e:
+            log.error('Got an error destroying posterfile')
+            log.error(e)
