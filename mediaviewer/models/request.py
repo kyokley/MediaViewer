@@ -38,8 +38,20 @@ class Request(models.Model):
                  INNER JOIN requestvote AS rv
                  ON rv.userid = u.id
                  WHERE rv.requestid = %s;
-              ''' % (self.id,)
-        return User.objects.raw(sql)
+              '''
+        return User.objects.raw(sql, params=[self.id])
+
+    @classmethod
+    def new(cls,
+            name,
+            user,
+            done=False):
+        obj = cls()
+        obj.name = name
+        obj.user = user
+        obj.done = done
+        obj.save()
+        return obj
 
 class RequestVote(models.Model):
     request = models.ForeignKey(Request, null=True, db_column='requestid', blank=False)
