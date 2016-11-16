@@ -5,8 +5,8 @@ from django.utils.timezone import utc
 from dateutil.relativedelta import relativedelta
 
 class Request(models.Model):
-    datecreated = models.DateTimeField(db_column='datecreated', blank=True)
-    dateedited = models.DateTimeField(db_column='dateedited', blank=True)
+    datecreated = models.DateTimeField(db_column='datecreated', auto_now_add=True)
+    dateedited = models.DateTimeField(db_column='dateedited', auto_now=True)
     name = models.TextField(blank=True)
     done = models.BooleanField()
     user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
@@ -44,7 +44,7 @@ class Request(models.Model):
 class RequestVote(models.Model):
     request = models.ForeignKey(Request, null=True, db_column='requestid', blank=False)
     user = models.ForeignKey(User, null=False, db_column='userid', blank=False)
-    datecreated = models.DateTimeField(db_column='datecreated', blank=True)
+    datecreated = models.DateTimeField(db_column='datecreated', auto_now_add=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -52,3 +52,11 @@ class RequestVote(models.Model):
 
     def __unicode__(self):
         return 'id: %s r: %s u: %s d: %s' % (self.id, self.request.name, self.user.id, self.datecreated)
+
+    @classmethod
+    def new(cls, request, user):
+        obj = cls()
+        obj.request = request
+        obj.user = user
+        obj.save()
+        return obj
