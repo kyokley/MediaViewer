@@ -98,9 +98,17 @@
                 {% for file in files %}
                 <tr>
                     {% if file.isMovie %}
-                        <td>{{ file.rawSearchString }}</td>
+                        {% if loggedin %}
+                            <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                        {% else %}
+                            <td>{{ file.rawSearchString }}</td>
+                        {% endif %}
                     {% else %}
-                        <td>{{ file.getScrapedFullName }}</td>
+                        {% if loggedin %}
+                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
+                        {% else %}
+                            <td>{{ file.getScrapedFullName }}</td>
+                        {% endif %}
                     {% endif %}
                 </tr>
                 {% endfor %}
