@@ -34,12 +34,6 @@ class TestAjaxVideoProgress(TestCase):
         self.fake_httpresponse = 'fake_httpresponse'
         self.mock_httpResponseClass.return_value = self.fake_httpresponse
 
-        os_patcher = mock.patch('mediaviewer.views.ajax.os')
-        self.mock_osClass = os_patcher.start()
-        self.addCleanup(os_patcher.stop)
-        self.os_joined_filename = 'os/joined/filename.mp4'
-        self.mock_osClass.path.join.return_value = self.os_joined_filename
-
         self.token = mock.create_autospec(DownloadToken)
         self.token.ismovie = False
         self.token.filename = 'dt.filename.mp4'
@@ -57,7 +51,6 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.assertFalse(self.mock_osClass.path.join.called)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=412)
@@ -70,7 +63,6 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.assertFalse(self.mock_osClass.path.join.called)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=412)
@@ -82,7 +74,6 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.assertFalse(self.mock_osClass.path.join.called)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=412)
@@ -95,10 +86,8 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.mock_osClass.path.join.assert_called_once_with(self.token.filename,
-                                                            self.filename)
         self.mock_vpClass.get.assert_called_once_with(self.user,
-                                                      self.os_joined_filename)
+                                                      self.filename)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=200)
@@ -110,7 +99,6 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.assertFalse(self.mock_osClass.path.join.called)
         self.mock_vpClass.get.assert_called_once_with(self.user,
                                                       self.filename)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
@@ -126,11 +114,10 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.mock_osClass.path.join.assert_called_once_with(self.token.filename,
-                                                            self.filename)
         self.assertFalse(self.mock_vpClass.get.called)
         self.mock_vpClass.createOrUpdate.assert_called_once_with(self.user,
-                                                                 self.os_joined_filename,
+                                                                 'dt.filename.mp4',
+                                                                 self.filename,
                                                                  987)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
@@ -145,9 +132,9 @@ class TestAjaxVideoProgress(TestCase):
         ret_val = ajaxvideoprogress(self.request,
                                     self.guid,
                                     self.filename)
-        self.assertFalse(self.mock_osClass.path.join.called)
         self.assertFalse(self.mock_vpClass.get.called)
         self.mock_vpClass.createOrUpdate.assert_called_once_with(self.user,
+                                                                 'dt.filename.mp4',
                                                                  self.filename,
                                                                  987)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,

@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import json
-import os
 
 @csrf_exempt
 def ajaxvideoprogress(request, guid, hashed_filename):
@@ -18,8 +17,6 @@ def ajaxvideoprogress(request, guid, hashed_filename):
                             status=412)
 
     user = dt.user
-    #if dt.ismovie:
-        #filename = os.path.join(dt.filename, filename)
 
     if request.method == 'GET':
         vp = VideoProgress.get(user, hashed_filename)
