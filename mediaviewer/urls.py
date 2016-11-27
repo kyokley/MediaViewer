@@ -65,7 +65,7 @@ urlpatterns = [
                        url(r'^ajaxclosemessage/', messaging.ajaxclosemessage, name='ajaxclosemessage'),
                        url(r'^ajaxreport/', files.ajaxreport, name='ajaxreport'),
                        url(r'^ajaxrunscraper/', home.ajaxrunscraper, name='ajaxrunscraper'),
-                       url(r'^ajaxvideoprogress/(?P<guid>[0-9A-Za-z]+)/(?P<filename>.+)/$', ajax.ajaxvideoprogress, name='ajaxvideoprogress'),
+                       url(r'^ajaxvideoprogress/(?P<guid>[0-9A-Za-z]+)/(?P<hashed_filename>.+)/$', ajax.ajaxvideoprogress, name='ajaxvideoprogress'),
                        url(r'^user/reset/$',
                            password_reset.reset,
                            name='password_reset'),

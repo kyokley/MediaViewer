@@ -7,7 +7,7 @@ import json
 import os
 
 @csrf_exempt
-def ajaxvideoprogress(request, guid, filename):
+def ajaxvideoprogress(request, guid, hashed_filename):
     data = {'offset': 0}
     dt = DownloadToken.getByGUID(guid)
     if (not dt or
@@ -18,11 +18,11 @@ def ajaxvideoprogress(request, guid, filename):
                             status=412)
 
     user = dt.user
-    if dt.ismovie:
-        filename = os.path.join(dt.filename, filename)
+    #if dt.ismovie:
+        #filename = os.path.join(dt.filename, filename)
 
     if request.method == 'GET':
-        vp = VideoProgress.get(user, filename)
+        vp = VideoProgress.get(user, hashed_filename)
         if vp:
             data['offset'] = float(vp.offset)
             data['date_edited'] = vp.date_edited.isoformat()
@@ -31,14 +31,15 @@ def ajaxvideoprogress(request, guid, filename):
                             status=200)
     elif request.method == 'POST':
         vp = VideoProgress.createOrUpdate(user,
-                                          filename,
+                                          dt.filename,
+                                          hashed_filename,
                                           request.POST['offset'])
         data['offset'] = float(vp.offset)
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=200)
     elif request.method == 'DELETE':
-        VideoProgress.delete(user, filename)
+        VideoProgress.delete(user, hashed_filename)
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=204)
