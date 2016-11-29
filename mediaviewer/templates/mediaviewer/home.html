@@ -69,14 +69,14 @@
     <div class="container">
 
       <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
           {% block jumbotron %}
+      <div class="jumbotron">
         <h1>Welcome to the MediaViewer</h1>
         <p></p>
         <p>{{ greeting }}</p>
         <p></p>
-        {% endblock %}
       </div>
+        {% endblock %}
 
     {% block messages %}
         {% for message in messages %}
@@ -125,6 +125,8 @@
   {% endblock %}
 </div> <!-- /container -->
 
+{% block waiter_frame %}
+{% endblock %}
 
   </body>
 

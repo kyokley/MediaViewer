@@ -9,61 +9,61 @@
 {% include navbar %}
 
 <!-- Main component for a primary marketing message or call to action -->
-<div class="jumbotron">
     {% block jumbotron %}
-    {% if view == 'files' %}
-        <ol class="breadcrumb">
-              <li><a href="/mediaviewer/">Home</a></li>
-                <li class="active">Files</li>
-        </ol>
-        <h1>Files</h1>
-        Below is a list of all files being tracked by the autodownloader.
-    {% elif view == 'movies' %}
-        <ol class="breadcrumb">
-              <li><a href="/mediaviewer/">Home</a></li>
-                <li class="active">Movies</li>
-        </ol>
-        <h1>Movies</h1>
-        <h3>Select from the following movies:</h3>
-    {% elif view == 'tvshows' %}
-        <ol class="breadcrumb">
-              <li><a href="/mediaviewer/">Home</a></li>
-                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-                <li class="active">{{ path.displayName }}</li>
-        </ol>
-        <div class="container">
-            <div class="row">
-                <div class="col-xs-12 col-md-12">
-                    <h1 class="text-center" id="file-displayName">{{ path.displayName }}</h1>
+        <div class="jumbotron">
+            {% if view == 'files' %}
+                <ol class="breadcrumb">
+                      <li><a href="/mediaviewer/">Home</a></li>
+                        <li class="active">Files</li>
+                </ol>
+                <h1>Files</h1>
+                Below is a list of all files being tracked by the autodownloader.
+            {% elif view == 'movies' %}
+                <ol class="breadcrumb">
+                      <li><a href="/mediaviewer/">Home</a></li>
+                        <li class="active">Movies</li>
+                </ol>
+                <h1>Movies</h1>
+                <h3>Select from the following movies:</h3>
+            {% elif view == 'tvshows' %}
+                <ol class="breadcrumb">
+                      <li><a href="/mediaviewer/">Home</a></li>
+                        <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                        <li class="active">{{ path.displayName }}</li>
+                </ol>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-12">
+                            <h1 class="text-center" id="file-displayName">{{ path.displayName }}</h1>
+                        </div>
+                        <div class="col-xs-12 col-md-6">
+                        {% if path.posterfile.image %}
+                            <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" /class="img-responsive center-block"/>
+                        {% else %}
+                            No Image
+                        {% endif %}
+                        </div>
+                        <div class="col-xs-12 col-md-6">
+                            <h4>
+                                <dl class="dl-horizontal">
+                                    <dt>Summary:</dt>
+                                    <dd>{{ path.posterfile.plot }}</dd>
+                                    {% if path.posterfile.rated %}
+                                        <dt>Rated:</dt>
+                                        <dd>{{ path.posterfile.rated }}</dd>
+                                    {% endif %}
+                                    {% if path.posterfile.rating and path.posterfile.rating != 'N/A' %}
+                                        <dt>IMDB Rating:</dt>
+                                        <dd>{{ path.posterfile.rating }}/10</dd>
+                                    {% endif %}
+                                </dl>
+                            </h4>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-xs-12 col-md-6">
-                {% if path.posterfile.image %}
-                    <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" /class="img-responsive center-block"/>
-                {% else %}
-                    No Image
-                {% endif %}
-                </div>
-                <div class="col-xs-12 col-md-6">
-                    <h4>
-                        <dl class="dl-horizontal">
-                            <dt>Summary:</dt>
-                            <dd>{{ path.posterfile.plot }}</dd>
-                            {% if path.posterfile.rated %}
-                                <dt>Rated:</dt>
-                                <dd>{{ path.posterfile.rated }}</dd>
-                            {% endif %}
-                            {% if path.posterfile.rating and path.posterfile.rating != 'N/A' %}
-                                <dt>IMDB Rating:</dt>
-                                <dd>{{ path.posterfile.rating }}/10</dd>
-                            {% endif %}
-                        </dl>
-                    </h4>
-                </div>
-            </div>
+            {% endif %}
         </div>
-    {% endif %}
     {% endblock %}
-</div>
 
 {% include messages %}
 
@@ -94,7 +94,8 @@
                 {% if can_download %}
                     {% if waiterstatus %}
                         {% if file.finished %}
-                        <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>
+                        <!--<td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>-->
+                        <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="window.open('/mediaviewer/waiterdisplay/{{file.id}}', '_self')">Open</a></center></td>
                         {% else %}
                             <td>No file</td>
                         {% endif %}

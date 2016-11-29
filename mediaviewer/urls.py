@@ -20,6 +20,7 @@ from mediaviewer.views import (home,
                                requests,
                                waiterstatus,
                                password_reset,
+                               waiter_display,
                                ajax,
                                )
 
@@ -53,6 +54,7 @@ urlpatterns = [
                        url(r'^submitsitesettings/', settings.submitsitesettings, name='submitsitesettings'),
                        url(r'^submitnewuser/', settings.submitnewuser, name='submitnewuser'),
                        url(r'^submitsitewidemessage/', messaging.submitsitewidemessage, name='submitsitewidemessage'),
+                       url(r'^waiterdisplay/(?P<fileid>\d+)/$', waiter_display.waiter_display, name='waiterdisplay'),
                        url(r'^requests/', requests.requests, name='requests'),
                        url(r'^addrequests/', requests.addrequests, name='addrequests'),
                        url(r'^ajaxviewed/', detail.ajaxviewed, name='ajaxviewed'),
