@@ -94,8 +94,8 @@
                 {% if can_download %}
                     {% if waiterstatus %}
                         {% if file.finished %}
-                        <!--<td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>-->
-                        <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="window.open('/mediaviewer/waiterdisplay/{{file.id}}', '_self')">Open</a></center></td>
+                        <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>
+                        <!--<td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="window.open('/mediaviewer/waiterdisplay/{{file.id}}', '_self')">Open</a></center></td>-->
                         {% else %}
                             <td>No file</td>
                         {% endif %}
