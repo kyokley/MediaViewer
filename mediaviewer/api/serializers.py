@@ -17,6 +17,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         model = DownloadToken
         fields = ('guid',
                   'userid',
+                  'username',
                   'path',
                   'filename',
                   'ismovie',
@@ -29,6 +30,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     guid = serializers.CharField(required=True,
                                  max_length=32)
     userid = serializers.IntegerField(required=True, source='user.id')
+    username = serializers.SerializerMethodField()
     path = serializers.CharField(required=True)
     filename = serializers.CharField(required=True)
     ismovie = serializers.BooleanField(required=True)
@@ -41,6 +43,9 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     def get_auto_download(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.auto_download
+
+    def get_username(self, obj):
+        return obj.user.username
 
 class DownloadClickSerializer(serializers.ModelSerializer):
     class Meta:
