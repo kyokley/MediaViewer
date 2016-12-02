@@ -8,8 +8,8 @@
 {% include navbar %}
 
     <div class="container">
-            <div class="jumbotron">
                 {% block jumbotron %}
+            <div class="jumbotron">
                 <form action="{% url 'mediaviewer:addrequests' %}" method="post">
                 <ol class="breadcrumb">
                     <li><a href="/mediaviewer/">Home</a></li>
@@ -28,8 +28,8 @@
                         </tr>
                     </table>
                 </form>
-                {% endblock %}
             </div>
+                {% endblock %}
 
             {% block main %}
             <table id="myTable" class="table table-striped cell-border">

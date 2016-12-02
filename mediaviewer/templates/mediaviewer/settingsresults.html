@@ -7,8 +7,8 @@
     {% include navbar %}
 
     <div class="container">
-        <div class="jumbotron">
             {% block jumbotron %}
+        <div class="jumbotron">
             {% if successful %}
                 <h1>Settings Saved!</h1>
                 <h3>Your settings have been saved successfully</h3>
@@ -20,8 +20,8 @@
             <a href="/mediaviewer/settings/">Return to Settings</a>
             <p/>
             <a href="/mediaviewer/">Go Home</a>
-            {% endblock %}
         </div>
+            {% endblock %}
     </div> <!-- /container -->
 
     {% include messages %}

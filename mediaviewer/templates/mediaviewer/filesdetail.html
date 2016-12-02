@@ -8,8 +8,8 @@
 {% include navbar %}
 
 <div class="container">
-    <div class="jumbotron">
         {% block jumbotron %}
+    <div class="jumbotron">
         <ol class="breadcrumb">
             {% if file.isMovie %}
             <li><a href="/mediaviewer/">Home</a></li>
@@ -82,8 +82,8 @@
             </div>
             {% endif %}
         </h4>
-        {% endblock %}
     </div>
+        {% endblock %}
 
     {% block messages %}
     {% endblock %}

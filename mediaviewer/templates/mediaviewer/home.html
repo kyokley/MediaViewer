@@ -29,9 +29,9 @@
 
   <body>
 
+    {% block navbar%}
     <!-- Fixed navbar -->
     <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    {% block navbar%}
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -62,8 +62,8 @@
         {% endif %}
         </div><!--/.nav-collapse -->
       </div>
-    {% endblock %}
     </div>
+    {% endblock %}
 
 
     <div class="container">

@@ -7,8 +7,8 @@
 
 {% include navbar %}
 
-    <div class="jumbotron">
         {% block jumbotron %}
+    <div class="jumbotron">
             {% if not loggedin %}
                 <h1>View your media!</h1>
                 <p></p>
@@ -19,8 +19,8 @@
                 <h3>You have logged in successfully</h3>
                 <a href="/mediaviewer/">Go Home</a>
             {% endif %}
-        {% endblock %}
     </div>
+        {% endblock %}
 
     {% include messages %}
 

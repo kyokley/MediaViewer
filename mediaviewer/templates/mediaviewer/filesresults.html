@@ -9,8 +9,8 @@
 
 
     <div class="container">
-        <div class="jumbotron">
             {% block jumbotron %}
+        <div class="jumbotron">
             <ol class="breadcrumb">
             {% if file.isMovie %}
                 <li><a href="/mediaviewer/">Home</a></li>
@@ -28,8 +28,8 @@
                 <a href="{{ file.downloadLink }}">Download</a>
             {% endif %}
             </ol>
-            {% endblock %}
         </div>
+            {% endblock %}
     </div> <!-- /container -->
 
     {% block main %}
