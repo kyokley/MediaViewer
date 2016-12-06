@@ -338,7 +338,7 @@ class File(models.Model):
 
     def getScrapedFullName(self):
         if self.isMovie():
-            return self.searchString()
+            return self.rawSearchString()
         else:
             name = self.getScrapedName()
             season = self.getScrapedSeason()

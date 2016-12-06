@@ -97,7 +97,7 @@
             <h4>
                 <div class="form-group">
                     <label for="search-textbox">Search:</label>
-                    <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.searchString }}">
+                    <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.rawSearchString }}">
                 </div>
                 <div class="form-group">
                     <label for="episode_name-textbox">Episode Name:</label>
@@ -131,11 +131,7 @@
                     {% if posterfile.image %}
                     <div class="row text-center">
                         <h4>
-                        {% if file.isMovie %}
-                            {{ file.searchString }}
-                        {% else %}
                             {{ file.getScrapedFullName }}
-                        {% endif %}
                         </h4>
                     </div>
                     <div class="row">
