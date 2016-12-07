@@ -1,35 +1,35 @@
 {% extends "results.html" %}
 <!DOCTYPE html>
 {% load staticfiles %}
-    {% include title %}
-    {% include css %}
+{% include title %}
+{% include css %}
 
-    {% include navbar %}
+{% include navbar %}
 
-    <div class="container">
-        <div class="jumbotron">
-            {% block jumbotron %}
-            {% if successful %}
-                <h1>Settings Saved!</h1>
-                <h3>Your settings have been saved successfully</h3>
-            {% else %}
-                <h1>Settings Failed!</h1>
-                <h3>There was an error</h3>
-            {% endif %}
-            <h4>{{ errMsg }}</h4>
-            <a href="/mediaviewer/settings/">Return to Settings</a>
-            <p/>
-            <a href="/mediaviewer/">Go Home</a>
-            {% endblock %}
-        </div>
-    </div> <!-- /container -->
-
-    {% include messages %}
-
-    {% block main %}
+<div class="container">
+    {% block jumbotron %}
+    <div class="jumbotron">
+        {% if successful %}
+        <h1>Settings Saved!</h1>
+        <h3>Your settings have been saved successfully</h3>
+        {% else %}
+        <h1>Settings Failed!</h1>
+        <h3>There was an error</h3>
+        {% endif %}
+        <h4>{{ errMsg }}</h4>
+        <a href="/mediaviewer/settings/">Return to Settings</a>
+        <p/>
+        <a href="/mediaviewer/">Go Home</a>
+    </div>
     {% endblock %}
+</div> <!-- /container -->
 
-    {% include footer %}
+{% include messages %}
 
-    {% include javascript %}
+{% block main %}
+{% endblock %}
+
+{% include footer %}
+
+{% include javascript %}
 

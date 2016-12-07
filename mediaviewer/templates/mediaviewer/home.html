@@ -1,169 +1,163 @@
 <!DOCTYPE html>
 {% load staticfiles %}
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" type="image/png" href="{% static "assets/favicon.ico" %}"/>
-    {% block title %}
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="shortcut icon" type="image/png" href="{% static "assets/favicon.ico" %}"/>
+        {% block title %}
         {% if title == '' or title == None %}
-            <title>MediaViewer</title>
+        <title>MediaViewer</title>
         {% else %}
-            <title>{{ title }} - MediaViewer</title>
+        <title>{{ title }} - MediaViewer</title>
         {% endif %}
-    {% endblock %}
+        {% endblock %}
 
-    <!-- Bootstrap core CSS -->
-    {% block css %}
+        <!-- Bootstrap core CSS -->
+        {% block css %}
         <link href="{% static "assets/home.css" %}" rel="stylesheet">
         <link href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
         <link href="{% static "datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
 
         <link href="{% static "bootswatch-dist/css/bootstrap.min.css" %}" rel="stylesheet">
-    {% endblock %}
-
-  </head>
-
-  <body>
-
-    <!-- Fixed navbar -->
-    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    {% block navbar%}
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="/mediaviewer/">MediaViewer</a>
-        </div>
-        <div class="navbar-collapse collapse">
-        {% if loggedin %}
-            <ul class="nav navbar-nav">
-                {{ header }}
-                {% if loggedin %}
-                    <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
-                {% else %}
-                    <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
-                {% endif %}
-            </ul>
-            {% if loggedin %}
-                <p class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></p>
-            {% endif %}
-        {% else %}
-            <ul class="nav navbar-nav">
-                <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
-            </ul>
-        {% endif %}
-        </div><!--/.nav-collapse -->
-      </div>
-    {% endblock %}
-    </div>
-
-
-    <div class="container">
-
-      <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
-          {% block jumbotron %}
-        <h1>Welcome to the MediaViewer</h1>
-        <p></p>
-        <p>{{ greeting }}</p>
-        <p></p>
         {% endblock %}
-      </div>
+    </head>
 
-    {% block messages %}
-        {% for message in messages %}
-        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
-            <a href="#" class="close" data-dismiss="alert">&times;</a>
-                 {{ message }}
-            </div>
-        {% endfor %}
-    {% endblock %}
-
-    {% block main %}
-        <table id="newFileTable" class="table table-plain">
-            <thead>
-                <tr>
-                    <th>Latest Files</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for file in files %}
-                <tr>
-                    {% if file.isMovie %}
+    <body>
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            {% block navbar%}
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/mediaviewer/">MediaViewer</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    {% if loggedin %}
+                    <ul class="nav navbar-nav">
+                        {{ header }}
                         {% if loggedin %}
-                            <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                        <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
                         {% else %}
-                            <td>{{ file.rawSearchString }}</td>
+                        <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
                         {% endif %}
+                    </ul>
+                    {% if loggedin %}
+                    <p class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></p>
+                    {% endif %}
                     {% else %}
+                    <ul class="nav navbar-nav">
+                        <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
+                    </ul>
+                    {% endif %}
+                </div><!--/.nav-collapse -->
+            </div>
+            {% endblock %}
+        </div>
+
+        <div class="container">
+            {% block jumbotron %}
+            <div class="jumbotron">
+                <h1>Welcome to the MediaViewer</h1>
+                <p></p>
+                <p>{{ greeting }}</p>
+                <p></p>
+            </div>
+            {% endblock %}
+
+            {% block messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
+                <a href="#" class="close" data-dismiss="alert">&times;</a>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endblock %}
+
+            {% block main %}
+            <table id="newFileTable" class="table table-plain">
+                <thead>
+                    <tr>
+                        <th>Latest Files</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        {% if file.isMovie %}
+                        {% if loggedin %}
+                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                        {% else %}
+                        <td>{{ file.rawSearchString }}</td>
+                        {% endif %}
+                        {% else %}
                         {% if loggedin %}
                         <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
                         {% else %}
-                            <td>{{ file.getScrapedFullName }}</td>
+                        <td>{{ file.getScrapedFullName }}</td>
                         {% endif %}
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    {% if loggedin and user.is_staff %}
+                    <tr>
+                        <td>
+                            <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
+                        </td>
+                    </tr>
                     {% endif %}
-                </tr>
-                {% endfor %}
-                {% if loggedin and user.is_staff %}
-                <tr>
-                    <td>
-                        <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
-                    </td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
 
-  {% endblock %}
-</div> <!-- /container -->
+            {% endblock %}
+        </div> <!-- /container -->
 
 
-  </body>
+    </body>
 
-  <footer>
-  {% block footer %}
-  <div class="navbar navbar-default navbar-fixed-bottom">
-      <div class="container">
-          {% if waiterstatus %}
-              <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
-          {% else %}
-              <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
-          {% endif %}
-      </div>
-  </div>
-  {% endblock %}
-  </footer>
+    <footer>
+    {% block footer %}
+    <div class="navbar navbar-default navbar-fixed-bottom">
+        <div class="container">
+            {% if waiterstatus %}
+            <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
+            {% else %}
+            <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
+            {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+    </footer>
 
-  {% block javascript_include %}
-  <!-- Bootstrap core JavaScript
-  ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
+    {% block javascript_include %}
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
     <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
     <script src="{% static "datatables.net/js/jquery.dataTables.min.js" %}"></script>
     <script src="{% static "datatables.net-bs/js/dataTables.bootstrap.min.js" %}"></script>
     <script src="{% static "datatables.net-responsive/js/dataTables.responsive.min.js" %}"></script>
     <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
     <script src="{% static "assets/mediaviewer.js" %}"></script>
-  {% endblock %}
+    {% endblock %}
 
-  {% block javascript %}
-  <script type="text/javascript">
-  $(document).ready(function(){
-        csrf_token = '{{ csrf_token }}';
-      preparePage($);
-      setHomeFormSubmit($);
-      prepareAjaxWaiterStatus($, '{{ is_staff }}');
-      prepareScraperButton($);
+    {% block javascript %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            csrf_token = '{{ csrf_token }}';
+            preparePage($);
+            setHomeFormSubmit($);
+            prepareAjaxWaiterStatus($, '{{ is_staff }}');
+            prepareScraperButton($);
 
-  });
-  </script>
-  {% endblock %}
+        });
+    </script>
+    {% endblock %}
 </html>

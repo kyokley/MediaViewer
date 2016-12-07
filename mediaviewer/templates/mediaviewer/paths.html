@@ -1,55 +1,54 @@
 {% extends "files.html" %}
 <!DOCTYPE html>
 {% load staticfiles %}
-    {% include title %}
-    {% include css %}
+{% include title %}
+{% include css %}
 
-    {% include navbar %}
+{% include navbar %}
 
-            <!-- Main component for a primary marketing message or call to action -->
-            <div class="jumbotron">
-                {% block jumbotron %}
-                <ol class="breadcrumb">
-                      <li><a href="/mediaviewer/">Home</a></li>
-                        <li class="active">Paths</li>
-                </ol>
-                <h1>Paths</h1>
-                <h3>Below is a list of all folders that are being watched by the autodownloader</h3>
-                {% endblock %}
-            </div>
+{% block jumbotron %}
+<div class="jumbotron">
+    <ol class="breadcrumb">
+        <li><a href="/mediaviewer/">Home</a></li>
+        <li class="active">Paths</li>
+    </ol>
+    <h1>Paths</h1>
+    <h3>Below is a list of all folders that are being watched by the autodownloader</h3>
+</div>
+{% endblock %}
 
-            {% include messages %}
+{% include messages %}
 
-            {% block main %}
-            {% if paths %}
-            <ul>
-                <table id="myTable" class="tablesorter table table-hover cell-border no-wrap dt-responsive">
-                    <thead>
-                        <tr>
-                            <th class='desktop'>ID</th>
-                            <th class='all'>Short Name</th>
-                            <th class='min-tablet-p'>Local Path</th>
-                            <th class='min-tablet-l'>Remote Path</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for path in paths %}
-                        <tr>
-                            <td>{{ path.id }}</td>
-                            <td>{{ path.displayName }}</td>
-                            <td>{{ path.localPath }}</td>
-                            <td>{{ path.remotePath }}</td>
-                            <td></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </ul>
-            {% else %}
-            <p>No paths are available.</p>
-            {% endif %}
-            {% endblock %}
+{% block main %}
+{% if paths %}
+<ul>
+    <table id="myTable" class="tablesorter table table-hover cell-border no-wrap dt-responsive">
+        <thead>
+            <tr>
+                <th class='desktop'>ID</th>
+                <th class='all'>Short Name</th>
+                <th class='min-tablet-p'>Local Path</th>
+                <th class='min-tablet-l'>Remote Path</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for path in paths %}
+            <tr>
+                <td>{{ path.id }}</td>
+                <td>{{ path.displayName }}</td>
+                <td>{{ path.localPath }}</td>
+                <td>{{ path.remotePath }}</td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</ul>
+{% else %}
+<p>No paths are available.</p>
+{% endif %}
+{% endblock %}
 
 {% include footer %}
 {% include javascript %}

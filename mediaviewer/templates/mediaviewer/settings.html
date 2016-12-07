@@ -7,32 +7,32 @@
 
 <div class="container">
 
-        <div class="jumbotron">
-            {% block jumbotron %}
-            <h1>Settings</h1>
-            {% endblock %}
-        </div>
-
-        {% include messages %}
-
-        {% block main %}
-
-<div class="modal" id="missingEmailModal" tabindex="-1" role="dialog" aria-labelledby="missingEmailModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="missingEmailModalLabel">Missing Email Address</h4>
-      </div>
-      <div class="modal-body">
-          Looks like your email address is missing. You should enter an address on this page before continuing.
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
-      </div>
+    {% block jumbotron %}
+    <div class="jumbotron">
+        <h1>Settings</h1>
     </div>
-  </div>
-</div>
+    {% endblock %}
+
+    {% include messages %}
+
+    {% block main %}
+
+    <div class="modal" id="missingEmailModal" tabindex="-1" role="dialog" aria-labelledby="missingEmailModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="missingEmailModalLabel">Missing Email Address</h4>
+                </div>
+                <div class="modal-body">
+                    Looks like your email address is missing. You should enter an address on this page before continuing.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="well well-sm">
         <h2>Password Settings</h2>
@@ -43,8 +43,8 @@
         </ul>
     </div>
     <div class="well well-sm">
-    <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
-        {% csrf_token %}
+        <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
+            {% csrf_token %}
             <h2>Account Settings</h2>
             <ul>
                 <label>Email Address:</label>
@@ -159,21 +159,21 @@
     {% endif %}
     {% if user.is_staff %}
     <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
-            {% csrf_token %}
-            <div class="well well-sm">
-                <h2>New User</h2>
-                <ul>
-                    <label>Email Address:</label>
-                    <div class="input">
-                        <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
-                    </div>
-                </ul>
-                <ul>
-                    <div class="sitemessageinput">
-                        <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn primary"/>
-                    </div>
-                </ul>
-            </div>
+        {% csrf_token %}
+        <div class="well well-sm">
+            <h2>New User</h2>
+            <ul>
+                <label>Email Address:</label>
+                <div class="input">
+                    <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
+                </div>
+            </ul>
+            <ul>
+                <div class="sitemessageinput">
+                    <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn primary"/>
+                </div>
+            </ul>
+        </div>
     </form>
     {% endif %}
 </div> <!-- /container -->
@@ -184,40 +184,40 @@
 {% include javascript_include %}
 
 {% block javascript %}
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        $(document).ready(function(){
-            csrf_token = '{{ csrf_token }}';
-              preparePage($);
-              setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
+    $(document).ready(function(){
+        csrf_token = '{{ csrf_token }}';
+        preparePage($);
+        setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
 
-              {% if default_sort == 'filename_sort' %}
-                  jQuery('#filename_sort').prop('checked', 'checked');
-              {% elif default_sort == 'timestamp_sort' %}
-                  jQuery('#timestamp_sort').prop('checked', 'checked');
-              {% endif %}
+        {% if default_sort == 'filename_sort' %}
+        jQuery('#filename_sort').prop('checked', 'checked');
+        {% elif default_sort == 'timestamp_sort' %}
+        jQuery('#timestamp_sort').prop('checked', 'checked');
+        {% endif %}
 
-              {% if auto_download == True %}
-                  jQuery('#auto_download_yes').prop('checked', 'checked');
-              {% else %}
-                  jQuery('#auto_download_no').prop('checked', 'checked');
-              {% endif %}
+        {% if auto_download == True %}
+        jQuery('#auto_download_yes').prop('checked', 'checked');
+        {% else %}
+        jQuery('#auto_download_no').prop('checked', 'checked');
+        {% endif %}
 
-            var input = document.getElementById('btn-input');
-            jQuery("#local_ip", "#bangup").change(function () {
-                    if(jQuery("#local_ip").is(":checked")) {
-                        input.value = 'local_ip';
-                    } else if(jQuery("#bangup").is(":checked")) {
-                        input.value = 'bangup';
-                    }
-                });
-
-            prepareAjaxWaiterStatus($, '{{ is_staff }}');
-
-            {% if display_missing_email_modal %}
-                jQuery('#missingEmailModal').modal('show');
-            {% endif %}
+        var input = document.getElementById('btn-input');
+        jQuery("#local_ip", "#bangup").change(function () {
+            if(jQuery("#local_ip").is(":checked")) {
+                input.value = 'local_ip';
+            } else if(jQuery("#bangup").is(":checked")) {
+                input.value = 'bangup';
+            }
         });
+
+        prepareAjaxWaiterStatus($, '{{ is_staff }}');
+
+        {% if display_missing_email_modal %}
+        jQuery('#missingEmailModal').modal('show');
+        {% endif %}
+    });
 </script>
 {% endblock %}
 

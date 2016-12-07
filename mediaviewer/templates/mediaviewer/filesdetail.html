@@ -32,94 +32,94 @@
                     {% endif %}
                 </ol>
                 {% if posterfile and posterfile.image %}
-                    <div class="row text-center">
-                        <h4>
-                            {{ file.getScrapedFullName }}
-                        </h4>
-                    </div>
-                    <div class="row">
-                        <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive center-block"/>
-                    </div>
-                    <div class="row">
-                        <h4>
-                            {% if posterfile.episodename %}
-                            <div class="row text-center">
-                                {{ posterfile.episodename }}
-                            </div>
-                            {% endif %}
-                        </h4>
-                    </div>
+                <div class="row text-center">
+                    <h4>
+                        {{ file.getScrapedFullName }}
+                    </h4>
+                </div>
+                <div class="row">
+                    <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive center-block"/>
+                </div>
+                <div class="row">
+                    <h4>
+                        {% if posterfile.episodename %}
+                        <div class="row text-center">
+                            {{ posterfile.episodename }}
+                        </div>
+                        {% endif %}
+                    </h4>
+                </div>
                 {% else %}
-                    <div class="row">
-                        <h4>
-                            No Image
-                        </h4>
-                    </div>
+                <div class="row">
+                    <h4>
+                        No Image
+                    </h4>
+                </div>
                 {% endif %}
                 {% if file.finished and can_download and waiterstatus %}
-                    <div class="row">
-                        <div class="col-xs-4"></div>
-                        <div class="col-xs-4">
-                            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
-                        </div>
-                        <div class="col-xs-4"></div>
+                <div class="row">
+                    <div class="col-xs-4"></div>
+                    <div class="col-xs-4">
+                        <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
                     </div>
+                    <div class="col-xs-4"></div>
+                </div>
                 {% endif %}
                 {% if poseterfile %}
-                    <div class="row">
-                        <h4>
-                            <dl class="dl-horizontal">
-                                {% if posterfile.genre %}
-                                <dt>Genre:</dt>
-                                <dd>{{ posterfile.genre }}</dd>
-                                {% endif %}
-                                {% if posterfile.writer %}
-                                <dt>Writer:</dt>
-                                <dd>{{ posterfile.writer }}</dd>
-                                {% endif %}
-                                {% if posterfile.director %}
-                                <dt>Director:</dt>
-                                <dd>{{ posterfile.director }}</dd>
-                                {% endif %}
-                                {% if posterfile.actors %}
-                                <dt>Actors:</dt>
-                                <dd>{{ posterfile.actors }}</dd>
-                                {% endif %}
-                                <dt>Description:</dt>
-                                <dd>{{ posterfile.extendedplot }}</dd>
-                                {% if posterfile.rated %}
-                                <dt>Rated:</dt>
-                                <dd>{{ posterfile.rated }}</dd>
-                                {% endif %}
-                                {% if posterfile.rating and posterfile.rating != 'N/A' %}
-                                <dt>IMDB Rating:</dt>
-                                <dd>{{ posterfile.rating }}/10</dd>
-                                {% endif %}
-                                {% if file_size and can_download %}
-                                <dt>Size:</dt>
-                                <dd>{{ file_size }}</dd>
-                                {% endif %}
-                            </dl>
-                            <div class="form-group">
-                                <label for="comment">Comment:</label>
-                                <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
-                            </div>
-                            <div class="form-group">
-                                <input type="hidden" name="viewed" value="" id="checkbox-input" />
-                                <label>
-                                    <input type="checkbox" id="toggle-viewed"/>
-                                    Viewed
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <p><input type="submit" value="Save" /></p>
-                            </div>
-                        </h4>
-                    </div>
+                <div class="row">
+                    <h4>
+                        <dl class="dl-horizontal">
+                            {% if posterfile.genre %}
+                            <dt>Genre:</dt>
+                            <dd>{{ posterfile.genre }}</dd>
+                            {% endif %}
+                            {% if posterfile.writer %}
+                            <dt>Writer:</dt>
+                            <dd>{{ posterfile.writer }}</dd>
+                            {% endif %}
+                            {% if posterfile.director %}
+                            <dt>Director:</dt>
+                            <dd>{{ posterfile.director }}</dd>
+                            {% endif %}
+                            {% if posterfile.actors %}
+                            <dt>Actors:</dt>
+                            <dd>{{ posterfile.actors }}</dd>
+                            {% endif %}
+                            <dt>Description:</dt>
+                            <dd>{{ posterfile.extendedplot }}</dd>
+                            {% if posterfile.rated %}
+                            <dt>Rated:</dt>
+                            <dd>{{ posterfile.rated }}</dd>
+                            {% endif %}
+                            {% if posterfile.rating and posterfile.rating != 'N/A' %}
+                            <dt>IMDB Rating:</dt>
+                            <dd>{{ posterfile.rating }}/10</dd>
+                            {% endif %}
+                            {% if file_size and can_download %}
+                            <dt>Size:</dt>
+                            <dd>{{ file_size }}</dd>
+                            {% endif %}
+                        </dl>
+                        <div class="form-group">
+                            <label for="comment">Comment:</label>
+                            <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <input type="hidden" name="viewed" value="" id="checkbox-input" />
+                            <label>
+                                <input type="checkbox" id="toggle-viewed"/>
+                                Viewed
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <p><input type="submit" value="Save" /></p>
+                        </div>
+                    </h4>
+                </div>
                 {% else %}
-                    <div class="row">
+                <div class="row">
                     <ul><h2>No file data found</h2></ul>
-                    </div>
+                </div>
                 {% endif %}
                 <h1>File Detail</h1>
                 <h4>
@@ -127,82 +127,82 @@
                         <div class="col-xs-12">
                             <dl class="dl-horizontal">
                                 {% if user.is_staff %}
-                                    <dt>File Name:</dt>
-                                    <dd>{{ file.filename }}</dd>
-                                    <dt>Local Path:</dt>
-                                    <dd>{{ file.path.localPath }}</dd>
-                                    <dt>Remote Path:</dt>
-                                    <dd>{{ file.path.remotePath }}</dd>
+                                <dt>File Name:</dt>
+                                <dd>{{ file.filename }}</dd>
+                                <dt>Local Path:</dt>
+                                <dd>{{ file.path.localPath }}</dd>
+                                <dt>Remote Path:</dt>
+                                <dd>{{ file.path.remotePath }}</dd>
                                 {% endif %}
                                 {% if file_size %}
-                                    <dt>Size:</dt>
-                                    <dd>{{ file_size }}</dd>
+                                <dt>Size:</dt>
+                                <dd>{{ file_size }}</dd>
                                 {% endif %}
                                 {% if user.is_staff %}
-                                    <dt>Skip:</dt>
-                                    <dd>{{ skip }}</dd>
-                                    <dt>Finished:</dt>
-                                    <dd>{{ finished }}</dd>
-                                    {% if file.hasErrors %}
-                                    <dt>Errors:</dt>
-                                    <dd>
-                                        <h4>
-                                            {% for error in file.errors %}
-                                                {% if not error.ignore %}
-                                                    <li>{{ error.errorStr }}</li>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </h4>
-                                    </dd>
+                                <dt>Skip:</dt>
+                                <dd>{{ skip }}</dd>
+                                <dt>Finished:</dt>
+                                <dd>{{ finished }}</dd>
+                                {% if file.hasErrors %}
+                                <dt>Errors:</dt>
+                                <dd>
+                                <h4>
+                                    {% for error in file.errors %}
+                                    {% if not error.ignore %}
+                                    <li>{{ error.errorStr }}</li>
                                     {% endif %}
+                                    {% endfor %}
+                                </h4>
+                                </dd>
+                                {% endif %}
                                 {% endif %}
                                 {% if file.finished %}
-                                    {% if file.isTVShow and file.datatransmission %}
-                                        <dt>Date Downloaded:</dt>
-                                        <dd>{{ file.datatransmission.date }}</dd>
-                                    {% elif file.datecreated %}
-                                        <dt>Date Added:</dt>
-                                        <dd>{{ file.datecreated.date }}</dd>
-                                    {% endif %}
+                                {% if file.isTVShow and file.datatransmission %}
+                                <dt>Date Downloaded:</dt>
+                                <dd>{{ file.datatransmission.date }}</dd>
+                                {% elif file.datecreated %}
+                                <dt>Date Added:</dt>
+                                <dd>{{ file.datecreated.date }}</dd>
+                                {% endif %}
                                 {% endif %}
                                 {% if file.usercomment and file.usercomment.dateedited %}
-                                    <dt>Date Edited:</dt>
-                                    <dd>{{ file.usercomment.dateedited.date }}</dd>
+                                <dt>Date Edited:</dt>
+                                <dd>{{ file.usercomment.dateedited.date }}</dd>
                                 {% endif %}
                             </dl>
                         </div>
                     </div>
                 </h4>
                 {% if user.is_staff %}
-                    <p><h1>File Admin Info</h1></p>
-                    <h4>
-                        <div class="form-group">
-                            <label for="search-textbox">Search:</label>
-                            <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.rawSearchString }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="episode_name-textbox">Episode Name:</label>
-                            <input type="text" name="episode_name" id="episode_name-textbox" class="form-control search-textbox" value="{{ file.override_filename }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="imdb_id-textbox">IMDB ID:</label>
-                            <input type="text" name="imdb_id" id="imdb_id-textbox" class="form-control search-textbox imdb_id-textbox" value="{{ file.imdb_id }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="season-textbox">Season:</label>
-                            <input type="text" name="season" id="season-textbox" class="form-control search-textbox" value="{{ file.override_season }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="episode_number-textbox">Episode Number:</label>
-                            <input type="text" name="episode_number" id="episode_number-textbox" class="form-control search-textbox" value="{{ file.override_episode }}">
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="hidden" name="hidden" value="" id="hide-checkbox-input" />
-                                Hide <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
-                            </label>
-                        </div>
-                    </h4>
+                <p><h1>File Admin Info</h1></p>
+                <h4>
+                    <div class="form-group">
+                        <label for="search-textbox">Search:</label>
+                        <input type="text" name="search" id="search-textbox" class="form-control search-textbox" value="{{ file.rawSearchString }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="episode_name-textbox">Episode Name:</label>
+                        <input type="text" name="episode_name" id="episode_name-textbox" class="form-control search-textbox" value="{{ file.override_filename }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="imdb_id-textbox">IMDB ID:</label>
+                        <input type="text" name="imdb_id" id="imdb_id-textbox" class="form-control search-textbox imdb_id-textbox" value="{{ file.imdb_id }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="season-textbox">Season:</label>
+                        <input type="text" name="season" id="season-textbox" class="form-control search-textbox" value="{{ file.override_season }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="episode_number-textbox">Episode Number:</label>
+                        <input type="text" name="episode_number" id="episode_number-textbox" class="form-control search-textbox" value="{{ file.override_episode }}">
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input type="hidden" name="hidden" value="" id="hide-checkbox-input" />
+                            Hide <input type="checkbox" id="toggle-hide" class="toggle-hide"/>
+                        </label>
+                    </div>
+                </h4>
                 {% endif %}
             </div>
         </div>
@@ -210,34 +210,35 @@
     {% endblock %}
 
     {% include footer %}
+</div>
 
-    {% include javascript_include %}
+{% include javascript_include %}
 
 {% block javascript %}
 <script type="text/javascript">
 
-$(document).ready(function(){
-    csrf_token = '{{ csrf_token }}';
-    preparePage($);
-    setFileDetailCheckboxes('{{ viewed }}', '{{ file.hide }}');
-    var input = document.getElementById('checkbox-input');
-    var viewedInput = document.getElementById('toggle-viewed')
+    $(document).ready(function(){
+        csrf_token = '{{ csrf_token }}';
+        preparePage($);
+        setFileDetailCheckboxes('{{ viewed }}', '{{ file.hide }}');
+        var input = document.getElementById('checkbox-input');
+        var viewedInput = document.getElementById('toggle-viewed')
         if (viewedInput !== null){
             viewedInput.addEventListener('click', function() {
                 input.value = this.checked;
             });
         }
 
-    var hideInput = document.getElementById('hide-checkbox-input');
-    var toggleHide = document.getElementById('toggle-hide');
-    if (toggleHide !== null){
-        toggleHide.addEventListener('click', function() {
-            hideInput.value = this.checked;
-        });
-    }
+        var hideInput = document.getElementById('hide-checkbox-input');
+        var toggleHide = document.getElementById('toggle-hide');
+        if (toggleHide !== null){
+            toggleHide.addEventListener('click', function() {
+                hideInput.value = this.checked;
+            });
+        }
 
-    prepareAjaxWaiterStatus($, '{{ is_staff }}');
+        prepareAjaxWaiterStatus($, '{{ is_staff }}');
 
-});
+    });
 </script>
 {% endblock %}

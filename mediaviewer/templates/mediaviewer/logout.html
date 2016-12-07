@@ -7,18 +7,18 @@
 
 {% include navbar %}
 
-    <div class="container">
-        <div class="jumbotron">
-            {% block jumbotron %}
-            <h1>Logged Out!</h1>
-            <h3>You have logged out successfully</h3>
-            <a href="/mediaviewer/">Go Home</a>
-            {% endblock %}
-        </div>
+<div class="container">
+    {% block jumbotron %}
+    <div class="jumbotron">
+        <h1>Logged Out!</h1>
+        <h3>You have logged out successfully</h3>
+        <a href="/mediaviewer/">Go Home</a>
+    </div>
+    {% endblock %}
 
-        {% block main %}
-        {% endblock %}
-    </div> <!-- /container -->
+    {% block main %}
+    {% endblock %}
+</div> <!-- /container -->
 
 {% include footer %}
 

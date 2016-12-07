@@ -1,52 +1,50 @@
 {% extends "files.html" %}
 <!DOCTYPE html>
 {% load staticfiles %}
-    {% include title %}
-    {% include css %}
+{% include title %}
+{% include css %}
 
-    {% include navbar %}
+{% include navbar %}
 
-            <!-- Main component for a primary marketing message or call to action -->
+{% block jumbotron %}
+<div class="jumbotron">
+    <ol class="breadcrumb">
+        <li><a href="/mediaviewer/">Home</a></li>
+        <li class="active">Data Usage</li>
+    </ol>
+    <h1>Data Usage</h1>
+    Below is the amount of data that has been transferred using the auto downloader.
+</div>
+{% endblock %}
 
-            <div class="jumbotron">
-                {% block jumbotron %}
-                <ol class="breadcrumb">
-                      <li><a href="/mediaviewer/">Home</a></li>
-                        <li class="active">Data Usage</li>
-                </ol>
-                <h1>Data Usage</h1>
-                Below is the amount of data that has been transferred using the auto downloader.
-            {% endblock %}
-            </div>
+{% include messages %}
 
-            {% include messages %}
+{% block main %}
+{% if datausage %}
+<table id="myTable" class="table table-striped cell-border">
+    <thead>
+        <tr>
+            <th class="desktop"><center>ID</center></th>
+            <th class="all"><center>Date</center></th>
+            <th class="min-tablet-p"><center>Bytes Transferred (in MBs)</center></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in datausage %}
+        <tr>
+            <td>{{ data.id }}</td>
+            <td>{{ data.date }}</td>
+            <td>{{ data.transferredInMBs }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No files are available.</p>
+{% endif %}
+{% endblock %}
 
-        {% block main %}
-        {% if datausage %}
-        <table id="myTable" class="table table-striped cell-border">
-            <thead>
-                <tr>
-                    <th class="desktop"><center>ID</center></th>
-                    <th class="all"><center>Date</center></th>
-                    <th class="min-tablet-p"><center>Bytes Transferred (in MBs)</center></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for data in datausage %}
-                <tr>
-                    <td>{{ data.id }}</td>
-                    <td>{{ data.date }}</td>
-                    <td>{{ data.transferredInMBs }}</td>
-                    <td></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>No files are available.</p>
-        {% endif %}
-        {% endblock %}
-
-        {% include footer %}
-        {% include javascript %}
+{% include footer %}
+{% include javascript %}

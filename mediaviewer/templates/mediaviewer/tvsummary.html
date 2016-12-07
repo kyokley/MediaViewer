@@ -7,16 +7,16 @@
 
 {% include navbar %}
 
+{% block jumbotron %}
 <div class="jumbotron">
-    {% block jumbotron %}
     <ol class="breadcrumb">
-          <li><a href="/mediaviewer/">Home</a></li>
-            <li class="active">TV Shows</li>
+        <li><a href="/mediaviewer/">Home</a></li>
+        <li class="active">TV Shows</li>
     </ol>
     <h1>TV Shows</h1>
     <h3>Select from the following TV Shows:</h3>
-    {% endblock %}
 </div>
+{% endblock %}
 
 {% include messages %}
 
@@ -52,13 +52,13 @@
 {% block javascript %}
 <script type="text/javascript">
     $(document).ready(function(){
-      csrf_token = '{{ csrf_token }}';
-      preparePage($);
+        csrf_token = '{{ csrf_token }}';
+        preparePage($);
         prepareTableSorter($, [[1,1]]);
 
         prepareAjaxWaiterStatus($, '{{ is_staff }}');
         populateUnwatchedBadges("/mediaviewer/api/tvpath/");
-});
+    });
 
 </script>
 {% endblock %}
