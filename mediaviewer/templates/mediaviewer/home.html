@@ -9,79 +9,79 @@
         <meta name="author" content="">
         <link rel="shortcut icon" type="image/png" href="{% static "assets/favicon.ico" %}"/>
         {% block title %}
-        {% if title == '' or title == None %}
-        <title>MediaViewer</title>
-        {% else %}
-        <title>{{ title }} - MediaViewer</title>
-        {% endif %}
+            {% if title == '' or title == None %}
+                <title>MediaViewer</title>
+            {% else %}
+                <title>{{ title }} - MediaViewer</title>
+            {% endif %}
         {% endblock %}
 
         <!-- Bootstrap core CSS -->
         {% block css %}
-        <link href="{% static "assets/home.css" %}" rel="stylesheet">
-        <link href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
-        <link href="{% static "datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "assets/home.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
 
-        <link href="{% static "bootswatch-dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "bootswatch-dist/css/bootstrap.min.css" %}" rel="stylesheet">
         {% endblock %}
     </head>
 
     <body>
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
             {% block navbar%}
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="/mediaviewer/">MediaViewer</a>
-                </div>
-                <div class="navbar-collapse collapse">
-                    {% if loggedin %}
-                    <ul class="nav navbar-nav">
-                        {{ header }}
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="/mediaviewer/">MediaViewer</a>
+                    </div>
+                    <div class="navbar-collapse collapse">
                         {% if loggedin %}
-                        <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
+                            <ul class="nav navbar-nav">
+                                {{ header }}
+                                {% if loggedin %}
+                                    <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
+                                {% else %}
+                                    <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
+                                {% endif %}
+                            </ul>
+                            {% if loggedin %}
+                                <p class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></p>
+                            {% endif %}
                         {% else %}
-                        <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
+                            <ul class="nav navbar-nav">
+                                <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
+                            </ul>
                         {% endif %}
-                    </ul>
-                    {% if loggedin %}
-                    <p class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></p>
-                    {% endif %}
-                    {% else %}
-                    <ul class="nav navbar-nav">
-                        <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
-                    </ul>
-                    {% endif %}
-                </div><!--/.nav-collapse -->
-            </div>
+                    </div><!--/.nav-collapse -->
+                </div>
             {% endblock %}
         </div>
 
         <div class="container">
             {% block jumbotron %}
-            <div class="jumbotron">
-                <h1>Welcome to the MediaViewer</h1>
-                <p></p>
-                <p>{{ greeting }}</p>
-                <p></p>
-            </div>
+                <div class="jumbotron">
+                    <h1>Welcome to the MediaViewer</h1>
+                    <p></p>
+                    <p>{{ greeting }}</p>
+                    <p></p>
+                </div>
             {% endblock %}
 
             {% block messages %}
-            {% for message in messages %}
-            <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
-                <a href="#" class="close" data-dismiss="alert">&times;</a>
-                {{ message }}
-            </div>
+                {% for message in messages %}
+                <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
+                    <a href="#" class="close" data-dismiss="alert">&times;</a>
+                    {{ message }}
+                </div>
             {% endfor %}
-            {% endblock %}
+        {% endblock %}
 
-            {% block main %}
+        {% block main %}
             <table id="newFileTable" class="table table-plain">
                 <thead>
                     <tr>
@@ -90,52 +90,52 @@
                 </thead>
                 <tbody>
                     {% for file in files %}
-                    <tr>
-                        {% if file.isMovie %}
-                        {% if loggedin %}
-                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
-                        {% else %}
-                        <td>{{ file.rawSearchString }}</td>
-                        {% endif %}
-                        {% else %}
-                        {% if loggedin %}
-                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
-                        {% else %}
-                        <td>{{ file.getScrapedFullName }}</td>
-                        {% endif %}
-                        {% endif %}
-                    </tr>
+                        <tr>
+                            {% if file.isMovie %}
+                                {% if loggedin %}
+                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                                {% else %}
+                                    <td>{{ file.rawSearchString }}</td>
+                                {% endif %}
+                            {% else %}
+                                {% if loggedin %}
+                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
+                                {% else %}
+                                    <td>{{ file.getScrapedFullName }}</td>
+                                {% endif %}
+                            {% endif %}
+                        </tr>
                     {% endfor %}
                     {% if loggedin and user.is_staff %}
-                    <tr>
-                        <td>
-                            <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
+                            </td>
+                        </tr>
                     {% endif %}
                 </tbody>
             </table>
 
-            {% endblock %}
-        </div> <!-- /container -->
+        {% endblock %}
+    </div> <!-- /container -->
 
-    </body>
+</body>
 
-    <footer>
-    {% block footer %}
+<footer>
+{% block footer %}
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
             {% if waiterstatus %}
-            <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
+                <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
             {% else %}
-            <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
+                <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
             {% endif %}
         </div>
     </div>
-    {% endblock %}
-    </footer>
+{% endblock %}
+</footer>
 
-    {% block javascript_include %}
+{% block javascript_include %}
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -145,9 +145,9 @@
     <script src="{% static "datatables.net-responsive/js/dataTables.responsive.min.js" %}"></script>
     <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
     <script src="{% static "assets/mediaviewer.js" %}"></script>
-    {% endblock %}
+{% endblock %}
 
-    {% block javascript %}
+{% block javascript %}
     <script type="text/javascript">
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
@@ -158,5 +158,5 @@
 
         });
     </script>
-    {% endblock %}
+{% endblock %}
 </html>

@@ -10,25 +10,25 @@
 
 <div class="container">
     {% block jumbotron %}
-    <div class="jumbotron">
-        <ol class="breadcrumb">
-            {% if file.isMovie %}
-            <li><a href="/mediaviewer/">Home</a></li>
-            <li><a href="/mediaviewer/movies/">Movies</a></li>
-            <li class="active">{{ file.rawSearchString }}</li>
-            {% else %}
-            <li><a href="/mediaviewer/">Home</a></li>
-            <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-            <li class="active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
-            {% endif %}
-            <h1>File Saved!</h1>
-            <h3>{{ file.displayName }} has been saved successfully</h3>
-            <a href="/mediaviewer/files/{{ file.id }}/">Go Back</a>
-            {% if file.finished and can_download %}
-            <a href="{{ file.downloadLink }}">Download</a>
-            {% endif %}
-        </ol>
-    </div>
+        <div class="jumbotron">
+            <ol class="breadcrumb">
+                {% if file.isMovie %}
+                    <li><a href="/mediaviewer/">Home</a></li>
+                    <li><a href="/mediaviewer/movies/">Movies</a></li>
+                    <li class="active">{{ file.rawSearchString }}</li>
+                {% else %}
+                    <li><a href="/mediaviewer/">Home</a></li>
+                    <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                    <li class="active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
+                {% endif %}
+                <h1>File Saved!</h1>
+                <h3>{{ file.displayName }} has been saved successfully</h3>
+                <a href="/mediaviewer/files/{{ file.id }}/">Go Back</a>
+                {% if file.finished and can_download %}
+                    <a href="{{ file.downloadLink }}">Download</a>
+                {% endif %}
+            </ol>
+        </div>
     {% endblock %}
 </div>
 

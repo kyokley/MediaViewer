@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block waiter_frame %}
-<iframe class="iframe waiter-frame" src="{{downloadLink}}" scrolling="no" frameborder="0"></iframe>
+    <iframe class="iframe waiter-frame" src="{{downloadLink}}" scrolling="no" frameborder="0"></iframe>
 {% endblock %}
 
 {% include footer %}
@@ -27,35 +27,35 @@
 {% include javascript_include %}
 
 {% block javascript %}
-  <script type="text/javascript">
-            //$(function(){
+    <script type="text/javascript">
+        //$(function(){
 
             //var iFrames = $('iframe');
 
             //function iResize() {
 
-            //    for (var i = 0, j = iFrames.length; i < j; i++) {
-            //      iFrames[i].style.height = iFrames[i].contentWindow.document.body.offsetHeight + 'px';}
-            //    }
+                //    for (var i = 0, j = iFrames.length; i < j; i++) {
+                    //      iFrames[i].style.height = iFrames[i].contentWindow.document.body.offsetHeight + 'px';}
+                    //    }
 
-            //    if ($.browser.safari || $.browser.opera) {
+                    //    if ($.browser.safari || $.browser.opera) {
 
-            //       iFrames.load(function(){
-            //           setTimeout(iResize, 0);
-            //       });
+                        //       iFrames.load(function(){
+                            //           setTimeout(iResize, 0);
+                        //       });
 
-            //       for (var i = 0, j = iFrames.length; i < j; i++) {
-            //            var iSource = iFrames[i].src;
-            //            iFrames[i].src = '';
-            //            iFrames[i].src = iSource;
-            //       }
+                        //       for (var i = 0, j = iFrames.length; i < j; i++) {
+                            //            var iSource = iFrames[i].src;
+                            //            iFrames[i].src = '';
+                            //            iFrames[i].src = iSource;
+                            //       }
 
-            //    } else {
-            //       iFrames.load(function() {
-            //           this.style.height = this.contentWindow.document.body.offsetHeight + 'px';
-            //       });
-            //    }
+                            //    } else {
+                                //       iFrames.load(function() {
+                                    //           this.style.height = this.contentWindow.document.body.offsetHeight + 'px';
+                                //       });
+                                //    }
 
-            //    });
-  </script>
+        //    });
+    </script>
 {% endblock %}
