@@ -1,5 +1,9 @@
 var tableElement;
 var csrf_token;
+var didScroll;
+var lastScrollTop = 0;
+var delta = 10;
+var navbarHeight = $('.navbar-fixed-top').outerHeight() + 20;
 
 function bindAlertMessage($) {
     $(".alert").bind('closed.bs.alert', function() {
@@ -341,4 +345,35 @@ function validatePassword(password){
     var char_regex = /[^0-9]/;
     var test_string = String(password);
     return test_string.search(digit_regex) !== -1 && test_string.search(char_regex) !== -1 && test_string.length >= 6
+}
+
+function hasScrolled(){
+    var st = $(this).scrollTop();
+    if (Math.abs(lastScrollTop - st) <= delta)
+        return;
+
+    if(st > lastScrollTop && st > navbarHeight){
+        $('.navbar-fixed-top').removeClass('nav-show').addClass('nav-hide');
+        $('.navbar-fixed-bottom').removeClass('nav-show').addClass('nav-hide');
+    } else {
+        if(st + $(window).height() < $(document).height()){
+            $('.navbar-fixed-top').removeClass('nav-hide').addClass('nav-show');
+            $('.navbar-fixed-bottom').removeClass('nav-hide').addClass('nav-show');
+        }
+    }
+
+    lastScrollTop = st;
+}
+
+function scrollSetup(){
+    $(window).scroll(function (event) {
+        didScroll = true;
+    });
+
+    setInterval(function(){
+        if(didScroll){
+            hasScrolled();
+            didScroll = false;
+            }
+            }, 250);
 }
