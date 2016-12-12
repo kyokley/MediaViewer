@@ -3,8 +3,6 @@ from django.shortcuts import render, get_object_or_404
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.file import File
 from django.contrib.auth.decorators import login_required
-from datetime import datetime as dateObj
-from django.utils.timezone import utc
 from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
                                       BANGUP_IP,
@@ -20,8 +18,8 @@ def comment(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     changed = False
     try:
-        comment = request.POST['comment']
-        viewed = request.POST['viewed'] == 'true' and True or False
+        comment = request.POST.get('comment')
+        viewed = request.POST.get('viewed') == 'true' and True or False
         usercomment = file.usercomment(request.user)
         if usercomment:
             changed = usercomment.comment != comment
@@ -29,37 +27,30 @@ def comment(request, file_id):
             usercomment.comment = comment
             usercomment.viewed = viewed
         else:
-            usercomment = UserComment()
-            usercomment.file = file
-            usercomment.user = request.user
-            usercomment.comment = comment
-            usercomment.viewed = viewed
-            usercomment.datecreated = dateObj.utcnow().replace(tzinfo=utc)
+            UserComment.new(file,
+                            request.user,
+                            comment,
+                            viewed)
             changed = True
 
         if request.user.is_staff:
-            if (file._searchString != request.POST['search'] or
-                    file.imdb_id != request.POST['imdb_id'] or
-                    file.override_filename != request.POST['episode_name'] or
-                    file.override_season != request.POST['season'] or
-                    file.override_episode != request.POST['episode_number']):
+            if (file._searchString != request.POST.get('search', file._searchString) or
+                    file.imdb_id != request.POST.get('imdb_id', file.imdb_id) or
+                    file.override_filename != request.POST.get('episode_name', file.override_filename) or
+                    file.override_season != request.POST.get('season', file.override_season) or
+                    file.override_episode != request.POST.get('episode_number', file.override_episode)):
                 file.posterfile.delete()
                 if file.path.posterfile:
                     file.path.posterfile.delete()
-                file._searchString = request.POST['search']
-                file.imdb_id = request.POST['imdb_id']
-                file.override_filename = request.POST['episode_name']
-                file.override_season = request.POST['season']
-                file.override_episode = request.POST['episode_number']
+                file._searchString = request.POST.get('search', file._searchString)
+                file.imdb_id = request.POST.get('imdb_id', file.imdb_id)
+                file.override_filename = request.POST.get('episode_name', file.override_filename)
+                file.override_season = request.POST.get('season', file.override_season)
+                file.override_episode = request.POST.get('episode_number', file.override_episode)
 
-            file.hide = request.POST['hidden'] == 'true' or False
-
-        if changed:
-            file.dateedited = dateObj.utcnow().replace(tzinfo=utc)
-            usercomment.dateedited = dateObj.utcnow().replace(tzinfo=utc)
+            file.hide = request.POST.get('hidden', file.hide) == 'true' or False
 
         file.save()
-        usercomment.save()
     except Exception, e:
         print e
         return render(request, 'mediaviewer/filesdetail.html',
@@ -82,4 +73,3 @@ def results(request, file_id):
     context['title'] = 'Saved Successfully!'
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/filesresults.html', context)
-
