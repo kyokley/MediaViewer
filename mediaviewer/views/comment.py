@@ -16,14 +16,11 @@ from mediaviewer.utils import logAccessInfo, check_force_password_change
 @logAccessInfo
 def comment(request, file_id):
     file = get_object_or_404(File, pk=file_id)
-    changed = False
     try:
         comment = request.POST.get('comment')
         viewed = request.POST.get('viewed') == 'true' and True or False
         usercomment = file.usercomment(request.user)
         if usercomment:
-            changed = usercomment.comment != comment
-            changed = usercomment.viewed != viewed or changed
             usercomment.comment = comment
             usercomment.viewed = viewed
         else:
@@ -31,7 +28,6 @@ def comment(request, file_id):
                             request.user,
                             comment,
                             viewed)
-            changed = True
 
         if request.user.is_staff:
             if (file._searchString != request.POST.get('search', file._searchString) or
@@ -50,9 +46,7 @@ def comment(request, file_id):
 
             file.hide = request.POST.get('hidden', file.hide) == 'true' or False
 
-        file.save()
-    except Exception, e:
-        print e
+    except Exception:
         return render(request, 'mediaviewer/filesdetail.html',
                 {'file': file,
                  'error_message': 'An error has occurred',})
