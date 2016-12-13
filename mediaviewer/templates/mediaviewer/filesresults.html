@@ -23,10 +23,18 @@
                 {% endif %}
                 <h1>File Saved!</h1>
                 <h3>{{ file.displayName }} has been saved successfully</h3>
-                <a href="/mediaviewer/files/{{ file.id }}/">Go Back</a>
-                {% if file.finished and can_download %}
-                    <a href="{{ file.downloadLink }}">Download</a>
-                {% endif %}
+                <div class="row">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-3">
+                        <a class="btn btn-info" href="/mediaviewer/files/{{ file.id }}/">Go Back</a>
+                    </div>
+                    {% if file.finished and can_download and waiterstatus %}
+                        <div class="col-xs-3">
+                            <a class="btn btn-info" name="download-btn" onclick="openDownloadWindow('{{ file.id }}')">Open</a>
+                        </div>
+                    {% endif %}
+                    <div class="col-xs-3"></div>
+                </div>
             </ol>
         </div>
     {% endblock %}
