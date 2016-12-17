@@ -45,6 +45,7 @@ def comment(request, file_id):
                 file.override_episode = request.POST.get('episode_number', file.override_episode)
 
             file.hide = request.POST.get('hidden', file.hide) == 'true' or False
+            file.save()
 
     except Exception:
         return render(request, 'mediaviewer/filesdetail.html',
