@@ -3,8 +3,6 @@ from mediaviewer.models.file import File
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.path import Path
 
-import mock
-
 class TestGetScrapedNameReplacements(TestCase):
     ''' The purpose of this test is to test the period and hyphen substitutions '''
     def setUp(self):
