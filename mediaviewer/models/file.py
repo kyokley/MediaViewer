@@ -291,7 +291,10 @@ class File(models.Model):
         return searchStr
 
     def rawSearchString(self):
-        searchStr = self._searchString or self.getSearchTerm()
+        searchStr = (self._searchString or
+                        self.override_filename or
+                        self.path.override_display_name or
+                        self.getSearchTerm())
         return searchStr
 
     def getScrapedName(self):
