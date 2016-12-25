@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.test import TestCase
 
 from django.contrib.auth.models import User
@@ -54,3 +55,9 @@ class TestCanVote(TestCase):
     def test_voteNotAllowed(self):
         RequestVote.new(self.request, self.user1)
         self.assertFalse(self.request.canVote(self.user1))
+
+    def test_voteAllowed2(self):
+        req_vote = RequestVote.new(self.request, self.user1)
+        req_vote.datecreated = req_vote.datecreated + timedelta(days=-1)
+        req_vote.save()
+        self.assertTrue(self.request.canVote(self.user1))
