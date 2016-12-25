@@ -8,7 +8,6 @@ from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 from datetime import datetime
 import pytz
-import mock
 
 class DownloadTokenViewSetTests(APITestCase):
     def setUp(self):
