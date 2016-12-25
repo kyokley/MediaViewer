@@ -1,7 +1,8 @@
+import pytz
+from mysite.settings import TIME_ZONE
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import datetime as dateObj
-from django.utils.timezone import utc
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 class Request(models.Model):
@@ -27,7 +28,7 @@ class Request(models.Model):
         if not mostRecentVote:
             return True
 
-        currentTime = dateObj.utcnow().replace(tzinfo=utc)
+        currentTime = datetime.now(pytz.timezone(TIME_ZONE))
         mostRecentVoteTime = mostRecentVote.datecreated
         refTime = mostRecentVoteTime + relativedelta(days=1)
 
