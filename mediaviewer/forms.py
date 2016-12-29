@@ -1,4 +1,6 @@
 from django import forms
+from django.template import loader
+from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import (SetPasswordForm,
                                        PasswordChangeForm,
@@ -117,6 +119,29 @@ class FormlessPasswordReset(PasswordResetForm):
         self.data = {'email': email}
         self.cleaned_data = {}
         self.user = user
+
+    def send_mail(self, subject_template_name, email_template_name,
+                  context, from_email, to_email, html_email_template_name=None):
+        """
+        Sends a django.core.mail.EmailMultiAlternatives to `to_email`.
+        """
+        subject = loader.render_to_string(subject_template_name, context)
+        # Email subject *must not* contain newlines
+        subject = ''.join(subject.splitlines())
+        body = loader.render_to_string(email_template_name, context)
+        bcc = [user.email for user in User.objects.filter(is_staff=True) if user.email]
+
+        email_message = EmailMultiAlternatives(subject,
+                                               body,
+                                               from_email,
+                                               [to_email],
+                                               bcc=bcc)
+
+        if html_email_template_name is not None:
+            html_email = loader.render_to_string(html_email_template_name, context)
+            email_message.attach_alternative(html_email, 'text/html')
+
+        email_message.send()
 
     def clean_email(self):
         email = self.data['email']
