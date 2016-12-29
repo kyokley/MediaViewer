@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from mediaviewer.views.home import setSiteWideContext, generateHeader
 from mediaviewer.forms import (MVSetPasswordForm,
                                MVPasswordChangeForm,
+                               PasswordResetFormWithBCC,
                                )
 
 def reset_confirm(request, uidb64=None, token=None):
@@ -33,6 +34,7 @@ def reset(request):
                           email_template_name='mediaviewer/password_reset_email.html',
                           subject_template_name='mediaviewer/password_reset_subject.txt',
                           post_reset_redirect=reverse('mediaviewer:password_reset_done'),
+                          password_reset_form=PasswordResetFormWithBCC,
                           )
 
 def reset_done(request):

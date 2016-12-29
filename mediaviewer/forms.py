@@ -114,12 +114,7 @@ class MVPasswordChangeForm(PasswordChangeForm, MVSaveBase):
 
         return password1
 
-class FormlessPasswordReset(PasswordResetForm):
-    def __init__(self, user, email):
-        self.data = {'email': email}
-        self.cleaned_data = {}
-        self.user = user
-
+class PasswordResetFormWithBCC(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         """
@@ -142,6 +137,12 @@ class FormlessPasswordReset(PasswordResetForm):
             email_message.attach_alternative(html_email, 'text/html')
 
         email_message.send()
+
+class FormlessPasswordReset(PasswordResetFormWithBCC):
+    def __init__(self, user, email):
+        self.data = {'email': email}
+        self.cleaned_data = {}
+        self.user = user
 
     def clean_email(self):
         email = self.data['email']
