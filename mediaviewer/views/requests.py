@@ -41,19 +41,8 @@ def addrequests(request):
 
     try:
         if name:
-            newrequest = Request()
-            newrequest.name = name
-            newrequest.done = False
-            newrequest.user = request.user
-            newrequest.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-            newrequest.dateedited = dateObj.utcnow().replace(tzinfo=utc)
-            newrequest.save()
-
-            newvote = RequestVote()
-            newvote.request = newrequest
-            newvote.user = request.user
-            newvote.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-            newvote.save()
+            newrequest = Request.new(name, request.user)
+            RequestVote.new(newrequest, request.user)
 
             createdBy = request.user
             users = User.objects.filter(is_staff=True)
