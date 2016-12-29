@@ -1,5 +1,6 @@
 import mock
 
+from requests.exceptions import HTTPError
 from django.test import TestCase
 from mediaviewer.views.waiterstatus import ajaxwaiterstatus
 
@@ -79,5 +80,22 @@ class TestAjaxWaiterStatus(TestCase):
                                                  'failureReason': ''})
         self.mock_new.assert_called_once_with(True,
                                               '')
+        self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
+                                                       content_type='application/javascript')
+
+    def test_request_timed_out(self):
+        self.mock_requests.get.side_effect = HTTPError('Timedout')
+        self.mock_resp.json.return_value = {}
+
+        actual = ajaxwaiterstatus(self.mock_request)
+        expected = self.mock_HttpResponse.return_value
+
+        self.assertEqual(expected, actual)
+        self.mock_requests.get.assert_called_once_with('test_url',
+                                                       timeout='test_request_timeout')
+        self.mock_dumps.assert_called_once_with({'status': False,
+                                                 'failureReason': 'Timedout'})
+        self.mock_new.assert_called_once_with(False,
+                                              'Timedout')
         self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
                                                        content_type='application/javascript')
