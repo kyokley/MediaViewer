@@ -7,8 +7,6 @@ from mediaviewer.models.request import (Request,
                                         )
 from mediaviewer.models.message import Message
 from mediaviewer.views.home import generateHeader, setSiteWideContext
-from datetime import datetime as dateObj
-from django.utils.timezone import utc
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from mysite.settings import DEBUG
@@ -66,14 +64,8 @@ def ajaxvote(request):
     user = request.user
     if not user.is_authenticated():
         raise Exception("User not authenticated. Refresh and try again.")
-    if not user:
-        raise
 
-    newvote = RequestVote()
-    newvote.request = requestObj
-    newvote.user = user
-    newvote.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-    newvote.save()
+    RequestVote.new(requestObj, user)
 
     response = {}
     response['numberOfVotes'] = requestObj.numberOfVotes()
