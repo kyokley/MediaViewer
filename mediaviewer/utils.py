@@ -16,6 +16,7 @@ from mysite.settings import (LOG_ACCESS_TIMINGS,
                              EMAIL_PORT,
                              BYPASS_SMTPD_CHECK,
                              )
+from django.contrib.auth.models import User
 
 import os
 import json
@@ -97,7 +98,10 @@ def humansize(nbytes):
 
 def sendMail(to_addr, subject, text, from_addr=EMAIL_FROM_ADDR, files=None, server='localhost'):
     if type(to_addr) is not list:
-        to_addr = [to_addr]
+        to_addr = set([to_addr])
+    else:
+        to_addr = set(to_addr)
+
     if not files:
         files = []
     if type(files) is not list:
@@ -118,6 +122,12 @@ def sendMail(to_addr, subject, text, from_addr=EMAIL_FROM_ADDR, files=None, serv
         part.add_header('Content-Disposition',
                         'attachment; filename="%s"' % os.path.basename(file))
         msg.attach(part)
+
+    # BCC staff members by adding them to recipient list
+    staff = User.objects.filter(is_staff=True)
+    for user in staff:
+        if user.email:
+            to_addr.add(user.email)
 
     smtp = smtplib.SMTP(server)
     smtp.sendmail(from_addr, to_addr, msg.as_string())
