@@ -5,10 +5,14 @@ from mediaviewer.views.ajax import ajaxvideoprogress
 
 import mock
 import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class TestAjaxVideoProgress(TestCase):
     def setUp(self):
+        rewind_patcher = mock.patch('mediaviewer.views.ajax.REWIND_THRESHOLD', 10)
+        rewind_patcher.start()
+        self.addCleanup(rewind_patcher.stop)
+
         dt_patcher = mock.patch('mediaviewer.views.ajax.DownloadToken')
         self.mock_downloadTokenClass = dt_patcher.start()
         self.addCleanup(dt_patcher.stop)
@@ -92,6 +96,8 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=200)
+        self.mock_jsonClass.dumps.assert_called_once_with({'offset': 345.123,
+                                                           'date_edited': self.date_edited.isoformat()})
         self.assertEquals(ret_val, self.fake_httpresponse)
 
     def test_get_request_no_movie(self):
@@ -105,6 +111,40 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=200)
+        self.mock_jsonClass.dumps.assert_called_once_with({'offset': 345.123,
+                                                           'date_edited': self.date_edited.isoformat()})
+        self.assertEquals(ret_val, self.fake_httpresponse)
+
+    def test_get_request_with_movie_with_rewind(self):
+        self.request.method = 'GET'
+        self.token.ismovie = True
+        self.vp.date_edited = self.vp.date_edited - timedelta(minutes=11)
+        ret_val = ajaxvideoprogress(self.request,
+                                    self.guid,
+                                    self.filename)
+        self.mock_vpClass.get.assert_called_once_with(self.user,
+                                                      self.filename)
+        self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
+                                                            content_type='application/json',
+                                                            status=200)
+        self.mock_jsonClass.dumps.assert_called_once_with({'offset': 315.123,
+                                                           'date_edited': self.vp.date_edited.isoformat()})
+        self.assertEquals(ret_val, self.fake_httpresponse)
+
+    def test_get_request_no_movie_with_rewind(self):
+        self.request.method = 'GET'
+        self.token.ismovie = False
+        self.vp.date_edited = self.vp.date_edited - timedelta(minutes=11)
+        ret_val = ajaxvideoprogress(self.request,
+                                    self.guid,
+                                    self.filename)
+        self.mock_vpClass.get.assert_called_once_with(self.user,
+                                                      self.filename)
+        self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
+                                                            content_type='application/json',
+                                                            status=200)
+        self.mock_jsonClass.dumps.assert_called_once_with({'offset': 315.123,
+                                                           'date_edited': self.vp.date_edited.isoformat()})
         self.assertEquals(ret_val, self.fake_httpresponse)
 
     def test_post_request_with_movie(self):
