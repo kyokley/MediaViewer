@@ -118,7 +118,8 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_vpClass.createOrUpdate.assert_called_once_with(self.user,
                                                                  'dt.filename.mp4',
                                                                  self.filename,
-                                                                 987)
+                                                                 987,
+                                                                 self.token.file)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=200)
@@ -136,7 +137,8 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_vpClass.createOrUpdate.assert_called_once_with(self.user,
                                                                  'dt.filename.mp4',
                                                                  self.filename,
-                                                                 987)
+                                                                 987,
+                                                                 self.token.file)
         self.mock_httpResponseClass.assert_called_once_with(self.fake_json_data,
                                                             content_type='application/json',
                                                             status=200)
