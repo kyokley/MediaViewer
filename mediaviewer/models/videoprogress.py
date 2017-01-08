@@ -6,11 +6,17 @@ class VideoProgress(models.Model):
     hashed_filename = models.TextField(db_column='hashedfilename')
     offset = models.DecimalField(max_digits=9, decimal_places=3)
     date_edited = models.DateTimeField(auto_now=True)
-    token = models.ForeignKey('mediaviewer.DownloadToken', null=True, blank=True)
+    file = models.ForeignKey('mediaviewer.File', null=True, blank=True)
 
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'videoprogress'
+
+    def _unicode__(self):
+        return 'id: %s f: %s o: %s' % (self.id,
+                                       self.filename,
+                                       self.offset,
+                                       )
 
     @classmethod
     def new(cls,
@@ -18,13 +24,14 @@ class VideoProgress(models.Model):
             filename,
             hashed_filename,
             offset,
-            token):
+            file,
+            ):
         vp = cls()
         vp.user = user
         vp.filename = filename
         vp.hashed_filename = hashed_filename
         vp.offset = offset
-        vp.token = token
+        vp.file = file
         vp.save()
         return vp
 
@@ -41,19 +48,22 @@ class VideoProgress(models.Model):
                        filename,
                        hashed_filename,
                        offset,
-                       token):
+                       file,
+                       ):
         record = (cls.objects.filter(user=user)
                              .filter(hashed_filename=hashed_filename)
                              .first())
         if record:
             record.offset = offset
+            record.file = file
             record.save()
         else:
             record = cls.new(user,
                              filename,
                              hashed_filename,
                              offset,
-                             token)
+                             file
+                             )
         return record
 
     @classmethod

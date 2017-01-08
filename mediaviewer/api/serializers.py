@@ -9,6 +9,7 @@ from mediaviewer.models.message import Message
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.usersettings import UserSettings
+from mediaviewer.models.videoprogress import VideoProgress
 
 from rest_framework import serializers
 
@@ -28,6 +29,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'auto_download',
                   'pathid',
                   'pathname',
+                  'videoprogresses',
                   )
     guid = serializers.CharField(required=True,
                                  max_length=32)
@@ -43,6 +45,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     auto_download = serializers.SerializerMethodField()
     pathid = serializers.SerializerMethodField()
     pathname = serializers.SerializerMethodField()
+    videoprogresses = serializers.SerializerMethodField()
 
     def get_auto_download(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
@@ -56,6 +59,11 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
 
     def get_pathname(self, obj):
         return obj.file.path.displayName
+
+    def get_videoprogresses(self, obj):
+        return [x.hashed_filename
+                    for x in VideoProgress.objects.filter(user=obj.user).filter(file=obj.file)
+                ]
 
 class DownloadClickSerializer(serializers.ModelSerializer):
     class Meta:
