@@ -4,6 +4,7 @@ from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.views.ajax import ajaxvideoprogress
 
 import mock
+import pytz
 from datetime import datetime
 
 class TestAjaxVideoProgress(TestCase):
@@ -22,7 +23,7 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_vpClass = vp_patcher.start()
         self.addCleanup(vp_patcher.stop)
         self.vp = mock.create_autospec(VideoProgress)
-        self.date_edited = datetime.now()
+        self.date_edited = datetime.now(pytz.timezone('utc'))
         self.vp.offset = 345.123
         self.vp.date_edited = self.date_edited
         self.mock_vpClass.get.return_value = self.vp
