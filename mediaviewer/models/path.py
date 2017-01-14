@@ -221,6 +221,6 @@ class Path(models.Model):
 
     @classmethod
     def populate_all_genres(cls):
-        all_paths = cls.objects.filter(ismovie=False)
+        all_paths = cls.objects.filter(is_movie=False).filter(hide=False)
         for path in all_paths:
             print(path.displayName(), path.populate_genres())

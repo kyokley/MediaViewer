@@ -1,13 +1,13 @@
 from django.db import models
 
-class MediaGenre(models.model):
+class MediaGenre(models.Model):
     file = models.ForeignKey('mediaviewer.File',
                              null=True,
                              blank=True)
     path = models.ForeignKey('mediaviewer.Path',
                              null=True,
                              blank=True)
-    genre = models.TestField(blank=False,
+    genre = models.TextField(blank=False,
                              null=False)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)

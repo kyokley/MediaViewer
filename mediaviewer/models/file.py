@@ -425,6 +425,6 @@ class File(models.Model):
 
     @classmethod
     def populate_all_genres(cls):
-        all_files = cls.objects.filter(path__ismovie=True)
+        all_files = cls.objects.filter(path__is_movie=True).filter(hide=False)
         for file in all_files:
             print(file.displayName(), file.populate_genres())
