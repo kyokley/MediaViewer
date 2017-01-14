@@ -1,4 +1,5 @@
 from django.db import models
+from django.db import connection
 
 class MediaGenre(models.Model):
     file = models.ForeignKey('mediaviewer.File',
@@ -30,3 +31,21 @@ class MediaGenre(models.Model):
         obj.genre = genre
         obj.save()
         return obj
+
+    @classmethod
+    def get_movie_genres(cls):
+        with connection.cursor() as cursor:
+            cursor.execute("""select distinct genre from mediagenre
+                              where file_id is not null;""")
+            rows = cursor.fetchall()
+
+        return [row for row in rows]
+
+    @classmethod
+    def get_tv_genres(cls):
+        with connection.cursor() as cursor:
+            cursor.execute("""select distinct genre from mediagenre
+                              where path_id is not null;""")
+            rows = cursor.fetchall()
+
+        return [row for row in rows]
