@@ -54,6 +54,8 @@ def getLastWaiterStatus(context):
     context['waiterfailurereason'] = lastStatus and lastStatus.failureReason or ''
 
 class HeaderHelper(object):
+    #TODO: Remove ALL of this html and relocate to templates!
+
     def homePage(self):
         return '<li><a href="/mediaviewer/">Home</a></li>'
 
@@ -140,7 +142,7 @@ def generateHeader(page, request):
               'requestsPage': requestsPage,
               }
     header = header % params
-    return mark_safe(header)
+    return mark_safe(header) #nosec
 
 @logAccessInfo
 def ajaxrunscraper(request):
