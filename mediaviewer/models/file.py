@@ -422,3 +422,9 @@ class File(models.Model):
             for genre in split_genres:
                 MediaGenre.new(genre, file=self)
             return split_genres
+
+    @classmethod
+    def populate_all_genres(cls):
+        all_files = cls.objects.filter(path__ismovie=True)
+        for file in all_files:
+            print(file.displayName(), file.populate_genres())

@@ -52,7 +52,6 @@ class Path(models.Model):
 
     remotepath = remotePath
 
-    @property
     def displayName(self):
         return self.override_display_name or self.shortName.replace('.', ' ').title()
 
@@ -114,7 +113,7 @@ class Path(models.Model):
         return poster
 
     def _handleDataFromTVDB(self, poster):
-        tvinfo = searchTVDBByName(self.defaultsearchstr or self.displayName)
+        tvinfo = searchTVDBByName(self.defaultsearchstr or self.displayName())
         if tvinfo and tvinfo.get('results'):
             self.tvdb_id = tvinfo['results'][0]['id']
             result = tvinfo['results'][0]
@@ -219,3 +218,9 @@ class Path(models.Model):
             for genre in split_genres:
                 MediaGenre.new(genre, path=self)
             return split_genres
+
+    @classmethod
+    def populate_all_genres(cls):
+        all_paths = cls.objects.filter(ismovie=False)
+        for path in all_paths:
+            print(path.displayName(), path.populate_genres())
