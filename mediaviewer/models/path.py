@@ -14,8 +14,6 @@ from django.utils.timezone import utc
 
 from mediaviewer.log import log
 
-MOVIE = 'Movies'
-
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
     remotepathstr = models.TextField(blank=True)
@@ -201,3 +199,9 @@ class Path(models.Model):
                                                  .filter(viewed=True)
                                                  .count())
         return file_count - usercomments_count
+
+    def populate_genres(self):
+        genres = (self.posterfile.genre
+                    if self.posterfile.genre != 'Genre not found'
+                    else None)
+        return genres and genres.split(', ')
