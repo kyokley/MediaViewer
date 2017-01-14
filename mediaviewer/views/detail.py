@@ -43,7 +43,7 @@ def filesdetail(request, file_id):
                'can_download': settings and settings.can_download or False,
                'file_size': file.size and humansize(file.size)}
     context['header'] = generateHeader('filesdetail', request)
-    context['title'] = file.isMovie() and file.rawSearchString() or file.path.displayName
+    context['title'] = file.isMovie() and file.rawSearchString() or file.path.displayName()
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/filesdetail.html', context)
 
@@ -54,7 +54,7 @@ def pathsdetail(request, path_id):
     path = Path.objects.get(pk=path_id)
     context = {'path': path}
     context['header'] = generateHeader('pathsdetail', request)
-    context['title'] = path.displayName
+    context['title'] = path.displayName()
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/pathsdetail.html', context)
 

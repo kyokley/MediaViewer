@@ -58,7 +58,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return obj.file.path.id
 
     def get_pathname(self, obj):
-        return obj.file.path.displayName
+        return obj.file.path.displayName()
 
     def get_videoprogresses(self, obj):
         return [x.hashed_filename

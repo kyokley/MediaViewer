@@ -21,7 +21,7 @@ class MediaGenre(models.model):
             genre,
             file=None,
             path=None):
-        if not file and not path:
+        if not file and not path or (path and file):
             raise ValueError('Either file or path must be defined')
 
         obj = cls()

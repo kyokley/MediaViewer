@@ -102,7 +102,7 @@ def tvshows(request, pathid):
               'can_download': settings and settings.can_download or False
               }
     context['header'] = generateHeader('tvshows', request)
-    context['title'] = refpath.displayName
+    context['title'] = refpath.displayName()
     context['long_plot'] = len(refpath.posterfile.plot) > 300
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
