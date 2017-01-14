@@ -1,5 +1,7 @@
 import re
+import time
 from django.db import models
+from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
@@ -10,6 +12,7 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
                                                   tvdbConfig,
                                                   getTVDBEpisodeInfo,
                                                   )
+from mediaviewer.models.mediagenre import MediaGenre
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
@@ -399,3 +402,23 @@ class File(models.Model):
         except Exception, e:
             log.error('Got an error destroying posterfile')
             log.error(e)
+
+    def populate_genres(self):
+        if not self.isMovie():
+            raise ValueError('This function should not be applied to tv paths')
+
+        posterfile = PosterFile.objects.filter(file=self).first()
+
+        if not posterfile:
+            # Try not to hammer the movieDBs so we'll add a small sleep
+            time.sleep(.5)
+
+        genres = (self.posterfile.genre
+                    if self.posterfile.genre != 'Genre not found'
+                    else None)
+
+        if genres:
+            split_genres = genres.split(', ')
+            for genre in split_genres:
+                MediaGenre.new(genre, file=self)
+            return split_genres

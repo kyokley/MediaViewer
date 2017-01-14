@@ -201,6 +201,9 @@ class Path(models.Model):
         return file_count - usercomments_count
 
     def populate_genres(self):
+        if self.isMovie():
+            raise ValueError('This function should not be applied to movie paths')
+
         posterfile = PosterFile.objects.filter(path=self).first()
 
         if not posterfile:
