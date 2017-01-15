@@ -1,9 +1,7 @@
 from django.core.urlresolvers import reverse
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
-from mediaviewer.views.home import (generateHeader,
-                                    setSiteWideContext,
-                                    )
+from mediaviewer.views.home import setSiteWideContext
 from django.contrib.auth import login
 from mediaviewer.models.loginevent import LoginEvent
 from django.http import HttpResponseRedirect
@@ -17,7 +15,7 @@ from mediaviewer.models.usersettings import (ImproperLogin,
 def signin(request):
     context = {'loggedin': False}
     siteGreeting = SiteGreeting.latestSiteGreeting()
-    context['header'] = generateHeader('signin', request)
+    context['active_page'] = 'signin'
     context['greeting'] = siteGreeting and siteGreeting.greeting or "SignIn"
     user = request.user
 

@@ -8,7 +8,7 @@ from django.contrib.auth.views import (password_reset,
                                        password_change_done,
                                        )
 from django.contrib.auth.models import User
-from mediaviewer.views.home import setSiteWideContext, generateHeader
+from mediaviewer.views.home import setSiteWideContext
 from mediaviewer.forms import (MVSetPasswordForm,
                                MVPasswordChangeForm,
                                PasswordResetFormWithBCC,
@@ -58,7 +58,7 @@ def create_new_password(request, uidb64=None, token=None):
 def change_password(request):
     context = {'force_change': request.user.settings().force_password_change}
     setSiteWideContext(context, request)
-    context['header'] = generateHeader('change_password', request)
+    context['active_page'] = 'change_password'
     return password_change(request,
                            template_name='mediaviewer/change_password.html',
                            post_change_redirect=reverse('mediaviewer:change_password_submit'),
@@ -68,7 +68,7 @@ def change_password(request):
 
 def change_password_submit(request):
     context = {}
-    context['header'] = generateHeader('change_password_submit', request)
+    context['active_page'] = 'change_password_submit'
     setSiteWideContext(context, request)
     return password_change_done(request,
                                 template_name='mediaviewer/change_password_submit.html',

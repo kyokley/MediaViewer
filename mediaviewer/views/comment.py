@@ -8,7 +8,7 @@ from mediaviewer.models.usersettings import (
                                       BANGUP_IP,
                                       )
 from django.core.urlresolvers import reverse
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from mediaviewer.utils import logAccessInfo, check_force_password_change
 
 @login_required(login_url='/mediaviewer/login/')
@@ -64,7 +64,7 @@ def results(request, file_id):
               'BANGUP_IP': BANGUP_IP,
                'can_download': request.user.settings() and request.user.settings().can_download or False
             }
-    context['header'] = generateHeader('results', request)
+    context['active_page'] = 'results'
     context['title'] = 'Saved Successfully!'
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/filesresults.html', context)

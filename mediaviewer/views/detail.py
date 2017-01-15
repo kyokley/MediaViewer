@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
                                              )
@@ -42,7 +42,7 @@ def filesdetail(request, file_id):
                'viewed': viewed,
                'can_download': settings and settings.can_download or False,
                'file_size': file.size and humansize(file.size)}
-    context['header'] = generateHeader('filesdetail', request)
+    context['active_page'] = 'filesdetail'
     context['title'] = file.isMovie() and file.rawSearchString() or file.path.displayName()
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/filesdetail.html', context)
@@ -53,7 +53,7 @@ def filesdetail(request, file_id):
 def pathsdetail(request, path_id):
     path = Path.objects.get(pk=path_id)
     context = {'path': path}
-    context['header'] = generateHeader('pathsdetail', request)
+    context['active_page'] = 'pathsdetail'
     context['title'] = path.displayName()
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/pathsdetail.html', context)

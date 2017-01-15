@@ -6,7 +6,7 @@ from mediaviewer.models.request import (Request,
                                         RequestVote,
                                         )
 from mediaviewer.models.message import Message
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from mysite.settings import DEBUG
@@ -26,7 +26,7 @@ def requests(request):
     context = {'items': items,
                'user': user,
                }
-    context['header'] = generateHeader('requests', request)
+    context['active_page'] = 'requests'
     context['title'] = 'Requests'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/request.html', context)

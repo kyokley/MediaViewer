@@ -1,4 +1,4 @@
-from mediaviewer.views.home import setSiteWideContext, generateHeader
+from mediaviewer.views.home import setSiteWideContext
 from django.shortcuts import render
 from mediaviewer.utils import logAccessInfo, check_force_password_change
 from mediaviewer.models.file import File
@@ -8,7 +8,7 @@ from mediaviewer.models.downloadtoken import DownloadToken
 @logAccessInfo
 def waiter_display(request, fileid):
     context = {}
-    context['header'] = generateHeader('home', request)
+    context['active_page'] = 'home'
     context['title'] = 'Home'
     file = File.objects.get(pk=fileid)
     user = request.user

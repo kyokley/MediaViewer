@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from mediaviewer.models.message import Message
 from django.shortcuts import render
 from mysite.settings import DEBUG
@@ -16,7 +16,7 @@ ID_REGEX = re.compile('\d+')
 def submitsitewidemessage(request):
     user = request.user
     context = {}
-    context['header'] = generateHeader('submitsitewidemessage', request)
+    context['active_page'] = 'submitsitewidemessage'
     setSiteWideContext(context, request)
 
     message = request.POST.get('sitemessage')

@@ -5,7 +5,7 @@ from mediaviewer.models.usersettings import (UserSettings,
                                       BANGUP_IP,
                                       FILENAME_SORT,
                                       )
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from django.shortcuts import render
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
@@ -23,7 +23,7 @@ def settings(request):
               'BANGUP_IP': BANGUP_IP,
               'greeting': siteGreeting and siteGreeting.greeting or "Check out the new downloads!",
             }
-    context['header'] = generateHeader('settings', request)
+    context['active_page'] = 'settings'
     user = request.user
     settings = user.settings()
     if settings:
@@ -48,7 +48,7 @@ def settings(request):
 @logAccessInfo
 def submitsettings(request):
     context = {'successful': True}
-    context['header'] = generateHeader('submitsettings', request)
+    context['active_page'] = 'submitsettings'
     setSiteWideContext(context, request)
 
     default_sort = request.POST.get('default_sort')
@@ -89,7 +89,7 @@ def submitsettings(request):
 def submitsitesettings(request):
     user = request.user
     context = {'successful': True}
-    context['header'] = generateHeader('submitsitesettings', request)
+    context['active_page'] = 'submitsitesettings'
     setSiteWideContext(context, request)
 
     newGreeting = request.POST.get('greeting')
@@ -114,7 +114,7 @@ def submitsitesettings(request):
 def submitnewuser(request):
     user = request.user
     context = {'successful': True}
-    context['header'] = generateHeader('submitnewuser', request)
+    context['active_page'] = 'submitnewuser'
     setSiteWideContext(context, request)
 
     new_user_email = request.POST.get('new_user_email')

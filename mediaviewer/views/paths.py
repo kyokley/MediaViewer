@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from mediaviewer.models.path import Path
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from django.shortcuts import render
 from mediaviewer.utils import logAccessInfo, check_force_password_change
 
@@ -17,7 +17,7 @@ def paths(request, items):
               'paths': paths,
               'view': 'paths',
               }
-    context['header'] = generateHeader('paths', request)
+    context['active_page'] = 'paths'
     context['title'] = 'Paths'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/paths.html', context)

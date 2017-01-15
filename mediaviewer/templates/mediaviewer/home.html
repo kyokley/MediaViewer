@@ -42,7 +42,30 @@
                     <div class="navbar-collapse collapse">
                         {% if loggedin %}
                             <ul class="nav navbar-nav">
-                                {{ header }}
+                                {% if active_page == 'home' %}
+                                    <li class="active"><a href="/mediaviewer/">Home</a></li>
+                                {% else %}
+                                    <li><a href="/mediaviewer/">Home</a></li>
+                                {% endif %}
+
+                                {% if active_page == 'movies' %}
+                                    <li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>
+                                {% else %}
+                                    <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>
+                                {% endif %}
+
+                                {% if active_page == 'tvshows' %}
+                                    <li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                                {% else %}
+                                    <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                                {% endif %}
+
+                                {% if active_page == 'requests' %}
+                                    <li class="active"><a href="/mediaviewer/requests/">Requests</a></li>
+                                {% else %}
+                                    <li><a href="/mediaviewer/requests/">Requests</a></li>
+                                {% endif %}
+
                                 {% if loggedin %}
                                     <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
                                 {% else %}

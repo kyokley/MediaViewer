@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from mediaviewer.models.file import File
-from mediaviewer.views.home import generateHeader, setSiteWideContext
+from mediaviewer.views.home import setSiteWideContext
 from django.contrib.auth.decorators import login_required
 from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
@@ -39,7 +39,7 @@ def files(request, items):
               'BANGUP_IP': BANGUP_IP,
                'can_download': settings and settings.can_download or False
               }
-    context['header'] = generateHeader('files', request)
+    context['active_page'] = 'files'
     context['title'] = 'Files'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
@@ -65,7 +65,7 @@ def movies(request, items):
               'BANGUP_IP': BANGUP_IP,
                'can_download': settings and settings.can_download or False
               }
-    context['header'] = generateHeader('movies', request)
+    context['active_page'] = 'movies'
     context['title'] = 'Movies'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
@@ -78,7 +78,7 @@ def tvshowsummary(request):
     pathSet = [path for name, path in pathDict.items()]
 
     context = {'pathSet': pathSet}
-    context['header'] = generateHeader('tvshows', request)
+    context['active_page'] = 'tvshows'
     context['title'] = 'TV Shows'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/tvsummary.html', context)
@@ -101,7 +101,7 @@ def tvshows(request, pathid):
               'BANGUP_IP': BANGUP_IP,
               'can_download': settings and settings.can_download or False
               }
-    context['header'] = generateHeader('tvshows', request)
+    context['active_page'] = 'tvshows'
     context['title'] = refpath.displayName()
     context['long_plot'] = len(refpath.posterfile.plot) > 300
     setSiteWideContext(context, request, includeMessages=True)
