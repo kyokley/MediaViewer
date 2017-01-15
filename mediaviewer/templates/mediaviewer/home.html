@@ -49,22 +49,39 @@
                                 {% endif %}
 
                                 {% if active_page == 'movies' %}
-                                    <li class="active"><a href="/mediaviewer/movies/display/0/">Movies</a></li>
+                                    <li class="active dropdown">
                                 {% else %}
-                                    <li><a href="/mediaviewer/movies/display/0/">Movies</a></li>
+                                    <li class="dropdown">
                                 {% endif %}
+                                <a href="/mediaviewer/movies/display/0/" role="button" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+
+                                <ul class="dropdown-menu">
+                                    {% for genre in movie_genres %}
+                                        <li><a href="#">{{genre}}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                </li>
 
                                 {% if active_page == 'tvshows' %}
-                                    <li class="active"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                                    <li class="active dropdown">
                                 {% else %}
-                                    <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                                    <li class="dropdown">
                                 {% endif %}
+                                <a href="/mediaviewer/tvshows/summary/" role="button" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+
+                                <ul class="dropdown-menu">
+                                    {% for genre in tv_genres %}
+                                        <li><a href="#">{{genre}}</a></li>
+                                    {% endfor %}
+                                </ul>
+                                </li>
 
                                 {% if active_page == 'requests' %}
-                                    <li class="active"><a href="/mediaviewer/requests/">Requests</a></li>
+                                    <li class="active">
                                 {% else %}
-                                    <li><a href="/mediaviewer/requests/">Requests</a></li>
+                                    <li>
                                 {% endif %}
+                                <a href="/mediaviewer/requests/">Requests</a></li>
 
                                 {% if loggedin %}
                                     <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
