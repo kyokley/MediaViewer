@@ -66,6 +66,10 @@ class Path(models.Model):
     def distinctShowFolders(cls):
         refFiles = File.objects.filter(path__is_movie=False).order_by('path').distinct('path').select_related('path')
         paths = set([file.path for file in refFiles])
+        return cls._buildDistinctShowFoldersFromPaths(paths)
+
+    @classmethod
+    def _buildDistinctShowFoldersFromPaths(cls, paths):
         pathDict = dict()
         for path in paths:
             lastDate = path.lastCreatedFileDate
@@ -75,6 +79,13 @@ class Path(models.Model):
             else:
                 pathDict[path.shortName] = path
         return pathDict
+
+    @classmethod
+    def distinctShowFoldersByGenre(cls, genre):
+        # We're only interested in tv shows here so path must be defined
+        mediagenres = MediaGenre.objects.exclude(path=None).filter(genre=genre.genre).select_related('path')
+        paths = [mg.path for mg in mediagenres]
+        return cls._buildDistinctShowFoldersFromPaths(paths)
 
     def isMovie(self):
         return self.is_movie

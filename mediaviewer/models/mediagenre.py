@@ -34,32 +34,30 @@ class MediaGenre(models.Model):
 
     @classmethod
     def get_movie_genres(cls):
-        with connection.cursor() as cursor:
-            cursor.execute("""select genre from
-                                (select genre, count(*) from mediagenre
-                                 where file_id is not null
-                                 group by genre
-                                 order by count(*) desc
-                                 limit 10
-                                 ) as result
-                              order by genre
-                              ;""")
-            rows = cursor.fetchall()
+        genres = cls.objects.raw('''select * from mediagenre
+                                    where id in
+                                    (select id from
+                                        (select max(id) as id, genre, count(*) from mediagenre
+                                         where file_id is not null
+                                         group by genre
+                                         order by count(*) desc
+                                         limit 10) as result)
+                                    order by genre
+                                    ;''')
 
-        return [row[0] for row in rows]
+        return genres
 
     @classmethod
     def get_tv_genres(cls):
-        with connection.cursor() as cursor:
-            cursor.execute("""select genre from
-                                (select genre, count(*) from mediagenre
-                                 where path_id is not null
-                                 group by genre
-                                 order by count(*) desc
-                                 limit 10
-                                 ) as result
-                              order by genre
-                              ;""")
-            rows = cursor.fetchall()
+        genres = cls.objects.raw('''select * from mediagenre
+                                    where id in
+                                    (select id from
+                                        (select max(id) as id, genre, count(*) from mediagenre
+                                         where path_id is not null
+                                         group by genre
+                                         order by count(*) desc
+                                         limit 10) as result)
+                                    order by genre
+                                    ;''')
 
-        return [row[0] for row in rows]
+        return genres

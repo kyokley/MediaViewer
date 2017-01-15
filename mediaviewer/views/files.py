@@ -69,11 +69,12 @@ def movies(request):
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
 @logAccessInfo
-def movies_by_genre(request, genre):
+def movies_by_genre(request, genre_id):
     user = request.user
-    mediagenres = MediaGenre.objects.exclude(file=None).filter(genre=genre)
-    files = [mg.file for mg in mediagenres]
-    files.sort(key=lambda x: -x.id)
+    # We're only interested in movies here so files must be defined
+    ref_genre = MediaGenre.objects.get(pk=genre_id)
+    mediagenres = MediaGenre.objects.exclude(file=None).filter(genre=ref_genre.genre)
+    files = [mg.file for mg in mediagenres if not mg.file.hide]
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -85,7 +86,7 @@ def movies_by_genre(request, genre):
                'can_download': settings and settings.can_download or False
               }
     context['active_page'] = 'movies'
-    context['title'] = 'Movies'
+    context['title'] = 'Movies: {}'.format(ref_genre.genre)
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
 
@@ -99,6 +100,20 @@ def tvshowsummary(request):
     context = {'pathSet': pathSet}
     context['active_page'] = 'tvshows'
     context['title'] = 'TV Shows'
+    setSiteWideContext(context, request, includeMessages=True)
+    return render(request, 'mediaviewer/tvsummary.html', context)
+
+@login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
+@logAccessInfo
+def tvshows_by_genre(request, genre_id):
+    ref_genre = MediaGenre.objects.get(pk=genre_id)
+    pathDict = Path.distinctShowFoldersByGenre(ref_genre)
+    pathSet = [path for name, path in pathDict.items()]
+
+    context = {'pathSet': pathSet}
+    context['active_page'] = 'tvshows'
+    context['title'] = 'TV Shows: {}'.format(ref_genre.genre)
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/tvsummary.html', context)
 
