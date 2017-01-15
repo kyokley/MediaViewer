@@ -210,9 +210,12 @@ class Path(models.Model):
                                                  .count())
         return file_count - usercomments_count
 
-    def populate_genres(self):
+    def populate_genres(self, clearExisting=False):
         if self.isMovie():
             raise ValueError('This function should not be applied to movie paths')
+
+        if clearExisting:
+            MediaGenre.objects.filter(path=self).delete()
 
         posterfile = PosterFile.objects.filter(path=self).first()
 
@@ -227,7 +230,9 @@ class Path(models.Model):
         if genres:
             split_genres = genres.split(', ')
             for genre in split_genres:
-                MediaGenre.new(genre, path=self)
+                existing = MediaGenre.objects.filter(path=self).filter(genre=genre).first()
+                if not existing:
+                    MediaGenre.new(genre, path=self)
             return split_genres
 
     @classmethod

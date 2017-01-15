@@ -1,7 +1,6 @@
 import mock
 from django.test import TestCase
 from django.contrib.auth.models import User
-#from django.test.client import RequestFactory
 from django.http import HttpRequest
 from mediaviewer.views.settings import submitnewuser
 from mediaviewer.models.usersettings import UserSettings
@@ -11,7 +10,6 @@ from django.core.exceptions import ValidationError
 @mock.patch('mediaviewer.views.settings.log')
 @mock.patch('mediaviewer.views.settings.render')
 @mock.patch('mediaviewer.views.settings.setSiteWideContext')
-@mock.patch('mediaviewer.views.settings.generateHeader')
 class TestNewUserView(TestCase):
     def setUp(self):
         self.user = mock.create_autospec(User)
@@ -27,7 +25,6 @@ class TestNewUserView(TestCase):
         self.request.POST = {'new_user_email': self.new_user_email}
 
     def test_newUserWithNonStaffer(self,
-                                   mock_generateHeader,
                                    mock_setSiteWideContext,
                                    mock_render,
                                    mock_log,
@@ -35,9 +32,8 @@ class TestNewUserView(TestCase):
                                    ):
         self.user.is_staff = False
         expected_context = {'successful': False,
-                            'header': 'header',
+                            'active_page': 'submitnewuser',
                             'errMsg': 'Unauthorized access attempted'}
-        mock_generateHeader.return_value = 'header'
         submitnewuser(self.request)
         mock_render.assert_called_once_with(self.request,
                                             'mediaviewer/settingsresults.html',
@@ -46,7 +42,6 @@ class TestNewUserView(TestCase):
         self.assertFalse(mock_new.called)
 
     def test_newUserWithStaffer(self,
-                                mock_generateHeader,
                                 mock_setSiteWideContext,
                                 mock_render,
                                 mock_log,
@@ -54,9 +49,8 @@ class TestNewUserView(TestCase):
                                 ):
         self.user.is_staff = True
         expected_context = {'successful': True,
-                            'header': 'header',
+                            'active_page': 'submitnewuser',
                             }
-        mock_generateHeader.return_value = 'header'
         submitnewuser(self.request)
         mock_render.assert_called_once_with(self.request,
                                             'mediaviewer/settingsresults.html',
@@ -67,7 +61,6 @@ class TestNewUserView(TestCase):
                                          can_download=True)
 
     def test_newUserRaisesValidationError(self,
-                                          mock_generateHeader,
                                           mock_setSiteWideContext,
                                           mock_render,
                                           mock_log,
@@ -75,10 +68,9 @@ class TestNewUserView(TestCase):
                                           ):
         self.user.is_staff = True
         expected_context = {'successful': False,
-                            'header': 'header',
+                            'active_page': 'submitnewuser',
                             'errMsg': 'This is an error message',
                             }
-        mock_generateHeader.return_value = 'header'
         mock_new.side_effect = ValidationError('This is an error message')
         submitnewuser(self.request)
 
@@ -91,7 +83,6 @@ class TestNewUserView(TestCase):
                                          can_download=True)
 
     def test_newUserRaisesException(self,
-                                    mock_generateHeader,
                                     mock_setSiteWideContext,
                                     mock_render,
                                     mock_log,
@@ -99,10 +90,9 @@ class TestNewUserView(TestCase):
                                     ):
         self.user.is_staff = True
         expected_context = {'successful': False,
-                            'header': 'header',
+                            'active_page': 'submitnewuser',
                             'errMsg': 'This is an error message',
                             }
-        mock_generateHeader.return_value = 'header'
         mock_new.side_effect = Exception('This is an error message')
         submitnewuser(self.request)
 

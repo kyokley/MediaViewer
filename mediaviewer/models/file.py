@@ -403,9 +403,12 @@ class File(models.Model):
             log.error('Got an error destroying posterfile')
             log.error(e)
 
-    def populate_genres(self):
+    def populate_genres(self, clearExisting=False):
         if not self.isMovie():
             raise ValueError('This function should not be applied to tv paths')
+
+        if clearExisting:
+            MediaGenre.objects.filter(file=self).delete()
 
         posterfile = PosterFile.objects.filter(file=self).first()
 
@@ -420,7 +423,9 @@ class File(models.Model):
         if genres:
             split_genres = genres.split(', ')
             for genre in split_genres:
-                MediaGenre.new(genre, file=self)
+                existing = MediaGenre.objects.filter(file=self).filter(genre=genre).first()
+                if not existing:
+                    MediaGenre.new(genre, file=self)
             return split_genres
 
     @classmethod

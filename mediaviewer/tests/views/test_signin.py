@@ -12,11 +12,6 @@ class TestSignin(TestCase):
         self.mock_siteGreeting.latestSiteGreeting.return_value = self.mock_greeting
         self.addCleanup(self.siteGreeting_patcher.stop)
 
-        self.generateHeader_patcher = mock.patch('mediaviewer.views.signin.generateHeader')
-        self.mock_generateHeader = self.generateHeader_patcher.start()
-        self.mock_generateHeader.return_value = 'fake_header'
-        self.addCleanup(self.generateHeader_patcher.stop)
-
         self.setSiteWideContext_patcher = mock.patch('mediaviewer.views.signin.setSiteWideContext')
         self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
         self.addCleanup(self.setSiteWideContext_patcher.stop)
@@ -67,7 +62,6 @@ class TestSignin(TestCase):
         self.user.is_authenticated.side_effect = [False, False]
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.assertFalse(self.mock_case_insensitive_authenticate.called)
@@ -99,7 +93,6 @@ class TestSignin(TestCase):
 
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(expected_context,
                                                              self.request)
@@ -133,7 +126,6 @@ class TestSignin(TestCase):
 
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.mock_case_insensitive_authenticate.assert_called_once_with(username='a@b.c',
@@ -166,7 +158,6 @@ class TestSignin(TestCase):
 
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(expected_context,
                                                              self.request)
@@ -200,7 +191,6 @@ class TestSignin(TestCase):
 
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(expected_context,
                                                              self.request)
@@ -235,7 +225,6 @@ class TestSignin(TestCase):
 
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(expected_context,
                                                              self.request)
@@ -271,7 +260,6 @@ class TestSignin(TestCase):
 
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.mock_case_insensitive_authenticate.assert_called_once_with(username='a@b.c',
@@ -301,7 +289,6 @@ class TestSignin(TestCase):
         self.settings.can_login = True
         ret_val = signin(self.request)
 
-        self.mock_generateHeader.assert_called_once_with('signin', self.request)
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.mock_case_insensitive_authenticate.assert_called_once_with(username='a@b.c',

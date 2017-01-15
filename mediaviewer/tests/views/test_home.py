@@ -1,6 +1,5 @@
 from django.test import TestCase
-from mediaviewer.views.home import (generateHeader,
-                                    setSiteWideContext,
+from mediaviewer.views.home import (setSiteWideContext,
                                     getLastWaiterStatus,
                                     )
 from mediaviewer.models.usersettings import FILENAME_SORT
@@ -9,19 +8,33 @@ from django.contrib.auth.models import User
 import mock
 from mock import call
 
-@mock.patch('mediaviewer.views.home.Message.add_message')
-@mock.patch('mediaviewer.views.home.Message.getMessagesForUser')
-@mock.patch('mediaviewer.views.home.getLastWaiterStatus')
 class TestSetSiteWideContext(TestCase):
     def setUp(self):
+        self.add_message_patcher = mock.patch('mediaviewer.views.home.Message.add_message')
+        self.mock_add_message = self.add_message_patcher.start()
+        self.addCleanup(self.add_message_patcher.stop)
+
+        self.getMessagesForUser_patcher = mock.patch('mediaviewer.views.home.Message.getMessagesForUser')
+        self.mock_getMessagesForUser = self.getMessagesForUser_patcher.start()
+        self.addCleanup(self.getMessagesForUser_patcher.stop)
+
+        self.getLastWaiterStatus_patcher = mock.patch('mediaviewer.views.home.getLastWaiterStatus')
+        self.mock_getLastWaiterStatus = self.getLastWaiterStatus_patcher.start()
+        self.addCleanup(self.getLastWaiterStatus_patcher.stop)
+
+        self.get_movie_genres_patcher = mock.patch('mediaviewer.views.home.MediaGenre.get_movie_genres')
+        self.mock_get_movie_genres = self.get_movie_genres_patcher.start()
+        self.addCleanup(self.get_movie_genres_patcher.stop)
+
+        self.get_tv_genres_patcher = mock.patch('mediaviewer.views.home.MediaGenre.get_tv_genres')
+        self.mock_get_tv_genres = self.get_tv_genres_patcher.start()
+        self.addCleanup(self.get_tv_genres_patcher.stop)
+
         self.request = mock.MagicMock()
         self.user = mock.create_autospec(User)
         self.request.user = self.user
 
-    def test_is_staff_not_logged_in(self,
-                                    mock_getLastWaiterStatus,
-                                    mock_getMessageForUser,
-                                    mock_add_message):
+    def test_is_staff_not_logged_in(self):
         self.user.is_staff = True
         self.user.is_authenticated.return_value = False
 
@@ -30,14 +43,11 @@ class TestSetSiteWideContext(TestCase):
 
         expected = {'loggedin': False,
                     'is_staff': 'true'}
-        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
-        self.assertFalse(mock_getMessageForUser.called)
-        self.assertFalse(mock_add_message.called)
+        self.assertEquals(call(expected), self.mock_getLastWaiterStatus.call_args)
+        self.assertFalse(self.mock_getMessagesForUser.called)
+        self.assertFalse(self.mock_add_message.called)
 
-    def test_not_staff_not_logged_in(self,
-                                     mock_getLastWaiterStatus,
-                                     mock_getMessageForUser,
-                                     mock_add_message):
+    def test_not_staff_not_logged_in(self):
         self.user.is_staff = False
         self.user.is_authenticated.return_value = False
 
@@ -46,14 +56,11 @@ class TestSetSiteWideContext(TestCase):
 
         expected = {'loggedin': False,
                     'is_staff': 'false'}
-        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
-        self.assertFalse(mock_getMessageForUser.called)
-        self.assertFalse(mock_add_message.called)
+        self.assertEquals(call(expected), self.mock_getLastWaiterStatus.call_args)
+        self.assertFalse(self.mock_getMessagesForUser.called)
+        self.assertFalse(self.mock_add_message.called)
 
-    def test_is_staff_is_logged_in(self,
-                                   mock_getLastWaiterStatus,
-                                   mock_getMessageForUser,
-                                   mock_add_message):
+    def test_is_staff_is_logged_in(self):
         self.user.is_staff = True
         self.user.is_authenticated.return_value = True
         self.user.settings.return_value = None
@@ -64,96 +71,27 @@ class TestSetSiteWideContext(TestCase):
         expected = {'loggedin': True,
                     'is_staff': 'true',
                     'default_sort': FILENAME_SORT,
-                    'user': self.user}
-        self.assertEquals(call(expected), mock_getLastWaiterStatus.call_args)
-        self.assertFalse(mock_getMessageForUser.called)
-        self.assertFalse(mock_add_message.called)
+                    'user': self.user,
+                    'movie_genres': self.mock_get_movie_genres.return_value,
+                    'tv_genres': self.mock_get_tv_genres.return_value}
+        self.assertEquals(call(expected), self.mock_getLastWaiterStatus.call_args)
+        self.assertFalse(self.mock_getMessagesForUser.called)
+        self.assertFalse(self.mock_add_message.called)
 
 class TestGetLastWaiterStatus(TestCase):
-    @mock.patch('mediaviewer.views.home.WaiterStatus')
-    def test_getLastWaiterStatus(self, mock_WaiterStatus):
+    def setUp(self):
+        self.WaiterStatus_patcher = mock.patch('mediaviewer.views.home.WaiterStatus')
+        self.mock_WaiterStatus = self.WaiterStatus_patcher.start()
+        self.addCleanup(self.WaiterStatus_patcher.stop)
+
+    def test_getLastWaiterStatus(self):
         context = {}
         mock_lastStatus = mock.MagicMock()
         mock_lastStatus.status = True
         mock_lastStatus.failureReason = 'test'
-        mock_WaiterStatus.getLastStatus.return_value = mock_lastStatus
+        self.mock_WaiterStatus.getLastStatus.return_value = mock_lastStatus
 
         getLastWaiterStatus(context)
 
         self.assertTrue(context['waiterstatus'])
         self.assertEquals('test', context['waiterfailurereason'])
-
-@mock.patch('mediaviewer.views.home.HeaderHelper')
-class TestGenerateHeaderUserIsStaff(TestCase):
-    def setUp(self):
-        self.request = mock.MagicMock()
-
-        self.user = mock.create_autospec(User)
-        self.user.is_staff = True
-        self.user.is_authenticated.return_value = False
-
-        self.request.user = self.user
-
-    def test_home_is_active(self,
-                            mock_HeaderHelper):
-        mock_headers = mock.MagicMock()
-        mock_HeaderHelper.return_value = mock_headers
-        page = 'home'
-        generateHeader(page, self.request)
-
-        mock_headers.activeHomePage.assert_called_once_with()
-        self.assertFalse(mock_headers.homePage.called)
-        mock_headers.moviesPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeMoviesPage.called)
-        mock_headers.tvshowsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeTvshowsPage.called)
-        mock_headers.requestsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeRequestsPage.called)
-
-    def test_movies_is_active(self,
-                              mock_HeaderHelper):
-        mock_headers = mock.MagicMock()
-        mock_HeaderHelper.return_value = mock_headers
-        page = 'movies'
-        generateHeader(page, self.request)
-
-        mock_headers.homePage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeHomePage.called)
-        mock_headers.activeMoviesPage.assert_called_once_with()
-        self.assertFalse(mock_headers.moviesPage.called)
-        mock_headers.tvshowsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeTvshowsPage.called)
-        mock_headers.requestsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeRequestsPage.called)
-
-    def test_tvshows_is_active(self,
-                               mock_HeaderHelper):
-        mock_headers = mock.MagicMock()
-        mock_HeaderHelper.return_value = mock_headers
-        page = 'tvshows'
-        generateHeader(page, self.request)
-
-        mock_headers.homePage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeHomePage.called)
-        mock_headers.moviesPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeMoviesPage.called)
-        mock_headers.activeTvshowsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.tvshowsPage.called)
-        mock_headers.requestsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeRequestsPage.called)
-
-    def test_requests_is_active(self,
-                                mock_HeaderHelper):
-        mock_headers = mock.MagicMock()
-        mock_HeaderHelper.return_value = mock_headers
-        page = 'requests'
-        generateHeader(page, self.request)
-
-        mock_headers.homePage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeHomePage.called)
-        mock_headers.moviesPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeMoviesPage.called)
-        mock_headers.tvshowsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.activeTvshowsPage.called)
-        mock_headers.activeRequestsPage.assert_called_once_with()
-        self.assertFalse(mock_headers.requestsPage.called)

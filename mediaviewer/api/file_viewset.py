@@ -45,6 +45,8 @@ class FileViewSet(viewsets.ModelViewSet):
         if not path.lastCreatedFileDate or path.lastCreatedFileDate < newFile.datecreated:
             path.lastCreatedFileDate = newFile.datecreated
             path.save()
+        if newFile.isMovie():
+            newFile.populate_genres()
         log.info('New file record created for %s' % newFile.filename)
         return serializer
 
