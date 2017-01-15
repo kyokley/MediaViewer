@@ -54,9 +54,10 @@ class TestSignin(TestCase):
 
     def test_request_not_POST(self):
         expected_context = {'loggedin': False,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
-                            'next': 'next_field'}
+                            'next': 'next_field',
+                            'active_page': 'signin',
+                            }
         self.request.method = 'GET'
         self.request.GET = {'next': 'next_field'}
         self.user.is_authenticated.side_effect = [False, False]
@@ -77,9 +78,9 @@ class TestSignin(TestCase):
 
     def test_request_POST_valid_user(self):
         expected_context = {'loggedin': True,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'user': self.user,
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -109,10 +110,10 @@ class TestSignin(TestCase):
 
     def test_request_POST_valid_user_cannot_login(self):
         expected_context = {'loggedin': False,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'error_message': ('You should have received an email with a link to set up your password the first time. '
                                               'Please follow the instructions in the email.'),
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -142,9 +143,9 @@ class TestSignin(TestCase):
 
     def test_request_POST_valid_user_force_password_change(self):
         expected_context = {'loggedin': True,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'user': self.user,
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -175,9 +176,9 @@ class TestSignin(TestCase):
 
     def test_request_POST_valid_user_no_email(self):
         expected_context = {'loggedin': True,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'user': self.user,
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -208,9 +209,9 @@ class TestSignin(TestCase):
 
     def test_request_POST_valid_user_next_redirect(self):
         expected_context = {'loggedin': True,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'user': self.user,
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -242,9 +243,9 @@ class TestSignin(TestCase):
 
     def test_request_POST_valid_user_not_active(self):
         expected_context = {'loggedin': False,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'error_message': 'User is no longer active',
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -277,9 +278,9 @@ class TestSignin(TestCase):
     def test_request_POST_invalid_user(self):
         self.user.is_authenticated.return_value = False
         expected_context = {'loggedin': False,
-                            'header': 'fake_header',
                             'greeting': 'latest_site_greeting',
                             'error_message': 'Incorrect username or password!',
+                            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
