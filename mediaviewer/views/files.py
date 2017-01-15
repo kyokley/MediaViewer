@@ -6,6 +6,7 @@ from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
                                       BANGUP_IP,
                                       )
+from mediaviewer.models.mediagenre import MediaGenre
 from django.shortcuts import render
 from mediaviewer.models.path import Path
 from django.contrib.auth.models import User
@@ -47,19 +48,37 @@ def files(request, items):
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
 @logAccessInfo
-def movies(request, items):
+def movies(request):
     user = request.user
-    items = int(items)
-    if items:
-        files = File.movies().filter(hide=False).order_by('-id')[:items]
-    else:
-        files = File.movies().filter(hide=False).order_by('-id')
+    files = File.movies().filter(hide=False).order_by('-id')
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
     context = {
               'files': files,
-              'items': items,
+              'view': 'movies',
+              'LOCAL_IP': LOCAL_IP,
+              'BANGUP_IP': BANGUP_IP,
+               'can_download': settings and settings.can_download or False
+              }
+    context['active_page'] = 'movies'
+    context['title'] = 'Movies'
+    setSiteWideContext(context, request, includeMessages=True)
+    return render(request, 'mediaviewer/files.html', context)
+
+@login_required(login_url='/mediaviewer/login/')
+@check_force_password_change
+@logAccessInfo
+def movies_by_genre(request, genre):
+    user = request.user
+    mediagenres = MediaGenre.objects.exclude(file=None).filter(genre=genre)
+    files = [mg.file for mg in mediagenres]
+    files.sort(key=lambda x: -x.id)
+    for file in files:
+        setattr(file, 'usercomment', file.usercomment(user))
+    settings = user.settings()
+    context = {
+              'files': files,
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,

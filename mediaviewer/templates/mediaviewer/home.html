@@ -53,11 +53,11 @@
                                 {% else %}
                                     <li class="dropdown">
                                 {% endif %}
-                                <a href="/mediaviewer/movies/display/0/" role="button" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                                <a href="/mediaviewer/movies/" role="button" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
 
                                 <ul class="dropdown-menu">
                                     {% for genre in movie_genres %}
-                                        <li><a href="#">{{genre}}</a></li>
+                                        <li><a href="/mediaviewer/movies/genre/{{genre}}/">{{genre}}</a></li>
                                     {% endfor %}
                                 </ul>
                                 </li>
