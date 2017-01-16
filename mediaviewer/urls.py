@@ -7,9 +7,7 @@ from axes.decorators import watch_login
 
 from mediaviewer.views import (home,
                                files,
-                               paths,
                                detail,
-                               errors,
                                comment,
                                signin,
                                signout,
@@ -64,6 +62,7 @@ urlpatterns = [
                        url(r'^ajaxreport/', files.ajaxreport, name='ajaxreport'),
                        url(r'^ajaxrunscraper/', home.ajaxrunscraper, name='ajaxrunscraper'),
                        url(r'^ajaxvideoprogress/(?P<guid>[0-9A-Za-z]+)/(?P<hashed_filename>.+)/$', ajax.ajaxvideoprogress, name='ajaxvideoprogress'),
+                       url(r'^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$', ajax.ajaxgenres, name='ajaxgenres'),
                        url(r'^user/reset/$',
                            password_reset.reset,
                            name='password_reset'),

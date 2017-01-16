@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models.mediagenre import MediaGenre
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -53,6 +54,30 @@ def ajaxvideoprogress(request, guid, hashed_filename):
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=204)
+    else:
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json',
+                            status=405)
+
+@csrf_exempt
+def ajaxgenres(request, guid):
+    dt = DownloadToken.getByGUID(guid)
+    if (not dt or
+            not dt.user or
+            not dt.isvalid):
+        return HttpResponse(None,
+                            content_type='application/json',
+                            status=412)
+
+    if request.method == 'GET':
+        movie_genres = MediaGenre.get_movie_genres()
+        tv_genres = MediaGenre.get_tv_genres()
+        data = {'movie_genres': [(mg.id, mg.genre) for mg in movie_genres],
+                'tv_genres': [(mg.id, mg.genre) for mg in tv_genres],
+                }
+        return HttpResponse(json.dumps(data),
+                            content_type='application/json',
+                            status=200)
     else:
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
