@@ -236,7 +236,7 @@ class Path(models.Model):
             return split_genres
 
     @classmethod
-    def populate_all_genres(cls):
+    def populate_all_genres(cls, clearExisting=False):
         all_paths = cls.objects.filter(is_movie=False)
         for path in all_paths:
-            print(path.displayName(), path.populate_genres())
+            print(path.displayName(), path.populate_genres(clearExisting=clearExisting))

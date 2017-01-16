@@ -1,5 +1,4 @@
 from django.db import models
-from django.db import connection
 
 class MediaGenre(models.Model):
     file = models.ForeignKey('mediaviewer.File',
@@ -61,3 +60,13 @@ class MediaGenre(models.Model):
                                     ;''')
 
         return genres
+
+    @classmethod
+    def regenerateAllGenreData(cls):
+        from mediaviewer.models.posterfile import PosterFile
+        from mediaviewer.models.file import File
+        from mediaviewer.models.path import Path
+
+        PosterFile.objects.all().delete()
+        Path.populate_all_genres(clearExisting=True)
+        File.populate_all_genres(clearExisting=True)

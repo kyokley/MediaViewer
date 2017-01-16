@@ -429,7 +429,7 @@ class File(models.Model):
             return split_genres
 
     @classmethod
-    def populate_all_genres(cls):
+    def populate_all_genres(cls, clearExisting=False):
         all_files = cls.objects.filter(path__is_movie=True).filter(hide=False)
         for file in all_files:
-            print(file.displayName(), file.populate_genres())
+            print(file.displayName(), file.populate_genres(clearExisting=clearExisting))
