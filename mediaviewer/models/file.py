@@ -69,6 +69,28 @@ class File(models.Model):
         app_label = 'mediaviewer'
         db_table = 'file'
 
+    @classmethod
+    def new(cls,
+            path,
+            filename,
+            skip=True,
+            finished=True,
+            size=None,
+            datatransmission=None,
+            hide=False,
+            streamable=True):
+        obj = cls()
+        obj.path = path
+        obj.filename = filename
+        obj.skip = skip
+        obj.finished = finished
+        obj.size = size
+        obj.datatransmission = datatransmission
+        obj.hide = hide
+        obj.streamable = streamable
+        obj.save()
+        return obj
+
     def _get_pathid(self):
         return self.path.id
     def _set_pathid(self, val):

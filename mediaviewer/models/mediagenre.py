@@ -24,6 +24,12 @@ class MediaGenre(models.Model):
         if not file and not path or (path and file):
             raise ValueError('Either file or path must be defined')
 
+        if path and path.isMovie():
+            raise ValueError('Only paths for tv shows are allowed to be associated with genres')
+
+        if file and not file.isMovie():
+            raise ValueError('Only files for movies are allowed to be associated with genres')
+
         obj = cls()
         obj.file = file
         obj.path = path
