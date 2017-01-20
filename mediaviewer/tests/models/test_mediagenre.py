@@ -57,3 +57,11 @@ class TestGetMediaGenres(TestCase):
         genres = MediaGenre.get_movie_genres()
         actual = [genre.genre for genre in genres]
         self.assertEqual(expected, actual)
+
+    def test_get_tv_genres(self):
+        expected = ['Biography',
+                    'Crime',
+                    'Thriller']
+        genres = MediaGenre.get_tv_genres()
+        actual = [genre.genre for genre in genres]
+        self.assertEqual(expected, actual)
