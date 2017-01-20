@@ -33,6 +33,23 @@ class Path(models.Model):
         app_label = 'mediaviewer'
         db_table = 'path'
 
+    @classmethod
+    def new(cls,
+            localpathstr,
+            remotepathstr,
+            is_movie,
+            skip=True,
+            server='127.0.0.1'
+            ):
+        obj = cls()
+        obj.localpathstr = localpathstr
+        obj.remotepathstr = remotepathstr
+        obj.is_movie = is_movie
+        obj.skip = skip
+        obj.server = server
+        obj.save()
+        return obj
+
     def files(self):
         return File.objects.filter(path__localpathstr=self.localpathstr).filter(hide=False)
 

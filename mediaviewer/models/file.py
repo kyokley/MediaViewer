@@ -71,8 +71,8 @@ class File(models.Model):
 
     @classmethod
     def new(cls,
-            path,
             filename,
+            path,
             skip=True,
             finished=True,
             size=None,
@@ -80,8 +80,8 @@ class File(models.Model):
             hide=False,
             streamable=True):
         obj = cls()
-        obj.path = path
         obj.filename = filename
+        obj.path = path
         obj.skip = skip
         obj.finished = finished
         obj.size = size

@@ -5,13 +5,13 @@ from mediaviewer.models.mediagenre import MediaGenre
 
 class TestGetMediaGenres(TestCase):
     def setUp(self):
-        self.movie_path = Path()
-        self.movie_path.is_movie = True
-        self.movie_path.save()
+        self.movie_path = Path.new('local.movie',
+                                   'local.movie',
+                                   is_movie=True)
 
-        self.tv_path = Path()
-        self.tv_path.is_movie = False
-        self.tv_path.save()
+        self.tv_path = Path.new('local.tv',
+                                'local.tv',
+                                is_movie=False)
 
         self.movie_file1 = File.new('This.is.a.movie.file1',
                                     self.movie_path)
@@ -34,20 +34,14 @@ class TestGetMediaGenres(TestCase):
         MediaGenre.new('Adventure',
                        file=self.movie_file3)
 
-        self.tv_file1 = File()
-        self.tv_file1.filename = 'This.is.a.tv.file1'
-        self.tv_file1.path = self.tv_path
-        self.tv_file1.save()
+        self.tv_file1 = File.new('This.is.a.tv.file1',
+                                 self.tv_path)
 
-        self.tv_file2 = File()
-        self.tv_file2.filename = 'This.is.a.tv.file2'
-        self.tv_file2.path = self.tv_path
-        self.tv_file2.save()
+        self.tv_file2 = File.new('This.is.a.tv.file2',
+                                 self.tv_path)
 
-        self.tv_file3 = File()
-        self.tv_file3.filename = 'This.is.a.tv.file3'
-        self.tv_file3.path = self.tv_path
-        self.tv_file3.save()
+        self.tv_file3 = File.new('This.is.a.tv.file3',
+                                 self.tv_path)
 
         MediaGenre.new('Crime',
                        path=self.tv_path)
