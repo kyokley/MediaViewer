@@ -16,6 +16,13 @@ class MediaGenre(models.Model):
         app_label = 'mediaviewer'
         db_table = 'mediagenre'
 
+    def __unicode__(self):
+        return 'id: %s f: %s g: %s' % (self.id, self.name, self.genre)
+
+    @property
+    def name(self):
+        return self.path.displayName() if self.path else self.file.fileName
+
     @classmethod
     def new(cls,
             genre,
