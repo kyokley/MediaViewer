@@ -189,13 +189,8 @@ class TestHandleIMDB(TestCase):
                                                                 useExtendedPlot=True)
         self.mock_assignDataToPoster.assert_any_call(self.mock_getDataFromIMDBByPath.return_value, self.poster, onlyExtendedPlot=True)
 
-class TestDownloadPosterData(TestCase):
+class TestDownloadPosterDataForMovie(TestCase):
     def setUp(self):
-        isMovie_patcher = mock.patch('mediaviewer.models.path.Path.isMovie')
-        self.mock_isMovie = isMovie_patcher.start()
-        self.addCleanup(isMovie_patcher.stop)
-        self.mock_isMovie.return_value = False
-
         getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.path.getDataFromIMDBByPath')
         self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
         self.addCleanup(getDataFromIMDBByPath_patcher.stop)
@@ -212,15 +207,40 @@ class TestDownloadPosterData(TestCase):
         self.mock_assignDataToPoster = assignDataToPoster_patcher.start()
         self.addCleanup(assignDataToPoster_patcher.stop)
 
-        self.path = Path()
+        self.path = Path.new('local.path',
+                             'local.path',
+                             is_movie=True)
 
-        self.poster = mock.create_autospec(PosterFile)
+        self.poster = PosterFile.new(path=self.path)
 
     def test_isMovie(self):
-        self.mock_isMovie.return_value = True
         expected = None
         actual = self.path._downloadPosterData(self.poster)
         self.assertEqual(expected, actual)
+
+class TestDownloadPosterDataForTVShow(TestCase):
+    def setUp(self):
+        getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.path.getDataFromIMDBByPath')
+        self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
+        self.addCleanup(getDataFromIMDBByPath_patcher.stop)
+
+        handleDataFromIMDB_patcher = mock.patch('mediaviewer.models.path.Path._handleDataFromIMDB')
+        self.mock_handleDataFromIMDB = handleDataFromIMDB_patcher.start()
+        self.addCleanup(handleDataFromIMDB_patcher.stop)
+
+        handleDataFromTVDB_patcher = mock.patch('mediaviewer.models.path.Path._handleDataFromTVDB')
+        self.mock_handleDataFromTVDB = handleDataFromTVDB_patcher.start()
+        self.addCleanup(handleDataFromTVDB_patcher.stop)
+
+        assignDataToPoster_patcher = mock.patch('mediaviewer.models.path.assignDataToPoster')
+        self.mock_assignDataToPoster = assignDataToPoster_patcher.start()
+        self.addCleanup(assignDataToPoster_patcher.stop)
+
+        self.path = Path.new('local.path',
+                             'local.path',
+                             is_movie=False)
+
+        self.poster = PosterFile.new(path=self.path)
 
     def test_no_data(self):
         self.mock_getDataFromIMDBByPath.return_value = None

@@ -173,11 +173,7 @@ class Path(models.Model):
 
         if not posterfile:
             log.info('PosterFile not found. Creating a new one')
-            poster = PosterFile()
-            poster.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-            poster.dateedited = dateObj.utcnow().replace(tzinfo=utc)
-            poster.path = self
-
+            poster = PosterFile.new(path=self)
             posterfile = self._downloadPosterData(poster)
 
         return posterfile
