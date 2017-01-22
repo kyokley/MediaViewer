@@ -5,8 +5,8 @@ from django.db import models
 class PosterFile(models.Model):
     file = models.ForeignKey('mediaviewer.File', null=True, db_column='fileid', blank=True, related_name='_posterfile')
     path = models.ForeignKey('mediaviewer.Path', null=True, db_column='pathid', blank=True, related_name='_posterfile')
-    datecreated = models.DateTimeField(db_column='datecreated', blank=True)
-    dateedited = models.DateTimeField(db_column='dateedited', blank=True)
+    datecreated = models.DateTimeField(db_column='datecreated', blank=True, auto_now_add=True)
+    dateedited = models.DateTimeField(db_column='dateedited', blank=True, auto_now=True)
     image = models.TextField(blank=True)
     plot = models.TextField(blank=True)
     extendedplot = models.TextField(blank=True)
@@ -24,3 +24,16 @@ class PosterFile(models.Model):
 
     def __unicode__(self):
         return 'id: %s f: %s i: %s' % (self.id, self.file and self.file.filename or self.path and self.path.localpathstr, self.image)
+
+    @classmethod
+    def new(cls,
+            file=None,
+            path=None):
+        if not file and not path or (file and path):
+            raise ValueError('Either file or path must be defined')
+
+        obj = cls()
+        obj.file = file
+        obj.path = path
+        obj.save()
+        return obj
