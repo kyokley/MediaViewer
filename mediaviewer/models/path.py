@@ -138,6 +138,9 @@ class Path(models.Model):
             log.error(str(e), exc_info=True)
             assignDataToPoster({}, poster, foundNone=True)
         poster.save()
+
+        if self.isTVShow():
+            self.populate_genres(clearExisting=True)
         return poster
 
     def _handleDataFromTVDB(self, poster):

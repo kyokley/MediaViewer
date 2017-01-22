@@ -190,6 +190,9 @@ class File(models.Model):
             assignDataToPoster({}, poster, foundNone=True)
         poster.save()
         log.debug('Done getting poster data')
+
+        if self.isMovie():
+            self.populate_genres(clearExisting=True)
         return poster
 
     def _posterfileget(self):
