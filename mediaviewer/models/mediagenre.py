@@ -1,4 +1,5 @@
 from django.db import models
+from mediaviewer.models.genre import Genre
 
 class MediaGenre(models.Model):
     file = models.ForeignKey('mediaviewer.File',
@@ -7,8 +8,9 @@ class MediaGenre(models.Model):
     path = models.ForeignKey('mediaviewer.Path',
                              null=True,
                              blank=True)
-    genre = models.TextField(blank=False,
-                             null=False)
+    genre = models.ForeignKey('mediaviewer.Genre',
+                              blank=False,
+                              null=False)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
 
@@ -40,7 +42,8 @@ class MediaGenre(models.Model):
         obj = cls()
         obj.file = file
         obj.path = path
-        obj.genre = genre
+        existing = Genre.get_genre(genre=genre)
+        obj.genre = existing or Genre.new(genre)
         obj.save()
         return obj
 
