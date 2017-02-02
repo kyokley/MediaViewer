@@ -13,13 +13,13 @@ class Genre(models.Model):
     def __unicode__(self):
         return 'g: %s' % (self.genre,)
 
-    @classmethod
-    def new(cls, genre):
-        obj = cls()
-        obj.genre = genre.title()
-        obj.save()
-        return obj
-
-    @classmethod
-    def get_genre(cls, genre):
-        return cls.objects.filter(genre=genre.title()).first()
+    #@classmethod
+    #def new(cls, genre):
+        #obj = cls()
+        #obj.genre = genre.title()
+        #obj.save()
+        #return obj
+#
+    #@classmethod
+    #def get_genre(cls, genre):
+        #return cls.objects.filter(genre=genre.title()).first()
