@@ -68,19 +68,19 @@
             <div class="row">
                 <h4>
                     <dl class="dl-horizontal">
-                        {% if posterfile.genre and posterfile.genre != 'Genre not found' %}
+                        {% if posterfile.genre %}
                             <dt>Genre:</dt>
                             <dd>{{ posterfile.genre }}</dd>
                         {% endif %}
-                        {% if posterfile.writer and posterfile.writer != 'Writer not found' %}
+                        {% if posterfile.writer %}
                             <dt>Writer:</dt>
                             <dd>{{ posterfile.writer }}</dd>
                         {% endif %}
-                        {% if posterfile.director and posterfile.director != 'Director not found' %}
+                        {% if posterfile.director %}
                             <dt>Director:</dt>
                             <dd>{{ posterfile.director }}</dd>
                         {% endif %}
-                        {% if posterfile.actors and posterfile.actors != 'Actors not found' %}
+                        {% if posterfile.actors %}
                             <dt>Actors:</dt>
                             <dd>{{ posterfile.actors }}</dd>
                         {% endif %}
