@@ -32,11 +32,20 @@ class TVDBConfiguration(object):
 
     def __init__(self):
         log.debug('Getting tvdb config')
-        data = self._getTVDBConfiguration()
-        self.url = data['images']['secure_base_url']
-        self.poster_size = data['images']['poster_sizes'][-1]
-        self.still_size = data['images']['still_sizes'][-1]
-        log.debug('tvdb values set successfully')
+        try:
+            data = self._getTVDBConfiguration()
+            self.url = data['images']['secure_base_url']
+            self.poster_size = data['images']['poster_sizes'][-1]
+            self.still_size = data['images']['still_sizes'][-1]
+            self.connected = True
+            log.debug('tvdb values set successfully')
+        except Exception, e:
+            self.url = ''
+            self.poster_size = ''
+            self.still_size = ''
+            self.connected = False
+            log.error(str(e), exc_info=True)
+            log.debug('Failed to set tvdb values')
 
     def _getTVDBConfiguration(self):
         url = 'https://api.themoviedb.org/3/configuration?api_key=%s' % (API_KEY,)
@@ -44,11 +53,16 @@ class TVDBConfiguration(object):
 tvdbConfig = TVDBConfiguration()
 
 def searchTVDBByName(name):
+    if not tvdbConfig.connected:
+        return {}
+
     url = 'https://api.themoviedb.org/3/search/tv?query=%s&api_key=%s' % (name, API_KEY)
     return getJSONData(url)
 
 def getTVDBEpisodeInfo(tvdb_id, season, episode):
     log.debug('Getting tvdb episode info for %s, season: %s, episode: %s' % (tvdb_id, season, episode))
+    if not tvdbConfig.connected:
+        return {}
 
     url = 'https://api.themoviedb.org/3/tv/%s/season/%s/episode/%s?api_key=%s' % (tvdb_id, season, episode, API_KEY)
     return getJSONData(url)
@@ -120,4 +134,3 @@ def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
     else:
         return None
     return data
-
