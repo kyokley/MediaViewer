@@ -1,11 +1,9 @@
 import re
-import time
 from django.db import models
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.mediagenre import MediaGenre
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
@@ -315,7 +313,6 @@ class File(models.Model):
             file.inferScraper(scrapers=scrapers)
 
     def destroyPosterFile(self):
-        from mediaviewer.models.posterfile import PosterFile
         try:
             log.debug('Destroying PosterFile for %s' % (self,))
             posterfile = PosterFile.objects.get(file=self)
@@ -323,34 +320,3 @@ class File(models.Model):
         except Exception, e:
             log.error('Got an error destroying posterfile')
             log.error(e)
-
-    def populate_genres(self, clearExisting=False):
-        if not self.isMovie():
-            raise ValueError('This function should not be applied to tv paths')
-
-        if clearExisting:
-            MediaGenre.objects.filter(file=self).delete()
-
-        posterfile = PosterFile.objects.filter(file=self).first()
-
-        if not posterfile:
-            # Try not to hammer the movieDBs so we'll add a small sleep
-            time.sleep(.5)
-
-        genres = (self.posterfile.genre
-                    if self.posterfile.genre != 'Genre not found'
-                    else None)
-
-        if genres:
-            split_genres = genres.split(', ')
-            for genre in split_genres:
-                existing = MediaGenre.objects.filter(file=self).filter(genre=genre).first()
-                if not existing:
-                    MediaGenre.new(genre, file=self)
-            return split_genres
-
-    @classmethod
-    def populate_all_genres(cls, clearExisting=False):
-        all_files = cls.objects.filter(path__is_movie=True).filter(hide=False)
-        for file in all_files:
-            print(file.displayName(), file.populate_genres(clearExisting=clearExisting))

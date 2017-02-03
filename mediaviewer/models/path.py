@@ -1,4 +1,3 @@
-import time
 from django.db import models
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
@@ -9,7 +8,6 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDBByPath,
                                                   searchTVDBByName,
                                                   tvdbConfig,
                                                   )
-from mediaviewer.models.mediagenre import MediaGenre
 from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
@@ -96,13 +94,6 @@ class Path(models.Model):
             else:
                 pathDict[path.shortName] = path
         return pathDict
-
-    @classmethod
-    def distinctShowFoldersByGenre(cls, genre):
-        # We're only interested in tv shows here so path must be defined
-        mediagenres = MediaGenre.objects.exclude(path=None).filter(genre=genre.genre).select_related('path')
-        paths = [mg.path for mg in mediagenres]
-        return cls._buildDistinctShowFoldersFromPaths(paths)
 
     def isMovie(self):
         return self.is_movie
@@ -221,34 +212,3 @@ class Path(models.Model):
                                                  .filter(viewed=True)
                                                  .count())
         return file_count - usercomments_count
-
-    def populate_genres(self, clearExisting=False):
-        if self.isMovie():
-            raise ValueError('This function should not be applied to movie paths')
-
-        if clearExisting:
-            MediaGenre.objects.filter(path=self).delete()
-
-        posterfile = PosterFile.objects.filter(path=self).first()
-
-        if not posterfile:
-            # Try not to hammer the movieDBs so we'll add a small sleep
-            time.sleep(.5)
-
-        genres = (self.posterfile.genre
-                    if self.posterfile.genre != 'Genre not found'
-                    else None)
-
-        if genres:
-            split_genres = genres.split(', ')
-            for genre in split_genres:
-                existing = MediaGenre.objects.filter(path=self).filter(genre=genre).first()
-                if not existing:
-                    MediaGenre.new(genre, path=self)
-            return split_genres
-
-    @classmethod
-    def populate_all_genres(cls, clearExisting=False):
-        all_paths = cls.objects.filter(is_movie=False)
-        for path in all_paths:
-            print(path.displayName(), path.populate_genres(clearExisting=clearExisting))
