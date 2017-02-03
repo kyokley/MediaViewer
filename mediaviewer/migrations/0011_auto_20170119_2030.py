@@ -9,7 +9,8 @@ from django.db import migrations
 from mediaviewer.models.mediagenre import MediaGenre
 
 def generate_initial_mediagenre_data(apps, schema_editor):
-    MediaGenre.regenerateAllGenreData()
+    #MediaGenre.regenerateAllGenreData()
+    pass
 
 class Migration(migrations.Migration):
 

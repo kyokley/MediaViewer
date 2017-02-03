@@ -7,6 +7,9 @@ class Person(models.Model):
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        abstract = True
+
     def __unicode__(self):
         return 'id: %s n: %s' % (self.id, self.name)
 
