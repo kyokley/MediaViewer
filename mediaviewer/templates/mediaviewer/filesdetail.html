@@ -68,24 +68,26 @@
             <div class="row">
                 <h4>
                     <dl class="dl-horizontal">
-                        {% if posterfile.genre %}
+                        {% if posterfile.display_genres %}
                             <dt>Genre:</dt>
-                            <dd>{{ posterfile.genre }}</dd>
+                            <dd>{{ posterfile.display_genres }}</dd>
                         {% endif %}
-                        {% if posterfile.writer %}
+                        {% if posterfile.display_writers %}
                             <dt>Writer:</dt>
-                            <dd>{{ posterfile.writer }}</dd>
+                            <dd>{{ posterfile.display_writers }}</dd>
                         {% endif %}
-                        {% if posterfile.director %}
+                        {% if posterfile.display_directors %}
                             <dt>Director:</dt>
-                            <dd>{{ posterfile.director }}</dd>
+                            <dd>{{ posterfile.display_directors }}</dd>
                         {% endif %}
-                        {% if posterfile.actors %}
+                        {% if posterfile.display_actors %}
                             <dt>Actors:</dt>
-                            <dd>{{ posterfile.actors }}</dd>
+                            <dd>{{ posterfile.display_actors }}</dd>
                         {% endif %}
+                        {% if posterfile.extendedplot %}
                         <dt>Description:</dt>
                         <dd>{{ posterfile.extendedplot }}</dd>
+                        {% endif %}
                         {% if posterfile.rated %}
                             <dt>Rated:</dt>
                             <dd>{{ posterfile.rated }}</dd>

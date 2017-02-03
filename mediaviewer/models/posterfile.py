@@ -37,6 +37,18 @@ class PosterFile(models.Model):
     def __unicode__(self):
         return 'id: %s f: %s i: %s' % (self.id, self.file and self.file.filename or self.path and self.path.localpathstr, self.image)
 
+    def display_genres(self):
+        return ', '.join([x.genre for x in self.genres])
+
+    def display_actors(self):
+        return ', '.join([x.name for x in self.actors])
+
+    def display_writers(self):
+        return ', '.join([x.name for x in self.writers])
+
+    def display_directors(self):
+        return ', '.join([x.name for x in self.directors])
+
     @classmethod
     def new(cls,
             file=None,
