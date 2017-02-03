@@ -2,17 +2,9 @@ from django.db import models
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
-from mediaviewer.models.tvdbconfiguration import (getDataFromIMDBByPath,
-                                                  saveImageToDisk,
-                                                  assignDataToPoster,
-                                                  searchTVDBByName,
-                                                  tvdbConfig,
-                                                  )
 from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
-
-from mediaviewer.log import log
 
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
@@ -100,64 +92,6 @@ class Path(models.Model):
 
     def isTVShow(self):
         return not self.isMovie()
-
-    def _downloadPosterData(self, poster):
-        try:
-            if self.isMovie():
-                log.debug('Path is for movies. Skipping.')
-                return None
-            else:
-                poster.path = self
-
-            imdbFailure = False
-            data = getDataFromIMDBByPath(self, useExtendedPlot=False)
-            try:
-                if not data or ('Response' in data and data['Response'] == 'False'):
-                    imdbFailure = True
-            except Exception, e:
-                log.error(e)
-                log.error('Got unexpected data: %s' % data)
-                imdbFailure = True
-
-            if not imdbFailure:
-                log.info('Using IMDB data')
-                self._handleDataFromIMDB(data, poster)
-            else:
-                log.info('IMDB failed. Attempting to use TVDB.')
-                self._handleDataFromTVDB(poster)
-        except Exception, e:
-            log.error(str(e), exc_info=True)
-            assignDataToPoster({}, poster, foundNone=True)
-        poster.save()
-
-        if self.isTVShow():
-            self.populate_genres(clearExisting=True)
-        return poster
-
-    def _handleDataFromTVDB(self, poster):
-        tvinfo = searchTVDBByName(self.defaultsearchstr or self.displayName())
-        if tvinfo and tvinfo.get('results'):
-            self.tvdb_id = tvinfo['results'][0]['id']
-            result = tvinfo['results'][0]
-            poster_path = result.get('poster_path')
-            if poster_path:
-                imgName = poster_path.rpartition('/')[-1]
-                posterURL = '%s/%s/%s' % (tvdbConfig.url, tvdbConfig.still_size, imgName)
-                saveImageToDisk(posterURL, imgName)
-                poster.image = imgName
-            assignDataToPoster(result, poster, foundNone=False)
-        else:
-            assignDataToPoster({}, poster, foundNone=True)
-
-    def _handleDataFromIMDB(self, data, poster):
-        imgName = data['Poster'].rpartition('/')[-1]
-        saveImageToDisk(data['Poster'], imgName)
-        poster.image = imgName
-
-        assignDataToPoster(data, poster)
-
-        data = getDataFromIMDBByPath(self, useExtendedPlot=True)
-        assignDataToPoster(data, poster, onlyExtendedPlot=True)
 
     def _posterfileget(self):
         posterfile = PosterFile.new(path=self)
