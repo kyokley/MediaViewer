@@ -106,20 +106,7 @@ class File(models.Model):
 
     def _posterfileget(self):
         from mediaviewer.models.posterfile import PosterFile
-        try:
-            found = True
-            posterfile = PosterFile.objects.get(file=self)
-        except:
-            found = False
-
-        if not found:
-            log.info('No PosterFile found. Creating a new one.')
-            poster = PosterFile()
-            poster.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-            poster.dateedited = dateObj.utcnow().replace(tzinfo=utc)
-            poster.file = self
-
-            posterfile = self._downloadPosterData(poster)
+        posterfile = PosterFile.new(file=self)
 
         return posterfile
 

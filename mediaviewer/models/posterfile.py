@@ -3,7 +3,6 @@ from mediaviewer.log import log
 
 from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
                                                   saveImageToDisk,
-                                                  assignDataToPoster,
                                                   searchTVDBByName,
                                                   tvdbConfig,
                                                   getTVDBEpisodeInfo,
@@ -45,6 +44,17 @@ class PosterFile(models.Model):
         if not file and not path or (file and path):
             raise ValueError('Either file or path must be defined')
 
+        if file:
+            existing = cls.objects.filter(file=file).first()
+            if existing:
+                return existing
+
+        if path:
+            existing = cls.objects.filter(path=path).first()
+            if existing:
+                return existing
+
+        log.info('PosterFile not found. Creating a new one')
         obj = cls()
         obj.file = file
         obj.path = path
@@ -132,7 +142,6 @@ class PosterFile(models.Model):
                 self._assignDataToPoster(data, onlyExtendedPlot=True)
         except Exception, e:
             log.error(str(e), exc_info=True)
-            assignDataToPoster({}, self, foundNone=True)
         self.save()
         log.debug('Done getting poster data')
 

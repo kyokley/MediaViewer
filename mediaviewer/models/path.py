@@ -169,14 +169,10 @@ class Path(models.Model):
         assignDataToPoster(data, poster, onlyExtendedPlot=True)
 
     def _posterfileget(self):
-        posterfile = PosterFile.objects.filter(path=self).first()
-
-        if not posterfile:
-            log.info('PosterFile not found. Creating a new one')
-            poster = PosterFile.new(path=self)
-            posterfile = self._downloadPosterData(poster)
+        posterfile = PosterFile.new(path=self)
 
         return posterfile
+
     def _posterfileset(self, val):
         val.path = self
         val.save()
