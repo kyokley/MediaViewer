@@ -1,3 +1,4 @@
+import re
 from django.db import models
 
 class Person(models.Model):
@@ -11,6 +12,9 @@ class Person(models.Model):
 
     @classmethod
     def new(cls, name):
+        # Remove anything appearing in parens
+        name = re.sub('\s+\(.*\)', '', name)
+
         existing = cls.objects.filter(name=name.title()).first()
 
         if existing:

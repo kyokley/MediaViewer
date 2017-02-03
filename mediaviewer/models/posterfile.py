@@ -9,6 +9,9 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
                                                   getTVDBEpisodeInfo,
                                                   )
 from mediaviewer.models.genre import Genre
+from mediaviewer.models.actor import Actor
+from mediaviewer.models.writer import Writer
+from mediaviewer.models.director import Director
 
 #TODO: Add column to track tvdb and omdb success
 # Destroy failed posterfiles weekly to allow new attempts
@@ -121,12 +124,12 @@ class PosterFile(models.Model):
                     log.error('Failed to download image')
 
             if data:
-                assignDataToPoster(data, self)
+                self._assignDataToPoster(data)
 
             if not self.extendedplot:
                 log.debug('No extended plot from TVDB. Getting info from IMDB')
                 data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
-                assignDataToPoster(data, self, onlyExtendedPlot=True)
+                self._assignDataToPoster(data, onlyExtendedPlot=True)
         except Exception, e:
             log.error(str(e), exc_info=True)
             assignDataToPoster({}, self, foundNone=True)
@@ -140,9 +143,9 @@ class PosterFile(models.Model):
     def _assignDataToPoster(self, data, onlyExtendedPlot=False):
         if not onlyExtendedPlot:
             plot = data.get('Plot') or data.get('overview')
-            self.plot = (not plot or plot == 'undefined') and 'Plot not found' or plot
+            self.plot = plot if plot and plot != 'undefined' else None
             genre = data.get('Genre')
-            genre = (not genre or genre == 'undefined') and None or genre
+            genre = genre if genre and genre != 'undefined' else None
             if genre:
                 genres = genre.split(', ')
                 for g in genres:
@@ -150,14 +153,33 @@ class PosterFile(models.Model):
                     self.genres.add(genre_obj)
 
             actors = data.get('Actors')
-            self.actors = (not actors or actors == 'undefined') and 'Actors not found' or actors
-            writer = data.get('Writer')
-            self.writer = (not writer or writer == 'undefined') and 'Writer not found' or writer
-            director = data.get('Director')
-            self.director = (not director or director == 'undefined') and 'Director not found' or director
+            actors = actors if actors and actors != 'undefined' else None
+            if actors:
+                actors = actors.split(', ')
+                for actor in actors:
+                    actor_obj = Actor.new(actor)
+                    self.actors.add(actor_obj)
+
+            writers = data.get('Writer')
+            writers = writers if writers and writers != 'undefined' else None
+            if writers:
+                writers = writers.split(', ')
+                for writer in writers:
+                    writer_obj = Writer.new(writer)
+                    self.writers.add(writer_obj)
+
+            directors = data.get('Director')
+            directors = directors if directors and directors != 'undefined' else None
+            if directors:
+                directors = directors.split(', ')
+                for director in directors:
+                    director_obj = Director.new(director)
+                    self.directors.add(director_obj)
+
             rating = data.get('imdbRating')
-            self.rating = rating != 'undefined' and rating or None
+            self.rating = rating if rating and rating != 'undefined' else None
             rated = data.get('Rated')
-            self.rated = rated != 'undefined' and rated or None
+            self.rated = rated if rated and rated != 'undefined' else None
         else:
-            self.extendedplot = (not data.get('Plot', None) or data.get('Plot', None) == 'undefined') and 'Plot not found' or data.get('Plot', None)
+            plot = data.get('Plot')
+            self.extendedplot = plot if plot and plot != 'undefined' else None
