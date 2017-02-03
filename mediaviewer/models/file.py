@@ -5,13 +5,6 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
-                                                  saveImageToDisk,
-                                                  assignDataToPoster,
-                                                  searchTVDBByName,
-                                                  tvdbConfig,
-                                                  getTVDBEpisodeInfo,
-                                                  )
 from mediaviewer.models.mediagenre import MediaGenre
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
@@ -235,9 +228,9 @@ class File(models.Model):
         return searchStr
 
     def rawSearchString(self):
-        searchStr = (self._searchString or
-                        self.override_filename or
+        searchStr = (self.override_filename or
                         self.path.override_display_name or
+                        self._searchString or
                         self.getSearchTerm())
         return searchStr
 

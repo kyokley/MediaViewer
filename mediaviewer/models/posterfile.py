@@ -1,4 +1,14 @@
 from django.db import models
+from mediaviewer.log import log
+
+from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
+                                                  saveImageToDisk,
+                                                  assignDataToPoster,
+                                                  searchTVDBByName,
+                                                  tvdbConfig,
+                                                  getTVDBEpisodeInfo,
+                                                  )
+from mediaviewer.models.genre import Genre
 
 #TODO: Add column to track tvdb and omdb success
 # Destroy failed posterfiles weekly to allow new attempts
@@ -76,7 +86,7 @@ class PosterFile(models.Model):
             if not season or not episode:
                 log.debug('Skipping tvdb search')
             else:
-                if not ref_obj.path.tvdb_id:
+                if ref_obj.path and not ref_obj.path.tvdb_id:
                     log.debug('No tvdb id for this path.'
                               'Continue search by tv show name')
                     tvinfo = searchTVDBByName(ref_obj.searchString())
@@ -97,32 +107,57 @@ class PosterFile(models.Model):
                         posterURL = '%s/%s/%s' % (tvdbConfig.url,
                                                   tvdbConfig.still_size,
                                                   imgName)
-                    poster.extendedplot = tvinfo.get('overview', '')
-                    poster.episodename = tvinfo.get('name')
+                    self.extendedplot = tvinfo.get('overview', '')
+                    self.episodename = tvinfo.get('name')
 
             if posterURL:
                 if data:
                     data['Poster'] = posterURL
                 try:
                     saveImageToDisk(posterURL, imgName)
-                    poster.image = imgName
+                    self.image = imgName
                 except Exception, e:
                     log.error(str(e), exc_info=True)
                     log.error('Failed to download image')
 
             if data:
-                assignDataToPoster(data, poster)
+                assignDataToPoster(data, self)
 
-            if not poster.extendedplot:
+            if not self.extendedplot:
                 log.debug('No extended plot from TVDB. Getting info from IMDB')
                 data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
-                assignDataToPoster(data, poster, onlyExtendedPlot=True)
+                assignDataToPoster(data, self, onlyExtendedPlot=True)
         except Exception, e:
             log.error(str(e), exc_info=True)
-            assignDataToPoster({}, poster, foundNone=True)
-        poster.save()
+            assignDataToPoster({}, self, foundNone=True)
+        self.save()
         log.debug('Done getting poster data')
 
         if ref_obj.isMovie():
             ref_obj.populate_genres(clearExisting=True)
-        return poster
+        return self
+
+    def _assignDataToPoster(self, data, onlyExtendedPlot=False):
+        if not onlyExtendedPlot:
+            plot = data.get('Plot') or data.get('overview')
+            self.plot = (not plot or plot == 'undefined') and 'Plot not found' or plot
+            genre = data.get('Genre')
+            genre = (not genre or genre == 'undefined') and None or genre
+            if genre:
+                genres = genre.split(', ')
+                for g in genres:
+                    genre_obj = Genre.new(g)
+                    self.genres.add(genre_obj)
+
+            actors = data.get('Actors')
+            self.actors = (not actors or actors == 'undefined') and 'Actors not found' or actors
+            writer = data.get('Writer')
+            self.writer = (not writer or writer == 'undefined') and 'Writer not found' or writer
+            director = data.get('Director')
+            self.director = (not director or director == 'undefined') and 'Director not found' or director
+            rating = data.get('imdbRating')
+            self.rating = rating != 'undefined' and rating or None
+            rated = data.get('Rated')
+            self.rated = rated != 'undefined' and rated or None
+        else:
+            self.extendedplot = (not data.get('Plot', None) or data.get('Plot', None) == 'undefined') and 'Plot not found' or data.get('Plot', None)
