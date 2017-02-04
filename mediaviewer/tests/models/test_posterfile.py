@@ -2,6 +2,8 @@ import mock
 from django.test import TestCase
 
 from mediaviewer.models.posterfile import PosterFile
+from mediaviewer.models.file import File
+from mediaviewer.models.path import Path
 
 class TestAssignDataToPoster(TestCase):
     def setUp(self):
@@ -129,3 +131,57 @@ class TestAssignDataToPoster(TestCase):
         self.assertEquals(self.poster.rating, None)
         self.assertEquals(self.poster.rated, None)
         self.assertEquals(self.poster.extendedplot, None)
+
+class TestNew(TestCase):
+    def setUp(self):
+        objects_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.objects')
+        self.mock_objects = objects_patcher.start()
+        self.addCleanup(objects_patcher.stop)
+
+        downloadPosterData_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile._downloadPosterData')
+        self.mock_downloadPosterData = downloadPosterData_patcher.start()
+        self.addCleanup(downloadPosterData_patcher.stop)
+
+        self.path = Path.new('local.path',
+                             'remote.path',
+                             is_movie=False)
+        self.movie_path = Path.new('movie.local.path',
+                                   'movie.remote.path',
+                                   is_movie=True)
+        self.file = File.new('new.file.mp4',
+                             self.movie_path)
+
+        self.mock_objects.filter.return_value.first.return_value = None
+
+
+    def test_no_file_no_path(self):
+        self.assertRaises(ValueError,
+                          PosterFile.new)
+
+    def test_file(self):
+        new_obj = PosterFile.new(file=self.file)
+
+        self.assertEqual(new_obj.file, self.file)
+        self.assertEqual(new_obj.path, None)
+        self.mock_downloadPosterData.assert_called_once_with()
+
+    def test_path(self):
+        new_obj = PosterFile.new(path=self.path)
+
+        self.assertEqual(new_obj.file, None)
+        self.assertEqual(new_obj.path, self.path)
+        self.mock_downloadPosterData.assert_called_once_with()
+
+    def test_existing_for_file(self):
+        self.mock_objects.filter.return_value.first.return_value = 'existing_obj'
+
+        existing = PosterFile.new(file=self.file)
+        self.assertEqual(existing, 'existing_obj')
+        self.assertFalse(self.mock_downloadPosterData.called)
+
+    def test_existing_for_path(self):
+        self.mock_objects.filter.return_value.first.return_value = 'existing_obj'
+
+        existing = PosterFile.new(path=self.path)
+        self.assertEqual(existing, 'existing_obj')
+        self.assertFalse(self.mock_downloadPosterData.called)
