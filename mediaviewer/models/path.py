@@ -87,6 +87,11 @@ class Path(models.Model):
                 pathDict[path.shortName] = path
         return pathDict
 
+    @classmethod
+    def distinctShowFoldersByGenre(cls, genre):
+        paths = genre.path_set.filter(hide=False).all()
+        return cls._buildDistinctShowFoldersFromPaths(paths)
+
     def isMovie(self):
         return self.is_movie
 
@@ -146,3 +151,7 @@ class Path(models.Model):
                                                  .filter(viewed=True)
                                                  .count())
         return file_count - usercomments_count
+
+    @classmethod
+    def get_tv_genres(cls):
+        return []

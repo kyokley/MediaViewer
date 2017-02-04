@@ -5,9 +5,9 @@ from mediaviewer.models.usersettings import (
 from mediaviewer.models.message import Message
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.waiterstatus import WaiterStatus
-from mediaviewer.models.mediagenre import MediaGenre
 from django.shortcuts import render
 from mediaviewer.models.file import File
+from mediaviewer.models.path import Path
 from mediaviewer.utils import logAccessInfo, check_force_password_change
 from mysite.settings import DEBUG
 
@@ -29,8 +29,8 @@ def setSiteWideContext(context, request, includeMessages=False):
                         message.body,
                         extra_tags=str(message.id))
 
-        context['movie_genres'] = MediaGenre.get_movie_genres()
-        context['tv_genres'] = MediaGenre.get_tv_genres()
+        context['movie_genres'] = File.get_movie_genres()
+        context['tv_genres'] = Path.get_tv_genres()
     else:
         context['loggedin'] = False
 

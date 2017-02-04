@@ -4,12 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
-# Normally, we would use apps.get_model to get at the class here
-# However, I'm only interested in running the class method in this migration
-from mediaviewer.models.mediagenre import MediaGenre
-
 def generate_initial_mediagenre_data(apps, schema_editor):
-    #MediaGenre.regenerateAllGenreData()
     pass
 
 class Migration(migrations.Migration):

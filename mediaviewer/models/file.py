@@ -320,3 +320,7 @@ class File(models.Model):
         except Exception, e:
             log.error('Got an error destroying posterfile')
             log.error(e)
+
+    @classmethod
+    def get_movie_genres(cls):
+        return []

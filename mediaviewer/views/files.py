@@ -6,7 +6,7 @@ from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
                                       BANGUP_IP,
                                       )
-from mediaviewer.models.mediagenre import MediaGenre
+from mediaviewer.models.genre import Genre
 from django.shortcuts import render
 from mediaviewer.models.path import Path
 from django.contrib.auth.models import User
@@ -72,9 +72,8 @@ def movies(request):
 def movies_by_genre(request, genre_id):
     user = request.user
     # We're only interested in movies here so files must be defined
-    ref_genre = MediaGenre.objects.get(pk=genre_id)
-    mediagenres = MediaGenre.objects.exclude(file=None).filter(genre=ref_genre.genre)
-    files = [mg.file for mg in mediagenres if not mg.file.hide]
+    ref_genre = Genre.objects.get(pk=genre_id)
+    files = ref_genre.file_set.filter(hide=False).all()
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -107,7 +106,7 @@ def tvshowsummary(request):
 @check_force_password_change
 @logAccessInfo
 def tvshows_by_genre(request, genre_id):
-    ref_genre = MediaGenre.objects.get(pk=genre_id)
+    ref_genre = Genre.objects.get(pk=genre_id)
     pathDict = Path.distinctShowFoldersByGenre(ref_genre)
     pathSet = [path for name, path in pathDict.items()]
 
