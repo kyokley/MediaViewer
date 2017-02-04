@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.mediagenre import MediaGenre
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from mediaviewer.models.file import File
+from mediaviewer.models.path import Path
 
 import json
 import pytz
@@ -70,8 +71,8 @@ def ajaxgenres(request, guid):
                             status=412)
 
     if request.method == 'GET':
-        movie_genres = MediaGenre.get_movie_genres()
-        tv_genres = MediaGenre.get_tv_genres()
+        movie_genres = File.get_movie_genres()
+        tv_genres = Path.get_tv_genres()
         data = {'movie_genres': [(mg.id, mg.genre) for mg in movie_genres],
                 'tv_genres': [(mg.id, mg.genre) for mg in tv_genres],
                 }

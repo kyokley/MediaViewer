@@ -22,14 +22,6 @@ class TestSetSiteWideContext(TestCase):
         self.mock_getLastWaiterStatus = self.getLastWaiterStatus_patcher.start()
         self.addCleanup(self.getLastWaiterStatus_patcher.stop)
 
-        self.get_movie_genres_patcher = mock.patch('mediaviewer.views.home.MediaGenre.get_movie_genres')
-        self.mock_get_movie_genres = self.get_movie_genres_patcher.start()
-        self.addCleanup(self.get_movie_genres_patcher.stop)
-
-        self.get_tv_genres_patcher = mock.patch('mediaviewer.views.home.MediaGenre.get_tv_genres')
-        self.mock_get_tv_genres = self.get_tv_genres_patcher.start()
-        self.addCleanup(self.get_tv_genres_patcher.stop)
-
         self.request = mock.MagicMock()
         self.user = mock.create_autospec(User)
         self.request.user = self.user

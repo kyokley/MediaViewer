@@ -89,7 +89,7 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFoldersByGenre(cls, genre):
-        paths = genre.path_set.filter(hide=False).all()
+        paths = genre.path_set.filter(hide=False).filter(is_movie=False).all()
         return cls._buildDistinctShowFoldersFromPaths(paths)
 
     def isMovie(self):
