@@ -37,8 +37,6 @@ class PathViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
             newPath = serializer.instance
-            if newPath.isTVShow():
-                newPath.populate_genres()
             return serializer
         else:
             raise Exception('Invalid serializer')
