@@ -64,8 +64,8 @@ class TestSetSiteWideContext(TestCase):
                     'is_staff': 'true',
                     'default_sort': FILENAME_SORT,
                     'user': self.user,
-                    'movie_genres': self.mock_get_movie_genres.return_value,
-                    'tv_genres': self.mock_get_tv_genres.return_value}
+                    'movie_genres': [],
+                    'tv_genres': []}
         self.assertEquals(call(expected), self.mock_getLastWaiterStatus.call_args)
         self.assertFalse(self.mock_getMessagesForUser.called)
         self.assertFalse(self.mock_add_message.called)
