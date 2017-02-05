@@ -349,8 +349,17 @@ class TestTVPathDownloadPosterData(TestCase):
         self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
         self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
 
-class TestTVDownloadPosterData(TestCase):
+class TestTVFileDownloadPosterData(TestCase):
     def setUp(self):
+        getDataFromIMDB_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDB')
+        self.mock_getDataFromIMDB = getDataFromIMDB_patcher.start()
+        self.mock_getDataFromIMDB.return_value = sample_imdb_result
+        self.addCleanup(getDataFromIMDB_patcher.stop)
+
+        getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDBByPath')
+        self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
+        self.addCleanup(getDataFromIMDBByPath_patcher.stop)
+
         searchTVDBByName_patcher = mock.patch('mediaviewer.models.posterfile.searchTVDBByName')
         self.mock_searchTVDBByName = searchTVDBByName_patcher.start()
         self.addCleanup(searchTVDBByName_patcher.stop)
@@ -378,28 +387,34 @@ class TestTVDownloadPosterData(TestCase):
                                 is_movie=False)
 
         self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
 
         self.poster = PosterFile()
+        self.poster.file = self.tv_file
 
     def test_no_tvinfo(self):
         self.mock_searchTVDBByName.return_value = {}
-        self.path._handleDataFromTVDB(self.poster)
 
+        self.poster._downloadPosterData()
         self.mock_searchTVDBByName.assert_called_once_with('test str')
-        self.assertFalse(self.mock_saveImageToDisk.called)
-        self.mock_assignDataToPoster.assert_called_once_with({},
-                                                             self.poster,
-                                                             foundNone=True)
+        self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
+        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg',
+                                                          u'image.jpg')
+        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
+        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
 
     def test_bad_result(self):
         self.mock_searchTVDBByName.return_value = sample_bad_result
-        self.path._handleDataFromTVDB(self.poster)
 
+        self.poster._downloadPosterData()
         self.mock_searchTVDBByName.assert_called_once_with('test str')
-        self.assertFalse(self.mock_saveImageToDisk.called)
-        self.mock_assignDataToPoster.assert_called_once_with({},
-                                                             self.poster,
-                                                             foundNone=True)
+        self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
+        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg',
+                                                          u'image.jpg')
+        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
+        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
 
     def test_no_poster_data(self):
         mock_result = {u'page': 1,
@@ -419,7 +434,7 @@ class TestTVDownloadPosterData(TestCase):
                        u'total_results': 1}
         self.mock_searchTVDBByName.return_value = mock_result
 
-        self.path._handleDataFromTVDB(self.poster)
+        self.poster._downloadPosterData()
 
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.assertFalse(self.mock_saveImageToDisk.called)
@@ -435,8 +450,7 @@ class TestTVDownloadPosterData(TestCase):
                                                               u'popularity': 4.278642,
                                                               u'vote_average': 6.81,
                                                               u'vote_count': 41},
-                                                             self.poster,
-                                                             foundNone=False)
+                                                             )
         self.assertEqual(self.path.tvdb_id, 12345)
 
     def test_response_with_poster_data(self):

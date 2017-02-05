@@ -134,15 +134,27 @@ class PosterFile(models.Model):
                     log.debug('No tvdb id for this path.'
                               'Continue search by tv show name')
                     tvinfo = searchTVDBByName(ref_obj.searchString())
-                    tvdb_id = tvinfo['results'][0]['id']
-                    log.debug('Set tvdb id for this path to {}'.format(tvdb_id))
-                    ref_obj.path.tvdb_id = tvdb_id
-                    ref_obj.path.save()
+
+                    try:
+                        tvdb_id = tvinfo['results'][0]['id'] if tvinfo else None
+                    except Exception as e:
+                        log.error('Got bad response during searchTVDBByName: {}'.format(ref_obj.searchString()))
+                        log.error(e)
+                        tvdb_id = None
+
+                    if tvdb_id:
+                        log.debug('Set tvdb id for this path to {}'.format(tvdb_id))
+                        ref_obj.path.tvdb_id = tvdb_id
+                        ref_obj.path.save()
                 else:
                     tvdb_id = ref_obj.path.tvdb_id
-                tvinfo = getTVDBEpisodeInfo(tvdb_id,
-                                            season,
-                                            episode)
+
+                if tvdb_id:
+                    tvinfo = getTVDBEpisodeInfo(tvdb_id,
+                                                season,
+                                                episode)
+                else:
+                    tvinfo = None
 
                 if tvinfo:
                     still_path = tvinfo.get('still_path')
