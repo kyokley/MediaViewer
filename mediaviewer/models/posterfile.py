@@ -116,7 +116,7 @@ class PosterFile(models.Model):
                               'Continue search by tv show name')
                     tvinfo = searchTVDBByName(ref_obj.searchString())
                     tvdb_id = tvinfo['results'][0]['id']
-                    log.debug('Set tvdb id for this path')
+                    log.debug('Set tvdb id for this path to {}'.format(tvdb_id))
                     ref_obj.path.tvdb_id = tvdb_id
                     ref_obj.path.save()
                 else:
@@ -156,9 +156,6 @@ class PosterFile(models.Model):
             log.error(str(e), exc_info=True)
         self.save()
         log.debug('Done getting poster data')
-
-        if ref_obj.isMovie():
-            ref_obj.populate_genres(clearExisting=True)
         return self
 
     def _assignDataToPoster(self, data, onlyExtendedPlot=False):
