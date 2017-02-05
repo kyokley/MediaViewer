@@ -344,8 +344,7 @@ class TestTVPathDownloadPosterData(TestCase):
         self.assertFalse(self.mock_getDataFromIMDB.called)
         self.assertFalse(self.mock_searchTVDBByName.called)
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
-        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg',
-                                                          u'image.jpg')
+        self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
         self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
         self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
 
@@ -400,8 +399,7 @@ class TestTVFileDownloadPosterData(TestCase):
         self.poster._downloadPosterData()
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
-        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg',
-                                                          u'image.jpg')
+        self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
         self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
         self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
 
@@ -434,78 +432,32 @@ class TestTVFileDownloadPosterData(TestCase):
                        u'total_results': 1}
         self.mock_searchTVDBByName.return_value = mock_result
 
+        mock_tv_info_result = {'still_path': u'/path/to/image.jpg',
+                               'overview': 'tv info overview',
+                               'name': 'episode name'}
+        self.mock_getTVDBEpisodeInfo.return_value = mock_tv_info_result
+
         self.poster._downloadPosterData()
 
         self.mock_searchTVDBByName.assert_called_once_with('test str')
-        self.assertFalse(self.mock_saveImageToDisk.called)
-        self.mock_assignDataToPoster.assert_called_once_with({u'backdrop_path': u'/asdfasdf.jpg',
-                                                              u'first_air_date': u'2016-09-30',
-                                                              u'genre_ids': [18, 10765],
-                                                              u'id': 12345,
-                                                              u'name': u"show name",
-                                                              u'origin_country': [u'US'],
-                                                              u'original_language': u'en',
-                                                              u'original_name': u"show name",
-                                                              u'overview': u'show description',
-                                                              u'popularity': 4.278642,
-                                                              u'vote_average': 6.81,
-                                                              u'vote_count': 41},
-                                                             )
-        self.assertEqual(self.path.tvdb_id, 12345)
+        self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
+        self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
+        self.mock_assignDataToPoster.assert_called_once_with(sample_imdb_result)
+        self.assertEqual(self.poster.file.path.tvdb_id, 12345)
 
     def test_response_with_poster_data(self):
         self.mock_searchTVDBByName.return_value = sample_good_result
+        mock_tv_info_result = {'still_path': u'/path/to/image.jpg',
+                               'overview': 'tv info overview',
+                               'name': 'episode name'}
+        self.mock_getTVDBEpisodeInfo.return_value = mock_tv_info_result
 
-        self.path._handleDataFromTVDB(self.poster)
+        self.poster._downloadPosterData()
 
         self.mock_searchTVDBByName.assert_called_once_with('test str')
-        self.mock_saveImageToDisk.assert_called_once_with('mock_url/mock_still_size/zxcvzxcv.jpg',
-                                                          'zxcvzxcv.jpg')
-        self.mock_assignDataToPoster.assert_called_once_with({u'backdrop_path': u'/asdfasdf.jpg',
-                                                              u'first_air_date': u'2016-09-30',
-                                                              u'genre_ids': [18, 10765],
-                                                              u'id': 12345,
-                                                              u'name': u"show name",
-                                                              u'origin_country': [u'US'],
-                                                              u'original_language': u'en',
-                                                              u'original_name': u"show name",
-                                                              u'overview': u'show description',
-                                                              u'popularity': 4.278642,
-                                                              u'vote_average': 6.81,
-                                                              u'poster_path': u'/zxcvzxcv.jpg',
-                                                              u'vote_count': 41},
-                                                             self.poster,
-                                                             foundNone=False)
-        self.assertEqual(self.path.tvdb_id, 12345)
-        self.assertEqual(self.poster.image, 'zxcvzxcv.jpg')
-
-class TestHandleIMDB(TestCase):
-    def setUp(self):
-        saveImageToDisk_patcher = mock.patch('mediaviewer.models.posterfile.saveImageToDisk')
-        self.mock_saveImageToDisk = saveImageToDisk_patcher.start()
-        self.addCleanup(saveImageToDisk_patcher.stop)
-
-        getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDBByPath')
-        self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
-        self.addCleanup(getDataFromIMDBByPath_patcher.stop)
-
-        assignDataToPoster_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile._assignDataToPoster')
-        self.mock_assignDataToPoster = assignDataToPoster_patcher.start()
-        self.addCleanup(assignDataToPoster_patcher.stop)
-
-        self.path = Path()
-        self.path.defaultsearchstr = 'test str'
-
-        self.poster = mock.create_autospec(PosterFile)
-
-    def test_(self):
-        mock_data = {'Poster': '/path/to/image.jpg'}
-
-        self.path._handleDataFromIMDB(mock_data, self.poster)
-
-        self.mock_saveImageToDisk.assert_called_once_with('/path/to/image.jpg', 'image.jpg')
+        self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
+        self.mock_saveImageToDisk.assert_called_once_with('mock_url/mock_still_size/image.jpg',
+                                                          'image.jpg')
+        self.mock_assignDataToPoster.assert_called_once_with(sample_imdb_result)
+        self.assertEqual(self.poster.file.path.tvdb_id, 12345)
         self.assertEqual(self.poster.image, 'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(mock_data, self.poster)
-        self.mock_getDataFromIMDBByPath.assert_called_once_with(self.path,
-                                                                useExtendedPlot=True)
-        self.mock_assignDataToPoster.assert_any_call(self.mock_getDataFromIMDBByPath.return_value, self.poster, onlyExtendedPlot=True)
