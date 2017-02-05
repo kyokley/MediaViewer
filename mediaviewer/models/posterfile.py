@@ -2,6 +2,7 @@ from django.db import models
 from mediaviewer.log import log
 
 from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
+                                                  getDataFromIMDBByPath,
                                                   saveImageToDisk,
                                                   searchTVDBByName,
                                                   tvdbConfig,
@@ -56,6 +57,9 @@ class PosterFile(models.Model):
         if not file and not path or (file and path):
             raise ValueError('Either file or path must be defined')
 
+        if path and path.isMovie():
+            raise ValueError('Movie paths are not allowed to have poster data')
+
         if file:
             existing = cls.objects.filter(file=file).first()
             if existing:
@@ -76,10 +80,14 @@ class PosterFile(models.Model):
         return obj
 
     def _downloadPosterData(self):
+        if self.path and self.path.isMovie():
+            raise ValueError('Movie paths are not allowed to have poster data')
+
+        ref_obj = self.file or self.path
+
         log.debug('Downloading poster data')
         log.info('Getting poster data for %s' % (self,))
 
-        ref_obj = self.file or self.path
         try:
             imgName = ''
             if ref_obj.isMovie():
@@ -87,6 +95,17 @@ class PosterFile(models.Model):
                           'Set season and episode to None')
                 season = None
                 episode = None
+
+                log.debug('Attempt to get data from IMDB')
+                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
+            elif self.path:
+                log.debug('This is a path for a tv show'
+                          'Set season and episode to None')
+                season = None
+                episode = None
+
+                log.debug('Attempt to get data from IMDB')
+                data = getDataFromIMDBByPath(ref_obj, useExtendedPlot=True)
             else:
                 log.debug('Getting season and episode')
                 season = ref_obj.getScrapedSeason()
@@ -94,8 +113,8 @@ class PosterFile(models.Model):
                 episode = ref_obj.getScrapedEpisode()
                 episode = episode and int(episode)
 
-            log.debug('Attempt to get data from IMDB')
-            data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
+                log.debug('Attempt to get data from IMDB')
+                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
 
             if data:
                 log.debug('Received data from IMDB')
@@ -150,7 +169,7 @@ class PosterFile(models.Model):
 
             if not self.extendedplot:
                 log.debug('No extended plot from TVDB. Getting info from IMDB')
-                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
+                #data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
                 self._assignDataToPoster(data, onlyExtendedPlot=True)
         except Exception, e:
             log.error(str(e), exc_info=True)
