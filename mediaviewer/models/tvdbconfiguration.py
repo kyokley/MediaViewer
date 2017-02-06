@@ -88,13 +88,13 @@ def getDataFromIMDB(refFile, useExtendedPlot=False):
         refFile.imdb_id = refFile.path.imdb_id
 
     if refFile.imdb_id and refFile.imdb_id != 'None':
-        return _getDataFromIMDBByID(refFile.imdb_id, useExtendedPlot=useExtendedPlot)
+        return _getDataFromIMDBByID(refFile.imdb_id, useExtendedPlot=useExtendedPlot, isMovie=refFile.isMovie())
     else:
-        return _getDataFromIMDBBySearchString(refFile.searchString(), useExtendedPlot=useExtendedPlot)
+        return _getDataFromIMDBBySearchString(refFile.searchString(), useExtendedPlot=useExtendedPlot, isMovie=refFile.isMovie())
 
 def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
     if refPath.imdb_id:
-        return _getDataFromIMDBByID(refPath.imdb_id, useExtendedPlot=useExtendedPlot)
+        return _getDataFromIMDBByID(refPath.imdb_id, useExtendedPlot=useExtendedPlot, isMovie=refPath.isMovie())
     else:
         files = refPath.files()
         refFile = files and files[0]
@@ -107,12 +107,17 @@ def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
 
         return getDataFromIMDB(refFile, useExtendedPlot=useExtendedPlot)
 
-def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False):
+def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (imdb_id,))
     url = OMDB_ID_URL + imdb_id
 
-    if useExtendedPlot:
-        url = url + OMDB_URL_TAIL
+    if not isMovie:
+        url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (imdb_id, API_KEY)
+    else:
+        url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (imdb_id, API_KEY)
+
+    #if useExtendedPlot:
+        #url = url + OMDB_URL_TAIL
 
     data = getJSONData(url)
     if data:
@@ -121,12 +126,17 @@ def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False):
         return None
     return data
 
-def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False):
+def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (searchString,))
     url = OMDB_URL + searchString
 
-    if useExtendedPlot:
-        url = url + OMDB_URL_TAIL
+    if not isMovie:
+        url = 'https://api.themoviedb.org/3/search/tv?query=%s&api_key=%s' % (searchString, API_KEY)
+    else:
+        url = 'https://api.themoviedb.org/3/search/movie?query=%s&api_key=%s' % (searchString, API_KEY)
+
+    #if useExtendedPlot:
+        #url = url + OMDB_URL_TAIL
 
     data = getJSONData(url)
     if data:
