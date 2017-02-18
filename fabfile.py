@@ -245,6 +245,7 @@ def install():
         fab.local('sudo rm %s' % nginxPath)
     write_sudo_file(nginxPath, nginxText)
 
+    fab.local('sudo systemctl start supervisor')
     fab.local('sudo supervisorctl update')
     fab.local('sudo supervisorctl restart %s' % values['programName'])
     fab.local('sudo service nginx restart')
