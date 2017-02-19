@@ -119,7 +119,9 @@ class PosterFile(models.Model):
             if data:
                 log.debug('Received data from IMDB')
                 try:
-                    posterURL = data.get('Poster') or data.get('results')[0]['poster_path']
+                    posterURL = (data.get('Poster') or
+                                    data.get('poster_path') or
+                                    data.setdefault('results', [{}])[0].get('poster_path'))
                 except:
                     posterURL = None
             else:
@@ -180,7 +182,7 @@ class PosterFile(models.Model):
 
             if not self.extendedplot:
                 log.debug('No extended plot from TVDB. Getting info from IMDB')
-                #data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
+                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
                 self._assignDataToPoster(data, onlyExtendedPlot=True)
         except Exception, e:
             log.error(str(e), exc_info=True)
@@ -190,13 +192,21 @@ class PosterFile(models.Model):
 
     def _assignDataToPoster(self, data, onlyExtendedPlot=False):
         if not onlyExtendedPlot:
-            plot = data.get('Plot') or data['results'][0]['overview']
+            plot = (data.get('Plot') or
+                        data.get('overview') or
+                        data.setdefault('results', [{}])[0].get('overview'))
             self.plot = plot if plot and plot != 'undefined' else None
-            genre_ids = data['results'][0]['genre_ids']
-            for genre_id in genre_ids:
-                g = tvdbConfig.genres[genre_id]
-                genre_obj = Genre.new(g)
-                self.genres.add(genre_obj)
+
+            if data.get('results'):
+                genre_ids = data['results'][0]['genre_ids']
+                for genre_id in genre_ids:
+                    g = tvdbConfig.genres[genre_id]
+                    genre_obj = Genre.new(g)
+                    self.genres.add(genre_obj)
+            elif data.get('genres'):
+                for genre in data.get('genres'):
+                    genre_obj = Genre.new(genre['name'])
+                    self.genres.add(genre_obj)
 
             actors = data.get('Actors')
             actors = actors if actors and actors != 'undefined' else None
@@ -227,5 +237,7 @@ class PosterFile(models.Model):
             rated = data.get('Rated')
             self.rated = rated if rated and rated != 'undefined' else None
         else:
-            plot = data.get('Plot')
+            plot = (data.get('Plot') or
+                        data.get('overview') or
+                        data.setdefault('results', [{}])[0].get('overview'))
             self.extendedplot = plot if plot and plot != 'undefined' else None
