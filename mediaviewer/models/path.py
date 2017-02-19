@@ -99,7 +99,7 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFoldersByGenre(cls, genre):
-        paths = genre.path_set.filter(hide=False).filter(is_movie=False).all()
+        paths = cls.objects.filter(_posterfile__genres=genre)
         return cls._buildDistinctShowFoldersFromPaths(paths)
 
     def isMovie(self):
@@ -167,7 +167,7 @@ class Path(models.Model):
         all_paths = cls.objects.filter(is_movie=False).all()
         for path in all_paths:
             path.posterfile
-            time.sleep(.75)
+            time.sleep(.5)
 
     @classmethod
     def get_tv_genres(cls):

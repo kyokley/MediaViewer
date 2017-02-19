@@ -194,7 +194,7 @@ class PosterFile(models.Model):
         if not onlyExtendedPlot:
             plot = (data.get('Plot') or
                         data.get('overview') or
-                        data.setdefault('results', [{}])[0].get('overview'))
+                        'results' in data and data['results'] and data['results'][0].get('overview'))
             self.plot = plot if plot and plot != 'undefined' else None
 
             if data.get('results'):
@@ -239,5 +239,5 @@ class PosterFile(models.Model):
         else:
             plot = (data.get('Plot') or
                         data.get('overview') or
-                        data.setdefault('results', [{}])[0].get('overview'))
+                        'results' in data and data['results'] and data['results'][0].get('overview'))
             self.extendedplot = plot if plot and plot != 'undefined' else None

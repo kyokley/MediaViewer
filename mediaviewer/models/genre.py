@@ -45,7 +45,7 @@ where genre.id in
     order by count(*) desc
     limit 10) as agg_genre
 )
-order by genre.genre desc;
+order by genre.genre;
         '''
 
         genres = cls.objects.raw(sql);
@@ -62,16 +62,14 @@ where genre.id in
     on pg.genre_id = g.id
     inner join posterfile as p
     on p.id = pg.posterfile_id
-    inner join file as f
-    on f.id = p.fileid
     inner join path
-    on path.id = f.pathid
+    on path.id = p.pathid
     where path.ismovie = 'f'
     group by g.id
     order by count(*) desc
     limit 10) as agg_genre
 )
-order by genre.genre desc;
+order by genre.genre;
         '''
 
         genres = cls.objects.raw(sql);

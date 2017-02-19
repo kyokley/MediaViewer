@@ -46,6 +46,10 @@
                     <div class="col-xs-12 col-md-6">
                         <h4>
                             <dl class="dl-horizontal">
+                                {% if path.posterfile.display_genres %}
+                                    <dt>Genre:</dt>
+                                    <dd>{{ path.posterfile.display_genres }}</dd>
+                                {% endif %}
                                 <dt>Summary:</dt>
                                 <dd>{{ path.posterfile.plot }}</dd>
                                 {% if path.posterfile.rated %}

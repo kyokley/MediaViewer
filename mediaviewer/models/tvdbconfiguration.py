@@ -1,3 +1,4 @@
+import time
 import os
 from mediaviewer.log import log
 from mysite.settings import (API_KEY,
@@ -14,6 +15,15 @@ def getJSONData(url):
         resp.raise_for_status()
         data = resp.json()
         log.debug('Got %s' % (data,))
+
+        if 'X-RateLimit-Remaining' in resp.headers:
+            remaining = int(resp.headers['X-RateLimit-Remaining'])
+            limit = int(resp.headers.get('X-RateLimit-Limit', '40'))
+
+            if remaining < .1 * limit:
+                log.warning('90%% of the rate limit has been used. Sleeping for 10 seconds')
+                time.sleep(10)
+
         return data
     except Exception, e:
         log.error(str(e), exc_info=True)

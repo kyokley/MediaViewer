@@ -73,7 +73,7 @@ def movies_by_genre(request, genre_id):
     user = request.user
     # We're only interested in movies here so files must be defined
     ref_genre = Genre.objects.get(pk=genre_id)
-    files = ref_genre.file_set.filter(hide=False).all()
+    files = File.objects.filter(_posterfile__genres=ref_genre).filter(hide=False)
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()

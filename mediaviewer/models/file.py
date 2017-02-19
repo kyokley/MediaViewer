@@ -336,7 +336,7 @@ class File(models.Model):
         all_files = cls.objects.filter(path__is_movie=True).filter(hide=False).all()
         for file in all_files:
             file.posterfile
-            time.sleep(.75)
+            time.sleep(.5)
 
     @classmethod
     def get_movie_genres(cls):
