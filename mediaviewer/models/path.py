@@ -3,6 +3,7 @@ from django.db import models
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
+from mediaviewer.models.genre import Genre
 from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
@@ -162,4 +163,4 @@ class Path(models.Model):
 
     @classmethod
     def get_tv_genres(cls):
-        return []
+        return Genre.get_tv_genres()

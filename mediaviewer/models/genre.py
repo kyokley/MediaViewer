@@ -44,7 +44,8 @@ where genre.id in
     group by g.id
     order by count(*) desc
     limit 10) as agg_genre
-);
+)
+order by genre.genre desc;
         '''
 
         genres = cls.objects.raw(sql);
@@ -69,7 +70,8 @@ where genre.id in
     group by g.id
     order by count(*) desc
     limit 10) as agg_genre
-);
+)
+order by genre.genre desc;
         '''
 
         genres = cls.objects.raw(sql);

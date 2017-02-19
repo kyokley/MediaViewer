@@ -5,6 +5,7 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
+from mediaviewer.models.genre import Genre
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
@@ -331,4 +332,4 @@ class File(models.Model):
 
     @classmethod
     def get_movie_genres(cls):
-        return []
+        return Genre.get_movie_genres()
