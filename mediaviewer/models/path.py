@@ -1,3 +1,4 @@
+import time
 from django.db import models
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
@@ -151,6 +152,13 @@ class Path(models.Model):
                                                  .filter(viewed=True)
                                                  .count())
         return file_count - usercomments_count
+
+    @classmethod
+    def populate_all_posterfiles(cls):
+        all_paths = cls.objects.filter(is_movie=False).filter(hide=False).all()
+        for path in all_paths:
+            path.posterfile
+            time.sleep(.5)
 
     @classmethod
     def get_tv_genres(cls):

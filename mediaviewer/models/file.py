@@ -1,4 +1,5 @@
 import re
+import time
 from django.db import models
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
@@ -320,6 +321,13 @@ class File(models.Model):
         except Exception, e:
             log.error('Got an error destroying posterfile')
             log.error(e)
+
+    @classmethod
+    def populate_all_posterfiles(cls):
+        all_files = cls.objects.filter(path__is_movie=True).filter(hide=False).all()
+        for file in all_files:
+            file.posterfile
+            time.sleep(.5)
 
     @classmethod
     def get_movie_genres(cls):
