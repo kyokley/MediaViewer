@@ -39,16 +39,16 @@ class PosterFile(models.Model):
         return 'id: %s f: %s i: %s' % (self.id, self.file and self.file.filename or self.path and self.path.localpathstr, self.image)
 
     def display_genres(self):
-        return ', '.join([x.genre for x in self.genres])
+        return ', '.join([x.genre for x in self.genres.all()])
 
     def display_actors(self):
-        return ', '.join([x.name for x in self.actors])
+        return ', '.join([x.name for x in self.actors.all()])
 
     def display_writers(self):
-        return ', '.join([x.name for x in self.writers])
+        return ', '.join([x.name for x in self.writers.all()])
 
     def display_directors(self):
-        return ', '.join([x.name for x in self.directors])
+        return ', '.join([x.name for x in self.directors.all()])
 
     @classmethod
     def new(cls,
@@ -118,7 +118,10 @@ class PosterFile(models.Model):
 
             if data:
                 log.debug('Received data from IMDB')
-                posterURL = data.get('Poster')
+                try:
+                    posterURL = data.get('Poster') or data.get('results')[0]['poster_path']
+                except:
+                    posterURL = None
             else:
                 posterURL = None
 

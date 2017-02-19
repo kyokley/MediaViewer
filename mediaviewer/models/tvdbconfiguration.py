@@ -3,7 +3,7 @@ from mediaviewer.log import log
 from mysite.settings import (API_KEY,
                              OMDB_URL,
                              OMDB_ID_URL,
-                             OMDB_URL_TAIL,
+                             #OMDB_URL_TAIL,
                              IMAGE_PATH,
                              REQUEST_TIMEOUT,
                              )
@@ -35,7 +35,8 @@ class TVDBConfiguration(object):
         try:
             data = self._getTVDBConfiguration()
             self.url = data['images']['secure_base_url']
-            self.poster_size = data['images']['poster_sizes'][-1]
+            #self.poster_size = data['images']['poster_sizes'][-1]
+            self.poster_size = 'w342'
             self.still_size = data['images']['still_sizes'][-1]
             self.connected = True
             log.debug('tvdb values set successfully')
@@ -67,12 +68,15 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
     url = 'https://api.themoviedb.org/3/tv/%s/season/%s/episode/%s?api_key=%s' % (tvdb_id, season, episode, API_KEY)
     return getJSONData(url)
 
-def saveImageToDisk(url, imgName):
-    log.debug('Getting image from %s' % (url,))
+def saveImageToDisk(path, imgName):
+    log.debug('Getting image from %s' % (path,))
     if imgName:
         exists = os.path.isfile(IMAGE_PATH + imgName)
         if not exists:
-            r = requests.get(url, stream=True, timeout=REQUEST_TIMEOUT)
+            #r = requests.get(url, stream=True, timeout=REQUEST_TIMEOUT)
+            r = requests.get('{url}{poster_size}{path}'.format(url=tvdbConfig.url,
+                                                               poster_size=tvdbConfig.poster_size,
+                                                               path=path), stream=True, timeout=REQUEST_TIMEOUT)
             r.raise_for_status()
             if r.status_code == 200:
                 with open(IMAGE_PATH + imgName, 'wb') as f:
