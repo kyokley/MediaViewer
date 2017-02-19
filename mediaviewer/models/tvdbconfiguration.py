@@ -1,9 +1,6 @@
 import os
 from mediaviewer.log import log
 from mysite.settings import (API_KEY,
-                             OMDB_URL,
-                             OMDB_ID_URL,
-                             #OMDB_URL_TAIL,
                              IMAGE_PATH,
                              REQUEST_TIMEOUT,
                              )
@@ -36,21 +33,42 @@ class TVDBConfiguration(object):
             data = self._getTVDBConfiguration()
             self.url = data['images']['secure_base_url']
             #self.poster_size = data['images']['poster_sizes'][-1]
-            self.poster_size = 'w342'
+            self.poster_size = 'w500'
             self.still_size = data['images']['still_sizes'][-1]
             self.connected = True
+            self.genres = self._getTVDBGenres()
             log.debug('tvdb values set successfully')
         except Exception, e:
             self.url = ''
             self.poster_size = ''
             self.still_size = ''
             self.connected = False
+            self.genres = {}
             log.error(str(e), exc_info=True)
             log.debug('Failed to set tvdb values')
 
     def _getTVDBConfiguration(self):
         url = 'https://api.themoviedb.org/3/configuration?api_key=%s' % (API_KEY,)
         return getJSONData(url)
+
+    def _getTVDBGenres(self):
+        data = {}
+
+        url = 'https://api.themoviedb.org/3/genre/tv/list?api_key=%s' % (API_KEY,)
+        resp = getJSONData(url)
+        genres = resp['genres']
+        for genre in genres:
+            data[genre['id']] = genre['name']
+
+        url = 'https://api.themoviedb.org/3/genre/movie/list?api_key=%s' % (API_KEY,)
+        resp = getJSONData(url)
+        genres = resp['genres']
+        for genre in genres:
+            data[genre['id']] = genre['name']
+
+        return data
+
+
 tvdbConfig = TVDBConfiguration()
 
 def searchTVDBByName(name):
@@ -113,15 +131,11 @@ def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
 
 def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (imdb_id,))
-    url = OMDB_ID_URL + imdb_id
 
     if not isMovie:
         url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (imdb_id, API_KEY)
     else:
         url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (imdb_id, API_KEY)
-
-    #if useExtendedPlot:
-        #url = url + OMDB_URL_TAIL
 
     data = getJSONData(url)
     if data:
@@ -132,15 +146,11 @@ def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False, isMovie=True):
 
 def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (searchString,))
-    url = OMDB_URL + searchString
 
     if not isMovie:
         url = 'https://api.themoviedb.org/3/search/tv?query=%s&api_key=%s' % (searchString, API_KEY)
     else:
         url = 'https://api.themoviedb.org/3/search/movie?query=%s&api_key=%s' % (searchString, API_KEY)
-
-    #if useExtendedPlot:
-        #url = url + OMDB_URL_TAIL
 
     data = getJSONData(url)
     if data:

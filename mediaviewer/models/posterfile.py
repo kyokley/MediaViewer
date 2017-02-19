@@ -160,12 +160,8 @@ class PosterFile(models.Model):
                     tvinfo = None
 
                 if tvinfo:
-                    still_path = tvinfo.get('still_path')
-                    if still_path:
-                        imgName = still_path.rpartition('/')[-1]
-                        posterURL = '%s/%s/%s' % (tvdbConfig.url,
-                                                  tvdbConfig.still_size,
-                                                  imgName)
+                    posterURL = tvinfo.get('still_path')
+                    imgName = posterURL.rpartition('/')[-1]
                     self.extendedplot = tvinfo.get('overview', '')
                     self.episodename = tvinfo.get('name')
 
@@ -194,15 +190,13 @@ class PosterFile(models.Model):
 
     def _assignDataToPoster(self, data, onlyExtendedPlot=False):
         if not onlyExtendedPlot:
-            plot = data.get('Plot') or data.get('overview')
+            plot = data.get('Plot') or data['results'][0]['overview']
             self.plot = plot if plot and plot != 'undefined' else None
-            genre = data.get('Genre')
-            genre = genre if genre and genre != 'undefined' else None
-            if genre:
-                genres = genre.split(', ')
-                for g in genres:
-                    genre_obj = Genre.new(g)
-                    self.genres.add(genre_obj)
+            genre_ids = data['results'][0]['genre_ids']
+            for genre_id in genre_ids:
+                g = tvdbConfig.genres[genre_id]
+                genre_obj = Genre.new(g)
+                self.genres.add(genre_obj)
 
             actors = data.get('Actors')
             actors = actors if actors and actors != 'undefined' else None
