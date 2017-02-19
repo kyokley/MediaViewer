@@ -105,7 +105,13 @@ def saveImageToDisk(path, imgName):
     else:
         log.info('No image name given. Skipping')
 
-def getDataFromIMDB(refFile, useExtendedPlot=False):
+def getDataFromIMDB(ref_obj, useExtendedPlot=False):
+    if ref_obj.isPath:
+        files = ref_obj.files()
+        refFile = files and files[0]
+    else:
+        refFile = ref_obj
+
     if not refFile.imdb_id and refFile.path.imdb_id:
         refFile.imdb_id = refFile.path.imdb_id
 
@@ -132,12 +138,18 @@ def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
 def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (imdb_id,))
 
+    url = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % (imdb_id, API_KEY)
+    resp = getJSONData(url)
+
     if not isMovie:
-        url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (imdb_id, API_KEY)
+        tmdb_id = resp.get('tv_results')[0]['id']
+        url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (tmdb_id, API_KEY)
     else:
-        url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (imdb_id, API_KEY)
+        tmdb_id = resp.get('movie_results')[0]['id']
+        url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
 
     data = getJSONData(url)
+
     if data:
         data['url'] = url
     else:

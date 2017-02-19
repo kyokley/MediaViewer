@@ -42,6 +42,14 @@ class Path(models.Model):
         obj.save()
         return obj
 
+    @property
+    def isFile(self):
+        return False
+
+    @property
+    def isPath(self):
+        return True
+
     def files(self):
         return File.objects.filter(path__localpathstr=self.localpathstr).filter(hide=False)
 
@@ -156,10 +164,10 @@ class Path(models.Model):
 
     @classmethod
     def populate_all_posterfiles(cls):
-        all_paths = cls.objects.filter(is_movie=False).filter(hide=False).all()
+        all_paths = cls.objects.filter(is_movie=False).all()
         for path in all_paths:
             path.posterfile
-            time.sleep(.5)
+            time.sleep(.75)
 
     @classmethod
     def get_tv_genres(cls):

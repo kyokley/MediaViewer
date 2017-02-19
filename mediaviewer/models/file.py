@@ -84,6 +84,14 @@ class File(models.Model):
         obj.save()
         return obj
 
+    @property
+    def isFile(self):
+        return True
+
+    @property
+    def isPath(self):
+        return False
+
     def _get_pathid(self):
         return self.path.id
     def _set_pathid(self, val):
@@ -328,7 +336,7 @@ class File(models.Model):
         all_files = cls.objects.filter(path__is_movie=True).filter(hide=False).all()
         for file in all_files:
             file.posterfile
-            time.sleep(.5)
+            time.sleep(.75)
 
     @classmethod
     def get_movie_genres(cls):
