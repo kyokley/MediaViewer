@@ -115,7 +115,7 @@ def saveImageToDisk(path, imgName):
     else:
         log.info('No image name given. Skipping')
 
-def getDataFromIMDB(ref_obj, useExtendedPlot=False):
+def getDataFromIMDB(ref_obj):
     if ref_obj.isPath:
         files = ref_obj.files()
         refFile = files and files[0]
@@ -126,13 +126,13 @@ def getDataFromIMDB(ref_obj, useExtendedPlot=False):
         refFile.imdb_id = refFile.path.imdb_id
 
     if refFile.imdb_id and refFile.imdb_id != 'None':
-        return _getDataFromIMDBByID(refFile.imdb_id, useExtendedPlot=useExtendedPlot, isMovie=refFile.isMovie())
+        return _getDataFromIMDBByID(refFile.imdb_id, isMovie=refFile.isMovie())
     else:
-        return _getDataFromIMDBBySearchString(refFile.searchString(), useExtendedPlot=useExtendedPlot, isMovie=refFile.isMovie())
+        return _getDataFromIMDBBySearchString(refFile.searchString(), isMovie=refFile.isMovie())
 
-def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
+def getDataFromIMDBByPath(refPath):
     if refPath.imdb_id:
-        return _getDataFromIMDBByID(refPath.imdb_id, useExtendedPlot=useExtendedPlot, isMovie=refPath.isMovie())
+        return _getDataFromIMDBByID(refPath.imdb_id, isMovie=refPath.isMovie())
     else:
         files = refPath.files()
         refFile = files and files[0]
@@ -143,9 +143,9 @@ def getDataFromIMDBByPath(refPath, useExtendedPlot=False):
         else:
             log.debug('Using %s for refFile' % (refFile,))
 
-        return getDataFromIMDB(refFile, useExtendedPlot=useExtendedPlot)
+        return getDataFromIMDB(refFile)
 
-def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False, isMovie=True):
+def _getDataFromIMDBByID(imdb_id, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (imdb_id,))
 
     url = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % (imdb_id, API_KEY)
@@ -166,7 +166,7 @@ def _getDataFromIMDBByID(imdb_id, useExtendedPlot=False, isMovie=True):
         return None
     return data
 
-def _getDataFromIMDBBySearchString(searchString, useExtendedPlot=False, isMovie=True):
+def _getDataFromIMDBBySearchString(searchString, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (searchString,))
 
     if not isMovie:

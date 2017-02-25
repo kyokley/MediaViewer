@@ -5,6 +5,28 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 
+sample_good_result = {u'page': 1,
+                      u'results': [{u'backdrop_path': u'/asdfasdf.jpg',
+                                    u'first_air_date': u'2016-09-30',
+                                    u'genre_ids': [18, 10765],
+                                    u'id': 12345,
+                                    u'name': u"show name",
+                                    u'origin_country': [u'US'],
+                                    u'original_language': u'en',
+                                    u'original_name': u"show name",
+                                    u'overview': u'show description',
+                                    u'popularity': 4.278642,
+                                    u'poster_path': u'/zxcvzxcv.jpg',
+                                    u'vote_average': 6.81,
+                                    u'vote_count': 41}],
+                      u'total_pages': 1,
+                      u'total_results': 1}
+
+sample_bad_result = {u'page': 1,
+                     u'results': [],
+                     u'total_pages': 1,
+                     u'total_results': 0}
+
 class TestAssignDataToPoster(TestCase):
     def setUp(self):
         genres_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.genres', mock.MagicMock())
@@ -43,33 +65,13 @@ class TestAssignDataToPoster(TestCase):
         self.poster.extendedplot = None
 
     def test_all_data(self):
-        data = {'Plot': 'plot',
-                'Genre': 'Action, Drama, Crime',
-                'Actors': 'Meridith Steele, Margy Marks, Merna Rutledge, Krissy Cole, Cammie Howell',
-                'Writer': 'Eleonore Carter, Kym Hodge',
-                'Director': 'Neda English, Gwyn Carson, Alica Ellis',
-                'imdbRating': 'imdb_rating',
-                'Rated': 'rated',
-                }
+        data = sample_good_result['results'][0]
 
         self.poster._assignDataToPoster(data)
 
-        self.assertEquals(self.poster.plot, 'plot')
-        self.poster.genres.add.assert_any_call('Action')
-        self.poster.genres.add.assert_any_call('Drama')
-        self.poster.genres.add.assert_any_call('Crime')
-        self.poster.actors.add.assert_any_call('Meridith Steele')
-        self.poster.actors.add.assert_any_call('Margy Marks')
-        self.poster.actors.add.assert_any_call('Merna Rutledge')
-        self.poster.actors.add.assert_any_call('Krissy Cole')
-        self.poster.actors.add.assert_any_call('Cammie Howell')
-        self.poster.writers.add.assert_any_call('Eleonore Carter')
-        self.poster.writers.add.assert_any_call('Kym Hodge')
-        self.poster.directors.add.assert_any_call('Neda English')
-        self.poster.directors.add.assert_any_call('Gwyn Carson')
-        self.poster.directors.add.assert_any_call('Alica Ellis')
-        self.assertEquals(self.poster.rating, 'imdb_rating')
-        self.assertEquals(self.poster.rated, 'rated')
+        self.assertEquals(self.poster.plot, data['overview'])
+        self.assertEquals(self.poster.rating, data['vote_average'])
+        self.assertEquals(self.poster.rated, None)
         self.assertEquals(self.poster.extendedplot, None)
 
     def test_onlyExtendedPlot(self):
@@ -191,56 +193,11 @@ class TestNew(TestCase):
         self.assertEqual(existing, 'existing_obj')
         self.assertFalse(self.mock_downloadPosterData.called)
 
-sample_good_result = {u'page': 1,
-                      u'results': [{u'backdrop_path': u'/asdfasdf.jpg',
-                                    u'first_air_date': u'2016-09-30',
-                                    u'genre_ids': [18, 10765],
-                                    u'id': 12345,
-                                    u'name': u"show name",
-                                    u'origin_country': [u'US'],
-                                    u'original_language': u'en',
-                                    u'original_name': u"show name",
-                                    u'overview': u'show description',
-                                    u'popularity': 4.278642,
-                                    u'poster_path': u'/zxcvzxcv.jpg',
-                                    u'vote_average': 6.81,
-                                    u'vote_count': 41}],
-                      u'total_pages': 1,
-                      u'total_results': 1}
-
-sample_bad_result = {u'page': 1,
-                     u'results': [],
-                     u'total_pages': 1,
-                     u'total_results': 0}
-
-sample_imdb_result = {u'Actors': u'Actors',
-                      u'Awards': u'N/A',
-                      u'Country': u'USA',
-                      u'Director': u'N/A',
-                      u'Genre': u'Action, Crime, Drama',
-                      u'Language': u'English',
-                      u'Metascore': u'N/A',
-                      u'Plot': u"plot",
-                      u'Poster': u'/path/to/image.jpg',
-                      u'Rated': u'TV-14',
-                      u'Released': u'23 Jun 2016',
-                      u'Response': u'True',
-                      u'Runtime': u'60 min',
-                      u'Title': u'Show title',
-                      u'Type': u'series',
-                      u'Writer': u'writers',
-                      u'Year': u'2016\u2013',
-                      u'imdbID': u'tt123456',
-                      u'imdbRating': u'7.4',
-                      u'imdbVotes': u'2,022',
-                      u'totalSeasons': u'1',
-                      'url': u'/path/to/omdbapi'}
-
 class TestMovieDownloadPosterData(TestCase):
     def setUp(self):
         getDataFromIMDB_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDB')
         self.mock_getDataFromIMDB = getDataFromIMDB_patcher.start()
-        self.mock_getDataFromIMDB.return_value = sample_imdb_result
+        self.mock_getDataFromIMDB.return_value = sample_good_result
         self.addCleanup(getDataFromIMDB_patcher.stop)
 
         getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDBByPath')
@@ -287,14 +244,13 @@ class TestMovieDownloadPosterData(TestCase):
 
     def test_(self):
         self.poster._downloadPosterData()
-        self.mock_getDataFromIMDB.assert_called_once_with(self.movie_file, useExtendedPlot=True)
+        self.mock_getDataFromIMDB.assert_called_once_with(self.movie_file)
         self.assertFalse(self.mock_getDataFromIMDBByPath.called)
         self.assertFalse(self.mock_searchTVDBByName.called)
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
-        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg',
-                                                          u'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
+        self.mock_saveImageToDisk.assert_called_once_with(u'/zxcvzxcv.jpg',
+                                                          u'zxcvzxcv.jpg')
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result)
 
 class TestTVPathDownloadPosterData(TestCase):
     def setUp(self):
@@ -304,7 +260,7 @@ class TestTVPathDownloadPosterData(TestCase):
 
         getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDBByPath')
         self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
-        self.mock_getDataFromIMDBByPath.return_value = sample_imdb_result
+        self.mock_getDataFromIMDBByPath.return_value = sample_good_result
         self.addCleanup(getDataFromIMDBByPath_patcher.stop)
 
         searchTVDBByName_patcher = mock.patch('mediaviewer.models.posterfile.searchTVDBByName')
@@ -340,19 +296,19 @@ class TestTVPathDownloadPosterData(TestCase):
         self.tv_path.tvdb_id = None
 
         self.poster._downloadPosterData()
-        self.mock_getDataFromIMDBByPath(self.tv_path, useExtendedPlot=True)
+        self.mock_getDataFromIMDBByPath(self.tv_path)
         self.assertFalse(self.mock_getDataFromIMDB.called)
         self.assertFalse(self.mock_searchTVDBByName.called)
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
         self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result, onlyExtendedPlot=True)
 
 class TestTVFileDownloadPosterData(TestCase):
     def setUp(self):
         getDataFromIMDB_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDB')
         self.mock_getDataFromIMDB = getDataFromIMDB_patcher.start()
-        self.mock_getDataFromIMDB.return_value = sample_imdb_result
+        self.mock_getDataFromIMDB.return_value = sample_good_result
         self.addCleanup(getDataFromIMDB_patcher.stop)
 
         getDataFromIMDBByPath_patcher = mock.patch('mediaviewer.models.posterfile.getDataFromIMDBByPath')
@@ -400,8 +356,8 @@ class TestTVFileDownloadPosterData(TestCase):
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
         self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result, onlyExtendedPlot=True)
 
     def test_bad_result(self):
         self.mock_searchTVDBByName.return_value = sample_bad_result
@@ -409,10 +365,9 @@ class TestTVFileDownloadPosterData(TestCase):
         self.poster._downloadPosterData()
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
-        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg',
-                                                          u'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result)
-        self.mock_assignDataToPoster.assert_any_call(sample_imdb_result, onlyExtendedPlot=True)
+        self.mock_saveImageToDisk.assert_called_once_with(u'/zxcvzxcv.jpg',
+                                                          u'zxcvzxcv.jpg')
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result)
 
     def test_no_poster_data(self):
         mock_result = {u'page': 1,
@@ -442,7 +397,7 @@ class TestTVFileDownloadPosterData(TestCase):
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
         self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_called_once_with(sample_imdb_result)
+        self.mock_assignDataToPoster.assert_called_once_with(sample_good_result)
         self.assertEqual(self.poster.file.path.tvdb_id, 12345)
 
     def test_response_with_poster_data(self):
@@ -458,6 +413,6 @@ class TestTVFileDownloadPosterData(TestCase):
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
         self.mock_saveImageToDisk.assert_called_once_with('mock_url/mock_still_size/image.jpg',
                                                           'image.jpg')
-        self.mock_assignDataToPoster.assert_called_once_with(sample_imdb_result)
+        self.mock_assignDataToPoster.assert_called_once_with(sample_good_result)
         self.assertEqual(self.poster.file.path.tvdb_id, 12345)
         self.assertEqual(self.poster.image, 'image.jpg')

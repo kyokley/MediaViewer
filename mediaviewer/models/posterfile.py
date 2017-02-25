@@ -97,7 +97,7 @@ class PosterFile(models.Model):
                 episode = None
 
                 log.debug('Attempt to get data from IMDB')
-                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
+                data = getDataFromIMDB(ref_obj)
             elif self.path:
                 log.debug('This is a path for a tv show'
                           'Set season and episode to None')
@@ -105,7 +105,7 @@ class PosterFile(models.Model):
                 episode = None
 
                 log.debug('Attempt to get data from IMDB')
-                data = getDataFromIMDBByPath(ref_obj, useExtendedPlot=True)
+                data = getDataFromIMDBByPath(ref_obj)
             else:
                 log.debug('Getting season and episode')
                 season = ref_obj.getScrapedSeason()
@@ -114,7 +114,7 @@ class PosterFile(models.Model):
                 episode = episode and int(episode)
 
                 log.debug('Attempt to get data from IMDB')
-                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
+                data = getDataFromIMDB(ref_obj)
 
             if data:
                 log.debug('Received data from IMDB')
@@ -179,11 +179,6 @@ class PosterFile(models.Model):
 
             if data:
                 self._assignDataToPoster(data)
-
-            if not self.extendedplot:
-                log.debug('No extended plot from TVDB. Getting info from IMDB')
-                data = getDataFromIMDB(ref_obj, useExtendedPlot=True)
-                self._assignDataToPoster(data, onlyExtendedPlot=True)
         except Exception, e:
             log.error(str(e), exc_info=True)
         self.save()
@@ -232,7 +227,7 @@ class PosterFile(models.Model):
                     director_obj = Director.new(director)
                     self.directors.add(director_obj)
 
-            rating = data.get('imdbRating')
+            rating = data.get('imdbRating') or data.get('vote_average')
             self.rating = rating if rating and rating != 'undefined' else None
             rated = data.get('Rated')
             self.rated = rated if rated and rated != 'undefined' else None

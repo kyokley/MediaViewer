@@ -248,9 +248,6 @@ os.environ['HTTPS'] = 'on'
 os.environ['wsgi.url_scheme'] = 'https'
 
 API_KEY = 'keykeykey'
-OMDB_URL = "http://www.omdbapi.com/?t="
-OMDB_ID_URL = "http://www.omdbapi.com/?i="
-OMDB_URL_TAIL = "&plot=full"
 IMAGE_PATH = 'mediaviewer/static/media/'
 
 REQUEST_TIMEOUT = 3
