@@ -355,9 +355,8 @@ class TestTVFileDownloadPosterData(TestCase):
         self.poster._downloadPosterData()
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
-        self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
+        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg', 'image.jpg')
         self.mock_assignDataToPoster.assert_any_call(sample_good_result)
-        self.mock_assignDataToPoster.assert_any_call(sample_good_result, onlyExtendedPlot=True)
 
     def test_bad_result(self):
         self.mock_searchTVDBByName.return_value = sample_bad_result
@@ -396,7 +395,7 @@ class TestTVFileDownloadPosterData(TestCase):
 
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
-        self.mock_saveImageToDisk.assert_called_once_with(u'mock_url/mock_still_size/image.jpg', 'image.jpg')
+        self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg', 'image.jpg')
         self.mock_assignDataToPoster.assert_called_once_with(sample_good_result)
         self.assertEqual(self.poster.file.path.tvdb_id, 12345)
 
