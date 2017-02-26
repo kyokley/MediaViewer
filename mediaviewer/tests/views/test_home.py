@@ -22,6 +22,14 @@ class TestSetSiteWideContext(TestCase):
         self.mock_getLastWaiterStatus = self.getLastWaiterStatus_patcher.start()
         self.addCleanup(self.getLastWaiterStatus_patcher.stop)
 
+        self.get_movie_genres_patcher = mock.patch('mediaviewer.views.home.File.get_movie_genres')
+        self.mock_get_movie_genres = self.get_movie_genres_patcher.start()
+        self.addCleanup(self.get_movie_genres_patcher.stop)
+
+        self.get_tv_genres_patcher = mock.patch('mediaviewer.views.home.Path.get_tv_genres')
+        self.mock_get_tv_genres = self.get_tv_genres_patcher.start()
+        self.addCleanup(self.get_tv_genres_patcher.stop)
+
         self.request = mock.MagicMock()
         self.user = mock.create_autospec(User)
         self.request.user = self.user
@@ -64,8 +72,8 @@ class TestSetSiteWideContext(TestCase):
                     'is_staff': 'true',
                     'default_sort': FILENAME_SORT,
                     'user': self.user,
-                    'movie_genres': [],
-                    'tv_genres': []}
+                    'movie_genres': self.mock_get_movie_genres.return_value,
+                    'tv_genres': self.mock_get_tv_genres.return_value}
         self.assertEquals(call(expected), self.mock_getLastWaiterStatus.call_args)
         self.assertFalse(self.mock_getMessagesForUser.called)
         self.assertFalse(self.mock_add_message.called)
