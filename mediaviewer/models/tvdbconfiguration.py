@@ -175,8 +175,29 @@ def _getDataFromIMDBBySearchString(searchString, isMovie=True):
         url = 'https://api.themoviedb.org/3/search/movie?query=%s&api_key=%s' % (searchString, API_KEY)
 
     data = getJSONData(url)
+    data = (data['results'][0]
+                if data.get('results') and
+                   data.get('results')[0] else None)
     if data:
         data['url'] = url
     else:
         return None
     return data
+
+def getCastData(tmdb_id, season=None, episode=None, isMovie=True):
+    log.debug('Getting data from TVDb using %s' % (tmdb_id,))
+
+    if not isMovie:
+        if episode and season:
+            url = 'https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={api_key}'.format(season=season,
+                episode=episode,
+                tmdb_id=tmdb_id,
+                api_key=API_KEY)
+        else:
+            url = 'https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={api_key}'.format(tmdb_id=tmdb_id,
+                                                                                               api_key=API_KEY)
+    else:
+        url = 'https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={api_key}'.format(tmdb_id=tmdb_id,
+                                                                                              api_key=API_KEY)
+
+    return getJSONData(url)
