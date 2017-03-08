@@ -5,22 +5,41 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 
-sample_good_result = {u'page': 1,
-                      u'results': [{u'backdrop_path': u'/asdfasdf.jpg',
-                                    u'first_air_date': u'2016-09-30',
-                                    u'genre_ids': [18, 10765],
-                                    u'id': 12345,
-                                    u'name': u"show name",
-                                    u'origin_country': [u'US'],
-                                    u'original_language': u'en',
-                                    u'original_name': u"show name",
-                                    u'overview': u'show description',
-                                    u'popularity': 4.278642,
-                                    u'poster_path': u'/zxcvzxcv.jpg',
-                                    u'vote_average': 6.81,
-                                    u'vote_count': 41}],
-                      u'total_pages': 1,
-                      u'total_results': 1}
+sample_good_result = {u'backdrop_path': u'/asdfasdf.jpg',
+                      u'first_air_date': u'2016-09-30',
+                      u'genre_ids': [18, 10765],
+                      u'id': 12345,
+                      u'name': u"show name",
+                      u'origin_country': [u'US'],
+                      u'original_language': u'en',
+                      u'original_name': u"show name",
+                      u'overview': u'show description',
+                      u'popularity': 4.278642,
+                      u'poster_path': u'/zxcvzxcv.jpg',
+                      u'vote_average': 6.81,
+                      u'vote_count': 41}
+
+sample_good_crew = {'id': 12345,
+                    'cast': [{'cast_id': 2345,
+                              'character': 'John Doe',
+                              'credit_id': '3456',
+                              'id': 4567,
+                              'name': 'Alex Reporter',
+                              'order': 0}],
+                    'crew': [{'credit_id': 18365,
+                              'department': 'Directing',
+                              'id': 582,
+                              'job': 'Director',
+                              'name': 'Jim Pope',
+                              'order': 0},
+                             {'credit_id': 18365,
+                              'department': 'Directing',
+                              'id': 582,
+                              'job': 'Director',
+                              'name': 'Jim Pope',
+                              'order': 0}
+                              ],
+                    }
 
 sample_bad_result = {u'page': 1,
                      u'results': [],
@@ -65,9 +84,9 @@ class TestAssignDataToPoster(TestCase):
         self.poster.extendedplot = None
 
     def test_all_data(self):
-        data = sample_good_result['results'][0]
+        data = sample_good_result
 
-        self.poster._assignDataToPoster(data)
+        self.poster._assignDataToPoster(data, sample_good_crew)
 
         self.assertEquals(self.poster.plot, data['overview'])
         self.assertEquals(self.poster.rating, data['vote_average'])
@@ -84,7 +103,7 @@ class TestAssignDataToPoster(TestCase):
                 'Rated': 'rated',
                 }
 
-        self.poster._assignDataToPoster(data, onlyExtendedPlot=True)
+        self.poster._assignDataToPoster(data, sample_good_crew)
         self.assertEquals(self.poster.plot, None)
         self.assertFalse(self.poster.genres.add.called)
         self.assertFalse(self.poster.actors.add.called)
@@ -104,7 +123,7 @@ class TestAssignDataToPoster(TestCase):
                 'Rated': 'undefined',
                 }
 
-        self.poster._assignDataToPoster(data, onlyExtendedPlot=False)
+        self.poster._assignDataToPoster(data, sample_good_crew)
         self.assertEquals(self.poster.plot, None)
         self.assertFalse(self.poster.genres.add.called)
         self.assertFalse(self.poster.actors.add.called)
@@ -124,7 +143,7 @@ class TestAssignDataToPoster(TestCase):
                 'Rated': 'undefined',
                 }
 
-        self.poster._assignDataToPoster(data, onlyExtendedPlot=True)
+        self.poster._assignDataToPoster(data, sample_good_crew)
         self.assertEquals(self.poster.plot, None)
         self.assertFalse(self.poster.genres.add.called)
         self.assertFalse(self.poster.actors.add.called)
