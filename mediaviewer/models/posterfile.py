@@ -200,9 +200,12 @@ class PosterFile(models.Model):
         if data.get('results') or data.get('genre_ids'):
             genre_ids = data.get('genre_ids') or data['results'][0]['genre_ids']
             for genre_id in genre_ids:
-                g = tvdbConfig.genres[genre_id]
-                genre_obj = Genre.new(g)
-                self.genres.add(genre_obj)
+                g = tvdbConfig.genres.get(genre_id)
+                if g:
+                    genre_obj = Genre.new(g)
+                    self.genres.add(genre_obj)
+                else:
+                    log.warn('Genre for ID = {} not found'.format(genre_id))
         elif data.get('genres'):
             for genre in data.get('genres'):
                 genre_obj = Genre.new(genre['name'])
