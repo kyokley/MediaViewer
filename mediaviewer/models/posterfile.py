@@ -8,6 +8,7 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
                                                   tvdbConfig,
                                                   getTVDBEpisodeInfo,
                                                   getCastData,
+                                                  getRating,
                                                   )
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.actor import Actor
@@ -185,13 +186,13 @@ class PosterFile(models.Model):
                 log.error('Failed to download image')
 
         if data:
-            self._assignDataToPoster(data, cast_and_crew)
+            self._assignDataToPoster(data, cast_and_crew, ref_obj)
 
         self.save()
         log.debug('Done getting poster data')
         return self
 
-    def _assignDataToPoster(self, data, cast_and_crew):
+    def _assignDataToPoster(self, data, cast_and_crew, ref_obj):
         plot = (data.get('Plot') or
                     data.get('overview') or
                     'results' in data and data['results'] and data['results'][0].get('overview'))
@@ -223,7 +224,7 @@ class PosterFile(models.Model):
                 director_obj = Director.new(job['name'])
                 self.directors.add(director_obj)
 
-        rating = data.get('imdbRating') or data.get('vote_average')
+        rating = getRating(self.tmdb_id, isMovie=ref_obj.isMovie())
         self.rating = rating if rating and rating != 'undefined' else None
         rated = data.get('Rated')
         self.rated = rated if rated and rated != 'undefined' else None

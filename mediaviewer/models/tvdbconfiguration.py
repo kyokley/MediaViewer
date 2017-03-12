@@ -101,7 +101,6 @@ def saveImageToDisk(path, imgName):
     if imgName:
         exists = os.path.isfile(IMAGE_PATH + imgName)
         if not exists:
-            #r = requests.get(url, stream=True, timeout=REQUEST_TIMEOUT)
             r = requests.get('{url}{poster_size}{path}'.format(url=tvdbConfig.url,
                                                                poster_size=tvdbConfig.poster_size,
                                                                path=path), stream=True, timeout=REQUEST_TIMEOUT)
@@ -201,3 +200,24 @@ def getCastData(tmdb_id, season=None, episode=None, isMovie=True):
                                                                                               api_key=API_KEY)
 
     return getJSONData(url)
+
+def getRating(tmdb_id, isMovie=True):
+    log.debug('Getting IMDB rating for tmdb_id = %s' % tmdb_id)
+
+    if not isMovie:
+        url = 'https://api.themoviedb.org/3/tv/%s/external_ids?api_key=%s' % (tmdb_id, API_KEY)
+    else:
+        url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
+
+    data = getJSONData(url)
+    imdb_id = data.get('imdb_id')
+
+    if imdb_id:
+        url = 'http://www.omdbapi.com/?i=%s' % imdb_id
+
+        try:
+            data = getJSONData(url)
+            return data['imdbRating']
+        except Exception as e:
+            log.error('Received error trying to get imdbRating')
+            log.error(e)

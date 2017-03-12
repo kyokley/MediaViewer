@@ -84,9 +84,13 @@
                             <dt>Actors:</dt>
                             <dd>{{ posterfile.display_actors }}</dd>
                         {% endif %}
-                        {% if posterfile.extendedplot %}
-                        <dt>Description:</dt>
-                        <dd>{{ posterfile.extendedplot }}</dd>
+                        {% if posterfile.extendedplot or posterfile.plot %}
+                            <dt>Description:</dt>
+                            {% if posterfile.extendedplot %}
+                                <dd>{{ posterfile.extendedplot }}</dd>
+                            {% else %}
+                                <dd>{{ posterfile.plot }}</dd>
+                            {% endif %}
                         {% endif %}
                         {% if posterfile.rated %}
                             <dt>Rated:</dt>
