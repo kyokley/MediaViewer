@@ -155,6 +155,32 @@ class File(models.Model):
 
         return WAITER_SERVER
 
+    def next(self):
+        if self.isMovie():
+            return None
+        else:
+            shows = [x for x in self.path.files()]
+            shows.sort(key=lambda x: x.displayName())
+
+            index = shows.index(self)
+            if index + 1 >= len(shows):
+                return None
+            else:
+                return shows[index + 1]
+
+    def previous(self):
+        if self.isMovie():
+            return None
+        else:
+            shows = [x for x in self.path.files()]
+            shows.sort(key=lambda x: x.displayName())
+
+            index = shows.index(self)
+            if index - 1 < 0:
+                return None
+            else:
+                return shows[index - 1]
+
     def hasErrors(self):
         return Error.objects.filter(file=self).exclude(ignore=True).exists()
 

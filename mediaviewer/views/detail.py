@@ -109,8 +109,7 @@ def ajaxsuperviewed(request):
 def ajaxdownloadbutton(request):
     response = {'errmsg': ''}
     fileid = int(request.POST['fileid'])
-    file = File.objects.filter(pk=fileid)
-    file = file and file[0]
+    file = File.objects.get(pk=fileid)
     user = request.user
 
     if not user.is_authenticated():
