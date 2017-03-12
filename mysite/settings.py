@@ -234,6 +234,7 @@ BOWER_INSTALLED_APPS = ('jquery',
                         'datatables.net-responsive',
                         'datatables.net-responsive-bs',
                         'bootswatch-dist#slate',
+                        'https://github.com/viralpatel/jquery.shorten.git',
                         )
 
 WAITER_HEAD = 'http://'

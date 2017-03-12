@@ -70,26 +70,26 @@
                     <dl class="dl-horizontal">
                         {% if posterfile.display_genres %}
                             <dt>Genre:</dt>
-                            <dd>{{ posterfile.display_genres }}</dd>
+                            <dd><div class="truncated-text">{{ posterfile.display_genres }}</div></dd>
                         {% endif %}
                         {% if posterfile.display_writers %}
                             <dt>Writer:</dt>
-                            <dd>{{ posterfile.display_writers }}</dd>
+                            <dd><div class="truncated-text">{{ posterfile.display_writers }}</div></dd>
                         {% endif %}
                         {% if posterfile.display_directors %}
                             <dt>Director:</dt>
-                            <dd>{{ posterfile.display_directors }}</dd>
+                            <dd><div class="truncated-text">{{ posterfile.display_directors }}</div></dd>
                         {% endif %}
                         {% if posterfile.display_actors %}
                             <dt>Actors:</dt>
-                            <dd>{{ posterfile.display_actors }}</dd>
+                            <dd><div class="truncated-text">{{ posterfile.display_actors }}</div></dd>
                         {% endif %}
                         {% if posterfile.extendedplot or posterfile.plot %}
                             <dt>Description:</dt>
                             {% if posterfile.extendedplot %}
-                                <dd>{{ posterfile.extendedplot }}</dd>
+                                <dd><div class="truncated-text">{{ posterfile.extendedplot }}</div></dd>
                             {% else %}
-                                <dd>{{ posterfile.plot }}</dd>
+                                <dd><div class="truncated-text">{{ posterfile.plot }}</div></dd>
                             {% endif %}
                         {% endif %}
                         {% if posterfile.rated %}
@@ -256,6 +256,7 @@
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
 
+            $(".truncated-text").shorten();
         });
     </script>
 {% endblock %}
