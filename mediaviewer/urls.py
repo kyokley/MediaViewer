@@ -41,6 +41,7 @@ urlpatterns = [
                        url(r'^tvshows/genre/(?P<genre_id>\d+)/$', files.tvshows_by_genre, name='tvshows_by_genre'),
                        url(r'^movies/$', files.movies, name='movies'),
                        url(r'^movies/genre/(?P<genre_id>\d+)/$', files.movies_by_genre, name='movies_by_genre'),
+                       url(r'^downloadlink/(?P<fileid>\d+)/$', detail.downloadlink, name='downloadlink'),
                        url(r'^login/', watch_login(signin.signin), name='signin'),
                        url(r'^logout/', signout.signout, name='signout'),
                        url(r'^settings/', settings.settings, name='settings'),

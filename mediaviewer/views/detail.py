@@ -9,7 +9,7 @@ from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
                                              )
 from mediaviewer.utils import logAccessInfo, humansize, check_force_password_change
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 import json
 
 @login_required(login_url='/mediaviewer/login/')
@@ -126,3 +126,13 @@ def ajaxdownloadbutton(request):
         response = {'errmsg': 'An error has occurred'}
 
     return HttpResponse(json.dumps(response), content_type='application/javascript')
+
+@login_required(login_url='/mediaviewer/login/')
+@logAccessInfo
+def downloadlink(request, fileid):
+    user = request.user
+    file = get_object_or_404(File, pk=fileid)
+    dt = DownloadToken.new(user, file)
+
+    downloadlink = file.downloadLink(user, dt.guid)
+    return redirect(downloadlink)
