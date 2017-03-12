@@ -51,7 +51,7 @@
                                     <dd>{{ path.posterfile.display_genres }}</dd>
                                 {% endif %}
                                 <dt>Summary:</dt>
-                                <dd>{{ path.posterfile.plot }}</dd>
+                                <dd><div class="truncated-text">{{ path.posterfile.plot }}</div></dd>
                                 {% if path.posterfile.rated %}
                                     <dt>Rated:</dt>
                                     <dd>{{ path.posterfile.rated }}</dd>
@@ -157,6 +157,8 @@
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
+
+            $(".truncated-text").shorten({"showChars": 300});
         });
 
     </script>
