@@ -45,7 +45,7 @@ class PosterFile(models.Model):
         return ', '.join([x.genre for x in self.genres.all()])
 
     def display_actors(self):
-        return ', '.join([x.name for x in self.actors.all()])
+        return ', '.join([x.name for x in self.actors.order_by('order').all()])
 
     def display_writers(self):
         return ', '.join([x.name for x in self.writers.all()])
@@ -213,7 +213,7 @@ class PosterFile(models.Model):
                 self.genres.add(genre_obj)
 
         for actor in cast_and_crew['cast']:
-            actor_obj = Actor.new(actor['name'])
+            actor_obj = Actor.new(actor['name'], order=actor.get('order'))
             self.actors.add(actor_obj)
 
         for job in cast_and_crew['crew']:
