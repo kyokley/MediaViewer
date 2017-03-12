@@ -171,7 +171,7 @@ class PosterFile(models.Model):
 
             if tvinfo:
                 posterURL = tvinfo.get('still_path')
-                imgName = posterURL.rpartition('/')[-1]
+                imgName = posterURL and posterURL.rpartition('/')[-1]
                 self.extendedplot = tvinfo.get('overview', '')
                 self.episodename = tvinfo.get('name')
 
