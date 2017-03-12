@@ -48,50 +48,59 @@ sample_bad_result = {u'page': 1,
 
 class TestAssignDataToPoster(TestCase):
     def setUp(self):
-        genres_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.genres', mock.MagicMock())
+        genres_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.genres')
         genres_patcher.start()
         self.addCleanup(genres_patcher.stop)
-        actors_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.actors', mock.MagicMock())
+        actors_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.actors')
         actors_patcher.start()
         self.addCleanup(actors_patcher.stop)
-        writers_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.writers', mock.MagicMock())
+        writers_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.writers')
         writers_patcher.start()
         self.addCleanup(writers_patcher.stop)
-        directors_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.directors', mock.MagicMock())
+        directors_patcher = mock.patch('mediaviewer.models.posterfile.PosterFile.directors')
         directors_patcher.start()
         self.addCleanup(directors_patcher.stop)
 
-        genre_obj_patcher = mock.patch('mediaviewer.models.posterfile.Genre.new', mock.MagicMock(side_effect=lambda x: x))
+        genre_obj_patcher = mock.patch('mediaviewer.models.posterfile.Genre.new')
         genre_obj_patcher.start()
         self.addCleanup(genre_obj_patcher.stop)
 
-        actor_obj_patcher = mock.patch('mediaviewer.models.posterfile.Actor.new', mock.MagicMock(side_effect=lambda x: x))
+        actor_obj_patcher = mock.patch('mediaviewer.models.posterfile.Actor.new')
         actor_obj_patcher.start()
         self.addCleanup(actor_obj_patcher.stop)
 
-        writer_obj_patcher = mock.patch('mediaviewer.models.posterfile.Writer.new', mock.MagicMock(side_effect=lambda x: x))
+        writer_obj_patcher = mock.patch('mediaviewer.models.posterfile.Writer.new')
         writer_obj_patcher.start()
         self.addCleanup(writer_obj_patcher.stop)
 
-        director_obj_patcher = mock.patch('mediaviewer.models.posterfile.Director.new', mock.MagicMock(side_effect=lambda x: x))
+        director_obj_patcher = mock.patch('mediaviewer.models.posterfile.Director.new')
         director_obj_patcher.start()
         self.addCleanup(director_obj_patcher.stop)
+
+        getRating_patcher = mock.patch('mediaviewer.models.posterfile.getRating')
+        self.mock_getRating = getRating_patcher.start()
+        self.addCleanup(getRating_patcher.stop)
 
         self.poster = PosterFile()
         self.poster.plot = None
         self.poster.rating = None
         self.poster.rated = None
         self.poster.extendedplot = None
+        self.poster.tmdb_id = 1234
+
+        self.ref_obj = mock.MagicMock(File)
 
     def test_all_data(self):
         data = sample_good_result
 
-        self.poster._assignDataToPoster(data, sample_good_crew)
+        self.poster._assignDataToPoster(data, sample_good_crew, self.ref_obj)
 
         self.assertEquals(self.poster.plot, data['overview'])
-        self.assertEquals(self.poster.rating, data['vote_average'])
+        self.assertEquals(self.poster.rating, self.mock_getRating.return_value)
         self.assertEquals(self.poster.rated, None)
         self.assertEquals(self.poster.extendedplot, None)
+
+        self.mock_getRating.assert_called_once_with(1234, isMovie=self.ref_obj.isMovie.return_value)
 
 class TestNew(TestCase):
     def setUp(self):
@@ -214,7 +223,7 @@ class TestMovieDownloadPosterData(TestCase):
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
         self.mock_saveImageToDisk.assert_called_once_with(u'/zxcvzxcv.jpg',
                                                           u'zxcvzxcv.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew, self.movie_file)
 
 class TestTVPathDownloadPosterData(TestCase):
     def setUp(self):
@@ -270,7 +279,7 @@ class TestTVPathDownloadPosterData(TestCase):
         self.assertFalse(self.mock_searchTVDBByName.called)
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
         self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew, self.tv_path)
 
 class TestTVFileDownloadPosterData(TestCase):
     def setUp(self):
@@ -329,7 +338,7 @@ class TestTVFileDownloadPosterData(TestCase):
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
         self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew, self.tv_file)
 
     def test_bad_result(self):
         self.mock_searchTVDBByName.return_value = sample_bad_result
@@ -339,7 +348,7 @@ class TestTVFileDownloadPosterData(TestCase):
         self.assertFalse(self.mock_getTVDBEpisodeInfo.called)
         self.mock_saveImageToDisk.assert_called_once_with(u'/zxcvzxcv.jpg',
                                                           u'zxcvzxcv.jpg')
-        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew)
+        self.mock_assignDataToPoster.assert_any_call(sample_good_result, sample_good_crew, self.tv_file)
 
     def test_no_poster_data(self):
         mock_result = {u'page': 1,
@@ -369,7 +378,7 @@ class TestTVFileDownloadPosterData(TestCase):
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
         self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_called_once_with(sample_good_result, sample_good_crew)
+        self.mock_assignDataToPoster.assert_called_once_with(sample_good_result, sample_good_crew, self.tv_file)
         self.assertEqual(self.poster.file.path.tvdb_id, 12345)
 
     def test_response_with_poster_data(self):
@@ -399,6 +408,6 @@ class TestTVFileDownloadPosterData(TestCase):
         self.mock_searchTVDBByName.assert_called_once_with('test str')
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(12345, 3, 5)
         self.mock_saveImageToDisk.assert_called_once_with(u'/path/to/image.jpg', 'image.jpg')
-        self.mock_assignDataToPoster.assert_called_once_with(sample_good_result, sample_good_crew)
+        self.mock_assignDataToPoster.assert_called_once_with(sample_good_result, sample_good_crew, self.tv_file)
         self.assertEqual(self.poster.file.path.tvdb_id, 12345)
         self.assertEqual(self.poster.image, 'image.jpg')
