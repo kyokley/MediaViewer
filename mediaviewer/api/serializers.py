@@ -50,6 +50,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     videoprogresses = serializers.SerializerMethodField()
     next_id = serializers.SerializerMethodField()
     previous_id = serializers.SerializerMethodField()
+    binge_mode = serializers.SerializerMethodField()
 
     def get_auto_download(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
@@ -76,6 +77,11 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     def get_previous_id(self, obj):
         previous_obj =  obj.file.previous()
         return previous_obj and previous_obj.id
+
+    def get_binge_mode(self, obj):
+        user_settings = UserSettings.getSettings(obj.user)
+        return user_settings.binge_mode
+
 
 class DownloadClickSerializer(serializers.ModelSerializer):
     class Meta:
