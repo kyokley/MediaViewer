@@ -32,6 +32,7 @@ def settings(request):
         context['ip_format'] = BANGUP_IP
     context['title'] = 'Settings'
     context['auto_download'] = settings.auto_download
+    context['binge_mode'] = settings.binge_mode
 
     context['email'] = user.email
     if not user.email:
@@ -61,6 +62,12 @@ def submitsettings(request):
     else:
         auto_download = auto_download == 'true'
 
+    binge_mode = request.POST.get('binge_mode')
+    if not binge_mode:
+        binge_mode = False
+    else:
+        binge_mode = binge_mode == 'true'
+
     user = request.user
     settings = user.settings()
     if not settings:
@@ -72,6 +79,7 @@ def submitsettings(request):
         changed = settings.default_sort != default_sort
 
     settings.auto_download = auto_download
+    settings.binge_mode = binge_mode
     settings.default_sort = default_sort
     user.email = request.POST.get('email_field', user.email)
     context['default_sort'] = settings.default_sort

@@ -89,6 +89,25 @@
                     </div>
                 </ul>
                 <ul>
+                    <label>Binge Watch Mode:</label>
+                    <div class="input">
+                        <ul class="inputs-list">
+                            <ul>
+                                <label>
+                                    <input type="radio" checked name="binge_mode" value=true id="binge_mode_yes"/>
+                                    <span>Yes</span>
+                                </label>
+                            </ul>
+                            <ul>
+                                <label>
+                                    <input type="radio" name="binge_mode" value=false id="binge_mode_no"/>
+                                    <span>No</span>
+                                </label>
+                            </ul>
+                        </ul>
+                    </div>
+                </ul>
+                <ul>
                     <div class="input">
                         <input type='submit' value='Save Settings &raquo;' id='submit_settings' name='submit_settings' class="btn primary"/>
                     </div>
@@ -199,6 +218,12 @@
                 jQuery('#auto_download_yes').prop('checked', 'checked');
             {% else %}
                 jQuery('#auto_download_no').prop('checked', 'checked');
+            {% endif %}
+
+            {% if binge_mode == True %}
+                jQuery('#binge_mode_yes').prop('checked', 'checked');
+            {% else %}
+                jQuery('#binge_mode_no').prop('checked', 'checked');
             {% endif %}
 
             var input = document.getElementById('btn-input');
