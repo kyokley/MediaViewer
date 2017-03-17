@@ -136,24 +136,30 @@ class File(models.Model):
         settings = user.settings()
         if not settings or settings.ip_format == LOCAL_IP:
             if self.isMovie():
-                WAITER_SERVER = '%s%s%s/' % (WAITER_HEAD,
+                waiter_server = '%s%s%s/' % (WAITER_HEAD,
                                              LOCAL_WAITER_IP_FORMAT_MOVIES,
                                              guid)
             else:
-                WAITER_SERVER = '%s%s%s/' % (WAITER_HEAD,
+                waiter_server = '%s%s%s/' % (WAITER_HEAD,
                                              LOCAL_WAITER_IP_FORMAT_TVSHOWS,
                                              guid)
         elif settings and settings.ip_format == BANGUP_IP:
             if self.isMovie():
-                WAITER_SERVER = '%s%s%s/' % (WAITER_HEAD,
+                waiter_server = '%s%s%s/' % (WAITER_HEAD,
                                              BANGUP_WAITER_IP_FORMAT_MOVIES,
                                              guid)
             else:
-                WAITER_SERVER = '%s%s%s/' % (WAITER_HEAD,
+                waiter_server = '%s%s%s/' % (WAITER_HEAD,
                                              BANGUP_WAITER_IP_FORMAT_TVSHOWS,
                                              guid)
 
-        return WAITER_SERVER
+        return waiter_server
+
+    def autoplayDownloadLink(self, user, guid):
+        if self.isMovie():
+            return None
+        else:
+            return self.downloadLink(user, guid) + 'autoplay'
 
     def next(self):
         if self.isMovie():

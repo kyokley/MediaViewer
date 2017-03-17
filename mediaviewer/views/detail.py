@@ -136,3 +136,13 @@ def downloadlink(request, fileid):
 
     downloadlink = file.downloadLink(user, dt.guid)
     return redirect(downloadlink)
+
+@login_required(login_url='/mediaviewer/login/')
+@logAccessInfo
+def autoplaydownloadlink(request, fileid):
+    user = request.user
+    file = get_object_or_404(File, pk=fileid)
+    dt = DownloadToken.new(user, file)
+
+    downloadlink = file.autoplayDownloadLink(user, dt.guid)
+    return redirect(downloadlink)

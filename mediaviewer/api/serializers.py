@@ -32,6 +32,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'videoprogresses',
                   'next_id',
                   'previous_id',
+                  'binge_mode',
                   )
     guid = serializers.CharField(required=True,
                                  max_length=32)
