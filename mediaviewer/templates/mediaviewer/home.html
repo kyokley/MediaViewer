@@ -83,6 +83,13 @@
                                 {% endif %}
                                 <a href="/mediaviewer/requests/">Requests</a></li>
 
+                                {% if active_page == 'settings' %}
+                                    <li class="active">
+                                {% else %}
+                                    <li>
+                                {% endif %}
+                                <a href="/mediaviewer/settings/"><span class="glyphicon glyphicon-cog"></span></a></li>
+
                                 {% if loggedin %}
                                     <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
                                 {% else %}
