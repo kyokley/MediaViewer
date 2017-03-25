@@ -36,6 +36,7 @@ class UserSettings(models.Model):
     auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
     force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
     can_login = models.BooleanField(db_column='can_login', blank=False, null=False, default=True)
+    binge_mode = models.BooleanField(blank=False, null=False, default=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -60,6 +61,7 @@ class UserSettings(models.Model):
             default_sort=FILENAME_SORT,
             can_download=True,
             send_email=True,
+            binge_mode=True,
             ):
         ''' Create new User and associated UserSettings '''
 
@@ -89,6 +91,7 @@ class UserSettings(models.Model):
         newSettings.default_sort = default_sort
         newSettings.can_download = can_download
         newSettings.can_login = False
+        newSettings.binge_mode = binge_mode
         newSettings.save()
 
         if send_email:

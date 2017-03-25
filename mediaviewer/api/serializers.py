@@ -30,6 +30,9 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'pathid',
                   'pathname',
                   'videoprogresses',
+                  'next_id',
+                  'previous_id',
+                  'binge_mode',
                   )
     guid = serializers.CharField(required=True,
                                  max_length=32)
@@ -46,6 +49,9 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     pathid = serializers.SerializerMethodField()
     pathname = serializers.SerializerMethodField()
     videoprogresses = serializers.SerializerMethodField()
+    next_id = serializers.SerializerMethodField()
+    previous_id = serializers.SerializerMethodField()
+    binge_mode = serializers.SerializerMethodField()
 
     def get_auto_download(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
@@ -64,6 +70,19 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return [x.hashed_filename
                     for x in VideoProgress.objects.filter(user=obj.user).filter(file=obj.file)
                 ]
+
+    def get_next_id(self, obj):
+        next_obj = obj.file.next()
+        return next_obj and next_obj.id
+
+    def get_previous_id(self, obj):
+        previous_obj =  obj.file.previous()
+        return previous_obj and previous_obj.id
+
+    def get_binge_mode(self, obj):
+        user_settings = UserSettings.getSettings(obj.user)
+        return user_settings.binge_mode
+
 
 class DownloadClickSerializer(serializers.ModelSerializer):
     class Meta:
