@@ -35,7 +35,7 @@ class File(models.Model):
     filename = models.TextField(blank=True)
     skip = models.BooleanField(blank=True)
     finished = models.BooleanField(blank=True)
-    size = models.IntegerField(null=True, blank=True)
+    size = models.BigIntegerField(null=True, blank=True)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
     datatransmission = models.ForeignKey('mediaviewer.DataTransmission',
