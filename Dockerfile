@@ -1,23 +1,20 @@
-FROM ubuntu:16.04
+FROM alpine:latest
 
 MAINTAINER Kevin Yokley
 
 # Install required packages and remove the apt packages cache when done.
 
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y \
+RUN apk update
+RUN apk add --no-cache --virtual .build-deps \
+    linux-headers \
+    g++ \
 	git \
 	python3 \
 	python3-dev \
-	python3-setuptools \
-	python3-pip \
 	nginx \
 	supervisor \
-    npm \
-	#sqlite3 && \
-	pip3 install pip setuptools && \
-   rm -rf /var/lib/apt/lists/*
+    nodejs && \
+	pip3 install -U pip setuptools
 
 RUN pip3 install uwsgi django
 
