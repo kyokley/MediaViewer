@@ -9,6 +9,8 @@ from mediaviewer.models.actor import Actor
 from mediaviewer.models.writer import Writer
 from mediaviewer.models.director import Director
 from mediaviewer.models.genre import Genre
+from mediaviewer.models.request import Request
+from mediaviewer.models.request import RequestVote
 
 admin.site.register(File)
 admin.site.register(Path)
@@ -19,3 +21,5 @@ admin.site.register(Actor)
 admin.site.register(Writer)
 admin.site.register(Director)
 admin.site.register(Genre)
+admin.site.register(Request)
+admin.site.register(RequestVote)

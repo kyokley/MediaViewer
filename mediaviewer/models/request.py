@@ -77,7 +77,7 @@ class RequestVote(models.Model):
         db_table = 'requestvote'
 
     def __unicode__(self):
-        return 'id: %s r: %s u: %s d: %s' % (self.id, self.request.name, self.user.id, self.datecreated)
+        return 'id: %s r: %s u: %s d: %s' % (self.id, self.request.name, self.user.username, self.datecreated)
 
     @classmethod
     def new(cls, request, user):
