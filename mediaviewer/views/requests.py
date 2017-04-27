@@ -40,14 +40,15 @@ def addrequests(request):
     try:
         if name:
             newrequest = Request.new(name, request.user)
-            RequestVote.new(newrequest, request.user)
+            if newrequest.canVote(request.user):
+                RequestVote.new(newrequest, request.user)
 
             createdBy = request.user
             users = User.objects.filter(is_staff=True)
 
             for user in users:
                 Message.createNewMessage(user,
-                                         '%s has been requested by %s' % (name, createdBy.username),
+                                         '%s has been requested by %s' % (newrequest.name, createdBy.username),
                                          level=messages.INFO)
     except Exception, e:
         print e
