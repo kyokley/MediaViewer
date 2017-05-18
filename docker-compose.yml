@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+    postgres:
+        hostname: postgres
+        image: postgres
+        environment:
+            - POSTGRES_USER=docker
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=mediaviewer
+        #ports:
+            #- "0.0.0.0:5672:5672"
+            #- "15672:15672"  # here, we can access rabbitmq management plugin
+
+    mediaviewer:
+        image: kyokley/mediaviewer
+        build: .
+        command: python manage.py runserver
+        hostname: mediaviewer
+        depends_on:
+            - "postgres"
+        ports:
+            - "8000:8000"

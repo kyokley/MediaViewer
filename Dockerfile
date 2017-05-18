@@ -14,17 +14,20 @@ RUN apk add --no-cache --virtual .build-deps \
     linux-headers \
     g++ \
     git \
-    python3 \
-    python3-dev \
+    #python3 \
+    #python3-dev \
+    python \
+    python-dev \
+    py2-pip \
     nginx \
     supervisor \
     postgresql \
     postgresql-dev \
     nodejs && \
-    pip3 install -U pip \
+    pip install -U pip \
                     setuptools
 
-RUN pip3 install uwsgi django
+RUN pip install uwsgi django
 
 # setup all the configfiles
 #VOLUME nginx
@@ -38,7 +41,7 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 # to prevent re-installing (all your) dependencies when you made a change a line or two in your app.
 
 COPY requirements.txt /home/docker/code/app/
-RUN pip3 install -r /home/docker/code/app/requirements.txt
+RUN pip install -r /home/docker/code/app/requirements.txt
 
 # add (the rest of) our code
 COPY . $HOME/code/
@@ -50,9 +53,9 @@ RUN rm -f $HOME/code/mysite/local_settings.py && \
     cp $HOME/code/mysite/docker_settings.py $HOME/code/mysite/local_settings.py
 
 
-WORKDIR $HOME
+WORKDIR $HOME/code
 #USER docker
 
-EXPOSE 8000 8001 8002
+#EXPOSE 8000 8001 8002
 #ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisor.d/supervisor.conf"]
-CMD /bin/sh
+#CMD /bin/sh
