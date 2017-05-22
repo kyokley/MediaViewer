@@ -19,7 +19,6 @@ RUN apk add --no-cache --virtual .build-deps \
     python \
     python-dev \
     py2-pip \
-    nginx \
     supervisor \
     postgresql \
     postgresql-dev \

@@ -19,5 +19,10 @@ services:
         hostname: mediaviewer
         depends_on:
             - "postgres"
+    nginx:
+        hostname: nginx
+        image: nginx
         ports:
             - "8000:8000"
+        depends_on:
+            - "mediaviewer"
