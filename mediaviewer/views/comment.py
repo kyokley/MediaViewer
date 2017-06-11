@@ -16,6 +16,7 @@ from mediaviewer.utils import logAccessInfo, check_force_password_change
 @logAccessInfo
 def comment(request, file_id):
     file = get_object_or_404(File, pk=file_id)
+
     try:
         comment = request.POST.get('comment')
         viewed = request.POST.get('viewed') == 'true' and True or False
