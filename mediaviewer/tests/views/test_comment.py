@@ -19,6 +19,10 @@ class TestComment(TestCase):
         self.mock_httpResponseRedirect = self.HttpResponseRedirect_patcher.start()
         self.addCleanup(self.HttpResponseRedirect_patcher.stop)
 
+        self.posterfile_new_patcher = mock.patch('mediaviewer.models.file.PosterFile.new')
+        self.mock_posterfile_new = self.posterfile_new_patcher.start()
+        self.addCleanup(self.posterfile_new_patcher.stop)
+
         self.request = mock.MagicMock()
 
         self.user = User.objects.create_superuser('test_user',
