@@ -37,7 +37,7 @@ def comment(request, file_id):
                     file.override_season != request.POST.get('season', file.override_season) or
                     file.override_episode != request.POST.get('episode_number', file.override_episode)):
                 file.posterfile.delete()
-                if file.path.posterfile:
+                if file.isTVShow() and file.path.posterfile:
                     file.path.posterfile.delete()
                 file._searchString = request.POST.get('search', file._searchString)
                 file.imdb_id = request.POST.get('imdb_id', file.imdb_id)
