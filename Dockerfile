@@ -33,7 +33,7 @@ RUN addgroup -S docker && \
 USER docker
 
 RUN rm -f $HOME/code/mysite/local_settings.py && \
-    cp $HOME/code/mysite/docker_settings.py $HOME/code/mysite/local_settings.py
+    cp $HOME/code/configs/docker_settings.py $HOME/code/mysite/local_settings.py
 
 WORKDIR $HOME/code
 
