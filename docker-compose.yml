@@ -8,9 +8,8 @@ services:
             - POSTGRES_USER=docker
             - POSTGRES_PASSWORD=password
             - POSTGRES_DB=mediaviewer
-        #ports:
-            #- "0.0.0.0:5672:5672"
-            #- "15672:15672"  # here, we can access rabbitmq management plugin
+        ports:
+            - "5672:5672"
 
     mediaviewer:
         image: kyokley/mediaviewer
@@ -19,6 +18,7 @@ services:
         hostname: mediaviewer
         depends_on:
             - "postgres"
+
     nginx:
         hostname: nginx
         image: nginx
