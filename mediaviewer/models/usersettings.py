@@ -37,6 +37,8 @@ class UserSettings(models.Model):
     force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
     can_login = models.BooleanField(db_column='can_login', blank=False, null=False, default=True)
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
+    last_watched = models.ForeignKey('mediaviewer.File', null=True, blank=True)
+    last_watched_dismissed = models.BooleanField(null=False, default=False, blank=True)
 
     class Meta:
         app_label = 'mediaviewer'

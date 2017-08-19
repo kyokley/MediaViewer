@@ -64,6 +64,9 @@ class VideoProgress(models.Model):
                              offset,
                              file
                              )
+        user.settings.last_watched = file
+        user.settings.last_watched_dismissed = False
+        user.settings.save()
         return record
 
     @classmethod
