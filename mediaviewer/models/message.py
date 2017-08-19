@@ -5,12 +5,22 @@ from django.utils import timezone
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
+REGULAR = 'regular'
+LAST_WATCHED = 'last_watched'
 class Message(models.Model):
+    MESSAGE_TYPES = ((REGULAR, 'Regular'),
+                     (LAST_WATCHED, 'Last Watched'),
+                     )
     touser = models.ForeignKey('auth.User', null=False, blank=False, db_column='touserid')
     body = models.TextField(db_column='body', blank=True)
     sent = models.BooleanField(db_column='sent', blank=False)
     level = models.IntegerField(db_column='level', blank=False)
     datecreated = models.DateTimeField(db_column='datecreated')
+    message_type = models.CharField(max_length=15,
+                                    choices=MESSAGE_TYPES,
+                                    default=REGULAR,
+                                    null=False,
+                                    blank=True)
 
     levels = [DEBUG,
               INFO,
@@ -39,13 +49,14 @@ class Message(models.Model):
         return timezone.localtime(self.datecreated)
 
     @classmethod
-    def createNewMessage(cls, user, body, level=messages.SUCCESS):
+    def createNewMessage(cls, user, body, level=messages.SUCCESS, message_type=REGULAR):
         newMessage = Message()
         newMessage.touser = user
         newMessage.body = body
         newMessage.datecreated = dateObj.utcnow().replace(tzinfo=utc)
         newMessage.level = level
         newMessage.sent = False
+        newMessage.message_type = message_type
         newMessage.save()
 
     @classmethod
@@ -61,5 +72,3 @@ class Message(models.Model):
     @classmethod
     def add_message(cls, request, level, body, extra_tags=''):
         messages.add_message(request, level, body, extra_tags=extra_tags)
-
-
