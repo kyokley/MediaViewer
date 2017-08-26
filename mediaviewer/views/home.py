@@ -2,7 +2,10 @@ from django.http import HttpResponse
 from mediaviewer.models.usersettings import (
                                       FILENAME_SORT,
                                       )
-from mediaviewer.models.message import Message
+from mediaviewer.models.message import (Message,
+                                        REGULAR,
+                                        LAST_WATCHED,
+                                        )
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.waiterstatus import WaiterStatus
 from django.shortcuts import render
@@ -23,7 +26,13 @@ def setSiteWideContext(context, request, includeMessages=False):
         context['user'] = user
         context['default_sort'] = settings and settings.default_sort or FILENAME_SORT
         if includeMessages:
-            for message in Message.getMessagesForUser(request.user):
+            for message in Message.getMessagesForUser(request.user, message_type=REGULAR):
+                Message.add_message(request,
+                        message.level,
+                        message.body,
+                        extra_tags=str(message.id))
+
+            for message in Message.getMessagesForUser(request.user, message_type=LAST_WATCHED):
                 Message.add_message(request,
                         message.level,
                         message.body,

@@ -1,4 +1,5 @@
 from django.db import models
+from mediaviewer.models.message import Message
 
 class VideoProgress(models.Model):
     user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
@@ -67,7 +68,6 @@ class VideoProgress(models.Model):
 
         settings = user.settings()
         settings.last_watched = file
-        settings.last_watched_dismissed = False
         settings.save()
         return record
 
@@ -76,3 +76,4 @@ class VideoProgress(models.Model):
                user,
                hashed_filename):
         cls.objects.filter(user=user).filter(hashed_filename=hashed_filename).delete()
+        Message.clearLastWatchedMessage(user)

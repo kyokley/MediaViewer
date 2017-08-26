@@ -7,6 +7,8 @@ from django.utils.timezone import utc
 
 REGULAR = 'regular'
 LAST_WATCHED = 'last_watched'
+
+CONTINUE_MESSAGE = 'Continue watching {display_name}?'
 class Message(models.Model):
     MESSAGE_TYPES = ((REGULAR, 'Regular'),
                      (LAST_WATCHED, 'Last Watched'),
@@ -66,8 +68,29 @@ class Message(models.Model):
            cls.createNewMessage(user, body, level=level)
 
     @classmethod
-    def getMessagesForUser(cls, user, sent=False):
-        return Message.objects.filter(touser=user).filter(sent=sent)
+    def createLastWatchedMessage(cls, user, body, level=messages.INFO):
+        old_message = (cls.objects.filter(touser=user)
+                                  .filter(sent=False)
+                                  .filter(message_type=LAST_WATCHED))
+        if old_message:
+            old_message.delete()
+
+        cls.createNewMessage(user,
+                             body,
+                             level=level,
+                             message_type=LAST_WATCHED)
+
+    @classmethod
+    def clearLastWatchedMessage(cls, user):
+        for message in cls.getMessagesForUser(user,
+                                              message_type=LAST_WATCHED):
+            message.delete()
+
+    @classmethod
+    def getMessagesForUser(cls, user, sent=False, message_type=REGULAR):
+        return (cls.objects.filter(touser=user)
+                           .filter(sent=sent)
+                           .filter(message_type=message_type))
 
     @classmethod
     def add_message(cls, request, level, body, extra_tags=''):
