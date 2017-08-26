@@ -1,7 +1,10 @@
+import mock
+
 from django.test import TestCase
 from mediaviewer.models.file import File
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.path import Path
+from mediaviewer.models.usersettings import UserSettings
 
 class TestGetScrapedNameReplacements(TestCase):
     ''' The purpose of this test is to test the period and hyphen substitutions '''
@@ -84,3 +87,29 @@ class TestGetScrapedNameOverrideFileName(TestCase):
         expected = 'overrided file name'
         actual = self.file.getScrapedName()
         self.assertEqual(expected, actual)
+
+class TestNew(TestCase):
+    def setUp(self):
+        self.filter_patcher = mock.patch('mediaviewer.models.file.UserSettings.objects.filter')
+        self.mock_filter = self.filter_patcher.start()
+
+        self.createLastWatchedMessage_patcher = mock.patch('mediaviewer.models.file.Message.createLastWatchedMessage')
+        self.mock_createLastWatchedMessage = self.createLastWatchedMessage_patcher.start()
+
+        self.mock_setting = mock.MagicMock(UserSettings)
+        self.mock_settings_queryset = [self.mock_setting]
+        self.mock_filter.return_value.all.return_value = self.mock_settings_queryset
+
+        self.path = Path.new('local_path', 'remote_path', False)
+        self.path.save()
+
+    def tearDown(self):
+        self.filter_patcher.stop()
+        self.createLastWatchedMessage_patcher.stop()
+
+    def test_(self):
+        new_file = File.new('test_filename',
+                            self.path)
+
+        self.mock_filter.assert_called_once_with(last_watched=self.path)
+        self.mock_createLastWatchedMessage.assert_called_once_with(self.mock_setting.user, new_file)
