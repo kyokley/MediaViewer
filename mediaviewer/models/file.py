@@ -89,7 +89,7 @@ class File(models.Model):
         # Generate continue watching messages
         settings = UserSettings.objects.filter(last_watched=path).all()
         for setting in settings:
-            Message.createLastWatchedMessage(settings.user, obj)
+            Message.createLastWatchedMessage(setting.user, obj)
         return obj
 
     @property

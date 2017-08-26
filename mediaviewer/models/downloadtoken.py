@@ -67,6 +67,9 @@ class DownloadToken(models.Model):
                 old_token.delete()
 
         Message.createLastWatchedMessage(user, file)
+        settings = user.settings()
+        settings.last_watched = file.path
+        settings.save()
         return dt
 
     @classmethod
