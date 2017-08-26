@@ -66,12 +66,7 @@ class DownloadToken(models.Model):
             if old_token:
                 old_token.delete()
 
-        if file.isTVShow():
-            Message.createLastWatchedMessage(user,
-                                             'Continue watching {}?'.format(file.path.url()))
-        else:
-            Message.createLastWatchedMessage(user,
-                                             'Continue watching {}?'.format(file.url()))
+        Message.createLastWatchedMessage(user, file)
         return dt
 
     @classmethod

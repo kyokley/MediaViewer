@@ -67,7 +67,7 @@ class VideoProgress(models.Model):
                              )
 
         settings = user.settings()
-        settings.last_watched = file
+        settings.last_watched = file.path
         settings.save()
         return record
 

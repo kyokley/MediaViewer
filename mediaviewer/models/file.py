@@ -18,7 +18,8 @@ from mysite.settings import (WAITER_HEAD,
                              BANGUP_WAITER_IP_FORMAT_TVSHOWS,
                              )
 from mediaviewer.models.usersettings import (LOCAL_IP,
-                                             BANGUP_IP)
+                                             BANGUP_IP,
+                                             UserSettings)
 
 from mediaviewer.log import log
 
@@ -84,6 +85,11 @@ class File(models.Model):
         obj.hide = hide
         obj.streamable = streamable
         obj.save()
+
+        # Generate continue watching messages
+        settings = UserSettings.objects.filter(last_watched=path).all()
+        for setting in settings:
+            Message.createLastWatchedMessage(settings.user, obj)
         return obj
 
     @property

@@ -8,7 +8,7 @@ from django.utils.timezone import utc
 REGULAR = 'regular'
 LAST_WATCHED = 'last_watched'
 
-CONTINUE_MESSAGE = 'Continue watching {display_name}?'
+CONTINUE_MESSAGE = 'Continue watching {}?'
 class Message(models.Model):
     MESSAGE_TYPES = ((REGULAR, 'Regular'),
                      (LAST_WATCHED, 'Last Watched'),
@@ -68,7 +68,12 @@ class Message(models.Model):
            cls.createNewMessage(user, body, level=level)
 
     @classmethod
-    def createLastWatchedMessage(cls, user, body, level=messages.WARNING):
+    def createLastWatchedMessage(cls, user, file, level=messages.WARNING):
+        if file.isTVShow():
+            body = CONTINUE_MESSAGE.format(file.path.url())
+        else:
+            body = CONTINUE_MESSAGE.format(file.url())
+
         old_messages = (cls.objects.filter(touser=user)
                                    .filter(sent=False)
                                    .filter(message_type=LAST_WATCHED)
