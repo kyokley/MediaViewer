@@ -121,10 +121,19 @@
 
             {% block messages %}
                 {% for message in messages %}
-                <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
-                    <a href="#" class="close" data-dismiss="alert">&times;</a>
-                    {{ message }}
-                </div>
+                    {% if 'last_watched' in message.extra_tags %}
+                        {% autoescape off %}
+                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            {{ message }}
+                        </div>
+                    {% endautoescape %}
+                    {% else %}
+                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            {{ message }}
+                        </div>
+                    {% endif %}
             {% endfor %}
         {% endblock %}
 

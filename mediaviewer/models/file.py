@@ -1,11 +1,13 @@
 import re
 import time
 from django.db import models
+from django.core.urlresolvers import reverse
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.genre import Genre
+from mediaviewer.models.message import Message
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 
@@ -227,8 +229,16 @@ class File(models.Model):
         usercomment.dateedited = dateObj.utcnow().replace(tzinfo=utc)
         usercomment.save()
 
+        if not self.next():
+            Message.clearLastWatchedMessage(user)
+
     def __unicode__(self):
         return 'id: %s f: %s' % (self.id, self.fileName)
+
+    def url(self):
+        return '<a href="{}">{}</a>'.format(reverse('mediaviewer:filesdetail', args=(self.id,)),
+                                            self.displayName())
+
 
     def getSearchTerm(self):
         if self.isMovie():

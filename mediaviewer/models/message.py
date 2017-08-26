@@ -68,11 +68,15 @@ class Message(models.Model):
            cls.createNewMessage(user, body, level=level)
 
     @classmethod
-    def createLastWatchedMessage(cls, user, body, level=messages.INFO):
-        old_message = (cls.objects.filter(touser=user)
-                                  .filter(sent=False)
-                                  .filter(message_type=LAST_WATCHED))
-        if old_message:
+    def createLastWatchedMessage(cls, user, body, level=messages.WARNING):
+        old_messages = (cls.objects.filter(touser=user)
+                                   .filter(sent=False)
+                                   .filter(message_type=LAST_WATCHED)
+                                   .all())
+        #if old_message:
+            #old_message.delete()
+
+        for old_message in old_messages:
             old_message.delete()
 
         cls.createNewMessage(user,

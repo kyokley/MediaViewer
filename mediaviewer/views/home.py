@@ -36,7 +36,7 @@ def setSiteWideContext(context, request, includeMessages=False):
                 Message.add_message(request,
                         message.level,
                         message.body,
-                        extra_tags=str(message.id))
+                        extra_tags=str(message.id) + ' last_watched')
 
         context['movie_genres'] = File.get_movie_genres()
         context['tv_genres'] = Path.get_tv_genres()

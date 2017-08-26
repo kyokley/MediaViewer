@@ -1,5 +1,6 @@
 import time
 from django.db import models
+from django.core.urlresolvers import reverse
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
@@ -78,6 +79,10 @@ class Path(models.Model):
     def lastCreatedFileDateForSpan(self):
         last_date = self.lastCreatedFileDate
         return last_date and last_date.date().isoformat()
+
+    def url(self):
+        return '<a href="{}">{}</a>'.format(reverse('mediaviewer:tvshows', args=(self.id,)),
+                                            self.displayName())
 
     @classmethod
     def distinctShowFolders(cls):
