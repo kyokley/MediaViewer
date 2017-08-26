@@ -78,8 +78,6 @@ class Message(models.Model):
                                    .filter(sent=False)
                                    .filter(message_type=LAST_WATCHED)
                                    .all())
-        #if old_message:
-            #old_message.delete()
 
         for old_message in old_messages:
             old_message.delete()
