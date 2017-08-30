@@ -210,9 +210,10 @@ def getRating(tmdb_id, isMovie=True):
         url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
 
     data = getJSONData(url)
-    imdb_id = data.get('imdb_id')
+    imdb_id = data and data.get('imdb_id')
 
     if imdb_id:
+        # TODO: Figure out if I need to switch to a different api
         url = 'http://www.omdbapi.com/?i=%s' % imdb_id
 
         try:

@@ -72,5 +72,12 @@ class VideoProgress(models.Model):
     def delete(cls,
                user,
                hashed_filename):
-        cls.objects.filter(user=user).filter(hashed_filename=hashed_filename).delete()
-        Message.clearLastWatchedMessage(user)
+        # TODO: Need to test this
+        vp = (cls.objects.filter(user=user)
+                         .filter(hashed_filename=hashed_filename)
+                         .first())
+        if vp:
+            if not vp.file.next():
+                Message.clearLastWatchedMessage(user)
+
+            vp.delete()
