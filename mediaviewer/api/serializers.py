@@ -1,4 +1,3 @@
-from mediaviewer.models.downloadclick import DownloadClick
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
@@ -83,24 +82,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.binge_mode
 
-
-class DownloadClickSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DownloadClick
-        fields = ('pk',
-                  'userid',
-                  'filename',
-                  'downloadtoken',
-                  'datecreated',
-                  'size',
-                  )
-
-    pk = serializers.ReadOnlyField()
-    downloadtoken = serializers.IntegerField(required=True, source='downloadtoken.id')
-    userid = serializers.IntegerField(required=True, source='user.id')
-    filename = serializers.CharField(required=True)
-    datecreated = serializers.DateTimeField(required=True)
-    size = serializers.IntegerField(required=True)
 
 class PathSerializer(serializers.ModelSerializer):
     class Meta:
