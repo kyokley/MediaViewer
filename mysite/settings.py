@@ -249,6 +249,7 @@ os.environ['HTTPS'] = 'on'
 os.environ['wsgi.url_scheme'] = 'https'
 
 API_KEY = 'keykeykey'
+OMDBAPI_KEY = None
 IMAGE_PATH = 'mediaviewer/static/media/'
 
 REQUEST_TIMEOUT = 3

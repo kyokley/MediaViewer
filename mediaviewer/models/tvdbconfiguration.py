@@ -2,6 +2,7 @@ import time
 import os
 from mediaviewer.log import log
 from mysite.settings import (API_KEY,
+                             OMDBAPI_KEY,
                              IMAGE_PATH,
                              REQUEST_TIMEOUT,
                              )
@@ -212,7 +213,7 @@ def getRating(tmdb_id, isMovie=True):
     data = getJSONData(url)
     imdb_id = data and data.get('imdb_id')
 
-    if imdb_id:
+    if imdb_id and OMDBAPI_KEY:
         # TODO: Figure out if I need to switch to a different api
         url = 'http://www.omdbapi.com/?i=%s' % imdb_id
 
