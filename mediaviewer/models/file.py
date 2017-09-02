@@ -375,7 +375,6 @@ class File(models.Model):
             posterfile = PosterFile.objects.get(file=self)
             posterfile.delete()
         except PosterFile.DoesNotExist:
-            # TODO: Need tests for this
             log.debug('Posterfile does not exist. Continuing.')
         except Exception, e:
             log.error('Got an error destroying posterfile')

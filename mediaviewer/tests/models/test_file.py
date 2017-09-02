@@ -5,6 +5,7 @@ from mediaviewer.models.file import File
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.path import Path
 from mediaviewer.models.usersettings import UserSettings
+from mediaviewer.models.posterfile import PosterFile
 
 class TestGetScrapedNameReplacements(TestCase):
     ''' The purpose of this test is to test the period and hyphen substitutions '''
@@ -113,3 +114,45 @@ class TestNew(TestCase):
 
         self.mock_filter.assert_called_once_with(last_watched=self.path)
         self.mock_createLastWatchedMessage.assert_called_once_with(self.mock_setting.user, new_file)
+
+class TestDestroyPosterFile(TestCase):
+    def setUp(self):
+        self.get_patcher = mock.patch('mediaviewer.models.file.PosterFile.objects.get')
+        self.mock_get = self.get_patcher.start()
+
+        self.log_patcher = mock.patch('mediaviewer.models.file.log')
+        self.mock_log = self.log_patcher.start()
+
+        self.path = Path.new('local_path', 'remote_path', False)
+        self.path.save()
+
+        self.file = File.new('test_filename',
+                                 self.path)
+
+        self.posterfile = mock.MagicMock(PosterFile)
+        self.mock_get.return_value = self.posterfile
+
+    def tearDown(self):
+        self.get_patcher.stop()
+        self.log_patcher.stop()
+
+    def test_valid(self):
+        self.file.destroyPosterFile()
+        self.mock_get.assert_called_once_with(file=self.file)
+        self.posterfile.delete.assert_called_once_with()
+
+    def test_no_posterfile(self):
+        self.mock_get.side_effect = PosterFile.DoesNotExist
+
+        self.file.destroyPosterFile()
+        self.mock_get.assert_called_once_with(file=self.file)
+        self.assertFalse(self.posterfile.delete.called)
+        self.mock_log.debug.assert_any_call('Posterfile does not exist. Continuing.')
+
+    def test_other_exception(self):
+        self.mock_get.side_effect = Exception
+
+        self.file.destroyPosterFile()
+        self.mock_get.assert_called_once_with(file=self.file)
+        self.assertFalse(self.posterfile.delete.called)
+        self.mock_log.error.assert_any_call('Got an error destroying posterfile')
