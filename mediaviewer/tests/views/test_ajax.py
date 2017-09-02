@@ -184,3 +184,16 @@ class TestAjaxVideoProgress(TestCase):
                                                             content_type='application/json',
                                                             status=200)
         self.assertEquals(ret_val, self.fake_httpresponse)
+
+    def test_delete(self):
+        self.request.method = 'DELETE'
+        ret_val = ajaxvideoprogress(self.request,
+                                    self.guid,
+                                    self.filename)
+        self.assertFalse(self.mock_vpClass.get.called)
+        self.assertFalse(self.mock_vpClass.createOrUpdate.called)
+        self.mock_httpResponseClass.assert_called_once_with('json_data',
+                                                            content_type='application/json',
+                                                            status=204)
+        self.mock_vpClass.destroy.assert_called_once_with(self.user, self.filename)
+        self.assertEquals(ret_val, self.fake_httpresponse)

@@ -69,10 +69,9 @@ class VideoProgress(models.Model):
         return record
 
     @classmethod
-    def delete(cls,
-               user,
-               hashed_filename):
-        # TODO: Need to test this
+    def destroy(cls,
+                user,
+                hashed_filename):
         vp = (cls.objects.filter(user=user)
                          .filter(hashed_filename=hashed_filename)
                          .first())

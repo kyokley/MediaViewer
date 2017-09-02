@@ -119,7 +119,6 @@ class File(models.Model):
     def dataTransmission(self):
         return self.datatransmission
 
-
     def _posterfileget(self):
         from mediaviewer.models.posterfile import PosterFile
         posterfile = PosterFile.new(file=self)

@@ -51,7 +51,7 @@ def ajaxvideoprogress(request, guid, hashed_filename):
                             content_type='application/json',
                             status=200)
     elif request.method == 'DELETE':
-        VideoProgress.delete(user, hashed_filename)
+        VideoProgress.destroy(user, hashed_filename)
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=204)
