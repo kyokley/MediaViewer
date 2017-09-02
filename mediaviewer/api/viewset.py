@@ -1,8 +1,4 @@
-import pytz
-from django.db import transaction
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from datetime import datetime
 from rest_framework import viewsets, views
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
@@ -26,8 +22,6 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.log import log
-
-from mysite.settings import TIME_ZONE
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):
     queryset = DownloadToken.objects.all()
