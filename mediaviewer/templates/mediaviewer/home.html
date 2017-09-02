@@ -138,40 +138,42 @@
         {% endblock %}
 
         {% block main %}
-            <table id="newFileTable" class="table table-plain">
-                <thead>
-                    <tr>
-                        <th>Latest Files</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for file in files %}
+            {% if loggedin %}
+                <table id="newFileTable" class="table table-plain">
+                    <thead>
                         <tr>
-                            {% if file.isMovie %}
-                                {% if loggedin %}
-                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
-                                {% else %}
-                                    <td>{{ file.rawSearchString }}</td>
-                                {% endif %}
-                            {% else %}
-                                {% if loggedin %}
-                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
-                                {% else %}
-                                    <td>{{ file.getScrapedFullName }}</td>
-                                {% endif %}
-                            {% endif %}
+                            <th>Latest Files</th>
                         </tr>
-                    {% endfor %}
-                    {% if loggedin and user.is_staff %}
-                        <tr>
-                            <td>
-                                <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                            <tr>
+                                {% if file.isMovie %}
+                                    {% if loggedin %}
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                                    {% else %}
+                                        <td>{{ file.rawSearchString }}</td>
+                                    {% endif %}
+                                {% else %}
+                                    {% if loggedin %}
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
+                                    {% else %}
+                                        <td>{{ file.getScrapedFullName }}</td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        {% if loggedin and user.is_staff %}
+                            <tr>
+                                <td>
+                                    <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
 
+            {% endif %}
         {% endblock %}
     </div> <!-- /container -->
 
