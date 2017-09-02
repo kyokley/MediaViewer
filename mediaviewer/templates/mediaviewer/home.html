@@ -145,29 +145,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for file in files %}
-                        <tr>
-                            {% if file.isMovie %}
-                                {% if loggedin %}
-                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                    {% if loggedin %}
+                        {% for file in files %}
+                            <tr>
+                                {% if file.isMovie %}
+                                    {% if loggedin %}
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                                    {% else %}
+                                        <td>{{ file.rawSearchString }}</td>
+                                    {% endif %}
                                 {% else %}
-                                    <td>{{ file.rawSearchString }}</td>
+                                    {% if loggedin %}
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
+                                    {% else %}
+                                        <td>{{ file.getScrapedFullName }}</td>
+                                    {% endif %}
                                 {% endif %}
-                            {% else %}
-                                {% if loggedin %}
-                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
-                                {% else %}
-                                    <td>{{ file.getScrapedFullName }}</td>
-                                {% endif %}
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                    {% if loggedin and user.is_staff %}
-                        <tr>
-                            <td>
-                                <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
-                            </td>
-                        </tr>
+                            </tr>
+                        {% endfor %}
+                        {% if loggedin and user.is_staff %}
+                            <tr>
+                                <td>
+                                    <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endif %}
                 </tbody>
             </table>
