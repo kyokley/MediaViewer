@@ -138,14 +138,14 @@
         {% endblock %}
 
         {% block main %}
-            <table id="newFileTable" class="table table-plain">
-                <thead>
-                    <tr>
-                        <th>Latest Files</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if loggedin %}
+            {% if loggedin %}
+                <table id="newFileTable" class="table table-plain">
+                    <thead>
+                        <tr>
+                            <th>Latest Files</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {% for file in files %}
                             <tr>
                                 {% if file.isMovie %}
@@ -170,10 +170,10 @@
                                 </td>
                             </tr>
                         {% endif %}
-                    {% endif %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
 
+            {% endif %}
         {% endblock %}
     </div> <!-- /container -->
 
