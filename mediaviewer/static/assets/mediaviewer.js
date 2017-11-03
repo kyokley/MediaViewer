@@ -4,6 +4,7 @@ var didScroll;
 var lastScrollTop = 0;
 var delta = 10;
 var navbarHeight = $('.navbar-fixed-top').outerHeight() + 20;
+var viewedCheckboxColumn = 3;
 
 function bindAlertMessage($) {
     $(".alert").bind('closed.bs.alert', function() {
@@ -79,6 +80,30 @@ function prepareTableForRequests($){
                     targets: -1
         }]
     });
+}
+
+function jumpToLastViewedPage($){
+    tableElement = $('#myTable');
+    dt = tableElement.DataTable();
+    if(dt.page.len() === -1){
+        return;
+    }
+
+    pageLength = dt.page.len();
+
+    maxIndex = dt.rows().data().length;
+    data = dt.column(viewedCheckboxColumn).data();
+    for(var i = 0; i < dt.rows().data().length; i++){
+        value = data[i];
+          if(value.indexOf('true') >= 0){
+              maxIndex = Math.min(maxIndex, i);
+              break;
+          }
+    }
+
+    // Subtract a very small amount to make sure evenly divisible pages round down
+    newPage = Math.floor(maxIndex / pageLength - .00001);
+    dt.page(newPage).draw(false);
 }
 
 function prepareViewedCheckBoxes($){
