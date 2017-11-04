@@ -38,7 +38,8 @@ def files(request, items):
               'view': 'files',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+               'can_download': settings and settings.can_download or False,
+               'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'files'
     context['title'] = 'Files'
@@ -59,7 +60,8 @@ def movies(request):
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+               'can_download': settings and settings.can_download or False,
+               'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'movies'
     context['title'] = 'Movies'
@@ -84,7 +86,8 @@ def movies_by_genre(request, genre_id):
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+               'can_download': settings and settings.can_download or False,
+               'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'movies'
     context['title'] = 'Movies: {}'.format(ref_genre.genre)
@@ -134,7 +137,8 @@ def tvshows(request, pathid):
               'view': 'tvshows',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-              'can_download': settings and settings.can_download or False
+              'can_download': settings and settings.can_download or False,
+              'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'tvshows'
     context['title'] = refpath.displayName()

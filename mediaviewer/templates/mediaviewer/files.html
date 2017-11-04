@@ -152,7 +152,10 @@
                 var sortOrder = [[0,1]];
             {% endif %}
             prepareTableSorter($, sortOrder);
-            jumpToLastViewedPage($);
+
+            {% if jump_to_last == True %}
+                jumpToLastViewedPage($);
+            {% endif %}
 
             prepareViewedCheckBoxes($);
 

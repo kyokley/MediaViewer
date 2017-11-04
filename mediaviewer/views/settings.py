@@ -33,6 +33,7 @@ def settings(request):
     context['title'] = 'Settings'
     context['auto_download'] = settings.auto_download
     context['binge_mode'] = settings.binge_mode
+    context['jump_to_last'] = settings.jump_to_last_watched
 
     context['email'] = user.email
     if not user.email:
@@ -68,6 +69,12 @@ def submitsettings(request):
     else:
         binge_mode = binge_mode == 'true'
 
+    jump_to_last = request.POST.get('jump_to_last')
+    if not jump_to_last:
+        jump_to_last = False
+    else:
+        jump_to_last = jump_to_last == 'true'
+
     user = request.user
     settings = user.settings()
     if not settings:
@@ -80,6 +87,7 @@ def submitsettings(request):
 
     settings.auto_download = auto_download
     settings.binge_mode = binge_mode
+    settings.jump_to_last_watched = jump_to_last
     settings.default_sort = default_sort
     user.email = request.POST.get('email_field', user.email)
     context['default_sort'] = settings.default_sort
