@@ -15,7 +15,6 @@ from mediaviewer.models.actor import Actor
 from mediaviewer.models.writer import Writer
 from mediaviewer.models.director import Director
 
-#TODO: Add column to track tvdb and omdb success
 # Destroy failed posterfiles weekly to allow new attempts
 class PosterFile(models.Model):
     file = models.ForeignKey('mediaviewer.File', null=True, db_column='fileid', blank=True, related_name='_posterfile')

@@ -29,7 +29,6 @@ def getJSONData(url):
     except Exception, e:
         log.error(str(e), exc_info=True)
 
-#TODO: Add tvdb config to database and update values weekly
 class TVDBConfiguration(object):
     _instance = None
     def __new__(cls, *args, **kwargs):
@@ -43,7 +42,6 @@ class TVDBConfiguration(object):
         try:
             data = self._getTVDBConfiguration()
             self.url = data['images']['secure_base_url']
-            #self.poster_size = data['images']['poster_sizes'][-1]
             self.poster_size = 'w500'
             self.still_size = data['images']['still_sizes'][-1]
             self.connected = True
@@ -214,7 +212,6 @@ def getRating(tmdb_id, isMovie=True):
     imdb_id = data and data.get('imdb_id')
 
     if imdb_id and OMDBAPI_KEY:
-        # TODO: Figure out if I need to switch to a different api
         url = 'http://www.omdbapi.com/?i=%s' % imdb_id
 
         try:
