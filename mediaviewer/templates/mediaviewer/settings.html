@@ -70,25 +70,6 @@
                     </div>
                 </ul>
                 <ul>
-                    <label>Auto Download:</label>
-                    <div class="input">
-                        <ul class="inputs-list">
-                            <ul>
-                                <label>
-                                    <input type="radio" checked name="auto_download" value=true id="auto_download_yes"/>
-                                    <span>Yes</span>
-                                </label>
-                            </ul>
-                            <ul>
-                                <label>
-                                    <input type="radio" name="auto_download" value=false id="auto_download_no"/>
-                                    <span>No</span>
-                                </label>
-                            </ul>
-                        </ul>
-                    </div>
-                </ul>
-                <ul>
                     <label>Binge Watch Mode:</label>
                     <div class="input">
                         <ul class="inputs-list">
@@ -231,12 +212,6 @@
                 jQuery('#filename_sort').prop('checked', 'checked');
             {% elif default_sort == 'timestamp_sort' %}
                 jQuery('#timestamp_sort').prop('checked', 'checked');
-            {% endif %}
-
-            {% if auto_download == True %}
-                jQuery('#auto_download_yes').prop('checked', 'checked');
-            {% else %}
-                jQuery('#auto_download_no').prop('checked', 'checked');
             {% endif %}
 
             {% if binge_mode == True %}

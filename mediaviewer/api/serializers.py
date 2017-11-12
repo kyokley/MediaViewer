@@ -25,7 +25,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'tokenid',
                   'isvalid',
                   'displayname',
-                  'auto_download',
                   'pathid',
                   'pathname',
                   'videoprogresses',
@@ -44,17 +43,12 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     tokenid = serializers.IntegerField(required=True, source='id')
     isvalid = serializers.BooleanField(required=True)
     displayname = serializers.CharField(required=True)
-    auto_download = serializers.SerializerMethodField()
     pathid = serializers.SerializerMethodField()
     pathname = serializers.SerializerMethodField()
     videoprogresses = serializers.SerializerMethodField()
     next_id = serializers.SerializerMethodField()
     previous_id = serializers.SerializerMethodField()
     binge_mode = serializers.SerializerMethodField()
-
-    def get_auto_download(self, obj):
-        user_settings = UserSettings.getSettings(obj.user)
-        return user_settings.auto_download
 
     def get_username(self, obj):
         return obj.user.username

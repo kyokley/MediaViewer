@@ -102,7 +102,7 @@ function jumpToLastViewedPage($){
     }
 
     // Subtract a very small amount to make sure evenly divisible pages round down
-    newPage = Math.floor(maxIndex / pageLength - .00001);
+    newPage = Math.max(0, Math.floor(maxIndex / pageLength - .00001));
     dt.page(newPage).draw(false);
 }
 

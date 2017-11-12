@@ -33,7 +33,6 @@ class UserSettings(models.Model):
     user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
     can_download = models.BooleanField(db_column='can_download', blank=False, null=False)
     default_sort = models.TextField(db_column='default_sort')
-    auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
     force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
     can_login = models.BooleanField(db_column='can_login', blank=False, null=False, default=True)
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
