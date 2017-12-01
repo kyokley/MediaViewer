@@ -1,7 +1,7 @@
 django
 django-memcached
 sqlalchemy
-django-axes
+django-axes==2.3.2
 psycopg2
 python-dateutil
 uwsgi
