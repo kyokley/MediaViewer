@@ -23,6 +23,7 @@ def comment(request, file_id):
     if usercomment:
         usercomment.comment = comment
         usercomment.viewed = viewed
+        usercomment.save()
     else:
         UserComment.new(file,
                         request.user,
