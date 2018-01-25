@@ -174,7 +174,8 @@ def _getDataFromIMDBBySearchString(searchString, isMovie=True):
 
     data = getJSONData(url)
     data = (data['results'][0]
-                if data.get('results') and
+                if data and
+                   data.get('results') and
                    data.get('results')[0] else None)
     if data:
         data['url'] = url
