@@ -101,8 +101,9 @@ body{
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-.login-submit-btn{
+.btn.login-submit-btn{
     margin-top: 10px;
+    margin-bottom: 50px;
 }
 /* tables */
 .table{
