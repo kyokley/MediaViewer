@@ -90,14 +90,13 @@ def ajaxsuperviewed(request):
     guid = request.POST['guid']
     viewed = request.POST['viewed'] == 'True' and True or False
 
-    if viewed:
-        token = (DownloadToken.objects
-                              .filter(guid=guid)
-                              .first())
-        if token and token.isvalid:
-            token.file.markFileViewed(token.user, viewed)
-        else:
-            errmsg = 'Token is invalid'
+    token = (DownloadToken.objects
+                          .filter(guid=guid)
+                          .first())
+    if token and token.isvalid:
+        token.file.markFileViewed(token.user, viewed)
+    else:
+        errmsg = 'Token is invalid'
 
     response = {'errmsg': errmsg,
                 'guid': guid,
