@@ -10,6 +10,7 @@ from mediaviewer.api.serializers import (DownloadTokenSerializer,
                                          MessageSerializer,
                                          PosterFileSerializer,
                                          UserCommentSerializer,
+                                         PathSerializer,
                                          )
 from mediaviewer.models.file import File
 from mediaviewer.models.path import (Path,
@@ -89,6 +90,23 @@ class InferScrapersView(views.APIView):
             return RESTResponse({"success": True})
         except Exception, e:
             return RESTResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        title = request.GET.get('title')
+
+        if not title:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_404_NOT_FOUND)
+
+        log.debug('Attempting to scrape title = %s' % title)
+        path = FilenameScrapeFormat.path_for_filename(title)
+
+        if path:
+            serializer = PathSerializer(path)
+            return RESTResponse(serializer.data)
+        else:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_404_NOT_FOUND)
 
 class PosterViewSetByPath(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()
