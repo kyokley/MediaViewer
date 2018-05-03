@@ -71,6 +71,10 @@ class FilenameScrapeFormat(models.Model):
             if not episode.isdigit():
                 return None
 
+        # Filenames containing 264 are most likely not right
+        if int(season) == 2 and int(episode) == 64:
+            return None
+
         return path
 
     @classmethod
