@@ -39,7 +39,7 @@ class TestAjaxSuperViewed(TestCase):
                                                  'guid': 'test_guid',
                                                  'viewed': True})
         self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status_code=400,
+                                                       status=400,
                                                        content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
@@ -58,7 +58,7 @@ class TestAjaxSuperViewed(TestCase):
                                                  'guid': 'test_guid',
                                                  'viewed': True})
         self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status_code=400,
+                                                       status=400,
                                                        content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
@@ -78,7 +78,7 @@ class TestAjaxSuperViewed(TestCase):
                                                  'guid': 'test_guid',
                                                  'viewed': False})
         self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status_code=200,
+                                                       status=200,
                                                        content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
@@ -98,9 +98,43 @@ class TestAjaxSuperViewed(TestCase):
                                                  'guid': 'test_guid',
                                                  'viewed': True})
         self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status_code=200,
+                                                       status=200,
                                                        content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
         self.token.file.markFileViewed.assert_called_once_with(self.token.user, True)
+
+class TestAjaxSuperViewedFunctional(TestCase):
+    def setUp(self):
+        self.filter_patcher = mock.patch('mediaviewer.views.detail.DownloadToken.objects.filter', autospec=True)
+        self.mock_filter = self.filter_patcher.start()
+        self.addCleanup(self.filter_patcher.stop)
+
+        self.dumps_patcher = mock.patch('mediaviewer.views.detail.json.dumps')
+        self.mock_dumps = self.dumps_patcher.start()
+        self.addCleanup(self.dumps_patcher.stop)
+
+        self.token = mock.MagicMock(DownloadToken)
+        self.token.isvalid = True
+
+        self.mock_filter.return_value.first.return_value = self.token
+
+        self.request = mock.MagicMock()
+        self.request.POST = {'guid': 'test_guid',
+                             'viewed': 'True'}
+
+    def test_success(self):
+        self.request.POST = {'guid': 'test_guid',
+                             'viewed': 'True'}
+
+        resp = ajaxsuperviewed(self.request)
+        self.assertEquals(resp.status_code, 200)
+
+    def test_failure(self):
+        self.token.isvalid = False
+        self.request.POST = {'guid': 'test_guid',
+                             'viewed': 'True'}
+
+        resp = ajaxsuperviewed(self.request)
+        self.assertEquals(resp.status_code, 400)

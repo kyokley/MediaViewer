@@ -102,7 +102,7 @@ def ajaxsuperviewed(request):
                 'guid': guid,
                 'viewed': viewed}
     response = json.dumps(response)
-    return HttpResponse(response, status_code=200 if not errmsg else 400, content_type="application/json")
+    return HttpResponse(response, status=200 if not errmsg else 400, content_type="application/json")
 
 @logAccessInfo
 def ajaxdownloadbutton(request):
