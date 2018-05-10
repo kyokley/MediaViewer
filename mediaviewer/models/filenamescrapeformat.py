@@ -75,7 +75,7 @@ class FilenameScrapeFormat(models.Model):
         if int(season) == 2 and int(episode) == 64:
             return None
 
-        return path
+        return (path, name)
 
     @classmethod
     def path_for_filename(cls, filename):
@@ -86,5 +86,5 @@ class FilenameScrapeFormat(models.Model):
             if path:
                 paths.append(path)
 
-        paths.sort(key=lambda x: x.id, reverse=True)
-        return paths[0] if paths else None
+        paths.sort(key=lambda x: len(x[1]), reverse=True)
+        return paths[0][0] if paths else None

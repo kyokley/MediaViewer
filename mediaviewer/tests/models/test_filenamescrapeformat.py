@@ -18,7 +18,7 @@ class TestValidForFilename(TestCase):
     def test_is_valid(self):
         test_filename = 'Foo.is.bar.S02E01.mpg'
 
-        expected = self.path
+        expected = (self.path, 'Foo is bar')
         actual = self.scraper.valid_for_filename(test_filename)
 
         self.assertEqual(expected, actual)
