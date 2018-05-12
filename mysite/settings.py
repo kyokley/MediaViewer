@@ -155,7 +155,15 @@ INSTALLED_APPS = (
     'mediaviewer',
     'mediaviewer.models',
     'mediaviewer.views',
+    'django_nose',
 )
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+        '--with-coverage',
+        '--cover-package=mediaviewer',
+]
 
 REST_FRAMEWORK = {
         'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),

@@ -7,3 +7,4 @@ secret.txt
 node_modules
 static/*
 components/*
+.coverage

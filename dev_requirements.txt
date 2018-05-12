@@ -1,3 +1,5 @@
 -r test_requirements.txt
 bpython
 pdbpp
+django-nose
+coverage
