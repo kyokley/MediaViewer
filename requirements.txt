@@ -1,6 +1,6 @@
 django==1.11.2
 django-memcached
-sqlalchemy
+sqlalchemy # TODO: Is this actually needed
 django-axes==2.3.2
 psycopg2
 python-dateutil
