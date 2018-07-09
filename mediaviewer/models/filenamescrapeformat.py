@@ -40,42 +40,41 @@ class FilenameScrapeFormat(models.Model):
             filename = filename.replace('.', ' ')
 
         name = re.findall(self.nameRegex, filename)
+        name = name[0].strip() if name and len(name[0]) > 1 else None
 
         if not name:
             return None
         else:
-            name = name[0]
-
             for p in Path.objects.filter(is_movie=False).order_by('-id'):
-                if name.strip().lower() in p.displayName().lower():
+                if name.lower() in p.displayName().lower():
                     path = p
                     break
             else:
                 return None
 
         season = re.findall(self.seasonRegex, filename)
-        if not season:
+        if not season or not season[0].strip():
             return None
         else:
             season = season[0]
 
-            if not season.isdigit():
+            if not season.isdigit() or int(season) == 0:
                 return None
 
         episode = re.findall(self.episodeRegex, filename)
-        if not episode:
+        if not episode or not episode[0].strip():
             return None
         else:
             episode = episode[0]
 
-            if not episode.isdigit():
+            if not episode.isdigit() or int(episode) == 0:
                 return None
 
         # Filenames containing 264 are most likely not right
         if int(season) == 2 and int(episode) == 64:
             return None
 
-        return (path, name)
+        return (path, name, season, episode)
 
     @classmethod
     def path_for_filename(cls, filename):
