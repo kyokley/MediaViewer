@@ -1,4 +1,4 @@
-django==1.11.2
+django==1.11.15
 django-memcached
 sqlalchemy # TODO: Is this actually needed
 django-axes==2.3.2
