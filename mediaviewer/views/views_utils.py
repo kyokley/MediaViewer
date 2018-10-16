@@ -14,16 +14,22 @@ def setSiteWideContext(context, request, includeMessages=False):
         settings = user.settings()
         context['loggedin'] = True
         context['user'] = user
-        context['default_sort'] = settings and settings.default_sort or FILENAME_SORT
+        context['default_sort'] = (settings and
+                                   settings.default_sort or
+                                   FILENAME_SORT)
         if includeMessages:
-            for message in Message.getMessagesForUser(request.user, message_type=REGULAR):
+            for message in Message.getMessagesForUser(request.user,
+                                                      message_type=REGULAR):
                 Message.add_message(request,
-                        message.level,
-                        message.body,
-                        extra_tags=str(message.id))
+                                    message.level,
+                                    message.body,
+                                    extra_tags=str(message.id))
 
-            for message in Message.getMessagesForUser(request.user, message_type=LAST_WATCHED):
-                Message.add_message(request,
+            for message in Message.getMessagesForUser(
+                    request.user,
+                    message_type=LAST_WATCHED):
+                Message.add_message(
+                        request,
                         message.level,
                         message.body,
                         extra_tags=str(message.id) + ' last_watched')
@@ -40,4 +46,6 @@ def setSiteWideContext(context, request, includeMessages=False):
 def getLastWaiterStatus(context):
     lastStatus = WaiterStatus.getLastStatus()
     context['waiterstatus'] = lastStatus and lastStatus.status or False
-    context['waiterfailurereason'] = lastStatus and lastStatus.failureReason or ''
+    context['waiterfailurereason'] = (lastStatus and
+                                      lastStatus.failureReason or
+                                      '')

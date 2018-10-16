@@ -17,9 +17,13 @@ from mediaviewer.log import log
 def home(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context = {}
-    context['greeting'] = siteGreeting and siteGreeting.greeting or 'Check out the new downloads!'
+    context['greeting'] = (siteGreeting and
+                           siteGreeting.greeting or
+                           'Check out the new downloads!')
     context['active_page'] = 'home'
-    files = File.objects.filter(hide=False).filter(finished=True).order_by('-id')[:10]
+    files = (File.objects
+                 .filter(hide=False)
+                 .filter(finished=True).order_by('-id')[:10])
     context['files'] = files
     context['title'] = 'Home'
     setSiteWideContext(context, request, includeMessages=True)
@@ -39,4 +43,5 @@ def ajaxrunscraper(request):
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'
-    return HttpResponse(json.dumps(response), content_type='application/javascript')
+    return HttpResponse(json.dumps(response),
+                        content_type='application/javascript')

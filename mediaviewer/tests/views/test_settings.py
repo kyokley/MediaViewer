@@ -8,6 +8,7 @@ from mediaviewer.models.usersettings import UserSettings
 from django.core.exceptions import ValidationError
 
 
+# TODO: Drop mock patch decorators
 @mock.patch('mediaviewer.views.settings.UserSettings.new')
 @mock.patch('mediaviewer.views.settings.log')
 @mock.patch('mediaviewer.views.settings.render')
