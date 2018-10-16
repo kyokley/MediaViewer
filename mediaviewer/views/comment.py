@@ -8,8 +8,9 @@ from mediaviewer.models.usersettings import (
                                       BANGUP_IP,
                                       )
 from django.core.urlresolvers import reverse
-from mediaviewer.views.home import setSiteWideContext
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.views.views_utils import setSiteWideContext
+from mediaviewer.views.password_reset import check_force_password_change
+from mediaviewer.utils import logAccessInfo
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change

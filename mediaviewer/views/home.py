@@ -1,50 +1,16 @@
+import json
+
 from django.http import HttpResponse
-from mediaviewer.models.usersettings import (
-                                      FILENAME_SORT,
-                                      )
-from mediaviewer.models.message import (Message,
-                                        REGULAR,
-                                        LAST_WATCHED,
-                                        )
 from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.models.waiterstatus import WaiterStatus
 from django.shortcuts import render
 from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
+from mediaviewer.views.views_utils import setSiteWideContext
 from mysite.settings import DEBUG
-
-import json
 
 from mediaviewer.log import log
 
-def setSiteWideContext(context, request, includeMessages=False):
-    user = request.user
-    if user.is_authenticated():
-        settings = user.settings()
-        context['loggedin'] = True
-        context['user'] = user
-        context['default_sort'] = settings and settings.default_sort or FILENAME_SORT
-        if includeMessages:
-            for message in Message.getMessagesForUser(request.user, message_type=REGULAR):
-                Message.add_message(request,
-                        message.level,
-                        message.body,
-                        extra_tags=str(message.id))
-
-            for message in Message.getMessagesForUser(request.user, message_type=LAST_WATCHED):
-                Message.add_message(request,
-                        message.level,
-                        message.body,
-                        extra_tags=str(message.id) + ' last_watched')
-
-        context['movie_genres'] = File.get_movie_genres()
-        context['tv_genres'] = Path.get_tv_genres()
-    else:
-        context['loggedin'] = False
-
-    context['is_staff'] = user.is_staff and 'true' or 'false'
-    getLastWaiterStatus(context)
 
 @check_force_password_change
 @logAccessInfo
@@ -60,10 +26,6 @@ def home(request):
 
     return render(request, 'mediaviewer/home.html', context)
 
-def getLastWaiterStatus(context):
-    lastStatus = WaiterStatus.getLastStatus()
-    context['waiterstatus'] = lastStatus and lastStatus.status or False
-    context['waiterfailurereason'] = lastStatus and lastStatus.failureReason or ''
 
 @logAccessInfo
 def ajaxrunscraper(request):

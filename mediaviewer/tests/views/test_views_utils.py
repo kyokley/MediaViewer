@@ -1,32 +1,32 @@
 from django.test import TestCase
-from mediaviewer.views.home import (setSiteWideContext,
-                                    getLastWaiterStatus,
-                                    )
+
+from mediaviewer.views.views_utils import setSiteWideContext, getLastWaiterStatus
 from mediaviewer.models.usersettings import FILENAME_SORT
 from django.contrib.auth.models import User
 
 import mock
 from mock import call
 
+
 class TestSetSiteWideContext(TestCase):
     def setUp(self):
-        self.add_message_patcher = mock.patch('mediaviewer.views.home.Message.add_message')
+        self.add_message_patcher = mock.patch('mediaviewer.views.views_utils.Message.add_message')
         self.mock_add_message = self.add_message_patcher.start()
         self.addCleanup(self.add_message_patcher.stop)
 
-        self.getMessagesForUser_patcher = mock.patch('mediaviewer.views.home.Message.getMessagesForUser')
+        self.getMessagesForUser_patcher = mock.patch('mediaviewer.views.views_utils.Message.getMessagesForUser')
         self.mock_getMessagesForUser = self.getMessagesForUser_patcher.start()
         self.addCleanup(self.getMessagesForUser_patcher.stop)
 
-        self.getLastWaiterStatus_patcher = mock.patch('mediaviewer.views.home.getLastWaiterStatus')
+        self.getLastWaiterStatus_patcher = mock.patch('mediaviewer.views.views_utils.getLastWaiterStatus')
         self.mock_getLastWaiterStatus = self.getLastWaiterStatus_patcher.start()
         self.addCleanup(self.getLastWaiterStatus_patcher.stop)
 
-        self.get_movie_genres_patcher = mock.patch('mediaviewer.views.home.File.get_movie_genres')
+        self.get_movie_genres_patcher = mock.patch('mediaviewer.views.views_utils.File.get_movie_genres')
         self.mock_get_movie_genres = self.get_movie_genres_patcher.start()
         self.addCleanup(self.get_movie_genres_patcher.stop)
 
-        self.get_tv_genres_patcher = mock.patch('mediaviewer.views.home.Path.get_tv_genres')
+        self.get_tv_genres_patcher = mock.patch('mediaviewer.views.views_utils.Path.get_tv_genres')
         self.mock_get_tv_genres = self.get_tv_genres_patcher.start()
         self.addCleanup(self.get_tv_genres_patcher.stop)
 
@@ -80,7 +80,7 @@ class TestSetSiteWideContext(TestCase):
 
 class TestGetLastWaiterStatus(TestCase):
     def setUp(self):
-        self.WaiterStatus_patcher = mock.patch('mediaviewer.views.home.WaiterStatus')
+        self.WaiterStatus_patcher = mock.patch('mediaviewer.views.views_utils.WaiterStatus')
         self.mock_WaiterStatus = self.WaiterStatus_patcher.start()
         self.addCleanup(self.WaiterStatus_patcher.stop)
 

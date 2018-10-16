@@ -6,11 +6,12 @@ from mediaviewer.models.request import (Request,
                                         RequestVote,
                                         )
 from mediaviewer.models.message import Message
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
+from mediaviewer.views.password_reset import check_force_password_change
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
 
 import json
 from mediaviewer import interjections

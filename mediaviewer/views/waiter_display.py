@@ -1,6 +1,7 @@
-from mediaviewer.views.home import setSiteWideContext
-from django.shortcuts import render
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.views.views_utils import setSiteWideContext
+from django.shortcuts import render, get_object_or_404
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
 from mediaviewer.models.file import File
 from mediaviewer.models.downloadtoken import DownloadToken
 
@@ -11,12 +12,12 @@ def waiter_display(request, fileid):
     context = {}
     context['active_page'] = 'home'
     context['title'] = 'Home'
-    file = File.objects.get(pk=fileid)
+    file = get_object_or_404(File, pk=fileid)
     user = request.user
 
     if not user.is_authenticated():
         context['errmsg'] = 'User not authenticated. Refresh and try again.'
-    elif file and user:
+    else:
         dt = DownloadToken.new(user, file)
 
         downloadlink = file.downloadLink(user, dt.guid)
@@ -24,8 +25,6 @@ def waiter_display(request, fileid):
                         'isMovie': dt.ismovie,
                         'downloadLink': downloadlink,
                         'errmsg': ''})
-    else:
-        context['errmsg'] = 'An error has occurred'
     setSiteWideContext(context, request, includeMessages=False)
 
     return render(request, 'mediaviewer/waiter_display.html', context)

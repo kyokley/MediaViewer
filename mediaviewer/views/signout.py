@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth import logout
 from mediaviewer.utils import logAccessInfo
 

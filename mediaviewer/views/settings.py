@@ -1,17 +1,19 @@
 from django.contrib.auth.decorators import login_required
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.usersettings import (UserSettings,
-                                      LOCAL_IP,
-                                      BANGUP_IP,
-                                      FILENAME_SORT,
-                                      )
-from mediaviewer.views.home import setSiteWideContext
+                                             LOCAL_IP,
+                                             BANGUP_IP,
+                                             FILENAME_SORT,
+                                             )
+from mediaviewer.views.views_utils import setSiteWideContext
 from django.shortcuts import render
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
 from mediaviewer.log import log
 from django.core.exceptions import ValidationError
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -21,7 +23,9 @@ def settings(request):
     context = {
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-              'greeting': siteGreeting and siteGreeting.greeting or "Check out the new downloads!",
+              'greeting': (siteGreeting and
+                           siteGreeting.greeting or
+                           "Check out the new downloads!"),
             }
     context['active_page'] = 'settings'
     user = request.user
@@ -43,6 +47,7 @@ def settings(request):
     setSiteWideContext(context, request, includeMessages=False)
 
     return render(request, 'mediaviewer/settings.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -91,6 +96,7 @@ def submitsettings(request):
     user.save()
     return render(request, 'mediaviewer/settingsresults.html', context)
 
+
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
 @logAccessInfo
@@ -115,6 +121,7 @@ def submitsitesettings(request):
         context['errMsg'] = 'Unauthorized access attempted'
         context['successful'] = False
     return render(request, 'mediaviewer/settingsresults.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change

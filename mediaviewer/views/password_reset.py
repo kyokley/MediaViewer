@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.core.urlresolvers import reverse
 from django.shortcuts import render
 from django.contrib.auth.views import (password_reset,
@@ -8,7 +10,7 @@ from django.contrib.auth.views import (password_reset,
                                        password_change_done,
                                        )
 from django.contrib.auth.models import User
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.forms import (MVSetPasswordForm,
                                MVPasswordChangeForm,
                                PasswordResetFormWithBCC,
@@ -65,6 +67,20 @@ def change_password(request):
                            password_change_form=MVPasswordChangeForm,
                            extra_context=context,
                            )
+
+def check_force_password_change(func):
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        request = args and args[0]
+        if request and request.user:
+            user = request.user
+            if user.is_authenticated():
+                settings = user.settings()
+                if settings.force_password_change:
+                    return change_password(request)
+        res = func(*args, **kwargs)
+        return res
+    return wrap
 
 def change_password_submit(request):
     context = {}

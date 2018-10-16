@@ -1,10 +1,12 @@
 import mock
+
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 from mediaviewer.views.settings import submitnewuser
 from mediaviewer.models.usersettings import UserSettings
 from django.core.exceptions import ValidationError
+
 
 @mock.patch('mediaviewer.views.settings.UserSettings.new')
 @mock.patch('mediaviewer.views.settings.log')

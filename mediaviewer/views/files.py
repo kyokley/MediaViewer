@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from mediaviewer.models.file import File
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth.decorators import login_required
 from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
@@ -13,7 +13,8 @@ from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
 
 import json
 import re

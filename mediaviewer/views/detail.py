@@ -4,11 +4,12 @@ from django.http import HttpResponse
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
                                              )
-from mediaviewer.utils import logAccessInfo, humansize, check_force_password_change
+from mediaviewer.utils import logAccessInfo, humansize
+from mediaviewer.views.password_reset import check_force_password_change
 from django.shortcuts import render, get_object_or_404, redirect
 import json
 
