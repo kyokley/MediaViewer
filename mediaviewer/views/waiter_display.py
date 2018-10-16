@@ -4,6 +4,7 @@ from mediaviewer.utils import logAccessInfo, check_force_password_change
 from mediaviewer.models.file import File
 from mediaviewer.models.downloadtoken import DownloadToken
 
+
 @check_force_password_change
 @logAccessInfo
 def waiter_display(request, fileid):
