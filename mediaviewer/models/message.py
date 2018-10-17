@@ -9,11 +9,16 @@ REGULAR = 'regular'
 LAST_WATCHED = 'last_watched'
 
 CONTINUE_MESSAGE = 'Continue watching {}?'
+
+
 class Message(models.Model):
     MESSAGE_TYPES = ((REGULAR, 'Regular'),
                      (LAST_WATCHED, 'Last Watched'),
                      )
-    touser = models.ForeignKey('auth.User', null=False, blank=False, db_column='touserid')
+    touser = models.ForeignKey('auth.User',
+                               null=False,
+                               blank=False,
+                               db_column='touserid')
     body = models.TextField(db_column='body', blank=True)
     sent = models.BooleanField(db_column='sent', blank=False)
     level = models.IntegerField(db_column='level', blank=False)
@@ -32,7 +37,8 @@ class Message(models.Model):
                         messages.INFO,
                         messages.SUCCESS,
                         messages.WARNING,
-                        messages.ERROR,]
+                        messages.ERROR,
+                        ]
     levelDescriptions = ['Debug',
                          'Info',
                          'Success',
@@ -45,13 +51,21 @@ class Message(models.Model):
         db_table = 'message'
 
     def __unicode__(self):
-        return 'id: %s body: %s datecreated: %s sent: %s' % (self.id, self.body, self.datecreated, self.sent)
+        return 'id: %s body: %s datecreated: %s sent: %s' % (
+                self.id,
+                self.body,
+                self.datecreated,
+                self.sent)
 
     def localdatecreated(self):
         return timezone.localtime(self.datecreated)
 
     @classmethod
-    def createNewMessage(cls, user, body, level=messages.SUCCESS, message_type=REGULAR):
+    def createNewMessage(cls,
+                         user,
+                         body,
+                         level=messages.SUCCESS,
+                         message_type=REGULAR):
         newMessage = Message()
         newMessage.touser = user
         newMessage.body = body
@@ -63,9 +77,9 @@ class Message(models.Model):
 
     @classmethod
     def createSitewideMessage(cls, body, level=messages.SUCCESS):
-       users = User.objects.all()
-       for user in users:
-           cls.createNewMessage(user, body, level=level)
+        users = User.objects.all()
+        for user in users:
+            cls.createNewMessage(user, body, level=level)
 
     @classmethod
     def createLastWatchedMessage(cls, user, file, level=messages.WARNING):
