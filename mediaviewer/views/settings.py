@@ -30,10 +30,7 @@ def settings(request):
     context['active_page'] = 'settings'
     user = request.user
     settings = user.settings()
-    if settings:
-        context['ip_format'] = settings.ip_format
-    else:
-        context['ip_format'] = BANGUP_IP
+    context['ip_format'] = settings.ip_format
     context['title'] = 'Settings'
     context['binge_mode'] = settings.binge_mode
     context['jump_to_last'] = settings.jump_to_last_watched
