@@ -72,13 +72,10 @@ def submitsettings(request):
 
     user = request.user
     settings = user.settings()
-    if not settings:
-        settings = UserSettings()
-        settings.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-        settings.user = request.user
-        changed = True
-    else:
-        changed = settings.default_sort != default_sort
+
+    changed = (settings.default_sort != default_sort or
+               settings.binge_mode != binge_mode or
+               settings.jump_to_last_watched != jump_to_last)
 
     settings.binge_mode = binge_mode
     settings.jump_to_last_watched = jump_to_last
@@ -87,7 +84,7 @@ def submitsettings(request):
     context['default_sort'] = settings.default_sort
 
     if changed:
-        settings.dateedited = dateObj.utcnow().replace(tzinfo=utc)
+        settings.dateedited = dateObj.now(utc)
 
     settings.save()
     user.save()

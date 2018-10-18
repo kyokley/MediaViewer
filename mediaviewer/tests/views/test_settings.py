@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from mediaviewer.views.settings import (submitnewuser,
                                         settings,
+                                        submitsettings,
                                         )
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.sitegreeting import SiteGreeting
@@ -216,6 +217,97 @@ class TestSettings(TestCase):
                 self.request,
                 'mediaviewer/settings.html',
                 expected_context)
+
+        self.assertFalse(self.mock_change_password.called)
+
+    def test_force_password_change(self):
+        self.settings.force_password_change = True
+
+        expected = self.mock_change_password.return_value
+        actual = settings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_change_password.assert_called_once_with(self.request)
+
+
+class TestSubmitSettings(TestCase):
+    def setUp(self):
+        self.FILENAME_SORT_patcher = mock.patch(
+                'mediaviewer.views.settings.FILENAME_SORT',
+                'test_filename_sort')
+        self.FILENAME_SORT_patcher.start()
+        self.addCleanup(self.FILENAME_SORT_patcher.stop)
+
+        self.setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.settings.setSiteWideContext')
+        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
+        self.addCleanup(self.setSiteWideContext_patcher.stop)
+
+        self.render_patcher = mock.patch('mediaviewer.views.settings.render')
+        self.mock_render = self.render_patcher.start()
+        self.addCleanup(self.render_patcher.stop)
+
+        self.change_password_patcher = mock.patch(
+                'mediaviewer.views.password_reset.change_password')
+        self.mock_change_password = self.change_password_patcher.start()
+        self.addCleanup(self.change_password_patcher.stop)
+
+        self.user = mock.create_autospec(User)
+        self.user.username = 'test_logged_in_user'
+        self.settings = mock.create_autospec(UserSettings)
+        self.settings.force_password_change = False
+        self.user.settings.return_value = self.settings
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+        self.request.POST = {}
+
+    def test_defaults(self):
+        expected_context = {'successful': True,
+                            'active_page': 'submitsettings',
+                            'default_sort': 'test_filename_sort',
+                            }
+
+        expected = self.mock_render.return_value
+        actual = submitsettings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/settingsresults.html',
+                expected_context)
+
+        self.assertEqual(self.settings.default_sort, 'test_filename_sort')
+        self.assertEqual(self.settings.binge_mode, False)
+        self.assertEqual(self.settings.jump_to_last_watched, False)
+
+        self.assertFalse(self.mock_change_password.called)
+
+    def test_non_defaults(self):
+        self.request.POST = {'default_sort': 'test_default_sort',
+                             'binge_mode': 'true',
+                             'jump_to_last': 'true',
+                             'email_field': 'test_new_email',
+                             }
+
+        expected_context = {'successful': True,
+                            'active_page': 'submitsettings',
+                            'default_sort': 'test_default_sort',
+                            }
+
+        expected = self.mock_render.return_value
+        actual = submitsettings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/settingsresults.html',
+                expected_context)
+
+        self.assertEqual(self.settings.default_sort, 'test_default_sort')
+        self.assertEqual(self.settings.binge_mode, True)
+        self.assertEqual(self.settings.jump_to_last_watched, True)
+        self.assertEqual(self.user.email, 'test_new_email')
 
         self.assertFalse(self.mock_change_password.called)
 
