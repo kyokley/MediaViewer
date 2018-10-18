@@ -6,6 +6,7 @@ from django.http import HttpRequest
 from mediaviewer.views.settings import (submitnewuser,
                                         settings,
                                         submitsettings,
+                                        submitsitesettings,
                                         )
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.sitegreeting import SiteGreeting
@@ -310,6 +311,117 @@ class TestSubmitSettings(TestCase):
         self.assertEqual(self.user.email, 'test_new_email')
 
         self.assertFalse(self.mock_change_password.called)
+
+    def test_force_password_change(self):
+        self.settings.force_password_change = True
+
+        expected = self.mock_change_password.return_value
+        actual = settings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_change_password.assert_called_once_with(self.request)
+
+
+class TestSubmitSiteSettings(TestCase):
+    def setUp(self):
+        self.SiteGreeting_patcher = mock.patch(
+                'mediaviewer.views.settings.SiteGreeting')
+        self.mock_SiteGreeting = self.SiteGreeting_patcher.start()
+        self.addCleanup(self.SiteGreeting_patcher.stop)
+
+        self.setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.settings.setSiteWideContext')
+        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
+        self.addCleanup(self.setSiteWideContext_patcher.stop)
+
+        self.render_patcher = mock.patch('mediaviewer.views.settings.render')
+        self.mock_render = self.render_patcher.start()
+        self.addCleanup(self.render_patcher.stop)
+
+        self.change_password_patcher = mock.patch(
+                'mediaviewer.views.password_reset.change_password')
+        self.mock_change_password = self.change_password_patcher.start()
+        self.addCleanup(self.change_password_patcher.stop)
+
+        self.user = mock.create_autospec(User)
+        self.user.username = 'test_logged_in_user'
+        self.settings = mock.create_autospec(UserSettings)
+        self.settings.force_password_change = False
+        self.user.settings.return_value = self.settings
+
+        self.newSiteGreeting = mock.MagicMock(SiteGreeting)
+        self.newSiteGreeting.greeting = 'test_greeting'
+        self.newSiteGreeting.user = self.user
+
+        self.mock_SiteGreeting.return_value = self.newSiteGreeting
+
+        self.latestSiteGreeting = mock.MagicMock(SiteGreeting)
+        self.latestSiteGreeting.greeting = 'test_greeting'
+        self.latestSiteGreeting.user = self.user
+
+        self.mock_SiteGreeting.return_value = self.latestSiteGreeting
+        self.mock_SiteGreeting.latestSiteGreeting.return_value = (
+                self.latestSiteGreeting)
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+        self.request.POST = {'greeting': 'new_greeting'}
+
+    def test_new_greeting(self):
+        self.user.is_staff = True
+        self.mock_SiteGreeting.latestSiteGreeting.return_value = None
+
+        expected_context = {'successful': True,
+                            'active_page': 'submitsitesettings',
+                            }
+
+        expected = self.mock_render.return_value
+        actual = submitsitesettings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/settingsresults.html',
+                expected_context)
+        self.assertEqual(self.mock_SiteGreeting.return_value.greeting,
+                         'new_greeting')
+
+    def test_no_greeting_change(self):
+        self.user.is_staff = True
+        self.request.POST['greeting'] = self.latestSiteGreeting.greeting
+
+        expected_context = {'successful': True,
+                            'active_page': 'submitsitesettings',
+                            }
+
+        expected = self.mock_render.return_value
+        actual = submitsitesettings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/settingsresults.html',
+                expected_context)
+        self.assertFalse(self.mock_SiteGreeting.called)
+
+    def test_is_not_staff(self):
+        self.user.is_staff = False
+        self.request.POST['greeting'] = self.latestSiteGreeting.greeting
+
+        expected_context = {'successful': False,
+                            'active_page': 'submitsitesettings',
+                            'errMsg': 'Unauthorized access attempted',
+                            }
+
+        expected = self.mock_render.return_value
+        actual = submitsitesettings(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/settingsresults.html',
+                expected_context)
+        self.assertFalse(self.mock_SiteGreeting.called)
 
     def test_force_password_change(self):
         self.settings.force_password_change = True
