@@ -4,14 +4,19 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 
+from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.forms import (MVSetPasswordForm,
                                PasswordResetFormWithBCC,
+                               MVPasswordChangeForm,
                                )
 
 from mediaviewer.views.password_reset import (reset_confirm,
                                               reset,
                                               reset_done,
                                               reset_complete,
+                                              create_new_password,
+                                              change_password,
+                                              change_password_submit,
                                               )
 
 
@@ -193,4 +198,120 @@ class TestRestComplete(TestCase):
         self.mock_password_reset_complete.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_complete.html'
+                )
+
+
+class TestCreateNewPassword(TestCase):
+    def setUp(self):
+        self.password_reset_confirm_patcher = mock.patch(
+                'mediaviewer.views.password_reset.password_reset_confirm')
+        self.mock_password_reset_confirm = (
+                self.password_reset_confirm_patcher.start())
+        self.addCleanup(self.password_reset_confirm_patcher.stop)
+
+        self.reverse_patcher = mock.patch(
+                'mediaviewer.views.password_reset.reverse')
+        self.mock_reverse = self.reverse_patcher.start()
+        self.addCleanup(self.reverse_patcher.stop)
+
+        self.request = mock.MagicMock(HttpRequest)
+
+    def test_valid(self):
+        expected = self.mock_password_reset_confirm.return_value
+        actual = create_new_password(self.request,
+                                     uidb64='test_uidb64',
+                                     token='test_token'
+                                     )
+
+        self.assertEqual(expected, actual)
+        self.mock_password_reset_confirm.assert_called_once_with(
+                self.request,
+                template_name='mediaviewer/password_create_confirm.html',
+                uidb64='test_uidb64',
+                token='test_token',
+                set_password_form=MVSetPasswordForm,
+                post_reset_redirect=self.mock_reverse.return_value,
+                )
+        self.mock_reverse.assert_called_once_with(
+                'mediaviewer:password_reset_complete')
+
+
+class TestChangePassword(TestCase):
+    def setUp(self):
+        self.password_change_patcher = mock.patch(
+                'mediaviewer.views.password_reset.password_change')
+        self.mock_password_change = self.password_change_patcher.start()
+        self.addCleanup(self.password_change_patcher.stop)
+
+        self.setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.password_reset.setSiteWideContext')
+        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
+        self.addCleanup(self.setSiteWideContext_patcher.stop)
+
+        self.reverse_patcher = mock.patch(
+                'mediaviewer.views.password_reset.reverse')
+        self.mock_reverse = self.reverse_patcher.start()
+        self.addCleanup(self.reverse_patcher.stop)
+
+        self.user = mock.MagicMock(User)
+        self.settings = mock.MagicMock(UserSettings)
+
+        self.user.settings.return_value = self.settings
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_valid(self):
+        expected_context = {
+                'force_change': self.settings.force_password_change,
+                'active_page': 'change_password'
+                }
+
+        expected = self.mock_password_change.return_value
+        actual = change_password(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request)
+        self.mock_reverse.assert_called_once_with(
+                'mediaviewer:change_password_submit')
+        self.mock_password_change.assert_called_once_with(
+                self.request,
+                template_name='mediaviewer/change_password.html',
+                post_change_redirect=self.mock_reverse.return_value,
+                password_change_form=MVPasswordChangeForm,
+                extra_context=expected_context,
+                )
+
+
+class TestChangePasswordSubmit(TestCase):
+    def setUp(self):
+        self.setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.password_reset.setSiteWideContext')
+        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
+        self.addCleanup(self.setSiteWideContext_patcher.stop)
+
+        self.password_change_done_patcher = mock.patch(
+                'mediaviewer.views.password_reset.password_change_done')
+        self.mock_password_change_done = (
+                self.password_change_done_patcher.start())
+        self.addCleanup(self.password_change_done_patcher.stop)
+
+        self.request = mock.MagicMock(HttpRequest)
+
+    def test_valid(self):
+        expected_context = {'active_page': 'change_password_submit'}
+
+        expected = self.mock_password_change_done.return_value
+        actual = change_password_submit(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request)
+        self.mock_password_change_done.assert_called_once_with(
+                self.request,
+                template_name='mediaviewer/change_password_submit.html',
+                extra_context=expected_context,
                 )
