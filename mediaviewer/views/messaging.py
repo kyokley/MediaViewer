@@ -42,8 +42,9 @@ def ajaxclosemessage(request):
         user = request.user
 
         if not user.is_authenticated():
-            response = {'errmsg': 'User not authenticated. Refresh and try again.'}
-        elif message and user:
+            response = {
+                    'errmsg': 'User not authenticated. Refresh and try again.'}
+        elif message:
             message.sent = True
             message.save()
     except Exception, e:
@@ -52,4 +53,5 @@ def ajaxclosemessage(request):
         else:
             response['errmsg'] = 'An error has occurred'
 
-    return HttpResponse(json.dumps(response), content_type='application/javascript')
+    return HttpResponse(json.dumps(response),
+                        content_type='application/javascript')

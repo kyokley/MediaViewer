@@ -73,7 +73,7 @@ class TestRequests(TestCase):
         self.settings.force_password_change = True
 
         expected = self.mock_change_password.return_value
-        actual = addrequests(self.request)
+        actual = requests(self.request)
         self.assertEqual(expected, actual)
 
         self.mock_change_password.assert_called_once_with(self.request)
