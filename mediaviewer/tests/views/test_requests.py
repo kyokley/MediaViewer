@@ -1,14 +1,82 @@
 import mock
 
-from django.contrib.auth.models import User
 from django.test import TestCase
+from django.contrib.auth.models import User
+from django.http import HttpRequest
 
 from mediaviewer.models.usersettings import UserSettings
+from mediaviewer.models.request import Request
 from mediaviewer.views.requests import (addrequests,
                                         ajaxvote,
                                         ajaxdone,
                                         ajaxgiveup,
+                                        requests,
                                         )
+
+
+class TestRequests(TestCase):
+    def setUp(self):
+        self.filter_patcher = mock.patch(
+                'mediaviewer.views.requests.Request.objects.filter')
+        self.mock_filter = self.filter_patcher.start()
+        self.addCleanup(self.filter_patcher.stop)
+
+        self.setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.requests.setSiteWideContext')
+        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
+        self.addCleanup(self.setSiteWideContext_patcher.stop)
+
+        self.render_patcher = mock.patch(
+                'mediaviewer.views.requests.render')
+        self.mock_render = self.render_patcher.start()
+        self.addCleanup(self.render_patcher.stop)
+
+        self.change_password_patcher = mock.patch(
+                'mediaviewer.views.password_reset.change_password')
+        self.mock_change_password = self.change_password_patcher.start()
+        self.addCleanup(self.change_password_patcher.stop)
+
+        self.user = mock.MagicMock(User)
+        self.settings = mock.MagicMock()
+        self.settings.force_password_change = False
+        self.user.settings.return_value = self.settings
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+        self.test_requestObj = mock.MagicMock(Request)
+        self.mock_filter.return_value = [self.test_requestObj]
+
+    def test_valid(self):
+        expected_context = {
+                'items': [self.test_requestObj],
+                'user': self.user,
+                'active_page': 'requests',
+                'title': 'Requests',
+                }
+
+        expected = self.mock_render.return_value
+        actual = requests(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_filter.assert_called_once_with(done=False)
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request,
+                includeMessages=True)
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/request.html',
+                expected_context)
+
+    def test_force_password_change(self):
+        self.settings.force_password_change = True
+
+        expected = self.mock_change_password.return_value
+        actual = addrequests(self.request)
+        self.assertEqual(expected, actual)
+
+        self.mock_change_password.assert_called_once_with(self.request)
 
 
 class TestAddRequests(TestCase):

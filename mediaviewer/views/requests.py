@@ -23,6 +23,10 @@ from mediaviewer import interjections
 def requests(request):
     items = Request.objects.filter(done=False)
     user = request.user
+
+    # The purpose of the code below is to put the item in a user "context"
+    # This is required to use the item in django's templating language
+    # It may be smarter to create a new type of object for this purpose
     for item in items:
         setattr(item, 'canVote', item.canVote(user))
     context = {'items': items,
@@ -96,7 +100,7 @@ def ajaxdone(request):
         response['errmsg'] = 'User not authenticated. Refresh and try again.'
         return HttpResponse(json.dumps(response),
                             content_type='application/javascript')
-    elif not user or not user.is_staff:
+    elif not user.is_staff:
         response['errmsg'] = 'User is not a staffer'
         return HttpResponse(json.dumps(response),
                             content_type='application/javascript')
@@ -141,7 +145,7 @@ def ajaxgiveup(request):
         response['errmsg'] = 'User not authenticated. Refresh and try again.'
         return HttpResponse(json.dumps(response),
                             content_type='application/javascript')
-    elif not user or not user.is_staff:
+    elif not user.is_staff:
         response['errmsg'] = 'User is not a staffer'
         return HttpResponse(json.dumps(response),
                             content_type='application/javascript')
