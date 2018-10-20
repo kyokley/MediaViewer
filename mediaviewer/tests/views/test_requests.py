@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.request import Request
 from mediaviewer.views.requests import (addrequests,
                                         ajaxvote,
                                         ajaxdone,
+                                        ajaxgiveup,
                                         )
 
 
@@ -133,6 +133,7 @@ class TestAjaxVote(TestCase):
                 self.request)
 
 
+# TODO: Add tests for user messages
 class TestAjaxDone(TestCase):
     def setUp(self):
         self.HttpResponse_patcher = mock.patch(
@@ -197,6 +198,78 @@ class TestAjaxDone(TestCase):
                 'requestid': 123}
         expected = self.mock_httpResponse.return_value
         actual = ajaxdone(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with(expected_response)
+        self.mock_httpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')
+
+
+class TestGiveUp(TestCase):
+    def setUp(self):
+        self.HttpResponse_patcher = mock.patch(
+                'mediaviewer.views.requests.HttpResponse')
+        self.mock_httpResponse = self.HttpResponse_patcher.start()
+        self.addCleanup(self.HttpResponse_patcher.stop)
+
+        self.dumps_patcher = mock.patch(
+                'mediaviewer.views.requests.json.dumps')
+        self.mock_dumps = self.dumps_patcher.start()
+        self.addCleanup(self.dumps_patcher.stop)
+
+        self.get_object_patcher = mock.patch(
+                'mediaviewer.views.requests.get_object_or_404')
+        self.mock_get_object = self.get_object_patcher.start()
+        self.addCleanup(self.get_object_patcher.stop)
+
+        self.user = mock.create_autospec(User)
+        self.user.username = 'test_logged_in_user'
+        self.user.is_authenticated.return_value = True
+        self.user.is_staff = True
+        self.settings = mock.create_autospec(UserSettings)
+        self.settings.force_password_change = False
+        self.user.settings.return_value = self.settings
+
+        self.request = mock.MagicMock()
+        self.request.POST = {'requestid': 123}
+        self.request.user = self.user
+
+    def test_user_not_authenticated(self):
+        self.user.is_authenticated.return_value = False
+
+        expected_response = {
+                'errmsg': 'User not authenticated. Refresh and try again.'}
+        expected = self.mock_httpResponse.return_value
+        actual = ajaxgiveup(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with(expected_response)
+        self.mock_httpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')
+
+    def test_user_not_staff(self):
+        self.user.is_staff = False
+
+        expected_response = {
+                'errmsg': 'User is not a staffer'}
+        expected = self.mock_httpResponse.return_value
+        actual = ajaxgiveup(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with(expected_response)
+        self.mock_httpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')
+
+    def test_valid(self):
+        expected_response = {
+                'errmsg': '',
+                'message': 'Give up!',
+                'requestid': 123}
+        expected = self.mock_httpResponse.return_value
+        actual = ajaxgiveup(self.request)
 
         self.assertEqual(expected, actual)
         self.mock_dumps.assert_called_once_with(expected_response)
