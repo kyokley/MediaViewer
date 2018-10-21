@@ -15,12 +15,25 @@ from mediaviewer.models.actor import Actor
 from mediaviewer.models.writer import Writer
 from mediaviewer.models.director import Director
 
+
 # Destroy failed posterfiles weekly to allow new attempts
 class PosterFile(models.Model):
-    file = models.ForeignKey('mediaviewer.File', null=True, db_column='fileid', blank=True, related_name='_posterfile')
-    path = models.ForeignKey('mediaviewer.Path', null=True, db_column='pathid', blank=True, related_name='_posterfile')
-    datecreated = models.DateTimeField(db_column='datecreated', blank=True, auto_now_add=True)
-    dateedited = models.DateTimeField(db_column='dateedited', blank=True, auto_now=True)
+    file = models.ForeignKey('mediaviewer.File',
+                             null=True,
+                             db_column='fileid',
+                             blank=True,
+                             related_name='_posterfile')
+    path = models.ForeignKey('mediaviewer.Path',
+                             null=True,
+                             db_column='pathid',
+                             blank=True,
+                             related_name='_posterfile')
+    datecreated = models.DateTimeField(db_column='datecreated',
+                                       blank=True,
+                                       auto_now_add=True)
+    dateedited = models.DateTimeField(db_column='dateedited',
+                                      blank=True,
+                                      auto_now=True)
     image = models.TextField(blank=True)
     plot = models.TextField(blank=True)
     extendedplot = models.TextField(blank=True)
@@ -38,7 +51,13 @@ class PosterFile(models.Model):
         db_table = 'posterfile'
 
     def __unicode__(self):
-        return 'id: %s f: %s i: %s' % (self.id, self.file and self.file.filename or self.path and self.path.localpathstr, self.image)
+        return 'id: %s f: %s i: %s' % (
+                self.id,
+                (self.file and
+                    self.file.filename or
+                    self.path and
+                    self.path.localpathstr),
+                self.image)
 
     def display_genres(self):
         return ', '.join([x.genre for x in self.genres.all()])
@@ -150,12 +169,15 @@ class PosterFile(models.Model):
                 try:
                     tvdb_id = tvinfo['results'][0]['id'] if tvinfo else None
                 except Exception as e:
-                    log.error('Got bad response during searchTVDBByName: {}'.format(ref_obj.searchString()))
+                    log.error(
+                        'Got bad response during searchTVDBByName: {}'.format(
+                            ref_obj.searchString()))
                     log.error(e)
                     tvdb_id = None
 
                 if tvdb_id:
-                    log.debug('Set tvdb id for this path to {}'.format(tvdb_id))
+                    log.debug(
+                            'Set tvdb id for this path to {}'.format(tvdb_id))
                     ref_obj.path.tvdb_id = tvdb_id
                     ref_obj.path.save()
             else:
@@ -193,12 +215,14 @@ class PosterFile(models.Model):
 
     def _assignDataToPoster(self, data, cast_and_crew, ref_obj):
         plot = (data.get('Plot') or
-                    data.get('overview') or
-                    'results' in data and data['results'] and data['results'][0].get('overview'))
+                data.get('overview') or
+                'results' in data and
+                data['results'] and data['results'][0].get('overview'))
         self.plot = plot if plot and plot != 'undefined' else None
 
         if data.get('results') or data.get('genre_ids'):
-            genre_ids = data.get('genre_ids') or data['results'][0]['genre_ids']
+            genre_ids = (data.get('genre_ids') or
+                         data['results'][0]['genre_ids'])
             for genre_id in genre_ids:
                 g = tvdbConfig.genres.get(genre_id)
                 if g:
