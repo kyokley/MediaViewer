@@ -23,7 +23,7 @@ def getJSONData(url):
 
             if remaining < .1 * limit:
                 log.warning('90%% of the rate limit has been used. Sleeping for 10 seconds')
-                time.sleep(10)
+                time.sleep(1)
 
         return data
     except Exception, e:
@@ -143,26 +143,28 @@ def getDataFromIMDBByPath(refPath):
 
         return getDataFromIMDB(refFile)
 
+# TODO: Test me!!!!
 def _getDataFromIMDBByID(imdb_id, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (imdb_id,))
 
     url = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % (imdb_id, API_KEY)
     resp = getJSONData(url)
 
-    if not isMovie:
-        tmdb_id = resp.get('tv_results')[0]['id']
-        url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (tmdb_id, API_KEY)
-    else:
-        tmdb_id = resp.get('movie_results')[0]['id']
-        url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
+    if resp:
+        if not isMovie:
+            tmdb_id = resp.get('tv_results')[0]['id']
+            url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (tmdb_id, API_KEY)
+        else:
+            tmdb_id = resp.get('movie_results')[0]['id']
+            url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
 
-    data = getJSONData(url)
+        data = getJSONData(url)
 
-    if data:
-        data['url'] = url
-    else:
-        return None
-    return data
+        if data:
+            data['url'] = url
+        else:
+            return None
+        return data
 
 def _getDataFromIMDBBySearchString(searchString, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (searchString,))
