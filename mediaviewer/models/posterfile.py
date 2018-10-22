@@ -100,6 +100,61 @@ class PosterFile(models.Model):
         obj._downloadPosterData()
         return obj
 
+    @property
+    def ref_obj(self):
+        return self.file or self.path
+
+    def _getIMDBData(self):
+        log.debug('Attempt to get data from IMDB')
+
+        if self.ref_obj.isMovie():
+            data = getDataFromIMDB(self.ref_obj)
+        elif self.path:
+            data = getDataFromIMDBByPath(self.ref_obj)
+        else:
+            data = getDataFromIMDB(self.ref_obj)
+
+        if data:
+            self._cast_and_crew(data)
+
+        return data
+
+    def _cast_and_crew(self, imdb_data):
+        """Populate cast and crew info for this posterfile.
+
+        Args:
+            imdb_data: Data received from IMDB
+
+        """
+        season = None
+        episode = None
+
+        if self.file and self.file.isTVShow():
+            log.debug('Getting season and episode')
+            season = self.ref_obj.getScrapedSeason()
+            season = season and int(season)
+            episode = self.ref_obj.getScrapedEpisode()
+            episode = episode and int(episode)
+
+        self.tmdb_id = imdb_data['id']
+        cast_and_crew = getCastData(self.tmdb_id,
+                                    season=season,
+                                    episode=episode,
+                                    isMovie=self.ref_obj.isMovie())
+
+        if cast_and_crew:
+            for actor in cast_and_crew['cast']:
+                actor_obj = Actor.new(actor['name'], order=actor.get('order'))
+                self.actors.add(actor_obj)
+
+            for job in cast_and_crew['crew']:
+                if job['job'] == 'Writer':
+                    writer_obj = Writer.new(job['name'])
+                    self.writers.add(writer_obj)
+                elif job['job'] == 'Director':
+                    director_obj = Director.new(job['name'])
+                    self.directors.add(director_obj)
+
     def _downloadPosterData(self):
         if self.path and self.path.isMovie():
             raise ValueError('Movie paths are not allowed to have poster data')

@@ -480,3 +480,204 @@ class TestTVFileDownloadPosterData(TestCase):
                 self.tv_file)
         self.assertEqual(self.poster.file.path.tvdb_id, 12345)
         self.assertEqual(self.poster.image, 'image.jpg')
+
+
+class TestGetIMDBData(TestCase):
+    def setUp(self):
+        getDataFromIMDB_patcher = mock.patch(
+                'mediaviewer.models.posterfile.getDataFromIMDB')
+        self.mock_getDataFromIMDB = getDataFromIMDB_patcher.start()
+        self.addCleanup(getDataFromIMDB_patcher.stop)
+
+        getDataFromIMDBByPath_patcher = mock.patch(
+                'mediaviewer.models.posterfile.getDataFromIMDBByPath')
+        self.mock_getDataFromIMDBByPath = getDataFromIMDBByPath_patcher.start()
+        self.addCleanup(getDataFromIMDBByPath_patcher.stop)
+
+        cast_and_crew_patcher = mock.patch(
+                'mediaviewer.models.posterfile.PosterFile._cast_and_crew')
+        self.mock_cast_and_crew = cast_and_crew_patcher.start()
+        self.addCleanup(cast_and_crew_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
+
+        self.movie_path = Path.new('movie.local.path',
+                                   'movie.remote.path',
+                                   is_movie=True)
+        self.movie_file = File.new('new.file.mp4',
+                                   self.movie_path)
+
+        self.test_obj = PosterFile()
+
+    def test_file_is_movie(self):
+        self.test_obj.file = self.movie_file
+
+        expected = self.mock_getDataFromIMDB.return_value
+        actual = self.test_obj._getIMDBData()
+
+        self.assertEqual(expected, actual)
+        self.mock_getDataFromIMDB.assert_called_once_with(self.movie_file)
+        self.mock_cast_and_crew.assert_called_once_with(
+                self.mock_getDataFromIMDB.return_value)
+
+    def test_path_for_tv(self):
+        self.test_obj.path = self.tv_path
+
+        expected = self.mock_getDataFromIMDBByPath.return_value
+        actual = self.test_obj._getIMDBData()
+
+        self.assertEqual(expected, actual)
+        self.mock_getDataFromIMDBByPath.assert_called_once_with(self.tv_path)
+        self.mock_cast_and_crew.assert_called_once_with(
+                self.mock_getDataFromIMDBByPath.return_value)
+
+    def test_file_for_tv(self):
+        self.test_obj.file = self.tv_file
+
+        expected = self.mock_getDataFromIMDB.return_value
+        actual = self.test_obj._getIMDBData()
+
+        self.assertEqual(expected, actual)
+        self.mock_getDataFromIMDB.assert_called_once_with(self.tv_file)
+        self.mock_cast_and_crew.assert_called_once_with(
+                self.mock_getDataFromIMDB.return_value)
+
+
+class TestCastAndCrew(TestCase):
+    def setUp(self):
+        getCastData_patcher = mock.patch(
+                'mediaviewer.models.posterfile.getCastData')
+        self.mock_getCastData = getCastData_patcher.start()
+        self.addCleanup(getCastData_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
+
+        self.movie_path = Path.new('movie.local.path',
+                                   'movie.remote.path',
+                                   is_movie=True)
+        self.movie_file = File.new('new.file.mp4',
+                                   self.movie_path)
+
+        self.test_obj = PosterFile()
+        self.test_obj.save()
+
+        self.test_imdb_data = {'id': 123}
+
+        self.test_getCastData = {
+                'cast': [
+                    {'name': 'test_actor'}],
+                'crew': [
+                    {'job': 'Writer',
+                        'name': 'test_writer'},
+                    {'job': 'Director',
+                        'name': 'test_director'},
+                    ],
+                }
+        self.mock_getCastData.return_value = self.test_getCastData
+
+    def test_no_cast_data(self):
+        self.mock_getCastData.return_value = None
+        self.test_obj.file = self.movie_file
+
+        expected = None
+        actual = self.test_obj._cast_and_crew(self.test_imdb_data)
+
+        self.assertEqual(expected, actual)
+        self.mock_getCastData.assert_called_once_with(
+                123,
+                season=None,
+                episode=None,
+                isMovie=True)
+
+        self.assertEqual(
+                [],
+                list(self.test_obj.actors.all()))
+        self.assertEqual(
+                [],
+                list(self.test_obj.writers.all()))
+        self.assertEqual(
+                [],
+                list(self.test_obj.directors.all()))
+
+    def test_file_is_movie(self):
+        self.test_obj.file = self.movie_file
+
+        expected = None
+        actual = self.test_obj._cast_and_crew(self.test_imdb_data)
+
+        self.assertEqual(expected, actual)
+        self.mock_getCastData.assert_called_once_with(
+                123,
+                season=None,
+                episode=None,
+                isMovie=True)
+
+        self.assertEqual(
+                'Test_Actor',
+                self.test_obj.actors.all()[0].name)
+        self.assertEqual(
+                'Test_Writer',
+                self.test_obj.writers.all()[0].name)
+        self.assertEqual(
+                'Test_Director',
+                self.test_obj.directors.all()[0].name)
+
+    def test_path_for_tv(self):
+        self.test_obj.path = self.tv_path
+
+        expected = None
+        actual = self.test_obj._cast_and_crew(self.test_imdb_data)
+
+        self.assertEqual(expected, actual)
+        self.mock_getCastData.assert_called_once_with(
+                123,
+                season=None,
+                episode=None,
+                isMovie=False)
+
+        self.assertEqual(
+                'Test_Actor',
+                self.test_obj.actors.all()[0].name)
+        self.assertEqual(
+                'Test_Writer',
+                self.test_obj.writers.all()[0].name)
+        self.assertEqual(
+                'Test_Director',
+                self.test_obj.directors.all()[0].name)
+
+    def test_file_is_tv(self):
+        self.test_obj.file = self.tv_file
+
+        expected = None
+        actual = self.test_obj._cast_and_crew(self.test_imdb_data)
+
+        self.assertEqual(expected, actual)
+        self.mock_getCastData.assert_called_once_with(
+                123,
+                season=3,
+                episode=5,
+                isMovie=False)
+
+        self.assertEqual(
+                'Test_Actor',
+                self.test_obj.actors.all()[0].name)
+        self.assertEqual(
+                'Test_Writer',
+                self.test_obj.writers.all()[0].name)
+        self.assertEqual(
+                'Test_Director',
+                self.test_obj.directors.all()[0].name)
