@@ -134,6 +134,7 @@ class PosterFile(models.Model):
         if data:
             self.poster_url = data.get('Poster') or data.get('poster_path')
             self._cast_and_crew(data)
+        self._assign_tvdb_info()
 
         return data
 
