@@ -45,6 +45,7 @@ class PosterFile(models.Model):
     rated = models.TextField(blank=True, null=True)
     rating = models.TextField(blank=True, null=True)
     tmdb_id = models.TextField(blank=True, null=True)
+    poster_url = models.URLField(blank=True, null=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -104,6 +105,22 @@ class PosterFile(models.Model):
     def ref_obj(self):
         return self.file or self.path
 
+    @property
+    def season(self):
+        if self.file and self.file.isTVShow():
+            scraped_season = self.ref_obj.getScrapedSeason()
+            return int(scraped_season) if scraped_season else None
+        else:
+            return None
+
+    @property
+    def episode(self):
+        if self.file and self.file.isTVShow():
+            scraped_episode = self.ref_obj.getScrapedEpisode()
+            return int(scraped_episode) if scraped_episode else None
+        else:
+            return None
+
     def _getIMDBData(self):
         log.debug('Attempt to get data from IMDB')
 
@@ -115,6 +132,7 @@ class PosterFile(models.Model):
             data = getDataFromIMDB(self.ref_obj)
 
         if data:
+            self.poster_url = data.get('Poster') or data.get('poster_path')
             self._cast_and_crew(data)
 
         return data
@@ -126,20 +144,10 @@ class PosterFile(models.Model):
             imdb_data: Data received from IMDB
 
         """
-        season = None
-        episode = None
-
-        if self.file and self.file.isTVShow():
-            log.debug('Getting season and episode')
-            season = self.ref_obj.getScrapedSeason()
-            season = season and int(season)
-            episode = self.ref_obj.getScrapedEpisode()
-            episode = episode and int(episode)
-
         self.tmdb_id = imdb_data['id']
         cast_and_crew = getCastData(self.tmdb_id,
-                                    season=season,
-                                    episode=episode,
+                                    season=self.season,
+                                    episode=self.episode,
                                     isMovie=self.ref_obj.isMovie())
 
         if cast_and_crew:
@@ -154,6 +162,47 @@ class PosterFile(models.Model):
                 elif job['job'] == 'Director':
                     director_obj = Director.new(job['name'])
                     self.directors.add(director_obj)
+
+    def _tvdb_episode_info(self, tvdb_id):
+        tvinfo = getTVDBEpisodeInfo(tvdb_id,
+                                    self.season,
+                                    self.episode)
+
+        if tvinfo:
+            self.poster_url = tvinfo.get('still_path') or self.poster_url
+            self.extendedplot = tvinfo.get('overview', '')
+            self.episodename = tvinfo.get('name')
+
+    def _assign_tvdb_info(self):
+        if not self.season or not self.episode:
+            return
+
+        if self.ref_obj.path and not self.ref_obj.path.tvdb_id:
+            log.debug('No tvdb id for this path. '
+                      'Continue search by tv show name')
+            tvinfo = searchTVDBByName(self.ref_obj.searchString())
+
+            try:
+                tvdb_id = tvinfo['results'][0]['id'] if tvinfo else None
+            except Exception as e:
+                log.error(
+                    'Got bad response during searchTVDBByName: {}'.format(
+                        self.ref_obj.searchString()))
+                log.error(e)
+                tvdb_id = None
+
+            if tvdb_id:
+                log.debug(
+                        'Set tvdb id for this path to {}'.format(tvdb_id))
+                self.ref_obj.path.tvdb_id = tvdb_id
+                self.ref_obj.path.save()
+        elif self.ref_obj.path:
+            tvdb_id = self.ref_obj.path.tvdb_id
+        else:
+            tvdb_id = None
+
+        if tvdb_id:
+            self._tvdb_episode_info(tvdb_id)
 
     def _downloadPosterData(self):
         if self.path and self.path.isMovie():
