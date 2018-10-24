@@ -99,6 +99,7 @@ class PosterFile(models.Model):
         obj.save()
 
         obj._populate_poster_data()
+        obj.save()
         return obj
 
     @property
@@ -127,7 +128,8 @@ class PosterFile(models.Model):
 
     def _download_poster(self):
         try:
-            if self.poster_url and self.image:
+            if self.poster_url:
+                self.image = self.poster_url.rpartition('/')[-1]
                 saveImageToDisk(self.poster_url, self.image)
         except Exception as e:
             log.error(str(e), exc_info=True)
@@ -157,10 +159,11 @@ class PosterFile(models.Model):
         return data
 
     def _store_plot(self, imdb_data):
-        plot = (imdb_data.get('Plot') or
-                imdb_data.get('overview') or
-                'results' in imdb_data and
-                imdb_data['results'] and imdb_data['results'][0].get('overview'))
+        plot = (
+            imdb_data.get('Plot') or
+            imdb_data.get('overview') or
+            'results' in imdb_data and
+            imdb_data['results'] and imdb_data['results'][0].get('overview'))
         self.plot = plot if plot and plot != 'undefined' else None
 
     def _store_genres(self, imdb_data):
