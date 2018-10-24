@@ -249,3 +249,5 @@ def getRating(tmdb_id, isMovie=True):
         except Exception as e:
             log.error('Received error trying to get imdbRating')
             log.error(e)
+    elif data.get('vote_average'):
+        return data.get('vote_average')

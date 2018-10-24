@@ -34,7 +34,6 @@ class PosterFile(models.Model):
     dateedited = models.DateTimeField(db_column='dateedited',
                                       blank=True,
                                       auto_now=True)
-    image = models.TextField(blank=True)
     plot = models.TextField(blank=True)
     extendedplot = models.TextField(blank=True)
     genres = models.ManyToManyField('mediaviewer.Genre')
@@ -71,6 +70,10 @@ class PosterFile(models.Model):
 
     def display_directors(self):
         return ', '.join([x.name for x in self.directors.all()])
+
+    @property
+    def image(self):
+        return self.poster_url.rpartition('/')[-1] if self.poster_url else None
 
     @classmethod
     def new(cls,
@@ -129,7 +132,6 @@ class PosterFile(models.Model):
     def _download_poster(self):
         try:
             if self.poster_url:
-                self.image = self.poster_url.rpartition('/')[-1]
                 saveImageToDisk(self.poster_url, self.image)
         except Exception as e:
             log.error(str(e), exc_info=True)

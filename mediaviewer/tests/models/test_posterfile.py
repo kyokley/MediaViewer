@@ -603,7 +603,7 @@ class TestDownloadPoster(TestCase):
 
         self.assertEqual(expected, actual)
         self.assertFalse(self.mock_saveImageToDisk.called)
-        self.assertEqual('', self.test_obj.image)
+        self.assertEqual(None, self.test_obj.image)
 
     def test_valid(self):
         expected = None
