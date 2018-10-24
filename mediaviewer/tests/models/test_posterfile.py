@@ -593,8 +593,7 @@ class TestDownloadPoster(TestCase):
         self.addCleanup(saveImageToDisk_patcher.stop)
 
         self.test_obj = PosterFile()
-        self.test_obj.poster_url = 'test_poster_url'
-        self.test_obj.image = 'test_image'
+        self.test_obj.poster_url = '/test_poster_url'
 
     def test_missing_poster_url(self):
         self.test_obj.poster_url = None
@@ -604,15 +603,7 @@ class TestDownloadPoster(TestCase):
 
         self.assertEqual(expected, actual)
         self.assertFalse(self.mock_saveImageToDisk.called)
-
-    def test_missing_image(self):
-        self.test_obj.image = None
-
-        expected = None
-        actual = self.test_obj._download_poster()
-
-        self.assertEqual(expected, actual)
-        self.assertFalse(self.mock_saveImageToDisk.called)
+        self.assertEqual('', self.test_obj.image)
 
     def test_valid(self):
         expected = None
@@ -622,6 +613,7 @@ class TestDownloadPoster(TestCase):
         self.mock_saveImageToDisk.assert_called_once_with(
                 self.test_obj.poster_url,
                 self.test_obj.image)
+        self.assertEqual('test_poster_url', self.test_obj.image)
 
 
 class TestStorePlot(TestCase):

@@ -52,11 +52,15 @@ class File(models.Model):
                                blank=True,
                                null=True)
     hide = models.BooleanField(db_column='hide', default=False)
-    filenamescrapeformat = models.ForeignKey('mediaviewer.FilenameScrapeFormat',
-                                             null=True,
-                                             db_column='filenamescrapeformatid',
-                                             blank=True)
-    streamable = models.BooleanField(db_column='streamable', null=False, default=True)
+    filenamescrapeformat = models.ForeignKey(
+            'mediaviewer.FilenameScrapeFormat',
+            null=True,
+            db_column='filenamescrapeformatid',
+            blank=True)
+    streamable = models.BooleanField(
+            db_column='streamable',
+            null=False,
+            default=True)
     override_filename = models.TextField(blank=True)
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
@@ -102,6 +106,7 @@ class File(models.Model):
 
     def _get_pathid(self):
         return self.path.id
+
     def _set_pathid(self, val):
         from mediaviewer.models.path import Path
         path = Path.objects.get(pk=val)
@@ -241,9 +246,9 @@ class File(models.Model):
         return 'id: %s f: %s' % (self.id, self.fileName)
 
     def url(self):
-        return '<a href="{}">{}</a>'.format(reverse('mediaviewer:filesdetail', args=(self.id,)),
-                                            self.displayName())
-
+        return '<a href="{}">{}</a>'.format(
+                reverse('mediaviewer:filesdetail', args=(self.id,)),
+                self.displayName())
 
     def getSearchTerm(self):
         if self.isMovie():
@@ -271,9 +276,9 @@ class File(models.Model):
 
     def rawSearchString(self):
         searchStr = (self.override_filename or
-                        self.path.override_display_name or
-                        self._searchString or
-                        self.getSearchTerm())
+                     self.path.override_display_name or
+                     self._searchString or
+                     self.getSearchTerm())
         return searchStr
 
     def getScrapedName(self):
@@ -301,22 +306,30 @@ class File(models.Model):
             if not self.filenamescrapeformat:
                 return None
 
-            seasonRegex = re.compile(self.filenamescrapeformat.seasonRegex).findall(self.filename)
+            seasonRegex = re.compile(
+                    self.filenamescrapeformat.seasonRegex).findall(
+                            self.filename)
             season = seasonRegex and seasonRegex[0] or None
         else:
             season = self.override_season
-        return season and (season.isdigit() and season.zfill(2) or None) or None
+        return (season and
+                (season.isdigit() and season.zfill(2) or None) or
+                None)
 
     def getScrapedEpisode(self):
         if not self.override_episode:
             if not self.filenamescrapeformat:
                 return None
 
-            episodeRegex = re.compile(self.filenamescrapeformat.episodeRegex).findall(self.filename)
+            episodeRegex = re.compile(
+                    self.filenamescrapeformat.episodeRegex).findall(
+                            self.filename)
             episode = episodeRegex and episodeRegex[0] or None
         else:
             episode = self.override_episode
-        return episode and (episode.isdigit() and episode.zfill(2) or None) or None
+        return (episode and
+                (episode.isdigit() and episode.zfill(2) or None) or
+                None)
 
     def getScrapedFullName(self):
         if self.isMovie():
@@ -347,14 +360,20 @@ class File(models.Model):
             episode = self.getScrapedEpisode()
             sFail = re.compile('\s[sS]$')
             if (name and
-                name != self.filename and
-                not sFail.findall(name) and
-                season and
-                episode and
-                int(episode) != 64):
+                    name != self.filename and
+                    not sFail.findall(name) and
+                    season and
+                    episode and
+                    int(episode) != 64):
                 # Success!
                 log.debug("Success!!!")
-                log.debug('Name: %s Season: %s Episode: %s Fullname: %s FSid: %s' % (name, season, episode, self.filename, scraper.id))
+                log.debug(
+                    'Name: %s Season: %s Episode: %s Fullname: %s FSid: %s' % (
+                        name,
+                        season,
+                        episode,
+                        self.filename,
+                        scraper.id))
                 self.save()
                 self.destroyPosterFile()
                 break
@@ -382,7 +401,8 @@ class File(models.Model):
 
     @classmethod
     def populate_all_posterfiles(cls):
-        all_files = cls.objects.filter(path__is_movie=True).filter(hide=False).all()
+        all_files = cls.objects.filter(
+                path__is_movie=True).filter(hide=False).all()
         for file in all_files:
             file.posterfile
             time.sleep(.5)

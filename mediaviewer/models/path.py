@@ -9,18 +9,31 @@ from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
 
+
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
     remotepathstr = models.TextField(blank=True)
     skip = models.BooleanField(blank=True)
-    is_movie = models.BooleanField(blank=False, null=False, db_column='ismovie')
-    defaultScraper = models.ForeignKey('mediaviewer.FilenameScrapeFormat', null=True, blank=True, db_column='defaultscraperid')
+    is_movie = models.BooleanField(blank=False,
+                                   null=False,
+                                   db_column='ismovie')
+    defaultScraper = models.ForeignKey(
+            'mediaviewer.FilenameScrapeFormat',
+            null=True,
+            blank=True,
+            db_column='defaultscraperid')
     tvdb_id = models.TextField(null=True, blank=True)
     server = models.TextField(blank=False, null=False)
     defaultsearchstr = models.TextField(null=True, blank=True)
     imdb_id = models.TextField(null=True, blank=True)
-    override_display_name = models.TextField(null=True, blank=True, db_column='display_name')
-    lastCreatedFileDate = models.DateTimeField(null=True, blank=True, db_column='lastcreatedfiledate')
+    override_display_name = models.TextField(
+            null=True,
+            blank=True,
+            db_column='display_name')
+    lastCreatedFileDate = models.DateTimeField(
+            null=True,
+            blank=True,
+            db_column='lastcreatedfiledate')
 
     class Meta:
         app_label = 'mediaviewer'
@@ -52,7 +65,8 @@ class Path(models.Model):
         return True
 
     def files(self):
-        return File.objects.filter(path__localpathstr=self.localpathstr).filter(hide=False)
+        return File.objects.filter(
+                path__localpathstr=self.localpathstr).filter(hide=False)
 
     @property
     def shortName(self):
@@ -71,22 +85,28 @@ class Path(models.Model):
     remotepath = remotePath
 
     def displayName(self):
-        return self.override_display_name or self.shortName.replace('.', ' ').title()
+        return (self.override_display_name or
+                self.shortName.replace('.', ' ').title())
 
     def __unicode__(self):
-        return 'id: %s r: %s l: %s' % (self.id, self.remotePath, self.localPath)
+        return 'id: %s r: %s l: %s' % (self.id,
+                                       self.remotePath,
+                                       self.localPath)
 
     def lastCreatedFileDateForSpan(self):
         last_date = self.lastCreatedFileDate
         return last_date and last_date.date().isoformat()
 
     def url(self):
-        return '<a href="{}">{}</a>'.format(reverse('mediaviewer:tvshows', args=(self.id,)),
-                                            self.displayName())
+        return '<a href="{}">{}</a>'.format(
+                reverse('mediaviewer:tvshows', args=(self.id,)),
+                self.displayName())
 
     @classmethod
     def distinctShowFolders(cls):
-        refFiles = File.objects.filter(path__is_movie=False).order_by('path').distinct('path').select_related('path')
+        refFiles = File.objects.filter(
+                path__is_movie=False).order_by(
+                        'path').distinct('path').select_related('path')
         paths = set([file.path for file in refFiles])
         return cls._buildDistinctShowFoldersFromPaths(paths)
 
@@ -96,7 +116,9 @@ class Path(models.Model):
         for path in paths:
             lastDate = path.lastCreatedFileDate
             if path.shortName in pathDict:
-                if lastDate and pathDict[path.shortName].lastCreatedFileDate < lastDate:
+                if (lastDate and
+                        pathDict[
+                            path.shortName].lastCreatedFileDate < lastDate):
                     pathDict[path.shortName] = path
             else:
                 pathDict[path.shortName] = path
@@ -134,7 +156,8 @@ class Path(models.Model):
             raise Exception('This function does not apply to movies')
 
         if daysBack > 0:
-            refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=daysBack)
+            refDate = (dateObj.utcnow().replace(tzinfo=utc) -
+                       timedelta(days=daysBack))
             files = (File.objects.filter(path__localpathstr=self.localpathstr)
                                  .filter(datecreated__gt=refDate)
                                  .filter(hide=False)
