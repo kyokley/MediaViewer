@@ -4,7 +4,6 @@ from django.test import TestCase
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
-from mediaviewer.models.genre import Genre
 
 sample_good_result = {u'backdrop_path': u'/asdfasdf.jpg',
                       u'first_air_date': u'2016-09-30',
@@ -128,6 +127,11 @@ class TestNew(TestCase):
         self.mock_downloadPosterData = downloadPosterData_patcher.start()
         self.addCleanup(downloadPosterData_patcher.stop)
 
+        populate_poster_data_patcher = mock.patch(
+            'mediaviewer.models.posterfile.PosterFile._populate_poster_data')
+        self.mock_populate_poster_data = populate_poster_data_patcher.start()
+        self.addCleanup(populate_poster_data_patcher.stop)
+
         self.path = Path.new('local.path',
                              'remote.path',
                              is_movie=False)
@@ -153,14 +157,14 @@ class TestNew(TestCase):
 
         self.assertEqual(new_obj.file, self.file)
         self.assertEqual(new_obj.path, None)
-        self.mock_downloadPosterData.assert_called_once_with()
+        self.mock_populate_poster_data.assert_called_once_with()
 
     def test_path(self):
         new_obj = PosterFile.new(path=self.path)
 
         self.assertEqual(new_obj.file, None)
         self.assertEqual(new_obj.path, self.path)
-        self.mock_downloadPosterData.assert_called_once_with()
+        self.mock_populate_poster_data.assert_called_once_with()
 
     def test_existing_for_file(self):
         self.mock_objects.filter.return_value.first.return_value = (
@@ -168,7 +172,7 @@ class TestNew(TestCase):
 
         existing = PosterFile.new(file=self.file)
         self.assertEqual(existing, 'existing_obj')
-        self.assertFalse(self.mock_downloadPosterData.called)
+        self.assertFalse(self.mock_populate_poster_data.called)
 
     def test_existing_for_path(self):
         self.mock_objects.filter.return_value.first.return_value = (
@@ -176,7 +180,7 @@ class TestNew(TestCase):
 
         existing = PosterFile.new(path=self.path)
         self.assertEqual(existing, 'existing_obj')
-        self.assertFalse(self.mock_downloadPosterData.called)
+        self.assertFalse(self.mock_populate_poster_data.called)
 
 
 class TestMovieDownloadPosterData(TestCase):

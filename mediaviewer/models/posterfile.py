@@ -98,7 +98,9 @@ class PosterFile(models.Model):
         obj.path = path
         obj.save()
 
-        obj._downloadPosterData()
+        # obj._downloadPosterData()
+
+        obj._populate_poster_data()
         return obj
 
     @property
