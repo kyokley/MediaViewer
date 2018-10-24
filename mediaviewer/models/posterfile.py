@@ -148,9 +148,10 @@ class PosterFile(models.Model):
 
             self.poster_url = data.get('Poster') or data.get('poster_path')
             self._cast_and_crew()
+            self._store_rating()
             self._store_plot(data)
             self._store_genres(data)
-            self._store_rating_and_rated(data)
+            self._store_rated(data)
         self._assign_tvdb_info()
 
         return data
@@ -178,9 +179,11 @@ class PosterFile(models.Model):
                 genre_obj = Genre.new(genre['name'])
                 self.genres.add(genre_obj)
 
-    def _store_rating_and_rated(self, imdb_data):
+    def _store_rating(self):
         rating = getRating(self.tmdb_id, isMovie=self.ref_obj.isMovie())
         self.rating = rating if rating and rating != 'undefined' else None
+
+    def _store_rated(self, imdb_data):
         rated = imdb_data.get('Rated')
         self.rated = rated if rated and rated != 'undefined' else None
 
