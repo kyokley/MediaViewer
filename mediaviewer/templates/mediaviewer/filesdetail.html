@@ -32,9 +32,9 @@
                 {% endif %}
             </ol>
             <div class="row text-center">
-                <h4>
+                <h2>
                     {{ file.getScrapedFullName }}
-                </h4>
+                </h2>
             </div>
             {% if posterfile.image %}
                 <div class="row">
@@ -48,13 +48,17 @@
                 </div>
             {% endif %}
             <div class="row">
-                <h4>
+                <h2>
                     {% if posterfile.episodename %}
                         <div class="row text-center">
                             {{ posterfile.episodename }}
                         </div>
+                    {% elif posterfile.tagline %}
+                        <div class="row text-center">
+                            {{ posterfile.tagline }}
+                        </div>
                     {% endif %}
-                </h4>
+                </h2>
             </div>
             {% if file.finished and can_download and waiterstatus %}
                 <div class="row">

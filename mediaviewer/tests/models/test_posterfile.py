@@ -132,10 +132,10 @@ class TestGetIMDBData(TestCase):
         self.mock_assign_tvdb_info = assign_tvdb_info_patcher.start()
         self.addCleanup(assign_tvdb_info_patcher.stop)
 
-        store_rating_patcher = mock.patch(
-                'mediaviewer.models.posterfile.PosterFile._store_rating')
-        self.mock_store_rating = store_rating_patcher.start()
-        self.addCleanup(store_rating_patcher.stop)
+        store_extended_info_patcher = mock.patch(
+            'mediaviewer.models.posterfile.PosterFile._store_extended_info')
+        self.mock_store_extended_info = store_extended_info_patcher.start()
+        self.addCleanup(store_extended_info_patcher.stop)
 
         store_plot_patcher = mock.patch(
                 'mediaviewer.models.posterfile.PosterFile._store_plot')
@@ -185,7 +185,7 @@ class TestGetIMDBData(TestCase):
         self.mock_cast_and_crew.assert_called_once_with()
         self.assertEqual('test_poster', self.test_obj.poster_url)
         self.mock_assign_tvdb_info.assert_called_once_with()
-        self.mock_store_rating.assert_called_once_with()
+        self.mock_store_extended_info.assert_called_once_with()
         self.mock_store_plot.assert_called_once_with(
                 self.mock_getDataFromIMDB.return_value)
         self.mock_store_genres.assert_called_once_with(
@@ -205,7 +205,7 @@ class TestGetIMDBData(TestCase):
         self.assertEqual('test_poster', self.test_obj.poster_url)
         self.mock_assign_tvdb_info.assert_called_once_with()
 
-        self.mock_store_rating.assert_called_once_with()
+        self.mock_store_extended_info.assert_called_once_with()
         self.mock_store_plot.assert_called_once_with(
                 self.mock_getDataFromIMDBByPath.return_value)
         self.mock_store_genres.assert_called_once_with(
@@ -225,7 +225,7 @@ class TestGetIMDBData(TestCase):
         self.assertEqual('test_poster', self.test_obj.poster_url)
         self.mock_assign_tvdb_info.assert_called_once_with()
 
-        self.mock_store_rating.assert_called_once_with()
+        self.mock_store_extended_info.assert_called_once_with()
         self.mock_store_plot.assert_called_once_with(
                 self.mock_getDataFromIMDB.return_value)
         self.mock_store_genres.assert_called_once_with(
@@ -245,7 +245,7 @@ class TestGetIMDBData(TestCase):
         self.assertFalse(self.mock_cast_and_crew.called)
         self.assertEqual(None, self.test_obj.poster_url)
         self.mock_assign_tvdb_info.assert_called_once_with()
-        self.assertFalse(self.mock_store_rating.called)
+        self.assertFalse(self.mock_store_extended_info.called)
         self.assertFalse(self.mock_store_plot.called)
         self.assertFalse(self.mock_store_genres.called)
         self.assertFalse(self.mock_store_rated.called)
@@ -262,7 +262,7 @@ class TestGetIMDBData(TestCase):
         self.assertFalse(self.mock_cast_and_crew.called)
         self.assertEqual(None, self.test_obj.poster_url)
         self.mock_assign_tvdb_info.assert_called_once_with()
-        self.assertFalse(self.mock_store_rating.called)
+        self.assertFalse(self.mock_store_extended_info.called)
         self.assertFalse(self.mock_store_plot.called)
         self.assertFalse(self.mock_store_genres.called)
         self.assertFalse(self.mock_store_rated.called)
@@ -278,7 +278,7 @@ class TestGetIMDBData(TestCase):
         self.mock_getDataFromIMDB.assert_called_once_with(self.tv_file)
         self.assertFalse(self.mock_cast_and_crew.called)
         self.assertEqual(None, self.test_obj.poster_url)
-        self.assertFalse(self.mock_store_rating.called)
+        self.assertFalse(self.mock_store_extended_info.called)
         self.assertFalse(self.mock_store_plot.called)
         self.assertFalse(self.mock_store_genres.called)
         self.assertFalse(self.mock_store_rated.called)
@@ -713,12 +713,85 @@ class TestStoreGenres(TestCase):
 
 class TestStoreRating(TestCase):
     def setUp(self):
-        getRating_patcher = mock.patch(
-                'mediaviewer.models.posterfile.getRating')
-        self.mock_getRating = getRating_patcher.start()
-        self.addCleanup(getRating_patcher.stop)
+        self.test_obj = PosterFile()
 
-        self.mock_getRating.return_value = 'test_rating'
+    def test_has_imdb_rating(self):
+        test_data = {
+                'imdbRating': 'test_rating',
+                }
+
+        expected = None
+        actual = self.test_obj._store_rating(test_data)
+
+        self.assertEqual(expected, actual)
+        self.assertEqual('test_rating', self.test_obj.rating)
+
+    def test_has_vote_average(self):
+        test_data = {
+                'vote_average': 'test_rating',
+                }
+
+        expected = None
+        actual = self.test_obj._store_rating(test_data)
+
+        self.assertEqual(expected, actual)
+        self.assertEqual('test_rating', self.test_obj.rating)
+
+    def test_undefined(self):
+        test_data = {
+                'vote_average': 'undefined',
+                }
+
+        expected = None
+        actual = self.test_obj._store_rating(test_data)
+
+        self.assertEqual(expected, actual)
+        self.assertEqual(None, self.test_obj.rating)
+
+
+class TestStoreTagline(TestCase):
+    def setUp(self):
+        self.test_obj = PosterFile()
+
+    def test_has_vote_average(self):
+        test_data = {
+                'tagline': 'test_tagline',
+                }
+
+        expected = None
+        actual = self.test_obj._store_tagline(test_data)
+
+        self.assertEqual(expected, actual)
+        self.assertEqual('test_tagline', self.test_obj.tagline)
+
+    def test_undefined(self):
+        test_data = {
+                'tagline': 'undefined',
+                }
+
+        expected = None
+        actual = self.test_obj._store_tagline(test_data)
+
+        self.assertEqual(expected, actual)
+        self.assertEqual(None, self.test_obj.tagline)
+
+
+class TestStoreExtendedInfo(TestCase):
+    def setUp(self):
+        getExtendedInfo_patcher = mock.patch(
+                'mediaviewer.models.posterfile.getExtendedInfo')
+        self.mock_getExtendedInfo = getExtendedInfo_patcher.start()
+        self.addCleanup(getExtendedInfo_patcher.stop)
+
+        store_rating_patcher = mock.patch(
+                'mediaviewer.models.posterfile.PosterFile._store_rating')
+        self.mock_store_rating = store_rating_patcher.start()
+        self.addCleanup(store_rating_patcher.stop)
+
+        store_tagline_patcher = mock.patch(
+                'mediaviewer.models.posterfile.PosterFile._store_tagline')
+        self.mock_store_tagline = store_tagline_patcher.start()
+        self.addCleanup(store_tagline_patcher.stop)
 
         self.tv_path = Path.new('tv.local.path',
                                 'tv.remote.path',
@@ -734,39 +807,18 @@ class TestStoreRating(TestCase):
         self.test_obj.tmdb_id = 123
         self.test_obj.file = self.tv_file
 
-    def test_has_rating(self):
+    def test_valid(self):
         expected = None
-        actual = self.test_obj._store_rating()
+        actual = self.test_obj._store_extended_info()
 
         self.assertEqual(expected, actual)
-        self.mock_getRating.assert_called_once_with(
+        self.mock_getExtendedInfo.assert_called_once_with(
                 123,
                 isMovie=False)
-        self.assertEqual('test_rating', self.test_obj.rating)
-
-    def test_no_rating(self):
-        self.mock_getRating.return_value = None
-
-        expected = None
-        actual = self.test_obj._store_rating()
-
-        self.assertEqual(expected, actual)
-        self.mock_getRating.assert_called_once_with(
-                123,
-                isMovie=False)
-        self.assertEqual(None, self.test_obj.rating)
-
-    def test_undefined(self):
-        self.mock_getRating.return_value = 'undefined'
-
-        expected = None
-        actual = self.test_obj._store_rating()
-
-        self.assertEqual(expected, actual)
-        self.mock_getRating.assert_called_once_with(
-                123,
-                isMovie=False)
-        self.assertEqual(None, self.test_obj.rating)
+        self.mock_store_rating.assert_called_once_with(
+                self.mock_getExtendedInfo.return_value)
+        self.mock_store_tagline.assert_called_once_with(
+                self.mock_getExtendedInfo.return_value)
 
 
 class TestStoreRated(TestCase):

@@ -2,7 +2,6 @@ import time
 import os
 from mediaviewer.log import log
 from mysite.settings import (API_KEY,
-                             OMDBAPI_KEY,
                              IMAGE_PATH,
                              REQUEST_TIMEOUT,
                              )
@@ -229,7 +228,7 @@ def getCastData(tmdb_id, season=None, episode=None, isMovie=True):
     return getJSONData(url)
 
 
-def getRating(tmdb_id, isMovie=True):
+def getExtendedInfo(tmdb_id, isMovie=True):
     log.debug('Getting IMDB rating for tmdb_id = %s' % tmdb_id)
 
     if not isMovie:
@@ -238,16 +237,4 @@ def getRating(tmdb_id, isMovie=True):
         url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
 
     data = getJSONData(url)
-    imdb_id = data and data.get('imdb_id')
-
-    if imdb_id and OMDBAPI_KEY:
-        url = 'http://www.omdbapi.com/?i=%s' % imdb_id
-
-        try:
-            data = getJSONData(url)
-            return data['imdbRating']
-        except Exception as e:
-            log.error('Received error trying to get imdbRating')
-            log.error(e)
-    elif data.get('vote_average'):
-        return data.get('vote_average')
+    return data

@@ -8,7 +8,7 @@ from mediaviewer.models.tvdbconfiguration import (getDataFromIMDB,
                                                   tvdbConfig,
                                                   getTVDBEpisodeInfo,
                                                   getCastData,
-                                                  getRating,
+                                                  getExtendedInfo,
                                                   )
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.actor import Actor
@@ -45,6 +45,7 @@ class PosterFile(models.Model):
     rating = models.TextField(blank=True, null=True)
     tmdb_id = models.TextField(blank=True, null=True)
     poster_url = models.URLField(blank=True, null=True)
+    tagline = models.TextField(blank=True, null=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -152,7 +153,7 @@ class PosterFile(models.Model):
 
             self.poster_url = data.get('Poster') or data.get('poster_path')
             self._cast_and_crew()
-            self._store_rating()
+            self._store_extended_info()
             self._store_plot(data)
             self._store_genres(data)
             self._store_rated(data)
@@ -184,8 +185,21 @@ class PosterFile(models.Model):
                 genre_obj = Genre.new(genre['name'])
                 self.genres.add(genre_obj)
 
-    def _store_rating(self):
-        rating = getRating(self.tmdb_id, isMovie=self.ref_obj.isMovie())
+    def _store_extended_info(self):
+        extended_info = getExtendedInfo(
+                self.tmdb_id,
+                isMovie=self.ref_obj.isMovie())
+
+        self._store_rating(extended_info)
+        self._store_tagline(extended_info)
+
+    def _store_tagline(self, extended_info):
+        tagline = extended_info.get('tagline')
+        self.tagline = tagline if tagline and tagline != 'undefined' else None
+
+    def _store_rating(self, extended_info):
+        rating = (extended_info.get('imdbRating') or
+                  extended_info.get('vote_average'))
         self.rating = rating if rating and rating != 'undefined' else None
 
     def _store_rated(self, imdb_data):
