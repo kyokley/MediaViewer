@@ -121,6 +121,18 @@ class PosterFile(models.Model):
         else:
             return None
 
+    def _populate_poster_data(self):
+        self._getIMDBData()
+        self._download_poster()
+
+    def _download_poster(self):
+        try:
+            if self.poster_url and self.image:
+                saveImageToDisk(self.poster_url, self.image)
+        except Exception as e:
+            log.error(str(e), exc_info=True)
+            log.error('Failed to download image')
+
     def _getIMDBData(self):
         log.debug('Attempt to get data from IMDB')
 
@@ -132,20 +144,48 @@ class PosterFile(models.Model):
             data = getDataFromIMDB(self.ref_obj)
 
         if data:
+            self.tmdb_id = data['id']
+
             self.poster_url = data.get('Poster') or data.get('poster_path')
-            self._cast_and_crew(data)
+            self._cast_and_crew()
+            self._store_plot(data)
+            self._store_genres(data)
+            self._store_rating_and_rated(data)
         self._assign_tvdb_info()
 
         return data
 
-    def _cast_and_crew(self, imdb_data):
-        """Populate cast and crew info for this posterfile.
+    def _store_plot(self, imdb_data):
+        plot = (imdb_data.get('Plot') or
+                imdb_data.get('overview') or
+                'results' in imdb_data and
+                imdb_data['results'] and imdb_data['results'][0].get('overview'))
+        self.plot = plot if plot and plot != 'undefined' else None
 
-        Args:
-            imdb_data: Data received from IMDB
+    def _store_genres(self, imdb_data):
+        if imdb_data.get('results') or imdb_data.get('genre_ids'):
+            genre_ids = (imdb_data.get('genre_ids') or
+                         imdb_data['results'][0]['genre_ids'])
+            for genre_id in genre_ids:
+                g = tvdbConfig.genres.get(genre_id)
+                if g:
+                    genre_obj = Genre.new(g)
+                    self.genres.add(genre_obj)
+                else:
+                    log.warn('Genre for ID = {} not found'.format(genre_id))
+        elif imdb_data.get('genres'):
+            for genre in imdb_data.get('genres'):
+                genre_obj = Genre.new(genre['name'])
+                self.genres.add(genre_obj)
 
-        """
-        self.tmdb_id = imdb_data['id']
+    def _store_rating_and_rated(self, imdb_data):
+        rating = getRating(self.tmdb_id, isMovie=self.ref_obj.isMovie())
+        self.rating = rating if rating and rating != 'undefined' else None
+        rated = imdb_data.get('Rated')
+        self.rated = rated if rated and rated != 'undefined' else None
+
+    def _cast_and_crew(self):
+        """Populate cast and crew info for this posterfile. """
         cast_and_crew = getCastData(self.tmdb_id,
                                     season=self.season,
                                     episode=self.episode,
@@ -178,6 +218,7 @@ class PosterFile(models.Model):
         if not self.season or not self.episode:
             return
 
+        # Having season and episode implies that we must be a tv file
         if self.ref_obj.path and not self.ref_obj.path.tvdb_id:
             log.debug('No tvdb id for this path. '
                       'Continue search by tv show name')
