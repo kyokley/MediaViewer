@@ -2,7 +2,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.models.usersettings import (LOCAL_IP,
@@ -50,18 +49,6 @@ def filesdetail(request, file_id):
                         file.path.displayName())
     setSiteWideContext(context, request)
     return render(request, 'mediaviewer/filesdetail.html', context)
-
-
-@login_required(login_url='/mediaviewer/login/')
-@check_force_password_change
-@logAccessInfo
-def pathsdetail(request, path_id):
-    path = Path.objects.get(pk=path_id)
-    context = {'path': path}
-    context['active_page'] = 'pathsdetail'
-    context['title'] = path.displayName()
-    setSiteWideContext(context, request)
-    return render(request, 'mediaviewer/pathsdetail.html', context)
 
 
 @logAccessInfo

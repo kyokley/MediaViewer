@@ -24,16 +24,9 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
                        url(r'^$', home.home, name='home'),
-                       #url(r'^files/$', lambda x: redirect('/mediaviewer/files/display/0/')),
-                       #url(r'^files/display/(?P<items>\d+)/$', files.files, name='files'),
-                       #url(r'^paths/$', lambda x: redirect('/mediaviewer/paths/display/0/')),
-                       #url(r'^paths/display/(?P<items>\d+)/$', paths.paths, name='paths'),
-                       #url(r'^errors/display/(?P<items>\d+)/$', errors.errors, name='errors'),
-                       #url(r'^errors/$', lambda x: redirect('/mediaviewer/errors/display/50/')),
                        url(r'^files/(?P<file_id>\d+)/$', detail.filesdetail, name='filesdetail'),
                        url(r'^files/(?P<file_id>\d+)/comment/$', comment.comment, name='comment'),
                        url(r'^files/(?P<file_id>\d+)/results/$', comment.results, name='results'),
-                       url(r'^paths/(?P<path_id>\d+)/$', detail.pathsdetail, name='pathsdetail'),
                        url(r'^tvshows/$', lambda x: redirect('/mediaviewer/tvshows/summary/')),
                        url(r'^tvshows/display/(?P<pathid>\d+)/$', files.tvshows, name='tvshows'),
                        url(r'^tvshows/(?P<pathid>\d+)/$', files.tvshows, name='tvshows'),
@@ -94,10 +87,8 @@ if not IS_SYNCING:
                                  file_viewset)
     router.register(r'downloadtoken', viewset.DownloadTokenViewSet, base_name='downloadtoken')
     router.register(r'unstreamablefile', file_viewset.UnstreamableFileViewSet, base_name='unstreamablefile')
-    #router.register(r'file', file_viewset.FileViewSet, base_name='file')
     router.register(r'movie', file_viewset.MovieFileViewSet, base_name='movie')
     router.register(r'tv', file_viewset.TvFileViewSet, base_name='tv')
-    #router.register(r'path', viewset.PathViewSet, base_name='path')
     router.register(r'tvpath', path_viewset.TvPathViewSet, base_name='tvpath')
     router.register(r'moviepath', path_viewset.MoviePathViewSet, base_name='moviepath')
     router.register(r'datatransmission', viewset.DataTransmissionViewSet)
@@ -110,5 +101,4 @@ if not IS_SYNCING:
 
     urlpatterns += [url(r'^api/', include(router.urls, namespace='api')),
                     url(r'^api/inferscrapers/', csrf_exempt(viewset.InferScrapersView.as_view())),
-                    #url(r'^api/posterviewsetbypath/', csrf_exempt(viewset.PosterViewSetByPath.as_view())),
                     ]
