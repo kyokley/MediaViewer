@@ -20,12 +20,12 @@ import json
 def filesdetail(request, file_id):
     user = request.user
     file = File.objects.get(pk=file_id)
-    skip = file.skip and True or False
-    finished = file.finished and True or False
+    skip = file.skip
+    finished = file.finished
     usercomment = file.usercomment(user)
     if usercomment:
-        viewed = usercomment.viewed and True or False
-        comment = bool(usercomment.comment) and usercomment.comment or ""
+        viewed = usercomment.viewed
+        comment = usercomment.comment or ''
         setattr(file, 'usercomment', usercomment)
     else:
         viewed = False

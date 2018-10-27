@@ -1,8 +1,22 @@
 import mock
 
 from django.test import TestCase
-from mediaviewer.views.detail import ajaxsuperviewed
+from django.http import HttpRequest
+
+from mediaviewer.views.detail import (
+        ajaxsuperviewed,
+        filesdetail,
+        )
+from django.contrib.auth.models import Group
+from mediaviewer.models.usersettings import (
+        UserSettings,
+        LOCAL_IP,
+        BANGUP_IP,
+        )
 from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models.file import File
+from mediaviewer.models.path import Path
+from mediaviewer.models.usercomment import UserComment
 
 
 class TestAjaxSuperViewed(TestCase):
@@ -119,7 +133,7 @@ class TestAjaxSuperViewed(TestCase):
                 True)
 
 
-class TestAjaxSuperViewedFunctional(TestCase):
+class TestAjaxSuperViewedResponseStatusCode(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
                 'mediaviewer.views.detail.DownloadToken.objects.filter',
@@ -154,3 +168,96 @@ class TestAjaxSuperViewedFunctional(TestCase):
 
         resp = ajaxsuperviewed(self.request)
         self.assertEquals(resp.status_code, 400)
+
+
+class TestFilesDetail(TestCase):
+    def setUp(self):
+        setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.detail.setSiteWideContext')
+        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
+        self.addCleanup(setSiteWideContext_patcher.stop)
+
+        render_patcher = mock.patch(
+                'mediaviewer.views.detail.render')
+        self.mock_render = render_patcher.start()
+        self.addCleanup(render_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.tv_path.tvdb_id = None
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new('test_user', 'a@b.com')
+        self.user.settings().force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_no_comment(self):
+        expected_context = {
+                'file': self.tv_file,
+                'posterfile': self.tv_file.posterfile,
+                'comment': '',
+                'skip': self.tv_file.skip,
+                'finished': self.tv_file.finished,
+                'LOCAL_IP': LOCAL_IP,
+                'BANGUP_IP': BANGUP_IP,
+                'viewed': False,
+                'can_download': True,
+                'file_size': None,
+                'active_page': 'filesdetail',
+                'title': 'Tv Local Path',
+                }
+        expected = self.mock_render.return_value
+        actual = filesdetail(self.request, self.tv_file.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request)
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/filesdetail.html',
+                expected_context)
+
+    def test_comment(self):
+        usercomment = UserComment()
+        usercomment.file = self.tv_file
+        usercomment.user = self.user
+        usercomment.viewed = True
+        usercomment.comment = 'test_comment'
+        usercomment.save()
+
+        expected_context = {
+                'file': self.tv_file,
+                'posterfile': self.tv_file.posterfile,
+                'comment': 'test_comment',
+                'skip': self.tv_file.skip,
+                'finished': self.tv_file.finished,
+                'LOCAL_IP': LOCAL_IP,
+                'BANGUP_IP': BANGUP_IP,
+                'viewed': True,
+                'can_download': True,
+                'file_size': None,
+                'active_page': 'filesdetail',
+                'title': 'Tv Local Path',
+                }
+        expected = self.mock_render.return_value
+        actual = filesdetail(self.request, self.tv_file.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request)
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/filesdetail.html',
+                expected_context)
