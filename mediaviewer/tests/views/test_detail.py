@@ -4,13 +4,18 @@ from django.test import TestCase
 from mediaviewer.views.detail import ajaxsuperviewed
 from mediaviewer.models.downloadtoken import DownloadToken
 
+
 class TestAjaxSuperViewed(TestCase):
     def setUp(self):
-        self.filter_patcher = mock.patch('mediaviewer.views.detail.DownloadToken.objects.filter', autospec=True)
+        self.filter_patcher = mock.patch(
+                'mediaviewer.views.detail.DownloadToken.objects.filter',
+                autospec=True)
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
-        self.HttpResponse_patcher = mock.patch('mediaviewer.views.detail.HttpResponse', autospec=True)
+        self.HttpResponse_patcher = mock.patch(
+                'mediaviewer.views.detail.HttpResponse',
+                autospec=True)
         self.mock_HttpResponse = self.HttpResponse_patcher.start()
         self.addCleanup(self.HttpResponse_patcher.stop)
 
@@ -38,9 +43,10 @@ class TestAjaxSuperViewed(TestCase):
         self.mock_dumps.assert_called_once_with({'errmsg': 'Token is invalid',
                                                  'guid': 'test_guid',
                                                  'viewed': True})
-        self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status=400,
-                                                       content_type='application/json')
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                status=400,
+                content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
@@ -57,9 +63,10 @@ class TestAjaxSuperViewed(TestCase):
         self.mock_dumps.assert_called_once_with({'errmsg': 'Token is invalid',
                                                  'guid': 'test_guid',
                                                  'viewed': True})
-        self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status=400,
-                                                       content_type='application/json')
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                status=400,
+                content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
@@ -77,13 +84,16 @@ class TestAjaxSuperViewed(TestCase):
         self.mock_dumps.assert_called_once_with({'errmsg': '',
                                                  'guid': 'test_guid',
                                                  'viewed': False})
-        self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status=200,
-                                                       content_type='application/json')
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                status=200,
+                content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
-        self.token.file.markFileViewed.assert_called_once_with(self.token.user, False)
+        self.token.file.markFileViewed.assert_called_once_with(
+                self.token.user,
+                False)
 
     def test_viewed(self):
         self.request.POST = {'guid': 'test_guid',
@@ -97,17 +107,23 @@ class TestAjaxSuperViewed(TestCase):
         self.mock_dumps.assert_called_once_with({'errmsg': '',
                                                  'guid': 'test_guid',
                                                  'viewed': True})
-        self.mock_HttpResponse.assert_called_once_with(self.mock_dumps.return_value,
-                                                       status=200,
-                                                       content_type='application/json')
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                status=200,
+                content_type='application/json')
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
-        self.token.file.markFileViewed.assert_called_once_with(self.token.user, True)
+        self.token.file.markFileViewed.assert_called_once_with(
+                self.token.user,
+                True)
+
 
 class TestAjaxSuperViewedFunctional(TestCase):
     def setUp(self):
-        self.filter_patcher = mock.patch('mediaviewer.views.detail.DownloadToken.objects.filter', autospec=True)
+        self.filter_patcher = mock.patch(
+                'mediaviewer.views.detail.DownloadToken.objects.filter',
+                autospec=True)
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
