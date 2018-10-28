@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.http import HttpRequest, Http404
 
 from mediaviewer.views.detail import (
+        ajaxdownloadbutton,
         ajaxsuperviewed,
         ajaxviewed,
         filesdetail,
@@ -357,3 +358,88 @@ class TestAjaxViewed(TestCase):
                 self.mock_dumps.return_value,
                 content_type='application/javascript'
                 )
+
+
+class TestAjaxDownloadButton(TestCase):
+    def setUp(self):
+        HttpResponse_patcher = mock.patch(
+                'mediaviewer.views.detail.HttpResponse')
+        self.mock_HttpResponse = HttpResponse_patcher.start()
+        self.addCleanup(HttpResponse_patcher.stop)
+
+        dumps_patcher = mock.patch(
+                'mediaviewer.views.detail.json.dumps')
+        self.mock_dumps = dumps_patcher.start()
+        self.addCleanup(dumps_patcher.stop)
+
+        downloadtoken_new_patcher = mock.patch(
+                'mediaviewer.views.detail.DownloadToken.new')
+        self.mock_downloadtoken_new = downloadtoken_new_patcher.start()
+        self.addCleanup(downloadtoken_new_patcher.stop)
+
+        downloadLink_patcher = mock.patch(
+                'mediaviewer.views.detail.File.downloadLink')
+        self.mock_downloadLink = downloadLink_patcher.start()
+        self.addCleanup(downloadLink_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.tv_path.tvdb_id = None
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        self.user.settings().force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+        self.request.POST = {'fileid': self.tv_file.id}
+
+    def test_user_not_authenticated(self):
+        self.request.user = AnonymousUser()
+
+        expected = self.mock_HttpResponse.return_value
+        actual = ajaxdownloadbutton(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with({
+            'errmsg': 'User not authenticated. Refresh and try again.'
+            })
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')
+
+    def test_no_file(self):
+        self.request.POST.update({'fileid': 0})
+        self.assertRaises(Http404,
+                          ajaxdownloadbutton,
+                          self.request,
+                          )
+
+    def test_valid(self):
+        expected_response = {
+                'guid': self.mock_downloadtoken_new.return_value.guid,
+                'isMovie': self.mock_downloadtoken_new.return_value.ismovie,
+                'downloadLink': self.mock_downloadLink.return_value,
+                'errmsg': '',
+                }
+
+        expected = self.mock_HttpResponse.return_value
+        actual = ajaxdownloadbutton(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with(
+                expected_response)
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')
