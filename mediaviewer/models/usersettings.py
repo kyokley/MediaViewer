@@ -19,32 +19,61 @@ BANGUP_IP = 'bangup'
 TIMESTAMP_SORT = 'timestamp_sort'
 FILENAME_SORT = 'filename_sort'
 
+
 class ImproperLogin(Exception):
     pass
+
+
 class BadEmail(Exception):
     pass
 
+
 EMAIL_REGEX = re.compile('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+
 
 class UserSettings(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     dateedited = models.DateTimeField(db_column='dateedited', blank=True)
-    ip_format = models.TextField(db_column='ip_format', blank=False, null=False)
-    user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
-    can_download = models.BooleanField(db_column='can_download', blank=False, null=False)
+    ip_format = models.TextField(
+            db_column='ip_format',
+            blank=False,
+            null=False)
+    user = models.ForeignKey(
+            'auth.User',
+            null=False,
+            db_column='userid',
+            blank=False)
+    can_download = models.BooleanField(
+            db_column='can_download',
+            blank=False,
+            null=False)
     default_sort = models.TextField(db_column='default_sort')
-    force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
-    can_login = models.BooleanField(db_column='can_login', blank=False, null=False, default=True)
+    force_password_change = models.BooleanField(
+            db_column='force_password_change',
+            blank=False,
+            null=False,
+            default=False)
+    can_login = models.BooleanField(
+            db_column='can_login',
+            blank=False,
+            null=False,
+            default=True)
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
     last_watched = models.ForeignKey('mediaviewer.Path', null=True, blank=True)
-    jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
+    jump_to_last_watched = models.BooleanField(
+            blank=False,
+            null=False,
+            default=True)
 
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'usersettings'
 
     def __unicode__(self):
-        return 'id: %s u: %s ip: %s' % (self.id, self.user.username, self.ip_format)
+        return 'id: %s u: %s ip: %s' % (
+                self.id,
+                self.user.username,
+                self.ip_format)
 
     @classmethod
     def getSettings(cls, user):
@@ -99,13 +128,16 @@ class UserSettings(models.Model):
 
         if send_email:
             fake_form = FormlessPasswordReset(newUser, email)
-            fake_form.save(email_template_name='mediaviewer/password_create_email.html',
-                           subject_template_name='mediaviewer/password_create_subject.txt',
-                           )
+            fake_form.save(
+               email_template_name='mediaviewer/password_create_email.html',
+               subject_template_name='mediaviewer/password_create_subject.txt',
+               )
 
         return newUser
 
+
 setattr(User, 'settings', lambda x: UserSettings.getSettings(x))
+
 
 def case_insensitive_authenticate(username, password):
     try:
@@ -114,6 +146,7 @@ def case_insensitive_authenticate(username, password):
         return None
 
     return authenticate(username=user.username, password=password)
+
 
 def validate_email(email):
     if not EMAIL_REGEX.search(email):
