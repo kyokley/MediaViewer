@@ -1,13 +1,16 @@
 import mock
 
 from django.test import TestCase
-from django.http import HttpRequest
+from django.http import HttpRequest, Http404
 
 from mediaviewer.views.detail import (
         ajaxsuperviewed,
+        ajaxviewed,
         filesdetail,
         )
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import (Group,
+                                        AnonymousUser,
+                                        )
 from mediaviewer.models.usersettings import (
         UserSettings,
         LOCAL_IP,
@@ -182,6 +185,10 @@ class TestFilesDetail(TestCase):
         self.mock_render = render_patcher.start()
         self.addCleanup(render_patcher.stop)
 
+        self.change_password_patcher = mock.patch(
+                'mediaviewer.views.password_reset.change_password')
+        self.mock_change_password = self.change_password_patcher.start()
+
         self.tv_path = Path.new('tv.local.path',
                                 'tv.remote.path',
                                 is_movie=False)
@@ -195,7 +202,10 @@ class TestFilesDetail(TestCase):
         mv_group = Group(name='MediaViewer')
         mv_group.save()
 
-        self.user = UserSettings.new('test_user', 'a@b.com')
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
         self.user.settings().force_password_change = False
 
         self.request = mock.MagicMock(HttpRequest)
@@ -261,3 +271,89 @@ class TestFilesDetail(TestCase):
                 self.request,
                 'mediaviewer/filesdetail.html',
                 expected_context)
+
+    def test_force_password_change(self):
+        settings = self.user.settings()
+        settings.force_password_change = True
+        settings.save()
+
+        expected = self.mock_change_password.return_value
+        actual = filesdetail(self.request, self.tv_file.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_change_password.assert_called_once_with(self.request)
+
+
+class TestAjaxViewed(TestCase):
+    def setUp(self):
+        HttpResponse_patcher = mock.patch(
+                'mediaviewer.views.detail.HttpResponse')
+        self.mock_HttpResponse = HttpResponse_patcher.start()
+        self.addCleanup(HttpResponse_patcher.stop)
+
+        dumps_patcher = mock.patch(
+                'mediaviewer.views.detail.json.dumps')
+        self.mock_dumps = dumps_patcher.start()
+        self.addCleanup(dumps_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.tv_path.tvdb_id = None
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        self.user.settings().force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+        self.request.POST = {'fileid': self.tv_file.id,
+                             'viewed': 'true',
+                             }
+
+    def test_no_file(self):
+        self.request.POST.update({'fileid': 0, 'viewed': 'true'})
+        self.assertRaises(Http404,
+                          ajaxviewed,
+                          self.request,
+                          )
+
+    def test_user_not_authenticated(self):
+        self.request.user = AnonymousUser()
+
+        expected = self.mock_HttpResponse.return_value
+        actual = ajaxviewed(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with({
+            'errmsg': 'User not authenticated. Refresh and try again.'
+            })
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')
+
+    def test_valid(self):
+        expected_response = {'errmsg': '',
+                             'fileid': self.tv_file.id,
+                             'viewed': True,
+                             }
+
+        expected = self.mock_HttpResponse.return_value
+        actual = ajaxviewed(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_dumps.assert_called_once_with(expected_response)
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript'
+                )
