@@ -9,6 +9,7 @@ from mediaviewer.views.detail import (
         ajaxviewed,
         filesdetail,
         downloadlink,
+        autoplaydownloadlink,
         )
 from django.contrib.auth.models import (Group,
                                         AnonymousUser,
@@ -448,6 +449,21 @@ class TestAjaxDownloadButton(TestCase):
 
 class TestDownloadlink(TestCase):
     def setUp(self):
+        downloadLink_patcher = mock.patch(
+                'mediaviewer.views.detail.File.downloadLink')
+        self.mock_downloadLink = downloadLink_patcher.start()
+        self.addCleanup(downloadLink_patcher.stop)
+
+        downloadtoken_new_patcher = mock.patch(
+                'mediaviewer.views.detail.DownloadToken.new')
+        self.mock_downloadtoken_new = downloadtoken_new_patcher.start()
+        self.addCleanup(downloadtoken_new_patcher.stop)
+
+        redirect_patcher = mock.patch(
+                'mediaviewer.views.detail.redirect')
+        self.mock_redirect = redirect_patcher.start()
+        self.addCleanup(redirect_patcher.stop)
+
         self.tv_path = Path.new('tv.local.path',
                                 'tv.remote.path',
                                 is_movie=False)
@@ -472,7 +488,82 @@ class TestDownloadlink(TestCase):
 
     def test_no_file(self):
         self.assertRaises(Http404,
-                          ajaxdownloadbutton,
+                          downloadlink,
                           self.request,
                           0,
                           )
+
+    def test_valid(self):
+        expected = self.mock_redirect.return_value
+        actual = downloadlink(self.request, self.tv_file.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_downloadtoken_new.assert_called_once_with(
+                self.user,
+                self.tv_file)
+        self.mock_downloadLink.assert_called_once_with(
+                self.user,
+                self.mock_downloadtoken_new.return_value.guid)
+        self.mock_redirect.assert_called_once_with(
+                self.mock_downloadLink.return_value)
+
+
+class TestAutoPlayDownloadLink(TestCase):
+    def setUp(self):
+        autoplayDownloadLink_patcher = mock.patch(
+                'mediaviewer.views.detail.File.autoplayDownloadLink')
+        self.mock_autoplayDownloadLink = autoplayDownloadLink_patcher.start()
+        self.addCleanup(autoplayDownloadLink_patcher.stop)
+
+        downloadtoken_new_patcher = mock.patch(
+                'mediaviewer.views.detail.DownloadToken.new')
+        self.mock_downloadtoken_new = downloadtoken_new_patcher.start()
+        self.addCleanup(downloadtoken_new_patcher.stop)
+
+        redirect_patcher = mock.patch(
+                'mediaviewer.views.detail.redirect')
+        self.mock_redirect = redirect_patcher.start()
+        self.addCleanup(redirect_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.tv_path.tvdb_id = None
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file.override_filename = 'test str'
+        self.tv_file.override_season = '3'
+        self.tv_file.override_episode = '5'
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        self.user.settings().force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_no_file(self):
+        self.assertRaises(Http404,
+                          autoplaydownloadlink,
+                          self.request,
+                          0,
+                          )
+
+    def test_valid(self):
+        expected = self.mock_redirect.return_value
+        actual = autoplaydownloadlink(self.request, self.tv_file.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_downloadtoken_new.assert_called_once_with(
+                self.user,
+                self.tv_file)
+        self.mock_autoplayDownloadLink.assert_called_once_with(
+                self.user,
+                self.mock_downloadtoken_new.return_value.guid)
+        self.mock_redirect.assert_called_once_with(
+                self.mock_autoplayDownloadLink.return_value)
