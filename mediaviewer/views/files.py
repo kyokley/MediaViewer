@@ -20,6 +20,7 @@ import json
 import re
 ID_REGEX = re.compile('\d+')
 
+
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
 @logAccessInfo
@@ -39,13 +40,20 @@ def files(request, items):
               'view': 'files',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False,
-               'jump_to_last': settings and settings.jump_to_last_watched or False,
+              'can_download': (
+                  settings and
+                  settings.can_download or
+                  False),
+              'jump_to_last': (
+                  settings and
+                  settings.jump_to_last_watched or
+                  False),
               }
     context['active_page'] = 'files'
     context['title'] = 'Files'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -61,13 +69,17 @@ def movies(request):
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False,
-               'jump_to_last': settings and settings.jump_to_last_watched or False,
+              'can_download': settings and settings.can_download or False,
+              'jump_to_last': (
+                  settings and
+                  settings.jump_to_last_watched or
+                  False),
               }
     context['active_page'] = 'movies'
     context['title'] = 'Movies'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -87,13 +99,17 @@ def movies_by_genre(request, genre_id):
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False,
-               'jump_to_last': settings and settings.jump_to_last_watched or False,
+              'can_download': settings and settings.can_download or False,
+              'jump_to_last': (
+                  settings and
+                  settings.jump_to_last_watched or
+                  False),
               }
     context['active_page'] = 'movies'
     context['title'] = 'Movies: {}'.format(ref_genre.genre)
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -107,6 +123,7 @@ def tvshowsummary(request):
     context['title'] = 'TV Shows'
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/tvsummary.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -122,13 +139,15 @@ def tvshows_by_genre(request, genre_id):
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/tvsummary.html', context)
 
+
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
 @logAccessInfo
 def tvshows(request, pathid):
     user = request.user
     refpath = Path.objects.get(pk=pathid)
-    files = File.objects.filter(path__localpathstr=refpath.localpathstr).filter(hide=False)
+    files = File.objects.filter(
+            path__localpathstr=refpath.localpathstr).filter(hide=False)
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -139,13 +158,17 @@ def tvshows(request, pathid):
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
               'can_download': settings and settings.can_download or False,
-              'jump_to_last': settings and settings.jump_to_last_watched or False,
+              'jump_to_last': (
+                  settings and
+                  settings.jump_to_last_watched or
+                  False),
               }
     context['active_page'] = 'tvshows'
     context['title'] = refpath.displayName()
     context['long_plot'] = len(refpath.posterfile.plot) > 300
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
+
 
 @logAccessInfo
 def ajaxreport(request):
@@ -160,11 +183,15 @@ def ajaxreport(request):
 
         for user in users:
             Message.createNewMessage(user,
-                                     '%s has been reported by %s' % (file.filename, createdBy.username),
+                                     '%s has been reported by %s' % (
+                                         file.filename,
+                                         createdBy.username),
                                      level=messages.WARNING)
     except Exception, e:
         if DEBUG:
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'
-    return HttpResponse(json.dumps(response), content_type='application/javascript')
+    return HttpResponse(
+            json.dumps(response),
+            content_type='application/javascript')
