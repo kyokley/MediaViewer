@@ -209,7 +209,8 @@ class TestFilesDetail(TestCase):
                 'test_user',
                 'a@b.com',
                 send_email=False)
-        self.user.settings().force_password_change = False
+        settings = self.user.settings()
+        settings.force_password_change = False
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
