@@ -410,3 +410,8 @@ class File(models.Model):
     @classmethod
     def get_movie_genres(cls):
         return Genre.get_movie_genres()
+
+    @classmethod
+    def movies_ordered_by_id(cls):
+        files = cls.movies().filter(hide=False).order_by('-id')
+        return files

@@ -343,30 +343,19 @@ class TestDownloadLink(TestCase):
                 'mediaviewer.models.file.LOCAL_IP',
                 'test_local_ip')
         self.LOCAL_IP_patcher.start()
+        self.addCleanup(self.LOCAL_IP_patcher.stop)
 
         self.BANGUP_IP_patcher = mock.patch(
                 'mediaviewer.models.file.BANGUP_IP',
                 'test_bangup_ip')
         self.BANGUP_IP_patcher.start()
+        self.addCleanup(self.BANGUP_IP_patcher.stop)
 
         self.WAITER_HEAD_patcher = mock.patch(
                 'mediaviewer.models.file.WAITER_HEAD',
                 'test_local_ip')
         self.WAITER_HEAD_patcher.start()
-
-        # TODO: Finish this!!!
-        self.LOCAL_IP_patcher = mock.patch(
-                'mediaviewer.models.file.LOCAL_IP',
-                'test_local_ip')
-        self.LOCAL_IP_patcher.start()
-        self.LOCAL_IP_patcher = mock.patch(
-                'mediaviewer.models.file.LOCAL_IP',
-                'test_local_ip')
-        self.LOCAL_IP_patcher.start()
-        self.LOCAL_IP_patcher = mock.patch(
-                'mediaviewer.models.file.LOCAL_IP',
-                'test_local_ip')
-        self.LOCAL_IP_patcher.start()
+        self.addCleanup(self.WAITER_HEAD_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
@@ -392,11 +381,37 @@ class TestDownloadLink(TestCase):
         self.user_settings = mock.MagicMock(UserSettings)
         self.user.settings.return_value = self.user_settings
 
-    def tearDown(self):
-        self.filter_patcher.stop()
-        self.createLastWatchedMessage_patcher.stop()
-        self.BANGUP_IP_patcher.stop()
-        self.LOCAL_IP_patcher.stop()
-
     def test_local_ip(self):
         self.user_settings.ip_format = 'test_local_ip'
+
+
+class TestMoviesOrderedByID(TestCase):
+    def setUp(self):
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.movie_path = Path.new('movie.local.path',
+                                   'movie.remote.path',
+                                   is_movie=True)
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file2 = File.new('tv.file2', self.tv_path)
+
+        self.hidden_tv_file = File.new(
+                'hidden.tv.file',
+                self.tv_path,
+                hide=True)
+
+        self.movie_file = File.new('movie.file', self.movie_path)
+        self.movie_file2 = File.new('movie.file2', self.movie_path)
+        self.hidden_movie_file = File.new(
+                'hidden.movie.file',
+                self.movie_path,
+                hide=True)
+
+    def test_movie_files(self):
+        expected = [self.movie_file2,
+                    self.movie_file]
+        actual = list(File.movies_ordered_by_id())
+
+        self.assertEqual(expected, actual)
