@@ -129,7 +129,7 @@ def tvshowsummary(request):
 @check_force_password_change
 @logAccessInfo
 def tvshows_by_genre(request, genre_id):
-    ref_genre = Genre.objects.get(pk=genre_id)
+    ref_genre = get_object_or_404(Genre, pk=genre_id)
     pathDict = Path.distinctShowFoldersByGenre(ref_genre)
     pathSet = [path for name, path in pathDict.items()]
 
