@@ -19,6 +19,7 @@ from mediaviewer.models.genre import Genre
 from mediaviewer.views.files import (
         movies,
         movies_by_genre,
+        tvshowsummary,
         )
 
 
@@ -112,10 +113,10 @@ class TestMoviesByGenre(TestCase):
         self.mock_get_object_or_404 = get_object_or_404_patcher.start()
         self.addCleanup(get_object_or_404_patcher.stop)
 
-        movies_by_genre_patcher = mock.patch(
+        files_movies_by_genre = mock.patch(
                 'mediaviewer.views.files.File.movies_by_genre')
-        self.mock_movies_by_genre = movies_by_genre_patcher.start()
-        self.addCleanup(movies_by_genre_patcher.stop)
+        self.mock_files_movies_by_genre = files_movies_by_genre.start()
+        self.addCleanup(files_movies_by_genre.stop)
 
         setSiteWideContext_patcher = mock.patch(
                 'mediaviewer.views.files.setSiteWideContext')
@@ -174,7 +175,7 @@ class TestMoviesByGenre(TestCase):
 
     def test_valid(self):
         expected_context = {
-                'files': self.mock_movies_by_genre.return_value,
+                'files': self.mock_files_movies_by_genre.return_value,
                 'view': 'movies',
                 'LOCAL_IP': LOCAL_IP,
                 'BANGUP_IP': BANGUP_IP,
@@ -187,6 +188,8 @@ class TestMoviesByGenre(TestCase):
         actual = movies_by_genre(self.request, self.genre.id)
 
         self.assertEqual(expected, actual)
+        self.mock_files_movies_by_genre.assert_called_once_with(
+                self.genre)
         self.mock_get_object_or_404.assert_called_once_with(
                 Genre,
                 pk=self.genre.id,
@@ -200,3 +203,78 @@ class TestMoviesByGenre(TestCase):
                 self.request,
                 'mediaviewer/files.html',
                 expected_context)
+
+
+class TestTvShowSummary(TestCase):
+    def setUp(self):
+        distinctShowFolders_patcher = mock.patch(
+                'mediaviewer.views.files.Path.distinctShowFolders')
+        self.mock_distinctShowFolders = distinctShowFolders_patcher.start()
+        self.addCleanup(distinctShowFolders_patcher.stop)
+
+        setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.files.setSiteWideContext')
+        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
+        self.addCleanup(setSiteWideContext_patcher.stop)
+
+        self.change_password_patcher = mock.patch(
+                'mediaviewer.views.password_reset.change_password')
+        self.mock_change_password = self.change_password_patcher.start()
+        self.addCleanup(self.change_password_patcher.stop)
+
+        render_patcher = mock.patch(
+                'mediaviewer.views.files.render')
+        self.mock_render = render_patcher.start()
+        self.addCleanup(render_patcher.stop)
+
+        self.test_distinct_folders = {
+                'test1': 'path1',
+                'test2': 'path2',
+                }
+        self.mock_distinctShowFolders.return_value = self.test_distinct_folders
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        settings = self.user.settings()
+        settings.force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_valid(self):
+        expected_context = {
+                'pathSet': ['path1', 'path2'],
+                'active_page': 'tvshows',
+                'title': 'TV Shows',
+                }
+
+        expected = self.mock_render.return_value
+        actual = tvshowsummary(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_distinctShowFolders.assert_called_once_with()
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request,
+                includeMessages=True)
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/tvsummary.html',
+                expected_context)
+
+    def test_force_password_change(self):
+        settings = self.user.settings()
+        settings.force_password_change = True
+        settings.save()
+
+        expected = self.mock_change_password.return_value
+        actual = tvshowsummary(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_change_password.assert_called_once_with(self.request)
+
