@@ -2,6 +2,8 @@ import re
 import time
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.timezone import utc
+
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
@@ -9,7 +11,6 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.message import Message
 from datetime import datetime as dateObj
-from django.utils.timezone import utc
 
 from mysite.settings import (WAITER_HEAD,
                              LOCAL_WAITER_IP_FORMAT_MOVIES,
@@ -414,4 +415,12 @@ class File(models.Model):
     @classmethod
     def movies_ordered_by_id(cls):
         files = cls.movies().filter(hide=False).order_by('-id')
+        return files
+
+    # TODO: Test the following function
+    @classmethod
+    def movies_by_genre(cls, genre):
+        files = (cls.objects.filter(_posterfile__genres=genre)
+                            .filter(hide=False)
+                            .filter(path__is_movie=True))
         return files

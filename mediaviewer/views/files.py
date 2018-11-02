@@ -1,4 +1,8 @@
 from django.http import HttpResponse
+from django.shortcuts import (render,
+                              get_object_or_404,
+                              )
+
 from mediaviewer.models.file import File
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth.decorators import login_required
@@ -7,7 +11,6 @@ from mediaviewer.models.usersettings import (
                                       BANGUP_IP,
                                       )
 from mediaviewer.models.genre import Genre
-from django.shortcuts import render
 from mediaviewer.models.path import Path
 from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
@@ -60,7 +63,7 @@ def files(request, items):
 @logAccessInfo
 def movies(request):
     user = request.user
-    files = File.movies().filter(hide=False).order_by('-id')
+    files = File.movies_ordered_by_id()
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -86,11 +89,8 @@ def movies(request):
 @logAccessInfo
 def movies_by_genre(request, genre_id):
     user = request.user
-    # We're only interested in movies here so files must be defined
-    ref_genre = Genre.objects.get(pk=genre_id)
-    files = (File.objects.filter(_posterfile__genres=ref_genre)
-                         .filter(hide=False)
-                         .filter(path__is_movie=True))
+    genre = get_object_or_404(Genre, pk=genre_id)
+    files = File.movies_by_genre(genre)
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -106,7 +106,7 @@ def movies_by_genre(request, genre_id):
                   False),
               }
     context['active_page'] = 'movies'
-    context['title'] = 'Movies: {}'.format(ref_genre.genre)
+    context['title'] = 'Movies: {}'.format(genre.genre)
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, 'mediaviewer/files.html', context)
 
