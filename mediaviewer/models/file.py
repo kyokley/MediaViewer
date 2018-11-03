@@ -417,10 +417,16 @@ class File(models.Model):
         files = cls.movies().filter(hide=False).order_by('-id')
         return files
 
-    # TODO: Test the following function
+    # TODO: Test the following functions
     @classmethod
     def movies_by_genre(cls, genre):
         files = (cls.objects.filter(_posterfile__genres=genre)
                             .filter(hide=False)
                             .filter(path__is_movie=True))
+        return files
+
+    @classmethod
+    def files_by_localpath(cls, localpath):
+        files = File.objects.filter(
+                path__localpathstr=localpath.localpathstr).filter(hide=False)
         return files

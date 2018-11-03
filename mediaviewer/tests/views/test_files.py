@@ -21,6 +21,7 @@ from mediaviewer.views.files import (
         movies_by_genre,
         tvshowsummary,
         tvshows_by_genre,
+        tvshows,
         )
 
 
@@ -308,7 +309,6 @@ class TestTvShowsByGenre(TestCase):
         self.mock_change_password = self.change_password_patcher.start()
         self.addCleanup(self.change_password_patcher.stop)
 
-
         self.genre = mock.MagicMock(Genre)
         self.genre.id = 123
         self.genre.genre = 'test_genre'
@@ -371,3 +371,97 @@ class TestTvShowsByGenre(TestCase):
         self.assertEqual(expected, actual)
         self.mock_change_password.assert_called_once_with(self.request)
 
+
+class TestTvShows(TestCase):
+    def setUp(self):
+        get_object_or_404_patcher = mock.patch(
+                'mediaviewer.views.files.get_object_or_404')
+        self.mock_get_object_or_404 = get_object_or_404_patcher.start()
+        self.addCleanup(get_object_or_404_patcher.stop)
+
+        files_by_localpath_patcher = mock.patch(
+                'mediaviewer.views.files.File.files_by_localpath')
+        self.mock_files_by_localpath = files_by_localpath_patcher.start()
+        self.addCleanup(files_by_localpath_patcher.stop)
+
+        setSiteWideContext_patcher = mock.patch(
+                'mediaviewer.views.files.setSiteWideContext')
+        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
+        self.addCleanup(setSiteWideContext_patcher.stop)
+
+        render_patcher = mock.patch(
+                'mediaviewer.views.files.render')
+        self.mock_render = render_patcher.start()
+        self.addCleanup(render_patcher.stop)
+
+        self.change_password_patcher = mock.patch(
+                'mediaviewer.views.password_reset.change_password')
+        self.mock_change_password = self.change_password_patcher.start()
+        self.addCleanup(self.change_password_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.movie_path = Path.new('movie.local.path',
+                                   'movie.remote.path',
+                                   is_movie=True)
+
+        self.tv_file = File.new('tv.file', self.tv_path)
+        self.movie_file = File.new('movie.file', self.movie_path)
+
+        self.mock_get_object_or_404.return_value = self.tv_path
+        self.mock_files_by_localpath.return_value = [self.tv_file]
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        settings = self.user.settings()
+        settings.force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_force_password_change(self):
+        settings = self.user.settings()
+        settings.force_password_change = True
+        settings.save()
+
+        expected = self.mock_change_password.return_value
+        actual = tvshows(self.request, self.tv_path.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_change_password.assert_called_once_with(self.request)
+
+    def test_valid(self):
+        expected_context = {
+                'files': [self.tv_file],
+                'path': self.tv_path,
+                'view': 'tvshows',
+                'LOCAL_IP': LOCAL_IP,
+                'BANGUP_IP': BANGUP_IP,
+                'can_download': True,
+                'jump_to_last': True,
+                'active_page': 'tvshows',
+                'title': 'Tv Local Path',
+                'long_plot': False,
+                }
+
+        expected = self.mock_render.return_value
+        actual = tvshows(self.request, self.tv_path.id)
+
+        self.assertEqual(expected, actual)
+        self.mock_get_object_or_404.assert_called_once_with(
+                Path,
+                pk=self.tv_path.id)
+        self.mock_setSiteWideContext.assert_called_once_with(
+                expected_context,
+                self.request,
+                includeMessages=True)
+        self.mock_render.assert_called_once_with(
+                self.request,
+                'mediaviewer/files.html',
+                expected_context)

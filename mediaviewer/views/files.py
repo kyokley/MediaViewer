@@ -145,9 +145,8 @@ def tvshows_by_genre(request, genre_id):
 @logAccessInfo
 def tvshows(request, pathid):
     user = request.user
-    refpath = Path.objects.get(pk=pathid)
-    files = File.objects.filter(
-            path__localpathstr=refpath.localpathstr).filter(hide=False)
+    refpath = get_object_or_404(Path, pk=pathid)
+    files = File.files_by_localpath(refpath)
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
