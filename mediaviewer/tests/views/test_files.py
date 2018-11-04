@@ -3,6 +3,7 @@ import mock
 from django.test import TestCase
 from django.http import HttpRequest, Http404
 
+from django.contrib import messages
 from django.contrib.auth.models import (Group,
                                         AnonymousUser,
                                         )
@@ -22,6 +23,7 @@ from mediaviewer.views.files import (
         tvshowsummary,
         tvshows_by_genre,
         tvshows,
+        ajaxreport,
         )
 
 
@@ -465,3 +467,73 @@ class TestTvShows(TestCase):
                 self.request,
                 'mediaviewer/files.html',
                 expected_context)
+
+
+class TestAjaxReport(TestCase):
+    def setUp(self):
+        get_object_or_404_patcher = mock.patch(
+                'mediaviewer.views.files.get_object_or_404')
+        self.mock_get_object_or_404 = get_object_or_404_patcher.start()
+        self.addCleanup(get_object_or_404_patcher.stop)
+
+        createNewMessage_patcher = mock.patch(
+                'mediaviewer.views.files.Message.createNewMessage')
+        self.mock_createNewMessage = (
+                createNewMessage_patcher.start())
+        self.addCleanup(createNewMessage_patcher.stop)
+
+        HttpResponse_patcher = mock.patch(
+                'mediaviewer.views.files.HttpResponse')
+        self.mock_HttpResponse = HttpResponse_patcher.start()
+        self.addCleanup(HttpResponse_patcher.stop)
+
+        dumps_patcher = mock.patch(
+                'mediaviewer.views.files.json.dumps')
+        self.mock_dumps = dumps_patcher.start()
+        self.addCleanup(dumps_patcher.stop)
+
+        self.fake_file = mock.MagicMock(File)
+        self.fake_file.filename = 'test_filename'
+        self.mock_get_object_or_404.return_value = self.fake_file
+
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.staff_user = UserSettings.new(
+                'test_staff_user',
+                'a@b.com',
+                send_email=False)
+        self.staff_user.is_staff = True
+        self.staff_user.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'b@c.com',
+                send_email=False)
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+        self.request.POST = {'reportid': 'file-123'}
+
+    def test_valid(self):
+        expected_response = {
+                'errmsg': '',
+                'reportid': 123,
+                }
+
+        expected = self.mock_HttpResponse.return_value
+        actual = ajaxreport(self.request)
+
+        self.assertEqual(expected, actual)
+        self.mock_get_object_or_404.assert_called_once_with(
+                File,
+                pk=123)
+        self.mock_createNewMessage.assert_called_once_with(
+                self.staff_user,
+                'test_filename has been reported by test_user',
+                level=messages.WARNING)
+        self.mock_dumps.assert_called_once_with(
+                expected_response)
+        self.mock_HttpResponse.assert_called_once_with(
+                self.mock_dumps.return_value,
+                content_type='application/javascript')

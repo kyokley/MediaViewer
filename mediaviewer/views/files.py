@@ -177,7 +177,7 @@ def ajaxreport(request):
         reportid = ID_REGEX.findall(request.POST['reportid'])[0]
         reportid = int(reportid)
         response['reportid'] = reportid
-        file = File.objects.get(pk=reportid)
+        file = get_object_or_404(File, pk=reportid)
         users = User.objects.filter(is_staff=True)
 
         for user in users:
