@@ -4,9 +4,7 @@ from django.test import TestCase
 from django.http import HttpRequest, Http404
 
 from django.contrib import messages
-from django.contrib.auth.models import (Group,
-                                        AnonymousUser,
-                                        )
+from django.contrib.auth.models import Group
 from mediaviewer.models.usersettings import (
         UserSettings,
         LOCAL_IP,
@@ -108,6 +106,28 @@ class TestMovies(TestCase):
 
         self.assertEqual(expected, actual)
         self.mock_change_password.assert_called_once_with(self.request)
+
+
+class TestMovieByGenre404(TestCase):
+    def setUp(self):
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        settings = self.user.settings()
+        settings.force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_404(self):
+        self.assertRaises(Http404,
+                          movies_by_genre,
+                          self.request,
+                          100)
 
 
 class TestMoviesByGenre(TestCase):
@@ -283,6 +303,28 @@ class TestTvShowSummary(TestCase):
         self.mock_change_password.assert_called_once_with(self.request)
 
 
+class TestTvShowByGenre404(TestCase):
+    def setUp(self):
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        settings = self.user.settings()
+        settings.force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_404(self):
+        self.assertRaises(Http404,
+                          tvshows_by_genre,
+                          self.request,
+                          100)
+
+
 class TestTvShowsByGenre(TestCase):
     def setUp(self):
         get_object_or_404_patcher = mock.patch(
@@ -372,6 +414,28 @@ class TestTvShowsByGenre(TestCase):
 
         self.assertEqual(expected, actual)
         self.mock_change_password.assert_called_once_with(self.request)
+
+
+class TestTvShow404(TestCase):
+    def setUp(self):
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        settings = self.user.settings()
+        settings.force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+
+    def test_404(self):
+        self.assertRaises(Http404,
+                          tvshows,
+                          self.request,
+                          100)
 
 
 class TestTvShows(TestCase):
@@ -467,6 +531,29 @@ class TestTvShows(TestCase):
                 self.request,
                 'mediaviewer/files.html',
                 expected_context)
+
+
+class TestAjaxReport404(TestCase):
+    def setUp(self):
+        mv_group = Group(name='MediaViewer')
+        mv_group.save()
+
+        self.user = UserSettings.new(
+                'test_user',
+                'a@b.com',
+                send_email=False)
+        settings = self.user.settings()
+        settings.force_password_change = False
+
+        self.request = mock.MagicMock(HttpRequest)
+        self.request.user = self.user
+        self.request.POST = {'reportid': 'file-100'}
+
+    def test_404(self):
+        self.assertRaises(Http404,
+                          ajaxreport,
+                          self.request,
+                          )
 
 
 class TestAjaxReport(TestCase):

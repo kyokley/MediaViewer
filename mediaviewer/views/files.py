@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import (render,
                               get_object_or_404,
                               )
@@ -186,6 +186,8 @@ def ajaxreport(request):
                                          file.filename,
                                          createdBy.username),
                                      level=messages.WARNING)
+    except Http404:
+        raise
     except Exception, e:
         if DEBUG:
             response['errmsg'] = str(e)
