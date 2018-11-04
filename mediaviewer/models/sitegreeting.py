@@ -7,7 +7,10 @@ class SiteGreeting(models.Model):
                              null=False,
                              blank=False,
                              db_column='userid')
-    datecreated = models.DateTimeField(db_column='datecreated', blank=True)
+    datecreated = models.DateTimeField(
+            db_column='datecreated',
+            blank=True,
+            auto_now_add=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -23,3 +26,11 @@ class SiteGreeting(models.Model):
     def latestSiteGreeting(cls):
         greetings = cls.objects.order_by('-id')
         return greetings and greetings[0] or None
+
+    @classmethod
+    def new(cls, user, greeting):
+        new_obj = cls()
+        new_obj.greeting = greeting
+        new_obj.user = user
+        new_obj.save()
+        return new_obj

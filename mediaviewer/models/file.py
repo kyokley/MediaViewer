@@ -430,3 +430,10 @@ class File(models.Model):
         files = File.objects.filter(
                 path__localpathstr=localpath.localpathstr).filter(hide=False)
         return files
+
+    @classmethod
+    def most_recent_files(cls, items=10):
+        files = (cls.objects
+                    .filter(hide=False)
+                    .filter(finished=True).order_by('-id')[:items])
+        return files
