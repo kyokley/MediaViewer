@@ -22,7 +22,7 @@ import telnetlib  # nosec
 
 from mediaviewer.log import log
 
-suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+SUFFIXES = ('B', 'KB', 'MB', 'GB', 'TB', 'PB')
 
 
 def getSomewhatUniqueID(numBytes=4):
@@ -73,11 +73,11 @@ def humansize(nbytes):
         return '0 B'
 
     i = 0
-    while nbytes >= 1024 and i < len(suffixes)-1:
+    while nbytes >= 1024 and i < len(SUFFIXES)-1:
         nbytes /= 1024.
         i += 1
     f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
-    return '%s %s' % (f, suffixes[i])
+    return '%s %s' % (f, SUFFIXES[i])
 
 
 def sendMail(

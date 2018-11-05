@@ -105,11 +105,7 @@ def submitsitesettings(request):
 
     if user.is_staff:
         if not latestGreeting or newGreeting != latestGreeting.greeting:
-            newSiteGreeting = SiteGreeting()
-            newSiteGreeting.greeting = newGreeting
-            newSiteGreeting.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-            newSiteGreeting.user = request.user
-            newSiteGreeting.save()
+            SiteGreeting.new(request.user, newGreeting)
     else:
         log.error("User is not a staffer!")
         context['errMsg'] = 'Unauthorized access attempted'

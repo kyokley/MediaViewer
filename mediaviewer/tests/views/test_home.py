@@ -1,7 +1,6 @@
 import mock
 
 from django.test import TestCase
-from django.contrib.auth.models import Group
 from django.http import HttpRequest
 
 from mediaviewer.models.file import File
@@ -12,22 +11,7 @@ from mediaviewer.views.home import (
         ajaxrunscraper,
         )
 
-from mediaviewer.models.usersettings import (
-        UserSettings,
-        )
-
-
-def create_test_user():
-        mv_group = Group(name='MediaViewer')
-        mv_group.save()
-
-        user = UserSettings.new(
-                'test_user',
-                'a@b.com',
-                send_email=False)
-        settings = user.settings()
-        settings.force_password_change = False
-        return user
+from mediaviewer.tests.helpers import create_test_user
 
 
 class TestHome(TestCase):
