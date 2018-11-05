@@ -2,10 +2,10 @@ from django.contrib.auth.models import Group
 from mediaviewer.models.usersettings import UserSettings
 
 
-def create_test_user(group_name='MediaViewer',
-                     username='test_user',
-                     email='a@b.com',
-                     send_email=False):
+def create_user(group_name='MediaViewer',
+                username='test_user',
+                email='a@b.com',
+                send_email=False):
         mv_group = Group(name=group_name)
         mv_group.save()
 

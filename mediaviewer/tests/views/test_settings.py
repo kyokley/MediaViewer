@@ -12,7 +12,7 @@ from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.core.exceptions import ValidationError
 
-from mediaviewer.tests.helpers import create_test_user
+from mediaviewer.tests.helpers import create_user
 
 
 # TODO: Drop mock patch decorators
@@ -355,7 +355,7 @@ class TestSubmitSiteSettings(TestCase):
 
         self.mock_latestSiteGreeting.return_value = self.old_greeting
 
-        self.user = create_test_user()
+        self.user = create_user()
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user

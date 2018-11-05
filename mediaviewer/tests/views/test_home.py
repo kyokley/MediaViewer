@@ -11,7 +11,7 @@ from mediaviewer.views.home import (
         ajaxrunscraper,
         )
 
-from mediaviewer.tests.helpers import create_test_user
+from mediaviewer.tests.helpers import create_user
 
 
 class TestHome(TestCase):
@@ -35,7 +35,7 @@ class TestHome(TestCase):
                 'mediaviewer.views.password_reset.change_password')
         self.mock_change_password = self.change_password_patcher.start()
 
-        self.user = create_test_user()
+        self.user = create_user()
 
         self.tv_path = Path.new('tv.local.path',
                                 'tv.remote.path',
@@ -124,7 +124,7 @@ class TestAjaxRunScraper(TestCase):
         self.mock_HttpResponse = HttpResponse_patcher.start()
         self.addCleanup(HttpResponse_patcher.stop)
 
-        self.user = create_test_user()
+        self.user = create_user()
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
