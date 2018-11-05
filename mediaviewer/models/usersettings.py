@@ -93,6 +93,7 @@ class UserSettings(models.Model):
             send_email=True,
             binge_mode=True,
             jump_to_last_watched=True,
+            group=None,
             ):
         ''' Create new User and associated UserSettings '''
 
@@ -105,12 +106,16 @@ class UserSettings(models.Model):
 
         newUser = User()
         newUser.username = name
+        newUser.email = email
         newUser.is_staff = is_staff
         newUser.is_superuser = is_superuser
         newUser.set_password(TEMPORARY_PASSWORD)
         newUser.save()
 
-        mv_group = Group.objects.get(name='MediaViewer')
+        if group:
+            mv_group = group
+        else:
+            mv_group = Group.objects.get(name='MediaViewer')
         mv_group.user_set.add(newUser)
         mv_group.save()
 
