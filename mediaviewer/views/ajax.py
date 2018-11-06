@@ -83,6 +83,6 @@ def ajaxgenres(request, guid):
                             content_type='application/json',
                             status=200)
     else:
-        return HttpResponse(json.dumps(data),
+        return HttpResponse(None,
                             content_type='application/json',
                             status=405)
