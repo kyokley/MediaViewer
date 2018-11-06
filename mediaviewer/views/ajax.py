@@ -9,7 +9,8 @@ from mediaviewer.models.path import Path
 import json
 import pytz
 
-REWIND_THRESHOLD = 10 # in minutes
+REWIND_THRESHOLD = 10  # in minutes
+
 
 @csrf_exempt
 def ajaxvideoprogress(request, guid, hashed_filename):
@@ -30,7 +31,8 @@ def ajaxvideoprogress(request, guid, hashed_filename):
             offset = float(vp.offset)
             date_edited = vp.date_edited
 
-            ref_time = datetime.now(pytz.timezone('utc')) - timedelta(minutes=REWIND_THRESHOLD)
+            ref_time = datetime.now(
+                    pytz.timezone('utc')) - timedelta(minutes=REWIND_THRESHOLD)
             if date_edited < ref_time:
                 offset = max(offset - 30, 0)
 
@@ -59,6 +61,7 @@ def ajaxvideoprogress(request, guid, hashed_filename):
         return HttpResponse(json.dumps(data),
                             content_type='application/json',
                             status=405)
+
 
 @csrf_exempt
 def ajaxgenres(request, guid):
