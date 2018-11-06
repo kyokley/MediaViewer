@@ -65,8 +65,7 @@ class Path(models.Model):
         return True
 
     def files(self):
-        return File.objects.filter(
-                path__localpathstr=self.localpathstr).filter(hide=False)
+        return File.files_by_localpath(self)
 
     @property
     def shortName(self):

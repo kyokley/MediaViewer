@@ -126,7 +126,6 @@ class File(models.Model):
         return self.datatransmission
 
     def _posterfileget(self):
-        from mediaviewer.models.posterfile import PosterFile
         posterfile = PosterFile.new(file=self)
 
         return posterfile
@@ -396,7 +395,7 @@ class File(models.Model):
             posterfile.delete()
         except PosterFile.DoesNotExist:
             log.debug('Posterfile does not exist. Continuing.')
-        except Exception, e:
+        except Exception as e:
             log.error('Got an error destroying posterfile')
             log.error(e)
 
