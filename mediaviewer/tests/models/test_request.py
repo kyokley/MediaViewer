@@ -6,6 +6,7 @@ from mediaviewer.models.request import (Request,
                                         RequestVote,
                                         )
 
+
 class TestGetSupportingUsers(TestCase):
     def setUp(self):
         self.user1 = User()
@@ -31,6 +32,7 @@ class TestGetSupportingUsers(TestCase):
         expected = set([self.user1, self.user3])
         actual = set(self.request.getSupportingUsers())
         self.assertEqual(expected, actual)
+
 
 class TestCanVote(TestCase):
     def setUp(self):
@@ -61,6 +63,7 @@ class TestCanVote(TestCase):
         req_vote.datecreated = req_vote.datecreated + timedelta(days=-1)
         req_vote.save()
         self.assertTrue(self.request.canVote(self.user1))
+
 
 class TestRequestNew(TestCase):
     def setUp(self):
