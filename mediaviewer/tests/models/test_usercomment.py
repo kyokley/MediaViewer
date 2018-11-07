@@ -25,6 +25,7 @@ class TestNew(TestCase):
                 self.user,
                 'test_comment',
                 False)
+        print(uc)
 
         self.assertEqual(uc.file, self.file)
         self.assertEqual(uc.user, self.user)
