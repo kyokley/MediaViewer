@@ -1,8 +1,13 @@
 from django.db import models
 from mediaviewer.models.message import Message
 
+
 class VideoProgress(models.Model):
-    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
+    user = models.ForeignKey(
+            'auth.User',
+            null=False,
+            blank=False,
+            db_column='userid')
     filename = models.TextField(db_column='filename', null=True)
     hashed_filename = models.TextField(db_column='hashedfilename')
     offset = models.DecimalField(max_digits=9, decimal_places=3)
