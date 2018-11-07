@@ -87,7 +87,7 @@ def sendMail(
         from_addr=EMAIL_FROM_ADDR,
         files=None,
         server='localhost'):
-    if type(to_addr) is not list:
+    if not isinstance(to_addr, list):
         to_addr = set([to_addr])
     else:
         to_addr = set(to_addr)

@@ -138,3 +138,4 @@ class TestSendMail(TestCase):
                 set([self.to_addr, self.staff_user.email]),
                 self.mock_MIMEMultipart.return_value.as_string.return_value
                 )
+        self.mock_SMTP.return_value.close.assert_called_once_with()
