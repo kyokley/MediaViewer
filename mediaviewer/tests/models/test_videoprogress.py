@@ -147,5 +147,3 @@ class TestNew(BaseVPTest):
         self.assertEqual(vp.hashed_filename, hashed_filename)
         self.assertEqual(vp.offset, 100)
         self.assertEqual(vp.file, self.file2)
-
-
