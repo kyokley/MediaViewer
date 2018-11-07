@@ -8,6 +8,7 @@ from mediaviewer.utils import (
         getSomewhatUniqueID,
         humansize,
         sendMail,
+        checkSMTPServer,
         )
 
 from mediaviewer.tests import helpers
@@ -139,3 +140,62 @@ class TestSendMail(TestCase):
                 self.mock_MIMEMultipart.return_value.as_string.return_value
                 )
         self.mock_SMTP.return_value.close.assert_called_once_with()
+
+
+class BaseSMTPServerTestCase(TestCase):
+    def create_mocks(self):
+        Telnet_patcher = mock.patch(
+                'mediaviewer.utils.telnetlib.Telnet')
+        self.mock_Telnet = Telnet_patcher.start()
+        self.addCleanup(Telnet_patcher.stop)
+
+        EMAIL_HOST_patcher = mock.patch(
+                'mediaviewer.utils.EMAIL_HOST',
+                'test_host')
+        EMAIL_HOST_patcher.start()
+        self.addCleanup(EMAIL_HOST_patcher.stop)
+
+        EMAIL_PORT_patcher = mock.patch(
+                'mediaviewer.utils.EMAIL_PORT',
+                'test_port')
+        EMAIL_PORT_patcher.start()
+        self.addCleanup(EMAIL_PORT_patcher.stop)
+
+
+class TestCheckSMTPServer(BaseSMTPServerTestCase):
+    def setUp(self):
+        self.create_mocks()
+
+        BYPASS_SMTPD_CHECK_patcher = mock.patch(
+                'mediaviewer.utils.BYPASS_SMTPD_CHECK',
+                False)
+        BYPASS_SMTPD_CHECK_patcher.start()
+        self.addCleanup(BYPASS_SMTPD_CHECK_patcher.stop)
+
+    def test_smtpd_check(self):
+        expected = None
+        actual = checkSMTPServer()
+
+        self.assertEquals(expected, actual)
+        self.mock_Telnet.assert_called_once_with(
+                host='test_host',
+                port='test_port')
+        self.mock_Telnet.return_value.close.assert_called_once_with()
+
+
+class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
+    def setUp(self):
+        self.create_mocks()
+
+        BYPASS_SMTPD_CHECK_patcher = mock.patch(
+                'mediaviewer.utils.BYPASS_SMTPD_CHECK',
+                True)
+        BYPASS_SMTPD_CHECK_patcher.start()
+        self.addCleanup(BYPASS_SMTPD_CHECK_patcher.stop)
+
+    def test_bypass_smtpd_check(self):
+        expected = None
+        actual = checkSMTPServer()
+
+        self.assertEquals(expected, actual)
+        self.assertFalse(self.mock_Telnet.called)
