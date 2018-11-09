@@ -1,6 +1,9 @@
-from django.test import TestCase
 import mock
+from django.test import TestCase
 
 from mediaviewer.models.path import Path
-from mediaviewer.models.posterfile import PosterFile
 
+
+class TestNew(TestCase):
+    def test_new(self):
+        pass
