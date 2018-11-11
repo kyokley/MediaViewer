@@ -65,7 +65,11 @@ class Path(models.Model):
         return True
 
     def files(self):
-        return File.files_by_localpath(self)
+        files = set()
+        paths = Path.objects.filter(localpathstr=self.localpathstr)
+        for path in paths:
+            files.update(path.file_set.filter(hide=False))
+        return list(files)
 
     @property
     def shortName(self):
@@ -97,6 +101,8 @@ class Path(models.Model):
         return last_date and last_date.date().isoformat()
 
     def url(self):
+        if self.is_movie:
+            raise TypeError('url method does not apply to movie paths')
         return '<a href="{}">{}</a>'.format(
                 reverse('mediaviewer:tvshows', args=(self.id,)),
                 self.displayName())
