@@ -1,4 +1,8 @@
 import mock
+
+from datetime import datetime
+
+from django.utils.timezone import utc
 from django.test import TestCase
 
 from mediaviewer.models.path import Path
@@ -132,3 +136,69 @@ class TestFiles(TestCase):
         actual = set(self.tv_path.files())
 
         self.assertEqual(expected, actual)
+
+
+class TestLastCreatedFileDateForSpan(TestCase):
+    def setUp(self):
+        self.path = Path.new('tv.local.path',
+                             'tv.remote.path',
+                             is_movie=False)
+
+    def test_with_lastCreatedFileDate(self):
+        self.path.lastCreatedFileDate = datetime(2018, 11, 1, 0, 0, 0, 0, utc)
+        self.path.save()
+
+        expected = '2018-11-01'
+        actual = self.path.lastCreatedFileDateForSpan()
+
+        self.assertEqual(expected, actual)
+
+    def test_no_lastCreatedFileDate(self):
+        expected = None
+        actual = self.path.lastCreatedFileDateForSpan()
+
+        self.assertEqual(expected, actual)
+
+
+class TestDistinctShowFolders(TestCase):
+    def setUp(self):
+        buildDistinctShowFoldersFromPaths_patcher = mock.patch(
+            'mediaviewer.models.path.Path._buildDistinctShowFoldersFromPaths')
+        self.mock_buildDistinctShowFolderFromPaths = (
+                buildDistinctShowFoldersFromPaths_patcher.start())
+        self.addCleanup(buildDistinctShowFoldersFromPaths_patcher.stop)
+
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.tv_file = File.new('tv.file', self.tv_path)
+
+        self.tv_path2 = Path.new('tv.local.path2',
+                                 'tv.remote.path2',
+                                 is_movie=False)
+        self.tv_file2 = File.new('tv.file2', self.tv_path2)
+
+        self.hidden_tv_path = Path.new('hidden.local.path',
+                                       'hidden.remote.path',
+                                       is_movie=False)
+        self.hidden_tv_file = File.new(
+                'hidden.file',
+                self.hidden_tv_path,
+                hide=True)
+
+        self.another_tv_path = Path.new('another.tv.local.path',
+                                        'another.tv.remote.path',
+                                        is_movie=False)
+
+        self.movie_path = Path.new('movie.local.path',
+                                   'movie.remote.path',
+                                   is_movie=True)
+        self.movie_file = File.new('movie.file', self.movie_path)
+
+    def test_distinctShowFolders(self):
+        expected = self.mock_buildDistinctShowFolderFromPaths.return_value
+        actual = Path.distinctShowFolders()
+
+        self.assertEqual(expected, actual)
+        self.mock_buildDistinctShowFolderFromPaths.assert_called_once_with(
+                set([self.tv_path, self.tv_path2]))
