@@ -109,13 +109,13 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFolders(cls):
-        refFiles = (File.objects
-                        .filter(hide=False)
-                        .filter(path__is_movie=False)
-                        .order_by('path')
-                        .distinct('path')
-                        .select_related('path'))
-        paths = set([file.path for file in refFiles])
+        paths_QS = (Path.objects
+                        .filter(is_movie=False)
+                        .filter(file__hide=False)
+                        .annotate(
+                            num_files=models.Count('file'))
+                        .filter(num_files__gt=0))
+        paths = set(paths_QS)
         return cls._buildDistinctShowFoldersFromPaths(paths)
 
     @classmethod
