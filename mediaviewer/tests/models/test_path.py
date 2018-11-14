@@ -1,6 +1,6 @@
 import mock
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.utils.timezone import utc
 from django.test import TestCase
@@ -202,3 +202,32 @@ class TestDistinctShowFolders(TestCase):
         self.assertEqual(expected, actual)
         self.mock_buildDistinctShowFolderFromPaths.assert_called_once_with(
                 set([self.tv_path, self.tv_path2]))
+
+
+class TestBuildDistinctShowFoldersFromPaths(TestCase):
+    def setUp(self):
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+
+        self.tv_path2 = Path.new('tv.local.path2',
+                                 'tv.remote.path2',
+                                 is_movie=False)
+        self.tv_path2.lastCreatedFileDate = (
+                datetime.now(utc) + timedelta(hours=1))
+
+        self.tv_path3 = Path.new('tv.local.path2',
+                                 'another.tv.remote.path',
+                                 is_movie=False)
+        self.tv_path3.lastCreatedFileDate = datetime.now(utc)
+
+    def test_buildDistinctShowFoldersFromPaths(self):
+        expected = {
+                'tv.local.path': self.tv_path,
+                'tv.local.path2': self.tv_path2}
+        actual = Path._buildDistinctShowFoldersFromPaths([
+            self.tv_path,
+            self.tv_path2,
+            self.tv_path3])
+
+        self.assertEqual(expected, actual)
