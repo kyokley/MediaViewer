@@ -231,3 +231,23 @@ class TestBuildDistinctShowFoldersFromPaths(TestCase):
             self.tv_path3])
 
         self.assertEqual(expected, actual)
+
+
+class TestDestroy(TestCase):
+    def setUp(self):
+        self.tv_path = Path.new('tv.local.path',
+                                'tv.remote.path',
+                                is_movie=False)
+        self.tv_path_file = File.new('tv.file', self.tv_path)
+        self.tv_path_file2 = File.new('tv.file2', self.tv_path)
+
+        self.tv_path2 = Path.new('tv.local.path2',
+                                 'tv.remote.path2',
+                                 is_movie=False)
+        self.tv_path2_file = File.new('tv.file', self.tv_path2)
+
+    def test_destroy(self):
+        self.tv_path.destroy()
+
+        self.assertEqual(set(Path.objects.all()), set([self.tv_path2]))
+        self.assertEqual(set(File.objects.all()), set([self.tv_path2_file]))
