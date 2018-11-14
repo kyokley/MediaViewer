@@ -154,9 +154,7 @@ class Path(models.Model):
     posterfile = property(fset=_posterfileset, fget=_posterfileget)
 
     def destroy(self):
-        files = File.objects.filter(path=self)
-        for file in files:
-            file.delete()
+        self.file_set.all().delete()
         self.delete()
 
     def unwatched_tv_shows_since_date(self, user, daysBack=30):
