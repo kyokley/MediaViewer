@@ -8,12 +8,20 @@ from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
                              TOKEN_VALIDITY_LENGTH)
 from mediaviewer.models.message import Message
 
+
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
 
+
 class DownloadToken(models.Model):
     guid = models.CharField(max_length=32, default=_createId, unique=True)
-    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
+    user = models.ForeignKey(
+        'auth.User',
+        null=False,
+        blank=False,
+        db_column='userid',
+        on_delete=models.CASCADE,
+    )
     path = models.TextField(db_column='path')
     filename = models.TextField(db_column='filename')
     ismovie = models.BooleanField(db_column='ismovie')
@@ -22,7 +30,9 @@ class DownloadToken(models.Model):
     file = models.ForeignKey('mediaviewer.File',
                              null=False,
                              db_column='fileid',
-                             blank=True)
+                             blank=True,
+                             on_delete=models.CASCADE,
+                             )
 
     class Meta:
         app_label = 'mediaviewer'
