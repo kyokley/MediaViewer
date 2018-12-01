@@ -7,5 +7,5 @@ before_script:
     - cp mysite/travis.settings mysite/local_settings.py
     - psql -c "create database autodl;" -U postgres
 script:
-    - python manage.py test mediaviewer/tests
+    - pytest
     - bandit -x mediaviewer/tests -r .
