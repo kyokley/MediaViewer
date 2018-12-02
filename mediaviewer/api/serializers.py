@@ -1,4 +1,3 @@
-from mediaviewer.models.downloadclick import DownloadClick
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
@@ -26,7 +25,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'tokenid',
                   'isvalid',
                   'displayname',
-                  'auto_download',
                   'pathid',
                   'pathname',
                   'videoprogresses',
@@ -45,17 +43,12 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     tokenid = serializers.IntegerField(required=True, source='id')
     isvalid = serializers.BooleanField(required=True)
     displayname = serializers.CharField(required=True)
-    auto_download = serializers.SerializerMethodField()
     pathid = serializers.SerializerMethodField()
     pathname = serializers.SerializerMethodField()
     videoprogresses = serializers.SerializerMethodField()
     next_id = serializers.SerializerMethodField()
     previous_id = serializers.SerializerMethodField()
     binge_mode = serializers.SerializerMethodField()
-
-    def get_auto_download(self, obj):
-        user_settings = UserSettings.getSettings(obj.user)
-        return user_settings.auto_download
 
     def get_username(self, obj):
         return obj.user.username
@@ -83,24 +76,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.binge_mode
 
-
-class DownloadClickSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DownloadClick
-        fields = ('pk',
-                  'userid',
-                  'filename',
-                  'downloadtoken',
-                  'datecreated',
-                  'size',
-                  )
-
-    pk = serializers.ReadOnlyField()
-    downloadtoken = serializers.IntegerField(required=True, source='downloadtoken.id')
-    userid = serializers.IntegerField(required=True, source='user.id')
-    filename = serializers.CharField(required=True)
-    datecreated = serializers.DateTimeField(required=True)
-    size = serializers.IntegerField(required=True)
 
 class PathSerializer(serializers.ModelSerializer):
     class Meta:

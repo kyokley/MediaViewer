@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from mediaviewer.models.file import File
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth.decorators import login_required
 from mediaviewer.models.usersettings import (
                                       LOCAL_IP,
@@ -13,7 +13,8 @@ from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
 
 import json
 import re
@@ -38,7 +39,8 @@ def files(request, items):
               'view': 'files',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+               'can_download': settings and settings.can_download or False,
+               'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'files'
     context['title'] = 'Files'
@@ -59,7 +61,8 @@ def movies(request):
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+               'can_download': settings and settings.can_download or False,
+               'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'movies'
     context['title'] = 'Movies'
@@ -73,7 +76,9 @@ def movies_by_genre(request, genre_id):
     user = request.user
     # We're only interested in movies here so files must be defined
     ref_genre = Genre.objects.get(pk=genre_id)
-    files = File.objects.filter(_posterfile__genres=ref_genre).filter(hide=False)
+    files = (File.objects.filter(_posterfile__genres=ref_genre)
+                         .filter(hide=False)
+                         .filter(path__is_movie=True))
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -82,7 +87,8 @@ def movies_by_genre(request, genre_id):
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-               'can_download': settings and settings.can_download or False
+               'can_download': settings and settings.can_download or False,
+               'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'movies'
     context['title'] = 'Movies: {}'.format(ref_genre.genre)
@@ -132,7 +138,8 @@ def tvshows(request, pathid):
               'view': 'tvshows',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-              'can_download': settings and settings.can_download or False
+              'can_download': settings and settings.can_download or False,
+              'jump_to_last': settings and settings.jump_to_last_watched or False,
               }
     context['active_page'] = 'tvshows'
     context['title'] = refpath.displayName()

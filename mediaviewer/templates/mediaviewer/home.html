@@ -121,48 +121,59 @@
 
             {% block messages %}
                 {% for message in messages %}
-                <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
-                    <a href="#" class="close" data-dismiss="alert">&times;</a>
-                    {{ message }}
-                </div>
+                    {% if 'last_watched' in message.extra_tags %}
+                        {% autoescape off %}
+                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            {{ message }}
+                        </div>
+                    {% endautoescape %}
+                    {% else %}
+                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            {{ message }}
+                        </div>
+                    {% endif %}
             {% endfor %}
         {% endblock %}
 
         {% block main %}
-            <table id="newFileTable" class="table table-plain">
-                <thead>
-                    <tr>
-                        <th>Latest Files</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for file in files %}
+            {% if loggedin %}
+                <table id="newFileTable" class="table table-plain">
+                    <thead>
                         <tr>
-                            {% if file.isMovie %}
-                                {% if loggedin %}
-                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
-                                {% else %}
-                                    <td>{{ file.rawSearchString }}</td>
-                                {% endif %}
-                            {% else %}
-                                {% if loggedin %}
-                                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
-                                {% else %}
-                                    <td>{{ file.getScrapedFullName }}</td>
-                                {% endif %}
-                            {% endif %}
+                            <th>Latest Files</th>
                         </tr>
-                    {% endfor %}
-                    {% if loggedin and user.is_staff %}
-                        <tr>
-                            <td>
-                                <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for file in files %}
+                            <tr>
+                                {% if file.isMovie %}
+                                    {% if loggedin %}
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                                    {% else %}
+                                        <td>{{ file.rawSearchString }}</td>
+                                    {% endif %}
+                                {% else %}
+                                    {% if loggedin %}
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
+                                    {% else %}
+                                        <td>{{ file.getScrapedFullName }}</td>
+                                    {% endif %}
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        {% if loggedin and user.is_staff %}
+                            <tr>
+                                <td>
+                                    <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
 
+            {% endif %}
         {% endblock %}
     </div> <!-- /container -->
 
@@ -172,11 +183,18 @@
 {% block footer %}
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            {% if waiterstatus %}
-                <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
-            {% else %}
-                <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
-            {% endif %}
+            <div class="row">
+                <div class="col-md-3">
+                    {% if waiterstatus %}
+                        <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
+                    {% else %}
+                        <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
+                    {% endif %}
+                </div>
+                <div class="col-md-9">
+                    <p class="text-right donation-text">If you've found this site useful, please consider donating to <a href="https://thewaterproject.org/give-water">The&nbsp;Water&nbsp;Project</a></p>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

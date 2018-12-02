@@ -6,6 +6,7 @@ from mediaviewer.utils import getSomewhatUniqueID
 from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
                              TIME_ZONE,
                              TOKEN_VALIDITY_LENGTH)
+from mediaviewer.models.message import Message
 
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
@@ -64,6 +65,11 @@ class DownloadToken(models.Model):
             old_token = cls.objects.order_by('id').first()
             if old_token:
                 old_token.delete()
+
+        Message.createLastWatchedMessage(user, file)
+        settings = user.settings()
+        settings.last_watched = file.path
+        settings.save()
         return dt
 
     @classmethod

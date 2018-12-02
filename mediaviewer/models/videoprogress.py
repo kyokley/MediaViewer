@@ -1,4 +1,5 @@
 from django.db import models
+from mediaviewer.models.message import Message
 
 class VideoProgress(models.Model):
     user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
@@ -64,10 +65,18 @@ class VideoProgress(models.Model):
                              offset,
                              file
                              )
+
         return record
 
     @classmethod
-    def delete(cls,
-               user,
-               hashed_filename):
-        cls.objects.filter(user=user).filter(hashed_filename=hashed_filename).delete()
+    def destroy(cls,
+                user,
+                hashed_filename):
+        vp = (cls.objects.filter(user=user)
+                         .filter(hashed_filename=hashed_filename)
+                         .first())
+        if vp:
+            if not vp.file.next():
+                Message.clearLastWatchedMessage(user)
+
+            vp.delete()

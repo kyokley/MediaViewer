@@ -33,10 +33,11 @@ class UserSettings(models.Model):
     user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
     can_download = models.BooleanField(db_column='can_download', blank=False, null=False)
     default_sort = models.TextField(db_column='default_sort')
-    auto_download = models.BooleanField(db_column='auto_download', blank=False, null=False, default=False)
     force_password_change = models.BooleanField(db_column='force_password_change', blank=False, null=False, default=False)
     can_login = models.BooleanField(db_column='can_login', blank=False, null=False, default=True)
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
+    last_watched = models.ForeignKey('mediaviewer.Path', null=True, blank=True)
+    jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
 
     class Meta:
         app_label = 'mediaviewer'
@@ -62,6 +63,7 @@ class UserSettings(models.Model):
             can_download=True,
             send_email=True,
             binge_mode=True,
+            jump_to_last_watched=True,
             ):
         ''' Create new User and associated UserSettings '''
 
@@ -92,6 +94,7 @@ class UserSettings(models.Model):
         newSettings.can_download = can_download
         newSettings.can_login = False
         newSettings.binge_mode = binge_mode
+        newSettings.jump_to_last_watched = jump_to_last_watched
         newSettings.save()
 
         if send_email:

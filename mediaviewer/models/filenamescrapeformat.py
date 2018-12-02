@@ -1,3 +1,4 @@
+import re
 from django.db import models
 
 class FilenameScrapeFormat(models.Model):
@@ -14,3 +15,75 @@ class FilenameScrapeFormat(models.Model):
     def __unicode__(self):
         return 'id: %s n: %s s: %s e: %s subPeriods: %s useSearchTerm: %s' % (self.id, self.nameRegex, self.seasonRegex, self.episodeRegex, self.subPeriods, self.useSearchTerm)
 
+    @classmethod
+    def new(cls,
+            nameRegex,
+            seasonRegex,
+            episodeRegex,
+            subPeriods=False,
+            useSearchTerm=False):
+        obj = cls()
+        obj.nameRegex = nameRegex
+        obj.seasonRegex = seasonRegex
+        obj.episodeRegex = episodeRegex
+        obj.subPeriods = subPeriods
+        obj.useSearchTerm = useSearchTerm
+        obj.save()
+        return obj
+
+    def valid_for_filename(self, filename):
+        from mediaviewer.models.path import Path
+
+        path = None
+
+        if self.subPeriods:
+            filename = filename.replace('.', ' ')
+
+        name = re.findall(self.nameRegex, filename)
+        name = name[0].strip() if name and len(name[0]) > 1 else None
+
+        if not name:
+            return None
+        else:
+            for p in Path.objects.filter(is_movie=False).order_by('-id'):
+                if name.lower() in p.displayName().lower():
+                    path = p
+                    break
+            else:
+                return None
+
+        season = re.findall(self.seasonRegex, filename)
+        if not season or not season[0].strip():
+            return None
+        else:
+            season = season[0]
+
+            if not season.isdigit() or int(season) == 0:
+                return None
+
+        episode = re.findall(self.episodeRegex, filename)
+        if not episode or not episode[0].strip():
+            return None
+        else:
+            episode = episode[0]
+
+            if not episode.isdigit() or int(episode) == 0:
+                return None
+
+        # Filenames containing 264 are most likely not right
+        if int(season) == 2 and int(episode) == 64:
+            return None
+
+        return (path, name, season, episode)
+
+    @classmethod
+    def path_for_filename(cls, filename):
+        paths = []
+
+        for scraper in FilenameScrapeFormat.objects.all():
+            path = scraper.valid_for_filename(filename)
+            if path:
+                paths.append(path)
+
+        paths.sort(key=lambda x: len(x[1]), reverse=True)
+        return paths[0][0] if paths else None

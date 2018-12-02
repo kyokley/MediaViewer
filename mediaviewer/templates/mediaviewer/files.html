@@ -57,7 +57,7 @@
                                     <dd>{{ path.posterfile.rated }}</dd>
                                 {% endif %}
                                 {% if path.posterfile.rating and path.posterfile.rating != 'N/A' %}
-                                    <dt>IMDB Rating:</dt>
+                                    <dt>Rating:</dt>
                                     <dd>{{ path.posterfile.rating }}/10</dd>
                                 {% endif %}
                             </dl>
@@ -152,6 +152,10 @@
                 var sortOrder = [[0,1]];
             {% endif %}
             prepareTableSorter($, sortOrder);
+
+            {% if jump_to_last and view == 'tvshows' %}
+                jumpToLastViewedPage($);
+            {% endif %}
 
             prepareViewedCheckBoxes($);
 

@@ -138,19 +138,3 @@ def checkSMTPServer():
         smtp_server = telnetlib.Telnet(host=EMAIL_HOST, #nosec
                                        port=EMAIL_PORT)
         smtp_server.close()
-
-def check_force_password_change(func):
-    @wraps(func)
-    def wrap(*args, **kwargs):
-        from mediaviewer.views.password_reset import change_password
-        request = args and args[0]
-        if request and request.user:
-            user = request.user
-            if user.is_authenticated():
-                settings = user.settings()
-                if settings.force_password_change:
-                    return change_password(request)
-        res = func(*args, **kwargs)
-        return res
-    return wrap
-

@@ -4,11 +4,12 @@ from django.http import HttpResponse
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
                                              )
-from mediaviewer.utils import logAccessInfo, humansize, check_force_password_change
+from mediaviewer.utils import logAccessInfo, humansize
+from mediaviewer.views.password_reset import check_force_password_change
 from django.shortcuts import render, get_object_or_404, redirect
 import json
 
@@ -90,20 +91,19 @@ def ajaxsuperviewed(request):
     guid = request.POST['guid']
     viewed = request.POST['viewed'] == 'True' and True or False
 
-    if viewed:
-        token = (DownloadToken.objects
-                              .filter(guid=guid)
-                              .first())
-        if token and token.isvalid:
-            token.file.markFileViewed(token.user, viewed)
-        else:
-            errmsg = 'Token is invalid'
+    token = (DownloadToken.objects
+                          .filter(guid=guid)
+                          .first())
+    if token and token.isvalid:
+        token.file.markFileViewed(token.user, viewed)
+    else:
+        errmsg = 'Token is invalid'
 
     response = {'errmsg': errmsg,
                 'guid': guid,
                 'viewed': viewed}
     response = json.dumps(response)
-    return HttpResponse(response, content_type="application/json")
+    return HttpResponse(response, status=200 if not errmsg else 400, content_type="application/json")
 
 @logAccessInfo
 def ajaxdownloadbutton(request):

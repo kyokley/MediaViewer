@@ -1,17 +1,19 @@
 from django.contrib.auth.decorators import login_required
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.usersettings import (UserSettings,
-                                      LOCAL_IP,
-                                      BANGUP_IP,
-                                      FILENAME_SORT,
-                                      )
-from mediaviewer.views.home import setSiteWideContext
+                                             LOCAL_IP,
+                                             BANGUP_IP,
+                                             FILENAME_SORT,
+                                             )
+from mediaviewer.views.views_utils import setSiteWideContext
 from django.shortcuts import render
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
 from mediaviewer.log import log
 from django.core.exceptions import ValidationError
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -21,18 +23,17 @@ def settings(request):
     context = {
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
-              'greeting': siteGreeting and siteGreeting.greeting or "Check out the new downloads!",
+              'greeting': (siteGreeting and
+                           siteGreeting.greeting or
+                           "Check out the new downloads!"),
             }
     context['active_page'] = 'settings'
     user = request.user
     settings = user.settings()
-    if settings:
-        context['ip_format'] = settings.ip_format
-    else:
-        context['ip_format'] = BANGUP_IP
+    context['ip_format'] = settings.ip_format
     context['title'] = 'Settings'
-    context['auto_download'] = settings.auto_download
     context['binge_mode'] = settings.binge_mode
+    context['jump_to_last'] = settings.jump_to_last_watched
 
     context['email'] = user.email
     if not user.email:
@@ -43,6 +44,7 @@ def settings(request):
     setSiteWideContext(context, request, includeMessages=False)
 
     return render(request, 'mediaviewer/settings.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -56,40 +58,38 @@ def submitsettings(request):
     if not default_sort:
         default_sort = FILENAME_SORT
 
-    auto_download = request.POST.get('auto_download')
-    if not auto_download:
-        auto_download = False
-    else:
-        auto_download = auto_download == 'true'
-
     binge_mode = request.POST.get('binge_mode')
     if not binge_mode:
         binge_mode = False
     else:
         binge_mode = binge_mode == 'true'
 
+    jump_to_last = request.POST.get('jump_to_last')
+    if not jump_to_last:
+        jump_to_last = False
+    else:
+        jump_to_last = jump_to_last == 'true'
+
     user = request.user
     settings = user.settings()
-    if not settings:
-        settings = UserSettings()
-        settings.datecreated = dateObj.utcnow().replace(tzinfo=utc)
-        settings.user = request.user
-        changed = True
-    else:
-        changed = settings.default_sort != default_sort
 
-    settings.auto_download = auto_download
+    changed = (settings.default_sort != default_sort or
+               settings.binge_mode != binge_mode or
+               settings.jump_to_last_watched != jump_to_last)
+
     settings.binge_mode = binge_mode
+    settings.jump_to_last_watched = jump_to_last
     settings.default_sort = default_sort
     user.email = request.POST.get('email_field', user.email)
     context['default_sort'] = settings.default_sort
 
     if changed:
-        settings.dateedited = dateObj.utcnow().replace(tzinfo=utc)
+        settings.dateedited = dateObj.now(utc)
 
     settings.save()
     user.save()
     return render(request, 'mediaviewer/settingsresults.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -115,6 +115,7 @@ def submitsitesettings(request):
         context['errMsg'] = 'Unauthorized access attempted'
         context['successful'] = False
     return render(request, 'mediaviewer/settingsresults.html', context)
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change

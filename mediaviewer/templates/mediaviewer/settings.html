@@ -70,25 +70,6 @@
                     </div>
                 </ul>
                 <ul>
-                    <label>Auto Download:</label>
-                    <div class="input">
-                        <ul class="inputs-list">
-                            <ul>
-                                <label>
-                                    <input type="radio" checked name="auto_download" value=true id="auto_download_yes"/>
-                                    <span>Yes</span>
-                                </label>
-                            </ul>
-                            <ul>
-                                <label>
-                                    <input type="radio" name="auto_download" value=false id="auto_download_no"/>
-                                    <span>No</span>
-                                </label>
-                            </ul>
-                        </ul>
-                    </div>
-                </ul>
-                <ul>
                     <label>Binge Watch Mode:</label>
                     <div class="input">
                         <ul class="inputs-list">
@@ -101,6 +82,25 @@
                             <ul>
                                 <label>
                                     <input type="radio" name="binge_mode" value=false id="binge_mode_no"/>
+                                    <span>No</span>
+                                </label>
+                            </ul>
+                        </ul>
+                    </div>
+                </ul>
+                <ul>
+                    <label>Jump to Last Viewed:</label>
+                    <div class="input">
+                        <ul class="inputs-list">
+                            <ul>
+                                <label>
+                                    <input type="radio" checked name="jump_to_last" value=true id="jump_to_last_yes"/>
+                                    <span>Yes</span>
+                                </label>
+                            </ul>
+                            <ul>
+                                <label>
+                                    <input type="radio" name="jump_to_last" value=false id="jump_to_last_no"/>
                                     <span>No</span>
                                 </label>
                             </ul>
@@ -214,16 +214,16 @@
                 jQuery('#timestamp_sort').prop('checked', 'checked');
             {% endif %}
 
-            {% if auto_download == True %}
-                jQuery('#auto_download_yes').prop('checked', 'checked');
-            {% else %}
-                jQuery('#auto_download_no').prop('checked', 'checked');
-            {% endif %}
-
             {% if binge_mode == True %}
                 jQuery('#binge_mode_yes').prop('checked', 'checked');
             {% else %}
                 jQuery('#binge_mode_no').prop('checked', 'checked');
+            {% endif %}
+
+            {% if jump_to_last == True %}
+                jQuery('#jump_to_last_yes').prop('checked', 'checked');
+            {% else %}
+                jQuery('#jump_to_last_no').prop('checked', 'checked');
             {% endif %}
 
             var input = document.getElementById('btn-input');

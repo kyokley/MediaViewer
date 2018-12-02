@@ -12,10 +12,19 @@ from datetime import datetime, timedelta
 import pytz
 import mock
 
-@mock.patch('mediaviewer.models.downloadtoken.DownloadToken.save')
 class TestDownloadToken(TestCase):
     def setUp(self):
+        self.save_patcher = mock.patch('mediaviewer.models.downloadtoken.DownloadToken.save')
+        self.mock_save = self.save_patcher.start()
+
+        self.objects_patcher = mock.patch('mediaviewer.models.downloadtoken.DownloadToken.objects')
+        self.mock_objects = self.objects_patcher.start()
+
+        self.createLastWatchedMessage_patcher = mock.patch('mediaviewer.models.downloadtoken.Message.createLastWatchedMessage')
+        self.mock_createLastWatchedMessage = self.createLastWatchedMessage_patcher.start()
+
         self.user = User()
+        self.user.settings = lambda : mock.MagicMock()
 
         self.path = Path()
         self.path.localpathstr = '/path/to/file'
@@ -25,13 +34,17 @@ class TestDownloadToken(TestCase):
         self.file.filename = 'some file'
         self.file.path = self.path
 
-    @mock.patch('mediaviewer.models.downloadtoken.DownloadToken.objects')
-    def test_new(self, mock_objects, mock_save):
-        mock_objects.count.return_value = MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS + 1
+    def tearDown(self):
+        self.save_patcher.stop()
+        self.objects_patcher.stop()
+        self.createLastWatchedMessage_patcher.stop()
+
+    def test_new(self):
+        self.mock_objects.count.return_value = MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS + 1
         mock_ordered_query = mock.MagicMock()
         old_token = mock.create_autospec(DownloadToken)
         mock_ordered_query.first.return_value = old_token
-        mock_objects.order_by.return_value = mock_ordered_query
+        self.mock_objects.order_by.return_value = mock_ordered_query
         dt = DownloadToken.new(self.user,
                                self.file)
 
@@ -41,16 +54,17 @@ class TestDownloadToken(TestCase):
         self.assertEqual(dt.ismovie, False)
         self.assertEqual(dt.displayname, 'some file')
         self.assertEqual(dt.file, self.file)
-        mock_save.assert_called_once_with()
-        self.assertTrue(mock_objects.count.called)
+        self.mock_save.assert_called_once_with()
+        self.assertTrue(self.mock_objects.count.called)
         self.assertTrue(old_token.delete.called)
+        self.mock_createLastWatchedMessage.assert_called_once_with(self.user, self.file)
 
-    def test_isvalid(self, mock_save):
+    def test_isvalid(self):
         dt = DownloadToken.new(self.user,
                                self.file)
         self.assertTrue(dt.isvalid)
 
-    def test_isNotValid(self, mock_save):
+    def test_isNotValid(self):
         dt = DownloadToken.new(self.user,
                                self.file,
                                datecreated=datetime.now(pytz.timezone(TIME_ZONE)) - timedelta(hours=TOKEN_VALIDITY_LENGTH + 1))

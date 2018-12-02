@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Genre(models.Model):
     genre = models.TextField(blank=False,
                              null=False)

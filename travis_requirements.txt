@@ -1,3 +1,1 @@
--r requirements.txt
 -r test_requirements.txt
-mock

@@ -61,3 +61,28 @@ class TestCanVote(TestCase):
         req_vote.datecreated = req_vote.datecreated + timedelta(days=-1)
         req_vote.save()
         self.assertTrue(self.request.canVote(self.user1))
+
+class TestRequestNew(TestCase):
+    def setUp(self):
+        self.user1 = User()
+        self.user2 = User()
+        self.user3 = User()
+
+        self.user1.username = 'user1'
+        self.user2.username = 'user2'
+        self.user3.username = 'user3'
+
+        self.user1.save()
+        self.user2.save()
+        self.user3.save()
+
+        self.request = Request.new('this is a test',
+                                   self.user1)
+
+    def test_unique_request(self):
+        new_obj = Request.new('new name', self.user1)
+        self.assertFalse(new_obj == self.request)
+
+    def test_existing_request(self):
+        new_obj = Request.new('This Is A Test', self.user1)
+        self.assertEqual(new_obj, self.request)

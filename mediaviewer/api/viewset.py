@@ -1,25 +1,20 @@
-import pytz
-from django.db import transaction
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from datetime import datetime
 from rest_framework import viewsets, views
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
 from rest_framework import permissions, authentication
 from mediaviewer.api.serializers import (DownloadTokenSerializer,
-                                         DownloadClickSerializer,
                                          DataTransmissionSerializer,
                                          ErrorSerializer,
                                          FilenameScrapeFormatSerializer,
                                          MessageSerializer,
                                          PosterFileSerializer,
                                          UserCommentSerializer,
+                                         PathSerializer,
                                          )
 from mediaviewer.models.file import File
 from mediaviewer.models.path import (Path,
                                      )
-from mediaviewer.models.downloadclick import DownloadClick
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.datatransmission import DataTransmission
 from mediaviewer.models.error import Error
@@ -28,8 +23,6 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.log import log
-
-from mysite.settings import TIME_ZONE
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):
     queryset = DownloadToken.objects.all()
@@ -48,47 +41,6 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
             log.debug('Found token. isValid: %s' % obj.isvalid)
         serializer = DownloadTokenSerializer(obj)
         return RESTResponse(serializer.data)
-
-class DownloadClickViewSet(viewsets.ModelViewSet):
-    queryset = DownloadClick.objects.all()
-    serializer_class = DownloadClickSerializer
-
-    def get_queryset(self):
-        queryset = DownloadClick.objects.all()
-        log.debug('Returning DownloadClick objects')
-        return queryset
-
-    def create(self, request):
-        data = request.data
-
-        try:
-            with transaction.atomic():
-                user = User.objects.get(pk=data['userid'])
-                dt = DownloadToken.objects.get(pk=data['tokenid'])
-                downloadclick = DownloadClick()
-                downloadclick.user = user
-                downloadclick.filename = data['filename']
-                downloadclick.downloadtoken = dt
-                downloadclick.datecreated = datetime.now(pytz.timezone(TIME_ZONE))
-                downloadclick.size = int(data['size'])
-
-                downloadclick.clean()
-                downloadclick.save()
-                log.debug('New click record created for user = %s and file = %s' % (user.username, downloadclick.filename))
-
-                serializer = DownloadClickSerializer(downloadclick)
-                headers = self.get_success_headers(serializer.data)
-
-                return RESTResponse(serializer.data,
-                                    status=RESTstatus.HTTP_201_CREATED,
-                                    headers=headers)
-        except Exception, e:
-            log.error(str(e))
-            log.error('DownloadClick record creation failed!')
-
-            return RESTResponse(None,
-                                status=RESTstatus.HTTP_500_INTERNAL_SERVER_ERROR,
-                                headers=None)
 
 class DataTransmissionViewSet(viewsets.ModelViewSet):
     queryset = DataTransmission.objects.all()
@@ -138,6 +90,23 @@ class InferScrapersView(views.APIView):
             return RESTResponse({"success": True})
         except Exception, e:
             return RESTResponse({"success": False, "error": str(e)})
+
+    def get(self, request, *args, **kwargs):
+        title = request.GET.get('title')
+
+        if not title:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_404_NOT_FOUND)
+
+        log.debug('Attempting to scrape title = %s' % title)
+        path = FilenameScrapeFormat.path_for_filename(title)
+
+        if path:
+            serializer = PathSerializer(path)
+            return RESTResponse(serializer.data)
+        else:
+            return RESTResponse(None,
+                                status=RESTstatus.HTTP_404_NOT_FOUND)
 
 class PosterViewSetByPath(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()

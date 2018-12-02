@@ -1,6 +1,7 @@
 from django.db import models
 from mediaviewer.models.person import Person
 
+
 class Actor(Person):
     order = models.IntegerField(blank=True, null=True)
 

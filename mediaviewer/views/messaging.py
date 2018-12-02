@@ -1,14 +1,16 @@
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from mediaviewer.views.home import setSiteWideContext
+from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.models.message import Message
 from django.shortcuts import render
 from mysite.settings import DEBUG
-from mediaviewer.utils import logAccessInfo, check_force_password_change
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.password_reset import check_force_password_change
 
 import json
 import re
 ID_REGEX = re.compile('\d+')
+
 
 @login_required(login_url='/mediaviewer/login/')
 @check_force_password_change
@@ -28,6 +30,7 @@ def submitsitewidemessage(request):
         raise Exception("User is not a staffer!")
     return render(request, 'mediaviewer/settingsresults.html', context)
 
+
 @logAccessInfo
 def ajaxclosemessage(request):
     response = {'errmsg': ''}
@@ -39,8 +42,9 @@ def ajaxclosemessage(request):
         user = request.user
 
         if not user.is_authenticated():
-            response = {'errmsg': 'User not authenticated. Refresh and try again.'}
-        elif message and user:
+            response = {
+                    'errmsg': 'User not authenticated. Refresh and try again.'}
+        elif message:
             message.sent = True
             message.save()
     except Exception, e:
@@ -49,4 +53,5 @@ def ajaxclosemessage(request):
         else:
             response['errmsg'] = 'An error has occurred'
 
-    return HttpResponse(json.dumps(response), content_type='application/javascript')
+    return HttpResponse(json.dumps(response),
+                        content_type='application/javascript')

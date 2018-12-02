@@ -7,3 +7,6 @@ secret.txt
 node_modules
 static/*
 components/*
+.coverage
+cover
+.python-version
