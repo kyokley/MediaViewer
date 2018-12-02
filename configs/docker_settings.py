@@ -1,6 +1,6 @@
 import os
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -64,3 +64,7 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 os.environ['HTTPS'] = 'off'
 os.environ['wsgi.url_scheme'] = 'http'
+
+STATIC_FILES_DIRS = (
+    '/home/docker/code/static',
+)

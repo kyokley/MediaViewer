@@ -8,21 +8,17 @@ services:
             - POSTGRES_USER=docker
             - POSTGRES_PASSWORD=password
             - POSTGRES_DB=mediaviewer
-        ports:
-            - "5672:5672"
 
     mediaviewer:
         image: kyokley/mediaviewer
         build: .
-        command: python manage.py runserver
+        command:
+            sh -c "/venv/bin/python manage.py migrate &&
+            /venv/bin/python manage.py runserver 0.0.0.0:8000"
         hostname: mediaviewer
         depends_on:
             - "postgres"
-
-    nginx:
-        hostname: nginx
-        image: nginx
         ports:
             - "8000:8000"
-        depends_on:
-            - "mediaviewer"
+        tty: true
+        stdin_open: true

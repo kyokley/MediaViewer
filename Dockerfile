@@ -17,12 +17,16 @@ RUN apk add --no-cache --virtual .build-deps \
     supervisor \
     postgresql \
     postgresql-dev \
-    nodejs
+    nodejs \
+    npm
+RUN npm install -g bower
 
-RUN virtualenv -p python $HOME/virtualenv
+ARG REQS=base
 
-COPY requirements.txt /home/docker/code/app/
-RUN $HOME/virtualenv/bin/pip install -r /home/docker/code/app/requirements.txt
+RUN virtualenv -p python /venv
+
+COPY ./requirements /home/docker/code/requirements
+RUN /venv/bin/pip install -r /home/docker/code/requirements/${REQS}_requirements.txt
 
 # add (the rest of) our code
 COPY . $HOME/code/
@@ -36,6 +40,9 @@ RUN rm -f $HOME/code/mysite/local_settings.py && \
     cp $HOME/code/configs/docker_settings.py $HOME/code/mysite/local_settings.py
 
 WORKDIR $HOME/code
+
+COPY ./package.json /home/docker/code/package.json
+RUN /venv/bin/python $HOME/code/manage.py bower install
 
 #EXPOSE 8000 8001 8002
 #ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisor.d/supervisor.conf"]
