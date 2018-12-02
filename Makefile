@@ -7,6 +7,9 @@ build_dev:
 	docker-compose build --build-arg REQS=dev mediaviewer
 
 up:
+	docker-compose up -d
+
+up-no-daemon:
 	docker-compose up
 
 attach:
@@ -17,3 +20,7 @@ shell:
 
 tests: build_dev
 	./run-tests.sh
+
+stop-all-but-db:
+	docker-compose down
+	docker-compose up -d postgres
