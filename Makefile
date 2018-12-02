@@ -9,5 +9,5 @@ build_dev:
 up:
 	docker-compose up
 
-tests:
+tests: build_dev
 	docker-compose run --rm mediaviewer sh -c "/venv/bin/python manage.py test && /venv/bin/bandit -x mediaviewer/tests -r ."
