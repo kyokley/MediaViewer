@@ -5,9 +5,9 @@ services:
         hostname: postgres
         image: postgres
         environment:
-            - POSTGRES_USER=docker
             - POSTGRES_PASSWORD=password
-            - POSTGRES_DB=mediaviewer
+        ports:
+            - "5432:5432"
 
     mediaviewer:
         image: kyokley/mediaviewer
