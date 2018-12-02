@@ -9,3 +9,4 @@ static/*
 components/*
 .coverage
 cover
+.python-version
