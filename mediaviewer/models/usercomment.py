@@ -1,12 +1,23 @@
 from django.db import models
 
+
 class UserComment(models.Model):
-    datecreated = models.DateTimeField(db_column='datecreated', auto_now_add=True)
+    datecreated = models.DateTimeField(
+            db_column='datecreated',
+            auto_now_add=True)
     dateedited = models.DateTimeField(db_column='dateedited', auto_now=True)
     comment = models.TextField(blank=True, null=True)
     viewed = models.BooleanField(db_column='viewed')
-    file = models.ForeignKey('mediaviewer.File', null=False, db_column='fileid', blank=False)
-    user = models.ForeignKey('auth.User', null=False, db_column='userid', blank=False)
+    file = models.ForeignKey(
+            'mediaviewer.File',
+            null=False,
+            db_column='fileid',
+            blank=False)
+    user = models.ForeignKey(
+            'auth.User',
+            null=False,
+            db_column='userid',
+            blank=False)
 
     class Meta:
         app_label = 'mediaviewer'

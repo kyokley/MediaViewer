@@ -2,6 +2,8 @@ import re
 import time
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.timezone import utc
+
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
@@ -9,7 +11,6 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.message import Message
 from datetime import datetime as dateObj
-from django.utils.timezone import utc
 
 from mysite.settings import (WAITER_HEAD,
                              LOCAL_WAITER_IP_FORMAT_MOVIES,
@@ -125,7 +126,6 @@ class File(models.Model):
         return self.datatransmission
 
     def _posterfileget(self):
-        from mediaviewer.models.posterfile import PosterFile
         posterfile = PosterFile.new(file=self)
 
         return posterfile
@@ -395,7 +395,7 @@ class File(models.Model):
             posterfile.delete()
         except PosterFile.DoesNotExist:
             log.debug('Posterfile does not exist. Continuing.')
-        except Exception, e:
+        except Exception as e:
             log.error('Got an error destroying posterfile')
             log.error(e)
 
@@ -410,3 +410,29 @@ class File(models.Model):
     @classmethod
     def get_movie_genres(cls):
         return Genre.get_movie_genres()
+
+    @classmethod
+    def movies_ordered_by_id(cls):
+        files = cls.movies().filter(hide=False).order_by('-id')
+        return files
+
+    # TODO: Test the following functions
+    @classmethod
+    def movies_by_genre(cls, genre):
+        files = (cls.objects.filter(_posterfile__genres=genre)
+                            .filter(hide=False)
+                            .filter(path__is_movie=True))
+        return files
+
+    @classmethod
+    def files_by_localpath(cls, localpath):
+        files = File.objects.filter(
+                path__localpathstr=localpath.localpathstr).filter(hide=False)
+        return files
+
+    @classmethod
+    def most_recent_files(cls, items=10):
+        files = (cls.objects
+                    .filter(hide=False)
+                    .filter(finished=True).order_by('-id')[:items])
+        return files

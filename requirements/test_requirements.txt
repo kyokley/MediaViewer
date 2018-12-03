@@ -3,3 +3,4 @@ mock
 django-debug-toolbar
 bandit
 django-nose
+pytest-django

@@ -1,5 +1,6 @@
+import mock
+
 from django.test import TestCase
-from django.contrib.auth.models import Group
 from django.db.utils import IntegrityError
 from mediaviewer.models.usersettings import (UserSettings,
                                              case_insensitive_authenticate,
@@ -7,7 +8,8 @@ from mediaviewer.models.usersettings import (UserSettings,
 from mediaviewer.forms import (InvalidPasswordException,
                                change_user_password,
                                )
-import mock
+from mediaviewer.tests import helpers
+
 
 class TestChangeUserPassword(TestCase):
     def setUp(self):
@@ -153,21 +155,24 @@ class TestChangeUserPassword(TestCase):
         self.settings.save.assert_called_once_with()
         self.user.save.assert_called_once_with()
 
+
 @mock.patch('mediaviewer.forms.PasswordResetForm')
 class TestNewUser(TestCase):
     def setUp(self):
-        self.mv_group = Group()
-        self.mv_group.name = 'MediaViewer'
-        self.mv_group.save()
         self.name = 'New User'
         self.email = 'test@user.com'
+
         self.existing_user = 'Existing User'
-        self.existing_email =  'existing@user.com'
-        UserSettings.new(self.existing_user, self.existing_email)
+        self.existing_email = 'existing@user.com'
+
+        helpers.create_user(
+                username=self.existing_user,
+                email=self.existing_email)
 
     def test_new(self, mock_form):
         new_user = UserSettings.new(self.name,
-                                    self.email)
+                                    self.email,
+                                    send_email=False)
         self.assertEqual(new_user.username, self.name)
 
     def test_existing_username(self, mock_form):
@@ -175,38 +180,41 @@ class TestNewUser(TestCase):
 
         with self.assertRaises(IntegrityError):
             UserSettings.new(test_username,
-                             self.email)
+                             self.email,
+                             send_email=False)
 
     def test_existing_username_mixed_case(self, mock_form):
         test_username = 'exIsTiNg USeR'
 
         with self.assertRaises(IntegrityError):
             UserSettings.new(test_username,
-                             self.email)
+                             self.email,
+                             send_email=False)
 
     def test_existing_email(self, mock_form):
         with self.assertRaises(IntegrityError):
             UserSettings.new(self.name,
-                             self.existing_email)
+                             self.existing_email,
+                             send_email=False)
 
     def test_existing_email_mixed_case(self, mock_form):
         test_email = 'ExIsTiNg@uSeR.CoM'
 
         with self.assertRaises(IntegrityError):
             UserSettings.new(self.name,
-                             test_email)
+                             test_email,
+                             send_email=False)
 
 
 class TestCaseInsensitiveAuthenticate(TestCase):
     def setUp(self):
-        self.mv_group = Group()
-        self.mv_group.name = 'MediaViewer'
-        self.mv_group.save()
         self.name = 'New User'
         self.email = 'test@user.com'
         self.password = 'password'
-        self.new_user = UserSettings.new(self.name,
-                                         self.email)
+
+        self.new_user = helpers.create_user(
+                username=self.name,
+                email=self.email)
         self.new_user.set_password(self.password)
         self.new_user.save()
 

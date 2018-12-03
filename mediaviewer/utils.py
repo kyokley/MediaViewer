@@ -8,7 +8,6 @@ from email import Encoders
 from datetime import datetime
 from binascii import hexlify
 from functools import wraps
-from django.http import HttpResponse
 
 from mysite.settings import (LOG_ACCESS_TIMINGS,
                              EMAIL_FROM_ADDR,
@@ -19,13 +18,16 @@ from mysite.settings import (LOG_ACCESS_TIMINGS,
 from django.contrib.auth.models import User
 
 import os
-import json
-import telnetlib #nosec
+import telnetlib  # nosec
 
 from mediaviewer.log import log
 
+SUFFIXES = ('B', 'KB', 'MB', 'GB', 'TB', 'PB')
+
+
 def getSomewhatUniqueID(numBytes=4):
     return hexlify(os.urandom(numBytes))
+
 
 def logAccessInfo(func):
     @wraps(func)
@@ -49,7 +51,7 @@ def logAccessInfo(func):
 
         try:
             res = func(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             # Log unhandled exceptions
             log.error('%s: %s' % (id, e), exc_info=True)
             log.error('%s: Access attempted with following vars...' % id)
@@ -65,39 +67,27 @@ def logAccessInfo(func):
         return res
     return wrap
 
-def json_response(func):
-    """
-    A decorator thats takes a view response and turns it
-    into json. If a callback is added through GET or POST
-    the response is JSONP.
-    """
-    def decorator(request, *args, **kwargs):
-        objects = func(request, *args, **kwargs)
-        if isinstance(objects, HttpResponse):
-            return objects
-        try:
-            data = json.dumps(objects)
-            if 'callback' in request.REQUEST:
-                # a jsonp response!
-                data = '%s(%s);' % (request.REQUEST['callback'], data)
-                return HttpResponse(data, "text/javascript")
-        except:
-            data = json.dumps(str(objects))
-        return HttpResponse(data, "application/json")
-    return decorator
 
-suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
 def humansize(nbytes):
-    if nbytes == 0: return '0 B'
+    if nbytes == 0:
+        return '0 B'
+
     i = 0
-    while nbytes >= 1024 and i < len(suffixes)-1:
+    while nbytes >= 1024 and i < len(SUFFIXES)-1:
         nbytes /= 1024.
         i += 1
     f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
-    return '%s %s' % (f, suffixes[i])
+    return '%s %s' % (f, SUFFIXES[i])
 
-def sendMail(to_addr, subject, text, from_addr=EMAIL_FROM_ADDR, files=None, server='localhost'):
-    if type(to_addr) is not list:
+
+def sendMail(
+        to_addr,
+        subject,
+        text,
+        from_addr=EMAIL_FROM_ADDR,
+        files=None,
+        server='localhost'):
+    if not isinstance(to_addr, list):
         to_addr = set([to_addr])
     else:
         to_addr = set(to_addr)
@@ -133,8 +123,9 @@ def sendMail(to_addr, subject, text, from_addr=EMAIL_FROM_ADDR, files=None, serv
     smtp.sendmail(from_addr, to_addr, msg.as_string())
     smtp.close()
 
+
 def checkSMTPServer():
     if not BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(host=EMAIL_HOST, #nosec
+        smtp_server = telnetlib.Telnet(host=EMAIL_HOST,  # nosec
                                        port=EMAIL_PORT)
         smtp_server.close()

@@ -21,9 +21,7 @@ def home(request):
                            siteGreeting.greeting or
                            'Check out the new downloads!')
     context['active_page'] = 'home'
-    files = (File.objects
-                 .filter(hide=False)
-                 .filter(finished=True).order_by('-id')[:10])
+    files = File.most_recent_files()
     context['files'] = files
     context['title'] = 'Home'
     setSiteWideContext(context, request, includeMessages=True)

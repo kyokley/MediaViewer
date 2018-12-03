@@ -1,8 +1,11 @@
-from django.test import TestCase
+import pytest
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.path import Path
 
-class TestValidForFilename(TestCase):
+
+@pytest.mark.django_db
+class TestValidForFilename(object):
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.path = Path.new('/path/to/local',
                              '/path/to/remote',
@@ -10,10 +13,11 @@ class TestValidForFilename(TestCase):
         self.path.override_display_name = 'Foo Is Bar'
         self.path.save()
 
-        self.scraper = FilenameScrapeFormat.new(nameRegex=r'[fF]oo[\.\s\-][Ii]s[\.\s\-][Bb]ar',
-                                                seasonRegex=r'(?<=[sS])\d{2}',
-                                                episodeRegex=r'(?<=[eE])\d{2}',
-                                                subPeriods=True)
+        self.scraper = FilenameScrapeFormat.new(
+            nameRegex=r'[fF]oo[\.\s\-][Ii]s[\.\s\-][Bb]ar',
+            seasonRegex=r'(?<=[sS])\d{2}',
+            episodeRegex=r'(?<=[eE])\d{2}',
+            subPeriods=True)
 
     def test_is_valid(self):
         test_filename = 'Foo.is.bar.S02E01.mpg'
@@ -21,7 +25,7 @@ class TestValidForFilename(TestCase):
         expected = (self.path, 'Foo is bar', '02', '01')
         actual = self.scraper.valid_for_filename(test_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_name_not_valid(self):
         test_filename = 'Foo.is.not.bar.S02E01.mpg'
@@ -29,7 +33,7 @@ class TestValidForFilename(TestCase):
         expected = None
         actual = self.scraper.valid_for_filename(test_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_season_and_episode_not_valid(self):
         test_filename = 'Foo.is.not.bar.201.mpg'
@@ -37,7 +41,7 @@ class TestValidForFilename(TestCase):
         expected = None
         actual = self.scraper.valid_for_filename(test_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_no_season_not_valid(self):
         test_filename = 'Foo.is.not.bar.mpg'
@@ -45,9 +49,12 @@ class TestValidForFilename(TestCase):
         expected = None
         actual = self.scraper.valid_for_filename(test_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
-class TestPathForFilename(TestCase):
+
+@pytest.mark.django_db
+class TestPathForFilename(object):
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.path1 = Path.new('/path/to/local',
                               '/path/to/remote',
@@ -73,10 +80,11 @@ class TestPathForFilename(TestCase):
         self.path4.override_display_name = 'Foo Is Bar'
         self.path4.save()
 
-        self.scraper = FilenameScrapeFormat.new(nameRegex=r'[fF]oo[\.\s\-][Ii]s[\.\s\-][Bb]ar',
-                                                seasonRegex=r'(?<=[sS])\d{2}',
-                                                episodeRegex=r'(?<=[eE])\d{2}',
-                                                subPeriods=True)
+        self.scraper = FilenameScrapeFormat.new(
+            nameRegex=r'[fF]oo[\.\s\-][Ii]s[\.\s\-][Bb]ar',
+            seasonRegex=r'(?<=[sS])\d{2}',
+            episodeRegex=r'(?<=[eE])\d{2}',
+            subPeriods=True)
 
     def test_found(self):
         test_filename = 'Foo.is.bar.S02E01.mpg'
@@ -84,7 +92,7 @@ class TestPathForFilename(TestCase):
         expected = self.path4
         actual = FilenameScrapeFormat.path_for_filename(test_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_not_found(self):
         test_filename = 'Foo.is.not.bar.mpg'
@@ -92,4 +100,4 @@ class TestPathForFilename(TestCase):
         expected = None
         actual = FilenameScrapeFormat.path_for_filename(test_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual

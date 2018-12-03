@@ -65,8 +65,11 @@ class Path(models.Model):
         return True
 
     def files(self):
-        return File.objects.filter(
-                path__localpathstr=self.localpathstr).filter(hide=False)
+        files = set()
+        paths = Path.objects.filter(localpathstr=self.localpathstr)
+        for path in paths:
+            files.update(path.file_set.filter(hide=False))
+        return list(files)
 
     @property
     def shortName(self):
@@ -98,16 +101,21 @@ class Path(models.Model):
         return last_date and last_date.date().isoformat()
 
     def url(self):
+        if self.is_movie:
+            raise TypeError('url method does not apply to movie paths')
         return '<a href="{}">{}</a>'.format(
                 reverse('mediaviewer:tvshows', args=(self.id,)),
                 self.displayName())
 
     @classmethod
     def distinctShowFolders(cls):
-        refFiles = File.objects.filter(
-                path__is_movie=False).order_by(
-                        'path').distinct('path').select_related('path')
-        paths = set([file.path for file in refFiles])
+        paths_QS = (Path.objects
+                        .filter(is_movie=False)
+                        .filter(file__hide=False)
+                        .annotate(
+                            num_files=models.Count('file'))
+                        .filter(num_files__gt=0))
+        paths = set(paths_QS)
         return cls._buildDistinctShowFoldersFromPaths(paths)
 
     @classmethod
@@ -146,9 +154,7 @@ class Path(models.Model):
     posterfile = property(fset=_posterfileset, fget=_posterfileget)
 
     def destroy(self):
-        files = File.objects.filter(path=self)
-        for file in files:
-            file.delete()
+        self.file_set.all().delete()
         self.delete()
 
     def unwatched_tv_shows_since_date(self, user, daysBack=30):
