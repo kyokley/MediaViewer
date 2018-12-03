@@ -24,3 +24,6 @@ tests: build_dev
 stop-all-but-db:
 	docker-compose down
 	docker-compose up -d postgres
+
+down:
+	docker-compose down
