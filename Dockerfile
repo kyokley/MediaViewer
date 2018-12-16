@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM python:3.6-alpine
 
 MAINTAINER Kevin Yokley
 
@@ -10,23 +10,21 @@ RUN apk add --no-cache --virtual .build-deps \
     linux-headers \
     g++ \
     git \
-    python \
-    python-dev \
-    py-virtualenv \
-    py2-pip \
     supervisor \
     postgresql \
     postgresql-dev \
+    python3-dev \
     nodejs \
     npm
 RUN npm install -g bower
 
 ARG REQS=base
 
-RUN virtualenv -p python /venv
+RUN python -m venv /venv
 
 COPY ./requirements /home/docker/code/requirements
-RUN /venv/bin/pip install -r /home/docker/code/requirements/${REQS}_requirements.txt
+RUN /venv/bin/pip install -U pip \
+ && /venv/bin/pip install -r /home/docker/code/requirements/${REQS}_requirements.txt
 
 # add (the rest of) our code
 COPY . $HOME/code/

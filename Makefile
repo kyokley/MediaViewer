@@ -3,7 +3,7 @@
 build:
 	docker-compose build --build-arg REQS=base mediaviewer
 
-build_dev:
+build-dev:
 	docker-compose build --build-arg REQS=dev mediaviewer
 
 up:
