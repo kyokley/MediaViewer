@@ -19,7 +19,7 @@ def signin(request):
     context['greeting'] = siteGreeting and siteGreeting.greeting or "SignIn"
     user = request.user
 
-    if request.GET.has_key('next'):
+    if 'next' in request.GET:
         context['next'] = request.GET['next']
 
     if not user.is_authenticated():
