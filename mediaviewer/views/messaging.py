@@ -47,7 +47,7 @@ def ajaxclosemessage(request):
         elif message:
             message.sent = True
             message.save()
-    except Exception, e:
+    except Exception as e:
         if DEBUG:
             response['errmsg'] = str(e)
         else:

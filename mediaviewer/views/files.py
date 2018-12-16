@@ -188,7 +188,7 @@ def ajaxreport(request):
                                      level=messages.WARNING)
     except Http404:
         raise
-    except Exception, e:
+    except Exception as e:
         if DEBUG:
             response['errmsg'] = str(e)
         else:

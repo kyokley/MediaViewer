@@ -27,7 +27,7 @@ def getJSONData(url):
                 time.sleep(1)
 
         return data
-    except Exception, e:
+    except Exception as e:
         log.error(str(e), exc_info=True)
 
 
@@ -55,7 +55,7 @@ class TVDBConfiguration(object):
 
             self.genres = genres
             log.debug('tvdb values set successfully')
-        except Exception, e:
+        except Exception as e:
             self.url = ''
             self.poster_size = ''
             self.still_size = ''

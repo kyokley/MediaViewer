@@ -14,8 +14,8 @@ class MVDiscoverRunner(DiscoverRunner):
             try:
                 cursor = connection.cursor()
                 cursor.execute(query);
-            except Exception, e:
-                print 'Warning: %s Got exception running: %s' % (str(e), query)
+            except Exception as e:
+                print('Warning: %s Got exception running: %s' % (str(e), query))
         return config
 
 def split_queries(sql_file):

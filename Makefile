@@ -1,4 +1,4 @@
-.PHONY: build build_dev up tests attach shell
+.PHONY: build build-dev up tests attach shell
 
 build:
 	docker-compose build --build-arg REQS=base mediaviewer
@@ -15,10 +15,10 @@ up-no-daemon:
 attach:
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
-shell:
+shell: up
 	docker-compose exec mediaviewer /bin/sh
 
-tests: build_dev
+tests: build-dev
 	./run-tests.sh
 
 stop-all-but-db:

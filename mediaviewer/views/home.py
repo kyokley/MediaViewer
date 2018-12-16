@@ -36,7 +36,7 @@ def ajaxrunscraper(request):
     try:
         if request.user.is_staff:
             File.inferAllScrapers()
-    except Exception, e:
+    except Exception as e:
         if DEBUG:
             response['errmsg'] = str(e)
         else:

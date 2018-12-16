@@ -23,7 +23,7 @@ def ajaxwaiterstatus(request):
             failureReason = ''
 
         response = {'status': data.get('status', False), 'failureReason': failureReason}
-    except Exception, e:
+    except Exception as e:
         response = {'status': False, 'failureReason': 'Timedout'}
         log.error(e)
 

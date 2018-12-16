@@ -42,9 +42,9 @@ def signin(request):
                     else:
                         raise ImproperLogin('User is no longer active')
 
-        except ImproperLogin, e:
+        except ImproperLogin as e:
             context['error_message'] = str(e)
-        except Exception, e:
+        except Exception as e:
             if DEBUG:
                 context['error_message'] = str(e)
             else:

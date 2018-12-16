@@ -88,7 +88,7 @@ class InferScrapersView(views.APIView):
         try:
             File.inferAllScrapers()
             return RESTResponse({"success": True})
-        except Exception, e:
+        except Exception as e:
             return RESTResponse({"success": False, "error": str(e)})
 
     def get(self, request, *args, **kwargs):

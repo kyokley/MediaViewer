@@ -50,7 +50,7 @@ class PathViewSet(viewsets.ModelViewSet):
         if not newPath:
             try:
                 serializer = self.create_path_obj(data)
-            except Exception, e:
+            except Exception as e:
                 log.error(str(e))
                 log.error('Path creation failed!')
                 return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)

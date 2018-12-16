@@ -1,10 +1,10 @@
 # Based on an example from http://masnun.com/2010/01/01/sending-mail-via-postfix-a-perfect-python-example.html
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEBase import MIMEBase
-from email.MIMEText import MIMEText
-from email.Utils import COMMASPACE, formatdate
-from email import Encoders
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email.utils import formatdate
+from email import encoders as Encoders
 from datetime import datetime
 from binascii import hexlify
 from functools import wraps
@@ -23,6 +23,7 @@ import telnetlib  # nosec
 from mediaviewer.log import log
 
 SUFFIXES = ('B', 'KB', 'MB', 'GB', 'TB', 'PB')
+COMMASPACE = ', '
 
 
 def getSomewhatUniqueID(numBytes=4):

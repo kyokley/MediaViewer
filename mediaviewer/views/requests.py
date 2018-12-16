@@ -60,8 +60,8 @@ def addrequests(request):
                             newrequest.name,
                             createdBy.username),
                         level=messages.INFO)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
         return render(request,
                       'mediaviewer/request.html',
                       {'error_message': 'An error has occurred'})
@@ -123,7 +123,7 @@ def ajaxdone(request):
                         interjection,
                         requestObj.name),
                     level=Message.SUCCESS)
-    except Exception, e:
+    except Exception as e:
         if DEBUG:
             response['errmsg'] = str(e)
         else:
@@ -166,7 +166,7 @@ def ajaxgiveup(request):
                         interjection,
                         requestObj.name),
                     level=Message.ERROR)
-    except Exception, e:
+    except Exception as e:
         if DEBUG:
             response['errmsg'] = str(e)
         else:

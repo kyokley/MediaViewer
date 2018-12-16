@@ -87,7 +87,7 @@ class MVSetPasswordForm(MVSaveBase):
             validate_reset_user_password(self.user,
                                          password1,
                                          )
-        except InvalidPasswordException, e:
+        except InvalidPasswordException as e:
             raise forms.ValidationError(str(e),
                                         code='password_exception')
 
@@ -108,7 +108,7 @@ class MVPasswordChangeForm(PasswordChangeForm, MVSaveBase):
             validate_reset_user_password(self.user,
                                          password1,
                                          )
-        except InvalidPasswordException, e:
+        except InvalidPasswordException as e:
             raise forms.ValidationError(str(e),
                                         code='password_exception')
 
@@ -151,7 +151,7 @@ class FormlessPasswordReset(PasswordResetFormWithBCC):
                            email,
                            )
             self.cleaned_data['email'] = email
-        except InvalidEmailException, e:
+        except InvalidEmailException as e:
             raise forms.ValidationError(str(e),
                                         code='email_exception')
         return email

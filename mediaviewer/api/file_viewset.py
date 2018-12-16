@@ -54,7 +54,7 @@ class FileViewSet(viewsets.ModelViewSet):
         try:
             with transaction.atomic():
                 serializer = self.create_file_obj(data)
-        except Exception, e:
+        except Exception as e:
             log.error(str(e))
             log.error('File creation failed!')
             return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)
@@ -90,7 +90,7 @@ class TvFileViewSet(FileViewSet):
     def create(self, request):
         try:
             return super(TvFileViewSet, self).create(request)
-        except Exception, e:
+        except Exception as e:
             log.error(str(e))
             log.error('TvFile creation failed!')
 
@@ -109,7 +109,7 @@ class MovieFileViewSet(FileViewSet):
     def create(self, request):
         try:
             return super(MovieFileViewSet, self).create(request)
-        except Exception, e:
+        except Exception as e:
             log.error(str(e))
             log.error('MovieFile creation failed!')
 

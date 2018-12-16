@@ -1,19 +1,19 @@
 from django.db import connections
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import ConnectionDoesNotExist    
+from django.db.utils import ConnectionDoesNotExist
 from mediaviewer import models
 
 def setup_cursors():
     try:
         autodlCursor = connections['autodl'].cursor()
     except ConnectionDoesNotExist:
-        print "autodl database is not configured"
+        print("autodl database is not configured")
         raise
 
     try:
         defaultCursor = connections['default'].cursor()
     except ConnectionDoesNotExist:
-        print "default database is not configured"
+        print("default database is not configured")
         raise
 
     return autodlCursor, defaultCursor
@@ -34,7 +34,7 @@ def import_paths():
     autodlCursor.execute(sql)
     rows = autodlCursor.fetchall()
     for idx, row in enumerate(rows):
-        print "importing path %s of %s" % (idx + 1, len(rows))
+        print("importing path %s of %s" % (idx + 1, len(rows)))
         path = models.Path(id=row[0], localPath=row[1], remotePath=row[2])
         path.save()
 
@@ -62,11 +62,11 @@ def import_files():
     autodlCursor.execute(sql)
     rows = autodlCursor.fetchall()
     for idx, row in enumerate(rows):
-        print "importing file %s of %s" % (idx + 1, len(rows))
+        print("importing file %s of %s" % (idx + 1, len(rows)))
         try:
             path = models.Path.objects.get(id=row[1])
         except ObjectDoesNotExist:
-            print "Path not found with id %s" % row[1]
+            print("Path not found with id %s" % row[1])
             continue
         else:
             file = models.File(id=row[0],
@@ -96,7 +96,7 @@ def import_datatransmission():
     autodlCursor.execute(sql)
     rows = autodlCursor.fetchall()
     for idx, row in enumerate(rows):
-        print "importing datatransmission %s of %s" % (idx + 1, len(rows))
+        print("importing datatransmission %s of %s" % (idx + 1, len(rows)))
         dt = models.DataTransmission(id=row[0],
                                      date=row[1],
                                      transferred=row[2])
@@ -118,19 +118,19 @@ def import_errors():
     autodlCursor.execute(sql)
     rows = autodlCursor.fetchall()
     for idx, row in enumerate(rows):
-        print "importing error %s of %s" % (idx + 1, len(rows))
+        print("importing error %s of %s" % (idx + 1, len(rows)))
         error = models.Error(id=row[0],
                              date=row[1],
                              errorStr=row[2])
         error.save()
 
 def import_all():
-    print "import paths"
+    print("import paths")
     import_paths()
-    print "import files"
+    print("import files")
     import_files()
-    print "import data transmission"
+    print("import data transmission")
     import_datatransmission()
-    print "import errors"
+    print("import errors")
     import_errors()
-    print "done"
+    print("done")

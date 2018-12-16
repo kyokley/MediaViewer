@@ -130,10 +130,10 @@ def submitnewuser(request):
                                  new_user_email,
                                  can_download=True,
                                  )
-            except ValidationError, e:
+            except ValidationError as e:
                 context['successful'] = False
                 context['errMsg'] = e.message
-            except Exception, e:
+            except Exception as e:
                 context['successful'] = False
                 context['errMsg'] = str(e)
     else:
