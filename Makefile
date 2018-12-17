@@ -16,7 +16,7 @@ attach:
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
 shell: up
-	docker-compose exec mediaviewer /bin/sh
+	docker-compose run --rm mediaviewer sh -c "./wait-for.sh postgres:5432 && /bin/sh"
 
 tests: build-dev
 	./run-tests.sh

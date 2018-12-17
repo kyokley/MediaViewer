@@ -103,7 +103,6 @@ class MovieFileViewSetTests(APITestCase):
                                  }],
                     }
         actual = dict(response.data)
-        actual['results'] = map(dict, actual['results'])
 
         self.assertEquals(expected, actual)
 
@@ -235,7 +234,6 @@ class TvFileViewSetTests(APITestCase):
                                  }],
                     }
         actual = dict(response.data)
-        actual['results'] = map(dict, actual['results'])
 
         self.assertEquals(expected, actual)
 

@@ -7,7 +7,7 @@ services:
         environment:
             - POSTGRES_PASSWORD=password
         ports:
-            - "5432:5432"
+            - "0.0.0.0:5432:5432"
         volumes:
           - mediaviewer-data:/var/lib/postgresql/data
         networks:
@@ -28,6 +28,8 @@ services:
         stdin_open: true
         networks:
           - mediaviewer-backend
+        volumes:
+          - ./:/code
 
 # Persistent Volumes
 volumes:
