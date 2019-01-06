@@ -3,6 +3,7 @@ FROM python:3.6-alpine
 MAINTAINER Kevin Yokley
 
 RUN echo '{ "allow_root": true }' > /root/.bowerrc
+RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 
 # Install required packages and remove the apt packages cache when done.
 RUN apk add --no-cache --virtual .build-deps \

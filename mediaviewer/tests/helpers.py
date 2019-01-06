@@ -27,8 +27,8 @@ def create_user(username=DEFAULT_USERNAME,
 
         username = getSomewhatUniqueID()
         email = '{}@{}.com'.format(
-                getSomewhatUniqueID(),
-                getSomewhatUniqueID())
+                str(getSomewhatUniqueID()),
+                str(getSomewhatUniqueID()))
 
     user = UserSettings.new(
             username,
