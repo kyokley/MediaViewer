@@ -1,3 +1,5 @@
+from mysite.settings import *
+
 import os
 
 DEBUG = True
@@ -5,7 +7,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 ADMINS = (
-     ('Docker', 'docker@example.com'),
+    ('Docker', 'docker@example.com'),
 )
 MANAGERS = ADMINS
 
@@ -45,7 +47,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
     'widget_tweaks',
-     #'django_memcached',
+    #'django_memcached',
     'rest_framework',
     'djangobower',
     'mediaviewer',
