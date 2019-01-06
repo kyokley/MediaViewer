@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='message',
             name='message_type',
-            field=models.CharField(blank=True, choices=[(b'regular', b'Regular'), (b'last_watched', b'Last Watched')], default=b'regular', max_length=15),
+            field=models.CharField(blank=True, choices=[('regular', b'Regular'), (b'last_watched', b'Last Watched')], default=b'regular', max_length=15),
         ),
     ]

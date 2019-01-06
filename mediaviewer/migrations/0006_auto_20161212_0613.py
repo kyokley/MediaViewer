@@ -15,11 +15,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='usercomment',
             name='datecreated',
-            field=models.DateTimeField(auto_now_add=True, db_column=b'datecreated'),
+            field=models.DateTimeField(auto_now_add=True, db_column='datecreated'),
         ),
         migrations.AlterField(
             model_name='usercomment',
             name='dateedited',
-            field=models.DateTimeField(auto_now=True, db_column=b'dateedited'),
+            field=models.DateTimeField(auto_now=True, db_column='dateedited'),
         ),
     ]

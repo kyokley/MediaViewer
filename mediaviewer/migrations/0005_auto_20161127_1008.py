@@ -20,18 +20,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='videoprogress',
             name='hashed_filename',
-            field=models.TextField(db_column=b'hashedfilename', null=True),
+            field=models.TextField(db_column='hashedfilename', null=True),
             preserve_default=False,
         ),
         migrations.AlterField(
             model_name='videoprogress',
             name='filename',
-            field=models.TextField(db_column=b'filename', null=True),
+            field=models.TextField(db_column='filename', null=True),
         ),
         migrations.RunPython(rename_filename),
         migrations.AlterField(
             model_name='videoprogress',
             name='hashed_filename',
-            field=models.TextField(db_column=b'hashedfilename', null=False),
+            field=models.TextField(db_column='hashedfilename', null=False),
         ),
     ]

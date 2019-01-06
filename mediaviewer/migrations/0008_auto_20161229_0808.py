@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='waiterstatus',
             name='datecreated',
-            field=models.DateTimeField(auto_now_add=True, db_column=b'datecreated'),
+            field=models.DateTimeField(auto_now_add=True, db_column='datecreated'),
         ),
     ]
