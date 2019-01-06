@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.6-slim
 
 MAINTAINER Kevin Yokley
 
@@ -6,16 +6,12 @@ RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 
 # Install required packages and remove the apt packages cache when done.
-RUN apk add --no-cache --virtual .build-deps \
-    linux-headers \
-    g++ \
-    git \
-    supervisor \
-    postgresql \
-    postgresql-dev \
-    python3-dev \
-    nodejs \
-    npm
+RUN apt-get update && \
+    apt-get install -y g++ \
+                       git \
+                       supervisor \
+                       nodejs && \
+    apt-get install -y postgresql
 RUN npm install -g bower
 
 ARG REQS=base

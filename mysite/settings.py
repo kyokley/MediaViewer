@@ -205,6 +205,16 @@ LOGGING = {
     }
 }
 
+AXES_CACHE = 'axes_cache'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    },
+    'axes_cache': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
 SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 LOG_DIR = os.path.join(SYSTEM_BASE_PATH, 'logs')
 LOG_FILE_NAME = os.path.join(LOG_DIR, 'mediaviewerLog')
