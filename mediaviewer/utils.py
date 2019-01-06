@@ -27,7 +27,7 @@ COMMASPACE = ', '
 
 
 def getSomewhatUniqueID(numBytes=4):
-    return hexlify(os.urandom(numBytes))
+    return hexlify(os.urandom(numBytes)).decode('ascii')
 
 
 def logAccessInfo(func):
