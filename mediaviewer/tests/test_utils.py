@@ -176,7 +176,7 @@ class TestCheckSMTPServer(BaseSMTPServerTestCase):
         expected = None
         actual = checkSMTPServer()
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
         self.mock_Telnet.assert_called_once_with(
                 host='test_host',
                 port='test_port')
@@ -197,5 +197,5 @@ class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
         expected = None
         actual = checkSMTPServer()
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
         self.assertFalse(self.mock_Telnet.called)

@@ -58,7 +58,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
         self.mock_dumps.assert_called_once_with({'errmsg': 'Token is invalid',
                                                  'guid': 'test_guid',
@@ -78,7 +78,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
         self.mock_dumps.assert_called_once_with({'errmsg': 'Token is invalid',
                                                  'guid': 'test_guid',
@@ -99,7 +99,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
         self.mock_dumps.assert_called_once_with({'errmsg': '',
                                                  'guid': 'test_guid',
@@ -122,7 +122,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
         self.mock_dumps.assert_called_once_with({'errmsg': '',
                                                  'guid': 'test_guid',
@@ -165,7 +165,7 @@ class TestAjaxSuperViewedResponseStatusCode(TestCase):
                              'viewed': 'True'}
 
         resp = ajaxsuperviewed(self.request)
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
 
     def test_failure(self):
         self.token.isvalid = False
@@ -173,7 +173,7 @@ class TestAjaxSuperViewedResponseStatusCode(TestCase):
                              'viewed': 'True'}
 
         resp = ajaxsuperviewed(self.request)
-        self.assertEquals(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 400)
 
 
 class TestFilesDetail(TestCase):

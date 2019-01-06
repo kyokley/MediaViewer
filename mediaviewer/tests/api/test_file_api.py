@@ -86,7 +86,7 @@ class MovieFileViewSetTests(APITestCase):
 
     def test_get_moviefiles_by_pathid(self):
         response = self.client.get(reverse('mediaviewer:api:movie-list'), {'pathid': self.moviePath.id})
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected = {'count': 1,
                     'next': None,
@@ -104,7 +104,7 @@ class MovieFileViewSetTests(APITestCase):
                     }
         actual = dict(response.data)
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
     def test_create_moviefile_using_tvpath(self):
         self.data = {'filename': 'new file',
@@ -115,7 +115,7 @@ class MovieFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_moviefile_using_moviepath(self):
         self.data = {'filename': 'new file',
@@ -126,7 +126,7 @@ class MovieFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:movie-list'), self.data)
-        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_valid_moviefile(self):
         self.data = {'filename': 'new.movie.filename',
@@ -136,13 +136,13 @@ class MovieFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.put(reverse('mediaviewer:api:movie-detail', args=[self.movieFile.id]), self.data)
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         movieFile = File.objects.get(pk=response.data['pk'])
         for k,v in self.data.items():
             expected = v
             actual = getattr(movieFile, k)
-            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+            self.assertEqual(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
 
     def test_update_invalid_moviefile(self):
         self.data = {'filename': 'new.movie.filename',
@@ -152,7 +152,7 @@ class MovieFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.put(reverse('mediaviewer:api:movie-detail', args=[self.tvFile.id]), self.data)
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class TvFileViewSetTests(APITestCase):
     def setUp(self):
@@ -217,7 +217,7 @@ class TvFileViewSetTests(APITestCase):
 
     def test_get_tvfiles_by_pathid(self):
         response = self.client.get(reverse('mediaviewer:api:tv-list'), {'pathid': self.tvPath.id})
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected = {'count': 1,
                     'next': None,
@@ -235,7 +235,7 @@ class TvFileViewSetTests(APITestCase):
                     }
         actual = dict(response.data)
 
-        self.assertEquals(expected, actual)
+        self.assertEqual(expected, actual)
 
     def test_create_tvfile_using_tvpath(self):
         self.data = {'filename': 'new file',
@@ -246,7 +246,7 @@ class TvFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
-        self.assertEquals(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         updatedTvPath = Path.objects.get(pk=self.tvPath.id)
         self.assertTrue(updatedTvPath.lastCreatedFileDate is not None)
 
@@ -259,7 +259,7 @@ class TvFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.post(reverse('mediaviewer:api:tv-list'), self.data)
-        self.assertEquals(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         updatedMoviePath = Path.objects.get(pk=self.moviePath.id)
         self.assertTrue(updatedMoviePath.lastCreatedFileDate is None)
 
@@ -271,13 +271,13 @@ class TvFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.put(reverse('mediaviewer:api:tv-detail', args=[self.tvFile.id]), self.data)
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         tvFile = File.objects.get(pk=response.data['pk'])
         for k,v in self.data.items():
             expected = v
             actual = getattr(tvFile, k)
-            self.assertEquals(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+            self.assertEqual(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
 
     def test_update_invalid_tvfile(self):
         self.data = {'filename': 'new.tv.filename',
@@ -287,4 +287,4 @@ class TvFileViewSetTests(APITestCase):
                      'streamable': True,
                      }
         response = self.client.put(reverse('mediaviewer:api:tv-detail', args=[self.movieFile.id]), self.data)
-        self.assertEquals(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

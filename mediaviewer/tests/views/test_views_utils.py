@@ -138,4 +138,4 @@ class TestGetLastWaiterStatus(TestCase):
         getLastWaiterStatus(context)
 
         self.assertTrue(context['waiterstatus'])
-        self.assertEquals('test', context['waiterfailurereason'])
+        self.assertEqual('test', context['waiterfailurereason'])

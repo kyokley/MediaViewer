@@ -57,4 +57,4 @@ class DownloadTokenViewSetTests(APITestCase):
 
     def test_get_download_token(self):
         response = self.client.get(reverse('mediaviewer:api:downloadtoken-detail', args=[self.download_token.guid]))
-        self.assertEquals(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

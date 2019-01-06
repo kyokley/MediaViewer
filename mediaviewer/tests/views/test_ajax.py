@@ -71,7 +71,7 @@ class TestAjaxVideoProgress(TestCase):
                 content_type='application/json',
                 status=412)
         self.mock_jsonClass.dumps.assert_called_once_with({'offset': 0})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_no_user(self):
         self.token.isvalid = False
@@ -84,7 +84,7 @@ class TestAjaxVideoProgress(TestCase):
                 content_type='application/json',
                 status=412)
         self.mock_jsonClass.dumps.assert_called_once_with({'offset': 0})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_no_token(self):
         self.mock_downloadTokenClass.getByGUID.return_value = None
@@ -96,7 +96,7 @@ class TestAjaxVideoProgress(TestCase):
                 content_type='application/json',
                 status=412)
         self.mock_jsonClass.dumps.assert_called_once_with({'offset': 0})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_get_request_with_movie(self):
         self.request.method = 'GET'
@@ -113,7 +113,7 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_jsonClass.dumps.assert_called_once_with(
                 {'offset': 345.123,
                  'date_edited': self.date_edited.isoformat()})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_get_request_no_movie(self):
         self.request.method = 'GET'
@@ -130,7 +130,7 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_jsonClass.dumps.assert_called_once_with(
                 {'offset': 345.123,
                  'date_edited': self.date_edited.isoformat()})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_get_request_with_movie_with_rewind(self):
         self.request.method = 'GET'
@@ -148,7 +148,7 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_jsonClass.dumps.assert_called_once_with(
                 {'offset': 315.123,
                  'date_edited': self.vp.date_edited.isoformat()})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_get_request_no_movie_with_rewind(self):
         self.request.method = 'GET'
@@ -166,7 +166,7 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_jsonClass.dumps.assert_called_once_with(
                 {'offset': 315.123,
                  'date_edited': self.vp.date_edited.isoformat()})
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_post_request_with_movie(self):
         self.request.method = 'POST'
@@ -187,7 +187,7 @@ class TestAjaxVideoProgress(TestCase):
                 self.fake_json_data,
                 content_type='application/json',
                 status=200)
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_post_request_no_movie(self):
         self.request.method = 'POST'
@@ -208,7 +208,7 @@ class TestAjaxVideoProgress(TestCase):
                 self.fake_json_data,
                 content_type='application/json',
                 status=200)
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
     def test_delete(self):
         self.request.method = 'DELETE'
@@ -221,7 +221,7 @@ class TestAjaxVideoProgress(TestCase):
                 'json_data', content_type='application/json', status=204)
         self.mock_vpClass.destroy.assert_called_once_with(
                 self.user, self.filename)
-        self.assertEquals(ret_val, self.fake_httpresponse)
+        self.assertEqual(ret_val, self.fake_httpresponse)
 
 
 class TestAjaxGenres(TestCase):
