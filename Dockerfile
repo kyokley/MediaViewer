@@ -2,6 +2,8 @@ FROM python:3.6-alpine
 
 MAINTAINER Kevin Yokley
 
+RUN echo '{ "allow_root": true }' > /root/.bowerrc
+
 # Install required packages and remove the apt packages cache when done.
 RUN apk add --no-cache --virtual .build-deps \
     linux-headers \
@@ -25,17 +27,8 @@ RUN /venv/bin/pip install -U pip \
 
 # add (the rest of) our code
 COPY . /code
-
-RUN addgroup -S docker && \
-    adduser -S docker -g docker \
-    && chown -R docker:docker /code
-USER docker
-
-RUN cp -f /code/configs/docker_settings.py /code/mysite/local_settings.py
-
 WORKDIR /code
 
-COPY ./package.json /code/package.json
 RUN /venv/bin/python manage.py bower install
 
 #EXPOSE 8000 8001 8002
