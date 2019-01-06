@@ -1,3 +1,5 @@
+from mysite.settings import *
+
 DATABASES = {
     # Testing settings!!!
     'default': {
@@ -7,8 +9,8 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
-        },
-    }
+    },
+}
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -19,9 +21,9 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'axes',
     # Uncomment the next line to enable the admin:
-     'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
-     'django.contrib.admindocs',
+    'django.contrib.admindocs',
     'rest_framework',
     'mediaviewer',
     'mediaviewer.models',
