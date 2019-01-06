@@ -52,7 +52,7 @@ class TestSetSiteWideContext(TestCase):
 
     def test_is_staff_not_logged_in(self):
         self.user.is_staff = True
-        self.user.is_authenticated.return_value = False
+        self.user.is_authenticated = False
 
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
@@ -65,7 +65,7 @@ class TestSetSiteWideContext(TestCase):
 
     def test_not_staff_not_logged_in(self):
         self.user.is_staff = False
-        self.user.is_authenticated.return_value = False
+        self.user.is_authenticated = False
 
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
@@ -78,7 +78,7 @@ class TestSetSiteWideContext(TestCase):
 
     def test_is_staff_is_logged_in(self):
         self.user.is_staff = True
-        self.user.is_authenticated.return_value = True
+        self.user.is_authenticated = True
         self.user.settings.return_value = None
 
         context = dict()
@@ -96,7 +96,7 @@ class TestSetSiteWideContext(TestCase):
 
     def test_includeMessages_not_staff(self):
         self.user.is_staff = False
-        self.user.is_authenticated.return_value = True
+        self.user.is_authenticated = True
         self.user.settings.return_value = None
 
         context = dict()

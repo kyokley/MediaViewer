@@ -10,7 +10,7 @@ from mediaviewer.models.message import (Message,
 
 def setSiteWideContext(context, request, includeMessages=False):
     user = request.user
-    if user.is_authenticated():
+    if user.is_authenticated:
         settings = user.settings()
         context['loggedin'] = True
         context['user'] = user

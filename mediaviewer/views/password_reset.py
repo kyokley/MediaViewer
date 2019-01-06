@@ -89,7 +89,7 @@ def check_force_password_change(func):
         request = args and args[0]
         if request and request.user:
             user = request.user
-            if user.is_authenticated():
+            if user.is_authenticated:
                 settings = user.settings()
                 if settings.force_password_change:
                     return change_password(request)

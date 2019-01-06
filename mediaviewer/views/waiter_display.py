@@ -15,7 +15,7 @@ def waiter_display(request, fileid):
     file = get_object_or_404(File, pk=fileid)
     user = request.user
 
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         context['errmsg'] = 'User not authenticated. Refresh and try again.'
     else:
         dt = DownloadToken.new(user, file)

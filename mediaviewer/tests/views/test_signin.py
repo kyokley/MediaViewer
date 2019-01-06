@@ -293,7 +293,7 @@ class TestSignin(TestCase):
                          self.mock_render_return)
 
     def test_request_POST_invalid_user(self):
-        self.user.is_authenticated.return_value = False
+        self.user.is_authenticated = False
         expected_context = {'loggedin': False,
                             'greeting': 'latest_site_greeting',
                             'error_message': 'Incorrect username or password!',

@@ -75,7 +75,7 @@ def ajaxvote(request):
     requestObj = get_object_or_404(Request, pk=requestid)
 
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         raise Exception("User not authenticated. Refresh and try again.")
 
     RequestVote.new(requestObj, user)
@@ -96,7 +96,7 @@ def ajaxdone(request):
     response = {'errmsg': ''}
 
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         response['errmsg'] = 'User not authenticated. Refresh and try again.'
         return HttpResponse(json.dumps(response),
                             content_type='application/javascript')
@@ -141,7 +141,7 @@ def ajaxgiveup(request):
     response = {'errmsg': ''}
 
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         response['errmsg'] = 'User not authenticated. Refresh and try again.'
         return HttpResponse(json.dumps(response),
                             content_type='application/javascript')

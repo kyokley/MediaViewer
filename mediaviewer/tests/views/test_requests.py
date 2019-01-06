@@ -191,7 +191,7 @@ class TestAjaxVote(TestCase):
 
     def test_user_not_authenticated(self):
         self.test_user = mock.MagicMock()
-        self.test_user.is_authenticated.return_value = False
+        self.test_user.is_authenticated = False
         self.request.user = self.test_user
 
         self.assertRaisesMessage(
@@ -221,7 +221,7 @@ class TestAjaxDone(TestCase):
 
         self.user = mock.create_autospec(User)
         self.user.username = 'test_logged_in_user'
-        self.user.is_authenticated.return_value = True
+        self.user.is_authenticated = True
         self.user.is_staff = True
         self.settings = mock.create_autospec(UserSettings)
         self.settings.force_password_change = False
@@ -232,7 +232,7 @@ class TestAjaxDone(TestCase):
         self.request.user = self.user
 
     def test_user_not_authenticated(self):
-        self.user.is_authenticated.return_value = False
+        self.user.is_authenticated = False
 
         expected_response = {
                 'errmsg': 'User not authenticated. Refresh and try again.'}
@@ -293,7 +293,7 @@ class TestGiveUp(TestCase):
 
         self.user = mock.create_autospec(User)
         self.user.username = 'test_logged_in_user'
-        self.user.is_authenticated.return_value = True
+        self.user.is_authenticated = True
         self.user.is_staff = True
         self.settings = mock.create_autospec(UserSettings)
         self.settings.force_password_change = False
@@ -304,7 +304,7 @@ class TestGiveUp(TestCase):
         self.request.user = self.user
 
     def test_user_not_authenticated(self):
-        self.user.is_authenticated.return_value = False
+        self.user.is_authenticated = False
 
         expected_response = {
                 'errmsg': 'User not authenticated. Refresh and try again.'}

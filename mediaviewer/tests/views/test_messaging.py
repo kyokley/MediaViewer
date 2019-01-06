@@ -109,7 +109,7 @@ class TestAjaxCloseMessage(TestCase):
         self.mock_filter.return_value = [self.messageObj]
 
         self.user = mock.MagicMock(User)
-        self.user.is_authenticated.return_value = True
+        self.user.is_authenticated = True
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
@@ -130,7 +130,7 @@ class TestAjaxCloseMessage(TestCase):
         self.messageObj.save.assert_called_once_with()
 
     def test_user_not_authenticated(self):
-        self.user.is_authenticated.return_value = False
+        self.user.is_authenticated = False
 
         expected = self.mock_HttpResponse.return_value
         actual = ajaxclosemessage(self.request)

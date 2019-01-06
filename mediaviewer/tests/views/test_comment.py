@@ -28,7 +28,7 @@ class TestComment(TestCase):
         self.user = User.objects.create_superuser('test_user',
                                                   'test@user.com',
                                                   'password')
-        self.user.is_authenticated.return_value = True
+        self.user.is_authenticated = True
 
         settings = mock.MagicMock()
         settings.force_password_change = False

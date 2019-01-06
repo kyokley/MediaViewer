@@ -61,7 +61,7 @@ def ajaxviewed(request):
     errmsg = ""
 
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         errmsg = "User not authenticated. Refresh and try again."
 
     if errmsg:
@@ -111,7 +111,7 @@ def ajaxdownloadbutton(request):
     file = get_object_or_404(File, pk=fileid)
     user = request.user
 
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         response = {'errmsg': 'User not authenticated. Refresh and try again.'}
     elif file and user:
         dt = DownloadToken.new(user, file)

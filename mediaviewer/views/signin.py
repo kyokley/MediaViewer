@@ -22,7 +22,7 @@ def signin(request):
     if 'next' in request.GET:
         context['next'] = request.GET['next']
 
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         try:
             if request.method == 'POST':
                 username = request.POST['username']
@@ -51,7 +51,7 @@ def signin(request):
                 context['error_message'] = 'Incorrect username or password!'
 
     if (user and
-            user.is_authenticated() and
+            user.is_authenticated and
             not context.get('error_message')):
         settings = user.settings()
         setSiteWideContext(context, request)
