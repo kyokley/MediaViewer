@@ -67,6 +67,7 @@ class TestDownloadToken(TestCase):
                 self.file)
 
     def test_isvalid(self):
+        self.mock_objects.count.return_value = 1
         dt = DownloadToken.new(self.user,
                                self.file)
         self.assertTrue(dt.isvalid)
