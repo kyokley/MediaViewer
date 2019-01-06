@@ -4,6 +4,7 @@ secret.txt
 *.log
 *.ini
 *.pyc
+*.lock
 node_modules
 static/*
 components/*

@@ -2,6 +2,9 @@ FROM python:3.6-slim
 
 MAINTAINER Kevin Yokley
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 
@@ -9,10 +12,10 @@ RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 RUN apt-get update && \
     apt-get install -y g++ \
                        git \
-                       supervisor \
-                       nodejs && \
-    apt-get install -y postgresql
-RUN npm install -g bower
+                       curl \
+                       yarn \
+                       make \
+                       gnupg
 
 ARG REQS=base
 
@@ -26,7 +29,7 @@ RUN /venv/bin/pip install -U pip \
 COPY . /code
 WORKDIR /code
 
-RUN /venv/bin/python manage.py bower install
+RUN yarn
 
 #EXPOSE 8000 8001 8002
 #ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisor.d/supervisor.conf"]

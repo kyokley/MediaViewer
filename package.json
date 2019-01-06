@@ -6,10 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kyokley/MediaViewer.git"
-  },
+  "repository": "git+https://github.com/kyokley/MediaViewer.git",
   "author": "Kevin Yokley",
   "license": "MIT",
   "bugs": {
@@ -18,6 +15,13 @@
   "homepage": "https://github.com/kyokley/MediaViewer#readme",
   "private": true,
   "dependencies": {
-    "bower": "^1.7.9"
+    "bootstrap": "^4.2.1",
+    "bower": "^1.7.9",
+    "datatables.net": "^1.10.19",
+    "datatables.net-bs": "^1.10.19",
+    "datatables.net-responsive": "^2.2.3",
+    "datatables.net-responsive-bs": "^2.2.3",
+    "jquery": "^3.3.1",
+    "jquery.shorten": "https://github.com/viralpatel/jquery.shorten.git"
   }
 }
