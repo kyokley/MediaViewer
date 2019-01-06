@@ -4,6 +4,7 @@ from django.db import models
 class SiteGreeting(models.Model):
     greeting = models.TextField(blank=True, null=False, db_column='greeting')
     user = models.ForeignKey('auth.User',
+                             on_delete=models.CASCADE,
                              null=False,
                              blank=False,
                              db_column='userid')

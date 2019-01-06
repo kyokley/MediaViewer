@@ -13,6 +13,7 @@ class Request(models.Model):
     name = models.TextField(blank=True, null=False)
     done = models.BooleanField()
     user = models.ForeignKey('auth.User',
+                             on_delete=models.CASCADE,
                              null=False,
                              db_column='userid',
                              blank=False)
@@ -80,10 +81,15 @@ class Request(models.Model):
 
 class RequestVote(models.Model):
     request = models.ForeignKey(Request,
+                                on_delete=models.CASCADE,
                                 null=True,
                                 db_column='requestid',
                                 blank=False)
-    user = models.ForeignKey(User, null=False, db_column='userid', blank=False)
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             null=False,
+                             db_column='userid',
+                             blank=False)
     datecreated = models.DateTimeField(db_column='datecreated',
                                        auto_now_add=True)
 

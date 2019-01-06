@@ -19,11 +19,13 @@ from mediaviewer.models.director import Director
 # Destroy failed posterfiles weekly to allow new attempts
 class PosterFile(models.Model):
     file = models.ForeignKey('mediaviewer.File',
+                             on_delete=models.CASCADE,
                              null=True,
                              db_column='fileid',
                              blank=True,
                              related_name='_posterfile')
     path = models.ForeignKey('mediaviewer.Path',
+                             on_delete=models.CASCADE,
                              null=True,
                              db_column='pathid',
                              blank=True,

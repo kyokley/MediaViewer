@@ -6,7 +6,11 @@ from datetime import datetime
 from django.db import models
 
 class LoginEvent(models.Model):
-    user = models.ForeignKey('auth.User', null=False, blank=False, db_column='userid')
+    user = models.ForeignKey('auth.User',
+                             on_delete=models.CASCADE,
+                             null=False,
+                             blank=False,
+                             db_column='userid')
     datecreated = models.DateTimeField(db_column='datecreated')
 
     class Meta:

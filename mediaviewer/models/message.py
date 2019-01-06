@@ -16,6 +16,7 @@ class Message(models.Model):
                      (LAST_WATCHED, 'Last Watched'),
                      )
     touser = models.ForeignKey('auth.User',
+                               on_delete=models.CASCADE,
                                null=False,
                                blank=False,
                                db_column='touserid')

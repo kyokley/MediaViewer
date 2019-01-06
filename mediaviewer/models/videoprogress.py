@@ -4,15 +4,19 @@ from mediaviewer.models.message import Message
 
 class VideoProgress(models.Model):
     user = models.ForeignKey(
-            'auth.User',
-            null=False,
-            blank=False,
-            db_column='userid')
+        'auth.User',
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        db_column='userid')
     filename = models.TextField(db_column='filename', null=True)
     hashed_filename = models.TextField(db_column='hashedfilename')
     offset = models.DecimalField(max_digits=9, decimal_places=3)
     date_edited = models.DateTimeField(auto_now=True)
-    file = models.ForeignKey('mediaviewer.File', null=True, blank=True)
+    file = models.ForeignKey('mediaviewer.File',
+                             on_delete=models.CASCADE,
+                             null=True,
+                             blank=True)
 
     class Meta:
         app_label = 'mediaviewer'

@@ -17,10 +17,10 @@ class DownloadToken(models.Model):
     guid = models.CharField(max_length=32, default=_createId, unique=True)
     user = models.ForeignKey(
         'auth.User',
+        on_delete=models.CASCADE,
         null=False,
         blank=False,
         db_column='userid',
-        on_delete=models.CASCADE,
     )
     path = models.TextField(db_column='path')
     filename = models.TextField(db_column='filename')
@@ -28,10 +28,10 @@ class DownloadToken(models.Model):
     datecreated = models.DateTimeField(db_column='datecreated', blank=True)
     displayname = models.TextField(db_column='display_name')
     file = models.ForeignKey('mediaviewer.File',
+                             on_delete=models.CASCADE,
                              null=False,
                              db_column='fileid',
                              blank=True,
-                             on_delete=models.CASCADE,
                              )
 
     class Meta:

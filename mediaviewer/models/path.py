@@ -18,10 +18,11 @@ class Path(models.Model):
                                    null=False,
                                    db_column='ismovie')
     defaultScraper = models.ForeignKey(
-            'mediaviewer.FilenameScrapeFormat',
-            null=True,
-            blank=True,
-            db_column='defaultscraperid')
+        'mediaviewer.FilenameScrapeFormat',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        db_column='defaultscraperid')
     tvdb_id = models.TextField(null=True, blank=True)
     server = models.TextField(blank=False, null=False)
     defaultsearchstr = models.TextField(null=True, blank=True)

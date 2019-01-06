@@ -32,10 +32,11 @@ punctuationRegex = re.compile('[^a-zA-Z0-9]+')
 
 class File(models.Model):
     path = models.ForeignKey('mediaviewer.Path',
+                             on_delete=models.CASCADE,
                              null=True,
                              db_column='pathid',
                              blank=True,
-                             on_delete=models.CASCADE)
+                             )
     filename = models.TextField(blank=True)
     skip = models.BooleanField(blank=True)
     finished = models.BooleanField(blank=True)
@@ -43,6 +44,7 @@ class File(models.Model):
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
     datatransmission = models.ForeignKey('mediaviewer.DataTransmission',
+                                         on_delete=models.CASCADE,
                                          null=True,
                                          db_column='datatransmissionid',
                                          blank=True)
@@ -54,14 +56,15 @@ class File(models.Model):
                                null=True)
     hide = models.BooleanField(db_column='hide', default=False)
     filenamescrapeformat = models.ForeignKey(
-            'mediaviewer.FilenameScrapeFormat',
-            null=True,
-            db_column='filenamescrapeformatid',
-            blank=True)
+        'mediaviewer.FilenameScrapeFormat',
+        on_delete=models.CASCADE,
+        null=True,
+        db_column='filenamescrapeformatid',
+        blank=True)
     streamable = models.BooleanField(
-            db_column='streamable',
-            null=False,
-            default=True)
+        db_column='streamable',
+        null=False,
+        default=True)
     override_filename = models.TextField(blank=True)
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
