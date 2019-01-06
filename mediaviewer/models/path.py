@@ -1,6 +1,6 @@
 import time
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment

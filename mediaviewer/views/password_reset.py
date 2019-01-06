@@ -1,13 +1,13 @@
 from functools import wraps
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render
-from django.contrib.auth.views import (password_reset,
-                                       password_reset_confirm,
-                                       password_reset_done,
-                                       password_reset_complete,
-                                       password_change,
-                                       password_change_done,
+from django.contrib.auth.views import (PasswordResetView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetDoneView,
+                                       PasswordResetCompleteView,
+                                       PasswordChangeView,
+                                       PasswordChangeDoneView,
                                        )
 from django.contrib.auth.models import User
 from mediaviewer.views.views_utils import setSiteWideContext
@@ -18,7 +18,7 @@ from mediaviewer.forms import (MVSetPasswordForm,
 
 
 def reset_confirm(request, uidb64=None, token=None):
-    return password_reset_confirm(
+    return PasswordResetConfirmView(
             request,
             template_name='mediaviewer/password_reset_confirm.html',
             uidb64=uidb64,
@@ -36,7 +36,7 @@ def reset(request):
                           'mediaviewer/password_reset_no_email.html',
                           {'email': email})
 
-    return password_reset(
+    return PasswordResetView(
             request,
             template_name='mediaviewer/password_reset_form.html',
             email_template_name='mediaviewer/password_reset_email.html',
@@ -47,21 +47,21 @@ def reset(request):
 
 
 def reset_done(request):
-    return password_reset_done(
+    return PasswordResetDoneView(
             request,
             template_name='mediaviewer/password_reset_done.html',
             )
 
 
 def reset_complete(request):
-    return password_reset_complete(
+    return PasswordResetCompleteView(
             request,
             template_name='mediaviewer/password_reset_complete.html',
             )
 
 
 def create_new_password(request, uidb64=None, token=None):
-    return password_reset_confirm(
+    return PasswordResetConfirmView(
             request,
             template_name='mediaviewer/password_create_confirm.html',
             uidb64=uidb64,
@@ -74,7 +74,7 @@ def change_password(request):
     context = {'force_change': request.user.settings().force_password_change}
     setSiteWideContext(context, request)
     context['active_page'] = 'change_password'
-    return password_change(
+    return PasswordChangeView(
             request,
             template_name='mediaviewer/change_password.html',
             post_change_redirect=reverse('mediaviewer:change_password_submit'),
@@ -102,7 +102,7 @@ def change_password_submit(request):
     context = {}
     context['active_page'] = 'change_password_submit'
     setSiteWideContext(context, request)
-    return password_change_done(
+    return PasswordChangeDoneView(
             request,
             template_name='mediaviewer/change_password_submit.html',
             extra_context=context,

@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
 from mediaviewer.views.views_utils import setSiteWideContext

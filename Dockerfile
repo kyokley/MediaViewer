@@ -25,11 +25,7 @@ COPY ./requirements /home/docker/code/requirements
 RUN /venv/bin/pip install -U pip \
  && /venv/bin/pip install -r /home/docker/code/requirements/${REQS}_requirements.txt
 
-# add (the rest of) our code
-COPY . /code
 WORKDIR /code
-
-RUN yarn
 
 #EXPOSE 8000 8001 8002
 #ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisor.d/supervisor.conf"]

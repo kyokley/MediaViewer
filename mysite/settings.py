@@ -108,7 +108,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'djangobower.finders.BowerFinder',
+    # 'djangobower.finders.BowerFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -151,7 +151,7 @@ INSTALLED_APPS = (
     'widget_tweaks',
      #'django_memcached',
     'rest_framework',
-    'djangobower',
+    # 'djangobower',
     'mediaviewer',
     'mediaviewer.models',
     'mediaviewer.views',
@@ -243,16 +243,16 @@ TEMPLATES = [
     },
 ]
 
-BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
-BOWER_INSTALLED_APPS = ('jquery',
-                        'bootstrap',
-                        'datatables.net',
-                        'datatables.net-bs',
-                        'datatables.net-responsive',
-                        'datatables.net-responsive-bs',
-                        'bootswatch-dist#slate',
-                        'https://github.com/viralpatel/jquery.shorten.git',
-                        )
+# BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
+# BOWER_INSTALLED_APPS = ('jquery',
+                        # 'bootstrap',
+                        # 'datatables.net',
+                        # 'datatables.net-bs',
+                        # 'datatables.net-responsive',
+                        # 'datatables.net-responsive-bs',
+                        # 'bootswatch-dist#slate',
+                        # 'https://github.com/viralpatel/jquery.shorten.git',
+                        # )
 
 WAITER_HEAD = 'http://'
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1/waiter/dir/'

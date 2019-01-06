@@ -69,7 +69,7 @@ class TestSignin(TestCase):
                             }
         self.request.method = 'GET'
         self.request.GET = {'next': 'next_field'}
-        self.user.is_authenticated.side_effect = [False, False]
+        self.user.is_authenticated = False
         ret_val = signin(self.request)
 
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
@@ -98,7 +98,7 @@ class TestSignin(TestCase):
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
-        self.user.is_authenticated.side_effect = [False, True]
+        self.user.is_authenticated = False
 
         ret_val = signin(self.request)
 

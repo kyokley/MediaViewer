@@ -1,7 +1,7 @@
 import re
 import time
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.timezone import utc
 
 from mediaviewer.models.posterfile import PosterFile
