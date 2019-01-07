@@ -3,6 +3,7 @@ from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth import login
+from django.contrib.auth.signals import user_logged_in
 from mediaviewer.models.loginevent import LoginEvent
 from django.http import HttpResponseRedirect
 from mysite.settings import DEBUG
@@ -39,6 +40,12 @@ def signin(request):
                         context['loggedin'] = True
                         context['user'] = request.user
                         LoginEvent.new(request.user)
+                        # TODO: Finish implementing signals
+                        user_logged_in.send(
+                            sender=User,
+                            request=request,
+                            user=user,
+                        )
                     else:
                         raise ImproperLogin('User is no longer active')
 
