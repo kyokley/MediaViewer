@@ -1,6 +1,6 @@
 django
 django-memcached
-django-axes==3.0.1
+django-axes
 psycopg2
 python-dateutil
 uwsgi
