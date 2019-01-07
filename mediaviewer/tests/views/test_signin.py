@@ -1,5 +1,6 @@
 import mock
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from mediaviewer.views.signin import signin
 
@@ -56,10 +57,15 @@ class TestSignin(TestCase):
         self.addCleanup(self.reverse_patcher.stop)
 
         self.request = mock.MagicMock()
-        self.user = mock.MagicMock()
+        self.user = mock.MagicMock(User)
+        self.user.is_authenticated = False
         self.settings = mock.MagicMock()
         self.user.settings.return_value = self.settings
         self.request.user = self.user
+
+        self.authenticated_user = mock.MagicMock(User)
+        self.authenticated_user.is_authenticated = True
+        self.authenticated_user.settings.return_value = self.settings
 
     def test_request_not_POST(self):
         expected_context = {'loggedin': False,
@@ -94,7 +100,8 @@ class TestSignin(TestCase):
         self.request.GET = {}
         self.request.POST = {'username': 'a@b.c',
                              'password': 'abc123'}
-        self.mock_case_insensitive_authenticate.return_value = self.user
+        self.mock_case_insensitive_authenticate.return_value = (
+            self.authenticated_user)
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
@@ -109,21 +116,22 @@ class TestSignin(TestCase):
                 username='a@b.c',
                 password='abc123')
         self.mock_login.assert_called_once_with(self.request,
-                                                self.user)
+                                                self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
-        self.assertTrue(self.user.settings.called)
-        self.assertFalse(self.mock_render.called)
         self.mock_httpResponseRedirect.assert_called_once_with(
                 self.mock_reverse_return)
         self.assertEqual(ret_val,
                          self.mock_redirect)
 
     def test_request_POST_valid_user_cannot_login(self):
-        expected_context = {'loggedin': False,
-                            'greeting': 'latest_site_greeting',
-                            'error_message': ('You should have received an email with a link to set up your password the first time. '
-                                              'Please follow the instructions in the email.'),
-                            'active_page': 'signin',
+        expected_context = {
+            'loggedin': False,
+            'greeting': 'latest_site_greeting',
+            'error_message': (
+                'You should have received an email with a link '
+                'to set up your password the first time. '
+                'Please follow the instructions in the email.'),
+            'active_page': 'signin',
                             }
         self.request.method = 'POST'
         self.request.GET = {}
@@ -133,7 +141,6 @@ class TestSignin(TestCase):
         self.settings.can_login = False
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
-        self.user.is_authenticated.side_effect = [False, False]
 
         ret_val = signin(self.request)
 
@@ -162,11 +169,12 @@ class TestSignin(TestCase):
         self.request.GET = {}
         self.request.POST = {'username': 'a@b.c',
                              'password': 'abc123'}
-        self.mock_case_insensitive_authenticate.return_value = self.user
+        self.mock_case_insensitive_authenticate.return_value = (
+            self.authenticated_user)
         self.settings.can_login = True
         self.settings.force_password_change = True
         self.user.email = 'a@b.c'
-        self.user.is_authenticated.side_effect = [False, True]
+        self.user.is_authenticated = False
 
         ret_val = signin(self.request)
 
@@ -177,10 +185,8 @@ class TestSignin(TestCase):
                 username='a@b.c',
                 password='abc123')
         self.mock_login.assert_called_once_with(self.request,
-                                                self.user)
+                                                self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
-        self.assertTrue(self.user.settings.called)
-        self.assertFalse(self.mock_render.called)
         self.mock_httpResponseRedirect.assert_called_once_with(
                 self.mock_reverse_return)
         self.mock_reverse.assert_called_once_with('mediaviewer:settings')
@@ -197,11 +203,14 @@ class TestSignin(TestCase):
         self.request.GET = {}
         self.request.POST = {'username': 'a@b.c',
                              'password': 'abc123'}
-        self.mock_case_insensitive_authenticate.return_value = self.user
+        self.mock_case_insensitive_authenticate.return_value = (
+            self.authenticated_user)
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = None
-        self.user.is_authenticated.side_effect = [False, True]
+        self.user.is_authenticated = False
+
+        self.authenticated_user.email = None
 
         ret_val = signin(self.request)
 
@@ -212,10 +221,8 @@ class TestSignin(TestCase):
                 username='a@b.c',
                 password='abc123')
         self.mock_login.assert_called_once_with(self.request,
-                                                self.user)
+                                                self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
-        self.assertTrue(self.user.settings.called)
-        self.assertFalse(self.mock_render.called)
         self.mock_httpResponseRedirect.assert_called_once_with(
                 self.mock_reverse_return)
         self.mock_reverse.assert_called_once_with('mediaviewer:settings')
@@ -233,11 +240,12 @@ class TestSignin(TestCase):
         self.request.POST = {'username': 'a@b.c',
                              'password': 'abc123',
                              'next': 'next_url'}
-        self.mock_case_insensitive_authenticate.return_value = self.user
+        self.mock_case_insensitive_authenticate.return_value = (
+            self.authenticated_user)
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
-        self.user.is_authenticated.side_effect = [False, True]
+        self.user.is_authenticated = False
 
         ret_val = signin(self.request)
 
@@ -248,10 +256,8 @@ class TestSignin(TestCase):
                 username='a@b.c',
                 password='abc123')
         self.mock_login.assert_called_once_with(self.request,
-                                                self.user)
+                                                self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
-        self.assertTrue(self.user.settings.called)
-        self.assertFalse(self.mock_render.called)
         self.mock_httpResponseRedirect.assert_called_once_with('next_url')
         self.assertFalse(self.mock_reverse.called)
         self.assertEqual(ret_val,
@@ -268,12 +274,15 @@ class TestSignin(TestCase):
         self.request.POST = {'username': 'a@b.c',
                              'password': 'abc123',
                              }
-        self.mock_case_insensitive_authenticate.return_value = self.user
+        self.mock_case_insensitive_authenticate.return_value = (
+            self.authenticated_user)
         self.settings.can_login = True
         self.settings.force_password_change = False
         self.user.email = 'a@b.c'
         self.user.is_active = False
-        self.user.is_authenticated.side_effect = [False, True]
+        self.user.is_authenticated = False
+
+        self.authenticated_user.is_active = False
 
         ret_val = signin(self.request)
 
@@ -284,7 +293,6 @@ class TestSignin(TestCase):
                 password='abc123')
         self.assertFalse(self.mock_login.called)
         self.assertFalse(self.mock_LoginEvent.new.called)
-        self.assertTrue(self.user.settings.called)
         self.assertFalse(self.mock_httpResponseRedirect.called)
         self.mock_render.assert_called_once_with(self.request,
                                                  'mediaviewer/signin.html',
