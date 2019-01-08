@@ -22,11 +22,11 @@ from mediaviewer.views.password_reset import (reset_confirm,
 
 class TestResetConfirm(TestCase):
     def setUp(self):
-        self.password_reset_confirm_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_reset_confirm')
-        self.mock_password_reset_confirm = (
-                self.password_reset_confirm_patcher.start())
-        self.addCleanup(self.password_reset_confirm_patcher.stop)
+        self.PasswordResetConfirmView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordResetConfirmView')
+        self.mock_PasswordResetConfirmView = (
+                self.PasswordResetConfirmView_patcher.start())
+        self.addCleanup(self.PasswordResetConfirmView_patcher.stop)
 
         self.reverse_patcher = mock.patch(
                 'mediaviewer.views.password_reset.reverse')
@@ -36,14 +36,14 @@ class TestResetConfirm(TestCase):
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_password_reset_confirm.return_value
+        expected = self.mock_PasswordResetConfirmView.return_value
         actual = reset_confirm(
                 self.request,
                 uidb64='test_uidb64',
                 token='test_token')
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset_confirm.assert_called_once_with(
+        self.mock_PasswordResetConfirmView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_confirm.html',
                 uidb64='test_uidb64',
@@ -67,10 +67,10 @@ class TestReset(TestCase):
         self.mock_render = self.render_patcher.start()
         self.addCleanup(self.render_patcher.stop)
 
-        self.password_reset_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_reset')
-        self.mock_password_reset = self.password_reset_patcher.start()
-        self.addCleanup(self.password_reset_patcher.stop)
+        self.PasswordResetView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordResetView')
+        self.mock_PasswordResetView = self.PasswordResetView_patcher.start()
+        self.addCleanup(self.PasswordResetView_patcher.stop)
 
         self.reverse_patcher = mock.patch(
                 'mediaviewer.views.password_reset.reverse')
@@ -106,11 +106,11 @@ class TestReset(TestCase):
         self.request.method = 'POST'
         self.request.POST = {'email': ''}
 
-        expected = self.mock_password_reset.return_value
+        expected = self.mock_PasswordResetView.return_value
         actual = reset(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset.assert_called_once_with(
+        self.mock_PasswordResetView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_form.html',
                 email_template_name='mediaviewer/password_reset_email.html',
@@ -126,11 +126,11 @@ class TestReset(TestCase):
         self.request.method = 'POST'
         self.request.POST = {'email': 'test_email'}
 
-        expected = self.mock_password_reset.return_value
+        expected = self.mock_PasswordResetView.return_value
         actual = reset(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset.assert_called_once_with(
+        self.mock_PasswordResetView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_form.html',
                 email_template_name='mediaviewer/password_reset_email.html',
@@ -145,11 +145,11 @@ class TestReset(TestCase):
     def test_not_POST(self):
         self.request.method = 'GET'
 
-        expected = self.mock_password_reset.return_value
+        expected = self.mock_PasswordResetView.return_value
         actual = reset(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset.assert_called_once_with(
+        self.mock_PasswordResetView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_form.html',
                 email_template_name='mediaviewer/password_reset_email.html',
@@ -162,40 +162,40 @@ class TestReset(TestCase):
 
 class TestResetDone(TestCase):
     def setUp(self):
-        self.password_reset_done_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_reset_done')
-        self.mock_password_reset_done = (
-                self.password_reset_done_patcher.start())
-        self.addCleanup(self.password_reset_done_patcher.stop)
+        self.PasswordResetDoneView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordResetDoneView')
+        self.mock_PasswordResetDoneView = (
+                self.PasswordResetDoneView_patcher.start())
+        self.addCleanup(self.PasswordResetDoneView_patcher.stop)
 
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_password_reset_done.return_value
+        expected = self.mock_PasswordResetDoneView.return_value
         actual = reset_done(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset_done.assert_called_once_with(
+        self.mock_PasswordResetDoneView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_done.html')
 
 
 class TestRestComplete(TestCase):
     def setUp(self):
-        self.password_reset_complete_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_reset_complete')
-        self.mock_password_reset_complete = (
-                self.password_reset_complete_patcher.start())
-        self.addCleanup(self.password_reset_complete_patcher.stop)
+        self.PasswordResetCompleteView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordResetCompleteView')
+        self.mock_PasswordResetCompleteView = (
+                self.PasswordResetCompleteView_patcher.start())
+        self.addCleanup(self.PasswordResetCompleteView_patcher.stop)
 
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_password_reset_complete.return_value
+        expected = self.mock_PasswordResetCompleteView.return_value
         actual = reset_complete(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset_complete.assert_called_once_with(
+        self.mock_PasswordResetCompleteView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_reset_complete.html'
                 )
@@ -203,11 +203,11 @@ class TestRestComplete(TestCase):
 
 class TestCreateNewPassword(TestCase):
     def setUp(self):
-        self.password_reset_confirm_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_reset_confirm')
-        self.mock_password_reset_confirm = (
-                self.password_reset_confirm_patcher.start())
-        self.addCleanup(self.password_reset_confirm_patcher.stop)
+        self.PasswordResetConfirmView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordResetConfirmView')
+        self.mock_PasswordResetConfirmView = (
+                self.PasswordResetConfirmView_patcher.start())
+        self.addCleanup(self.PasswordResetConfirmView_patcher.stop)
 
         self.reverse_patcher = mock.patch(
                 'mediaviewer.views.password_reset.reverse')
@@ -217,14 +217,14 @@ class TestCreateNewPassword(TestCase):
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_password_reset_confirm.return_value
+        expected = self.mock_PasswordResetConfirmView.return_value
         actual = create_new_password(self.request,
                                      uidb64='test_uidb64',
                                      token='test_token'
                                      )
 
         self.assertEqual(expected, actual)
-        self.mock_password_reset_confirm.assert_called_once_with(
+        self.mock_PasswordResetConfirmView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/password_create_confirm.html',
                 uidb64='test_uidb64',
@@ -238,10 +238,10 @@ class TestCreateNewPassword(TestCase):
 
 class TestChangePassword(TestCase):
     def setUp(self):
-        self.password_change_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_change')
-        self.mock_password_change = self.password_change_patcher.start()
-        self.addCleanup(self.password_change_patcher.stop)
+        self.PasswordChangeView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordChangeView')
+        self.mock_PasswordChangeView = self.PasswordChangeView_patcher.start()
+        self.addCleanup(self.PasswordChangeView_patcher.stop)
 
         self.setSiteWideContext_patcher = mock.patch(
                 'mediaviewer.views.password_reset.setSiteWideContext')
@@ -267,7 +267,7 @@ class TestChangePassword(TestCase):
                 'active_page': 'change_password'
                 }
 
-        expected = self.mock_password_change.return_value
+        expected = self.mock_PasswordChangeView.return_value
         actual = change_password(self.request)
 
         self.assertEqual(expected, actual)
@@ -276,7 +276,7 @@ class TestChangePassword(TestCase):
                 self.request)
         self.mock_reverse.assert_called_once_with(
                 'mediaviewer:change_password_submit')
-        self.mock_password_change.assert_called_once_with(
+        self.mock_PasswordChangeView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/change_password.html',
                 post_change_redirect=self.mock_reverse.return_value,
@@ -292,25 +292,25 @@ class TestChangePasswordSubmit(TestCase):
         self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
         self.addCleanup(self.setSiteWideContext_patcher.stop)
 
-        self.password_change_done_patcher = mock.patch(
-                'mediaviewer.views.password_reset.password_change_done')
-        self.mock_password_change_done = (
-                self.password_change_done_patcher.start())
-        self.addCleanup(self.password_change_done_patcher.stop)
+        self.PasswordChangeDoneView_patcher = mock.patch(
+                'mediaviewer.views.password_reset.PasswordChangeDoneView')
+        self.mock_PasswordChangeDoneView = (
+                self.PasswordChangeDoneView_patcher.start())
+        self.addCleanup(self.PasswordChangeDoneView_patcher.stop)
 
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
         expected_context = {'active_page': 'change_password_submit'}
 
-        expected = self.mock_password_change_done.return_value
+        expected = self.mock_PasswordChangeDoneView.return_value
         actual = change_password_submit(self.request)
 
         self.assertEqual(expected, actual)
         self.mock_setSiteWideContext.assert_called_once_with(
                 expected_context,
                 self.request)
-        self.mock_password_change_done.assert_called_once_with(
+        self.mock_PasswordChangeDoneView.assert_called_once_with(
                 self.request,
                 template_name='mediaviewer/change_password_submit.html',
                 extra_context=expected_context,

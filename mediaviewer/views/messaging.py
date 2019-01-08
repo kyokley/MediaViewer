@@ -9,7 +9,7 @@ from mediaviewer.views.password_reset import check_force_password_change
 
 import json
 import re
-ID_REGEX = re.compile('\d+')
+ID_REGEX = re.compile(r'\d+')
 
 
 @login_required(login_url='/mediaviewer/login/')

@@ -3,7 +3,6 @@ from django.conf.urls import url, include
 from rest_framework import routers
 from django.shortcuts import redirect
 from mysite.settings import IS_SYNCING
-from axes.decorators import watch_login
 
 from mediaviewer.views import (home,
                                files,
@@ -44,7 +43,7 @@ urlpatterns = [
     url(r'^autoplaydownloadlink/(?P<fileid>\d+)/$',
         detail.autoplaydownloadlink,
         name='autoplaydownloadlink'),
-    url(r'^login/', watch_login(signin.signin), name='signin'),
+    url(r'^login/', signin.signin, name='signin'),
     url(r'^logout/', signout.signout, name='signout'),
     url(r'^settings/', settings.settings, name='settings'),
     url(r'^submitsettings/', settings.submitsettings, name='submitsettings'),
@@ -116,18 +115,18 @@ if not IS_SYNCING:
     router.register(
             r'downloadtoken',
             viewset.DownloadTokenViewSet,
-            base_name='downloadtoken')
+            basename='downloadtoken')
     router.register(
             r'unstreamablefile',
             file_viewset.UnstreamableFileViewSet,
-            base_name='unstreamablefile')
-    router.register(r'movie', file_viewset.MovieFileViewSet, base_name='movie')
-    router.register(r'tv', file_viewset.TvFileViewSet, base_name='tv')
-    router.register(r'tvpath', path_viewset.TvPathViewSet, base_name='tvpath')
+            basename='unstreamablefile')
+    router.register(r'movie', file_viewset.MovieFileViewSet, basename='movie')
+    router.register(r'tv', file_viewset.TvFileViewSet, basename='tv')
+    router.register(r'tvpath', path_viewset.TvPathViewSet, basename='tvpath')
     router.register(
             r'moviepath',
             path_viewset.MoviePathViewSet,
-            base_name='moviepath')
+            basename='moviepath')
     router.register(r'datatransmission', viewset.DataTransmissionViewSet)
     router.register(r'error', viewset.ErrorViewSet)
     router.register(r'message', viewset.MessageViewSet)
