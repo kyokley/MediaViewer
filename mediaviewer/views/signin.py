@@ -3,7 +3,8 @@ from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth import login
-from django.contrib.auth.signals import user_logged_in
+from django.contrib.auth.models import User
+from django.contrib.auth.signals import user_logged_in, user_login_failed
 from mediaviewer.models.loginevent import LoginEvent
 from django.http import HttpResponseRedirect
 from mysite.settings import DEBUG
@@ -11,6 +12,7 @@ from mediaviewer.utils import logAccessInfo
 from mediaviewer.models.usersettings import (ImproperLogin,
                                              case_insensitive_authenticate,
                                              )
+
 
 @logAccessInfo
 def signin(request):
@@ -28,12 +30,28 @@ def signin(request):
             if request.method == 'POST':
                 username = request.POST['username']
                 password = request.POST['password']
-                user = case_insensitive_authenticate(username=username, password=password)
+                user = case_insensitive_authenticate(
+                    username=username,
+                    password=password)
                 if user is None:
+                    user_login_failed.send(
+                        sender=User,
+                        credentials={'username': username,
+                                     'password': password},
+                        request=request,
+                    )
                     raise Exception('Incorrect username or password!')
                 elif not user.settings().can_login:
-                    raise ImproperLogin('You should have received an email with a link to set up your password the first time. '
-                                        'Please follow the instructions in the email.')
+                    user_login_failed.send(
+                        sender=User,
+                        credentials={'username': username,
+                                     'password': password},
+                        request=request,
+                    )
+                    raise ImproperLogin(
+                        'You should have received an email with a link '
+                        'to set up your password the first time. '
+                        'Please follow the instructions in the email.')
                 else:
                     if user.is_active:
                         login(request, user)
@@ -47,6 +65,12 @@ def signin(request):
                             user=user,
                         )
                     else:
+                        user_login_failed.send(
+                            sender=User,
+                            credentials={'username': username,
+                                         'password': password},
+                            request=request,
+                        )
                         raise ImproperLogin('User is no longer active')
 
         except ImproperLogin as e:
