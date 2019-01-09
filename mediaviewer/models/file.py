@@ -24,10 +24,10 @@ from mediaviewer.models.usersettings import (LOCAL_IP,
 
 from mediaviewer.log import log
 
-yearRegex = re.compile('20[01]\d.*$')
-dvdRegex = re.compile('[A-Z]{2,}.*$')
-formatRegex = re.compile('\b(xvid|avi|XVID|AVI)+\b')
-punctuationRegex = re.compile('[^a-zA-Z0-9]+')
+yearRegex = re.compile(r'20[01]\d.*$')
+dvdRegex = re.compile(r'[A-Z]{2,}.*$')
+formatRegex = re.compile(r'\b(xvid|avi|XVID|AVI)+\b')
+punctuationRegex = re.compile(r'[^a-zA-Z0-9]+')
 
 
 class File(models.Model):
