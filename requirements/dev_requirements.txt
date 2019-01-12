@@ -1,4 +1,10 @@
--r test_requirements.txt
+-r base_requirements.txt
+mock
+django-debug-toolbar
+bandit
+django-nose
+pytest-django
+pytest-cov
 bpython
 pdbpp
 django-nose
