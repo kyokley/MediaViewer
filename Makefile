@@ -1,10 +1,10 @@
 .PHONY: build build-dev up tests attach shell
 
 build:
-	docker-compose build --build-arg REQS=base mediaviewer
+	docker-compose build mediaviewer
 
 build-dev:
-	docker-compose build --build-arg REQS=dev mediaviewer
+	docker-compose build --build-arg REQS= mediaviewer
 
 up:
 	docker-compose up -d
