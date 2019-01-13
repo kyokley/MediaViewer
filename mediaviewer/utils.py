@@ -9,13 +9,8 @@ from datetime import datetime
 from binascii import hexlify
 from functools import wraps
 
-from mysite.settings import (LOG_ACCESS_TIMINGS,
-                             EMAIL_FROM_ADDR,
-                             EMAIL_HOST,
-                             EMAIL_PORT,
-                             BYPASS_SMTPD_CHECK,
-                             )
-from django.contrib.auth.models import User
+from django.conf import settings
+from django.contrib.auth import get_user
 
 import os
 import telnetlib  # nosec
@@ -36,7 +31,7 @@ def logAccessInfo(func):
         id = getSomewhatUniqueID()
         request = args and args[0]
         username = None
-        if LOG_ACCESS_TIMINGS:
+        if settings.LOG_ACCESS_TIMINGS:
             start = datetime.now()
 
         if not request:
@@ -59,7 +54,7 @@ def logAccessInfo(func):
             log.error('%s: %s' % (id, locals()))
             raise
 
-        if LOG_ACCESS_TIMINGS:
+        if settings.LOG_ACCESS_TIMINGS:
             finished = datetime.now()
             log.debug('%s: page started at: %s' % (id, start))
             log.debug('%s: page finished at: %s' % (id, finished))
@@ -85,7 +80,7 @@ def sendMail(
         to_addr,
         subject,
         text,
-        from_addr=EMAIL_FROM_ADDR,
+        from_addr=settings.EMAIL_FROM_ADDR,
         files=None,
         server='localhost'):
     if not isinstance(to_addr, list):
@@ -115,7 +110,7 @@ def sendMail(
         msg.attach(part)
 
     # BCC staff members by adding them to recipient list
-    staff = User.objects.filter(is_staff=True)
+    staff = get_user().objects.filter(is_staff=True)
     for user in staff:
         if user.email:
             to_addr.add(user.email)
@@ -126,7 +121,7 @@ def sendMail(
 
 
 def checkSMTPServer():
-    if not BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(host=EMAIL_HOST,  # nosec
-                                       port=EMAIL_PORT)
+    if not settings.BYPASS_SMTPD_CHECK:
+        smtp_server = telnetlib.Telnet(host=settings.EMAIL_HOST,  # nosec
+                                       port=settings.EMAIL_PORT)
         smtp_server.close()
