@@ -1,4 +1,4 @@
-.PHONY: build build-dev up up-no-daemon tests attach shell help list
+.PHONY: build build-dev up up-no-daemon tests attach shell help list static
 
 help: ## This help
 	@grep -F "##" $(MAKEFILE_LIST) | grep -vF '@grep -F "##" $$(MAKEFILE_LIST)' | sed -r 's/(:).*##/\1/' | sort
@@ -33,3 +33,6 @@ stop-all-but-db:
 
 down:
 	docker-compose down
+
+static:
+	cd mediaviewer && yarn install && mv node_modules/* static/ && cd -
