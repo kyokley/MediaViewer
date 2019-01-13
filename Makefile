@@ -1,4 +1,10 @@
-.PHONY: build build-dev up tests attach shell
+.PHONY: build build-dev up up-no-daemon tests attach shell help list
+
+help: ## This help
+	@grep -F "##" $(MAKEFILE_LIST) | grep -vF '@grep -F "##" $$(MAKEFILE_LIST)' | sed -r 's/(:).*##/\1/' | sort
+
+list: ## List all targets
+	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
 build:
 	docker-compose build --build-arg REQS=base mediaviewer
