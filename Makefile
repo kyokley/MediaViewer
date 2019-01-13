@@ -7,10 +7,10 @@ list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
 build:
-	docker-compose build --build-arg REQS=base mediaviewer
+	docker-compose build mediaviewer
 
 build-dev:
-	docker-compose build --build-arg REQS=dev mediaviewer
+	docker-compose build --build-arg REQS= mediaviewer
 
 up:
 	docker-compose up -d
