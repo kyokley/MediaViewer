@@ -124,7 +124,7 @@ MIDDLEWARE = (
     #'axes.middleware.FailedLoginMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
     # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 # Auto logout delay in minutes
