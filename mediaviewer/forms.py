@@ -7,47 +7,63 @@ from django.contrib.auth.forms import (SetPasswordForm,
                                        PasswordResetForm,
                                        )
 from django.contrib.auth.tokens import default_token_generator
-from mysite.settings import MINIMUM_PASSWORD_LENGTH
+from django.conf import settings as conf_settings
 import re
 
 NUMBER_REGEX = re.compile(r'[0-9]')
 CHAR_REGEX = re.compile(r'[a-zA-Z]')
 
+
 class InvalidPasswordException(Exception):
     pass
+
 
 class InvalidEmailException(Exception):
     pass
 
+
 def _has_number_validator(val):
     return bool(NUMBER_REGEX.search(val))
+
 
 def _has_char_validator(val):
     return bool(CHAR_REGEX.search(val))
 
+
 def _is_long_enough_validator(val):
-    return len(val) >= MINIMUM_PASSWORD_LENGTH
+    return len(val) >= conf_settings.MINIMUM_PASSWORD_LENGTH
+
 
 def validate_reset_user_password(user,
                                  new_password,
                                  can_login=True
                                  ):
     if not _has_number_validator(new_password):
-        raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one numeric character.')
+        raise InvalidPasswordException(
+            'Password is too weak. '
+            'Valid passwords must contain at least one numeric character.')
 
     if not _has_char_validator(new_password):
-        raise InvalidPasswordException('Password is too weak. Valid passwords must contain at least one alphabetic character.')
+        raise InvalidPasswordException(
+            'Password is too weak. '
+            'Valid passwords must contain at least one alphabetic character.')
 
     if not _is_long_enough_validator(new_password):
-        raise InvalidPasswordException('Password is too weak. Valid passwords must be at least %s characters long.' % MINIMUM_PASSWORD_LENGTH)
+        raise InvalidPasswordException(
+            f'Password is too weak. '
+            f'Valid passwords must be at least '
+            f'{conf_settings.MINIMUM_PASSWORD_LENGTH} characters long.')
+
 
 def _is_email_unique(user, val):
     return (user.email.lower() != val.lower() and
-                not User.objects.filter(email__iexact=val).exists())
+            not User.objects.filter(email__iexact=val).exists())
+
 
 def validate_email(user, email):
     if not _is_email_unique(user, email):
-        raise InvalidEmailException('Email already exists on system. Please try another.')
+        raise InvalidEmailException(
+            'Email already exists on system. Please try another.')
 
 
 def change_user_password(user,
@@ -62,7 +78,8 @@ def change_user_password(user,
         raise InvalidPasswordException('New passwords do not match')
 
     if old_password == new_password:
-        raise InvalidPasswordException('New and old passwords must be different')
+        raise InvalidPasswordException(
+            'New and old passwords must be different')
 
     validate_reset_user_password(user, new_password, can_login=can_login)
     user.set_password(new_password)
@@ -72,6 +89,7 @@ def change_user_password(user,
     settings.save()
     user.save()
 
+
 class MVSaveBase(SetPasswordForm):
     def save(self, commit=True):
         settings = self.user.settings()
@@ -79,6 +97,7 @@ class MVSaveBase(SetPasswordForm):
         settings.can_login = True
         settings.save()
         super(MVSaveBase, self).save()
+
 
 class MVSetPasswordForm(MVSaveBase):
     def clean_new_password1(self):
@@ -102,7 +121,8 @@ class MVPasswordChangeForm(PasswordChangeForm, MVSaveBase):
         old_password = self.cleaned_data['old_password']
         password1 = self.cleaned_data.get('new_password1')
         if old_password == password1:
-            raise InvalidPasswordException('New and old passwords must be different')
+            raise InvalidPasswordException(
+                'New and old passwords must be different')
 
         try:
             validate_reset_user_password(self.user,
@@ -114,9 +134,15 @@ class MVPasswordChangeForm(PasswordChangeForm, MVSaveBase):
 
         return password1
 
+
 class PasswordResetFormWithBCC(PasswordResetForm):
-    def send_mail(self, subject_template_name, email_template_name,
-                  context, from_email, to_email, html_email_template_name=None):
+    def send_mail(self,
+                  subject_template_name,
+                  email_template_name,
+                  context,
+                  from_email,
+                  to_email,
+                  html_email_template_name=None):
         """
         Sends a django.core.mail.EmailMultiAlternatives to `to_email`.
         """
@@ -124,7 +150,9 @@ class PasswordResetFormWithBCC(PasswordResetForm):
         # Email subject *must not* contain newlines
         subject = ''.join(subject.splitlines())
         body = loader.render_to_string(email_template_name, context)
-        bcc = [user.email for user in User.objects.filter(is_staff=True) if user.email]
+        bcc = [
+            user.email
+            for user in User.objects.filter(is_staff=True) if user.email]
 
         email_message = EmailMultiAlternatives(subject,
                                                body,
@@ -133,10 +161,12 @@ class PasswordResetFormWithBCC(PasswordResetForm):
                                                bcc=bcc)
 
         if html_email_template_name is not None:
-            html_email = loader.render_to_string(html_email_template_name, context)
+            html_email = loader.render_to_string(html_email_template_name,
+                                                 context)
             email_message.attach_alternative(html_email, 'text/html')
 
         email_message.send()
+
 
 class FormlessPasswordReset(PasswordResetFormWithBCC):
     def __init__(self, user, email):
@@ -167,11 +197,12 @@ class FormlessPasswordReset(PasswordResetFormWithBCC):
         self.user.email = self.clean_email()
         self.user.save()
 
-        super(FormlessPasswordReset, self).save(domain_override=domain_override,
-                                                subject_template_name=subject_template_name,
-                                                email_template_name=email_template_name,
-                                                use_https=use_https,
-                                                token_generator=token_generator,
-                                                from_email=from_email,
-                                                request=request,
-                                                )
+        super(FormlessPasswordReset, self).save(
+            domain_override=domain_override,
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name,
+            use_https=use_https,
+            token_generator=token_generator,
+            from_email=from_email,
+            request=request,
+        )

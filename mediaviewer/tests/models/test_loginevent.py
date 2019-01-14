@@ -3,17 +3,14 @@ import pytz
 from datetime import datetime
 from django.test import TestCase
 
-from mysite.settings import (TIME_ZONE,
-                             )
+from django.conf import settings
 from mediaviewer.tests import helpers
 from mediaviewer.models.loginevent import LoginEvent
 
 
-@mock.patch(
-    'mediaviewer.models.loginevent.MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS', 3)
 class TestNew(TestCase):
     def setUp(self):
-        self.ref_time = datetime.now(pytz.timezone(TIME_ZONE))
+        self.ref_time = datetime.now(pytz.timezone(settings.TIME_ZONE))
         self.objects_patcher = mock.patch(
                 'mediaviewer.models.loginevent.LoginEvent.objects')
         self.mock_objects = self.objects_patcher.start()
@@ -46,7 +43,8 @@ class TestNew(TestCase):
         self.assertFalse(self.mock_first.called)
 
     def test_more_stored_events(self):
-        self.mock_objects.count.return_value = 4
+        self.mock_objects.count.return_value = (
+            settings.MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS + 1)
         event = LoginEvent.new(self.user)
 
         self.assertEqual(event.user, self.user)

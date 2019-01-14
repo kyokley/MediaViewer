@@ -2,7 +2,7 @@ import mock
 
 from django.test import TestCase
 
-from mysite.settings import EMAIL_FROM_ADDR
+from django.conf import settings
 
 from mediaviewer.utils import (
         getSomewhatUniqueID,
@@ -135,7 +135,7 @@ class TestSendMail(TestCase):
         self.mock_SMTP.assert_called_once_with(
                 'localhost')
         self.mock_SMTP.return_value.sendmail.assert_called_once_with(
-                EMAIL_FROM_ADDR,
+                settings.EMAIL_FROM_ADDR,
                 set([self.to_addr, self.staff_user.email]),
                 self.mock_MIMEMultipart.return_value.as_string.return_value
                 )
@@ -149,28 +149,20 @@ class BaseSMTPServerTestCase(TestCase):
         self.mock_Telnet = Telnet_patcher.start()
         self.addCleanup(Telnet_patcher.stop)
 
-        EMAIL_HOST_patcher = mock.patch(
-                'mediaviewer.utils.EMAIL_HOST',
-                'test_host')
-        EMAIL_HOST_patcher.start()
-        self.addCleanup(EMAIL_HOST_patcher.stop)
+        settings_patcher = mock.patch(
+            'mediaviewer.utils.settings')
+        self.mock_settings = settings_patcher.start()
+        self.addCleanup(settings_patcher.stop)
 
-        EMAIL_PORT_patcher = mock.patch(
-                'mediaviewer.utils.EMAIL_PORT',
-                'test_port')
-        EMAIL_PORT_patcher.start()
-        self.addCleanup(EMAIL_PORT_patcher.stop)
+        self.mock_settings.EMAIL_HOST = 'test_host'
+        self.mock_settings.EMAIL_PORT = 'test_port'
 
 
 class TestCheckSMTPServer(BaseSMTPServerTestCase):
     def setUp(self):
         self.create_mocks()
 
-        BYPASS_SMTPD_CHECK_patcher = mock.patch(
-                'mediaviewer.utils.BYPASS_SMTPD_CHECK',
-                False)
-        BYPASS_SMTPD_CHECK_patcher.start()
-        self.addCleanup(BYPASS_SMTPD_CHECK_patcher.stop)
+        self.mock_settings.BYPASS_SMTPD_CHECK = False
 
     def test_smtpd_check(self):
         expected = None
@@ -187,11 +179,7 @@ class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
     def setUp(self):
         self.create_mocks()
 
-        BYPASS_SMTPD_CHECK_patcher = mock.patch(
-                'mediaviewer.utils.BYPASS_SMTPD_CHECK',
-                True)
-        BYPASS_SMTPD_CHECK_patcher.start()
-        self.addCleanup(BYPASS_SMTPD_CHECK_patcher.stop)
+        self.mock_settings.BYPASS_SMTPD_CHECK = True
 
     def test_bypass_smtpd_check(self):
         expected = None

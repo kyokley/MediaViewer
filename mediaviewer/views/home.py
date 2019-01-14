@@ -7,7 +7,7 @@ from mediaviewer.models.file import File
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.password_reset import check_force_password_change
 from mediaviewer.views.views_utils import setSiteWideContext
-from mysite.settings import DEBUG
+from django.conf import settings
 
 from mediaviewer.log import log
 
@@ -37,7 +37,7 @@ def ajaxrunscraper(request):
         if request.user.is_staff:
             File.inferAllScrapers()
     except Exception as e:
-        if DEBUG:
+        if settings.DEBUG:
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'

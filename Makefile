@@ -35,4 +35,4 @@ down:
 	docker-compose down
 
 static:
-	cd mediaviewer && yarn install && mv node_modules/* static/ && cd -
+	yarn install

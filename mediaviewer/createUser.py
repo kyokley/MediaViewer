@@ -1,8 +1,8 @@
 import sys
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
-
 from mediaviewer.models.usersettings import UserSettings
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
 
 def createUser(name, email, can_download=True):
@@ -18,6 +18,7 @@ def createUser(name, email, can_download=True):
                                can_download=can_download,
                                )
     return newUser
+
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:

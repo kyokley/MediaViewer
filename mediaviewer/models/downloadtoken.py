@@ -3,9 +3,7 @@ from datetime import timedelta
 from datetime import datetime
 import pytz
 from mediaviewer.utils import getSomewhatUniqueID
-from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
-                             TIME_ZONE,
-                             TOKEN_VALIDITY_LENGTH)
+from django.conf import settings as conf_settings
 from mediaviewer.models.message import Message
 
 
@@ -47,8 +45,10 @@ class DownloadToken(models.Model):
     @property
     def isvalid(self):
         # Tokens are only valid for a certain amount of time
-        refDate = self.datecreated + timedelta(hours=TOKEN_VALIDITY_LENGTH)
-        return refDate > datetime.now(pytz.timezone(TIME_ZONE))
+        refDate = self.datecreated + timedelta(
+            hours=conf_settings.TOKEN_VALIDITY_LENGTH)
+        return refDate > datetime.now(pytz.timezone(
+            conf_settings.TIME_ZONE))
 
     @classmethod
     def new(cls,
@@ -63,7 +63,7 @@ class DownloadToken(models.Model):
         dt.ismovie = file.isMovie()
 
         if not datecreated:
-            datecreated = datetime.now(pytz.timezone(TIME_ZONE))
+            datecreated = datetime.now(pytz.timezone(conf_settings.TIME_ZONE))
         dt.datecreated = datecreated
 
         dt.displayname = file.displayName()
@@ -71,7 +71,7 @@ class DownloadToken(models.Model):
         dt.save()
 
         number_of_stored_tokens = cls.objects.count()
-        if number_of_stored_tokens > MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS:
+        if number_of_stored_tokens > conf_settings.MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS:  # noqa
             old_token = cls.objects.order_by('id').first()
             if old_token:
                 old_token.delete()

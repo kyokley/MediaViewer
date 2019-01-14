@@ -1,10 +1,7 @@
 import time
 import os
 from mediaviewer.log import log
-from mysite.settings import (API_KEY,
-                             IMAGE_PATH,
-                             REQUEST_TIMEOUT,
-                             )
+from django.conf import settings
 import requests
 
 
@@ -12,7 +9,7 @@ def getJSONData(url):
     try:
         url = url.replace(' ', '+')
         log.info('Getting json from %s' % (url,))
-        resp = requests.get(url, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(url, timeout=settings.REQUEST_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
         log.debug('Got %s' % (data,))
@@ -65,19 +62,23 @@ class TVDBConfiguration(object):
             log.debug('Failed to set tvdb values')
 
     def _getTVDBConfiguration(self):
-        url = 'https://api.themoviedb.org/3/configuration?api_key=%s' % (API_KEY,)
+        url = 'https://api.themoviedb.org/3/configuration?api_key={}'.format(
+            settings.API_KEY)
         return getJSONData(url)
 
     def _getTVDBGenres(self):
         data = {}
 
-        url = 'https://api.themoviedb.org/3/genre/tv/list?api_key=%s' % (API_KEY,)
+        url = 'https://api.themoviedb.org/3/genre/tv/list?api_key={}'.format(
+            settings.API_KEY)
         resp = getJSONData(url)
         genres = resp['genres']
         for genre in genres:
             data[genre['id']] = genre['name']
 
-        url = 'https://api.themoviedb.org/3/genre/movie/list?api_key=%s' % (API_KEY,)
+        url = (
+            'https://api.themoviedb.org/3/genre/movie/list?api_key={}'.format(
+                settings.API_KEY))
         resp = getJSONData(url)
         genres = resp['genres']
         for genre in genres:
@@ -93,33 +94,43 @@ def searchTVDBByName(name):
     if not tvdbConfig.connected:
         return {}
 
-    url = 'https://api.themoviedb.org/3/search/tv?query=%s&api_key=%s' % (name, API_KEY)
+    url = (
+        'https://api.themoviedb.org/3/search/tv?query={name}&api_key={api_key}'
+        .format(name=name,
+                api_key=settings.API_KEY))
     return getJSONData(url)
 
 
 def getTVDBEpisodeInfo(tvdb_id, season, episode):
-    log.debug('Getting tvdb episode info for %s, season: %s, episode: %s' % (tvdb_id, season, episode))
+    log.debug(
+        f'Getting tvdb episode info for {tvdb_id}, '
+        f'season: {season}, episode: {episode}')
     if not tvdbConfig.connected:
         return {}
 
-    url = 'https://api.themoviedb.org/3/tv/%s/season/%s/episode/%s?api_key=%s' % (tvdb_id, season, episode, API_KEY)
+    url = (
+        'https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={api_key}'  # noqa
+        .format(tvdb_id=tvdb_id,
+                season=season,
+                episode=episode,
+                api_key=settings.API_KEY))
     return getJSONData(url)
 
 
 def saveImageToDisk(path, imgName):
     log.debug('Getting image from %s' % (path,))
     if imgName:
-        exists = os.path.isfile(IMAGE_PATH + imgName)
+        exists = os.path.isfile(settings.IMAGE_PATH + imgName)
         if not exists:
             r = requests.get('{url}{poster_size}{path}'.format(
                 url=tvdbConfig.url,
                 poster_size=tvdbConfig.poster_size,
                 path=path),
                 stream=True,
-                timeout=REQUEST_TIMEOUT)
+                timeout=settings.REQUEST_TIMEOUT)
             r.raise_for_status()
             if r.status_code == 200:
-                with open(IMAGE_PATH + imgName, 'wb') as f:
+                with open(settings.IMAGE_PATH + imgName, 'wb') as f:
                     for chunk in r.iter_content(1024):
                         f.write(chunk)
         else:
@@ -166,16 +177,25 @@ def getDataFromIMDBByPath(refPath):
 def _getDataFromIMDBByID(imdb_id, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (imdb_id,))
 
-    url = 'https://api.themoviedb.org/3/find/%s?api_key=%s&external_source=imdb_id' % (imdb_id, API_KEY)
+    url = (
+        'https://api.themoviedb.org/3/find/{imdb_id}?api_key={api_key}&external_source=imdb_id'  # noqa
+        .format(imdb_id=imdb_id,
+                api_key=settings.API_KEY))
     resp = getJSONData(url)
 
     if resp:
         if not isMovie:
             tmdb_id = resp.get('tv_results')[0]['id']
-            url = 'https://api.themoviedb.org/3/tv/%s?api_key=%s' % (tmdb_id, API_KEY)
+            url = (
+                'https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={api_key}'
+                .format(tmdb_id=tmdb_id,
+                        api_key=settings.API_KEY))
         else:
             tmdb_id = resp.get('movie_results')[0]['id']
-            url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
+            url = (
+                'https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={api_key}'  # noqa
+                .format(tmdb_id=tmdb_id,
+                        api_key=settings.API_KEY))
 
         data = getJSONData(url)
 
@@ -190,9 +210,11 @@ def _getDataFromIMDBBySearchString(searchString, isMovie=True):
     log.debug('Getting data from IMDB using %s' % (searchString,))
 
     if not isMovie:
-        url = 'https://api.themoviedb.org/3/search/tv?query=%s&api_key=%s' % (searchString, API_KEY)
+        url = (
+            f'https://api.themoviedb.org/3/search/tv?query={searchString}&api_key={settings.API_KEY}')  # noqa
     else:
-        url = 'https://api.themoviedb.org/3/search/movie?query=%s&api_key=%s' % (searchString, API_KEY)
+        url = (
+            f'https://api.themoviedb.org/3/search/movie?query={searchString}&api_key={settings.API_KEY}') # noqa
 
     data = getJSONData(url)
     data = (data['results'][0]
@@ -211,19 +233,19 @@ def getCastData(tmdb_id, season=None, episode=None, isMovie=True):
 
     if not isMovie:
         if episode and season:
-            url = 'https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={api_key}'.format(
+            url = 'https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={api_key}'.format(  # noqa
                     season=season,
                     episode=episode,
                     tmdb_id=tmdb_id,
-                    api_key=API_KEY)
+                    api_key=settings.API_KEY)
         else:
-            url = 'https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={api_key}'.format(
+            url = 'https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={api_key}'.format(  # noqa
                     tmdb_id=tmdb_id,
-                    api_key=API_KEY)
+                    api_key=settings.API_KEY)
     else:
-        url = 'https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={api_key}'.format(
+        url = 'https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={api_key}'.format(  # noqa
                 tmdb_id=tmdb_id,
-                api_key=API_KEY)
+                api_key=settings.API_KEY)
 
     return getJSONData(url)
 
@@ -232,9 +254,15 @@ def getExtendedInfo(tmdb_id, isMovie=True):
     log.debug('Getting IMDB rating for tmdb_id = %s' % tmdb_id)
 
     if not isMovie:
-        url = 'https://api.themoviedb.org/3/tv/%s/external_ids?api_key=%s' % (tmdb_id, API_KEY)
+        url = (
+            'https://api.themoviedb.org/3/tv/{tmdb_id}/external_ids?api_key={api_key}'  # noqa
+            .format(tmdb_id=tmdb_id,
+                    api_key=settings.API_KEY))
     else:
-        url = 'https://api.themoviedb.org/3/movie/%s?api_key=%s' % (tmdb_id, API_KEY)
+        url = (
+            'https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={api_key}'  # noqa
+            .format(tmdb_id=tmdb_id,
+                    api_key=settings.API_KEY))
 
     data = getJSONData(url)
     return data

@@ -5,9 +5,7 @@ from django.contrib.auth.models import (User,
 from django.contrib.auth import authenticate
 from django.db import transaction
 from django.db.utils import IntegrityError
-from mysite.settings import (TEMPORARY_PASSWORD,
-                             TIME_ZONE,
-                             )
+from django.conf import settings
 from mediaviewer.forms import FormlessPasswordReset
 from datetime import datetime
 import pytz
@@ -28,7 +26,7 @@ class BadEmail(Exception):
     pass
 
 
-EMAIL_REGEX = re.compile('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+EMAIL_REGEX = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
 
 
 class UserSettings(models.Model):
@@ -113,7 +111,7 @@ class UserSettings(models.Model):
         newUser.email = email
         newUser.is_staff = is_staff
         newUser.is_superuser = is_superuser
-        newUser.set_password(TEMPORARY_PASSWORD)
+        newUser.set_password(settings.TEMPORARY_PASSWORD)
         newUser.save()
 
         if group:
@@ -124,7 +122,8 @@ class UserSettings(models.Model):
         mv_group.save()
 
         newSettings = cls()
-        newSettings.datecreated = datetime.now(pytz.timezone(TIME_ZONE))
+        newSettings.datecreated = datetime.now(
+            pytz.timezone(settings.TIME_ZONE))
         newSettings.dateedited = newSettings.datecreated
         newSettings.user = newUser
         newSettings.ip_format = ip_format
@@ -139,7 +138,7 @@ class UserSettings(models.Model):
             fake_form = FormlessPasswordReset(newUser, email)
             fake_form.save(
                 email_template_name='mediaviewer/password_create_email.html',
-                subject_template_name='mediaviewer/password_create_subject.txt',
+                subject_template_name='mediaviewer/password_create_subject.txt',  # noqa
             )
 
         return newUser

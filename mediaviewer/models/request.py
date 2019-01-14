@@ -1,5 +1,5 @@
 import pytz
-from mysite.settings import TIME_ZONE
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -39,7 +39,7 @@ class Request(models.Model):
         if not mostRecentVote:
             return True
 
-        currentTime = datetime.now(pytz.timezone(TIME_ZONE))
+        currentTime = datetime.now(pytz.timezone(settings.TIME_ZONE))
         mostRecentVoteTime = mostRecentVote.datecreated
         refTime = mostRecentVoteTime + relativedelta(days=1)
 

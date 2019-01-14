@@ -10,7 +10,7 @@ from binascii import hexlify
 from functools import wraps
 
 from django.conf import settings
-from django.contrib.auth import get_user
+from django.contrib.auth import get_user_model
 
 import os
 import telnetlib  # nosec
@@ -110,7 +110,7 @@ def sendMail(
         msg.attach(part)
 
     # BCC staff members by adding them to recipient list
-    staff = get_user().objects.filter(is_staff=True)
+    staff = get_user_model().objects.filter(is_staff=True)
     for user in staff:
         if user.email:
             to_addr.add(user.email)

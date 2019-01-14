@@ -10,7 +10,7 @@ from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.views.password_reset import check_force_password_change
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from mysite.settings import DEBUG
+from django.conf import settings
 from mediaviewer.utils import logAccessInfo
 
 import json
@@ -124,7 +124,7 @@ def ajaxdone(request):
                         requestObj.name),
                     level=Message.SUCCESS)
     except Exception as e:
-        if DEBUG:
+        if settings.DEBUG:
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'
@@ -167,7 +167,7 @@ def ajaxgiveup(request):
                         requestObj.name),
                     level=Message.ERROR)
     except Exception as e:
-        if DEBUG:
+        if settings.DEBUG:
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'

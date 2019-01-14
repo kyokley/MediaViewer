@@ -1,4 +1,3 @@
-import pytz
 import mock
 
 from django.test import TestCase
@@ -7,10 +6,7 @@ from mediaviewer.tests import helpers
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
-from mysite.settings import (MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS,
-                             TOKEN_VALIDITY_LENGTH,
-                             TIME_ZONE)
-from datetime import datetime, timedelta
+from django.conf import settings
 
 
 class TestDownloadToken(TestCase):
@@ -46,7 +42,7 @@ class TestDownloadToken(TestCase):
 
     def test_new(self):
         self.mock_objects.count.return_value = (
-                MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS + 1)
+                settings.MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS + 1)
         mock_ordered_query = mock.MagicMock()
         old_token = mock.create_autospec(DownloadToken)
         mock_ordered_query.first.return_value = old_token
@@ -77,6 +73,6 @@ class TestDownloadToken(TestCase):
                 # self.user,
                 # self.file,
                 # datecreated=datetime.now(
-                    # pytz.timezone(TIME_ZONE)) - timedelta(
-                        # hours=TOKEN_VALIDITY_LENGTH + 1))
+                    # pytz.timezone(settings.TIME_ZONE)) - timedelta(
+                        # hours=settings.TOKEN_VALIDITY_LENGTH + 1))
         # self.assertFalse(dt.isvalid)

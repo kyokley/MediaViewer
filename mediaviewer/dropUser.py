@@ -1,8 +1,9 @@
 import sys
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
 from django.contrib.auth.models import User
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
 
 def dropUser(username):
@@ -17,9 +18,9 @@ def dropUser(username):
     if user:
         user.delete()
 
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         dropUser(sys.argv[1])
     else:
         print('Invalid number of arguments')
-

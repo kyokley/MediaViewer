@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from mediaviewer.models.loginevent import LoginEvent
 from django.http import HttpResponseRedirect
-from mysite.settings import DEBUG
+from django.conf import settings as conf_settings
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.models.usersettings import (ImproperLogin,
                                              case_insensitive_authenticate,
@@ -76,7 +76,7 @@ def signin(request):
         except ImproperLogin as e:
             context['error_message'] = str(e)
         except Exception as e:
-            if DEBUG:
+            if conf_settings.DEBUG:
                 context['error_message'] = str(e)
             else:
                 context['error_message'] = 'Incorrect username or password!'

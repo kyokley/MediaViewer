@@ -2,7 +2,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import url, include
 from rest_framework import routers
 from django.shortcuts import redirect
-from mysite.settings import IS_SYNCING
+from django.conf import settings as conf_settings
 
 from mediaviewer.views import (home,
                                files,
@@ -108,7 +108,7 @@ urlpatterns = [
         name='change_password_submit'),
     ]
 
-if not IS_SYNCING:
+if not conf_settings.IS_SYNCING:
     from mediaviewer.api import (viewset,
                                  path_viewset,
                                  file_viewset)

@@ -18,14 +18,17 @@ try:
 except IOError:
     try:
         import random
-        SECRET_KEY = ''.join([random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz'
-                                                           'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-                                                           '0123456789!@#$%^&*(-_=+)')
-                                for i in range(50)])
+        SECRET_KEY = ''.join(
+            [random.SystemRandom().choice('abcdefghijklmnopqrstuvwxyz'
+                                          'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                                          '0123456789!@#$%^&*(-_=+)')
+             for i in range(50)])
         with open(SECRET_FILE, 'w') as secret_file:
             secret_file.write(SECRET_KEY)
     except IOError:
-        Exception('Please create a %s file with random characters to generate your secret key!' % SECRET_FILE)
+        Exception(
+            f'Please create a {SECRET_FILE} file with random characters '
+            f'to generate your secret key!')
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -41,12 +44,12 @@ MANAGERS = ADMINS
 DATABASES = {
     # Testing settings!!!
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'dbname',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'dbname',
         'USER': 'db_user',
         'PASSWORD': 'db_password',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'HOST': '',
+        'PORT': '',
     },
 }
 
@@ -165,12 +168,14 @@ NOSE_ARGS = [
 ]
 
 REST_FRAMEWORK = {
-        'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+        'DEFAULT_PERMISSION_CLASSES': (
+            'rest_framework.permissions.IsAdminUser',),
         'DEFAULT_AUTHENTICATION_CLASSES': (
             'rest_framework.authentication.SessionAuthentication',
             'rest_framework.authentication.BasicAuthentication',
             ),
-        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+        'DEFAULT_PAGINATION_CLASS': (
+            'rest_framework.pagination.PageNumberPagination'),
         'PAGE_SIZE': 30,
 }
 
@@ -215,16 +220,19 @@ CACHES = {
     }
 }
 
-SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+SYSTEM_BASE_PATH = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__), '..'))
 LOG_DIR = os.path.join(SYSTEM_BASE_PATH, 'logs')
 LOG_FILE_NAME = os.path.join(LOG_DIR, 'mediaviewerLog')
-loglevel = logging.DEBUG
+LOG_LEVEL = logging.DEBUG
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(SYSTEM_BASE_PATH, 'mediaviewer/templates/mediaviewer'),
+            os.path.join(SYSTEM_BASE_PATH,
+                         'mediaviewer/templates/mediaviewer'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -255,8 +263,10 @@ TEMPLATES = [
                         # )
 
 WAITER_HEAD = 'http://'
-LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1/waiter/dir/'
-LOCAL_WAITER_IP_FORMAT_TVSHOWS = BANGUP_WAITER_IP_FORMAT_TVSHOWS = '127.0.0.1/waiter/file/'
+LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = (
+    '127.0.0.1/waiter/dir/')
+LOCAL_WAITER_IP_FORMAT_TVSHOWS = BANGUP_WAITER_IP_FORMAT_TVSHOWS = (
+    '127.0.0.1/waiter/file/')
 
 WAITER_STATUS_URL = 'http://127.0.0.1/waiter/status'
 

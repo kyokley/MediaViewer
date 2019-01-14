@@ -351,11 +351,12 @@ class TestDownloadLink(TestCase):
         self.BANGUP_IP_patcher.start()
         self.addCleanup(self.BANGUP_IP_patcher.stop)
 
-        self.WAITER_HEAD_patcher = mock.patch(
-                'mediaviewer.models.file.WAITER_HEAD',
-                'test_local_ip')
-        self.WAITER_HEAD_patcher.start()
-        self.addCleanup(self.WAITER_HEAD_patcher.stop)
+        conf_settings_patcher = mock.patch(
+            'mediaviewer.models.file.conf_settings')
+        self.mock_conf_settings = conf_settings_patcher.start()
+        self.addCleanup(conf_settings_patcher.stop)
+
+        self.mock_conf_settings.WAITER_HEAD = 'test_local_ip'
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]

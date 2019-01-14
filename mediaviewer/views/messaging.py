@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.models.message import Message
 from django.shortcuts import render
-from mysite.settings import DEBUG
+from django.conf import settings
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.password_reset import check_force_password_change
 
@@ -48,7 +48,7 @@ def ajaxclosemessage(request):
             message.sent = True
             message.save()
     except Exception as e:
-        if DEBUG:
+        if settings.DEBUG:
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'

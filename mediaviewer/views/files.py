@@ -15,7 +15,7 @@ from mediaviewer.models.path import Path
 from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
-from mysite.settings import DEBUG
+from django.conf import settings
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.password_reset import check_force_password_change
 
@@ -189,7 +189,7 @@ def ajaxreport(request):
     except Http404:
         raise
     except Exception as e:
-        if DEBUG:
+        if settings.DEBUG:
             response['errmsg'] = str(e)
         else:
             response['errmsg'] = 'An error has occurred'

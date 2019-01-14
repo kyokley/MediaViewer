@@ -12,12 +12,7 @@ from mediaviewer.models.genre import Genre
 from mediaviewer.models.message import Message
 from datetime import datetime as dateObj
 
-from mysite.settings import (WAITER_HEAD,
-                             LOCAL_WAITER_IP_FORMAT_MOVIES,
-                             LOCAL_WAITER_IP_FORMAT_TVSHOWS,
-                             BANGUP_WAITER_IP_FORMAT_MOVIES,
-                             BANGUP_WAITER_IP_FORMAT_TVSHOWS,
-                             )
+from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import (LOCAL_IP,
                                              BANGUP_IP,
                                              UserSettings)
@@ -151,22 +146,26 @@ class File(models.Model):
         settings = user.settings()
         if not settings or settings.ip_format == LOCAL_IP:
             if self.isMovie():
-                waiter_server = '%s%s%s/' % (WAITER_HEAD,
-                                             LOCAL_WAITER_IP_FORMAT_MOVIES,
-                                             guid)
+                waiter_server = '%s%s%s/' % (
+                    conf_settings.WAITER_HEAD,
+                    conf_settings.LOCAL_WAITER_IP_FORMAT_MOVIES,
+                    guid)
             else:
-                waiter_server = '%s%s%s/' % (WAITER_HEAD,
-                                             LOCAL_WAITER_IP_FORMAT_TVSHOWS,
-                                             guid)
+                waiter_server = '%s%s%s/' % (
+                    conf_settings.WAITER_HEAD,
+                    conf_settings.LOCAL_WAITER_IP_FORMAT_TVSHOWS,
+                    guid)
         elif settings and settings.ip_format == BANGUP_IP:
             if self.isMovie():
-                waiter_server = '%s%s%s/' % (WAITER_HEAD,
-                                             BANGUP_WAITER_IP_FORMAT_MOVIES,
-                                             guid)
+                waiter_server = '%s%s%s/' % (
+                    conf_settings.WAITER_HEAD,
+                    conf_settings.BANGUP_WAITER_IP_FORMAT_MOVIES,
+                    guid)
             else:
-                waiter_server = '%s%s%s/' % (WAITER_HEAD,
-                                             BANGUP_WAITER_IP_FORMAT_TVSHOWS,
-                                             guid)
+                waiter_server = '%s%s%s/' % (
+                    conf_settings.WAITER_HEAD,
+                    conf_settings.BANGUP_WAITER_IP_FORMAT_TVSHOWS,
+                    guid)
 
         return waiter_server
 
@@ -361,7 +360,7 @@ class File(models.Model):
             name = self.getScrapedName()
             season = self.getScrapedSeason()
             episode = self.getScrapedEpisode()
-            sFail = re.compile('\s[sS]$')
+            sFail = re.compile(r'\s[sS]$')
             if (name and
                     name != self.filename and
                     not sFail.findall(name) and

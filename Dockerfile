@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
         g++ \
         git \
         apt-transport-https \
+        ncurses-dev \
         make
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
