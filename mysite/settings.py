@@ -111,22 +111,15 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # 'djangobower.finders.BowerFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 MIDDLEWARE = (
-    #'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.cache.FetchFromCacheMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'mediaviewer.middleware.AutoLogout',
-    #'axes.middleware.FailedLoginMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
@@ -152,9 +145,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'debug_toolbar',
     'widget_tweaks',
-     #'django_memcached',
     'rest_framework',
-    # 'djangobower',
     'mediaviewer',
     'mediaviewer.models',
     'mediaviewer.views',
@@ -251,17 +242,6 @@ TEMPLATES = [
     },
 ]
 
-# BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
-# BOWER_INSTALLED_APPS = ('jquery',
-                        # 'bootstrap',
-                        # 'datatables.net',
-                        # 'datatables.net-bs',
-                        # 'datatables.net-responsive',
-                        # 'datatables.net-responsive-bs',
-                        # 'bootswatch-dist#slate',
-                        # 'https://github.com/viralpatel/jquery.shorten.git',
-                        # )
-
 WAITER_HEAD = 'http://'
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = (
     '127.0.0.1/waiter/dir/')
@@ -292,9 +272,8 @@ EMAIL_FROM_ADDR = DEFAULT_FROM_EMAIL = 'testing@example.com'
 BYPASS_SMTPD_CHECK = False
 
 MINIMUM_PASSWORD_LENGTH = 6
-TEMPORARY_PASSWORD = 'password' # Throwaway password set on user creation
 
 MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
-TOKEN_VALIDITY_LENGTH = 3 # In hours
+TOKEN_VALIDITY_LENGTH = 3  # In hours
