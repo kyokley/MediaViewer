@@ -22,7 +22,7 @@ attach:
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
 shell: up
-	docker-compose run --rm mediaviewer /bin/bash
+	docker-compose exec mediaviewer /bin/bash
 
 tests: build-dev
 	./run-tests.sh

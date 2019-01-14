@@ -7,7 +7,6 @@ ENV PYTHONUNBUFFERED 1
 
 ARG REQS=--no-dev
 
-
 # Install required packages and remove the apt packages cache when done.
 RUN apt-get update && apt-get install -y \
         curl \
@@ -21,7 +20,9 @@ RUN apt-get update && apt-get install -y \
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
-RUN apt-get update && apt-get install -y yarn
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+
+RUN apt-get update && apt-get install -y yarn nodejs
 
 RUN python -m venv /venv
 
@@ -30,6 +31,8 @@ RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
+COPY package.json /node/package.json
+RUN cd /node && yarn install
 
 COPY poetry.lock /code/poetry.lock
 COPY pyproject.toml /code/pyproject.toml

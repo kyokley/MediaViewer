@@ -31,6 +31,10 @@ MIDDLEWARE += (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
+STATICFILES_DIRS += (
+    '/node/node_modules',
+)
+
 WAITER_STATUS_URL = 'http://127.0.0.1:5000/waiter/status'
 WAITER_HEAD = 'http://'
 BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1:5000/waiter/dir/'
