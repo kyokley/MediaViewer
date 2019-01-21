@@ -11,9 +11,10 @@ from mediaviewer.models.path import Path
 
 from mediaviewer.log import log
 
+
 class PathViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
-    queryset = Path.objects.all()
+    queryset = Path.objects.all().order_by('id')
     serializer_class = PathSerializer
 
     def get_queryset(self):
@@ -23,7 +24,9 @@ class PathViewSet(viewsets.ModelViewSet):
         if localpath and remotepath:
             queryset = queryset.filter(localpathstr=localpath)
             queryset = queryset.filter(remotepathstr=remotepath)
-            log.debug('Attempting to return path with local = %s and remote = %s' % (localpath, remotepath))
+            log.debug(
+                'Attempting to return path with local = %s and remote = %s' % (
+                    localpath, remotepath))
         return queryset
 
     def retrieve(self, request, pk=None):
@@ -44,8 +47,8 @@ class PathViewSet(viewsets.ModelViewSet):
         data = request.data
 
         newPath = Path.objects.filter(localpathstr=data['localpath']
-                    ).filter(remotepathstr=data['remotepath']
-                        ).first()
+                                      ).filter(remotepathstr=data['remotepath']
+                                               ).first()
 
         if not newPath:
             try:
@@ -60,7 +63,8 @@ class PathViewSet(viewsets.ModelViewSet):
                                 status=RESTstatus.HTTP_201_CREATED,
                                 headers=headers)
         else:
-            log.info('Path for %s already exists. Skipping.' % newPath.localpathstr)
+            log.info(
+                'Path for %s already exists. Skipping.' % newPath.localpathstr)
             serializer = PathSerializer(newPath)
             headers = self.get_success_headers(serializer.data)
 
@@ -68,8 +72,9 @@ class PathViewSet(viewsets.ModelViewSet):
                                 status=RESTstatus.HTTP_200_OK,
                                 headers=headers)
 
+
 class MoviePathViewSet(PathViewSet):
-    queryset = Path.objects.filter(is_movie=True)
+    queryset = Path.objects.filter(is_movie=True).order_by('id')
     serializer_class = MoviePathSerializer
 
     def create_path_obj(self, data):
@@ -77,8 +82,9 @@ class MoviePathViewSet(PathViewSet):
             raise Exception('Path must be of movie type')
         return super(MoviePathViewSet, self).create_path_obj(data)
 
+
 class TvPathViewSet(PathViewSet):
-    queryset = Path.objects.filter(is_movie=False)
+    queryset = Path.objects.filter(is_movie=False).order_by('id')
     serializer_class = TvPathSerializer
 
     def create_path_obj(self, data):
