@@ -28,6 +28,7 @@ RUN python -m venv /venv
 
 RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
+RUN echo 'export PATH=$PATH:/root/.poetry/bin' >> /root/.bashrc
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 

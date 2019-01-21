@@ -6,33 +6,33 @@ help: ## This help
 list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
-build:
+build: ## Build prod-like container
 	docker-compose build mediaviewer
 
-build-dev:
+build-dev: ## Build dev container
 	docker-compose build --build-arg REQS= mediaviewer
 
-up:
+up: ## Bring up containers and daemonize
 	docker-compose up -d
 
-up-no-daemon:
+up-no-daemon: ## Bring up all containers
 	docker-compose up
 
-attach:
+attach: ## Attach to a running mediaviewer container
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
-shell: up
+shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec mediaviewer /bin/bash
 
-tests: build-dev
+tests: build-dev ## Run tests
 	./run-tests.sh
 
-stop-all-but-db:
+stop-all-but-db: ## Bring all containers down except postgres
 	docker-compose down
 	docker-compose up -d postgres
 
-down:
+down: ## Bring all containers down
 	docker-compose down
 
-static:
+static: ## Install static files
 	yarn install
