@@ -24,6 +24,9 @@ attach: ## Attach to a running mediaviewer container
 shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec mediaviewer /bin/bash
 
+db-shell: up ## Open a shell in a mediaviewer container
+	docker-compose exec postgres /bin/bash
+
 tests: build-dev ## Run tests
 	./run-tests.sh
 
