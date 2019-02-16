@@ -26,14 +26,12 @@ RUN apt-get update && apt-get install -y yarn nodejs
 
 RUN python -m venv /venv
 
-RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 RUN echo 'export PATH=$PATH:/root/.poetry/bin' >> /root/.bashrc
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
 COPY package.json /node/package.json
-RUN cd /node && yarn install
 
 COPY poetry.lock /code/poetry.lock
 COPY pyproject.toml /code/pyproject.toml
@@ -41,6 +39,8 @@ COPY pyproject.toml /code/pyproject.toml
 RUN /bin/bash -c "source /venv/bin/activate && \
                   cd /code && \
                   /root/.poetry/bin/poetry install -vvv ${REQS}"
+
+RUN cd /node && yarn install && rsync -ruv /node/node_modules/* /code/static/
 
 COPY . /code
 WORKDIR /code
