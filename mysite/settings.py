@@ -143,20 +143,12 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
-    'debug_toolbar',
     'widget_tweaks',
     'rest_framework',
     'mediaviewer',
     'mediaviewer.models',
     'mediaviewer.views',
 )
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-NOSE_ARGS = [
-        '--with-coverage',
-        '--cover-package=mediaviewer',
-]
 
 REST_FRAMEWORK = {
         'DEFAULT_PERMISSION_CLASSES': (
