@@ -12,7 +12,7 @@ class WaiterStatus(models.Model):
         app_label = 'mediaviewer'
         db_table = 'waiterstatus'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s status: %s failureReason: %s date: %s' % (
                 self.id,
                 self.status,

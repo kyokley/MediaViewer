@@ -244,7 +244,7 @@ class File(models.Model):
         if not self.next():
             Message.clearLastWatchedMessage(user)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s f: %s' % (self.id, self.fileName)
 
     def url(self):

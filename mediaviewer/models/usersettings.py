@@ -71,7 +71,7 @@ class UserSettings(models.Model):
         app_label = 'mediaviewer'
         db_table = 'usersettings'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s u: %s ip: %s' % (
             self.id,
             self.user.username,

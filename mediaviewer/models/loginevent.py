@@ -16,7 +16,7 @@ class LoginEvent(models.Model):
         app_label = 'mediaviewer'
         db_table = 'loginevent'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s u: %s date: %s' % (self.id,
                                           self.user.username,
                                           self.datecreated)

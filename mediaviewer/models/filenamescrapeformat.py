@@ -29,7 +29,7 @@ class FilenameScrapeFormat(models.Model):
         app_label = 'mediaviewer'
         db_table = 'filenamescrapeformat'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s n: %s s: %s e: %s subPeriods: %s useSearchTerm: %s' % (
             self.id,
             self.nameRegex,

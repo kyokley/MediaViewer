@@ -92,7 +92,7 @@ class Path(models.Model):
         return (self.override_display_name or
                 self.shortName.replace('.', ' ').title())
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s r: %s l: %s' % (self.id,
                                        self.remotePath,
                                        self.localPath)

@@ -28,6 +28,6 @@ class DataTransmission(models.Model):
     def errors(self):
         return self.error_set.all()
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s d: %s b: %s' % (self.id, self.date, self.transferred)
 

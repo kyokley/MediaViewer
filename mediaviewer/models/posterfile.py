@@ -53,7 +53,7 @@ class PosterFile(models.Model):
         app_label = 'mediaviewer'
         db_table = 'posterfile'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s f: %s i: %s' % (
                 self.id,
                 (self.file and

@@ -22,7 +22,7 @@ class Request(models.Model):
         app_label = 'mediaviewer'
         db_table = 'request'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s r: %s u: %s d: %s' % (
                 self.id,
                 self.name,
@@ -97,7 +97,7 @@ class RequestVote(models.Model):
         app_label = 'mediaviewer'
         db_table = 'requestvote'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s r: %s u: %s d: %s' % (
                 self.id,
                 self.request.name,

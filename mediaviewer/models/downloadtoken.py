@@ -36,7 +36,7 @@ class DownloadToken(models.Model):
         app_label = 'mediaviewer'
         db_table = 'downloadtoken'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s f: %s p: %s d: %s' % (self.id,
                                              self.filename,
                                              self.path,

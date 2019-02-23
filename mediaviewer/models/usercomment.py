@@ -25,7 +25,7 @@ class UserComment(models.Model):
         app_label = 'mediaviewer'
         db_table = 'usercomment'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s f: %s u: %s' % (self.id, self.file.id, self.user.id)
 
     @classmethod

@@ -17,7 +17,7 @@ class SiteGreeting(models.Model):
         app_label = 'mediaviewer'
         db_table = 'sitegreeting'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s g: %s\nu: %s\nd: %s' % (self.id,
                                                self.greeting,
                                                self.user.id,

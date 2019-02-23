@@ -11,7 +11,7 @@ class Genre(models.Model):
         app_label = 'mediaviewer'
         db_table = 'genre'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'g: %s' % (self.genre,)
 
     @classmethod

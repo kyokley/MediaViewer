@@ -40,5 +40,5 @@ class Error(models.Model):
     def date(self):
         return self.datecreated
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s e: %s d: %s' % (self.id, self.errorStr, self.date)

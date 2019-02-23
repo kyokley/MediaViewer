@@ -51,7 +51,7 @@ class Message(models.Model):
         app_label = 'mediaviewer'
         db_table = 'message'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'id: %s body: %s datecreated: %s sent: %s' % (
                 self.id,
                 self.body,
