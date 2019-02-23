@@ -119,11 +119,17 @@ def sendMail(
             to_addr.add(user.email)
 
     if use_tls:
-        smtp = smtplib.SMTP_SSL(host=server,
-                                port=port)
+        smtp = smtplib.SMTP(host=server,
+                            port=port)
+        smtp.ehlo()
+        smtp.starttls()
     else:
         smtp = smtplib.SMTP(host=server,
                             port=port)
+
+    if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
+        smtp.login(settings.EMAIL_HOST_USER,
+                   settings.EMAIL_HOST_PASSWORD)
 
     smtp.sendmail(from_addr, to_addr, msg.as_string())
     smtp.close()
