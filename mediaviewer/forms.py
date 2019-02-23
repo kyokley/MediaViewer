@@ -55,16 +55,6 @@ def validate_reset_user_password(user,
             f'{conf_settings.MINIMUM_PASSWORD_LENGTH} characters long.')
 
 
-def _is_email_unique(val):
-    return not User.objects.filter(email__iexact=val).exists()
-
-
-def validate_email(email):
-    if not _is_email_unique(email):
-        raise InvalidEmailException(
-            'Email already exists on system. Please try another.')
-
-
 def change_user_password(user,
                          old_password,
                          new_password,
@@ -176,7 +166,6 @@ class FormlessPasswordReset(PasswordResetFormWithBCC):
     def clean_email(self):
         email = self.data['email']
         try:
-            validate_email(email)
             self.cleaned_data['email'] = email
         except InvalidEmailException as e:
             raise forms.ValidationError(str(e),
