@@ -84,6 +84,7 @@ def sendMail(
         files=None,
         server=settings.EMAIL_HOST,
         port=settings.EMAIL_PORT,
+        use_tls=settings.EMAIL_USE_TLS,
 ):
     if not isinstance(to_addr, list):
         to_addr = set([to_addr])
@@ -117,8 +118,13 @@ def sendMail(
         if user.email:
             to_addr.add(user.email)
 
-    smtp = smtplib.SMTP(host=server,
-                        port=port)
+    if use_tls:
+        smtp = smtplib.SMTP_SSL(host=server,
+                                port=port)
+    else:
+        smtp = smtplib.SMTP(host=server,
+                            port=port)
+
     smtp.sendmail(from_addr, to_addr, msg.as_string())
     smtp.close()
 

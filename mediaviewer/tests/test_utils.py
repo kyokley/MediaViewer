@@ -133,8 +133,8 @@ class TestSendMail(TestCase):
 
         self.assertEqual(expected, actual)
         self.mock_SMTP.assert_called_once_with(
-            host='localhost',
-            port=1025,
+            host=settings.EMAIL_HOST,
+            port=settings.EMAIL_PORT,
         )
         self.mock_SMTP.return_value.sendmail.assert_called_once_with(
                 settings.EMAIL_FROM_ADDR,
