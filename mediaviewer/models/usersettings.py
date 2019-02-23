@@ -111,7 +111,7 @@ class UserSettings(models.Model):
         newUser.email = email
         newUser.is_staff = is_staff
         newUser.is_superuser = is_superuser
-        newUser.set_password(None)
+        newUser.set_password(User.objects.make_random_password())
         newUser.save()
 
         if group:
