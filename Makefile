@@ -21,10 +21,10 @@ up-no-daemon: ## Bring up all containers
 attach: ## Attach to a running mediaviewer container
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
-shell: up ## Open a shell in a mediaviewer container
+shell: build-dev up ## Open a shell in a mediaviewer container
 	docker-compose exec mediaviewer /bin/bash
 
-db-shell: up ## Open a shell in a mediaviewer container
+db-shell: build-dev up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
 tests: build-dev ## Run tests
@@ -39,3 +39,6 @@ down: ## Bring all containers down
 
 static: ## Install static files
 	yarn install
+
+push: build ## Push image to docker hub
+	docker push kyokley/mediaviewer
