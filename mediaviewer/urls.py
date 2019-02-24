@@ -3,6 +3,11 @@ from django.conf.urls import url, include
 from rest_framework import routers
 from django.shortcuts import redirect
 from django.conf import settings as conf_settings
+from django.urls import reverse_lazy
+from mediaviewer.forms import (MVSetPasswordForm,
+                               MVPasswordChangeForm,
+                               PasswordResetFormWithBCC,
+                               )
 
 from mediaviewer.views import (home,
                                files,
@@ -18,6 +23,13 @@ from mediaviewer.views import (home,
                                waiter_display,
                                ajax,
                                )
+from django.contrib.auth.views import (PasswordResetView,
+                                       PasswordResetConfirmView,
+                                       PasswordResetDoneView,
+                                       PasswordResetCompleteView,
+                                       PasswordChangeView,
+                                       PasswordChangeDoneView,
+                                       )
 
 router = routers.DefaultRouter()
 
@@ -86,25 +98,54 @@ urlpatterns = [
         name='ajaxgenres'),
 
     url(r'^user/reset/$',
-        password_reset.reset,
+        PasswordResetView.as_view(
+            template_name='mediaviewer/password_reset_form.html',
+            email_template_name='mediaviewer/password_reset_email.html',
+            subject_template_name='mediaviewer/password_reset_subject.txt',
+            success_url=reverse_lazy('mediaviewer:password_reset_done'),
+            form_class=PasswordResetFormWithBCC,
+        ),
         name='password_reset'),
+
     url(r'^user/reset/done$',
-        password_reset.reset_done,
+        PasswordResetDoneView.as_view(
+            template_name='mediaviewer/password_reset_done.html',
+        ),
         name='password_reset_done'),
+
     url(r'^user/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        password_reset.reset_confirm,
+        PasswordResetConfirmView.as_view(
+            template_name='mediaviewer/password_reset_confirm.html',
+            form_class=MVSetPasswordForm,
+            success_url=reverse_lazy('mediaviewer:password_reset_complete'),
+        ),
         name='password_reset_confirm'),
+
     url(r'^user/create/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        password_reset.create_new_password,
+        PasswordResetConfirmView.as_view(
+            template_name='mediaviewer/password_create_confirm.html',
+            form_class=MVSetPasswordForm,
+            success_url=reverse_lazy('mediaviewer:password_reset_complete')),
         name='password_create_confirm'),
+
     url(r'^user/reset/complete$',
-        password_reset.reset_complete,
+        PasswordResetCompleteView.as_view(
+            template_name='mediaviewer/password_reset_complete.html',
+        ),
         name='password_reset_complete'),
+
     url(r'^user/change_password/$',
-        password_reset.change_password,
+        PasswordChangeView.as_view(
+            template_name='mediaviewer/change_password.html',
+            success_url=reverse_lazy('mediaviewer:change_password_submit'),
+            form_class=MVPasswordChangeForm,
+            ),
         name='change_password'),
+
     url(r'^user/change_password_submit/$',
-        password_reset.change_password_submit,
+        PasswordChangeDoneView.as_view(
+            template_name='mediaviewer/change_password_submit.html',
+            ),
         name='change_password_submit'),
     ]
 

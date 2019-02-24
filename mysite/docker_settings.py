@@ -55,3 +55,5 @@ SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 os.environ['HTTPS'] = 'off'
 os.environ['wsgi.url_scheme'] = 'http'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
