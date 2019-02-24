@@ -24,7 +24,8 @@ def reset_confirm(request, uidb64=None, token=None):
             uidb64=uidb64,
             token=token,
             set_password_form=MVSetPasswordForm,
-            post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
+            post_reset_redirect=reverse('mediaviewer:password_reset_complete')
+    ).as_view()
 
 
 def reset(request):
@@ -43,21 +44,21 @@ def reset(request):
             subject_template_name='mediaviewer/password_reset_subject.txt',
             post_reset_redirect=reverse('mediaviewer:password_reset_done'),
             password_reset_form=PasswordResetFormWithBCC,
-            )
+            ).as_view()
 
 
 def reset_done(request):
     return PasswordResetDoneView(
             request,
             template_name='mediaviewer/password_reset_done.html',
-            )
+            ).as_view()
 
 
 def reset_complete(request):
     return PasswordResetCompleteView(
             request,
             template_name='mediaviewer/password_reset_complete.html',
-            )
+            ).as_view()
 
 
 def create_new_password(request, uidb64=None, token=None):
@@ -67,7 +68,8 @@ def create_new_password(request, uidb64=None, token=None):
             uidb64=uidb64,
             token=token,
             set_password_form=MVSetPasswordForm,
-            post_reset_redirect=reverse('mediaviewer:password_reset_complete'))
+            post_reset_redirect=reverse('mediaviewer:password_reset_complete')
+    ).as_view()
 
 
 def change_password(request):
@@ -80,7 +82,7 @@ def change_password(request):
             post_change_redirect=reverse('mediaviewer:change_password_submit'),
             password_change_form=MVPasswordChangeForm,
             extra_context=context,
-            )
+            ).as_view()
 
 
 def check_force_password_change(func):
@@ -106,4 +108,4 @@ def change_password_submit(request):
             request,
             template_name='mediaviewer/change_password_submit.html',
             extra_context=context,
-            )
+            ).as_view()

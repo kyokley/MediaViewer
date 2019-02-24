@@ -36,7 +36,9 @@ class TestResetConfirm(TestCase):
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_PasswordResetConfirmView.return_value
+        expected = (
+            self.mock_PasswordResetConfirmView
+            .return_value.as_view.return_value)
         actual = reset_confirm(
                 self.request,
                 uidb64='test_uidb64',
@@ -106,7 +108,8 @@ class TestReset(TestCase):
         self.request.method = 'POST'
         self.request.POST = {'email': ''}
 
-        expected = self.mock_PasswordResetView.return_value
+        expected = (
+            self.mock_PasswordResetView.return_value.as_view.return_value)
         actual = reset(self.request)
 
         self.assertEqual(expected, actual)
@@ -126,7 +129,8 @@ class TestReset(TestCase):
         self.request.method = 'POST'
         self.request.POST = {'email': 'test_email'}
 
-        expected = self.mock_PasswordResetView.return_value
+        expected = (
+            self.mock_PasswordResetView.return_value.as_view.return_value)
         actual = reset(self.request)
 
         self.assertEqual(expected, actual)
@@ -145,7 +149,8 @@ class TestReset(TestCase):
     def test_not_POST(self):
         self.request.method = 'GET'
 
-        expected = self.mock_PasswordResetView.return_value
+        expected = (
+            self.mock_PasswordResetView.return_value.as_view.return_value)
         actual = reset(self.request)
 
         self.assertEqual(expected, actual)
@@ -171,7 +176,9 @@ class TestResetDone(TestCase):
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_PasswordResetDoneView.return_value
+        expected = (
+            self.mock_PasswordResetDoneView
+            .return_value.as_view.return_value)
         actual = reset_done(self.request)
 
         self.assertEqual(expected, actual)
@@ -191,7 +198,9 @@ class TestRestComplete(TestCase):
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_PasswordResetCompleteView.return_value
+        expected = (
+            self.mock_PasswordResetCompleteView
+            .return_value.as_view.return_value)
         actual = reset_complete(self.request)
 
         self.assertEqual(expected, actual)
@@ -217,7 +226,9 @@ class TestCreateNewPassword(TestCase):
         self.request = mock.MagicMock(HttpRequest)
 
     def test_valid(self):
-        expected = self.mock_PasswordResetConfirmView.return_value
+        expected = (
+            self.mock_PasswordResetConfirmView
+            .return_value.as_view.return_value)
         actual = create_new_password(self.request,
                                      uidb64='test_uidb64',
                                      token='test_token'
@@ -267,7 +278,8 @@ class TestChangePassword(TestCase):
                 'active_page': 'change_password'
                 }
 
-        expected = self.mock_PasswordChangeView.return_value
+        expected = (
+            self.mock_PasswordChangeView.return_value.as_view.return_value)
         actual = change_password(self.request)
 
         self.assertEqual(expected, actual)
@@ -303,7 +315,8 @@ class TestChangePasswordSubmit(TestCase):
     def test_valid(self):
         expected_context = {'active_page': 'change_password_submit'}
 
-        expected = self.mock_PasswordChangeDoneView.return_value
+        expected = (
+            self.mock_PasswordChangeDoneView.return_value.as_view.return_value)
         actual = change_password_submit(self.request)
 
         self.assertEqual(expected, actual)
