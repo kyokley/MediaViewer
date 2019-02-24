@@ -111,7 +111,9 @@ class UserSettings(models.Model):
         newUser.email = email
         newUser.is_staff = is_staff
         newUser.is_superuser = is_superuser
-        newUser.set_password(None)
+        # Password reset emails are only sent for user that have passwords
+        # Create a random password for the time being
+        newUser.set_password(User.objects.make_random_password())
         newUser.save()
 
         if group:
