@@ -71,7 +71,11 @@ class TestMovies(TestCase):
 
     def test_valid(self):
         expected_context = {
-                'files': self.mock_movies_ordered_by_id.return_value,
+                'files': (
+                    self.mock_movies_ordered_by_id
+                    .return_value
+                    .select_related
+                    .return_value),
                 'view': 'movies',
                 'LOCAL_IP': LOCAL_IP,
                 'BANGUP_IP': BANGUP_IP,
@@ -199,7 +203,12 @@ class TestMoviesByGenre(TestCase):
 
     def test_valid(self):
         expected_context = {
-                'files': self.mock_files_movies_by_genre.return_value,
+                'files': (
+                    self.mock_files_movies_by_genre
+                    .return_value
+                    .select_related
+                    .return_value
+                ),
                 'view': 'movies',
                 'LOCAL_IP': LOCAL_IP,
                 'BANGUP_IP': BANGUP_IP,
