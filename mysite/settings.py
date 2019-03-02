@@ -34,6 +34,7 @@ DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 LOG_ACCESS_TIMINGS = False
 IS_SYNCING = False
+USE_SILK = False
 
 ADMINS = (
      ('AdminName', 'admin@email.com'),

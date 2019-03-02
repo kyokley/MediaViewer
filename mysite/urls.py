@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.conf import settings as conf_settings
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -18,3 +19,6 @@ urlpatterns = [
     url(r'^mediaviewer/',
         include(('mediaviewer.urls', 'mediaviewer'), namespace='mediaviewer')),
 ]
+
+if conf_settings.USE_SILK:
+    urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]

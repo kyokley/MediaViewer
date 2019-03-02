@@ -2,7 +2,7 @@ from mysite.settings import *
 
 import os
 
-DEBUG = True
+USE_SILK = DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -24,9 +24,14 @@ DATABASES = {
 }
 
 INSTALLED_APPS += (
+    'silk',
     'django_nose',
     'debug_toolbar',
 )
+
+MIDDLEWARE = (
+    'silk.middleware.SilkyMiddleware',
+) + MIDDLEWARE
 
 MIDDLEWARE += (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
