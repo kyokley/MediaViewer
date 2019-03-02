@@ -38,6 +38,7 @@ COPY pyproject.toml /code/pyproject.toml
 
 RUN /bin/bash -c "source /venv/bin/activate && \
                   cd /code && \
+                  pip install --upgrade pip && \
                   /root/.poetry/bin/poetry install -vvv ${REQS}"
 
 RUN cd /node && yarn install && rsync -ruv /node/node_modules/* /code/static/

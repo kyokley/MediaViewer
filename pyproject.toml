@@ -29,6 +29,7 @@ pytest-cov = "^2.6"
 bpython = "^0.17.1"
 pdbpp = "^0.9.3"
 coverage = "^4.5"
+django-silk = "^3.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
