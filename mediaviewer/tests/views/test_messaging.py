@@ -83,7 +83,7 @@ class TestSubmitSiteWideMessage(TestCase):
         actual = submitsitewidemessage(self.request)
         self.assertEqual(expected, actual)
 
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestAjaxCloseMessage(TestCase):

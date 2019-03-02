@@ -230,7 +230,7 @@ class TestSettings(TestCase):
         actual = settings(self.request)
         self.assertEqual(expected, actual)
 
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestSubmitSettings(TestCase):
@@ -321,7 +321,7 @@ class TestSubmitSettings(TestCase):
         actual = settings(self.request)
         self.assertEqual(expected, actual)
 
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestSubmitSiteSettings(TestCase):
@@ -425,4 +425,4 @@ class TestSubmitSiteSettings(TestCase):
         actual = submitsitesettings(self.request)
         self.assertEqual(expected, actual)
 
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()

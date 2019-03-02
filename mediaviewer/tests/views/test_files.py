@@ -105,7 +105,7 @@ class TestMovies(TestCase):
         actual = movies(self.request, self.tv_file.id)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestMovieByGenre404(TestCase):
@@ -195,7 +195,7 @@ class TestMoviesByGenre(TestCase):
         actual = movies_by_genre(self.request, self.genre.id)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
     def test_valid(self):
         expected_context = {
@@ -300,7 +300,7 @@ class TestTvShowSummary(TestCase):
         actual = tvshowsummary(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestTvShowByGenre404(TestCase):
@@ -413,7 +413,7 @@ class TestTvShowsByGenre(TestCase):
         actual = tvshows_by_genre(self.request, self.genre.id)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestTvShow404(TestCase):
@@ -500,7 +500,7 @@ class TestTvShows(TestCase):
         actual = tvshows(self.request, self.tv_path.id)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
     def test_valid(self):
         expected_context = {

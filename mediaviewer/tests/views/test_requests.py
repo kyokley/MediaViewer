@@ -76,7 +76,7 @@ class TestRequests(TestCase):
         actual = requests(self.request)
         self.assertEqual(expected, actual)
 
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestAddRequests(TestCase):
@@ -138,7 +138,7 @@ class TestAddRequests(TestCase):
         actual = addrequests(self.request)
         self.assertEqual(expected, actual)
 
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestAjaxVote(TestCase):

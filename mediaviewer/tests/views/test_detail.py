@@ -285,7 +285,7 @@ class TestFilesDetail(TestCase):
         actual = filesdetail(self.request, self.tv_file.id)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestAjaxViewed(TestCase):

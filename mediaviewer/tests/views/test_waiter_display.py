@@ -112,4 +112,4 @@ class TestWaiterDisplay(TestCase):
         actual = waiter_display(self.request, self.file.id)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()

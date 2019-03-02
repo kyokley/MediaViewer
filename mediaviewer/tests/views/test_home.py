@@ -104,7 +104,7 @@ class TestHome(TestCase):
         actual = home(self.request)
 
         self.assertEqual(expected, actual)
-        self.mock_change_password.assert_called_once_with(self.request)
+        self.mock_change_password.assert_called_once_with()
 
 
 class TestAjaxRunScraper(TestCase):
