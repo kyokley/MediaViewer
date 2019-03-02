@@ -63,7 +63,7 @@ def files(request, items):
 @logAccessInfo
 def movies(request):
     user = request.user
-    files = File.movies_ordered_by_id()
+    files = File.movies_ordered_by_id().select_related('path')
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
@@ -90,7 +90,7 @@ def movies(request):
 def movies_by_genre(request, genre_id):
     user = request.user
     genre = get_object_or_404(Genre, pk=genre_id)
-    files = File.movies_by_genre(genre)
+    files = File.movies_by_genre(genre).select_related('path')
     for file in files:
         setattr(file, 'usercomment', file.usercomment(user))
     settings = user.settings()
