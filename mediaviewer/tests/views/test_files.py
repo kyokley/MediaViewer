@@ -71,11 +71,7 @@ class TestMovies(TestCase):
 
     def test_valid(self):
         expected_context = {
-                'files': (
-                    self.mock_movies_ordered_by_id
-                    .return_value
-                    .select_related
-                    .return_value),
+                'files': [],
                 'view': 'movies',
                 'LOCAL_IP': LOCAL_IP,
                 'BANGUP_IP': BANGUP_IP,
@@ -203,12 +199,7 @@ class TestMoviesByGenre(TestCase):
 
     def test_valid(self):
         expected_context = {
-                'files': (
-                    self.mock_files_movies_by_genre
-                    .return_value
-                    .select_related
-                    .return_value
-                ),
+                'files': [],
                 'view': 'movies',
                 'LOCAL_IP': LOCAL_IP,
                 'BANGUP_IP': BANGUP_IP,
@@ -485,7 +476,8 @@ class TestTvShows(TestCase):
         self.movie_file = File.new('movie.file', self.movie_path)
 
         self.mock_get_object_or_404.return_value = self.tv_path
-        self.mock_files_by_localpath.return_value = [self.tv_file]
+        self.mock_files_by_localpath.return_value.select_related.return_value = [
+            self.tv_file]
 
         mv_group = Group(name='MediaViewer')
         mv_group.save()
