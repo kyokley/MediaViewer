@@ -447,6 +447,6 @@ class File(models.Model):
                             if self.isMovie() else
                             self.getScrapedFullName()),
                    'dateCreatedForSpan': self.dateCreatedForSpan(),
-                   'date': self.datecreated.date,
+                   'date': self.datecreated.date(),
                    }
         return payload

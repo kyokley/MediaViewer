@@ -505,17 +505,22 @@ class TestTvShows(TestCase):
 
     def test_valid(self):
         expected_context = {
-                'files': [self.tv_file],
-                'path': self.tv_path,
-                'view': 'tvshows',
-                'LOCAL_IP': LOCAL_IP,
-                'BANGUP_IP': BANGUP_IP,
-                'can_download': True,
-                'jump_to_last': True,
-                'active_page': 'tvshows',
-                'title': 'Tv Local Path',
-                'long_plot': False,
-                }
+            'files': [{'date': self.tv_file.datecreated.date(),
+                       'dateCreatedForSpan': self.tv_file.dateCreatedForSpan(),
+                       'id': self.tv_file.id,
+                       'name': 'tv.file',
+                       'viewed': False,
+                       }],
+            'path': self.tv_path,
+            'view': 'tvshows',
+            'LOCAL_IP': LOCAL_IP,
+            'BANGUP_IP': BANGUP_IP,
+            'can_download': True,
+            'jump_to_last': True,
+            'active_page': 'tvshows',
+            'title': 'Tv Local Path',
+            'long_plot': False,
+        }
 
         expected = self.mock_render.return_value
         actual = tvshows(self.request, self.tv_path.id)
