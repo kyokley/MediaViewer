@@ -1,7 +1,18 @@
 from django.db import models
 
 
+class UserCommentManager(models.Manager):
+    def viewed_by_file(self, user):
+        file_viewed = (
+            self.filter(user=user)
+            .values_list('file', 'viewed')
+        )
+        return dict(file_viewed)
+
+
 class UserComment(models.Model):
+    objects = UserCommentManager()
+
     datecreated = models.DateTimeField(
         db_column='datecreated',
         auto_now_add=True)

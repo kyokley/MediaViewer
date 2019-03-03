@@ -36,7 +36,7 @@ class UserSettings(models.Model):
         db_column='ip_format',
         blank=False,
         null=False)
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         'auth.User',
         on_delete=models.CASCADE,
         null=False,

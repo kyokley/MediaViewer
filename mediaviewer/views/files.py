@@ -12,6 +12,7 @@ from mediaviewer.models.usersettings import (
                                       )
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.path import Path
+from mediaviewer.models.usercomment import UserComment
 from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
@@ -34,11 +35,17 @@ def files(request, items):
         files = File.objects.order_by('-id')[:items]
     else:
         files = File.objects.order_by('-id')
-    for file in files:
-        setattr(file, 'usercomment', file.usercomment(user))
+    files = files.select_related('path')
+
+    viewed_by_file = UserComment.objects.viewed_by_file(user)
+    file_data = [file.display_payload()
+                 for file in files]
+    for file in file_data:
+        file['viewed'] = viewed_by_file.get(file['id'], False)
+
     settings = user.settings()
     context = {
-              'files': files,
+              'files': file_data,
               'items': items,
               'view': 'files',
               'LOCAL_IP': LOCAL_IP,
@@ -63,12 +70,20 @@ def files(request, items):
 @logAccessInfo
 def movies(request):
     user = request.user
-    files = File.movies_ordered_by_id().select_related('path')
-    for file in files:
-        setattr(file, 'usercomment', file.usercomment(user))
+    files = (
+        File.movies_ordered_by_id()
+        .select_related('path')
+    )
+
+    viewed_by_file = UserComment.objects.viewed_by_file(user)
+    file_data = [file.display_payload()
+                 for file in files]
+    for file in file_data:
+        file['viewed'] = viewed_by_file.get(file['id'], False)
+
     settings = user.settings()
     context = {
-              'files': files,
+              'files': file_data,
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
@@ -91,11 +106,16 @@ def movies_by_genre(request, genre_id):
     user = request.user
     genre = get_object_or_404(Genre, pk=genre_id)
     files = File.movies_by_genre(genre).select_related('path')
-    for file in files:
-        setattr(file, 'usercomment', file.usercomment(user))
+
+    viewed_by_file = UserComment.objects.viewed_by_file(user)
+    file_data = [file.display_payload()
+                 for file in files]
+    for file in file_data:
+        file['viewed'] = viewed_by_file.get(file['id'], False)
+
     settings = user.settings()
     context = {
-              'files': files,
+              'files': file_data,
               'view': 'movies',
               'LOCAL_IP': LOCAL_IP,
               'BANGUP_IP': BANGUP_IP,
@@ -146,12 +166,17 @@ def tvshows_by_genre(request, genre_id):
 def tvshows(request, pathid):
     user = request.user
     refpath = get_object_or_404(Path, pk=pathid)
-    files = File.files_by_localpath(refpath)
-    for file in files:
-        setattr(file, 'usercomment', file.usercomment(user))
+    files = File.files_by_localpath(refpath).select_related('path')
+
+    viewed_by_file = UserComment.objects.viewed_by_file(user)
+    file_data = [file.display_payload()
+                 for file in files]
+    for file in file_data:
+        file['viewed'] = viewed_by_file.get(file['id'], False)
+
     settings = user.settings()
     context = {
-              'files': files,
+              'files': file_data,
               'path': refpath,
               'view': 'tvshows',
               'LOCAL_IP': LOCAL_IP,

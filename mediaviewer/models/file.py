@@ -64,6 +64,8 @@ class File(models.Model):
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
 
+    users = models.ManyToManyField('auth.User', through='UserComment')
+
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'file'
@@ -438,3 +440,13 @@ class File(models.Model):
                     .filter(hide=False)
                     .filter(finished=True).order_by('-id')[:items])
         return files
+
+    def display_payload(self):
+        payload = {'id': self.id,
+                   'name': (self.rawSearchString()
+                            if self.isMovie() else
+                            self.getScrapedFullName()),
+                   'dateCreatedForSpan': self.dateCreatedForSpan(),
+                   'date': self.datecreated.date,
+                   }
+        return payload
