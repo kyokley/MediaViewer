@@ -49,10 +49,10 @@ NOSE_ARGS = [
 ]
 
 
-WAITER_STATUS_URL = 'http://127.0.0.1:5000/waiter/status'
+WAITER_STATUS_URL = 'http://mediawaiter:5000/waiter/status'
 WAITER_HEAD = 'http://'
-BANGUP_WAITER_IP_FORMAT_MOVIES = '127.0.0.1:5000/waiter/dir/'
-BANGUP_WAITER_IP_FORMAT_TVSHOWS = '127.0.0.1:5000/waiter/file/'
+BANGUP_WAITER_IP_FORMAT_MOVIES = 'mediawaiter:5000/waiter/dir/'
+BANGUP_WAITER_IP_FORMAT_TVSHOWS = 'mediawaiter:5000/waiter/file/'
 
 BYPASS_SMTPD_CHECK = True
 
