@@ -24,10 +24,29 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 
 RUN apt-get update && apt-get install -y yarn nodejs
 
-RUN python -m venv /venv
+ENV VIRTUAL_ENV=/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
 RUN echo 'export PATH=$PATH:/root/.poetry/bin' >> /root/.bashrc
+
+# Add virtualenv to bash prompt
+RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
+              _OLD_VIRTUAL_PS1="${PS1:-}" \n\
+              if [ "x(venv) " != x ] ; then \n\
+          	PS1="(venv) ${PS1:-}" \n\
+              else \n\
+              if [ "`basename \"$VIRTUAL_ENV\"`" = "__" ] ; then \n\
+                  # special case for Aspen magic directories \n\
+                  # see http://www.zetadev.com/software/aspen/ \n\
+                  PS1="[`basename \`dirname \"$VIRTUAL_ENV\"\``] $PS1" \n\
+              else \n\
+                  PS1="(`basename \"$VIRTUAL_ENV\"`)$PS1" \n\
+              fi \n\
+              fi \n\
+              export PS1 \n\
+          fi' >> ~/.bashrc
 
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
@@ -46,6 +65,4 @@ RUN cd /node && yarn install && rsync -ruv /node/node_modules/* /code/static/
 COPY . /code
 WORKDIR /code
 
-#EXPOSE 8000 8001 8002
-#ENTRYPOINT ["supervisord", "-n", "-c", "/etc/supervisor.d/supervisor.conf"]
 CMD uwsgi --ini /home/docker/code/uwsgi/uwsi.conf
