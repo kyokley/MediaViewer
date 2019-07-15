@@ -1,7 +1,9 @@
+import pytest
+
 from django.urls import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from mediaviewer.models.path import Path
 
 
@@ -103,7 +105,34 @@ class TvPathViewSetTests(APITestCase):
 
         self.assertEqual(expected, actual)
 
-    def test_unfinished_list_only(self):
+
+@pytest.mark.django_db
+class TestUnfinishedTVPaths:
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        self.test_user = User.objects.create_superuser('test_user',
+                                                       'test@user.com',
+                                                       'password')
+
+        self.client = APIClient()
+        self.client.login(username='test_user', password='password')
+
+        self.tvPath = Path()
+        self.tvPath.localpathstr = '/some/local/path'
+        self.tvPath.remotepathstr = '/some/local/path'
+        self.tvPath.skip = False
+        self.tvPath.is_movie = False
+        self.tvPath.server = 'a.server'
+        self.tvPath.save()
+
+        self.moviePath = Path()
+        self.moviePath.localpathstr = '/another/local/path'
+        self.moviePath.remotepathstr = '/another/local/path'
+        self.moviePath.skip = False
+        self.moviePath.is_movie = True
+        self.moviePath.server = 'a.server'
+        self.moviePath.save()
+
         self.finishedTvPath = Path()
         self.finishedTvPath.localpathstr = '/some/local/finished/path'
         self.finishedTvPath.remotepathstr = '/some/local/finished/path'
@@ -113,9 +142,10 @@ class TvPathViewSetTests(APITestCase):
         self.finishedTvPath.finished = True
         self.finishedTvPath.save()
 
+    def test_unfinished_list_only(self):
         response = self.client.get(reverse('mediaviewer:api:tvpath-list'),
                                    {'finished': True})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        assert response.status_code == status.HTTP_200_OK
 
         expected = {'count': 1,
                     'next': None,
@@ -131,7 +161,7 @@ class TvPathViewSetTests(APITestCase):
                     }
         actual = dict(response.data)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_finished_query_param(self):
         self.finishedTvPath = Path()
@@ -145,7 +175,7 @@ class TvPathViewSetTests(APITestCase):
 
         response = self.client.get(reverse('mediaviewer:api:tvpath-list'),
                                    {'finished': 'asdf'})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 class MoviePathViewSetTests(APITestCase):

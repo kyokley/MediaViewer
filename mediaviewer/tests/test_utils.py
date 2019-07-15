@@ -1,14 +1,16 @@
 import mock
+import pytest
 
 from django.test import TestCase
 
 from django.conf import settings
 
 from mediaviewer.utils import (
-        getSomewhatUniqueID,
-        humansize,
-        sendMail,
-        checkSMTPServer,
+    getSomewhatUniqueID,
+    humansize,
+    sendMail,
+    checkSMTPServer,
+    query_param_to_bool,
         )
 
 from mediaviewer.tests import helpers
@@ -189,3 +191,27 @@ class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
 
         self.assertEqual(expected, actual)
         self.assertFalse(self.mock_Telnet.called)
+
+
+class TestQueryParamToBool:
+    def test_true(self):
+        assert query_param_to_bool(True)
+        assert query_param_to_bool('True')
+        assert query_param_to_bool('true')
+        assert query_param_to_bool('T')
+        assert query_param_to_bool('t')
+        assert query_param_to_bool('yes')
+        assert query_param_to_bool('y')
+
+    def test_false(self):
+        assert not query_param_to_bool(False)
+        assert not query_param_to_bool('False')
+        assert not query_param_to_bool('false')
+        assert not query_param_to_bool('F')
+        assert not query_param_to_bool('f')
+        assert not query_param_to_bool('no')
+        assert not query_param_to_bool('n')
+
+    def test_raise(self):
+        assert query_param_to_bool(None) is None
+        assert query_param_to_bool('') is None
