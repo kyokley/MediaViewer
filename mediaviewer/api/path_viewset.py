@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import SuspiciousOperation
 from rest_framework import viewsets
 from rest_framework import status as RESTstatus
 from rest_framework.permissions import IsAuthenticated
@@ -10,6 +11,7 @@ from mediaviewer.api.serializers import (PathSerializer,
 from mediaviewer.models.path import Path
 
 from mediaviewer.log import log
+from mediaviewer.utils import query_param_to_bool
 
 
 class PathViewSet(viewsets.ModelViewSet):
@@ -91,3 +93,18 @@ class TvPathViewSet(PathViewSet):
         if data.get('is_movie', False):
             raise Exception('Path must be of tv type')
         return super(TvPathViewSet, self).create_path_obj(data)
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        try:
+            finished = query_param_to_bool(
+                self.request.query_params.get('finished')
+            )
+        except ValueError as e:
+            raise SuspiciousOperation(str(e))
+
+        if finished is not None:
+            queryset = queryset.filter(finished=finished)
+
+        return queryset

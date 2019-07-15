@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from mediaviewer.models.path import Path
 
+
 class TvPathViewSetTests(APITestCase):
     def setUp(self):
         self.test_user = User.objects.create_superuser('test_user',
@@ -33,7 +34,8 @@ class TvPathViewSetTests(APITestCase):
                      'server': 'fake.server',
                      'skip': False,
                      }
-        response = self.client.post(reverse('mediaviewer:api:tvpath-list'), self.data)
+        response = self.client.post(reverse('mediaviewer:api:tvpath-list'),
+                                    self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         expected_dict = {'localpath': '/some/local/path',
@@ -45,10 +47,14 @@ class TvPathViewSetTests(APITestCase):
 
         pk = response.data['pk']
         path = Path.objects.get(pk=pk)
-        for k,v in expected_dict.items():
+        for k, v in expected_dict.items():
             expected = v
             actual = getattr(path, k)
-            self.assertEqual(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
+            self.assertEqual(expected,
+                             actual,
+                             'attr: %s expected: %s actual: %s' % (k,
+                                                                   expected,
+                                                                   actual))
 
     def test_create_tvpath(self):
         self.data = {'localpath': '/path/to/folder',
@@ -96,6 +102,51 @@ class TvPathViewSetTests(APITestCase):
         actual = dict(response.data)
 
         self.assertEqual(expected, actual)
+
+    def test_unfinished_list_only(self):
+        self.finishedTvPath = Path()
+        self.finishedTvPath.localpathstr = '/some/local/finished/path'
+        self.finishedTvPath.remotepathstr = '/some/local/finished/path'
+        self.finishedTvPath.skip = False
+        self.finishedTvPath.is_movie = False
+        self.finishedTvPath.server = 'a.server'
+        self.finishedTvPath.finished = True
+        self.finishedTvPath.save()
+
+        response = self.client.get(reverse('mediaviewer:api:tvpath-list'),
+                                   {'finished': True})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'pk': self.finishedTvPath.id,
+                                 'localpath': '/some/local/finished/path',
+                                 'remotepath': '/some/local/finished/path',
+                                 'server': 'a.server',
+                                 'skip': False,
+                                 'number_of_unwatched_shows': 0,
+                                 'is_movie': False,
+                                 }],
+                    }
+        actual = dict(response.data)
+
+        self.assertEqual(expected, actual)
+
+    def test_finished_query_param(self):
+        self.finishedTvPath = Path()
+        self.finishedTvPath.localpathstr = '/some/local/finished/path'
+        self.finishedTvPath.remotepathstr = '/some/local/finished/path'
+        self.finishedTvPath.skip = False
+        self.finishedTvPath.is_movie = False
+        self.finishedTvPath.server = 'a.server'
+        self.finishedTvPath.finished = True
+        self.finishedTvPath.save()
+
+        response = self.client.get(reverse('mediaviewer:api:tvpath-list'),
+                                   {'finished': 'asdf'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class MoviePathViewSetTests(APITestCase):
     def setUp(self):

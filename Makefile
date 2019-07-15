@@ -21,10 +21,10 @@ up-no-daemon: ## Bring up all containers
 attach: ## Attach to a running mediaviewer container
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
-shell: build-dev up ## Open a shell in a mediaviewer container
+shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec mediaviewer /bin/bash
 
-db-shell: build-dev up ## Open a shell in a mediaviewer container
+db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
 tests: build-dev ## Run tests

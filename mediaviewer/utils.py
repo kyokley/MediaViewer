@@ -150,3 +150,21 @@ def checkSMTPServer():
         smtp_server = telnetlib.Telnet(host=settings.EMAIL_HOST,  # nosec
                                        port=settings.EMAIL_PORT)
         smtp_server.close()
+
+
+def query_param_to_bool(param):
+    if not param:
+        return None
+    elif param is True or param.lower() in ('true',
+                                            't',
+                                            'y',
+                                            'yes'):
+        return True
+    elif param is False or param.lower() in ('false',
+                                             'f',
+                                             'n',
+                                             'no',
+                                             ):
+        return False
+    else:
+        raise ValueError(f'Could not coerce "{param}" to bool')

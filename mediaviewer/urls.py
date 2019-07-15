@@ -19,7 +19,6 @@ from mediaviewer.views import (home,
                                messaging,
                                requests,
                                waiterstatus,
-                               password_reset,
                                waiter_display,
                                ajax,
                                )

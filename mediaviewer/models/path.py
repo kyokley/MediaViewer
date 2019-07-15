@@ -35,6 +35,11 @@ class Path(models.Model):
             null=True,
             blank=True,
             db_column='lastcreatedfiledate')
+    finished = models.BooleanField(
+        blank=False,
+        null=False,
+        default=False,
+    )
 
     class Meta:
         app_label = 'mediaviewer'
@@ -93,9 +98,10 @@ class Path(models.Model):
                 self.shortName.replace('.', ' ').title())
 
     def __str__(self):
-        return 'id: %s r: %s l: %s' % (self.id,
-                                       self.remotePath,
-                                       self.localPath)
+        return 'id: %s r: %s l: %s f: %s' % (self.id,
+                                             self.remotePath,
+                                             self.localPath,
+                                             self.finished)
 
     def lastCreatedFileDateForSpan(self):
         last_date = self.lastCreatedFileDate

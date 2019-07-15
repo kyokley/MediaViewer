@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
         git \
         apt-transport-https \
         ncurses-dev \
+        rsync \
         make
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
