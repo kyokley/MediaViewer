@@ -12,6 +12,7 @@ from mediaviewer.models.videoprogress import VideoProgress
 
 from rest_framework import serializers
 
+
 class DownloadTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = DownloadToken
@@ -87,6 +88,7 @@ class PathSerializer(serializers.ModelSerializer):
                   'skip',
                   'number_of_unwatched_shows',
                   'is_movie',
+                  'finished',
                   )
     pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=True, source='localpathstr')
@@ -95,6 +97,7 @@ class PathSerializer(serializers.ModelSerializer):
     skip = serializers.BooleanField(required=True)
     number_of_unwatched_shows = serializers.SerializerMethodField('unwatched_shows')
     is_movie = serializers.BooleanField(required=True)
+    finished = serializers.BooleanField(required=False)
 
     def unwatched_shows(self, obj):
         request = self.context.get('request')

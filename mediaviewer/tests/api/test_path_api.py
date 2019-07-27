@@ -45,6 +45,7 @@ class TvPathViewSetTests(APITestCase):
                          'skip': False,
                          'server': 'a.server',
                          'is_movie': False,
+                         'finished': False,
                          }
 
         pk = response.data['pk']
@@ -99,6 +100,7 @@ class TvPathViewSetTests(APITestCase):
                                  'skip': False,
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': False,
+                                 'finished': False,
                                  }],
                     }
         actual = dict(response.data)
@@ -144,6 +146,28 @@ class TestUnfinishedTVPaths:
 
     def test_unfinished_list_only(self):
         response = self.client.get(reverse('mediaviewer:api:tvpath-list'),
+                                   {'finished': False})
+        assert response.status_code == status.HTTP_200_OK
+
+        expected = {'count': 1,
+                    'next': None,
+                    'previous': None,
+                    'results': [{'pk': self.tvPath.id,
+                                 'localpath': '/some/local/path',
+                                 'remotepath': '/some/local/path',
+                                 'server': 'a.server',
+                                 'skip': False,
+                                 'number_of_unwatched_shows': 0,
+                                 'is_movie': False,
+                                 'finished': False,
+                                 }],
+                    }
+        actual = dict(response.data)
+
+        assert expected == actual
+
+    def test_finished_list_only(self):
+        response = self.client.get(reverse('mediaviewer:api:tvpath-list'),
                                    {'finished': True})
         assert response.status_code == status.HTTP_200_OK
 
@@ -157,13 +181,14 @@ class TestUnfinishedTVPaths:
                                  'skip': False,
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': False,
+                                 'finished': True,
                                  }],
                     }
         actual = dict(response.data)
 
         assert expected == actual
 
-    def test_finished_query_param(self):
+    def test_bad_finished_query_param(self):
         self.finishedTvPath = Path()
         self.finishedTvPath.localpathstr = '/some/local/finished/path'
         self.finishedTvPath.remotepathstr = '/some/local/finished/path'
@@ -199,6 +224,7 @@ class MoviePathViewSetTests(APITestCase):
         self.moviePath.skip = False
         self.moviePath.is_movie = True
         self.moviePath.server = 'a.server'
+        self.moviePath.finished = False
         self.moviePath.save()
 
     def test_create_moviepath_exists(self):
@@ -215,6 +241,7 @@ class MoviePathViewSetTests(APITestCase):
                          'skip': False,
                          'server': 'a.server',
                          'is_movie': True,
+                         'finished': False,
                          }
 
         pk = response.data['pk']
@@ -253,6 +280,7 @@ class MoviePathViewSetTests(APITestCase):
                     'server': u'a.server',
                     'remotepath': u'/another/local/path',
                     'pk': self.moviePath.id,
+                    'finished': False,
                     'is_movie': True}
 
         self.assertEqual(expected, response.data)
@@ -271,6 +299,7 @@ class MoviePathViewSetTests(APITestCase):
                                  'skip': False,
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': True,
+                                 'finished': False,
                                  }],
                     }
         actual = dict(response.data)
