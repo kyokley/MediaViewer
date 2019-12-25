@@ -12,8 +12,15 @@ from mediaviewer.models.genre import Genre
 from mediaviewer.models.request import Request
 from mediaviewer.models.request import RequestVote
 
+
+class PathAdmin(admin.ModelAdmin):
+    fields = ('id', 'remotepathstr', 'localpathstr', 'finished')
+    list_filter = ('finished',)
+    search_fields = ('localpathstr', 'remotepathstr', 'override_display_name',)
+
+
 admin.site.register(File)
-admin.site.register(Path)
+admin.site.register(Path, PathAdmin)
 admin.site.register(FilenameScrapeFormat)
 admin.site.register(UserSettings)
 admin.site.register(PosterFile)
