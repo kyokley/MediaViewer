@@ -14,7 +14,13 @@ from mediaviewer.models.request import RequestVote
 
 
 class PathAdmin(admin.ModelAdmin):
-    fields = ('id', 'remotepathstr', 'localpathstr', 'finished')
+    fields = ('remotepathstr',
+              'localpathstr',
+              'finished',
+              'defaultsearchstr',
+              'override_display_name',
+              'imdb_id',
+              )
     list_filter = ('finished',)
     search_fields = ('localpathstr', 'remotepathstr', 'override_display_name',)
 
