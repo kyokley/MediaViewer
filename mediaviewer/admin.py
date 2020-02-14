@@ -1,5 +1,4 @@
 from django.contrib import admin
-#from mediaviewer.models import File, Path, FilenameScrapeFormat, UserSettings
 from mediaviewer.models.path import Path
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.usersettings import UserSettings
@@ -22,7 +21,10 @@ class PathAdmin(admin.ModelAdmin):
               'imdb_id',
               )
     list_filter = ('finished',)
-    search_fields = ('localpathstr', 'remotepathstr', 'override_display_name',)
+    search_fields = ('localpathstr',
+                     'remotepathstr',
+                     'override_display_name',
+                     )
 
 
 admin.site.register(File)
