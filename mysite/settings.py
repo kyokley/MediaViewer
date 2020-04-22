@@ -117,11 +117,13 @@ STATICFILES_FINDERS = (
 MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'mediaviewer.middleware.AutoLogout',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_referrer_policy.middleware.ReferrerPolicyMiddleware',
 )
 
 # Auto logout delay in minutes
@@ -247,6 +249,15 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 os.environ['HTTPS'] = 'on'
 os.environ['wsgi.url_scheme'] = 'https'
+
+# For SecurityMiddleware in django 3.0
+# SECURE_REFERRER_POLICY = 'same-origin'
+# SECURE_HSTS_SECONDS = 300
+# SECURE_BROWSER_XSS_FILTER = True
+
+# For pre-SecurityMiddleware in django 3.0
+# Use django_referrer_policy middleware
+REFERRER_POLICY = 'same-origin'
 
 API_KEY = 'keykeykey'
 OMDBAPI_KEY = None
