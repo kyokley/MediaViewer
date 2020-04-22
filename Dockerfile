@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.8-slim
 
 MAINTAINER Kevin Yokley
 
@@ -16,12 +16,13 @@ RUN apt-get update && apt-get install -y \
         apt-transport-https \
         ncurses-dev \
         rsync \
+        libpq-dev \
         make
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
     echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 RUN apt-get update && apt-get install -y yarn nodejs
 
@@ -36,7 +37,7 @@ RUN echo 'export PATH=$PATH:/root/.poetry/bin' >> /root/.bashrc
 RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
               _OLD_VIRTUAL_PS1="${PS1:-}" \n\
               if [ "x(venv) " != x ] ; then \n\
-          	PS1="(venv) ${PS1:-}" \n\
+                PS1="(venv) ${PS1:-}" \n\
               else \n\
               if [ "`basename \"$VIRTUAL_ENV\"`" = "__" ] ; then \n\
                   # special case for Aspen magic directories \n\

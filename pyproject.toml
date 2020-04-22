@@ -18,6 +18,7 @@ pytz = "^2018.9"
 requests = "^2.21"
 django-widget-tweaks = "^1.4"
 django-bower = "^5.2"
+django-referrer-policy = "^1.0"
 
 [tool.poetry.dev-dependencies]
 mock = "^2.0"
