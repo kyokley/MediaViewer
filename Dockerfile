@@ -1,30 +1,9 @@
-FROM python:3.8-slim
+FROM python:3.8-slim AS base
 
 MAINTAINER Kevin Yokley
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-
-ARG REQS=--no-dev
-
-# Install required packages and remove the apt packages cache when done.
-RUN apt-get update && apt-get install -y \
-        curl \
-        gnupg \
-        g++ \
-        git \
-        apt-transport-https \
-        ncurses-dev \
-        rsync \
-        libpq-dev \
-        make
-
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-
-RUN apt-get update && apt-get install -y yarn nodejs
 
 ENV VIRTUAL_ENV=/venv
 RUN python3 -m venv $VIRTUAL_ENV
@@ -50,21 +29,43 @@ RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
               export PS1 \n\
           fi' >> ~/.bashrc
 
-RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
+# Install required packages and remove the apt packages cache when done.
+RUN apt-get update && apt-get install -y \
+        curl \
+        gnupg \
+        g++ \
+        git \
+        apt-transport-https \
+        ncurses-dev \
+        libpq-dev \
+        make
 
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN apt-get update && apt-get install -y yarn nodejs
 COPY package.json /node/package.json
+RUN cd /node && yarn install
+
+RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
 COPY poetry.lock /code/poetry.lock
 COPY pyproject.toml /code/pyproject.toml
 
-RUN /bin/bash -c "source /venv/bin/activate && \
-                  cd /code && \
+RUN /bin/bash -c "cd /code && \
                   pip install --upgrade pip && \
-                  /root/.poetry/bin/poetry install -vvv ${REQS}"
+                  /root/.poetry/bin/poetry install -vvv --no-dev"
 
-RUN cd /node && yarn install && rsync -ruv /node/node_modules/* /code/static/
 
 COPY . /code
 WORKDIR /code
 
+# ********************* Begin Prod Image ******************
+FROM base AS prod
 CMD uwsgi --ini /home/docker/code/uwsgi/uwsi.conf
+
+
+# ********************* Begin Dev Image ******************
+FROM base AS dev
+RUN /bin/bash -c "cd /code && \
+                  /root/.poetry/bin/poetry install -vvv"

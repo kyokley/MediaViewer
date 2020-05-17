@@ -1,4 +1,4 @@
-version: '2'
+version: '3.4'
 
 services:
     postgres:
@@ -13,7 +13,9 @@ services:
 
     mediaviewer:
         image: kyokley/mediaviewer
-        build: .
+        build:
+          context: .
+          target: prod
         environment:
             - DJANGO_SETTINGS_MODULE=mysite.docker_settings
         command:
