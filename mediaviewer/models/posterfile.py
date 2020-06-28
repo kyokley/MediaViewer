@@ -56,7 +56,7 @@ class PosterFile(models.Model):
     def __str__(self):
         return 'id: %s f: %s i: %s' % (
                 self.id,
-                (self.filename or self.pathname),
+                self.filename or self.pathname,
                 self.image)
 
     @property
