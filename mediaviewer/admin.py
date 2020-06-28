@@ -10,6 +10,7 @@ from mediaviewer.models.director import Director
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.request import Request
 from mediaviewer.models.request import RequestVote
+from mediaviewer.models.downloadtoken import DownloadToken
 
 
 class PathAdmin(admin.ModelAdmin):
@@ -25,6 +26,20 @@ class PathAdmin(admin.ModelAdmin):
                      'remotepathstr',
                      'override_display_name',
                      )
+    list_display = ('id',
+                    'remotepathstr',
+                    'finished',
+                    )
+
+
+@admin.register(DownloadToken)
+class DownloadTokenAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'user',
+                    'displayname',
+                    'ismovie',
+                    'datecreated',
+                    )
 
 
 admin.site.register(File)
