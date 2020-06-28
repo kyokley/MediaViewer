@@ -56,13 +56,12 @@ RUN /bin/bash -c "cd /code && \
                   pip install --upgrade pip && \
                   /root/.poetry/bin/poetry install -vvv --no-dev"
 
-
-COPY . /code
 WORKDIR /code
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod
-CMD uwsgi --ini /home/docker/code/uwsgi/uwsi.conf
+COPY . /code
+CMD uwsgi --ini /code/uwsgi/uwsi.conf
 
 
 # ********************* Begin Dev Image ******************
