@@ -56,11 +56,16 @@ class PosterFile(models.Model):
     def __str__(self):
         return 'id: %s f: %s i: %s' % (
                 self.id,
-                (self.file and
-                    self.file.filename or
-                    self.path and
-                    self.path.localpathstr),
+                (self.filename or self.pathname),
                 self.image)
+
+    @property
+    def filename(self):
+        return self.file and self.file.displayName
+
+    @property
+    def pathname(self):
+        return self.path and self.path.remotepathstr
 
     def display_genres(self):
         return ', '.join([x.genre for x in self.genres.all()])

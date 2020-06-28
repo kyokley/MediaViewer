@@ -4,15 +4,11 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.actor import Actor
-from mediaviewer.models.writer import Writer
-from mediaviewer.models.director import Director
-from mediaviewer.models.genre import Genre
 from mediaviewer.models.request import Request
-from mediaviewer.models.request import RequestVote
 from mediaviewer.models.downloadtoken import DownloadToken
 
 
+@admin.register(Path)
 class PathAdmin(admin.ModelAdmin):
     fields = ('remotepathstr',
               'localpathstr',
@@ -32,6 +28,16 @@ class PathAdmin(admin.ModelAdmin):
                     )
 
 
+@admin.register(File)
+class FileAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'filename',
+                    'displayName',
+                    'hide',
+                    'datecreated',
+                    )
+
+
 @admin.register(DownloadToken)
 class DownloadTokenAdmin(admin.ModelAdmin):
     list_display = ('id',
@@ -42,14 +48,39 @@ class DownloadTokenAdmin(admin.ModelAdmin):
                     )
 
 
-admin.site.register(File)
-admin.site.register(Path, PathAdmin)
-admin.site.register(FilenameScrapeFormat)
-admin.site.register(UserSettings)
-admin.site.register(PosterFile)
-admin.site.register(Actor)
-admin.site.register(Writer)
-admin.site.register(Director)
-admin.site.register(Genre)
-admin.site.register(Request)
-admin.site.register(RequestVote)
+@admin.register(Request)
+class RequestAdmin(admin.ModelAdmin):
+    list_display = ('user',
+                    'name',
+                    'done',
+                    'datecreated',
+                    )
+    ordering = ('-datecreated',)
+
+
+@admin.register(FilenameScrapeFormat)
+class FilenameScrapeFormatAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'nameRegex',
+                    'seasonRegex',
+                    'episodeRegex',
+                    'subPeriods',
+                    'useSearchTerm',
+                    )
+
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'user',
+                    'last_watched',
+                    )
+
+
+@admin.register(PosterFile)
+class PosterFileAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'filename',
+                    'pathname',
+                    'poster_url',
+                    )

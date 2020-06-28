@@ -1,7 +1,6 @@
 from django.conf.urls import include, url
 from django.conf import settings as conf_settings
 
-# Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
 
