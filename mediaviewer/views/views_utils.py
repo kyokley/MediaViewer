@@ -6,6 +6,7 @@ from mediaviewer.models.message import (Message,
                                         REGULAR,
                                         LAST_WATCHED,
                                         )
+from mediaviewer.models.donation_site import DonationSite
 
 
 def setSiteWideContext(context, request, includeMessages=False):
@@ -17,6 +18,16 @@ def setSiteWideContext(context, request, includeMessages=False):
         context['default_sort'] = (settings and
                                    settings.default_sort or
                                    FILENAME_SORT)
+        donation_site = DonationSite.objects.random()
+        if donation_site:
+            context['donation_site_name'] = donation_site.site_name.replace(
+                ' ',
+                '&nbsp;')
+            context['donation_site_url'] = donation_site.url
+        else:
+            context['donation_site_name'] = ''
+            context['donation_site_url'] = ''
+
         if includeMessages:
             for message in Message.getMessagesForUser(request.user,
                                                       message_type=REGULAR):

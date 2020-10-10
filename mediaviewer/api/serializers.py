@@ -9,8 +9,16 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.videoprogress import VideoProgress
+from mediaviewer.models.donation_site import DonationSite
 
 from rest_framework import serializers
+
+
+class DonationSiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DonationSite
+        fields = ('site_name',
+                  'url')
 
 
 class DownloadTokenSerializer(serializers.ModelSerializer):
@@ -32,6 +40,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'next_id',
                   'previous_id',
                   'binge_mode',
+                  'donation_site',
                   )
     guid = serializers.CharField(required=True,
                                  max_length=32)
@@ -50,6 +59,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     next_id = serializers.SerializerMethodField()
     previous_id = serializers.SerializerMethodField()
     binge_mode = serializers.SerializerMethodField()
+    donation_site = serializers.SerializerMethodField()
 
     def get_username(self, obj):
         return obj.user.username
@@ -62,7 +72,8 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
 
     def get_videoprogresses(self, obj):
         return [x.hashed_filename
-                    for x in VideoProgress.objects.filter(user=obj.user).filter(file=obj.file)
+                for x in VideoProgress.objects.filter(
+                    user=obj.user).filter(file=obj.file)
                 ]
 
     def get_next_id(self, obj):
@@ -70,12 +81,16 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return next_obj and next_obj.id
 
     def get_previous_id(self, obj):
-        previous_obj =  obj.file.previous()
+        previous_obj = obj.file.previous()
         return previous_obj and previous_obj.id
 
     def get_binge_mode(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.binge_mode
+
+    def get_donation_site(self, obj):
+        donation_site = DonationSite.objects.random()
+        return DonationSiteSerializer(donation_site).data
 
 
 class PathSerializer(serializers.ModelSerializer):
@@ -106,11 +121,14 @@ class PathSerializer(serializers.ModelSerializer):
         else:
             return 0
 
+
 class MoviePathSerializer(PathSerializer):
     is_movie = serializers.BooleanField(default=True)
 
+
 class TvPathSerializer(PathSerializer):
     is_movie = serializers.BooleanField(default=False)
+
 
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -134,6 +152,7 @@ class FileSerializer(serializers.ModelSerializer):
     streamable = serializers.BooleanField(required=False)
     ismovie = serializers.ReadOnlyField(source='path.is_movie')
 
+
 class MovieFileSerializer(FileSerializer):
     class Meta:
         model = File
@@ -148,6 +167,7 @@ class MovieFileSerializer(FileSerializer):
                   'ismovie',
                   )
 
+
 class DataTransmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataTransmission
@@ -158,6 +178,7 @@ class DataTransmissionSerializer(serializers.ModelSerializer):
     pk = serializers.ReadOnlyField()
     downloaded = serializers.DecimalField(max_digits=12, decimal_places=0, required=True)
     date = serializers.DateTimeField(required=True)
+
 
 class ErrorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -179,6 +200,7 @@ class ErrorSerializer(serializers.ModelSerializer):
     path = serializers.CharField(required=True)
     datatransmission = serializers.IntegerField(required=True)
 
+
 class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
     class Meta:
         model = FilenameScrapeFormat
@@ -196,6 +218,7 @@ class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
     subPeriods = serializers.BooleanField(required=True)
     useSearchTerm = serializers.BooleanField(required=True)
 
+
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -212,6 +235,7 @@ class MessageSerializer(serializers.ModelSerializer):
     sent = serializers.BooleanField(required=True)
     level = serializers.IntegerField(required=True)
     datecreated = serializers.DateTimeField(required=True)
+
 
 class PosterFileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -234,6 +258,7 @@ class PosterFileSerializer(serializers.ModelSerializer):
         writer = serializers.CharField()
         director = serializers.CharField()
         episodename = serializers.CharField()
+
 
 class UserCommentSerializer(serializers.ModelSerializer):
     class Meta:

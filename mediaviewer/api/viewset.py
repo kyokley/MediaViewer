@@ -24,6 +24,7 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.log import log
 
+
 class DownloadTokenViewSet(viewsets.ModelViewSet):
     queryset = DownloadToken.objects.all()
     serializer_class = DownloadTokenSerializer
@@ -42,6 +43,7 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
         serializer = DownloadTokenSerializer(obj)
         return RESTResponse(serializer.data)
 
+
 class DataTransmissionViewSet(viewsets.ModelViewSet):
     queryset = DataTransmission.objects.all()
     serializer_class = DataTransmissionSerializer
@@ -50,6 +52,7 @@ class DataTransmissionViewSet(viewsets.ModelViewSet):
         queryset = DataTransmission.objects.all()
         log.debug('Returning DataTransmission objects')
         return queryset
+
 
 class ErrorViewSet(viewsets.ModelViewSet):
     queryset = Error.objects.all()
@@ -60,6 +63,7 @@ class ErrorViewSet(viewsets.ModelViewSet):
         log.debug('Returning Error objects')
         return queryset
 
+
 class FilenameScrapeFormatViewSet(viewsets.ModelViewSet):
     queryset = FilenameScrapeFormat.objects.all()
     serializer_class = FilenameScrapeFormatSerializer
@@ -69,6 +73,7 @@ class FilenameScrapeFormatViewSet(viewsets.ModelViewSet):
         log.debug('Returning FilenameScrapeFormat objects')
         return queryset
 
+
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
@@ -77,6 +82,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         queryset = Message.objects.all()
         log.debug('Returning Message objects')
         return queryset
+
 
 class InferScrapersView(views.APIView):
     permission_classes = (permissions.IsAdminUser,)
@@ -108,6 +114,7 @@ class InferScrapersView(views.APIView):
             return RESTResponse(None,
                                 status=RESTstatus.HTTP_404_NOT_FOUND)
 
+
 class PosterViewSetByPath(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()
     serializer_class = PosterFileSerializer
@@ -122,6 +129,7 @@ class PosterViewSetByPath(viewsets.ModelViewSet):
         else:
             return RESTResponse(None,
                                 status=RESTstatus.HTTP_404_NOT_FOUND)
+
 
 class PosterViewSetByFile(viewsets.ModelViewSet):
     queryset = PosterFile.objects.all()
@@ -138,6 +146,7 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
         else:
             return RESTResponse(None,
                                 status=RESTstatus.HTTP_404_NOT_FOUND)
+
 
 class UserCommentViewSet(viewsets.ModelViewSet):
     queryset = UserComment.objects.all()

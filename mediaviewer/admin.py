@@ -6,6 +6,7 @@ from mediaviewer.models.file import File
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.request import Request
 from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models.donation_site import DonationSite
 
 
 @admin.register(Path)
@@ -83,4 +84,12 @@ class PosterFileAdmin(admin.ModelAdmin):
                     'filename',
                     'pathname',
                     'poster_url',
+                    )
+
+
+@admin.register(DonationSite)
+class DonationSiteAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'site_name',
+                    'url',
                     )
