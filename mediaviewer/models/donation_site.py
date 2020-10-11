@@ -18,3 +18,6 @@ class DonationSite(models.Model):
 
     site_name = models.TextField(blank=False)
     url = models.URLField(blank=False)
+
+    class Meta:
+        app_label = 'mediaviewer'
