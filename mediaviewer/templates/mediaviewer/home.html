@@ -20,9 +20,9 @@
         {% block css %}
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "@bower_components/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
 
-            <link href="{% static "slate/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "@bower_components/bootswatch-dist/css/bootstrap.min.css" %}" rel="stylesheet">
         {% endblock %}
     </head>
 
@@ -210,7 +210,7 @@
     <script src="{% static "datatables.net/js/jquery.dataTables.min.js" %}"></script>
     <script src="{% static "datatables.net-bs/js/dataTables.bootstrap.min.js" %}"></script>
     <script src="{% static "datatables.net-responsive/js/dataTables.responsive.min.js" %}"></script>
-    <script src="{% static "slate/bootstrap.min.js" %}"></script>
+    <script src="{% static "@bower_components/bootswatch-dist/js/bootstrap.min.js" %}"></script>
     <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
     <script src="{% static "assets/mediaviewer.js" %}"></script>
 {% endblock %}
