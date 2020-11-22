@@ -1,18 +1,36 @@
 {
-  "name": "MediaViewer",
-  "version": "0.1.1",
+  "name": "mediaviewer",
+  "version": "1.0.0",
+  "description": "Track media files",
   "main": "index.js",
-  "repository": "git@github.com:kyokley/MediaViewer.git",
-  "author": "Kevin Yokley <kyokley2@gmail.com>",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node -e \"try { require('fs').symlinkSync(require('path').resolve('node_modules/@bower_components'), 'static/bower_components', 'junction') } catch (e) { }\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kyokley/MediaViewer.git"
+  },
+  "author": "Kevin Yokley",
   "license": "MIT",
-  "private": true,
+  "bugs": {
+    "url": "https://github.com/kyokley/MediaViewer/issues"
+  },
+  "homepage": "https://github.com/kyokley/MediaViewer#readme",
   "dependencies": {
-    "bootstrap": "3.3.7",
-    "datatables.net": "^1.10.19",
-    "datatables.net-bs": "^1.10.19",
-    "datatables.net-responsive": "^2.2.3",
-    "datatables.net-responsive-bs": "^2.2.3",
-    "jquery": "=3.4.1",
-    "jquery.shorten": "^1.0.0"
+    "yarn": "^1.22.10",
+    "@bower_components/bootstrap": "twbs/bootstrap#^3.3.7",
+    "@bower_components/bootswatch-dist": "dbtek/bootswatch-dist#slate",
+    "@bower_components/datatables.net": "DataTables/Dist-DataTables#^1.10.12",
+    "@bower_components/datatables.net-bs": "DataTables/Dist-DataTables-Bootstrap#^1.10.12",
+    "@bower_components/datatables.net-responsive": "DataTables/Dist-DataTables-Responsive#^2.1.0",
+    "@bower_components/datatables.net-responsive-bs": "DataTables/Dist-DataTables-Responsive-Bootstrap#^2.1.0",
+    "@bower_components/jquery": "jquery/jquery-dist#^3.1.1"
+  },
+  "engines": {
+    "yarn": ">= 1.0.0"
   }
 }

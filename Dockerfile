@@ -1,4 +1,18 @@
-FROM python:3.8-slim AS base
+ARG BASE_IMAGE=python:3.8-slim
+
+FROM ${BASE_IMAGE} AS static-builder
+WORKDIR /code
+
+RUN apt-get update && apt-get install -y \
+        npm \
+        make
+
+RUN npm install -g yarn
+RUN mkdir /code/static
+COPY package.json /code/package.json
+RUN yarn install
+
+FROM ${BASE_IMAGE} AS base
 
 MAINTAINER Kevin Yokley
 
@@ -40,13 +54,6 @@ RUN apt-get update && apt-get install -y \
         libpq-dev \
         make
 
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
-RUN apt-get update && apt-get install -y yarn nodejs
-COPY package.json /node/package.json
-RUN cd /node && yarn install
-
 RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
 
 COPY poetry.lock /code/poetry.lock
@@ -57,6 +64,8 @@ RUN /bin/bash -c "cd /code && \
                   /root/.poetry/bin/poetry install -vvv --no-dev"
 
 WORKDIR /code
+
+COPY --from=static-builder /code/node_modules /node/node_modules
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod

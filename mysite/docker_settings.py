@@ -23,30 +23,31 @@ DATABASES = {
     },
 }
 
-INSTALLED_APPS += (
-    'silk',
-    'django_nose',
-    'debug_toolbar',
-)
+if DEBUG:
+    INSTALLED_APPS += (
+        'silk',
+        'django_nose',
+        'debug_toolbar',
+    )
 
-MIDDLEWARE = (
-    'silk.middleware.SilkyMiddleware',
-) + MIDDLEWARE
+    MIDDLEWARE = (
+        'silk.middleware.SilkyMiddleware',
+    ) + MIDDLEWARE
 
-MIDDLEWARE += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
+    MIDDLEWARE += (
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    )
+
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+    NOSE_ARGS = [
+            '--with-coverage',
+            '--cover-package=mediaviewer',
+    ]
 
 STATICFILES_DIRS += (
     '/node/node_modules',
 )
-
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
-NOSE_ARGS = [
-        '--with-coverage',
-        '--cover-package=mediaviewer',
-]
 
 
 WAITER_STATUS_URL = 'http://mediawaiter:5000/waiter/status'
