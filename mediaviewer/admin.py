@@ -7,6 +7,7 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.request import Request
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.donation_site import DonationSite
+from mediaviewer.models.videoprogress import VideoProgress
 
 
 @admin.register(Path)
@@ -92,4 +93,13 @@ class DonationSiteAdmin(admin.ModelAdmin):
     list_display = ('id',
                     'site_name',
                     'url',
+                    )
+
+
+@admin.register(VideoProgress)
+class VideoProgressAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'user',
+                    'file',
+                    'offset',
                     )
