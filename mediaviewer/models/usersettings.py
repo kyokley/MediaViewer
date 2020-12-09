@@ -70,6 +70,7 @@ class UserSettings(models.Model):
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'usersettings'
+        verbose_name_plural = 'User Settings'
 
     def __str__(self):
         return 'id: %s u: %s ip: %s' % (

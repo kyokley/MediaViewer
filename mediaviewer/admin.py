@@ -100,6 +100,11 @@ class DonationSiteAdmin(admin.ModelAdmin):
 class VideoProgressAdmin(admin.ModelAdmin):
     list_display = ('id',
                     'user',
-                    'file',
+                    'file_filename',
                     'offset',
                     )
+
+    def file_filename(self, obj):
+        return f'{obj.file.filename}'
+
+    file_filename.short_description = 'File'

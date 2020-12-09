@@ -21,6 +21,7 @@ class VideoProgress(models.Model):
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'videoprogress'
+        verbose_name_plural = 'Video Progress'
 
     def _unicode__(self):
         return 'id: %s f: %s o: %s' % (self.id,
