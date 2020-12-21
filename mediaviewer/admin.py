@@ -51,6 +51,10 @@ class DownloadTokenAdmin(admin.ModelAdmin):
                     'ismovie',
                     'datecreated',
                     )
+    search_fields = ('id',
+                     'displayname',
+                     'user__username',
+                     )
 
 
 @admin.register(Request)
