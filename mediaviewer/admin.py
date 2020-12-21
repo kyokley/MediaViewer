@@ -1,4 +1,5 @@
 from django.contrib import admin
+from mediaviewer.models.genre import Genre
 from mediaviewer.models.path import Path
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.usersettings import UserSettings
@@ -34,10 +35,12 @@ class PathAdmin(admin.ModelAdmin):
 class FileAdmin(admin.ModelAdmin):
     list_display = ('id',
                     'filename',
-                    'displayName',
                     'hide',
                     'datecreated',
                     )
+    search_fields = ('id',
+                     'filename',
+                     )
 
 
 @admin.register(DownloadToken)
@@ -108,3 +111,13 @@ class VideoProgressAdmin(admin.ModelAdmin):
         return f'{obj.file.filename}'
 
     file_filename.short_description = 'File'
+
+
+@admin.register(Genre)
+class GenreAdmin(admin.ModelAdmin):
+    list_display = ('id',
+                    'genre',
+                    )
+    search_fields = ('id',
+                     'genre',
+                     )
