@@ -87,6 +87,8 @@ class TestSetSiteWideContext(TestCase):
         expected = {'loggedin': True,
                     'is_staff': 'true',
                     'default_sort': FILENAME_SORT,
+                    'donation_site_name': '',
+                    'donation_site_url': '',
                     'user': self.user,
                     'movie_genres': self.mock_get_movie_genres.return_value,
                     'tv_genres': self.mock_get_tv_genres.return_value}
@@ -105,6 +107,8 @@ class TestSetSiteWideContext(TestCase):
         expected = {'loggedin': True,
                     'is_staff': 'false',
                     'default_sort': FILENAME_SORT,
+                    'donation_site_name': '',
+                    'donation_site_url': '',
                     'user': self.user,
                     'movie_genres': self.mock_get_movie_genres.return_value,
                     'tv_genres': self.mock_get_tv_genres.return_value}
