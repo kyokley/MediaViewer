@@ -1,5 +1,6 @@
 from django.conf.urls import include, url
 from django.conf import settings as conf_settings
+from django.conf.urls.static import static
 
 from django.contrib import admin
 admin.autodiscover()
@@ -17,7 +18,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^mediaviewer/',
         include(('mediaviewer.urls', 'mediaviewer'), namespace='mediaviewer')),
-]
+] + static(conf_settings.MEDIA_URL, document_root=conf_settings.MEDIA_ROOT)
 
 if conf_settings.USE_SILK:
     urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
