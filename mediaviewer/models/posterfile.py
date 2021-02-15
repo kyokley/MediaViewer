@@ -46,7 +46,7 @@ class PosterFile(models.Model):
     rated = models.TextField(blank=True, null=True)
     rating = models.TextField(blank=True, null=True)
     tmdb_id = models.TextField(blank=True, null=True)
-    poster_url = models.URLField(blank=True, null=True)
+    poster_url = models.TextField(blank=True, null=True)
     tagline = models.TextField(blank=True, null=True)
 
     class Meta:
