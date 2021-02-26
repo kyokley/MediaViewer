@@ -25,12 +25,12 @@ live-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec mediaviewer /bin/bash
 
 shell: ## Open a shell in a mediaviewer container
-	docker-compose run --no-deps mediaviewer /bin/bash
+	docker-compose run mediaviewer /bin/bash
 
 db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
-tests: build-dev ## Run tests
+tests: build-dev up ## Run tests
 	./run-tests.sh
 
 stop-all-but-db: ## Bring all containers down except postgres
