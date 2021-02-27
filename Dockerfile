@@ -23,9 +23,6 @@ ENV VIRTUAL_ENV=/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN echo 'alias venv="source /venv/bin/activate"' >> /root/.bashrc
-RUN echo 'export PATH=$PATH:/root/.poetry/bin' >> /root/.bashrc
-
 # Add virtualenv to bash prompt
 RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
               _OLD_VIRTUAL_PS1="${PS1:-}" \n\
@@ -45,7 +42,6 @@ RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
 
 # Install required packages and remove the apt packages cache when done.
 RUN apt-get update && apt-get install -y \
-        curl \
         gnupg \
         g++ \
         git \
@@ -54,16 +50,12 @@ RUN apt-get update && apt-get install -y \
         libpq-dev \
         make
 
-RUN curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-
-COPY poetry.lock /code/poetry.lock
-COPY pyproject.toml /code/pyproject.toml
-
-RUN /bin/bash -c "cd /code && \
-                  pip install --upgrade pip && \
-                  /root/.poetry/bin/poetry install -vvv --no-dev"
+RUN pip install -U pip poetry
 
 WORKDIR /code
+COPY poetry.lock pyproject.toml /code
+
+RUN poetry install --no-dev
 
 COPY --from=static-builder /code/node_modules /node/node_modules
 
@@ -75,5 +67,4 @@ CMD uwsgi --ini /code/uwsgi/uwsi.conf
 
 # ********************* Begin Dev Image ******************
 FROM base AS dev
-RUN /bin/bash -c "cd /code && \
-                  /root/.poetry/bin/poetry install -vvv"
+RUN poetry install
