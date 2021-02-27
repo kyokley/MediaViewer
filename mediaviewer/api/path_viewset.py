@@ -2,20 +2,20 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import SuspiciousOperation
 from rest_framework import viewsets
 from rest_framework import status as RESTstatus
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response as RESTResponse
 from mediaviewer.api.serializers import (PathSerializer,
                                          MoviePathSerializer,
                                          TvPathSerializer,
                                          )
 from mediaviewer.models.path import Path
+from mediaviewer.api.permissions import IsStaffOrReadOnly
 
 from mediaviewer.log import log
 from mediaviewer.utils import query_param_to_bool
 
 
 class PathViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsStaffOrReadOnly,)
     queryset = Path.objects.all().order_by('id')
     serializer_class = PathSerializer
 

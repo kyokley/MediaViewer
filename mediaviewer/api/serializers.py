@@ -144,6 +144,8 @@ class FileSerializer(serializers.ModelSerializer):
                   'size',
                   'streamable',
                   'ismovie',
+                  'displayname',
+                  'watched',
                   )
     pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=False, source='path.localpathstr')
@@ -153,6 +155,17 @@ class FileSerializer(serializers.ModelSerializer):
     size = serializers.IntegerField(required=False)
     streamable = serializers.BooleanField(required=False)
     ismovie = serializers.ReadOnlyField(source='path.is_movie')
+    displayname = serializers.ReadOnlyField(source='displayName')
+    watched = serializers.SerializerMethodField('get_watched')
+
+    def get_watched(self, obj):
+        request = self.context.get('request')
+        if request is not None:
+            uc = obj.usercomment(request.user)
+            if uc and uc.viewed:
+                return True
+        return False
+
 
 
 class MovieFileSerializer(FileSerializer):

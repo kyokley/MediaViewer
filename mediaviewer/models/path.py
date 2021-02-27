@@ -205,10 +205,15 @@ class Path(models.Model):
 
     @classmethod
     def populate_all_posterfiles(cls):
-        all_paths = cls.objects.filter(is_movie=False).all()
+        all_paths = (
+            cls.objects.filter(is_movie=False)
+                       .exclude(
+                           pk__in=PosterFile.objects.filter(
+                               path__isnull=False).values('path'))
+        )
         for path in all_paths:
             path.posterfile
-            time.sleep(.5)
+            time.sleep(.25)
 
     @classmethod
     def get_tv_genres(cls):

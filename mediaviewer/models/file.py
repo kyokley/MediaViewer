@@ -339,11 +339,15 @@ class File(models.Model):
         if self.isMovie():
             return self.rawSearchString()
         else:
-            name = self.getScrapedName()
+            name = (
+                self.posterfile.episodename
+                if self.posterfile and self.posterfile.episodename
+                else self.getScrapedName()
+            )
             season = self.getScrapedSeason()
             episode = self.getScrapedEpisode()
             if name and season and episode:
-                fullname = '%s S%s E%s' % (name, season, episode)
+                fullname = f'S{season} E{episode}: {name}'
             else:
                 fullname = name
             return fullname
@@ -405,11 +409,18 @@ class File(models.Model):
 
     @classmethod
     def populate_all_posterfiles(cls):
-        all_files = cls.objects.filter(
-                path__is_movie=True).filter(hide=False).all()
+        all_files = cls.objects.exclude(
+            pk__in=PosterFile.objects.filter(
+                file__isnull=False).values('file'))
+        missing_count = all_files.count()
+        fixed_count = 0
         for file in all_files:
             file.posterfile
-            time.sleep(.5)
+            fixed_count += 1
+            time.sleep(.25)
+
+            if fixed_count % 10 == 0:
+                print(f'Fixed {fixed_count} of {missing_count}')
 
     @classmethod
     def get_movie_genres(cls):
