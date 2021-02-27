@@ -204,11 +204,28 @@ class Path(models.Model):
         return file_count - usercomments_count
 
     @classmethod
-    def populate_all_posterfiles(cls):
-        all_paths = cls.objects.filter(is_movie=False).all()
+    def populate_all_posterfiles(cls, batch=None):
+        all_paths = (
+            cls.objects.filter(is_movie=False)
+                       .exclude(
+                           pk__in=PosterFile.objects.filter(
+                               path__isnull=False).values('path'))
+                       .order_by('-id')
+        )
+
+        if batch:
+            all_paths = all_paths[:batch]
+
+        missing_count = all_paths.count()
+        fixed_count = 0
         for path in all_paths:
             path.posterfile
-            time.sleep(.5)
+            fixed_count += 1
+            time.sleep(.25)
+
+            if fixed_count % 10 == 0:
+                print(f'Fixed {fixed_count} of {missing_count}')
+        print(f'Fixed {fixed_count} of {missing_count}')
 
     @classmethod
     def get_tv_genres(cls):

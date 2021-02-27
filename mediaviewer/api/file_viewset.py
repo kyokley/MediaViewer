@@ -6,12 +6,14 @@ from rest_framework.response import Response as RESTResponse
 from mediaviewer.api.serializers import (FileSerializer,
                                          MovieFileSerializer,
                                          )
+from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.models.file import File
 from mediaviewer.log import log
 
 
 class FileViewSet(viewsets.ModelViewSet):
-    queryset = File.objects.all().order_by('id')
+    permission_classes = (IsStaffOrReadOnly,)
+    queryset = File.objects.order_by('id')
     serializer_class = FileSerializer
 
     def get_queryset(self):

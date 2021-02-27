@@ -1,9 +1,12 @@
+import pytest
+
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 from mediaviewer.models.path import Path
 from mediaviewer.models.file import File
+from mediaviewer.models.usersettings import UserSettings
 
 
 class MovieFileViewSetTests(APITestCase):
@@ -244,7 +247,9 @@ class TvFileViewSetTests(APITestCase):
                                  'size': self.tvFile.size,
                                  'streamable': True,
                                  'localpath': self.tvFile.path.localpathstr,
-                                 'ismovie': self.tvFile.isMovie()
+                                 'ismovie': self.tvFile.isMovie(),
+                                 'watched': False,
+                                 'displayname': 'some.tv.show',
                                  }],
                     }
         actual = dict(response.data)
@@ -311,3 +316,111 @@ class TvFileViewSetTests(APITestCase):
                                            args=[self.movieFile.id]),
                                    self.data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    'tv_or_movie', ('tv', 'movie'))
+class TestBasicAuthAPIAccess:
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        self.client = APIClient()
+
+        self.tvPath = Path()
+        self.tvPath.localpathstr = '/some/local/path'
+        self.tvPath.remotepathstr = '/some/local/path'
+        self.tvPath.skip = False
+        self.tvPath.is_movie = False
+        self.tvPath.server = 'a.server'
+        self.tvPath.save()
+
+        self.anotherTvPath = Path()
+        self.anotherTvPath.localpathstr = '/path/to/folder'
+        self.anotherTvPath.remotepathstr = '/path/to/folder'
+        self.anotherTvPath.skip = False
+        self.anotherTvPath.is_movie = False
+        self.anotherTvPath.server = 'a.server'
+        self.anotherTvPath.save()
+
+        self.tvFile = File()
+        self.tvFile.filename = 'some.tv.show'
+        self.tvFile.skip = False
+        self.tvFile.finished = True
+        self.tvFile.size = 100
+        self.tvFile.streamable = True
+        self.tvFile.path = self.tvPath
+        self.tvFile.hide = False
+        self.tvFile.save()
+
+        self.anotherTvFile = File()
+        self.anotherTvFile.filename = 'another.tv.show'
+        self.anotherTvFile.skip = False
+        self.anotherTvFile.finished = True
+        self.anotherTvFile.size = 100
+        self.anotherTvFile.streamable = True
+        self.anotherTvFile.path = self.anotherTvPath
+        self.anotherTvFile.hide = False
+        self.anotherTvFile.save()
+
+        self.moviePath = Path()
+        self.moviePath.localpathstr = '/another/local/path'
+        self.moviePath.remotepathstr = '/another/local/path'
+        self.moviePath.skip = False
+        self.moviePath.is_movie = True
+        self.moviePath.server = 'a.server'
+        self.moviePath.save()
+
+        self.movieFile = File()
+        self.movieFile.filename = 'some.movie.show'
+        self.movieFile.skip = False
+        self.movieFile.finished = True
+        self.movieFile.size = 0
+        self.movieFile.streamable = True
+        self.movieFile.path = self.moviePath
+        self.movieFile.hide = False
+        self.movieFile.save()
+
+        self.password = 'password'
+        self.test_super_user = User.objects.create_superuser(
+            'test_super_user',
+            'test@super_user.com',
+            self.password)
+
+        self.test_user = UserSettings.new(
+            'test_user',
+            'test@user.com',
+            group=Group.objects.create(),
+            )
+        self.test_user.set_password(self.password)
+        self.test_user.save()
+
+    @pytest.mark.parametrize(
+        'user_type', ('regular', 'super'))
+    def test_path(self, user_type, tv_or_movie):
+        if user_type == 'regular':
+            user = self.test_user
+        else:
+            user = self.test_super_user
+
+        if tv_or_movie == 'tv':
+            path_id = self.tvPath.id
+        else:
+            path_id = self.moviePath.id
+
+        self.client.login(username=user.username,
+                          password=self.password)
+        response = self.client.get(
+            reverse(f'mediaviewer:api:{tv_or_movie}-list'),
+            {'pathid': path_id})
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_unauthorized_user(self, tv_or_movie):
+        if tv_or_movie == 'tv':
+            path_id = self.tvPath.id
+        else:
+            path_id = self.moviePath.id
+
+        response = self.client.get(
+            reverse(f'mediaviewer:api:{tv_or_movie}-list'),
+            {'pathid': path_id})
+        assert response.status_code == status.HTTP_403_FORBIDDEN

@@ -82,6 +82,8 @@ class TvPathViewSetTests(APITestCase):
         response = self.client.get(reverse('mediaviewer:api:tvpath-detail', args=[self.tvPath.id]))
         for k,v in response.data.items():
             actual = v
+            if not hasattr(self.tvPath, k):
+                continue
             expected = getattr(self.tvPath, k)
             expected = expected(self.test_user) if hasattr(expected, '__call__') else expected
             self.assertEqual(expected, actual, 'attr: %s expected: %s actual: %s' % (k, expected, actual))
@@ -101,6 +103,7 @@ class TvPathViewSetTests(APITestCase):
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': False,
                                  'finished': False,
+                                 'short_name': 'path',
                                  }],
                     }
         actual = dict(response.data)
@@ -160,6 +163,7 @@ class TestUnfinishedTVPaths:
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': False,
                                  'finished': False,
+                                 'short_name': 'path',
                                  }],
                     }
         actual = dict(response.data)
@@ -182,6 +186,7 @@ class TestUnfinishedTVPaths:
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': False,
                                  'finished': True,
+                                 'short_name': 'path',
                                  }],
                     }
         actual = dict(response.data)
@@ -281,7 +286,9 @@ class MoviePathViewSetTests(APITestCase):
                     'remotepath': u'/another/local/path',
                     'pk': self.moviePath.id,
                     'finished': False,
-                    'is_movie': True}
+                    'is_movie': True,
+                    'short_name': 'path',
+                    }
 
         self.assertEqual(expected, response.data)
 
@@ -300,6 +307,7 @@ class MoviePathViewSetTests(APITestCase):
                                  'number_of_unwatched_shows': 0,
                                  'is_movie': True,
                                  'finished': False,
+                                 'short_name': 'path',
                                  }],
                     }
         actual = dict(response.data)
