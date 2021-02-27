@@ -408,10 +408,14 @@ class File(models.Model):
             log.error(e)
 
     @classmethod
-    def populate_all_posterfiles(cls):
+    def populate_all_posterfiles(cls, batch=None):
         all_files = cls.objects.exclude(
             pk__in=PosterFile.objects.filter(
                 file__isnull=False).values('file'))
+
+        if batch:
+            all_files = all_files[:batch]
+
         missing_count = all_files.count()
         fixed_count = 0
         for file in all_files:
@@ -421,6 +425,7 @@ class File(models.Model):
 
             if fixed_count % 10 == 0:
                 print(f'Fixed {fixed_count} of {missing_count}')
+        print(f'Fixed {fixed_count} of {missing_count}')
 
     @classmethod
     def get_movie_genres(cls):
