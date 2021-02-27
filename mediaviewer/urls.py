@@ -167,7 +167,9 @@ if not conf_settings.IS_SYNCING:
             r'moviepath',
             path_viewset.MoviePathViewSet,
             basename='moviepath')
-    router.register(r'distinct-tv', path_viewset.DistinctTvPathViewSet, basename='distinct-tv')
+    router.register(r'distinct-tv',
+                    path_viewset.DistinctTvPathViewSet,
+                    basename='distinct-tv')
     router.register(r'datatransmission', viewset.DataTransmissionViewSet)
     router.register(r'error', viewset.ErrorViewSet)
     router.register(r'message', viewset.MessageViewSet)

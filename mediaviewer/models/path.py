@@ -210,6 +210,7 @@ class Path(models.Model):
                        .exclude(
                            pk__in=PosterFile.objects.filter(
                                path__isnull=False).values('path'))
+                       .order_by('-id')
         )
 
         if batch:

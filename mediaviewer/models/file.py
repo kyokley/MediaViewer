@@ -411,7 +411,8 @@ class File(models.Model):
     def populate_all_posterfiles(cls, batch=None):
         all_files = cls.objects.exclude(
             pk__in=PosterFile.objects.filter(
-                file__isnull=False).values('file'))
+                file__isnull=False).values('file')
+        ).order_by('-id')
 
         if batch:
             all_files = all_files[:batch]
