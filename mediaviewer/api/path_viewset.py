@@ -108,3 +108,11 @@ class TvPathViewSet(PathViewSet):
             queryset = queryset.filter(finished=finished)
 
         return queryset
+
+
+class DistinctTvPathViewSet(viewsets.ViewSet):
+    def list(self, request):
+        paths = Path.distinctShowFolders()
+        serializer = TvPathSerializer((paths[key] for key in paths),
+                                      many=True)
+        return RESTResponse(serializer.data)

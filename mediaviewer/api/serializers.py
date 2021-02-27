@@ -104,6 +104,7 @@ class PathSerializer(serializers.ModelSerializer):
                   'number_of_unwatched_shows',
                   'is_movie',
                   'finished',
+                  'short_name',
                   )
     pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=True, source='localpathstr')
@@ -113,6 +114,7 @@ class PathSerializer(serializers.ModelSerializer):
     number_of_unwatched_shows = serializers.SerializerMethodField('unwatched_shows')
     is_movie = serializers.BooleanField(required=True)
     finished = serializers.BooleanField(required=False)
+    short_name = serializers.ReadOnlyField(source='shortName')
 
     def unwatched_shows(self, obj):
         request = self.context.get('request')
