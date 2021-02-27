@@ -247,7 +247,9 @@ class TvFileViewSetTests(APITestCase):
                                  'size': self.tvFile.size,
                                  'streamable': True,
                                  'localpath': self.tvFile.path.localpathstr,
-                                 'ismovie': self.tvFile.isMovie()
+                                 'ismovie': self.tvFile.isMovie(),
+                                 'watched': False,
+                                 'displayname': 'some.tv.show',
                                  }],
                     }
         actual = dict(response.data)
