@@ -26,13 +26,7 @@ from mediaviewer.log import log
 
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):
-    queryset = DownloadToken.objects.all()
     serializer_class = DownloadTokenSerializer
-
-    def get_queryset(self):
-        queryset = DownloadToken.objects.all()
-        log.debug('Returning DownloadToken objects')
-        return queryset
 
     def retrieve(self, request, pk=None):
         log.debug('Attempting to find token with guid = %s' % pk)
@@ -41,6 +35,15 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
         if obj:
             log.debug('Found token. isValid: %s' % obj.isvalid)
         serializer = DownloadTokenSerializer(obj)
+        return RESTResponse(serializer.data)
+
+    def create(self, request):
+        user = request.user
+        file_id = request.data['file_id']
+        file = get_object_or_404(File.objects.filter(hide=False),
+                                 pk=file_id)
+        token = DownloadToken.new(user, file)
+        serializer = DownloadTokenSerializer(token)
         return RESTResponse(serializer.data)
 
 

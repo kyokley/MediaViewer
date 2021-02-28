@@ -41,6 +41,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
                   'previous_id',
                   'binge_mode',
                   'donation_site',
+                  'download_link',
                   )
     guid = serializers.CharField(required=True,
                                  max_length=32)
@@ -60,6 +61,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     previous_id = serializers.SerializerMethodField()
     binge_mode = serializers.SerializerMethodField()
     donation_site = serializers.SerializerMethodField()
+    download_link = serializers.SerializerMethodField()
 
     def get_username(self, obj):
         return obj.user.username
@@ -91,6 +93,11 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     def get_donation_site(self, obj):
         donation_site = DonationSite.objects.random()
         return DonationSiteSerializer(donation_site).data
+
+    def get_download_link(self, obj):
+        return obj.file.downloadLink(
+            obj.user,
+            obj.guid)
 
 
 class PathSerializer(serializers.ModelSerializer):
