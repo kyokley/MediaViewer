@@ -53,7 +53,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install -U pip poetry
 
 WORKDIR /code
-COPY poetry.lock pyproject.toml /code
+COPY poetry.lock pyproject.toml /code/
 
 RUN poetry install --no-dev
 
