@@ -174,22 +174,6 @@ class FileSerializer(serializers.ModelSerializer):
         return False
 
 
-
-class MovieFileSerializer(FileSerializer):
-    class Meta:
-        model = File
-        fields = ('pk',
-                  'path',
-                  'localpath',
-                  'filename',
-                  'skip',
-                  'finished',
-                  'size',
-                  'streamable',
-                  'ismovie',
-                  )
-
-
 class DataTransmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DataTransmission

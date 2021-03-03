@@ -3,9 +3,7 @@ from django.db import transaction
 from rest_framework import viewsets
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
-from mediaviewer.api.serializers import (FileSerializer,
-                                         MovieFileSerializer,
-                                         )
+from mediaviewer.api.serializers import FileSerializer
 from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.models.file import File
 from mediaviewer.log import log
@@ -106,7 +104,6 @@ class TvFileViewSet(FileViewSet):
 
 class MovieFileViewSet(FileViewSet):
     queryset = File.objects.filter(path__is_movie=True).order_by('id')
-    serializer_class = MovieFileSerializer
 
     def validate_path(self, serializer):
         if not serializer.instance.path.is_movie:
