@@ -104,7 +104,9 @@ class MovieFileViewSetTests(APITestCase):
                                  'size': self.movieFile.size,
                                  'streamable': True,
                                  'localpath': self.movieFile.path.localpathstr,
-                                 'ismovie': self.movieFile.isMovie()
+                                 'ismovie': self.movieFile.isMovie(),
+                                 'displayname': 'some movie show',
+                                 'watched': False,
                                  }],
                     }
         actual = dict(response.data)
