@@ -51,6 +51,7 @@ def filesdetail(request, file_id):
     return render(request, 'mediaviewer/filesdetail.html', context)
 
 
+@csrf_exempt
 @logAccessInfo
 def ajaxviewed(request):
     fileid = int(request.POST['fileid'])
