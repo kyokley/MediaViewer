@@ -26,6 +26,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         model = DownloadToken
         fields = ('guid',
                   'userid',
+                  'fileid',
                   'username',
                   'path',
                   'filename',
@@ -46,6 +47,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     guid = serializers.CharField(required=True,
                                  max_length=32)
     userid = serializers.IntegerField(required=True, source='user.id')
+    fileid = serializers.IntegerField(required=True, source='file.id')
     username = serializers.SerializerMethodField()
     path = serializers.CharField(required=True)
     filename = serializers.CharField(required=True)
