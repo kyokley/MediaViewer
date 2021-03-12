@@ -33,7 +33,7 @@
             </ol>
             <div class="row text-center">
                 <h2>
-                    {{ file.getScrapedFullName }}
+                    {{ file.displayName }}
                 </h2>
             </div>
             {% if posterfile.image %}
@@ -49,11 +49,7 @@
             {% endif %}
             <div class="row">
                 <h2>
-                    {% if posterfile.episodename %}
-                        <div class="row text-center">
-                            {{ posterfile.episodename }}
-                        </div>
-                    {% elif posterfile.tagline %}
+                    {% if posterfile.tagline %}
                         <div class="row text-center">
                             {{ posterfile.tagline }}
                         </div>

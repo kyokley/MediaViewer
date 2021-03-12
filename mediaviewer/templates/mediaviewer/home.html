@@ -156,9 +156,9 @@
                                     {% endif %}
                                 {% else %}
                                     {% if loggedin %}
-                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.getScrapedFullName }}</a></td>
+                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.display_name_with_path }}</a></td>
                                     {% else %}
-                                        <td>{{ file.getScrapedFullName }}</td>
+                                        <td>{{ file.display_name_with_path }}</td>
                                     {% endif %}
                                 {% endif %}
                             </tr>

@@ -66,7 +66,7 @@ class DownloadToken(models.Model):
             datecreated = datetime.now(pytz.timezone(conf_settings.TIME_ZONE))
         dt.datecreated = datecreated
 
-        dt.displayname = file.displayName()
+        dt.displayname = file.display_name_with_path()
         dt.file = file
         dt.save()
 

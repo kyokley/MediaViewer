@@ -335,7 +335,7 @@ class File(models.Model):
                 (episode.isdigit() and episode.zfill(2) or None) or
                 None)
 
-    def getScrapedFullName(self):
+    def getScrapedFullName(self, include_path_name=True):
         if self.isMovie():
             return self.rawSearchString()
         else:
@@ -347,13 +347,19 @@ class File(models.Model):
             season = self.getScrapedSeason()
             episode = self.getScrapedEpisode()
             if name and season and episode:
-                fullname = f'S{season} E{episode}: {name}'
+                if include_path_name:
+                    fullname = f'{self.path.displayName()} S{season} E{episode}: {name}'
+                else:
+                    fullname = f'S{season} E{episode}: {name}'
             else:
                 fullname = name
             return fullname
 
     def displayName(self):
-        return self.getScrapedFullName()
+        return self.getScrapedFullName(include_path_name=False)
+
+    def display_name_with_path(self):
+        return self.getScrapedFullName(include_path_name=True)
 
     def inferScraper(self, scrapers=None):
         if self.isMovie():
@@ -460,9 +466,7 @@ class File(models.Model):
 
     def display_payload(self):
         payload = {'id': self.id,
-                   'name': (self.rawSearchString()
-                            if self.isMovie() else
-                            self.getScrapedFullName()),
+                   'name': self.displayName(),
                    'dateCreatedForSpan': self.dateCreatedForSpan(),
                    'date': self.datecreated.date(),
                    }
