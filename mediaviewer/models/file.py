@@ -19,7 +19,7 @@ from mediaviewer.models.usersettings import (LOCAL_IP,
 
 from mediaviewer.log import log
 
-yearRegex = re.compile(r'20[01]\d.*$')
+yearRegex = re.compile(r'20\d{2}\D?.*$')
 dvdRegex = re.compile(r'[A-Z]{2,}.*$')
 formatRegex = re.compile(r'\b(xvid|avi|XVID|AVI)+\b')
 punctuationRegex = re.compile(r'[^a-zA-Z0-9]+')
