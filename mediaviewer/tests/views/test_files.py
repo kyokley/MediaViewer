@@ -519,7 +519,7 @@ class TestTvShows(TestCase):
             'jump_to_last': True,
             'active_page': 'tvshows',
             'title': 'Tv Local Path',
-            'long_plot': False,
+            'long_plot': '',
         }
 
         expected = self.mock_render.return_value
