@@ -31,7 +31,10 @@ db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
 tests: build-dev up ## Run tests
-	./run-tests.sh
+	docker-compose run --rm mediaviewer /venv/bin/pytest
+
+bandit: build-dev ## Run bandit tests
+	docker-compose run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests -r .
 
 stop-all-but-db: ## Bring all containers down except postgres
 	docker-compose down
