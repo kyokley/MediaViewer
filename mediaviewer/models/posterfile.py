@@ -222,15 +222,15 @@ class PosterFile(models.Model):
 
         if cast_and_crew:
             for actor in cast_and_crew['cast']:
-                actor_obj = Actor.new(actor['name'], order=actor.get('order'))
+                actor_obj = Actor.objects.create(name=actor['name'], order=actor.get('order'))
                 self.actors.add(actor_obj)
 
             for job in cast_and_crew['crew']:
                 if job['job'] == 'Writer':
-                    writer_obj = Writer.new(job['name'])
+                    writer_obj = Writer.objects.create(name=job['name'])
                     self.writers.add(writer_obj)
                 elif job['job'] == 'Director':
-                    director_obj = Director.new(job['name'])
+                    director_obj = Director.objects.create(name=job['name'])
                     self.directors.add(director_obj)
 
     def _tvdb_episode_info(self, tvdb_id):

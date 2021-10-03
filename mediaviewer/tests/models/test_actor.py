@@ -16,5 +16,5 @@ class TestCreate:
                              order=expected_order)
 
         new_actor = Actor.objects.get()
-        assert new_actor.name == self.test_name
+        assert new_actor.name == 'Test_Name'
         assert new_actor.order == expected_order
