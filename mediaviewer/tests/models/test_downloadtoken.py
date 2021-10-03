@@ -1,6 +1,5 @@
 import mock
-
-from django.test import TestCase
+import pytest
 
 from mediaviewer.tests import helpers
 from mediaviewer.models.downloadtoken import DownloadToken
@@ -9,23 +8,18 @@ from mediaviewer.models.path import Path
 from django.conf import settings
 
 
-class TestDownloadToken(TestCase):
-    def setUp(self):
-        self.save_patcher = mock.patch(
+@pytest.mark.django_db
+class TestDownloadToken:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_save = mocker.patch(
             'mediaviewer.models.downloadtoken.DownloadToken.save')
-        self.mock_save = self.save_patcher.start()
-        self.addCleanup(self.save_patcher.stop)
 
-        self.objects_patcher = mock.patch(
+        self.mock_objects = mocker.patch(
             'mediaviewer.models.downloadtoken.DownloadToken.objects')
-        self.mock_objects = self.objects_patcher.start()
-        self.addCleanup(self.objects_patcher.stop)
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.downloadtoken.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
-        self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.user = helpers.create_user()
 
@@ -50,14 +44,14 @@ class TestDownloadToken(TestCase):
         dt = DownloadToken.new(self.user,
                                self.file)
 
-        self.assertEqual(dt.filename, 'some file')
-        self.assertEqual(dt.path, '/path/to/file')
-        self.assertEqual(dt.ismovie, False)
-        self.assertEqual(dt.displayname, 'some file')
-        self.assertEqual(dt.file, self.file)
+        assert dt.filename == 'some file'
+        assert dt.path == '/path/to/file'
+        assert not dt.ismovie
+        assert dt.displayname == 'some file'
+        assert dt.file == self.file
         self.mock_save.assert_called_once_with()
-        self.assertTrue(self.mock_objects.count.called)
-        self.assertTrue(old_token.delete.called)
+        assert self.mock_objects.count.called
+        assert old_token.delete.called
         self.mock_createLastWatchedMessage.assert_called_once_with(
             self.user,
             self.file)
@@ -66,4 +60,4 @@ class TestDownloadToken(TestCase):
         self.mock_objects.count.return_value = 1
         dt = DownloadToken.new(self.user,
                                self.file)
-        self.assertTrue(dt.isvalid)
+        assert dt.isvalid

@@ -1,6 +1,5 @@
-import mock
+import pytest
 
-from django.test import TestCase
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
@@ -9,7 +8,7 @@ from mediaviewer.tests import helpers
 from mediaviewer.utils import getSomewhatUniqueID
 
 
-class BaseVPTest(TestCase):
+class BaseVPTest:
     def setUp(self):
         self.user = helpers.create_user(random=True)
         self.user2 = helpers.create_user(random=True)
@@ -36,26 +35,22 @@ class BaseVPTest(TestCase):
                                     self.file)
 
 
+@pytest.mark.django_db
 class TestDestroy(BaseVPTest):
-    def setUp(self):
-        clearLastWatchedMessage_patcher = mock.patch(
-            'mediaviewer.models.videoprogress.Message.clearLastWatchedMessage')
-        self.mock_clearLastWatchedMessage = (
-            clearLastWatchedMessage_patcher.start())
-        self.addCleanup(clearLastWatchedMessage_patcher.stop)
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_clearLastWatchedMessage = mocker.patch('mediaviewer.models.videoprogress.Message.clearLastWatchedMessage')
 
-        super(TestDestroy, self).setUp()
+        super().setUp()
 
     def test_no_videoprogress(self):
         expected = None
         actual = VideoProgress.destroy(self.user,
                                        'non-existent_filename_hash')
 
-        self.assertEqual(expected, actual)
-        self.assertFalse(self.mock_clearLastWatchedMessage.called)
-        self.assertEqual(
-            [self.vp],
-            list(VideoProgress.objects.all()))
+        assert expected == actual
+        assert not self.mock_clearLastWatchedMessage.called
+        assert [self.vp] == list(VideoProgress.objects.all())
 
     def test_no_next(self):
         expected = None
@@ -63,9 +58,9 @@ class TestDestroy(BaseVPTest):
             self.user,
             self.hashed_filename)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_clearLastWatchedMessage.assert_called_once_with(self.user)
-        self.assertFalse(VideoProgress.objects.exists())
+        assert not VideoProgress.objects.exists()
 
     def test_with_next_file(self):
         File.new('test_filename2',
@@ -76,11 +71,12 @@ class TestDestroy(BaseVPTest):
             self.user,
             self.hashed_filename)
 
-        self.assertEqual(expected, actual)
-        self.assertFalse(self.mock_clearLastWatchedMessage.called)
-        self.assertFalse(VideoProgress.objects.exists())
+        assert expected == actual
+        assert not self.mock_clearLastWatchedMessage.called
+        assert not VideoProgress.objects.exists()
 
 
+@pytest.mark.django_db
 class TestCreateOrUpdate(BaseVPTest):
     def test_new_file_vp(self):
         vp = VideoProgress.createOrUpdate(
@@ -89,7 +85,7 @@ class TestCreateOrUpdate(BaseVPTest):
             self.hashed_filename2,
             100,
             self.file2)
-        self.assertNotEqual(self.vp, vp)
+        assert self.vp != vp
 
     def test_new_user_vp(self):
         vp = VideoProgress.createOrUpdate(
@@ -98,7 +94,7 @@ class TestCreateOrUpdate(BaseVPTest):
             self.hashed_filename2,
             100,
             self.file)
-        self.assertNotEqual(self.vp, vp)
+        assert self.vp != vp
 
     def test_return_existing(self):
         vp = VideoProgress.createOrUpdate(
@@ -107,29 +103,31 @@ class TestCreateOrUpdate(BaseVPTest):
             self.hashed_filename,
             100,
             self.file)
-        self.assertEqual(self.vp, vp)
+        assert self.vp == vp
 
 
+@pytest.mark.django_db
 class TestGet(BaseVPTest):
     def test_no_matching_vp(self):
         vp = VideoProgress.get(
             self.user,
             self.hashed_filename2)
-        self.assertIsNone(vp)
+        assert vp is None
 
     def test_nomatching_for_user(self):
         vp = VideoProgress.get(
             self.user2,
             self.hashed_filename)
-        self.assertIsNone(vp)
+        assert vp is None
 
     def test_found(self):
         vp = VideoProgress.get(
             self.user,
             self.hashed_filename)
-        self.assertEqual(self.vp, vp)
+        assert self.vp == vp
 
 
+@pytest.mark.django_db
 class TestNew(BaseVPTest):
     def test_new(self):
         test_filename = getSomewhatUniqueID()
@@ -142,8 +140,8 @@ class TestNew(BaseVPTest):
             100,
             self.file2)
 
-        self.assertEqual(vp.user, self.user)
-        self.assertEqual(vp.filename, test_filename)
-        self.assertEqual(vp.hashed_filename, hashed_filename)
-        self.assertEqual(vp.offset, 100)
-        self.assertEqual(vp.file, self.file2)
+        assert vp.user == self.user
+        assert vp.filename == test_filename
+        assert vp.hashed_filename == hashed_filename
+        assert vp.offset == 100
+        assert vp.file == self.file2

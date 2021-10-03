@@ -1,15 +1,16 @@
-import mock
+import pytest
 
 from datetime import datetime, timedelta
 
 from django.utils.timezone import utc
-from django.test import TestCase
 
 from mediaviewer.models.path import Path
 from mediaviewer.models.file import File
 
 
-class TestProperties(TestCase):
+@pytest.mark.django_db
+class TestProperties:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.local_path = '/local/path/to/dir'
         self.remote_path = '/remote/path/to/dir'
@@ -21,29 +22,31 @@ class TestProperties(TestCase):
             server='localhost')
 
     def test_new(self):
-        self.assertEqual(self.path_obj.localpathstr, self.local_path)
-        self.assertEqual(self.path_obj.remotepathstr, self.remote_path)
-        self.assertEqual(self.path_obj.is_movie, True)
-        self.assertEqual(self.path_obj.skip, False)
-        self.assertEqual(self.path_obj.server, 'localhost')
+        assert self.path_obj.localpathstr == self.local_path
+        assert self.path_obj.remotepathstr == self.remote_path
+        assert self.path_obj.is_movie
+        assert not self.path_obj.skip
+        assert self.path_obj.server == 'localhost'
 
     def test_shortName(self):
         expected = 'dir'
         actual = self.path_obj.shortName
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_localPath(self):
         expected = self.local_path
         actual = self.path_obj.localPath
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_remotePath(self):
         expected = self.remote_path
         actual = self.path_obj.remotePath
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestUrl(TestCase):
+@pytest.mark.django_db
+class TestUrl:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.local_path = '/local/path/to/dir'
         self.remote_path = '/remote/path/to/dir'
@@ -60,7 +63,7 @@ class TestUrl(TestCase):
             self.path_obj.id)
         actual = self.path_obj.url()
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_url_for_movie(self):
         self.path_obj = Path.objects.create(
@@ -70,11 +73,13 @@ class TestUrl(TestCase):
             skip=False,
             server='localhost')
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             self.path_obj.url()
 
 
-class TestDisplayName(TestCase):
+@pytest.mark.django_db
+class TestDisplayName:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.local_path = '/local/path/to/dir/this.is.a.test.dir'
         self.remote_path = '/remote/path/to/dir'
@@ -89,16 +94,17 @@ class TestDisplayName(TestCase):
         expected = 'This Is A Test Dir'
         actual = self.path_obj.displayName()
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_with_override(self):
         self.path_obj.override_display_name = 'Overridden Name'
 
-        self.assertEqual('Overridden Name',
-                         self.path_obj.displayName())
+        assert 'Overridden Name' == self.path_obj.displayName()
 
 
-class TestFiles(TestCase):
+@pytest.mark.django_db
+class TestFiles:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -135,10 +141,12 @@ class TestFiles(TestCase):
             self.tv_file4])
         actual = set(self.tv_path.files())
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestLastCreatedFileDateForSpan(TestCase):
+@pytest.mark.django_db
+class TestLastCreatedFileDateForSpan:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.path = Path.objects.create(localpathstr='tv.local.path',
                                         remotepathstr='tv.remote.path',
@@ -151,22 +159,20 @@ class TestLastCreatedFileDateForSpan(TestCase):
         expected = '2018-11-01'
         actual = self.path.lastCreatedFileDateForSpan()
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_no_lastCreatedFileDate(self):
         expected = None
         actual = self.path.lastCreatedFileDateForSpan()
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestDistinctShowFolders(TestCase):
-    def setUp(self):
-        buildDistinctShowFoldersFromPaths_patcher = mock.patch(
-            'mediaviewer.models.path.Path._buildDistinctShowFoldersFromPaths')
-        self.mock_buildDistinctShowFolderFromPaths = (
-            buildDistinctShowFoldersFromPaths_patcher.start())
-        self.addCleanup(buildDistinctShowFoldersFromPaths_patcher.stop)
+@pytest.mark.django_db
+class TestDistinctShowFolders:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_buildDistinctShowFolderFromPaths = mocker.patch('mediaviewer.models.path.Path._buildDistinctShowFoldersFromPaths')
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -199,12 +205,14 @@ class TestDistinctShowFolders(TestCase):
         expected = self.mock_buildDistinctShowFolderFromPaths.return_value
         actual = Path.distinctShowFolders()
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_buildDistinctShowFolderFromPaths.assert_called_once_with(
             set([self.tv_path, self.tv_path2]))
 
 
-class TestBuildDistinctShowFoldersFromPaths(TestCase):
+@pytest.mark.django_db
+class TestBuildDistinctShowFoldersFromPaths:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -230,10 +238,12 @@ class TestBuildDistinctShowFoldersFromPaths(TestCase):
             self.tv_path2,
             self.tv_path3])
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestDestroy(TestCase):
+@pytest.mark.django_db
+class TestDestroy:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -249,5 +259,5 @@ class TestDestroy(TestCase):
     def test_destroy(self):
         self.tv_path.destroy()
 
-        self.assertEqual(set(Path.objects.all()), set([self.tv_path2]))
-        self.assertEqual(set(File.objects.all()), set([self.tv_path2_file]))
+        assert set(Path.objects.all()) == set([self.tv_path2])
+        assert set(File.objects.all()) == set([self.tv_path2_file])
