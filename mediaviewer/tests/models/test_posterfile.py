@@ -1,4 +1,5 @@
 import mock
+import pytest
 from django.test import TestCase
 
 from mediaviewer.models.posterfile import PosterFile
@@ -776,22 +777,18 @@ class TestStoreTagline(TestCase):
         self.assertEqual(None, self.test_obj.tagline)
 
 
-class TestStoreExtendedInfo(TestCase):
-    def setUp(self):
-        getExtendedInfo_patcher = mock.patch(
+@pytest.mark.django_db
+class TestStoreExtendedInfo:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_getExtendedInfo = mocker.patch(
                 'mediaviewer.models.posterfile.getExtendedInfo')
-        self.mock_getExtendedInfo = getExtendedInfo_patcher.start()
-        self.addCleanup(getExtendedInfo_patcher.stop)
 
-        store_rating_patcher = mock.patch(
+        self.mock_store_rating = mocker.patch(
                 'mediaviewer.models.posterfile.PosterFile._store_rating')
-        self.mock_store_rating = store_rating_patcher.start()
-        self.addCleanup(store_rating_patcher.stop)
 
-        store_tagline_patcher = mock.patch(
+        self.mock_store_tagline = mocker.patch(
                 'mediaviewer.models.posterfile.PosterFile._store_tagline')
-        self.mock_store_tagline = store_tagline_patcher.start()
-        self.addCleanup(store_tagline_patcher.stop)
 
         self.tv_path = Path.new('tv.local.path',
                                 'tv.remote.path',
@@ -811,7 +808,7 @@ class TestStoreExtendedInfo(TestCase):
         expected = None
         actual = self.test_obj._store_extended_info()
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_getExtendedInfo.assert_called_once_with(
                 123,
                 isMovie=False)
@@ -821,7 +818,8 @@ class TestStoreExtendedInfo(TestCase):
                 self.mock_getExtendedInfo.return_value)
 
 
-class TestStoreRated(TestCase):
+class TestStoreRated:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.test_data = {'Rated': 'test_rated'}
 
@@ -831,8 +829,8 @@ class TestStoreRated(TestCase):
         expected = None
         actual = self.test_obj._store_rated(self.test_data)
 
-        self.assertEqual(expected, actual)
-        self.assertEqual('test_rated', self.test_obj.rated)
+        assert expected == actual
+        assert 'test_rated' == self.test_obj.rated
 
     def test_no_rated(self):
         self.test_data = {}
@@ -840,8 +838,8 @@ class TestStoreRated(TestCase):
         expected = None
         actual = self.test_obj._store_rated(self.test_data)
 
-        self.assertEqual(expected, actual)
-        self.assertEqual(None, self.test_obj.rated)
+        assert expected == actual
+        assert self.test_obj.rated is None
 
     def test_undefined(self):
         self.test_data = {'Rated': 'undefined'}
@@ -849,5 +847,5 @@ class TestStoreRated(TestCase):
         expected = None
         actual = self.test_obj._store_rated(self.test_data)
 
-        self.assertEqual(expected, actual)
-        self.assertEqual(None, self.test_obj.rated)
+        assert expected == actual
+        assert self.test_obj.rated is None
