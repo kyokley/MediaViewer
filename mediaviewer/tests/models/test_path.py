@@ -13,12 +13,12 @@ class TestProperties(TestCase):
     def setUp(self):
         self.local_path = '/local/path/to/dir'
         self.remote_path = '/remote/path/to/dir'
-        self.path_obj = Path.new(
-                self.local_path,
-                self.remote_path,
-                True,
-                skip=False,
-                server='localhost')
+        self.path_obj = Path.objects.create(
+            localpathstr=self.local_path,
+            remotepathstr=self.remote_path,
+            is_movie=True,
+            skip=False,
+            server='localhost')
 
     def test_new(self):
         self.assertEqual(self.path_obj.localpathstr, self.local_path)
@@ -49,26 +49,26 @@ class TestUrl(TestCase):
         self.remote_path = '/remote/path/to/dir'
 
     def test_url_for_tv(self):
-        self.path_obj = Path.new(
-                self.local_path,
-                self.remote_path,
-                False,
-                skip=False,
-                server='localhost')
+        self.path_obj = Path.objects.create(
+            localpathstr=self.local_path,
+            remotepathstr=self.remote_path,
+            is_movie=False,
+            skip=False,
+            server='localhost')
 
         expected = '<a href="/mediaviewer/tvshows/{}/">Dir</a>'.format(
-                self.path_obj.id)
+            self.path_obj.id)
         actual = self.path_obj.url()
 
         self.assertEqual(expected, actual)
 
     def test_url_for_movie(self):
-        self.path_obj = Path.new(
-                self.local_path,
-                self.remote_path,
-                True,
-                skip=False,
-                server='localhost')
+        self.path_obj = Path.objects.create(
+            localpathstr=self.local_path,
+            remotepathstr=self.remote_path,
+            is_movie=True,
+            skip=False,
+            server='localhost')
 
         with self.assertRaises(TypeError):
             self.path_obj.url()
@@ -78,12 +78,12 @@ class TestDisplayName(TestCase):
     def setUp(self):
         self.local_path = '/local/path/to/dir/this.is.a.test.dir'
         self.remote_path = '/remote/path/to/dir'
-        self.path_obj = Path.new(
-                self.local_path,
-                self.remote_path,
-                True,
-                skip=False,
-                server='localhost')
+        self.path_obj = Path.objects.create(
+            localpathstr=self.local_path,
+            remotepathstr=self.remote_path,
+            is_movie=True,
+            skip=False,
+            server='localhost')
 
     def test_no_override(self):
         expected = 'This Is A Test Dir'
@@ -100,15 +100,15 @@ class TestDisplayName(TestCase):
 
 class TestFiles(TestCase):
     def setUp(self):
-        self.tv_path = Path.new('tv.local.path',
-                                'tv.remote.path',
-                                is_movie=False)
-        self.tv_path2 = Path.new('tv.local.path',
-                                 'another.remote.path',
-                                 is_movie=False)
-        self.movie_path = Path.new('movie.local.path',
-                                   'movie.remote.path',
-                                   is_movie=True)
+        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
+                                           remotepathstr='tv.remote.path',
+                                           is_movie=False)
+        self.tv_path2 = Path.objects.create(localpathstr='tv.local.path',
+                                            remotepathstr='another.remote.path',
+                                            is_movie=False)
+        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
+                                              remotepathstr='movie.remote.path',
+                                              is_movie=True)
 
         self.tv_file = File.new('tv.file', self.tv_path)
         self.tv_file2 = File.new('tv.file2', self.tv_path)
@@ -116,16 +116,16 @@ class TestFiles(TestCase):
         self.tv_file4 = File.new('tv.file4', self.tv_path2)
 
         self.hidden_tv_file = File.new(
-                'hidden.tv.file',
-                self.tv_path,
-                hide=True)
+            'hidden.tv.file',
+            self.tv_path,
+            hide=True)
 
         self.movie_file = File.new('movie.file', self.movie_path)
         self.movie_file2 = File.new('movie.file2', self.movie_path)
         self.hidden_movie_file = File.new(
-                'hidden.movie.file',
-                self.movie_path,
-                hide=True)
+            'hidden.movie.file',
+            self.movie_path,
+            hide=True)
 
     def test_files(self):
         expected = set([
@@ -140,9 +140,9 @@ class TestFiles(TestCase):
 
 class TestLastCreatedFileDateForSpan(TestCase):
     def setUp(self):
-        self.path = Path.new('tv.local.path',
-                             'tv.remote.path',
-                             is_movie=False)
+        self.path = Path.objects.create(localpathstr='tv.local.path',
+                                        remotepathstr='tv.remote.path',
+                                        is_movie=False)
 
     def test_with_lastCreatedFileDate(self):
         self.path.lastCreatedFileDate = datetime(2018, 11, 1, 0, 0, 0, 0, utc)
@@ -165,34 +165,34 @@ class TestDistinctShowFolders(TestCase):
         buildDistinctShowFoldersFromPaths_patcher = mock.patch(
             'mediaviewer.models.path.Path._buildDistinctShowFoldersFromPaths')
         self.mock_buildDistinctShowFolderFromPaths = (
-                buildDistinctShowFoldersFromPaths_patcher.start())
+            buildDistinctShowFoldersFromPaths_patcher.start())
         self.addCleanup(buildDistinctShowFoldersFromPaths_patcher.stop)
 
-        self.tv_path = Path.new('tv.local.path',
-                                'tv.remote.path',
-                                is_movie=False)
+        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
+                                           remotepathstr='tv.remote.path',
+                                           is_movie=False)
         self.tv_file = File.new('tv.file', self.tv_path)
 
-        self.tv_path2 = Path.new('tv.local.path2',
-                                 'tv.remote.path2',
-                                 is_movie=False)
+        self.tv_path2 = Path.objects.create(localpathstr='tv.local.path2',
+                                            remotepathstr='tv.remote.path2',
+                                            is_movie=False)
         self.tv_file2 = File.new('tv.file2', self.tv_path2)
 
-        self.hidden_tv_path = Path.new('hidden.local.path',
-                                       'hidden.remote.path',
-                                       is_movie=False)
+        self.hidden_tv_path = Path.objects.create(localpathstr='hidden.local.path',
+                                                  remotepathstr='hidden.remote.path',
+                                                  is_movie=False)
         self.hidden_tv_file = File.new(
-                'hidden.file',
-                self.hidden_tv_path,
-                hide=True)
+            'hidden.file',
+            self.hidden_tv_path,
+            hide=True)
 
-        self.another_tv_path = Path.new('another.tv.local.path',
-                                        'another.tv.remote.path',
-                                        is_movie=False)
+        self.another_tv_path = Path.objects.create(localpathstr='another.tv.local.path',
+                                                   remotepathstr='another.tv.remote.path',
+                                                   is_movie=False)
 
-        self.movie_path = Path.new('movie.local.path',
-                                   'movie.remote.path',
-                                   is_movie=True)
+        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
+                                              remotepathstr='movie.remote.path',
+                                              is_movie=True)
         self.movie_file = File.new('movie.file', self.movie_path)
 
     def test_distinctShowFolders(self):
@@ -201,30 +201,30 @@ class TestDistinctShowFolders(TestCase):
 
         self.assertEqual(expected, actual)
         self.mock_buildDistinctShowFolderFromPaths.assert_called_once_with(
-                set([self.tv_path, self.tv_path2]))
+            set([self.tv_path, self.tv_path2]))
 
 
 class TestBuildDistinctShowFoldersFromPaths(TestCase):
     def setUp(self):
-        self.tv_path = Path.new('tv.local.path',
-                                'tv.remote.path',
-                                is_movie=False)
+        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
+                                           remotepathstr='tv.remote.path',
+                                           is_movie=False)
 
-        self.tv_path2 = Path.new('tv.local.path2',
-                                 'tv.remote.path2',
-                                 is_movie=False)
+        self.tv_path2 = Path.objects.create(localpathstr='tv.local.path2',
+                                            remotepathstr='tv.remote.path2',
+                                            is_movie=False)
         self.tv_path2.lastCreatedFileDate = (
-                datetime.now(utc) + timedelta(hours=1))
+            datetime.now(utc) + timedelta(hours=1))
 
-        self.tv_path3 = Path.new('tv.local.path2',
-                                 'another.tv.remote.path',
-                                 is_movie=False)
+        self.tv_path3 = Path.objects.create(localpathstr='tv.local.path2',
+                                            remotepathstr='another.tv.remote.path',
+                                            is_movie=False)
         self.tv_path3.lastCreatedFileDate = datetime.now(utc)
 
     def test_buildDistinctShowFoldersFromPaths(self):
         expected = {
-                'tv.local.path': self.tv_path,
-                'tv.local.path2': self.tv_path2}
+            'tv.local.path': self.tv_path,
+            'tv.local.path2': self.tv_path2}
         actual = Path._buildDistinctShowFoldersFromPaths([
             self.tv_path,
             self.tv_path2,
@@ -235,15 +235,15 @@ class TestBuildDistinctShowFoldersFromPaths(TestCase):
 
 class TestDestroy(TestCase):
     def setUp(self):
-        self.tv_path = Path.new('tv.local.path',
-                                'tv.remote.path',
-                                is_movie=False)
+        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
+                                           remotepathstr='tv.remote.path',
+                                           is_movie=False)
         self.tv_path_file = File.new('tv.file', self.tv_path)
         self.tv_path_file2 = File.new('tv.file2', self.tv_path)
 
-        self.tv_path2 = Path.new('tv.local.path2',
-                                 'tv.remote.path2',
-                                 is_movie=False)
+        self.tv_path2 = Path.objects.create(localpathstr='tv.local.path2',
+                                            remotepathstr='tv.remote.path2',
+                                            is_movie=False)
         self.tv_path2_file = File.new('tv.file', self.tv_path2)
 
     def test_destroy(self):

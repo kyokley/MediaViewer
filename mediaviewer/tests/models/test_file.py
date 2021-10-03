@@ -100,22 +100,24 @@ class TestGetScrapedNameOverrideFileName(TestCase):
 class TestNew(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
-                'mediaviewer.models.file.UserSettings.objects.filter')
+            'mediaviewer.models.file.UserSettings.objects.filter')
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
         self.createLastWatchedMessage_patcher = mock.patch(
-                'mediaviewer.models.file.Message.createLastWatchedMessage')
+            'mediaviewer.models.file.Message.createLastWatchedMessage')
         self.mock_createLastWatchedMessage = (
-                self.createLastWatchedMessage_patcher.start())
+            self.createLastWatchedMessage_patcher.start())
         self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
         self.mock_filter.return_value.all.return_value = (
-                self.mock_settings_queryset)
+            self.mock_settings_queryset)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
     def test_(self):
@@ -124,13 +126,13 @@ class TestNew(TestCase):
 
         self.mock_filter.assert_called_once_with(last_watched=self.path)
         self.mock_createLastWatchedMessage.assert_called_once_with(
-                self.mock_setting.user, new_file)
+            self.mock_setting.user, new_file)
 
 
 class TestDestroyPosterFile(TestCase):
     def setUp(self):
         self.get_patcher = mock.patch(
-                'mediaviewer.models.file.PosterFile.objects.get')
+            'mediaviewer.models.file.PosterFile.objects.get')
         self.mock_get = self.get_patcher.start()
         self.addCleanup(self.get_patcher.stop)
 
@@ -138,7 +140,9 @@ class TestDestroyPosterFile(TestCase):
         self.mock_log = self.log_patcher.start()
         self.addCleanup(self.log_patcher.stop)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
         self.file = File.new('test_filename',
@@ -159,7 +163,7 @@ class TestDestroyPosterFile(TestCase):
         self.mock_get.assert_called_once_with(file=self.file)
         self.assertFalse(self.posterfile.delete.called)
         self.mock_log.debug.assert_any_call(
-                'Posterfile does not exist. Continuing.')
+            'Posterfile does not exist. Continuing.')
 
     def test_other_exception(self):
         self.mock_get.side_effect = Exception
@@ -168,28 +172,30 @@ class TestDestroyPosterFile(TestCase):
         self.mock_get.assert_called_once_with(file=self.file)
         self.assertFalse(self.posterfile.delete.called)
         self.mock_log.error.assert_any_call(
-                'Got an error destroying posterfile')
+            'Got an error destroying posterfile')
 
 
 class TestIsFileNotPath(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
-                'mediaviewer.models.file.UserSettings.objects.filter')
+            'mediaviewer.models.file.UserSettings.objects.filter')
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
         self.createLastWatchedMessage_patcher = mock.patch(
-                'mediaviewer.models.file.Message.createLastWatchedMessage')
+            'mediaviewer.models.file.Message.createLastWatchedMessage')
         self.mock_createLastWatchedMessage = (
-                self.createLastWatchedMessage_patcher.start())
+            self.createLastWatchedMessage_patcher.start())
         self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
         self.mock_filter.return_value.all.return_value = (
-                self.mock_settings_queryset)
+            self.mock_settings_queryset)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
         self.new_file = File.new('test_filename',
@@ -205,26 +211,27 @@ class TestIsFileNotPath(TestCase):
 class TestProperty(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
-                'mediaviewer.models.file.UserSettings.objects.filter')
+            'mediaviewer.models.file.UserSettings.objects.filter')
         self.mock_filter = self.filter_patcher.start()
 
         self.createLastWatchedMessage_patcher = mock.patch(
-                'mediaviewer.models.file.Message.createLastWatchedMessage')
+            'mediaviewer.models.file.Message.createLastWatchedMessage')
         self.mock_createLastWatchedMessage = (
-                self.createLastWatchedMessage_patcher.start())
+            self.createLastWatchedMessage_patcher.start())
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
         self.mock_filter.return_value.all.return_value = (
-                self.mock_settings_queryset)
+            self.mock_settings_queryset)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
-        self.another_path = Path.new(
-                'local_another_path',
-                'remote_another_path',
-                False)
+        self.another_path = Path.objects.create(localpathstr='local_another_path',
+                                                remotepathstr='remote_another_path',
+                                                is_movie=False)
         self.another_path.save()
 
         self.new_file = File.new('test_filename',
@@ -250,28 +257,29 @@ class TestProperty(TestCase):
 class TestDateCreatedForSpan(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
-                'mediaviewer.models.file.UserSettings.objects.filter')
+            'mediaviewer.models.file.UserSettings.objects.filter')
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
         self.createLastWatchedMessage_patcher = mock.patch(
-                'mediaviewer.models.file.Message.createLastWatchedMessage')
+            'mediaviewer.models.file.Message.createLastWatchedMessage')
         self.mock_createLastWatchedMessage = (
-                self.createLastWatchedMessage_patcher.start())
+            self.createLastWatchedMessage_patcher.start())
         self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
         self.mock_filter.return_value.all.return_value = (
-                self.mock_settings_queryset)
+            self.mock_settings_queryset)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
-        self.another_path = Path.new(
-                'local_another_path',
-                'remote_another_path',
-                False)
+        self.another_path = Path.objects.create(localpathstr='local_another_path',
+                                                remotepathstr='remote_another_path',
+                                                is_movie=False)
         self.another_path.save()
 
         self.new_file = File.new('test_filename',
@@ -280,35 +288,36 @@ class TestDateCreatedForSpan(TestCase):
 
     def test_valid(self):
         self.assertEqual(
-                self.new_file.dateCreatedForSpan(),
-                '2018-05-12T00:00:00')
+            self.new_file.dateCreatedForSpan(),
+            '2018-05-12T00:00:00')
 
 
 class TestCamelCasedProperties(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
-                'mediaviewer.models.file.UserSettings.objects.filter')
+            'mediaviewer.models.file.UserSettings.objects.filter')
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
         self.createLastWatchedMessage_patcher = mock.patch(
-                'mediaviewer.models.file.Message.createLastWatchedMessage')
+            'mediaviewer.models.file.Message.createLastWatchedMessage')
         self.mock_createLastWatchedMessage = (
-                self.createLastWatchedMessage_patcher.start())
+            self.createLastWatchedMessage_patcher.start())
         self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
         self.mock_filter.return_value.all.return_value = (
-                self.mock_settings_queryset)
+            self.mock_settings_queryset)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
-        self.another_path = Path.new(
-                'local_another_path',
-                'remote_another_path',
-                False)
+        self.another_path = Path.objects.create(localpathstr='local_another_path',
+                                                remotepathstr='remote_another_path',
+                                                is_movie=False)
         self.another_path.save()
 
         self.datatransmission = DataTransmission()
@@ -322,32 +331,32 @@ class TestCamelCasedProperties(TestCase):
 
     def test_dataTransmission(self):
         self.assertEqual(
-                self.new_file.dataTransmission,
-                self.new_file.datatransmission)
+            self.new_file.dataTransmission,
+            self.new_file.datatransmission)
 
 
 class TestDownloadLink(TestCase):
     def setUp(self):
         self.filter_patcher = mock.patch(
-                'mediaviewer.models.file.UserSettings.objects.filter')
+            'mediaviewer.models.file.UserSettings.objects.filter')
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
         self.createLastWatchedMessage_patcher = mock.patch(
-                'mediaviewer.models.file.Message.createLastWatchedMessage')
+            'mediaviewer.models.file.Message.createLastWatchedMessage')
         self.mock_createLastWatchedMessage = (
-                self.createLastWatchedMessage_patcher.start())
+            self.createLastWatchedMessage_patcher.start())
         self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.LOCAL_IP_patcher = mock.patch(
-                'mediaviewer.models.file.LOCAL_IP',
-                'test_local_ip')
+            'mediaviewer.models.file.LOCAL_IP',
+            'test_local_ip')
         self.LOCAL_IP_patcher.start()
         self.addCleanup(self.LOCAL_IP_patcher.stop)
 
         self.BANGUP_IP_patcher = mock.patch(
-                'mediaviewer.models.file.BANGUP_IP',
-                'test_bangup_ip')
+            'mediaviewer.models.file.BANGUP_IP',
+            'test_bangup_ip')
         self.BANGUP_IP_patcher.start()
         self.addCleanup(self.BANGUP_IP_patcher.stop)
 
@@ -361,15 +370,16 @@ class TestDownloadLink(TestCase):
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
         self.mock_filter.return_value.all.return_value = (
-                self.mock_settings_queryset)
+            self.mock_settings_queryset)
 
-        self.path = Path.new('local_path', 'remote_path', False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
         self.path.save()
 
-        self.another_path = Path.new(
-                'local_another_path',
-                'remote_another_path',
-                False)
+        self.another_path = Path.objects.create(localpathstr='local_another_path',
+                                                remotepathstr='remote_another_path',
+                                                is_movie=False)
         self.another_path.save()
 
         self.datatransmission = DataTransmission()
@@ -388,27 +398,27 @@ class TestDownloadLink(TestCase):
 
 class TestMoviesOrderedByID(TestCase):
     def setUp(self):
-        self.tv_path = Path.new('tv.local.path',
-                                'tv.remote.path',
-                                is_movie=False)
-        self.movie_path = Path.new('movie.local.path',
-                                   'movie.remote.path',
-                                   is_movie=True)
+        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
+                                           remotepathstr='tv.remote.path',
+                                           is_movie=False)
+        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
+                                              remotepathstr='movie.remote.path',
+                                              is_movie=True)
 
         self.tv_file = File.new('tv.file', self.tv_path)
         self.tv_file2 = File.new('tv.file2', self.tv_path)
 
         self.hidden_tv_file = File.new(
-                'hidden.tv.file',
-                self.tv_path,
-                hide=True)
+            'hidden.tv.file',
+            self.tv_path,
+            hide=True)
 
         self.movie_file = File.new('movie.file', self.movie_path)
         self.movie_file2 = File.new('movie.file2', self.movie_path)
         self.hidden_movie_file = File.new(
-                'hidden.movie.file',
-                self.movie_path,
-                hide=True)
+            'hidden.movie.file',
+            self.movie_path,
+            hide=True)
 
     def test_movie_files(self):
         expected = [self.movie_file2,

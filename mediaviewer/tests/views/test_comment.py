@@ -6,9 +6,12 @@ from django.contrib.auth.models import User
 
 import mock
 
+
 class TestComment(TestCase):
     def setUp(self):
-        self.path = Path.new('local.path', 'remote.path', True)
+        self.path = Path.objects.create(localpathstr='local.path',
+                                        remotepathstr='remote.path',
+                                        is_movie=True)
         self.file = File.new('test.filename', self.path)
 
         self.reverse_patcher = mock.patch('mediaviewer.views.comment.reverse')

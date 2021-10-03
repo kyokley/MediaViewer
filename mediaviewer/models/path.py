@@ -13,7 +13,7 @@ from django.utils.timezone import utc
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
     remotepathstr = models.TextField(blank=True)
-    skip = models.BooleanField(blank=True)
+    skip = models.BooleanField(blank=True, null=False, default=False)
     is_movie = models.BooleanField(blank=False,
                                    null=False,
                                    db_column='ismovie')
@@ -24,7 +24,7 @@ class Path(models.Model):
         blank=True,
         db_column='defaultscraperid')
     tvdb_id = models.TextField(null=True, blank=True)
-    server = models.TextField(blank=False, null=False)
+    server = models.TextField(blank=False, null=False, default='127.0.0.1')
     defaultsearchstr = models.TextField(null=True, blank=True)
     imdb_id = models.TextField(null=True, blank=True)
     override_display_name = models.TextField(
@@ -44,23 +44,6 @@ class Path(models.Model):
     class Meta:
         app_label = 'mediaviewer'
         db_table = 'path'
-
-    @classmethod
-    def new(cls,
-            localpathstr,
-            remotepathstr,
-            is_movie,
-            skip=True,
-            server='127.0.0.1'
-            ):
-        obj = cls()
-        obj.localpathstr = localpathstr
-        obj.remotepathstr = remotepathstr
-        obj.is_movie = is_movie
-        obj.skip = skip
-        obj.server = server
-        obj.save()
-        return obj
 
     @property
     def isFile(self):

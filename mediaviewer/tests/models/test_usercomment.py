@@ -9,9 +9,9 @@ from mediaviewer.models.path import Path
 
 class TestNew(TestCase):
     def setUp(self):
-        self.path = Path.new('local_path',
-                             'remote_path',
-                             False)
+        self.path = Path.objects.create(localpathstr='local_path',
+                                        remotepathstr='remote_path',
+                                        is_movie=False)
 
         self.filename = 'test_filename'
         self.file = File.new(self.filename,
@@ -21,10 +21,10 @@ class TestNew(TestCase):
 
     def test_new(self):
         uc = UserComment.new(
-                self.file,
-                self.user,
-                'test_comment',
-                False)
+            self.file,
+            self.user,
+            'test_comment',
+            False)
         print(uc)
 
         self.assertEqual(uc.file, self.file)

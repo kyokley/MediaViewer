@@ -7,9 +7,9 @@ from mediaviewer.models.path import Path
 class TestValidForFilename(object):
     @pytest.fixture(autouse=True)
     def setUp(self):
-        self.path = Path.new('/path/to/local',
-                             '/path/to/remote',
-                             is_movie=False)
+        self.path = Path.objects.create(localpathstr='/path/to/local',
+                                        remotepathstr='/path/to/remote',
+                                        is_movie=False)
         self.path.override_display_name = 'Foo Is Bar'
         self.path.save()
 
@@ -56,27 +56,27 @@ class TestValidForFilename(object):
 class TestPathForFilename(object):
     @pytest.fixture(autouse=True)
     def setUp(self):
-        self.path1 = Path.new('/path/to/local',
-                              '/path/to/remote',
-                              is_movie=False)
+        self.path1 = Path.objects.create(localpathstr='/path/to/local',
+                                         remotepathstr='/path/to/remote',
+                                         is_movie=False)
         self.path1.override_display_name = 'Foo Is Bar'
         self.path1.save()
 
-        self.path2 = Path.new('/path/to/local2',
-                              '/path/to/remote2',
-                              is_movie=False)
+        self.path2 = Path.objects.create(localpathstr='/path/to/local2',
+                                         remotepathstr='/path/to/remote2',
+                                         is_movie=False)
         self.path2.override_display_name = 'Foo Is Not Bar'
         self.path2.save()
 
-        self.path3 = Path.new('/path/to/local3',
-                              '/path/to/remote3',
-                              is_movie=False)
+        self.path3 = Path.objects.create(localpathstr='/path/to/local3',
+                                         remotepathstr='/path/to/remote3',
+                                         is_movie=False)
         self.path3.override_display_name = 'Boo As Baz'
         self.path3.save()
 
-        self.path4 = Path.new('/path/to/local',
-                              '/path/to/remote4',
-                              is_movie=False)
+        self.path4 = Path.objects.create(localpathstr='/path/to/local',
+                                         remotepathstr='/path/to/remote4',
+                                         is_movie=False)
         self.path4.override_display_name = 'Foo Is Bar'
         self.path4.save()
 
