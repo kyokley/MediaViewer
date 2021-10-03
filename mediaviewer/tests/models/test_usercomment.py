@@ -9,6 +9,7 @@ from mediaviewer.models.path import Path
 
 @pytest.mark.django_db
 class TestNew:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.path = Path.objects.create(localpathstr='local_path',
                                         remotepathstr='remote_path',

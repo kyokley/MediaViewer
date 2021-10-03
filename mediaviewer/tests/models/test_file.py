@@ -1,10 +1,10 @@
 import mock
+import pytest
 
 from datetime import datetime
 
 from django.contrib.auth.models import User
 
-from django.test import TestCase
 from mediaviewer.models.file import File
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.path import Path
@@ -13,8 +13,9 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.datatransmission import DataTransmission
 
 
-class TestGetScrapedNameReplacements(TestCase):
+class TestGetScrapedNameReplacements:
     """ Test period and hyphen substitutions """
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.path = Path()
         self.path.override_display_name = None
@@ -32,30 +33,31 @@ class TestGetScrapedNameReplacements(TestCase):
         self.scraper.subPeriods = True
         expected = 'This Is A Sample File'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_filename_contains_hyphen_with_subPeriod_scraper(self):
         self.file.filename = 'This-is-a-sample-file'
         self.scraper.subPeriods = True
         expected = 'This Is A Sample File'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_filename_contains_period_without_subPeriod_scraper(self):
         self.scraper.subPeriods = False
         expected = 'This.is.a.sample.file'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_filename_contains_hyphen_without_subPeriod_scraper(self):
         self.file.filename = 'This-is-a-sample-file'
         self.scraper.subPeriods = False
         expected = 'This-is-a-sample-file'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestGetScrapedNameOverrideFileName(TestCase):
+class TestGetScrapedNameOverrideFileName:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.path = Path()
         self.path.override_display_name = None
@@ -68,7 +70,7 @@ class TestGetScrapedNameOverrideFileName(TestCase):
 
         expected = 'This.is.a.sample.file'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_override_filename(self):
         self.file.filename = 'This.is.a.sample.file'
@@ -76,7 +78,7 @@ class TestGetScrapedNameOverrideFileName(TestCase):
 
         expected = 'overrided file name'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_scrapedName_uses_path_override(self):
         self.path.override_display_name = 'overrided path name'
@@ -85,7 +87,7 @@ class TestGetScrapedNameOverrideFileName(TestCase):
 
         expected = 'overrided path name'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_scrapedName_uses_overrided_file_name(self):
         self.path.override_display_name = 'overrided path name'
@@ -94,21 +96,18 @@ class TestGetScrapedNameOverrideFileName(TestCase):
 
         expected = 'overrided file name'
         actual = self.file.getScrapedName()
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestNew(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
+@pytest.mark.django_db
+class TestNew:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch(
             'mediaviewer.models.file.UserSettings.objects.filter')
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.file.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
-        self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
@@ -129,16 +128,15 @@ class TestNew(TestCase):
             self.mock_setting.user, new_file)
 
 
-class TestDestroyPosterFile(TestCase):
-    def setUp(self):
-        self.get_patcher = mock.patch(
+@pytest.mark.django_db
+class TestDestroyPosterFile:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_get = mocker.patch(
             'mediaviewer.models.file.PosterFile.objects.get')
-        self.mock_get = self.get_patcher.start()
-        self.addCleanup(self.get_patcher.stop)
 
-        self.log_patcher = mock.patch('mediaviewer.models.file.log')
-        self.mock_log = self.log_patcher.start()
-        self.addCleanup(self.log_patcher.stop)
+        self.mock_log = mocker.patch(
+            'mediaviewer.models.file.log')
 
         self.path = Path.objects.create(localpathstr='local_path',
                                         remotepathstr='remote_path',
@@ -161,7 +159,7 @@ class TestDestroyPosterFile(TestCase):
 
         self.file.destroyPosterFile()
         self.mock_get.assert_called_once_with(file=self.file)
-        self.assertFalse(self.posterfile.delete.called)
+        assert not self.posterfile.delete.called
         self.mock_log.debug.assert_any_call(
             'Posterfile does not exist. Continuing.')
 
@@ -170,23 +168,20 @@ class TestDestroyPosterFile(TestCase):
 
         self.file.destroyPosterFile()
         self.mock_get.assert_called_once_with(file=self.file)
-        self.assertFalse(self.posterfile.delete.called)
+        assert not self.posterfile.delete.called
         self.mock_log.error.assert_any_call(
             'Got an error destroying posterfile')
 
 
-class TestIsFileNotPath(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
+@pytest.mark.django_db
+class TestIsFileNotPath:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch(
             'mediaviewer.models.file.UserSettings.objects.filter')
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.file.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
-        self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
@@ -202,22 +197,21 @@ class TestIsFileNotPath(TestCase):
                                  self.path)
 
     def test_isFile(self):
-        self.assertTrue(self.new_file.isFile)
+        assert self.new_file.isFile
 
     def test_not_isPath(self):
-        self.assertFalse(self.new_file.isPath)
+        assert not self.new_file.isPath
 
 
-class TestProperty(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
+@pytest.mark.django_db
+class TestProperty:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch(
             'mediaviewer.models.file.UserSettings.objects.filter')
-        self.mock_filter = self.filter_patcher.start()
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.file.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
@@ -244,28 +238,25 @@ class TestProperty(TestCase):
         self.createLastWatchedMessage_patcher.stop()
 
     def test_get_pathid(self):
-        self.assertEqual(self.new_file.pathid, self.path.id)
+        assert self.new_file.pathid == self.path.id
 
     def test_set_pathid(self):
         self.new_file.pathid = self.another_path.id
-        self.assertEqual(self.new_file.path, self.another_path)
+        assert self.new_file.path == self.another_path
 
     def test_get_posterfile(self):
-        self.assertEqual(self.new_file.posterfile, self.new_posterfile)
+        assert self.new_file.posterfile == self.new_posterfile
 
 
-class TestDateCreatedForSpan(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
+@pytest.mark.django_db
+class TestDateCreatedForSpan:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch(
             'mediaviewer.models.file.UserSettings.objects.filter')
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.file.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
-        self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
@@ -275,35 +266,28 @@ class TestDateCreatedForSpan(TestCase):
         self.path = Path.objects.create(localpathstr='local_path',
                                         remotepathstr='remote_path',
                                         is_movie=False)
-        self.path.save()
 
         self.another_path = Path.objects.create(localpathstr='local_another_path',
                                                 remotepathstr='remote_another_path',
                                                 is_movie=False)
-        self.another_path.save()
 
         self.new_file = File.new('test_filename',
                                  self.path)
         self.new_file.datecreated = datetime(2018, 5, 12)
 
     def test_valid(self):
-        self.assertEqual(
-            self.new_file.dateCreatedForSpan(),
-            '2018-05-12T00:00:00')
+        assert self.new_file.dateCreatedForSpan() == '2018-05-12T00:00:00'
 
 
-class TestCamelCasedProperties(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
+@pytest.mark.django_db
+class TestCamelCasedProperties:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch(
             'mediaviewer.models.file.UserSettings.objects.filter')
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.file.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
-        self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
         self.mock_setting = mock.MagicMock(UserSettings)
         self.mock_settings_queryset = [self.mock_setting]
@@ -313,12 +297,10 @@ class TestCamelCasedProperties(TestCase):
         self.path = Path.objects.create(localpathstr='local_path',
                                         remotepathstr='remote_path',
                                         is_movie=False)
-        self.path.save()
 
         self.another_path = Path.objects.create(localpathstr='local_another_path',
                                                 remotepathstr='remote_another_path',
                                                 is_movie=False)
-        self.another_path.save()
 
         self.datatransmission = DataTransmission()
 
@@ -327,43 +309,30 @@ class TestCamelCasedProperties(TestCase):
         self.new_file.datatransmission = self.datatransmission
 
     def test_fileName(self):
-        self.assertEqual(self.new_file.fileName, self.new_file.filename)
+        assert self.new_file.fileName == self.new_file.filename
 
     def test_dataTransmission(self):
-        self.assertEqual(
-            self.new_file.dataTransmission,
-            self.new_file.datatransmission)
+        assert self.new_file.dataTransmission == self.new_file.datatransmission
 
 
-class TestDownloadLink(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
+@pytest.mark.django_db
+class TestDownloadLink:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch(
             'mediaviewer.models.file.UserSettings.objects.filter')
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
 
-        self.createLastWatchedMessage_patcher = mock.patch(
+        self.mock_createLastWatchedMessage = mocker.patch(
             'mediaviewer.models.file.Message.createLastWatchedMessage')
-        self.mock_createLastWatchedMessage = (
-            self.createLastWatchedMessage_patcher.start())
-        self.addCleanup(self.createLastWatchedMessage_patcher.stop)
 
-        self.LOCAL_IP_patcher = mock.patch(
-            'mediaviewer.models.file.LOCAL_IP',
-            'test_local_ip')
-        self.LOCAL_IP_patcher.start()
-        self.addCleanup(self.LOCAL_IP_patcher.stop)
+        mocker.patch(
+            'mediaviewer.models.file.LOCAL_IP', 'test_local_ip')
 
-        self.BANGUP_IP_patcher = mock.patch(
-            'mediaviewer.models.file.BANGUP_IP',
-            'test_bangup_ip')
-        self.BANGUP_IP_patcher.start()
-        self.addCleanup(self.BANGUP_IP_patcher.stop)
+        mocker.patch(
+            'mediaviewer.models.file.BANGUP_IP', 'test_bangup_ip')
 
-        conf_settings_patcher = mock.patch(
+        self.mock_conf_settings = mocker.patch(
             'mediaviewer.models.file.conf_settings')
-        self.mock_conf_settings = conf_settings_patcher.start()
-        self.addCleanup(conf_settings_patcher.stop)
 
         self.mock_conf_settings.WAITER_HEAD = 'test_local_ip'
 
@@ -375,12 +344,10 @@ class TestDownloadLink(TestCase):
         self.path = Path.objects.create(localpathstr='local_path',
                                         remotepathstr='remote_path',
                                         is_movie=False)
-        self.path.save()
 
         self.another_path = Path.objects.create(localpathstr='local_another_path',
                                                 remotepathstr='remote_another_path',
                                                 is_movie=False)
-        self.another_path.save()
 
         self.datatransmission = DataTransmission()
 
@@ -396,7 +363,9 @@ class TestDownloadLink(TestCase):
         self.user_settings.ip_format = 'test_local_ip'
 
 
-class TestMoviesOrderedByID(TestCase):
+@pytest.mark.django_db
+class TestMoviesOrderedByID:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -425,4 +394,4 @@ class TestMoviesOrderedByID(TestCase):
                     self.movie_file]
         actual = list(File.movies_ordered_by_id())
 
-        self.assertEqual(expected, actual)
+        assert expected == actual

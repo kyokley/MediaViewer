@@ -25,7 +25,7 @@ live-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec mediaviewer /bin/bash
 
 shell: ## Open a shell in a mediaviewer container
-	docker-compose run mediaviewer /bin/bash
+	docker-compose run -v $$(pwd):/code mediaviewer /bin/bash
 
 db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash

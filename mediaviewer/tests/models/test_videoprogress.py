@@ -78,6 +78,10 @@ class TestDestroy(BaseVPTest):
 
 @pytest.mark.django_db
 class TestCreateOrUpdate(BaseVPTest):
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        super().setUp()
+
     def test_new_file_vp(self):
         vp = VideoProgress.createOrUpdate(
             self.user,
@@ -108,6 +112,10 @@ class TestCreateOrUpdate(BaseVPTest):
 
 @pytest.mark.django_db
 class TestGet(BaseVPTest):
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        super().setUp()
+
     def test_no_matching_vp(self):
         vp = VideoProgress.get(
             self.user,
@@ -129,6 +137,10 @@ class TestGet(BaseVPTest):
 
 @pytest.mark.django_db
 class TestNew(BaseVPTest):
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        super().setUp()
+
     def test_new(self):
         test_filename = getSomewhatUniqueID()
         hashed_filename = getSomewhatUniqueID()

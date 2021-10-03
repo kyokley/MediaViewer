@@ -1,6 +1,4 @@
-import mock
 import pytest
-from django.test import TestCase
 
 from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.file import File
