@@ -1,6 +1,6 @@
 import mock
+import pytest
 
-from django.test import TestCase
 from django.http import HttpRequest, Http404
 
 from mediaviewer.views.detail import (
@@ -25,23 +25,15 @@ from mediaviewer.models.path import Path
 from mediaviewer.models.usercomment import UserComment
 
 
-class TestAjaxSuperViewed(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
-            'mediaviewer.views.detail.DownloadToken.objects.filter',
-            autospec=True)
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
+@pytest.mark.django_db
+class TestAjaxSuperViewed:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch('mediaviewer.views.detail.DownloadToken.objects.filter', autospec=True)
 
-        self.HttpResponse_patcher = mock.patch(
-            'mediaviewer.views.detail.HttpResponse',
-            autospec=True)
-        self.mock_HttpResponse = self.HttpResponse_patcher.start()
-        self.addCleanup(self.HttpResponse_patcher.stop)
+        self.mock_HttpResponse = mocker.patch('mediaviewer.views.detail.HttpResponse', autospec=True)
 
-        self.dumps_patcher = mock.patch('mediaviewer.views.detail.json.dumps')
-        self.mock_dumps = self.dumps_patcher.start()
-        self.addCleanup(self.dumps_patcher.stop)
+        self.mock_dumps = mocker.patch('mediaviewer.views.detail.json.dumps')
 
         self.token = mock.MagicMock(DownloadToken)
         self.token.isvalid = True
@@ -58,7 +50,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_dumps.assert_called_once_with({'errmsg': 'Token is invalid',
                                                  'guid': 'test_guid',
@@ -70,7 +62,7 @@ class TestAjaxSuperViewed(TestCase):
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
-        self.assertFalse(self.token.file.markFileViewed.called)
+        assert not self.token.file.markFileViewed.called
 
     def test_token_invalid(self):
         self.token.isvalid = False
@@ -78,7 +70,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_dumps.assert_called_once_with({'errmsg': 'Token is invalid',
                                                  'guid': 'test_guid',
@@ -90,7 +82,7 @@ class TestAjaxSuperViewed(TestCase):
         self.mock_filter.assert_called_once_with(guid='test_guid')
         self.mock_filter.return_value.first.assert_called_once_with()
 
-        self.assertFalse(self.token.file.markFileViewed.called)
+        assert not self.token.file.markFileViewed.called
 
     def test_not_viewed(self):
         self.request.POST = {'guid': 'test_guid',
@@ -99,7 +91,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_dumps.assert_called_once_with({'errmsg': '',
                                                  'guid': 'test_guid',
@@ -122,7 +114,7 @@ class TestAjaxSuperViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxsuperviewed(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_dumps.assert_called_once_with({'errmsg': '',
                                                  'guid': 'test_guid',
@@ -139,17 +131,13 @@ class TestAjaxSuperViewed(TestCase):
             True)
 
 
-class TestAjaxSuperViewedResponseStatusCode(TestCase):
-    def setUp(self):
-        self.filter_patcher = mock.patch(
-            'mediaviewer.views.detail.DownloadToken.objects.filter',
-            autospec=True)
-        self.mock_filter = self.filter_patcher.start()
-        self.addCleanup(self.filter_patcher.stop)
+@pytest.mark.django_db
+class TestAjaxSuperViewedResponseStatusCode:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_filter = mocker.patch('mediaviewer.views.detail.DownloadToken.objects.filter', autospec=True)
 
-        self.dumps_patcher = mock.patch('mediaviewer.views.detail.json.dumps')
-        self.mock_dumps = self.dumps_patcher.start()
-        self.addCleanup(self.dumps_patcher.stop)
+        self.mock_dumps = mocker.patch('mediaviewer.views.detail.json.dumps')
 
         self.token = mock.MagicMock(DownloadToken)
         self.token.isvalid = True
@@ -165,7 +153,7 @@ class TestAjaxSuperViewedResponseStatusCode(TestCase):
                              'viewed': 'True'}
 
         resp = ajaxsuperviewed(self.request)
-        self.assertEqual(resp.status_code, 200)
+        assert resp.status_code == 200
 
     def test_failure(self):
         self.token.isvalid = False
@@ -173,24 +161,21 @@ class TestAjaxSuperViewedResponseStatusCode(TestCase):
                              'viewed': 'True'}
 
         resp = ajaxsuperviewed(self.request)
-        self.assertEqual(resp.status_code, 400)
+        assert resp.status_code == 400
 
 
-class TestFilesDetail(TestCase):
-    def setUp(self):
-        setSiteWideContext_patcher = mock.patch(
+@pytest.mark.django_db
+class TestFilesDetail:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.detail.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.detail.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -233,7 +218,7 @@ class TestFilesDetail(TestCase):
         expected = self.mock_render.return_value
         actual = filesdetail(self.request, self.tv_file.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context,
             self.request)
@@ -267,7 +252,7 @@ class TestFilesDetail(TestCase):
         expected = self.mock_render.return_value
         actual = filesdetail(self.request, self.tv_file.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context,
             self.request)
@@ -284,21 +269,19 @@ class TestFilesDetail(TestCase):
         expected = self.mock_change_password.return_value
         actual = filesdetail(self.request, self.tv_file.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
 
-class TestAjaxViewed(TestCase):
-    def setUp(self):
-        HttpResponse_patcher = mock.patch(
+@pytest.mark.django_db
+class TestAjaxViewed:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_HttpResponse = mocker.patch(
             'mediaviewer.views.detail.HttpResponse')
-        self.mock_HttpResponse = HttpResponse_patcher.start()
-        self.addCleanup(HttpResponse_patcher.stop)
 
-        dumps_patcher = mock.patch(
+        self.mock_dumps = mocker.patch(
             'mediaviewer.views.detail.json.dumps')
-        self.mock_dumps = dumps_patcher.start()
-        self.addCleanup(dumps_patcher.stop)
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -327,10 +310,8 @@ class TestAjaxViewed(TestCase):
 
     def test_no_file(self):
         self.request.POST.update({'fileid': 0, 'viewed': 'true'})
-        self.assertRaises(Http404,
-                          ajaxviewed,
-                          self.request,
-                          )
+        with pytest.raises(Http404):
+            ajaxviewed(self.request)
 
     def test_user_not_authenticated(self):
         self.request.user = AnonymousUser()
@@ -338,7 +319,7 @@ class TestAjaxViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxviewed(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_dumps.assert_called_once_with({
             'errmsg': 'User not authenticated. Refresh and try again.'
         })
@@ -355,7 +336,7 @@ class TestAjaxViewed(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxviewed(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_dumps.assert_called_once_with(expected_response)
         self.mock_HttpResponse.assert_called_once_with(
             self.mock_dumps.return_value,
@@ -363,27 +344,21 @@ class TestAjaxViewed(TestCase):
         )
 
 
-class TestAjaxDownloadButton(TestCase):
-    def setUp(self):
-        HttpResponse_patcher = mock.patch(
+@pytest.mark.django_db
+class TestAjaxDownloadButton:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_HttpResponse = mocker.patch(
             'mediaviewer.views.detail.HttpResponse')
-        self.mock_HttpResponse = HttpResponse_patcher.start()
-        self.addCleanup(HttpResponse_patcher.stop)
 
-        dumps_patcher = mock.patch(
+        self.mock_dumps = mocker.patch(
             'mediaviewer.views.detail.json.dumps')
-        self.mock_dumps = dumps_patcher.start()
-        self.addCleanup(dumps_patcher.stop)
 
-        downloadtoken_new_patcher = mock.patch(
+        self.mock_downloadtoken_new = mocker.patch(
             'mediaviewer.views.detail.DownloadToken.new')
-        self.mock_downloadtoken_new = downloadtoken_new_patcher.start()
-        self.addCleanup(downloadtoken_new_patcher.stop)
 
-        downloadLink_patcher = mock.patch(
+        self.mock_downloadLink = mocker.patch(
             'mediaviewer.views.detail.File.downloadLink')
-        self.mock_downloadLink = downloadLink_patcher.start()
-        self.addCleanup(downloadLink_patcher.stop)
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -414,7 +389,7 @@ class TestAjaxDownloadButton(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxdownloadbutton(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_dumps.assert_called_once_with({
             'errmsg': 'User not authenticated. Refresh and try again.'
         })
@@ -424,10 +399,8 @@ class TestAjaxDownloadButton(TestCase):
 
     def test_no_file(self):
         self.request.POST.update({'fileid': 0})
-        self.assertRaises(Http404,
-                          ajaxdownloadbutton,
-                          self.request,
-                          )
+        with pytest.raises(Http404):
+            ajaxdownloadbutton(self.request)
 
     def test_valid(self):
         expected_response = {
@@ -440,7 +413,7 @@ class TestAjaxDownloadButton(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxdownloadbutton(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_dumps.assert_called_once_with(
             expected_response)
         self.mock_HttpResponse.assert_called_once_with(
@@ -448,22 +421,18 @@ class TestAjaxDownloadButton(TestCase):
             content_type='application/javascript')
 
 
-class TestDownloadlink(TestCase):
-    def setUp(self):
-        downloadLink_patcher = mock.patch(
+@pytest.mark.django_db
+class TestDownloadlink:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_downloadLink = mocker.patch(
             'mediaviewer.views.detail.File.downloadLink')
-        self.mock_downloadLink = downloadLink_patcher.start()
-        self.addCleanup(downloadLink_patcher.stop)
 
-        downloadtoken_new_patcher = mock.patch(
+        self.mock_downloadtoken_new = mocker.patch(
             'mediaviewer.views.detail.DownloadToken.new')
-        self.mock_downloadtoken_new = downloadtoken_new_patcher.start()
-        self.addCleanup(downloadtoken_new_patcher.stop)
 
-        redirect_patcher = mock.patch(
+        self.mock_redirect = mocker.patch(
             'mediaviewer.views.detail.redirect')
-        self.mock_redirect = redirect_patcher.start()
-        self.addCleanup(redirect_patcher.stop)
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -488,17 +457,14 @@ class TestDownloadlink(TestCase):
         self.request.user = self.user
 
     def test_no_file(self):
-        self.assertRaises(Http404,
-                          downloadlink,
-                          self.request,
-                          0,
-                          )
+        with pytest.raises(Http404):
+            downloadlink(self.request, 0)
 
     def test_valid(self):
         expected = self.mock_redirect.return_value
         actual = downloadlink(self.request, self.tv_file.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_downloadtoken_new.assert_called_once_with(
             self.user,
             self.tv_file)
@@ -509,22 +475,18 @@ class TestDownloadlink(TestCase):
             self.mock_downloadLink.return_value)
 
 
-class TestAutoPlayDownloadLink(TestCase):
-    def setUp(self):
-        autoplayDownloadLink_patcher = mock.patch(
+@pytest.mark.django_db
+class TestAutoPlayDownloadLink:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_autoplayDownloadLink = mocker.patch(
             'mediaviewer.views.detail.File.autoplayDownloadLink')
-        self.mock_autoplayDownloadLink = autoplayDownloadLink_patcher.start()
-        self.addCleanup(autoplayDownloadLink_patcher.stop)
 
-        downloadtoken_new_patcher = mock.patch(
+        self.mock_downloadtoken_new = mocker.patch(
             'mediaviewer.views.detail.DownloadToken.new')
-        self.mock_downloadtoken_new = downloadtoken_new_patcher.start()
-        self.addCleanup(downloadtoken_new_patcher.stop)
 
-        redirect_patcher = mock.patch(
+        self.mock_redirect = mocker.patch(
             'mediaviewer.views.detail.redirect')
-        self.mock_redirect = redirect_patcher.start()
-        self.addCleanup(redirect_patcher.stop)
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -549,17 +511,14 @@ class TestAutoPlayDownloadLink(TestCase):
         self.request.user = self.user
 
     def test_no_file(self):
-        self.assertRaises(Http404,
-                          autoplaydownloadlink,
-                          self.request,
-                          0,
-                          )
+        with pytest.raises(Http404):
+            autoplaydownloadlink(self.request, 0)
 
     def test_valid(self):
         expected = self.mock_redirect.return_value
         actual = autoplaydownloadlink(self.request, self.tv_file.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_downloadtoken_new.assert_called_once_with(
             self.user,
             self.tv_file)
