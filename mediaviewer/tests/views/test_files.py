@@ -1,6 +1,6 @@
 import mock
+import pytest
 
-from django.test import TestCase
 from django.http import HttpRequest, Http404
 
 from django.contrib import messages
@@ -25,26 +25,21 @@ from mediaviewer.views.files import (
 )
 
 
-class TestMovies(TestCase):
-    def setUp(self):
-        movies_ordered_by_id_patcher = mock.patch(
+@pytest.mark.django_db
+class TestMovies:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_movies_ordered_by_id = mocker.patch(
             'mediaviewer.views.files.File.movies_ordered_by_id')
-        self.mock_movies_ordered_by_id = movies_ordered_by_id_patcher.start()
-        self.addCleanup(movies_ordered_by_id_patcher.stop)
 
-        setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.files.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.files.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -83,7 +78,7 @@ class TestMovies(TestCase):
         expected = self.mock_render.return_value
         actual = movies(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context,
             self.request,
@@ -104,11 +99,13 @@ class TestMovies(TestCase):
         expected = self.mock_change_password.return_value
         actual = movies(self.request, self.tv_file.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
 
-class TestMovieByGenre404(TestCase):
+@pytest.mark.django_db
+class TestMovieByGenre404:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         mv_group = Group(name='MediaViewer')
         mv_group.save()
@@ -124,38 +121,28 @@ class TestMovieByGenre404(TestCase):
         self.request.user = self.user
 
     def test_404(self):
-        self.assertRaises(Http404,
-                          movies_by_genre,
-                          self.request,
-                          100)
+        with pytest.raises(Http404):
+            movies_by_genre(self.request, 100)
 
 
-class TestMoviesByGenre(TestCase):
-    def setUp(self):
-        get_object_or_404_patcher = mock.patch(
+@pytest.mark.django_db
+class TestMoviesByGenre:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_get_object_or_404 = mocker.patch(
             'mediaviewer.views.files.get_object_or_404')
-        self.mock_get_object_or_404 = get_object_or_404_patcher.start()
-        self.addCleanup(get_object_or_404_patcher.stop)
 
-        files_movies_by_genre = mock.patch(
+        self.mock_files_movies_by_genre = mocker.patch(
             'mediaviewer.views.files.File.movies_by_genre')
-        self.mock_files_movies_by_genre = files_movies_by_genre.start()
-        self.addCleanup(files_movies_by_genre.stop)
 
-        setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.files.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.files.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
         self.genre = mock.MagicMock(Genre)
         self.genre.id = 123
@@ -194,7 +181,7 @@ class TestMoviesByGenre(TestCase):
         expected = self.mock_change_password.return_value
         actual = movies_by_genre(self.request, self.genre.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
     def test_valid(self):
@@ -211,7 +198,7 @@ class TestMoviesByGenre(TestCase):
         expected = self.mock_render.return_value
         actual = movies_by_genre(self.request, self.genre.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_files_movies_by_genre.assert_called_once_with(
             self.genre)
         self.mock_get_object_or_404.assert_called_once_with(
@@ -229,27 +216,21 @@ class TestMoviesByGenre(TestCase):
             expected_context)
 
 
-class TestTvShowSummary(TestCase):
-    def setUp(self):
-        distinctShowFolders_patcher = mock.patch(
+@pytest.mark.django_db
+class TestTvShowSummary:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_distinctShowFolders = mocker.patch(
             'mediaviewer.views.files.Path.distinctShowFolders')
-        self.mock_distinctShowFolders = distinctShowFolders_patcher.start()
-        self.addCleanup(distinctShowFolders_patcher.stop)
 
-        setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.files.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.files.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
         self.test_distinct_folders = {
             'test1': 'path1',
@@ -280,7 +261,7 @@ class TestTvShowSummary(TestCase):
         expected = self.mock_render.return_value
         actual = tvshowsummary(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_distinctShowFolders.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context,
@@ -299,11 +280,13 @@ class TestTvShowSummary(TestCase):
         expected = self.mock_change_password.return_value
         actual = tvshowsummary(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
 
-class TestTvShowByGenre404(TestCase):
+@pytest.mark.django_db
+class TestTvShowByGenre404:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         mv_group = Group(name='MediaViewer')
         mv_group.save()
@@ -319,39 +302,28 @@ class TestTvShowByGenre404(TestCase):
         self.request.user = self.user
 
     def test_404(self):
-        self.assertRaises(Http404,
-                          tvshows_by_genre,
-                          self.request,
-                          100)
+        with pytest.raises(Http404):
+            tvshows_by_genre(self.request, 100)
 
 
-class TestTvShowsByGenre(TestCase):
-    def setUp(self):
-        get_object_or_404_patcher = mock.patch(
+@pytest.mark.django_db
+class TestTvShowsByGenre:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_get_object_or_404 = mocker.patch(
             'mediaviewer.views.files.get_object_or_404')
-        self.mock_get_object_or_404 = get_object_or_404_patcher.start()
-        self.addCleanup(get_object_or_404_patcher.stop)
 
-        setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.files.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.files.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
-        distinctShowFoldersByGenre_patcher = mock.patch(
+        self.mock_distinctShowFoldersByGenre = mocker.patch(
             'mediaviewer.views.files.Path.distinctShowFoldersByGenre')
-        self.mock_distinctShowFoldersByGenre = (
-            distinctShowFoldersByGenre_patcher.start())
-        self.addCleanup(distinctShowFoldersByGenre_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
         self.genre = mock.MagicMock(Genre)
         self.genre.id = 123
@@ -389,7 +361,7 @@ class TestTvShowsByGenre(TestCase):
         expected = self.mock_render.return_value
         actual = tvshows_by_genre(self.request, self.genre.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_get_object_or_404.assert_called_once_with(
             Genre,
             pk=self.genre.id)
@@ -412,11 +384,13 @@ class TestTvShowsByGenre(TestCase):
         expected = self.mock_change_password.return_value
         actual = tvshows_by_genre(self.request, self.genre.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
 
-class TestTvShow404(TestCase):
+@pytest.mark.django_db
+class TestTvShow404:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         mv_group = Group(name='MediaViewer')
         mv_group.save()
@@ -432,38 +406,28 @@ class TestTvShow404(TestCase):
         self.request.user = self.user
 
     def test_404(self):
-        self.assertRaises(Http404,
-                          tvshows,
-                          self.request,
-                          100)
+        with pytest.raises(Http404):
+            tvshows(self.request, 100)
 
 
-class TestTvShows(TestCase):
-    def setUp(self):
-        get_object_or_404_patcher = mock.patch(
+@pytest.mark.django_db
+class TestTvShows:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_get_object_or_404 = mocker.patch(
             'mediaviewer.views.files.get_object_or_404')
-        self.mock_get_object_or_404 = get_object_or_404_patcher.start()
-        self.addCleanup(get_object_or_404_patcher.stop)
 
-        files_by_localpath_patcher = mock.patch(
+        self.mock_files_by_localpath = mocker.patch(
             'mediaviewer.views.files.File.files_by_localpath')
-        self.mock_files_by_localpath = files_by_localpath_patcher.start()
-        self.addCleanup(files_by_localpath_patcher.stop)
 
-        setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.files.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.files.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
@@ -500,7 +464,7 @@ class TestTvShows(TestCase):
         expected = self.mock_change_password.return_value
         actual = tvshows(self.request, self.tv_path.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
     def test_valid(self):
@@ -525,7 +489,7 @@ class TestTvShows(TestCase):
         expected = self.mock_render.return_value
         actual = tvshows(self.request, self.tv_path.id)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_get_object_or_404.assert_called_once_with(
             Path,
             pk=self.tv_path.id)
@@ -539,7 +503,9 @@ class TestTvShows(TestCase):
             expected_context)
 
 
-class TestAjaxReport404(TestCase):
+@pytest.mark.django_db
+class TestAjaxReport404:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         mv_group = Group(name='MediaViewer')
         mv_group.save()
@@ -556,34 +522,25 @@ class TestAjaxReport404(TestCase):
         self.request.POST = {'reportid': 'file-100'}
 
     def test_404(self):
-        self.assertRaises(Http404,
-                          ajaxreport,
-                          self.request,
-                          )
+        with pytest.raises(Http404):
+            ajaxreport(self.request)
 
 
-class TestAjaxReport(TestCase):
-    def setUp(self):
-        get_object_or_404_patcher = mock.patch(
+@pytest.mark.django_db
+class TestAjaxReport:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_get_object_or_404 = mocker.patch(
             'mediaviewer.views.files.get_object_or_404')
-        self.mock_get_object_or_404 = get_object_or_404_patcher.start()
-        self.addCleanup(get_object_or_404_patcher.stop)
 
-        createNewMessage_patcher = mock.patch(
+        self.mock_createNewMessage = mocker.patch(
             'mediaviewer.views.files.Message.createNewMessage')
-        self.mock_createNewMessage = (
-            createNewMessage_patcher.start())
-        self.addCleanup(createNewMessage_patcher.stop)
 
-        HttpResponse_patcher = mock.patch(
+        self.mock_HttpResponse = mocker.patch(
             'mediaviewer.views.files.HttpResponse')
-        self.mock_HttpResponse = HttpResponse_patcher.start()
-        self.addCleanup(HttpResponse_patcher.stop)
 
-        dumps_patcher = mock.patch(
+        self.mock_dumps = mocker.patch(
             'mediaviewer.views.files.json.dumps')
-        self.mock_dumps = dumps_patcher.start()
-        self.addCleanup(dumps_patcher.stop)
 
         self.fake_file = mock.MagicMock(File)
         self.fake_file.filename = 'test_filename'
@@ -617,7 +574,7 @@ class TestAjaxReport(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxreport(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_get_object_or_404.assert_called_once_with(
             File,
             pk=123)
