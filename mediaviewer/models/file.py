@@ -25,6 +25,22 @@ formatRegex = re.compile(r'\b(xvid|avi|XVID|AVI)+\b')
 punctuationRegex = re.compile(r'[^a-zA-Z0-9]+')
 
 
+class FileManager(models.Manager):
+    def create(self,
+               *args,
+               **kwargs):
+        obj = super().create(*args, **kwargs)
+
+        path = kwargs['path']
+
+        # Generate continue watching messages
+        settings = UserSettings.objects.filter(last_watched=path).all()
+        for setting in settings:
+            Message.createLastWatchedMessage(setting.user, obj)
+
+        return obj
+
+
 class File(models.Model):
     path = models.ForeignKey('mediaviewer.Path',
                              on_delete=models.CASCADE,
@@ -33,8 +49,8 @@ class File(models.Model):
                              blank=True,
                              )
     filename = models.TextField(blank=True)
-    skip = models.BooleanField(blank=True)
-    finished = models.BooleanField(blank=True)
+    skip = models.BooleanField(blank=True, default=False)
+    finished = models.BooleanField(blank=True, default=True)
     size = models.BigIntegerField(null=True, blank=True)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
@@ -65,6 +81,8 @@ class File(models.Model):
     override_episode = models.TextField(blank=True)
 
     users = models.ManyToManyField('auth.User', through='UserComment')
+
+    objects = FileManager()
 
     class Meta:
         app_label = 'mediaviewer'

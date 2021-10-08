@@ -116,21 +116,21 @@ class TestFiles:
                                               remotepathstr='movie.remote.path',
                                               is_movie=True)
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.tv_file2 = File.new('tv.file2', self.tv_path)
-        self.tv_file3 = File.new('tv.file3', self.tv_path2)
-        self.tv_file4 = File.new('tv.file4', self.tv_path2)
+        self.tv_file = File.objects.create(filename='tv.file', path=self.tv_path)
+        self.tv_file2 = File.objects.create(filename='tv.file2', path=self.tv_path)
+        self.tv_file3 = File.objects.create(filename='tv.file3', path=self.tv_path2)
+        self.tv_file4 = File.objects.create(filename='tv.file4', path=self.tv_path2)
 
-        self.hidden_tv_file = File.new(
-            'hidden.tv.file',
-            self.tv_path,
+        self.hidden_tv_file = File.objects.create(
+            filename='hidden.tv.file',
+            path=self.tv_path,
             hide=True)
 
-        self.movie_file = File.new('movie.file', self.movie_path)
-        self.movie_file2 = File.new('movie.file2', self.movie_path)
-        self.hidden_movie_file = File.new(
-            'hidden.movie.file',
-            self.movie_path,
+        self.movie_file = File.objects.create(filename='movie.file', path=self.movie_path)
+        self.movie_file2 = File.objects.create(filename='movie.file2', path=self.movie_path)
+        self.hidden_movie_file = File.objects.create(
+            filename='hidden.movie.file',
+            path=self.movie_path,
             hide=True)
 
     def test_files(self):
@@ -177,19 +177,20 @@ class TestDistinctShowFolders:
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
                                            is_movie=False)
-        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file = File.objects.create(
+            filename='tv.file', path=self.tv_path)
 
         self.tv_path2 = Path.objects.create(localpathstr='tv.local.path2',
                                             remotepathstr='tv.remote.path2',
                                             is_movie=False)
-        self.tv_file2 = File.new('tv.file2', self.tv_path2)
+        self.tv_file2 = File.objects.create(filename='tv.file2', path=self.tv_path2)
 
         self.hidden_tv_path = Path.objects.create(localpathstr='hidden.local.path',
                                                   remotepathstr='hidden.remote.path',
                                                   is_movie=False)
-        self.hidden_tv_file = File.new(
-            'hidden.file',
-            self.hidden_tv_path,
+        self.hidden_tv_file = File.objects.create(
+            filename='hidden.file',
+            path=self.hidden_tv_path,
             hide=True)
 
         self.another_tv_path = Path.objects.create(localpathstr='another.tv.local.path',
@@ -199,7 +200,7 @@ class TestDistinctShowFolders:
         self.movie_path = Path.objects.create(localpathstr='movie.local.path',
                                               remotepathstr='movie.remote.path',
                                               is_movie=True)
-        self.movie_file = File.new('movie.file', self.movie_path)
+        self.movie_file = File.objects.create(filename='movie.file', path=self.movie_path)
 
     def test_distinctShowFolders(self):
         expected = self.mock_buildDistinctShowFolderFromPaths.return_value
@@ -248,13 +249,13 @@ class TestDestroy:
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
                                            is_movie=False)
-        self.tv_path_file = File.new('tv.file', self.tv_path)
-        self.tv_path_file2 = File.new('tv.file2', self.tv_path)
+        self.tv_path_file = File.objects.create(filename='tv.file', path=self.tv_path)
+        self.tv_path_file2 = File.objects.create(filename='tv.file2', path=self.tv_path)
 
         self.tv_path2 = Path.objects.create(localpathstr='tv.local.path2',
                                             remotepathstr='tv.remote.path2',
                                             is_movie=False)
-        self.tv_path2_file = File.new('tv.file', self.tv_path2)
+        self.tv_path2_file = File.objects.create(filename='tv.file', path=self.tv_path2)
 
     def test_destroy(self):
         self.tv_path.destroy()

@@ -1,4 +1,4 @@
-from django.test import TestCase
+import pytest
 
 from mediaviewer.views.views_utils import (setSiteWideContext,
                                            getLastWaiterStatus,
@@ -11,33 +11,24 @@ import mock
 from mock import call
 
 
-class TestSetSiteWideContext(TestCase):
-    def setUp(self):
-        self.add_message_patcher = mock.patch(
+@pytest.mark.django_db
+class TestSetSiteWideContext:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_add_message = mocker.patch(
                 'mediaviewer.views.views_utils.Message.add_message')
-        self.mock_add_message = self.add_message_patcher.start()
-        self.addCleanup(self.add_message_patcher.stop)
 
-        self.getMessagesForUser_patcher = mock.patch(
+        self.mock_getMessagesForUser = mocker.patch(
                 'mediaviewer.views.views_utils.Message.getMessagesForUser')
-        self.mock_getMessagesForUser = self.getMessagesForUser_patcher.start()
-        self.addCleanup(self.getMessagesForUser_patcher.stop)
 
-        self.getLastWaiterStatus_patcher = mock.patch(
+        self.mock_getLastWaiterStatus = mocker.patch(
                 'mediaviewer.views.views_utils.getLastWaiterStatus')
-        self.mock_getLastWaiterStatus = (
-                self.getLastWaiterStatus_patcher.start())
-        self.addCleanup(self.getLastWaiterStatus_patcher.stop)
 
-        self.get_movie_genres_patcher = mock.patch(
+        self.mock_get_movie_genres = mocker.patch(
                 'mediaviewer.views.views_utils.File.get_movie_genres')
-        self.mock_get_movie_genres = self.get_movie_genres_patcher.start()
-        self.addCleanup(self.get_movie_genres_patcher.stop)
 
-        self.get_tv_genres_patcher = mock.patch(
+        self.mock_get_tv_genres = mocker.patch(
                 'mediaviewer.views.views_utils.Path.get_tv_genres')
-        self.mock_get_tv_genres = self.get_tv_genres_patcher.start()
-        self.addCleanup(self.get_tv_genres_patcher.stop)
 
         self.first_message = mock.MagicMock(Message)
         self.second_message = mock.MagicMock(Message)
@@ -60,8 +51,8 @@ class TestSetSiteWideContext(TestCase):
         expected = {'loggedin': False,
                     'is_staff': 'true'}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
-        self.assertFalse(self.mock_getMessagesForUser.called)
-        self.assertFalse(self.mock_add_message.called)
+        assert not self.mock_getMessagesForUser.called
+        assert not self.mock_add_message.called
 
     def test_not_staff_not_logged_in(self):
         self.user.is_staff = False
@@ -73,8 +64,8 @@ class TestSetSiteWideContext(TestCase):
         expected = {'loggedin': False,
                     'is_staff': 'false'}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
-        self.assertFalse(self.mock_getMessagesForUser.called)
-        self.assertFalse(self.mock_add_message.called)
+        assert not self.mock_getMessagesForUser.called
+        assert not self.mock_add_message.called
 
     def test_is_staff_is_logged_in(self):
         self.user.is_staff = True
@@ -93,8 +84,8 @@ class TestSetSiteWideContext(TestCase):
                     'movie_genres': self.mock_get_movie_genres.return_value,
                     'tv_genres': self.mock_get_tv_genres.return_value}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
-        self.assertFalse(self.mock_getMessagesForUser.called)
-        self.assertFalse(self.mock_add_message.called)
+        assert not self.mock_getMessagesForUser.called
+        assert not self.mock_add_message.called
 
     def test_includeMessages_not_staff(self):
         self.user.is_staff = False
@@ -125,12 +116,11 @@ class TestSetSiteWideContext(TestCase):
                  ])
 
 
-class TestGetLastWaiterStatus(TestCase):
-    def setUp(self):
-        self.WaiterStatus_patcher = mock.patch(
+class TestGetLastWaiterStatus:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_WaiterStatus = mocker.patch(
                 'mediaviewer.views.views_utils.WaiterStatus')
-        self.mock_WaiterStatus = self.WaiterStatus_patcher.start()
-        self.addCleanup(self.WaiterStatus_patcher.stop)
 
     def test_getLastWaiterStatus(self):
         context = {}
@@ -141,5 +131,5 @@ class TestGetLastWaiterStatus(TestCase):
 
         getLastWaiterStatus(context)
 
-        self.assertTrue(context['waiterstatus'])
-        self.assertEqual('test', context['waiterfailurereason'])
+        assert context['waiterstatus']
+        assert 'test' == context['waiterfailurereason']

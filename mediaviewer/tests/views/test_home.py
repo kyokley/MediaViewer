@@ -40,7 +40,7 @@ class TestHome(TestCase):
         self.tv_path = Path.objects.create(localpathstr='tv.local.path',
                                            remotepathstr='tv.remote.path',
                                            is_movie=False)
-        self.tv_file = File.new('tv.file', self.tv_path)
+        self.tv_file = File.objects.create(filename='tv.file', path=self.tv_path)
 
         self.mock_most_recent_files.return_value = [self.tv_file]
 

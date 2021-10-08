@@ -48,8 +48,8 @@ class TestMovies:
                                               remotepathstr='movie.remote.path',
                                               is_movie=True)
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.movie_file = File.new('movie.file', self.movie_path)
+        self.tv_file = File.objects.create(filename='tv.file', path=self.tv_path)
+        self.movie_file = File.objects.create(filename='movie.file', path=self.movie_path)
 
         mv_group = Group(name='MediaViewer')
         mv_group.save()
@@ -157,8 +157,8 @@ class TestMoviesByGenre:
                                               remotepathstr='movie.remote.path',
                                               is_movie=True)
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.movie_file = File.new('movie.file', self.movie_path)
+        self.tv_file = File.objects.create(filename='tv.file', path=self.tv_path)
+        self.movie_file = File.objects.create(filename='movie.file', path=self.movie_path)
 
         mv_group = Group(name='MediaViewer')
         mv_group.save()
@@ -436,8 +436,8 @@ class TestTvShows:
                                               remotepathstr='movie.remote.path',
                                               is_movie=True)
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.movie_file = File.new('movie.file', self.movie_path)
+        self.tv_file = File.objects.create(filename='tv.file', path=self.tv_path)
+        self.movie_file = File.objects.create(filename='movie.file', path=self.movie_path)
 
         self.mock_get_object_or_404.return_value = self.tv_path
         self.mock_files_by_localpath.return_value.select_related.return_value = [

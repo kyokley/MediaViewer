@@ -16,8 +16,8 @@ class TestNew:
                                         is_movie=False)
 
         self.filename = 'test_filename'
-        self.file = File.new(self.filename,
-                             self.path)
+        self.file = File.objects.create(filename=self.filename,
+                                        path=self.path)
 
         self.user = helpers.create_user(random=True)
 
