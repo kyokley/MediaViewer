@@ -1,6 +1,6 @@
 import mock
+import pytest
 
-from django.test import TestCase
 from django.http import HttpRequest
 
 from mediaviewer.models.file import File
@@ -14,26 +14,20 @@ from mediaviewer.views.home import (
 from mediaviewer.tests.helpers import create_user
 
 
-class TestHome(TestCase):
-    def setUp(self):
-        most_recent_files_patcher = mock.patch(
+class TestHome:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_most_recent_files = mocker.patch(
             'mediaviewer.views.home.File.most_recent_files')
-        self.mock_most_recent_files = most_recent_files_patcher.start()
-        self.addCleanup(most_recent_files_patcher.stop)
 
-        setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
             'mediaviewer.views.home.setSiteWideContext')
-        self.mock_setSiteWideContext = setSiteWideContext_patcher.start()
-        self.addCleanup(setSiteWideContext_patcher.stop)
 
-        render_patcher = mock.patch(
+        self.mock_render = mocker.patch(
             'mediaviewer.views.home.render')
-        self.mock_render = render_patcher.start()
-        self.addCleanup(render_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
             'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
 
         self.user = create_user()
 
@@ -62,7 +56,7 @@ class TestHome(TestCase):
         expected = self.mock_render.return_value
         actual = home(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_most_recent_files.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context,
@@ -84,7 +78,7 @@ class TestHome(TestCase):
         expected = self.mock_render.return_value
         actual = home(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_most_recent_files.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context,
@@ -103,26 +97,21 @@ class TestHome(TestCase):
         expected = self.mock_change_password.return_value
         actual = home(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_change_password.assert_called_once_with()
 
 
-class TestAjaxRunScraper(TestCase):
-    def setUp(self):
-        inferAllScrapers_patcher = mock.patch(
+class TestAjaxRunScraper:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        self.mock_inferAllScrapers = mock.patch(
             'mediaviewer.views.home.File.inferAllScrapers')
-        self.mock_inferAllScrapers = inferAllScrapers_patcher.start()
-        self.addCleanup(inferAllScrapers_patcher.stop)
 
-        dumps_patcher = mock.patch(
+        self.mock_dumps = mock.patch(
             'mediaviewer.views.home.json.dumps')
-        self.mock_dumps = dumps_patcher.start()
-        self.addCleanup(dumps_patcher.stop)
 
-        HttpResponse_patcher = mock.patch(
+        self.mock_HttpResponse = mock.patch(
             'mediaviewer.views.home.HttpResponse')
-        self.mock_HttpResponse = HttpResponse_patcher.start()
-        self.addCleanup(HttpResponse_patcher.stop)
 
         self.user = create_user()
 
@@ -135,8 +124,8 @@ class TestAjaxRunScraper(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxrunscraper(self.request)
 
-        self.assertEqual(expected, actual)
-        self.assertFalse(self.mock_inferAllScrapers.called)
+        assert expected == actual
+        assert not self.mock_inferAllScrapers.called
         self.mock_dumps.assert_called_once_with(expected_response)
         self.mock_HttpResponse.assert_called_once_with(
             self.mock_dumps.return_value,
@@ -150,7 +139,7 @@ class TestAjaxRunScraper(TestCase):
         expected = self.mock_HttpResponse.return_value
         actual = ajaxrunscraper(self.request)
 
-        self.assertEqual(expected, actual)
+        assert expected == actual
         self.mock_inferAllScrapers.assert_called_once_with()
         self.mock_dumps.assert_called_once_with(expected_response)
         self.mock_HttpResponse.assert_called_once_with(

@@ -1,10 +1,11 @@
-from django.test import TestCase
+import pytest
 from django.contrib.auth.models import User
 from mediaviewer.forms import FormlessPasswordReset
 import mock
 
 
-class TestFormlessPasswordReset(TestCase):
+class TestFormlessPasswordReset:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.email = 'test@email.com'
         self.user = mock.create_autospec(User)
@@ -13,5 +14,5 @@ class TestFormlessPasswordReset(TestCase):
 
     def test_save(self):
         self.form.save()
-        self.assertEqual(self.user.email, self.email)
-        self.assertTrue(self.user.save.called)
+        assert self.user.email == self.email
+        assert self.user.save.called
