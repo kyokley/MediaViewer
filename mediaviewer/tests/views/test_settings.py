@@ -1,6 +1,6 @@
 import mock
+import pytest
 
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 from mediaviewer.views.settings import (submitnewuser,
@@ -20,7 +20,8 @@ from mediaviewer.tests.helpers import create_user
 @mock.patch('mediaviewer.views.settings.log')
 @mock.patch('mediaviewer.views.settings.render')
 @mock.patch('mediaviewer.views.settings.setSiteWideContext')
-class TestNewUserView(TestCase):
+class TestNewUserView:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.user = mock.create_autospec(User)
         self.user.username = 'test_logged_in_user'
@@ -49,7 +50,7 @@ class TestNewUserView(TestCase):
                                             'mediaviewer/settingsresults.html',
                                             expected_context)
         mock_log.error.assert_called_once_with("User is not a staffer!")
-        self.assertFalse(mock_new.called)
+        assert not mock_new.called
 
     def test_newUserWithStaffer(self,
                                 mock_setSiteWideContext,
@@ -65,7 +66,7 @@ class TestNewUserView(TestCase):
         mock_render.assert_called_once_with(self.request,
                                             'mediaviewer/settingsresults.html',
                                             expected_context)
-        self.assertFalse(mock_log.error.called)
+        assert not mock_log.error.called
         mock_new.assert_called_once_with(self.new_user_email,
                                          self.new_user_email,
                                          can_download=True)
@@ -87,7 +88,7 @@ class TestNewUserView(TestCase):
         mock_render.assert_called_once_with(self.request,
                                             'mediaviewer/settingsresults.html',
                                             expected_context)
-        self.assertFalse(mock_log.error.called)
+        assert not mock_log.error.called
         mock_new.assert_called_once_with(self.new_user_email,
                                          self.new_user_email,
                                          can_download=True)
@@ -109,13 +110,14 @@ class TestNewUserView(TestCase):
         mock_render.assert_called_once_with(self.request,
                                             'mediaviewer/settingsresults.html',
                                             expected_context)
-        self.assertFalse(mock_log.error.called)
+        assert not mock_log.error.called
         mock_new.assert_called_once_with(self.new_user_email,
                                          self.new_user_email,
                                          can_download=True)
 
 
-class TestSettings(TestCase):
+class TestSettings:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.LOCAL_IP_patcher = mock.patch(
                 'mediaviewer.views.settings.LOCAL_IP', 'test_local_ip')
@@ -190,7 +192,7 @@ class TestSettings(TestCase):
                 'mediaviewer/settings.html',
                 expected_context)
 
-        self.assertFalse(self.mock_change_password.called)
+        assert not self.mock_change_password.called
 
     def test_user_has_no_email(self):
         self.user.email = None
@@ -221,7 +223,7 @@ class TestSettings(TestCase):
                 'mediaviewer/settings.html',
                 expected_context)
 
-        self.assertFalse(self.mock_change_password.called)
+        assert not self.mock_change_password.called
 
     def test_force_password_change(self):
         self.settings.force_password_change = True
@@ -233,7 +235,8 @@ class TestSettings(TestCase):
         self.mock_change_password.assert_called_once_with()
 
 
-class TestSubmitSettings(TestCase):
+class TestSubmitSettings:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.FILENAME_SORT_patcher = mock.patch(
                 'mediaviewer.views.settings.FILENAME_SORT',
@@ -284,7 +287,7 @@ class TestSubmitSettings(TestCase):
         self.assertEqual(self.settings.binge_mode, False)
         self.assertEqual(self.settings.jump_to_last_watched, False)
 
-        self.assertFalse(self.mock_change_password.called)
+        assert not self.mock_change_password.called
 
     def test_non_defaults(self):
         self.request.POST = {'default_sort': 'test_default_sort',
@@ -312,7 +315,7 @@ class TestSubmitSettings(TestCase):
         self.assertEqual(self.settings.jump_to_last_watched, True)
         self.assertEqual(self.user.email, 'test_new_email')
 
-        self.assertFalse(self.mock_change_password.called)
+        assert not self.mock_change_password.called
 
     def test_force_password_change(self):
         self.settings.force_password_change = True
@@ -324,7 +327,8 @@ class TestSubmitSettings(TestCase):
         self.mock_change_password.assert_called_once_with()
 
 
-class TestSubmitSiteSettings(TestCase):
+class TestSubmitSiteSettings:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.new_patcher = mock.patch(
                 'mediaviewer.views.settings.SiteGreeting.new')
@@ -396,7 +400,7 @@ class TestSubmitSiteSettings(TestCase):
                 self.request,
                 'mediaviewer/settingsresults.html',
                 expected_context)
-        self.assertFalse(self.mock_new.called)
+        assert not self.mock_new.called
 
     def test_is_not_staff(self):
         self.user.is_staff = False
@@ -414,7 +418,7 @@ class TestSubmitSiteSettings(TestCase):
                 self.request,
                 'mediaviewer/settingsresults.html',
                 expected_context)
-        self.assertFalse(self.mock_new.called)
+        assert not self.mock_new.called
 
     def test_force_password_change(self):
         user_settings = self.user.settings()

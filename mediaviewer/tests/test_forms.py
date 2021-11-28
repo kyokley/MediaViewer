@@ -4,6 +4,7 @@ from mediaviewer.forms import FormlessPasswordReset
 import mock
 
 
+@pytest.mark.django_db
 class TestFormlessPasswordReset:
     @pytest.fixture(autouse=True)
     def setUp(self):

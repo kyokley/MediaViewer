@@ -14,6 +14,7 @@ from mediaviewer.views.home import (
 from mediaviewer.tests.helpers import create_user
 
 
+@pytest.mark.django_db
 class TestHome:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
@@ -101,6 +102,7 @@ class TestHome:
         self.mock_change_password.assert_called_once_with()
 
 
+@pytest.mark.django_db
 class TestAjaxRunScraper:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
