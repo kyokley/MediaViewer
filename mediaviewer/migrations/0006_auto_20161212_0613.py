@@ -8,18 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0005_auto_20161127_1008'),
+        ("mediaviewer", "0005_auto_20161127_1008"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usercomment',
-            name='datecreated',
-            field=models.DateTimeField(auto_now_add=True, db_column='datecreated'),
+            model_name="usercomment",
+            name="datecreated",
+            field=models.DateTimeField(auto_now_add=True, db_column="datecreated"),
         ),
         migrations.AlterField(
-            model_name='usercomment',
-            name='dateedited',
-            field=models.DateTimeField(auto_now=True, db_column='dateedited'),
+            model_name="usercomment",
+            name="dateedited",
+            field=models.DateTimeField(auto_now=True, db_column="dateedited"),
         ),
     ]

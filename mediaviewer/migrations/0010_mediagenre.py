@@ -9,22 +9,46 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0009_videoprogress_file'),
+        ("mediaviewer", "0009_videoprogress_file"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MediaGenre',
+            name="MediaGenre",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('genre', models.TextField()),
-                ('datecreated', models.DateTimeField(auto_now_add=True)),
-                ('dateedited', models.DateTimeField(auto_now=True)),
-                ('file', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.File')),
-                ('path', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.Path')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("genre", models.TextField()),
+                ("datecreated", models.DateTimeField(auto_now_add=True)),
+                ("dateedited", models.DateTimeField(auto_now=True)),
+                (
+                    "file",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="mediaviewer.File",
+                    ),
+                ),
+                (
+                    "path",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="mediaviewer.Path",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'mediagenre',
+                "db_table": "mediagenre",
             },
         ),
     ]

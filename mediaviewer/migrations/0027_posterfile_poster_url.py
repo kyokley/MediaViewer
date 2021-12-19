@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0026_remove_usersettings_auto_download'),
+        ("mediaviewer", "0026_remove_usersettings_auto_download"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterfile',
-            name='poster_url',
+            model_name="posterfile",
+            name="poster_url",
             field=models.URLField(blank=True, null=True),
         ),
     ]

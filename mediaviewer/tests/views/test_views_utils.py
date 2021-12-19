@@ -1,8 +1,9 @@
 import pytest
 
-from mediaviewer.views.views_utils import (setSiteWideContext,
-                                           getLastWaiterStatus,
-                                           )
+from mediaviewer.views.views_utils import (
+    setSiteWideContext,
+    getLastWaiterStatus,
+)
 from mediaviewer.models.usersettings import FILENAME_SORT
 from mediaviewer.models.message import Message
 from django.contrib.auth.models import User
@@ -16,26 +17,32 @@ class TestSetSiteWideContext:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_add_message = mocker.patch(
-                'mediaviewer.views.views_utils.Message.add_message')
+            "mediaviewer.views.views_utils.Message.add_message"
+        )
 
         self.mock_getMessagesForUser = mocker.patch(
-                'mediaviewer.views.views_utils.Message.getMessagesForUser')
+            "mediaviewer.views.views_utils.Message.getMessagesForUser"
+        )
 
         self.mock_getLastWaiterStatus = mocker.patch(
-                'mediaviewer.views.views_utils.getLastWaiterStatus')
+            "mediaviewer.views.views_utils.getLastWaiterStatus"
+        )
 
         self.mock_get_movie_genres = mocker.patch(
-                'mediaviewer.views.views_utils.File.get_movie_genres')
+            "mediaviewer.views.views_utils.File.get_movie_genres"
+        )
 
         self.mock_get_tv_genres = mocker.patch(
-                'mediaviewer.views.views_utils.Path.get_tv_genres')
+            "mediaviewer.views.views_utils.Path.get_tv_genres"
+        )
 
         self.first_message = mock.MagicMock(Message)
         self.second_message = mock.MagicMock(Message)
 
-        self.mock_getMessagesForUser.side_effect = [(self.first_message,),
-                                                    (self.second_message,)
-                                                    ]
+        self.mock_getMessagesForUser.side_effect = [
+            (self.first_message,),
+            (self.second_message,),
+        ]
 
         self.request = mock.MagicMock()
         self.user = mock.create_autospec(User)
@@ -48,8 +55,7 @@ class TestSetSiteWideContext:
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {'loggedin': False,
-                    'is_staff': 'true'}
+        expected = {"loggedin": False, "is_staff": "true"}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
         assert not self.mock_add_message.called
@@ -61,8 +67,7 @@ class TestSetSiteWideContext:
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {'loggedin': False,
-                    'is_staff': 'false'}
+        expected = {"loggedin": False, "is_staff": "false"}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
         assert not self.mock_add_message.called
@@ -75,14 +80,16 @@ class TestSetSiteWideContext:
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {'loggedin': True,
-                    'is_staff': 'true',
-                    'default_sort': FILENAME_SORT,
-                    'donation_site_name': '',
-                    'donation_site_url': '',
-                    'user': self.user,
-                    'movie_genres': self.mock_get_movie_genres.return_value,
-                    'tv_genres': self.mock_get_tv_genres.return_value}
+        expected = {
+            "loggedin": True,
+            "is_staff": "true",
+            "default_sort": FILENAME_SORT,
+            "donation_site_name": "",
+            "donation_site_url": "",
+            "user": self.user,
+            "movie_genres": self.mock_get_movie_genres.return_value,
+            "tv_genres": self.mock_get_tv_genres.return_value,
+        }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
         assert not self.mock_add_message.called
@@ -95,41 +102,50 @@ class TestSetSiteWideContext:
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=True)
 
-        expected = {'loggedin': True,
-                    'is_staff': 'false',
-                    'default_sort': FILENAME_SORT,
-                    'donation_site_name': '',
-                    'donation_site_url': '',
-                    'user': self.user,
-                    'movie_genres': self.mock_get_movie_genres.return_value,
-                    'tv_genres': self.mock_get_tv_genres.return_value}
+        expected = {
+            "loggedin": True,
+            "is_staff": "false",
+            "default_sort": FILENAME_SORT,
+            "donation_site_name": "",
+            "donation_site_url": "",
+            "user": self.user,
+            "movie_genres": self.mock_get_movie_genres.return_value,
+            "tv_genres": self.mock_get_tv_genres.return_value,
+        }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         self.mock_add_message.assert_has_calls(
-                [call(self.request,
-                      self.first_message.level,
-                      self.first_message.body,
-                      extra_tags=str(self.first_message.id)),
-                 call(self.request,
-                      self.second_message.level,
-                      self.second_message.body,
-                      extra_tags=str(self.second_message.id) + ' last_watched')
-                 ])
+            [
+                call(
+                    self.request,
+                    self.first_message.level,
+                    self.first_message.body,
+                    extra_tags=str(self.first_message.id),
+                ),
+                call(
+                    self.request,
+                    self.second_message.level,
+                    self.second_message.body,
+                    extra_tags=str(self.second_message.id) + " last_watched",
+                ),
+            ]
+        )
 
 
 class TestGetLastWaiterStatus:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_WaiterStatus = mocker.patch(
-                'mediaviewer.views.views_utils.WaiterStatus')
+            "mediaviewer.views.views_utils.WaiterStatus"
+        )
 
     def test_getLastWaiterStatus(self):
         context = {}
         mock_lastStatus = mock.MagicMock()
         mock_lastStatus.status = True
-        mock_lastStatus.failureReason = 'test'
+        mock_lastStatus.failureReason = "test"
         self.mock_WaiterStatus.getLastStatus.return_value = mock_lastStatus
 
         getLastWaiterStatus(context)
 
-        assert context['waiterstatus']
-        assert 'test' == context['waiterfailurereason']
+        assert context["waiterstatus"]
+        assert "test" == context["waiterfailurereason"]

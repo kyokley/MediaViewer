@@ -10,9 +10,9 @@ from mediaviewer.utils import logAccessInfo
 def signout(request):
     logout(request)
     context = {}
-    context['active_page'] = 'logout'
-    context['loggedin'] = False
-    context['title'] = 'Signed out'
+    context["active_page"] = "logout"
+    context["loggedin"] = False
+    context["title"] = "Signed out"
     setSiteWideContext(context, request)
 
     user_logged_out.send(
@@ -20,4 +20,4 @@ def signout(request):
         request=request,
         user=request.user,
     )
-    return render(request, 'mediaviewer/logout.html', context)
+    return render(request, "mediaviewer/logout.html", context)

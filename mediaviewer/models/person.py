@@ -8,9 +8,9 @@ class PersonManager(models.Manager):
 
     def get_or_create(self, *args, **kwargs):
         # Remove anything appearing in parens
-        kwargs['name'] = re.sub(r'\s+\(.*\)', '', kwargs['name']).title()
+        kwargs["name"] = re.sub(r"\s+\(.*\)", "", kwargs["name"]).title()
 
-        existing = self.filter(name=kwargs['name']).first()
+        existing = self.filter(name=kwargs["name"]).first()
 
         if existing:
             return existing, False
@@ -19,8 +19,7 @@ class PersonManager(models.Manager):
 
 
 class Person(models.Model):
-    name = models.TextField(blank=False,
-                            null=False)
+    name = models.TextField(blank=False, null=False)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
 
@@ -30,4 +29,4 @@ class Person(models.Model):
         abstract = True
 
     def __str__(self):
-        return 'id: %s n: %s' % (self.id, self.name)
+        return "id: %s n: %s" % (self.id, self.name)

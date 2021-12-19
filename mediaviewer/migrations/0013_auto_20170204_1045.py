@@ -8,11 +8,11 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0012_auto_20170121_2207'),
+        ("mediaviewer", "0012_auto_20170121_2207"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='MediaGenre',
-            )
+            name="MediaGenre",
+        )
     ]

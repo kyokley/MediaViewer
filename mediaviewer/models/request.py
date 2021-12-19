@@ -7,34 +7,39 @@ from dateutil.relativedelta import relativedelta
 
 
 class Request(models.Model):
-    datecreated = models.DateTimeField(db_column='datecreated',
-                                       auto_now_add=True)
-    dateedited = models.DateTimeField(db_column='dateedited', auto_now=True)
+    datecreated = models.DateTimeField(db_column="datecreated", auto_now_add=True)
+    dateedited = models.DateTimeField(db_column="dateedited", auto_now=True)
     name = models.TextField(blank=True, null=False)
     done = models.BooleanField()
-    user = models.ForeignKey('auth.User',
-                             on_delete=models.CASCADE,
-                             null=False,
-                             db_column='userid',
-                             blank=False)
+    user = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE,
+        null=False,
+        db_column="userid",
+        blank=False,
+    )
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'request'
+        app_label = "mediaviewer"
+        db_table = "request"
 
     def __str__(self):
-        return 'id: %s r: %s u: %s d: %s' % (
-                self.id,
-                self.name,
-                self.user.username,
-                self.done)
+        return "id: %s r: %s u: %s d: %s" % (
+            self.id,
+            self.name,
+            self.user.username,
+            self.done,
+        )
 
     def numberOfVotes(self):
         return RequestVote.objects.filter(request=self).count()
 
     def canVote(self, user):
-        mostRecentVote = RequestVote.objects.filter(
-                request=self).filter(user=user).order_by('-datecreated')
+        mostRecentVote = (
+            RequestVote.objects.filter(request=self)
+            .filter(user=user)
+            .order_by("-datecreated")
+        )
         mostRecentVote = mostRecentVote and mostRecentVote[0]
         if not mostRecentVote:
             return True
@@ -46,21 +51,16 @@ class Request(models.Model):
         return currentTime >= refTime
 
     def getSupportingUsers(self):
-        sql = '''SELECT DISTINCT u.* FROM auth_user AS u
+        sql = """SELECT DISTINCT u.* FROM auth_user AS u
                  INNER JOIN requestvote AS rv
                  ON rv.userid = u.id
                  WHERE rv.requestid = %s;
-              '''
+              """
         return User.objects.raw(sql, params=[self.id])
 
     @classmethod
-    def new(cls,
-            name,
-            user,
-            done=False):
-        existing = (cls.objects.filter(name=name.title())
-                               .filter(done=False)
-                               .first())
+    def new(cls, name, user, done=False):
+        existing = cls.objects.filter(name=name.title()).filter(done=False).first()
         if existing:
             return existing
 
@@ -73,36 +73,30 @@ class Request(models.Model):
 
     @classmethod
     def getRequestByName(cls, name):
-        existing = (cls.objects.filter(name=name.title())
-                               .filter(done=False)
-                               .first())
+        existing = cls.objects.filter(name=name.title()).filter(done=False).first()
         return existing
 
 
 class RequestVote(models.Model):
-    request = models.ForeignKey(Request,
-                                on_delete=models.CASCADE,
-                                null=True,
-                                db_column='requestid',
-                                blank=False)
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             null=False,
-                             db_column='userid',
-                             blank=False)
-    datecreated = models.DateTimeField(db_column='datecreated',
-                                       auto_now_add=True)
+    request = models.ForeignKey(
+        Request, on_delete=models.CASCADE, null=True, db_column="requestid", blank=False
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=False, db_column="userid", blank=False
+    )
+    datecreated = models.DateTimeField(db_column="datecreated", auto_now_add=True)
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'requestvote'
+        app_label = "mediaviewer"
+        db_table = "requestvote"
 
     def __str__(self):
-        return 'id: %s r: %s u: %s d: %s' % (
-                self.id,
-                self.request.name,
-                self.user.username,
-                self.datecreated)
+        return "id: %s r: %s u: %s d: %s" % (
+            self.id,
+            self.request.name,
+            self.user.username,
+            self.datecreated,
+        )
 
     @classmethod
     def new(cls, request, user):

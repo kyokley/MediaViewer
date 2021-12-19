@@ -9,17 +9,22 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0022_message_message_type'),
+        ("mediaviewer", "0022_message_message_type"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='usersettings',
-            name='last_watched_dismissed',
+            model_name="usersettings",
+            name="last_watched_dismissed",
         ),
         migrations.AlterField(
-            model_name='usersettings',
-            name='last_watched',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.Path'),
+            model_name="usersettings",
+            name="last_watched",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="mediaviewer.Path",
+            ),
         ),
     ]

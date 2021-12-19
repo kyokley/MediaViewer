@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0024_auto_20170902_1025'),
+        ("mediaviewer", "0024_auto_20170902_1025"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='usersettings',
-            name='jump_to_last_watched',
+            model_name="usersettings",
+            name="jump_to_last_watched",
             field=models.BooleanField(default=True),
         ),
     ]

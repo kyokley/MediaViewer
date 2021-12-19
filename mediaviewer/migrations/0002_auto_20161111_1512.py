@@ -4,16 +4,18 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+
 def delete_posterfiles(apps, schema_editor):
-    PosterFile = apps.get_model('mediaviewer', 'PosterFile')
+    PosterFile = apps.get_model("mediaviewer", "PosterFile")
     PosterFile.objects.all().delete()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0001_initial'),
+        ("mediaviewer", "0001_initial"),
     ]
 
     operations = [
-            migrations.RunPython(delete_posterfiles),
+        migrations.RunPython(delete_posterfiles),
     ]

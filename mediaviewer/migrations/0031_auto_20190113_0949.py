@@ -6,33 +6,33 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0030_auto_20190105_1925'),
+        ("mediaviewer", "0030_auto_20190105_1925"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='file',
-            name='finished',
+            model_name="file",
+            name="finished",
             field=models.BooleanField(blank=True),
         ),
         migrations.AlterField(
-            model_name='file',
-            name='skip',
+            model_name="file",
+            name="skip",
             field=models.BooleanField(blank=True),
         ),
         migrations.AlterField(
-            model_name='filenamescrapeformat',
-            name='subPeriods',
-            field=models.BooleanField(blank=True, db_column='subperiods'),
+            model_name="filenamescrapeformat",
+            name="subPeriods",
+            field=models.BooleanField(blank=True, db_column="subperiods"),
         ),
         migrations.AlterField(
-            model_name='filenamescrapeformat',
-            name='useSearchTerm',
-            field=models.BooleanField(blank=True, db_column='usesearchterm'),
+            model_name="filenamescrapeformat",
+            name="useSearchTerm",
+            field=models.BooleanField(blank=True, db_column="usesearchterm"),
         ),
         migrations.AlterField(
-            model_name='path',
-            name='skip',
+            model_name="path",
+            name="skip",
             field=models.BooleanField(blank=True),
         ),
     ]

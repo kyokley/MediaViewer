@@ -14,27 +14,24 @@ class Path(models.Model):
     localpathstr = models.TextField(blank=True)
     remotepathstr = models.TextField(blank=True)
     skip = models.BooleanField(blank=True, null=False, default=False)
-    is_movie = models.BooleanField(blank=False,
-                                   null=False,
-                                   db_column='ismovie')
+    is_movie = models.BooleanField(blank=False, null=False, db_column="ismovie")
     defaultScraper = models.ForeignKey(
-        'mediaviewer.FilenameScrapeFormat',
+        "mediaviewer.FilenameScrapeFormat",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        db_column='defaultscraperid')
+        db_column="defaultscraperid",
+    )
     tvdb_id = models.TextField(null=True, blank=True)
-    server = models.TextField(blank=False, null=False, default='127.0.0.1')
+    server = models.TextField(blank=False, null=False, default="127.0.0.1")
     defaultsearchstr = models.TextField(null=True, blank=True)
     imdb_id = models.TextField(null=True, blank=True)
     override_display_name = models.TextField(
-            null=True,
-            blank=True,
-            db_column='display_name')
+        null=True, blank=True, db_column="display_name"
+    )
     lastCreatedFileDate = models.DateTimeField(
-            null=True,
-            blank=True,
-            db_column='lastcreatedfiledate')
+        null=True, blank=True, db_column="lastcreatedfiledate"
+    )
     finished = models.BooleanField(
         blank=False,
         null=False,
@@ -42,8 +39,8 @@ class Path(models.Model):
     )
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'path'
+        app_label = "mediaviewer"
+        db_table = "path"
 
     @property
     def isFile(self):
@@ -62,7 +59,7 @@ class Path(models.Model):
 
     @property
     def shortName(self):
-        return self.localPath.rpartition('/')[-1]
+        return self.localPath.rpartition("/")[-1]
 
     @property
     def localPath(self):
@@ -77,14 +74,15 @@ class Path(models.Model):
     remotepath = remotePath
 
     def displayName(self):
-        return (self.override_display_name or
-                self.shortName.replace('.', ' ').title())
+        return self.override_display_name or self.shortName.replace(".", " ").title()
 
     def __str__(self):
-        return 'id: %s r: %s l: %s f: %s' % (self.id,
-                                             self.remotePath,
-                                             self.localPath,
-                                             self.finished)
+        return "id: %s r: %s l: %s f: %s" % (
+            self.id,
+            self.remotePath,
+            self.localPath,
+            self.finished,
+        )
 
     def lastCreatedFileDateForSpan(self):
         last_date = self.lastCreatedFileDate
@@ -92,19 +90,19 @@ class Path(models.Model):
 
     def url(self):
         if self.is_movie:
-            raise TypeError('url method does not apply to movie paths')
+            raise TypeError("url method does not apply to movie paths")
         return '<a href="{}">{}</a>'.format(
-                reverse('mediaviewer:tvshows', args=(self.id,)),
-                self.displayName())
+            reverse("mediaviewer:tvshows", args=(self.id,)), self.displayName()
+        )
 
     @classmethod
     def distinctShowFolders(cls):
-        paths_QS = (Path.objects
-                        .filter(is_movie=False)
-                        .filter(file__hide=False)
-                        .annotate(
-                            num_files=models.Count('file'))
-                        .filter(num_files__gt=0))
+        paths_QS = (
+            Path.objects.filter(is_movie=False)
+            .filter(file__hide=False)
+            .annotate(num_files=models.Count("file"))
+            .filter(num_files__gt=0)
+        )
         paths = set(paths_QS)
         return cls._buildDistinctShowFoldersFromPaths(paths)
 
@@ -114,9 +112,7 @@ class Path(models.Model):
         for path in paths:
             lastDate = path.lastCreatedFileDate
             if path.shortName in pathDict:
-                if (lastDate and
-                        pathDict[
-                            path.shortName].lastCreatedFileDate < lastDate):
+                if lastDate and pathDict[path.shortName].lastCreatedFileDate < lastDate:
                     pathDict[path.shortName] = path
             else:
                 pathDict[path.shortName] = path
@@ -141,6 +137,7 @@ class Path(models.Model):
     def _posterfileset(self, val):
         val.path = self
         val.save()
+
     posterfile = property(fset=_posterfileset, fget=_posterfileget)
 
     def destroy(self):
@@ -149,19 +146,22 @@ class Path(models.Model):
 
     def unwatched_tv_shows_since_date(self, user, daysBack=30):
         if self.isMovie():
-            raise Exception('This function does not apply to movies')
+            raise Exception("This function does not apply to movies")
 
         if daysBack > 0:
-            refDate = (dateObj.utcnow().replace(tzinfo=utc) -
-                       timedelta(days=daysBack))
-            files = (File.objects.filter(path__localpathstr=self.localpathstr)
-                                 .filter(datecreated__gt=refDate)
-                                 .filter(hide=False)
-                                 .all())
+            refDate = dateObj.utcnow().replace(tzinfo=utc) - timedelta(days=daysBack)
+            files = (
+                File.objects.filter(path__localpathstr=self.localpathstr)
+                .filter(datecreated__gt=refDate)
+                .filter(hide=False)
+                .all()
+            )
         else:
-            files = (File.objects.filter(path__localpathstr=self.localpathstr)
-                                 .filter(hide=False)
-                                 .all())
+            files = (
+                File.objects.filter(path__localpathstr=self.localpathstr)
+                .filter(hide=False)
+                .all()
+            )
         unwatched_files = set()
         for file in files:
             comment = file.usercomment(user)
@@ -177,23 +177,26 @@ class Path(models.Model):
         if not user:
             return 0
 
-        files = (File.objects.filter(path__localpathstr=self.localpathstr)
-                             .filter(hide=False))
+        files = File.objects.filter(path__localpathstr=self.localpathstr).filter(
+            hide=False
+        )
         file_count = files.count()
-        usercomments_count = (UserComment.objects.filter(user=user)
-                                                 .filter(file__in=files)
-                                                 .filter(viewed=True)
-                                                 .count())
+        usercomments_count = (
+            UserComment.objects.filter(user=user)
+            .filter(file__in=files)
+            .filter(viewed=True)
+            .count()
+        )
         return file_count - usercomments_count
 
     @classmethod
     def populate_all_posterfiles(cls, batch=None):
         all_paths = (
             cls.objects.filter(is_movie=False)
-                       .exclude(
-                           pk__in=PosterFile.objects.filter(
-                               path__isnull=False).values('path'))
-                       .order_by('-id')
+            .exclude(
+                pk__in=PosterFile.objects.filter(path__isnull=False).values("path")
+            )
+            .order_by("-id")
         )
 
         if batch:
@@ -204,11 +207,11 @@ class Path(models.Model):
         for path in all_paths:
             path.posterfile
             fixed_count += 1
-            time.sleep(.25)
+            time.sleep(0.25)
 
             if fixed_count % 10 == 0:
-                print(f'Fixed {fixed_count} of {missing_count}')
-        print(f'Fixed {fixed_count} of {missing_count}')
+                print(f"Fixed {fixed_count} of {missing_count}")
+        print(f"Fixed {fixed_count} of {missing_count}")
 
     @classmethod
     def get_tv_genres(cls):

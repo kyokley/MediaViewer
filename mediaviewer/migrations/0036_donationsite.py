@@ -6,16 +6,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0035_path_finished'),
+        ("mediaviewer", "0035_path_finished"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DonationSite',
+            name="DonationSite",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('site_name', models.TextField()),
-                ('url', models.URLField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("site_name", models.TextField()),
+                ("url", models.URLField()),
             ],
         ),
     ]

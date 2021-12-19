@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0007_auto_20161217_0820'),
+        ("mediaviewer", "0007_auto_20161217_0820"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='waiterstatus',
-            name='datecreated',
-            field=models.DateTimeField(auto_now_add=True, db_column='datecreated'),
+            model_name="waiterstatus",
+            name="datecreated",
+            field=models.DateTimeField(auto_now_add=True, db_column="datecreated"),
         ),
     ]

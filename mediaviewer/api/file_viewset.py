@@ -11,20 +11,20 @@ from mediaviewer.log import log
 
 class FileViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffOrReadOnly,)
-    queryset = File.objects.order_by('id')
+    queryset = File.objects.order_by("id")
     serializer_class = FileSerializer
 
     def get_queryset(self):
-        pathid = self.request.query_params.get('pathid', None)
+        pathid = self.request.query_params.get("pathid", None)
         queryset = self.queryset
-        log.debug('Returning File objects')
+        log.debug("Returning File objects")
         if pathid:
             queryset = queryset.filter(path__id=pathid)
-            log.debug('Filtering file objects by pathid = %s' % pathid)
+            log.debug("Filtering file objects by pathid = %s" % pathid)
         return queryset
 
     def retrieve(self, request, pk=None):
-        log.debug('Attempting to find file with id = %s' % pk)
+        log.debug("Attempting to find file with id = %s" % pk)
         queryset = self.queryset
         obj = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(obj)
@@ -39,15 +39,17 @@ class FileViewSet(viewsets.ModelViewSet):
             serializer.save()
             self.validate_path(serializer)
         else:
-            raise Exception('Invalid serializer')
+            raise Exception("Invalid serializer")
 
         newFile = serializer.instance
         path = newFile.path
-        if (not path.lastCreatedFileDate or
-                path.lastCreatedFileDate < newFile.datecreated):
+        if (
+            not path.lastCreatedFileDate
+            or path.lastCreatedFileDate < newFile.datecreated
+        ):
             path.lastCreatedFileDate = newFile.datecreated
             path.save()
-        log.info('New file record created for %s' % newFile.filename)
+        log.info("New file record created for %s" % newFile.filename)
         return serializer
 
     def create(self, request):
@@ -58,13 +60,13 @@ class FileViewSet(viewsets.ModelViewSet):
                 serializer = self.create_file_obj(data)
         except Exception as e:
             log.error(str(e))
-            log.error('File creation failed!')
+            log.error("File creation failed!")
             return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)
 
         headers = self.get_success_headers(serializer.data)
-        return RESTResponse(serializer.data,
-                            status=RESTstatus.HTTP_201_CREATED,
-                            headers=headers)
+        return RESTResponse(
+            serializer.data, status=RESTstatus.HTTP_201_CREATED, headers=headers
+        )
 
     def update(self, request, pk=None):
         data = request.data
@@ -75,53 +77,51 @@ class FileViewSet(viewsets.ModelViewSet):
             serializer.save()
             headers = self.get_success_headers(serializer.data)
 
-            return RESTResponse(serializer.data,
-                                status=RESTstatus.HTTP_200_OK,
-                                headers=headers)
+            return RESTResponse(
+                serializer.data, status=RESTstatus.HTTP_200_OK, headers=headers
+            )
         else:
             return RESTResponse(status=RESTstatus.HTTP_400_BAD_REQUEST)
 
 
 class TvFileViewSet(FileViewSet):
-    queryset = File.objects.filter(path__is_movie=False).order_by('id')
+    queryset = File.objects.filter(path__is_movie=False).order_by("id")
 
     def validate_path(self, serializer):
         if serializer.instance.path.is_movie:
-            raise Exception('Attempting to use a movie path with a tv obj')
+            raise Exception("Attempting to use a movie path with a tv obj")
 
     def create(self, request):
         try:
             return super(TvFileViewSet, self).create(request)
         except Exception as e:
             log.error(str(e))
-            log.error('TvFile creation failed!')
+            log.error("TvFile creation failed!")
 
             return RESTResponse(
-                None,
-                status=RESTstatus.HTTP_500_INTERNAL_SERVER_ERROR,
-                headers=None)
+                None, status=RESTstatus.HTTP_500_INTERNAL_SERVER_ERROR, headers=None
+            )
 
 
 class MovieFileViewSet(FileViewSet):
-    queryset = File.objects.filter(path__is_movie=True).order_by('id')
+    queryset = File.objects.filter(path__is_movie=True).order_by("id")
 
     def validate_path(self, serializer):
         if not serializer.instance.path.is_movie:
-            raise Exception('Attempting to use a tv path with a movie obj')
+            raise Exception("Attempting to use a tv path with a movie obj")
 
     def create(self, request):
         try:
             return super(MovieFileViewSet, self).create(request)
         except Exception as e:
             log.error(str(e))
-            log.error('MovieFile creation failed!')
+            log.error("MovieFile creation failed!")
 
             return RESTResponse(
-                None,
-                status=RESTstatus.HTTP_500_INTERNAL_SERVER_ERROR,
-                headers=None)
+                None, status=RESTstatus.HTTP_500_INTERNAL_SERVER_ERROR, headers=None
+            )
 
 
 class UnstreamableFileViewSet(FileViewSet):
-    queryset = File.objects.filter(streamable=False).order_by('id')
+    queryset = File.objects.filter(streamable=False).order_by("id")
     serializer_class = FileSerializer

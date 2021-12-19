@@ -14,48 +14,52 @@ def _createId():
 class DownloadToken(models.Model):
     guid = models.CharField(max_length=32, default=_createId, unique=True)
     user = models.ForeignKey(
-        'auth.User',
+        "auth.User",
         on_delete=models.CASCADE,
         null=False,
         blank=False,
-        db_column='userid',
+        db_column="userid",
     )
-    path = models.TextField(db_column='path')
-    filename = models.TextField(db_column='filename')
-    ismovie = models.BooleanField(db_column='ismovie')
-    datecreated = models.DateTimeField(db_column='datecreated', blank=True)
-    displayname = models.TextField(db_column='display_name')
-    file = models.ForeignKey('mediaviewer.File',
-                             on_delete=models.CASCADE,
-                             null=False,
-                             db_column='fileid',
-                             blank=True,
-                             )
+    path = models.TextField(db_column="path")
+    filename = models.TextField(db_column="filename")
+    ismovie = models.BooleanField(db_column="ismovie")
+    datecreated = models.DateTimeField(db_column="datecreated", blank=True)
+    displayname = models.TextField(db_column="display_name")
+    file = models.ForeignKey(
+        "mediaviewer.File",
+        on_delete=models.CASCADE,
+        null=False,
+        db_column="fileid",
+        blank=True,
+    )
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'downloadtoken'
+        app_label = "mediaviewer"
+        db_table = "downloadtoken"
 
     def __str__(self):
-        return 'id: %s f: %s p: %s d: %s' % (self.id,
-                                             self.filename,
-                                             self.path,
-                                             self.datecreated)
+        return "id: %s f: %s p: %s d: %s" % (
+            self.id,
+            self.filename,
+            self.path,
+            self.datecreated,
+        )
 
     @property
     def isvalid(self):
         # Tokens are only valid for a certain amount of time
         refDate = self.datecreated + timedelta(
-            hours=conf_settings.TOKEN_VALIDITY_LENGTH)
-        return refDate > datetime.now(pytz.timezone(
-            conf_settings.TIME_ZONE))
+            hours=conf_settings.TOKEN_VALIDITY_LENGTH
+        )
+        return refDate > datetime.now(pytz.timezone(conf_settings.TIME_ZONE))
 
     @classmethod
-    def new(cls,
-            user,
-            file,
-            datecreated=None,
-            ):
+    def new(
+        cls,
+        user,
+        file,
+        datecreated=None,
+    ):
         dt = cls()
         dt.user = user
         dt.filename = file.filename
@@ -71,8 +75,11 @@ class DownloadToken(models.Model):
         dt.save()
 
         number_of_stored_tokens = cls.objects.count()
-        if number_of_stored_tokens > conf_settings.MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS:  # noqa
-            old_token = cls.objects.order_by('id').first()
+        if (
+            number_of_stored_tokens
+            > conf_settings.MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
+        ):  # noqa
+            old_token = cls.objects.order_by("id").first()
             if old_token:
                 old_token.delete()
 

@@ -8,12 +8,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0025_usersettings_jump_to_last_watched'),
+        ("mediaviewer", "0025_usersettings_jump_to_last_watched"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='usersettings',
-            name='auto_download',
+            model_name="usersettings",
+            name="auto_download",
         ),
     ]

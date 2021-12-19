@@ -8,13 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0021_auto_20170819_0951'),
+        ("mediaviewer", "0021_auto_20170819_0951"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='message',
-            name='message_type',
-            field=models.CharField(blank=True, choices=[('regular', b'Regular'), (b'last_watched', b'Last Watched')], default=b'regular', max_length=15),
+            model_name="message",
+            name="message_type",
+            field=models.CharField(
+                blank=True,
+                choices=[("regular", b"Regular"), (b"last_watched", b"Last Watched")],
+                default=b"regular",
+                max_length=15,
+            ),
         ),
     ]

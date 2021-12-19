@@ -6,7 +6,7 @@ from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.password_reset import check_force_password_change
 
 
-@login_required(login_url='/mediaviewer/login/')
+@login_required(login_url="/mediaviewer/login/")
 @check_force_password_change
 @logAccessInfo
 def errors(request, items):
@@ -16,14 +16,14 @@ def errors(request, items):
 
     items = int(items)
     if items:
-        errors = Error.objects.order_by('-id')[:items]
+        errors = Error.objects.order_by("-id")[:items]
     else:
-        errors = Error.objects.order_by('-id')
+        errors = Error.objects.order_by("-id")
     context = {
-              'errors': errors,
-              'view': 'errors',
-              }
-    context['active_page'] = 'errors'
-    context['title'] = 'Errors'
+        "errors": errors,
+        "view": "errors",
+    }
+    context["active_page"] = "errors"
+    context["title"] = "Errors"
     setSiteWideContext(context, request, includeMessages=True)
-    return render(request, 'mediaviewer/errors.html', context)
+    return render(request, "mediaviewer/errors.html", context)

@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0006_auto_20161212_0613'),
+        ("mediaviewer", "0006_auto_20161212_0613"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usercomment',
-            name='comment',
+            model_name="usercomment",
+            name="comment",
             field=models.TextField(blank=True, null=True),
         ),
     ]

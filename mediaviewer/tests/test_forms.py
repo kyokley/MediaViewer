@@ -8,7 +8,7 @@ import mock
 class TestFormlessPasswordReset:
     @pytest.fixture(autouse=True)
     def setUp(self):
-        self.email = 'test@email.com'
+        self.email = "test@email.com"
         self.user = mock.create_autospec(User)
 
         self.form = FormlessPasswordReset(self.user, self.email)

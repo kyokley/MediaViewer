@@ -6,7 +6,7 @@ from mediaviewer.models.director import Director
 class TestCreate:
     @pytest.fixture(autouse=True)
     def setUp(self):
-        self.test_name = 'test_name'
+        self.test_name = "test_name"
 
         assert not Director.objects.exists()
 
@@ -14,4 +14,4 @@ class TestCreate:
         Director.objects.create(name=self.test_name)
 
         new_director = Director.objects.get()
-        assert new_director.name == 'Test_Name'
+        assert new_director.name == "Test_Name"

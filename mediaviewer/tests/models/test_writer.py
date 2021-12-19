@@ -6,7 +6,7 @@ from mediaviewer.models.writer import Writer
 class TestCreate:
     @pytest.fixture(autouse=True)
     def setUp(self):
-        self.test_name = 'test_name'
+        self.test_name = "test_name"
 
         assert not Writer.objects.exists()
 
@@ -14,4 +14,4 @@ class TestCreate:
         Writer.objects.create(name=self.test_name)
 
         new_writer = Writer.objects.get()
-        assert new_writer.name == 'Test_Name'
+        assert new_writer.name == "Test_Name"

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0034_migrate_paths'),
+        ("mediaviewer", "0034_migrate_paths"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='path',
-            name='finished',
+            model_name="path",
+            name="finished",
             field=models.BooleanField(default=False),
         ),
     ]

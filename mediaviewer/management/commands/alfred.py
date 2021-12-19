@@ -18,38 +18,43 @@ class StrEnum(str, Enum):
 
 
 class Actions(StrEnum):
-    STATUS = 'status'
+    STATUS = "status"
 
 
 class Command(BaseCommand):
     help = "Management commands for Alfred"
 
     def add_arguments(self, parser):
-        parser.add_argument('action',
-                            metavar="ACTION",
-                            help="Action to take. Currently, STATUS is the only unavailable option")
+        parser.add_argument(
+            "action",
+            metavar="ACTION",
+            help="Action to take. Currently, STATUS is the only unavailable option",
+        )
 
     def handle(self, *args, **kwargs):
-        action = kwargs['action']
+        action = kwargs["action"]
 
         if Actions.from_string(action) == Actions.STATUS:
             try:
-                resp = requests.get(settings.WAITER_STATUS_URL,
-                                    timeout=settings.REQUEST_TIMEOUT)
+                resp = requests.get(
+                    settings.WAITER_STATUS_URL, timeout=settings.REQUEST_TIMEOUT
+                )
                 resp.raise_for_status()
                 data = resp.json()
 
-                if 'status' not in data or not data['status']:
-                    failureReason = 'Bad Symlink'
+                if "status" not in data or not data["status"]:
+                    failureReason = "Bad Symlink"
                 else:
-                    failureReason = ''
+                    failureReason = ""
 
-                response = {'status': data.get('status', False),
-                            'failureReason': failureReason}
-                self.stdout.write(
-                    self.style.SUCCESS(str(response)))
+                response = {
+                    "status": data.get("status", False),
+                    "failureReason": failureReason,
+                }
+                self.stdout.write(self.style.SUCCESS(str(response)))
             except Exception as e:
                 raise CommandError(e)
         else:
             raise CommandError(
-                f'Got action "{action}". Valid actions are: {", ".join(Actions)}')
+                f'Got action "{action}". Valid actions are: {", ".join(Actions)}'
+            )

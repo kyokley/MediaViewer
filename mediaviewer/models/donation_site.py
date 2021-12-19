@@ -20,4 +20,4 @@ class DonationSite(models.Model):
     url = models.URLField(blank=False)
 
     class Meta:
-        app_label = 'mediaviewer'
+        app_label = "mediaviewer"

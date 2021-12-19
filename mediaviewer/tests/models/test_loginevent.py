@@ -14,17 +14,16 @@ class TestNew:
     def setUp(self, mocker):
         self.ref_time = datetime.now(pytz.timezone(settings.TIME_ZONE))
         self.mock_objects = mocker.patch(
-                'mediaviewer.models.loginevent.LoginEvent.objects')
+            "mediaviewer.models.loginevent.LoginEvent.objects"
+        )
         self.mock_ordered_query = mock.MagicMock()
         self.mock_first = mock.MagicMock()
         self.mock_ordered_query.first.return_value = self.mock_first
         self.mock_objects.order_by.return_value = self.mock_ordered_query
 
-        self.mock_save = mocker.patch(
-                'mediaviewer.models.loginevent.LoginEvent.save')
+        self.mock_save = mocker.patch("mediaviewer.models.loginevent.LoginEvent.save")
 
-        self.mock_datetime = mocker.patch(
-                'mediaviewer.models.loginevent.datetime')
+        self.mock_datetime = mocker.patch("mediaviewer.models.loginevent.datetime")
         self.mock_datetime.now.return_value = self.ref_time
 
         self.user = helpers.create_user()
@@ -40,7 +39,8 @@ class TestNew:
 
     def test_more_stored_events(self):
         self.mock_objects.count.return_value = (
-            settings.MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS + 1)
+            settings.MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS + 1
+        )
         event = LoginEvent.new(self.user)
 
         assert event.user == self.user

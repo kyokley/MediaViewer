@@ -8,18 +8,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0011_auto_20170119_2030'),
+        ("mediaviewer", "0011_auto_20170119_2030"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='posterfile',
-            name='datecreated',
-            field=models.DateTimeField(auto_now_add=True, db_column='datecreated'),
+            model_name="posterfile",
+            name="datecreated",
+            field=models.DateTimeField(auto_now_add=True, db_column="datecreated"),
         ),
         migrations.AlterField(
-            model_name='posterfile',
-            name='dateedited',
-            field=models.DateTimeField(auto_now=True, db_column='dateedited'),
+            model_name="posterfile",
+            name="dateedited",
+            field=models.DateTimeField(auto_now=True, db_column="dateedited"),
         ),
     ]

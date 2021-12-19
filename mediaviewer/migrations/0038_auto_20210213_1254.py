@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0037_auto_20201212_0935'),
+        ("mediaviewer", "0037_auto_20201212_0935"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='posterfile',
-            name='actors',
-            field=models.ManyToManyField(blank=True, to='mediaviewer.Actor'),
+            model_name="posterfile",
+            name="actors",
+            field=models.ManyToManyField(blank=True, to="mediaviewer.Actor"),
         ),
         migrations.AlterField(
-            model_name='posterfile',
-            name='directors',
-            field=models.ManyToManyField(blank=True, to='mediaviewer.Director'),
+            model_name="posterfile",
+            name="directors",
+            field=models.ManyToManyField(blank=True, to="mediaviewer.Director"),
         ),
         migrations.AlterField(
-            model_name='posterfile',
-            name='genres',
-            field=models.ManyToManyField(blank=True, to='mediaviewer.Genre'),
+            model_name="posterfile",
+            name="genres",
+            field=models.ManyToManyField(blank=True, to="mediaviewer.Genre"),
         ),
         migrations.AlterField(
-            model_name='posterfile',
-            name='writers',
-            field=models.ManyToManyField(blank=True, to='mediaviewer.Writer'),
+            model_name="posterfile",
+            name="writers",
+            field=models.ManyToManyField(blank=True, to="mediaviewer.Writer"),
         ),
     ]

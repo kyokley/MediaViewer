@@ -8,16 +8,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0001_initial'),
+        ("mediaviewer", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='downloadtoken',
-            name='waitertheme',
+            model_name="downloadtoken",
+            name="waitertheme",
         ),
         migrations.RemoveField(
-            model_name='usersettings',
-            name='site_theme',
+            model_name="usersettings",
+            name="site_theme",
         ),
     ]

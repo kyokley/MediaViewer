@@ -4,46 +4,55 @@ from mediaviewer.models.posterfile import PosterFile
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 
-sample_good_result = {u'backdrop_path': u'/asdfasdf.jpg',
-                      u'first_air_date': u'2016-09-30',
-                      u'genre_ids': [18, 10765],
-                      u'id': 12345,
-                      u'name': u"show name",
-                      u'origin_country': [u'US'],
-                      u'original_language': u'en',
-                      u'original_name': u"show name",
-                      u'overview': u'show description',
-                      u'popularity': 4.278642,
-                      u'poster_path': u'/zxcvzxcv.jpg',
-                      u'vote_average': 6.81,
-                      u'vote_count': 41}
+sample_good_result = {
+    u"backdrop_path": u"/asdfasdf.jpg",
+    u"first_air_date": u"2016-09-30",
+    u"genre_ids": [18, 10765],
+    u"id": 12345,
+    u"name": u"show name",
+    u"origin_country": [u"US"],
+    u"original_language": u"en",
+    u"original_name": u"show name",
+    u"overview": u"show description",
+    u"popularity": 4.278642,
+    u"poster_path": u"/zxcvzxcv.jpg",
+    u"vote_average": 6.81,
+    u"vote_count": 41,
+}
 
-sample_good_crew = {'id': 12345,
-                    'cast': [{'cast_id': 2345,
-                              'character': 'John Doe',
-                              'credit_id': '3456',
-                              'id': 4567,
-                              'name': 'Alex Reporter',
-                              'order': 0}],
-                    'crew': [{'credit_id': 18365,
-                              'department': 'Directing',
-                              'id': 582,
-                              'job': 'Director',
-                              'name': 'Jim Pope',
-                              'order': 0},
-                             {'credit_id': 18365,
-                              'department': 'Directing',
-                              'id': 582,
-                              'job': 'Director',
-                              'name': 'Jim Pope',
-                              'order': 0}
-                             ],
-                    }
+sample_good_crew = {
+    "id": 12345,
+    "cast": [
+        {
+            "cast_id": 2345,
+            "character": "John Doe",
+            "credit_id": "3456",
+            "id": 4567,
+            "name": "Alex Reporter",
+            "order": 0,
+        }
+    ],
+    "crew": [
+        {
+            "credit_id": 18365,
+            "department": "Directing",
+            "id": 582,
+            "job": "Director",
+            "name": "Jim Pope",
+            "order": 0,
+        },
+        {
+            "credit_id": 18365,
+            "department": "Directing",
+            "id": 582,
+            "job": "Director",
+            "name": "Jim Pope",
+            "order": 0,
+        },
+    ],
+}
 
-sample_bad_result = {u'page': 1,
-                     u'results': [],
-                     u'total_pages': 1,
-                     u'total_results': 0}
+sample_bad_result = {u"page": 1, u"results": [], u"total_pages": 1, u"total_results": 0}
 
 
 @pytest.mark.django_db
@@ -51,19 +60,22 @@ class TestNew:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_objects = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile.objects')
+            "mediaviewer.models.posterfile.PosterFile.objects"
+        )
 
         self.mock_populate_poster_data = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._populate_poster_data')
+            "mediaviewer.models.posterfile.PosterFile._populate_poster_data"
+        )
 
-        self.path = Path.objects.create(localpathstr='local.path',
-                                        remotepathstr='remote.path',
-                                        is_movie=False)
-        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
-                                              remotepathstr='movie.remote.path',
-                                              is_movie=True)
-        self.file = File.new('new.file.mp4',
-                             self.movie_path)
+        self.path = Path.objects.create(
+            localpathstr="local.path", remotepathstr="remote.path", is_movie=False
+        )
+        self.movie_path = Path.objects.create(
+            localpathstr="movie.local.path",
+            remotepathstr="movie.remote.path",
+            is_movie=True,
+        )
+        self.file = File.new("new.file.mp4", self.movie_path)
 
         self.mock_objects.filter.return_value.first.return_value = None
 
@@ -90,19 +102,17 @@ class TestNew:
         self.mock_populate_poster_data.assert_called_once_with()
 
     def test_existing_for_file(self):
-        self.mock_objects.filter.return_value.first.return_value = (
-            'existing_obj')
+        self.mock_objects.filter.return_value.first.return_value = "existing_obj"
 
         existing = PosterFile.new(file=self.file)
-        assert existing == 'existing_obj'
+        assert existing == "existing_obj"
         assert not self.mock_populate_poster_data.called
 
     def test_existing_for_path(self):
-        self.mock_objects.filter.return_value.first.return_value = (
-            'existing_obj')
+        self.mock_objects.filter.return_value.first.return_value = "existing_obj"
 
         existing = PosterFile.new(path=self.path)
-        assert existing == 'existing_obj'
+        assert existing == "existing_obj"
         assert not self.mock_populate_poster_data.called
 
 
@@ -111,48 +121,56 @@ class TestGetIMDBData:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_getDataFromIMDB = mocker.patch(
-            'mediaviewer.models.posterfile.getDataFromIMDB')
+            "mediaviewer.models.posterfile.getDataFromIMDB"
+        )
 
         self.mock_getDataFromIMDBByPath = mocker.patch(
-            'mediaviewer.models.posterfile.getDataFromIMDBByPath')
+            "mediaviewer.models.posterfile.getDataFromIMDBByPath"
+        )
 
         self.mock_cast_and_crew = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._cast_and_crew')
+            "mediaviewer.models.posterfile.PosterFile._cast_and_crew"
+        )
 
         self.mock_assign_tvdb_info = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._assign_tvdb_info')
+            "mediaviewer.models.posterfile.PosterFile._assign_tvdb_info"
+        )
 
         self.mock_store_extended_info = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._store_extended_info')
+            "mediaviewer.models.posterfile.PosterFile._store_extended_info"
+        )
 
         self.mock_store_plot = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._store_plot')
+            "mediaviewer.models.posterfile.PosterFile._store_plot"
+        )
 
         self.mock_store_genres = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._store_genres')
+            "mediaviewer.models.posterfile.PosterFile._store_genres"
+        )
 
         self.mock_store_rated = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._store_rated')
+            "mediaviewer.models.posterfile.PosterFile._store_rated"
+        )
 
-        self.fake_data = {'Poster': 'test_poster',
-                          'id': 123}
+        self.fake_data = {"Poster": "test_poster", "id": 123}
         self.mock_getDataFromIMDB.return_value = self.fake_data
         self.mock_getDataFromIMDBByPath.return_value = self.fake_data
 
-        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
-                                           remotepathstr='tv.remote.path',
-                                           is_movie=False)
+        self.tv_path = Path.objects.create(
+            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
+        )
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.tv_file.override_filename = 'test str'
-        self.tv_file.override_season = '3'
-        self.tv_file.override_episode = '5'
+        self.tv_file = File.new("tv.file", self.tv_path)
+        self.tv_file.override_filename = "test str"
+        self.tv_file.override_season = "3"
+        self.tv_file.override_episode = "5"
 
-        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
-                                              remotepathstr='movie.remote.path',
-                                              is_movie=True)
-        self.movie_file = File.new('new.file.mp4',
-                                   self.movie_path)
+        self.movie_path = Path.objects.create(
+            localpathstr="movie.local.path",
+            remotepathstr="movie.remote.path",
+            is_movie=True,
+        )
+        self.movie_file = File.new("new.file.mp4", self.movie_path)
 
         self.test_obj = PosterFile()
 
@@ -165,15 +183,18 @@ class TestGetIMDBData:
         assert expected == actual
         self.mock_getDataFromIMDB.assert_called_once_with(self.movie_file)
         self.mock_cast_and_crew.assert_called_once_with()
-        assert 'test_poster' == self.test_obj.poster_url
+        assert "test_poster" == self.test_obj.poster_url
         self.mock_assign_tvdb_info.assert_called_once_with()
         self.mock_store_extended_info.assert_called_once_with()
         self.mock_store_plot.assert_called_once_with(
-            self.mock_getDataFromIMDB.return_value)
+            self.mock_getDataFromIMDB.return_value
+        )
         self.mock_store_genres.assert_called_once_with(
-            self.mock_getDataFromIMDB.return_value)
+            self.mock_getDataFromIMDB.return_value
+        )
         self.mock_store_rated.assert_called_once_with(
-            self.mock_getDataFromIMDB.return_value)
+            self.mock_getDataFromIMDB.return_value
+        )
 
     def test_path_for_tv(self):
         self.test_obj.path = self.tv_path
@@ -184,16 +205,19 @@ class TestGetIMDBData:
         assert expected == actual
         self.mock_getDataFromIMDBByPath.assert_called_once_with(self.tv_path)
         self.mock_cast_and_crew.assert_called_once_with()
-        assert 'test_poster' == self.test_obj.poster_url
+        assert "test_poster" == self.test_obj.poster_url
         self.mock_assign_tvdb_info.assert_called_once_with()
 
         self.mock_store_extended_info.assert_called_once_with()
         self.mock_store_plot.assert_called_once_with(
-            self.mock_getDataFromIMDBByPath.return_value)
+            self.mock_getDataFromIMDBByPath.return_value
+        )
         self.mock_store_genres.assert_called_once_with(
-            self.mock_getDataFromIMDBByPath.return_value)
+            self.mock_getDataFromIMDBByPath.return_value
+        )
         self.mock_store_rated.assert_called_once_with(
-            self.mock_getDataFromIMDBByPath.return_value)
+            self.mock_getDataFromIMDBByPath.return_value
+        )
 
     def test_file_for_tv(self):
         self.test_obj.file = self.tv_file
@@ -204,16 +228,19 @@ class TestGetIMDBData:
         assert expected == actual
         self.mock_getDataFromIMDB.assert_called_once_with(self.tv_file)
         self.mock_cast_and_crew.assert_called_once_with()
-        assert 'test_poster' == self.test_obj.poster_url
+        assert "test_poster" == self.test_obj.poster_url
         self.mock_assign_tvdb_info.assert_called_once_with()
 
         self.mock_store_extended_info.assert_called_once_with()
         self.mock_store_plot.assert_called_once_with(
-            self.mock_getDataFromIMDB.return_value)
+            self.mock_getDataFromIMDB.return_value
+        )
         self.mock_store_genres.assert_called_once_with(
-            self.mock_getDataFromIMDB.return_value)
+            self.mock_getDataFromIMDB.return_value
+        )
         self.mock_store_rated.assert_called_once_with(
-            self.mock_getDataFromIMDB.return_value)
+            self.mock_getDataFromIMDB.return_value
+        )
 
     def test_no_data_for_movie(self):
         self.mock_getDataFromIMDB.return_value = None
@@ -271,35 +298,34 @@ class TestCastAndCrew:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_getCastData = mocker.patch(
-            'mediaviewer.models.posterfile.getCastData')
+            "mediaviewer.models.posterfile.getCastData"
+        )
 
-        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
-                                           remotepathstr='tv.remote.path',
-                                           is_movie=False)
+        self.tv_path = Path.objects.create(
+            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
+        )
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.tv_file.override_filename = 'test str'
-        self.tv_file.override_season = '3'
-        self.tv_file.override_episode = '5'
+        self.tv_file = File.new("tv.file", self.tv_path)
+        self.tv_file.override_filename = "test str"
+        self.tv_file.override_season = "3"
+        self.tv_file.override_episode = "5"
 
-        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
-                                              remotepathstr='movie.remote.path',
-                                              is_movie=True)
-        self.movie_file = File.new('new.file.mp4',
-                                   self.movie_path)
+        self.movie_path = Path.objects.create(
+            localpathstr="movie.local.path",
+            remotepathstr="movie.remote.path",
+            is_movie=True,
+        )
+        self.movie_file = File.new("new.file.mp4", self.movie_path)
 
         self.test_obj = PosterFile()
         self.test_obj.tmdb_id = 123
         self.test_obj.save()
 
         self.test_getCastData = {
-            'cast': [
-                {'name': 'test_actor'}],
-            'crew': [
-                {'job': 'Writer',
-                 'name': 'test_writer'},
-                {'job': 'Director',
-                 'name': 'test_director'},
+            "cast": [{"name": "test_actor"}],
+            "crew": [
+                {"job": "Writer", "name": "test_writer"},
+                {"job": "Director", "name": "test_director"},
             ],
         }
         self.mock_getCastData.return_value = self.test_getCastData
@@ -313,10 +339,8 @@ class TestCastAndCrew:
 
         assert expected == actual
         self.mock_getCastData.assert_called_once_with(
-            123,
-            season=None,
-            episode=None,
-            isMovie=True)
+            123, season=None, episode=None, isMovie=True
+        )
 
         assert [] == list(self.test_obj.actors.all())
         assert [] == list(self.test_obj.writers.all())
@@ -330,14 +354,12 @@ class TestCastAndCrew:
 
         assert expected == actual
         self.mock_getCastData.assert_called_once_with(
-            123,
-            season=None,
-            episode=None,
-            isMovie=True)
+            123, season=None, episode=None, isMovie=True
+        )
 
-        assert 'Test_Actor' == self.test_obj.actors.all()[0].name
-        assert 'Test_Writer' == self.test_obj.writers.all()[0].name
-        assert 'Test_Director' == self.test_obj.directors.all()[0].name
+        assert "Test_Actor" == self.test_obj.actors.all()[0].name
+        assert "Test_Writer" == self.test_obj.writers.all()[0].name
+        assert "Test_Director" == self.test_obj.directors.all()[0].name
 
     def test_path_for_tv(self):
         self.test_obj.path = self.tv_path
@@ -347,14 +369,12 @@ class TestCastAndCrew:
 
         assert expected == actual
         self.mock_getCastData.assert_called_once_with(
-            123,
-            season=None,
-            episode=None,
-            isMovie=False)
+            123, season=None, episode=None, isMovie=False
+        )
 
-        assert 'Test_Actor' == self.test_obj.actors.all()[0].name
-        assert 'Test_Writer' == self.test_obj.writers.all()[0].name
-        assert 'Test_Director' == self.test_obj.directors.all()[0].name
+        assert "Test_Actor" == self.test_obj.actors.all()[0].name
+        assert "Test_Writer" == self.test_obj.writers.all()[0].name
+        assert "Test_Director" == self.test_obj.directors.all()[0].name
 
     def test_file_is_tv(self):
         self.test_obj.file = self.tv_file
@@ -364,14 +384,12 @@ class TestCastAndCrew:
 
         assert expected == actual
         self.mock_getCastData.assert_called_once_with(
-            123,
-            season=3,
-            episode=5,
-            isMovie=False)
+            123, season=3, episode=5, isMovie=False
+        )
 
-        assert 'Test_Actor' == self.test_obj.actors.all()[0].name
-        assert 'Test_Writer' == self.test_obj.writers.all()[0].name
-        assert 'Test_Director' == self.test_obj.directors.all()[0].name
+        assert "Test_Actor" == self.test_obj.actors.all()[0].name
+        assert "Test_Writer" == self.test_obj.writers.all()[0].name
+        assert "Test_Director" == self.test_obj.directors.all()[0].name
 
 
 @pytest.mark.django_db
@@ -379,11 +397,14 @@ class TestTVDBEpisodeInfo:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_getTVDBEpisodeInfo = mocker.patch(
-            'mediaviewer.models.posterfile.getTVDBEpisodeInfo')
+            "mediaviewer.models.posterfile.getTVDBEpisodeInfo"
+        )
 
-        self.fake_data = {'still_path': 'test_path',
-                          'overview': 'test_overview',
-                          'name': 'test_name'}
+        self.fake_data = {
+            "still_path": "test_path",
+            "overview": "test_overview",
+            "name": "test_name",
+        }
         self.tvdb_id = 123
 
         self.test_obj = PosterFile()
@@ -396,12 +417,11 @@ class TestTVDBEpisodeInfo:
 
         assert expected == actual
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(
-            123,
-            self.test_obj.season,
-            self.test_obj.episode)
-        assert 'test_path' == self.test_obj.poster_url
-        assert 'test_overview' == self.test_obj.extendedplot
-        assert 'test_name' == self.test_obj.episodename
+            123, self.test_obj.season, self.test_obj.episode
+        )
+        assert "test_path" == self.test_obj.poster_url
+        assert "test_overview" == self.test_obj.extendedplot
+        assert "test_name" == self.test_obj.episodename
 
     def test_no_tvinfo(self):
         self.mock_getTVDBEpisodeInfo.return_value = None
@@ -411,11 +431,10 @@ class TestTVDBEpisodeInfo:
 
         assert expected == actual
         self.mock_getTVDBEpisodeInfo.assert_called_once_with(
-            123,
-            self.test_obj.season,
-            self.test_obj.episode)
+            123, self.test_obj.season, self.test_obj.episode
+        )
         assert self.test_obj.poster_url is None
-        assert '' == self.test_obj.extendedplot
+        assert "" == self.test_obj.extendedplot
         assert self.test_obj.episodename is None
 
 
@@ -424,33 +443,36 @@ class TestAssignTVDBInfo:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_searchTVDBByName = mocker.patch(
-            'mediaviewer.models.posterfile.searchTVDBByName')
+            "mediaviewer.models.posterfile.searchTVDBByName"
+        )
 
         self.mock_tvdb_episode_info = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._tvdb_episode_info')
+            "mediaviewer.models.posterfile.PosterFile._tvdb_episode_info"
+        )
 
         self.fake_data = {
-            'results': [
-                {'id': 123},
+            "results": [
+                {"id": 123},
             ]
         }
         self.mock_searchTVDBByName.return_value = self.fake_data
 
-        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
-                                           remotepathstr='tv.remote.path',
-                                           is_movie=False)
+        self.tv_path = Path.objects.create(
+            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
+        )
         self.tv_path.tvdb_id = None
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.tv_file.override_filename = 'test str'
-        self.tv_file.override_season = '3'
-        self.tv_file.override_episode = '5'
+        self.tv_file = File.new("tv.file", self.tv_path)
+        self.tv_file.override_filename = "test str"
+        self.tv_file.override_season = "3"
+        self.tv_file.override_episode = "5"
 
-        self.movie_path = Path.objects.create(localpathstr='movie.local.path',
-                                              remotepathstr='movie.remote.path',
-                                              is_movie=True)
-        self.movie_file = File.new('new.file.mp4',
-                                   self.movie_path)
+        self.movie_path = Path.objects.create(
+            localpathstr="movie.local.path",
+            remotepathstr="movie.remote.path",
+            is_movie=True,
+        )
+        self.movie_file = File.new("new.file.mp4", self.movie_path)
 
         self.test_obj = PosterFile()
 
@@ -503,8 +525,7 @@ class TestAssignTVDBInfo:
 
         assert expected == actual
         assert self.tv_path.tvdb_id == 123
-        self.mock_searchTVDBByName.assert_called_once_with(
-            self.tv_file.searchString())
+        self.mock_searchTVDBByName.assert_called_once_with(self.tv_file.searchString())
         self.mock_tvdb_episode_info.assert_called_once_with(123)
 
     def test_badly_formatted_tvinfo(self):
@@ -523,10 +544,12 @@ class TestPopulatePosterData:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_getIMDBData = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._getIMDBData')
+            "mediaviewer.models.posterfile.PosterFile._getIMDBData"
+        )
 
         self.mock_download_poster = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._download_poster')
+            "mediaviewer.models.posterfile.PosterFile._download_poster"
+        )
 
         self.test_obj = PosterFile()
 
@@ -544,10 +567,11 @@ class TestDownloadPoster:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_saveImageToDisk = mocker.patch(
-            'mediaviewer.models.posterfile.saveImageToDisk')
+            "mediaviewer.models.posterfile.saveImageToDisk"
+        )
 
         self.test_obj = PosterFile()
-        self.test_obj.poster_url = '/test_poster_url'
+        self.test_obj.poster_url = "/test_poster_url"
 
     def test_missing_poster_url(self):
         self.test_obj.poster_url = None
@@ -565,9 +589,9 @@ class TestDownloadPoster:
 
         assert expected == actual
         self.mock_saveImageToDisk.assert_called_once_with(
-            self.test_obj.poster_url,
-            self.test_obj.image)
-        assert 'test_poster_url' == self.test_obj.image
+            self.test_obj.poster_url, self.test_obj.image
+        )
+        assert "test_poster_url" == self.test_obj.image
 
 
 @pytest.mark.django_db
@@ -577,36 +601,38 @@ class TestStorePlot:
         self.test_obj = PosterFile()
 
     def test_has_plot(self):
-        test_data = {'Plot': 'test_plot'}
+        test_data = {"Plot": "test_plot"}
 
         expected = None
         actual = self.test_obj._store_plot(test_data)
 
         assert expected == actual
-        assert 'test_plot' == self.test_obj.plot
+        assert "test_plot" == self.test_obj.plot
 
     def test_has_overview(self):
-        test_data = {'overview': 'test_overview'}
+        test_data = {"overview": "test_overview"}
 
         expected = None
         actual = self.test_obj._store_plot(test_data)
 
         assert expected == actual
-        assert 'test_overview' == self.test_obj.plot
+        assert "test_overview" == self.test_obj.plot
 
     def test_has_multiple_results(self):
-        test_data = {'results': [
-            {'overview': 'test_results_overview'},
-        ]}
+        test_data = {
+            "results": [
+                {"overview": "test_results_overview"},
+            ]
+        }
 
         expected = None
         actual = self.test_obj._store_plot(test_data)
 
         assert expected == actual
-        assert 'test_results_overview' == self.test_obj.plot
+        assert "test_results_overview" == self.test_obj.plot
 
     def test_plot_undefined(self):
-        test_data = {'Plot': 'undefined'}
+        test_data = {"Plot": "undefined"}
 
         expected = None
         actual = self.test_obj._store_plot(test_data)
@@ -619,19 +645,17 @@ class TestStorePlot:
 class TestStoreGenres:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.mock_tvdbConfig = mocker.patch(
-            'mediaviewer.models.posterfile.tvdbConfig')
+        self.mock_tvdbConfig = mocker.patch("mediaviewer.models.posterfile.tvdbConfig")
 
-        self.mock_tvdbConfig.genres = {
-            123: 'test_genre'}
+        self.mock_tvdbConfig.genres = {123: "test_genre"}
 
         self.test_obj = PosterFile()
         self.test_obj.save()
 
     def test_has_results(self):
         imdb_data = {
-            'results': [
-                {'genre_ids': [123]},
+            "results": [
+                {"genre_ids": [123]},
             ],
         }
 
@@ -639,27 +663,29 @@ class TestStoreGenres:
         actual = self.test_obj._store_genres(imdb_data)
 
         assert expected == actual
-        assert 'Test_Genre' == self.test_obj.genres.all()[0].genre
+        assert "Test_Genre" == self.test_obj.genres.all()[0].genre
 
     def test_has_genre_ids(self):
-        imdb_data = {'genre_ids': [123]}
+        imdb_data = {"genre_ids": [123]}
 
         expected = None
         actual = self.test_obj._store_genres(imdb_data)
 
         assert expected == actual
-        assert 'Test_Genre' == self.test_obj.genres.all()[0].genre
+        assert "Test_Genre" == self.test_obj.genres.all()[0].genre
 
     def test_has_genres(self):
-        imdb_data = {'genres': [
-            {'name': 'test_genre'},
-        ]}
+        imdb_data = {
+            "genres": [
+                {"name": "test_genre"},
+            ]
+        }
 
         expected = None
         actual = self.test_obj._store_genres(imdb_data)
 
         assert expected == actual
-        assert 'Test_Genre' == self.test_obj.genres.all()[0].genre
+        assert "Test_Genre" == self.test_obj.genres.all()[0].genre
 
 
 @pytest.mark.django_db
@@ -670,29 +696,29 @@ class TestStoreRating:
 
     def test_has_imdb_rating(self):
         test_data = {
-            'imdbRating': 'test_rating',
+            "imdbRating": "test_rating",
         }
 
         expected = None
         actual = self.test_obj._store_rating(test_data)
 
         assert expected == actual
-        assert 'test_rating' == self.test_obj.rating
+        assert "test_rating" == self.test_obj.rating
 
     def test_has_vote_average(self):
         test_data = {
-            'vote_average': 'test_rating',
+            "vote_average": "test_rating",
         }
 
         expected = None
         actual = self.test_obj._store_rating(test_data)
 
         assert expected == actual
-        assert 'test_rating' == self.test_obj.rating
+        assert "test_rating" == self.test_obj.rating
 
     def test_undefined(self):
         test_data = {
-            'vote_average': 'undefined',
+            "vote_average": "undefined",
         }
 
         expected = None
@@ -710,18 +736,18 @@ class TestStoreTagline:
 
     def test_has_vote_average(self):
         test_data = {
-            'tagline': 'test_tagline',
+            "tagline": "test_tagline",
         }
 
         expected = None
         actual = self.test_obj._store_tagline(test_data)
 
         assert expected == actual
-        assert 'test_tagline' == self.test_obj.tagline
+        assert "test_tagline" == self.test_obj.tagline
 
     def test_undefined(self):
         test_data = {
-            'tagline': 'undefined',
+            "tagline": "undefined",
         }
 
         expected = None
@@ -736,23 +762,26 @@ class TestStoreExtendedInfo:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
         self.mock_getExtendedInfo = mocker.patch(
-            'mediaviewer.models.posterfile.getExtendedInfo')
+            "mediaviewer.models.posterfile.getExtendedInfo"
+        )
 
         self.mock_store_rating = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._store_rating')
+            "mediaviewer.models.posterfile.PosterFile._store_rating"
+        )
 
         self.mock_store_tagline = mocker.patch(
-            'mediaviewer.models.posterfile.PosterFile._store_tagline')
+            "mediaviewer.models.posterfile.PosterFile._store_tagline"
+        )
 
-        self.tv_path = Path.objects.create(localpathstr='tv.local.path',
-                                           remotepathstr='tv.remote.path',
-                                           is_movie=False)
+        self.tv_path = Path.objects.create(
+            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
+        )
         self.tv_path.tvdb_id = None
 
-        self.tv_file = File.new('tv.file', self.tv_path)
-        self.tv_file.override_filename = 'test str'
-        self.tv_file.override_season = '3'
-        self.tv_file.override_episode = '5'
+        self.tv_file = File.new("tv.file", self.tv_path)
+        self.tv_file.override_filename = "test str"
+        self.tv_file.override_season = "3"
+        self.tv_file.override_episode = "5"
 
         self.test_obj = PosterFile()
         self.test_obj.tmdb_id = 123
@@ -763,19 +792,19 @@ class TestStoreExtendedInfo:
         actual = self.test_obj._store_extended_info()
 
         assert expected == actual
-        self.mock_getExtendedInfo.assert_called_once_with(
-            123,
-            isMovie=False)
+        self.mock_getExtendedInfo.assert_called_once_with(123, isMovie=False)
         self.mock_store_rating.assert_called_once_with(
-            self.mock_getExtendedInfo.return_value)
+            self.mock_getExtendedInfo.return_value
+        )
         self.mock_store_tagline.assert_called_once_with(
-            self.mock_getExtendedInfo.return_value)
+            self.mock_getExtendedInfo.return_value
+        )
 
 
 class TestStoreRated:
     @pytest.fixture(autouse=True)
     def setUp(self):
-        self.test_data = {'Rated': 'test_rated'}
+        self.test_data = {"Rated": "test_rated"}
 
         self.test_obj = PosterFile()
 
@@ -784,7 +813,7 @@ class TestStoreRated:
         actual = self.test_obj._store_rated(self.test_data)
 
         assert expected == actual
-        assert 'test_rated' == self.test_obj.rated
+        assert "test_rated" == self.test_obj.rated
 
     def test_no_rated(self):
         self.test_data = {}
@@ -796,7 +825,7 @@ class TestStoreRated:
         assert self.test_obj.rated is None
 
     def test_undefined(self):
-        self.test_data = {'Rated': 'undefined'}
+        self.test_data = {"Rated": "undefined"}
 
         expected = None
         actual = self.test_obj._store_rated(self.test_data)

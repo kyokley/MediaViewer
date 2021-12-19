@@ -11,36 +11,42 @@ import mock
 class TestComment:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.path = Path.objects.create(localpathstr='local.path',
-                                        remotepathstr='remote.path',
-                                        is_movie=True)
-        self.file = File.new('test.filename', self.path)
+        self.path = Path.objects.create(
+            localpathstr="local.path", remotepathstr="remote.path", is_movie=True
+        )
+        self.file = File.new("test.filename", self.path)
 
-        self.mock_reverse = mocker.patch('mediaviewer.views.comment.reverse')
+        self.mock_reverse = mocker.patch("mediaviewer.views.comment.reverse")
 
-        self.mock_httpResponseRedirect = mocker.patch('mediaviewer.views.comment.HttpResponseRedirect')
+        self.mock_httpResponseRedirect = mocker.patch(
+            "mediaviewer.views.comment.HttpResponseRedirect"
+        )
 
-        self.mock_posterfile_new = mocker.patch('mediaviewer.models.file.PosterFile.new')
+        self.mock_posterfile_new = mocker.patch(
+            "mediaviewer.models.file.PosterFile.new"
+        )
 
         self.request = mock.MagicMock()
 
-        self.user = User.objects.create_superuser('test_user',
-                                                  'test@user.com',
-                                                  'password')
+        self.user = User.objects.create_superuser(
+            "test_user", "test@user.com", "password"
+        )
 
         settings = mock.MagicMock()
         settings.force_password_change = False
-        self.user.settings = lambda : settings
+        self.user.settings = lambda: settings
 
         self.request.user = self.user
-        self.request.POST = {'comment': 'comment',
-                             'viewed': 'viewed',
-                             'search': 'search',
-                             'imdb_id': 'imdb_id',
-                             'episode_name': 'episode_name',
-                             'season': 'season',
-                             'episode_number': 'episode_number',
-                             'hidden': 'hidden'}
+        self.request.POST = {
+            "comment": "comment",
+            "viewed": "viewed",
+            "search": "search",
+            "imdb_id": "imdb_id",
+            "episode_name": "episode_name",
+            "season": "season",
+            "episode_number": "episode_number",
+            "hidden": "hidden",
+        }
 
     def test_user_not_staff_movie_comment(self):
         self.request.user.is_staff = False
@@ -51,13 +57,17 @@ class TestComment:
         self.file.refresh_from_db()
 
         assert expected == actual
-        self.mock_reverse.assert_called_once_with('mediaviewer:results', args=(self.file.id,))
-        self.mock_httpResponseRedirect.assert_called_once_with(self.mock_reverse.return_value)
+        self.mock_reverse.assert_called_once_with(
+            "mediaviewer:results", args=(self.file.id,)
+        )
+        self.mock_httpResponseRedirect.assert_called_once_with(
+            self.mock_reverse.return_value
+        )
 
-        assert self.file.imdb_id != self.request.POST.get('imdb_id')
-        assert self.file.override_filename != self.request.POST.get('episode_name')
-        assert self.file.override_season != self.request.POST.get('season')
-        assert self.file.override_episode != self.request.POST.get('episode_number')
+        assert self.file.imdb_id != self.request.POST.get("imdb_id")
+        assert self.file.override_filename != self.request.POST.get("episode_name")
+        assert self.file.override_season != self.request.POST.get("season")
+        assert self.file.override_episode != self.request.POST.get("episode_number")
 
     def test_user_is_staff_movie_comment(self):
         self.request.user.is_staff = True
@@ -68,13 +78,17 @@ class TestComment:
         self.file.refresh_from_db()
 
         assert expected == actual
-        self.mock_reverse.assert_called_once_with('mediaviewer:results', args=(self.file.id,))
-        self.mock_httpResponseRedirect.assert_called_once_with(self.mock_reverse.return_value)
+        self.mock_reverse.assert_called_once_with(
+            "mediaviewer:results", args=(self.file.id,)
+        )
+        self.mock_httpResponseRedirect.assert_called_once_with(
+            self.mock_reverse.return_value
+        )
 
-        assert self.file.imdb_id == self.request.POST.get('imdb_id')
-        assert self.file.override_filename == self.request.POST.get('episode_name')
-        assert self.file.override_season == self.request.POST.get('season')
-        assert self.file.override_episode == self.request.POST.get('episode_number')
+        assert self.file.imdb_id == self.request.POST.get("imdb_id")
+        assert self.file.override_filename == self.request.POST.get("episode_name")
+        assert self.file.override_season == self.request.POST.get("season")
+        assert self.file.override_episode == self.request.POST.get("episode_number")
 
     def test_user_not_staff_tv_comment(self):
         self.request.user.is_staff = False
@@ -86,13 +100,17 @@ class TestComment:
         self.file.refresh_from_db()
 
         assert expected == actual
-        self.mock_reverse.assert_called_once_with('mediaviewer:results', args=(self.file.id,))
-        self.mock_httpResponseRedirect.assert_called_once_with(self.mock_reverse.return_value)
+        self.mock_reverse.assert_called_once_with(
+            "mediaviewer:results", args=(self.file.id,)
+        )
+        self.mock_httpResponseRedirect.assert_called_once_with(
+            self.mock_reverse.return_value
+        )
 
-        assert self.file.imdb_id != self.request.POST.get('imdb_id')
-        assert self.file.override_filename != self.request.POST.get('episode_name')
-        assert self.file.override_season != self.request.POST.get('season')
-        assert self.file.override_episode != self.request.POST.get('episode_number')
+        assert self.file.imdb_id != self.request.POST.get("imdb_id")
+        assert self.file.override_filename != self.request.POST.get("episode_name")
+        assert self.file.override_season != self.request.POST.get("season")
+        assert self.file.override_episode != self.request.POST.get("episode_number")
 
     def test_user_is_staff_tv_comment(self):
         self.request.user.is_staff = True
@@ -105,10 +123,14 @@ class TestComment:
         self.file.refresh_from_db()
 
         assert expected == actual
-        self.mock_reverse.assert_called_once_with('mediaviewer:results', args=(self.file.id,))
-        self.mock_httpResponseRedirect.assert_called_once_with(self.mock_reverse.return_value)
+        self.mock_reverse.assert_called_once_with(
+            "mediaviewer:results", args=(self.file.id,)
+        )
+        self.mock_httpResponseRedirect.assert_called_once_with(
+            self.mock_reverse.return_value
+        )
 
-        assert self.file.imdb_id == self.request.POST.get('imdb_id')
-        assert self.file.override_filename == self.request.POST.get('episode_name')
-        assert self.file.override_season == self.request.POST.get('season')
-        assert self.file.override_episode == self.request.POST.get('episode_number')
+        assert self.file.imdb_id == self.request.POST.get("imdb_id")
+        assert self.file.override_filename == self.request.POST.get("episode_name")
+        assert self.file.override_season == self.request.POST.get("season")
+        assert self.file.override_episode == self.request.POST.get("episode_number")
