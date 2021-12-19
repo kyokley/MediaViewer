@@ -17,6 +17,9 @@ FROM ${BASE_IMAGE} AS base
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+ENV POETRY_VENV=/poetry_venv
+RUN python3 -m venv $POETRY_VENV
+
 ENV VIRTUAL_ENV=/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -48,14 +51,14 @@ RUN apt-get update && apt-get install -y \
         libpq-dev \
         make
 
-RUN pip install -U pip poetry
+RUN pip install -U pip
 
 COPY ./pdbrc.py /root/.pdbrc.py
 
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
 
-RUN poetry install --no-dev
+RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --no-dev
 
 COPY --from=static-builder /code/node_modules /node/node_modules
 
@@ -67,4 +70,4 @@ CMD uwsgi --ini /code/uwsgi/uwsi.conf
 
 # ********************* Begin Dev Image ******************
 FROM base AS dev
-RUN poetry install
+RUN $POETRY_VENV/bin/poetry install

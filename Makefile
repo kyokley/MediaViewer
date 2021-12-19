@@ -50,3 +50,6 @@ push: build ## Push image to docker hub
 	docker push kyokley/mediaviewer
 
 publish: push ## Alias for push
+
+autoformat:
+	docker-compose run --rm --no-deps mediaviewer /venv/bin/black .
