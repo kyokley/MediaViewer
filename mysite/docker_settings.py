@@ -26,7 +26,6 @@ DATABASES = {
 if DEBUG:
     INSTALLED_APPS += (
         'silk',
-        'django_nose',
         'debug_toolbar',
     )
 
@@ -37,8 +36,6 @@ if DEBUG:
     MIDDLEWARE += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
     )
-
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
     NOSE_ARGS = [
             '--with-coverage',

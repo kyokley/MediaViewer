@@ -237,17 +237,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "django-nose"
-version = "1.4.7"
-description = "Makes your Django tests simple and snappy"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-nose = ">=1.2.1"
-
-[[package]]
 name = "django-referrer-policy"
 version = "1.0"
 description = "Referrer-Policy header implementation for Django."
@@ -434,14 +423,6 @@ six = ">=1.9"
 [package.extras]
 docs = ["sphinx", "Pygments (<2)", "jinja2 (<2.7)", "sphinx (<1.3)"]
 test = ["unittest2 (>=1.1.0)"]
-
-[[package]]
-name = "nose"
-version = "1.3.7"
-description = "nose extends unittest to make testing easier"
-category = "dev"
-optional = false
-python-versions = "*"
 
 [[package]]
 name = "packaging"
@@ -776,7 +757,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "dc59a1e9249f7cc8c84f9983de18caf5b92ad1e0a43cd35e046e04c606924389"
+content-hash = "4415904e80da0f86e9fb019c6439638bddf99ee69915f7e7bd8d3a43879833d1"
 
 [metadata.files]
 atomicwrites = [
@@ -909,10 +890,6 @@ django-ipware = [
 ]
 django-memcached = [
     {file = "django-memcached-0.1.2.tar.gz", hash = "sha256:4ae2bcb9962c148530bd638cffb40eb5044adb24cb65bf6807e0c8070f3aa862"},
-]
-django-nose = [
-    {file = "django-nose-1.4.7.tar.gz", hash = "sha256:a4885cd002d65fd2de96e2bb2563ef477c3fbe207009360c015fca5c3b5561b7"},
-    {file = "django_nose-1.4.7-py2.py3-none-any.whl", hash = "sha256:304adc447ee35b889b733d7106004f98aa401d8387ddcada5d4f2239d86790a9"},
 ]
 django-referrer-policy = [
     {file = "django-referrer-policy-1.0.tar.gz", hash = "sha256:09e134324fa08c10efc12244a4bae7aee5defa7d332b92c603b09258c854615a"},
@@ -1075,11 +1052,6 @@ markupsafe = [
 mock = [
     {file = "mock-2.0.0-py2.py3-none-any.whl", hash = "sha256:5ce3c71c5545b472da17b72268978914d0252980348636840bd34a00b5cc96c1"},
     {file = "mock-2.0.0.tar.gz", hash = "sha256:b158b6df76edd239b8208d481dc46b6afd45a846b7812ff0ce58971cf5bc8bba"},
-]
-nose = [
-    {file = "nose-1.3.7-py2-none-any.whl", hash = "sha256:dadcddc0aefbf99eea214e0f1232b94f2fa9bd98fa8353711dacb112bfcbbb2a"},
-    {file = "nose-1.3.7-py3-none-any.whl", hash = "sha256:9ff7c6cc443f8c51994b34a667bbcf45afd6d945be7477b52e97516fd17c53ac"},
-    {file = "nose-1.3.7.tar.gz", hash = "sha256:f1bffef9cbc82628f6e7d7b40d7e255aefaa1adb6a1b1d26c69a8b79e6208a98"},
 ]
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
