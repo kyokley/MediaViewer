@@ -147,8 +147,8 @@ def send_test_mail(to_addr):
 
 def checkSMTPServer():
     if not settings.BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(
-            host=settings.EMAIL_HOST, port=settings.EMAIL_PORT  # nosec
+        smtp_server = telnetlib.Telnet(  # nosec
+            host=settings.EMAIL_HOST, port=settings.EMAIL_PORT
         )
         smtp_server.close()
 
