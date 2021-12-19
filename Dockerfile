@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=python:3.8-slim
+ARG BASE_IMAGE=python:3.10-slim
 
 FROM ${BASE_IMAGE} AS static-builder
 WORKDIR /code
@@ -13,8 +13,6 @@ COPY package.json /code/package.json
 RUN yarn install
 
 FROM ${BASE_IMAGE} AS base
-
-MAINTAINER Kevin Yokley
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -51,6 +49,8 @@ RUN apt-get update && apt-get install -y \
         make
 
 RUN pip install -U pip poetry
+
+COPY ./pdbrc.py /root/.pdbrc.py
 
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
