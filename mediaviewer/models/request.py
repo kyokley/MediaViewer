@@ -51,12 +51,7 @@ class Request(models.Model):
         return currentTime >= refTime
 
     def getSupportingUsers(self):
-        sql = """SELECT DISTINCT u.* FROM auth_user AS u
-                 INNER JOIN requestvote AS rv
-                 ON rv.userid = u.id
-                 WHERE rv.requestid = %s;
-              """
-        return User.objects.raw(sql, params=[self.id])
+        return User.objects.filter(requestvote__request=self)
 
     @classmethod
     def new(cls, name, user, done=False):

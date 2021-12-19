@@ -1,5 +1,6 @@
+import pytest
+
 from datetime import timedelta
-from django.test import TestCase
 
 from django.contrib.auth.models import User
 from mediaviewer.models.request import (
@@ -8,7 +9,9 @@ from mediaviewer.models.request import (
 )
 
 
-class TestGetSupportingUsers(TestCase):
+@pytest.mark.django_db
+class TestGetSupportingUsers:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.user1 = User()
         self.user2 = User()
@@ -31,10 +34,12 @@ class TestGetSupportingUsers(TestCase):
 
         expected = set([self.user1, self.user3])
         actual = set(self.request.getSupportingUsers())
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
 
-class TestCanVote(TestCase):
+@pytest.mark.django_db
+class TestCanVote:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.user1 = User()
         self.user2 = User()
@@ -51,20 +56,22 @@ class TestCanVote(TestCase):
         self.request = Request.new("test request", self.user1)
 
     def test_voteAllowed(self):
-        self.assertTrue(self.request.canVote(self.user1))
+        assert self.request.canVote(self.user1)
 
     def test_voteNotAllowed(self):
         RequestVote.new(self.request, self.user1)
-        self.assertFalse(self.request.canVote(self.user1))
+        assert not self.request.canVote(self.user1)
 
     def test_voteAllowed2(self):
         req_vote = RequestVote.new(self.request, self.user1)
         req_vote.datecreated = req_vote.datecreated + timedelta(days=-1)
         req_vote.save()
-        self.assertTrue(self.request.canVote(self.user1))
+        assert self.request.canVote(self.user1)
 
 
-class TestRequestNew(TestCase):
+@pytest.mark.django_db
+class TestRequestNew:
+    @pytest.fixture(autouse=True)
     def setUp(self):
         self.user1 = User()
         self.user2 = User()
@@ -82,8 +89,8 @@ class TestRequestNew(TestCase):
 
     def test_unique_request(self):
         new_obj = Request.new("new name", self.user1)
-        self.assertFalse(new_obj == self.request)
+        assert new_obj != self.request
 
     def test_existing_request(self):
         new_obj = Request.new("This Is A Test", self.user1)
-        self.assertEqual(new_obj, self.request)
+        assert new_obj == self.request
