@@ -118,35 +118,23 @@ class TestNewUserView:
 
 class TestSettings:
     @pytest.fixture(autouse=True)
-    def setUp(self):
-        self.LOCAL_IP_patcher = mock.patch(
+    def setUp(self, mocker):
+        self.LOCAL_IP_patcher = mocker.patch(
                 'mediaviewer.views.settings.LOCAL_IP', 'test_local_ip')
-        self.LOCAL_IP_patcher.start()
-        self.addCleanup(self.LOCAL_IP_patcher.stop)
 
-        self.BANGUP_IP_patcher = mock.patch(
+        self.BANGUP_IP_patcher = mocker.patch(
                 'mediaviewer.views.settings.BANGUP_IP', 'test_bangup_ip')
-        self.BANGUP_IP_patcher.start()
-        self.addCleanup(self.BANGUP_IP_patcher.stop)
 
-        self.latestSiteGreeting_patcher = mock.patch(
+        self.mock_latestSiteGreeting = mocker.patch(
                 'mediaviewer.views.settings.SiteGreeting.latestSiteGreeting')
-        self.mock_latestSiteGreeting = self.latestSiteGreeting_patcher.start()
-        self.addCleanup(self.latestSiteGreeting_patcher.stop)
 
-        self.setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
                 'mediaviewer.views.settings.setSiteWideContext')
-        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
-        self.addCleanup(self.setSiteWideContext_patcher.stop)
 
-        self.render_patcher = mock.patch('mediaviewer.views.settings.render')
-        self.mock_render = self.render_patcher.start()
-        self.addCleanup(self.render_patcher.stop)
+        self.mock_render = mocker.patch('mediaviewer.views.settings.render')
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
                 'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
         self.user = mock.create_autospec(User)
         self.user.username = 'test_logged_in_user'
@@ -180,7 +168,7 @@ class TestSettings:
             }
         expected = self.mock_render.return_value
         actual = settings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_setSiteWideContext.assert_called_once_with(
                 expected_context,
@@ -211,7 +199,7 @@ class TestSettings:
             }
         expected = self.mock_render.return_value
         actual = settings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_setSiteWideContext.assert_called_once_with(
                 expected_context,
@@ -230,33 +218,25 @@ class TestSettings:
 
         expected = self.mock_change_password.return_value
         actual = settings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_change_password.assert_called_once_with()
 
 
 class TestSubmitSettings:
     @pytest.fixture(autouse=True)
-    def setUp(self):
-        self.FILENAME_SORT_patcher = mock.patch(
+    def setUp(self, mocker):
+        mocker.patch(
                 'mediaviewer.views.settings.FILENAME_SORT',
                 'test_filename_sort')
-        self.FILENAME_SORT_patcher.start()
-        self.addCleanup(self.FILENAME_SORT_patcher.stop)
 
-        self.setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
                 'mediaviewer.views.settings.setSiteWideContext')
-        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
-        self.addCleanup(self.setSiteWideContext_patcher.stop)
 
-        self.render_patcher = mock.patch('mediaviewer.views.settings.render')
-        self.mock_render = self.render_patcher.start()
-        self.addCleanup(self.render_patcher.stop)
+        self.mock_render = mocker.patch('mediaviewer.views.settings.render')
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
                 'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
         self.user = mock.create_autospec(User)
         self.user.username = 'test_logged_in_user'
@@ -276,16 +256,16 @@ class TestSubmitSettings:
 
         expected = self.mock_render.return_value
         actual = submitsettings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_render.assert_called_once_with(
                 self.request,
                 'mediaviewer/settingsresults.html',
                 expected_context)
 
-        self.assertEqual(self.settings.default_sort, 'test_filename_sort')
-        self.assertEqual(self.settings.binge_mode, False)
-        self.assertEqual(self.settings.jump_to_last_watched, False)
+        assert self.settings.default_sort == 'test_filename_sort'
+        assert self.settings.binge_mode is False
+        assert self.settings.jump_to_last_watched is False
 
         assert not self.mock_change_password.called
 
@@ -303,17 +283,17 @@ class TestSubmitSettings:
 
         expected = self.mock_render.return_value
         actual = submitsettings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_render.assert_called_once_with(
                 self.request,
                 'mediaviewer/settingsresults.html',
                 expected_context)
 
-        self.assertEqual(self.settings.default_sort, 'test_default_sort')
-        self.assertEqual(self.settings.binge_mode, True)
-        self.assertEqual(self.settings.jump_to_last_watched, True)
-        self.assertEqual(self.user.email, 'test_new_email')
+        assert self.settings.default_sort == 'test_default_sort'
+        assert self.settings.binge_mode is True
+        assert self.settings.jump_to_last_watched is True
+        assert self.user.email == 'test_new_email'
 
         assert not self.mock_change_password.called
 
@@ -322,37 +302,28 @@ class TestSubmitSettings:
 
         expected = self.mock_change_password.return_value
         actual = settings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_change_password.assert_called_once_with()
 
 
+@pytest.mark.django_db
 class TestSubmitSiteSettings:
     @pytest.fixture(autouse=True)
-    def setUp(self):
-        self.new_patcher = mock.patch(
+    def setUp(self, mocker):
+        self.mock_new = mocker.patch(
                 'mediaviewer.views.settings.SiteGreeting.new')
-        self.mock_new = self.new_patcher.start()
-        self.addCleanup(self.new_patcher.stop)
 
-        self.latestSiteGreeting_patcher = mock.patch(
+        self.mock_latestSiteGreeting = mocker.patch(
                 'mediaviewer.views.settings.SiteGreeting.latestSiteGreeting')
-        self.mock_latestSiteGreeting = self.latestSiteGreeting_patcher.start()
-        self.addCleanup(self.latestSiteGreeting_patcher.stop)
 
-        self.setSiteWideContext_patcher = mock.patch(
+        self.mock_setSiteWideContext = mocker.patch(
                 'mediaviewer.views.settings.setSiteWideContext')
-        self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
-        self.addCleanup(self.setSiteWideContext_patcher.stop)
 
-        self.render_patcher = mock.patch('mediaviewer.views.settings.render')
-        self.mock_render = self.render_patcher.start()
-        self.addCleanup(self.render_patcher.stop)
+        self.mock_render = mocker.patch('mediaviewer.views.settings.render')
 
-        self.change_password_patcher = mock.patch(
+        self.mock_change_password = mocker.patch(
                 'mediaviewer.views.password_reset.change_password')
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
         self.old_greeting = mock.MagicMock(SiteGreeting)
         self.old_greeting.greeting = 'old_greeting'
@@ -374,7 +345,7 @@ class TestSubmitSiteSettings:
 
         expected = self.mock_render.return_value
         actual = submitsitesettings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_render.assert_called_once_with(
                 self.request,
@@ -394,7 +365,7 @@ class TestSubmitSiteSettings:
 
         expected = self.mock_render.return_value
         actual = submitsitesettings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_render.assert_called_once_with(
                 self.request,
@@ -412,7 +383,7 @@ class TestSubmitSiteSettings:
 
         expected = self.mock_render.return_value
         actual = submitsitesettings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_render.assert_called_once_with(
                 self.request,
@@ -427,6 +398,6 @@ class TestSubmitSiteSettings:
 
         expected = self.mock_change_password.return_value
         actual = submitsitesettings(self.request)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
         self.mock_change_password.assert_called_once_with()

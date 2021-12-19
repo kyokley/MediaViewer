@@ -106,13 +106,13 @@ class TestHome:
 class TestAjaxRunScraper:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.mock_inferAllScrapers = mock.patch(
+        self.mock_inferAllScrapers = mocker.patch(
             'mediaviewer.views.home.File.inferAllScrapers')
 
-        self.mock_dumps = mock.patch(
+        self.mock_dumps = mocker.patch(
             'mediaviewer.views.home.json.dumps')
 
-        self.mock_HttpResponse = mock.patch(
+        self.mock_HttpResponse = mocker.patch(
             'mediaviewer.views.home.HttpResponse')
 
         self.user = create_user()
