@@ -20,7 +20,7 @@ def getJSONData(url):
 
             if remaining < 0.1 * limit:
                 log.warning(
-                    "90%% of the rate limit has been used. " "Sleeping for 1 second"
+                    "90%% of the rate limit has been used. Sleeping for 1 second"
                 )
                 time.sleep(1)
 
