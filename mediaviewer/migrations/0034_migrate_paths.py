@@ -3,11 +3,11 @@
 import re
 from django.db import migrations
 
-HOME_DIR_REGEX = re.compile(r'^/home/yokley/')
+HOME_DIR_REGEX = re.compile(r"^/home/yokley/")
 
 
 def remove_home_dir(apps, schema_editor):
-    Path = apps.get_model('mediaviewer', 'Path')
+    Path = apps.get_model("mediaviewer", "Path")
     paths = Path.objects.all()
 
     for path in paths:
@@ -24,7 +24,7 @@ def remove_home_dir(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0033_auto_20190302_2010'),
+        ("mediaviewer", "0033_auto_20190302_2010"),
     ]
 
     operations = [

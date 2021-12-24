@@ -1,4 +1,4 @@
-from django.test import TestCase
+import pytest
 
 from mediaviewer.tests import helpers
 
@@ -7,27 +7,24 @@ from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 
 
-class TestNew(TestCase):
+@pytest.mark.django_db
+class TestNew:
+    @pytest.fixture(autouse=True)
     def setUp(self):
-        self.path = Path.new('local_path',
-                             'remote_path',
-                             False)
+        self.path = Path.objects.create(
+            localpathstr="local_path", remotepathstr="remote_path", is_movie=False
+        )
 
-        self.filename = 'test_filename'
-        self.file = File.new(self.filename,
-                             self.path)
+        self.filename = "test_filename"
+        self.file = File.objects.create(filename=self.filename, path=self.path)
 
         self.user = helpers.create_user(random=True)
 
     def test_new(self):
-        uc = UserComment.new(
-                self.file,
-                self.user,
-                'test_comment',
-                False)
+        uc = UserComment.new(self.file, self.user, "test_comment", False)
         print(uc)
 
-        self.assertEqual(uc.file, self.file)
-        self.assertEqual(uc.user, self.user)
-        self.assertEqual(uc.comment, 'test_comment')
-        self.assertEqual(uc.viewed, False)
+        assert uc.file == self.file
+        assert uc.user == self.user
+        assert uc.comment == "test_comment"
+        assert not uc.viewed

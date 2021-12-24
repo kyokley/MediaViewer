@@ -6,31 +6,33 @@ from django.http import HttpRequest
 
 from mediaviewer.models.message import Message
 
-from mediaviewer.views.messaging import (submitsitewidemessage,
-                                         ajaxclosemessage,
-                                         )
+from mediaviewer.views.messaging import (
+    submitsitewidemessage,
+    ajaxclosemessage,
+)
 
 
 class TestSubmitSiteWideMessage(TestCase):
     def setUp(self):
         self.setSiteWideContext_patcher = mock.patch(
-                'mediaviewer.views.messaging.setSiteWideContext')
+            "mediaviewer.views.messaging.setSiteWideContext"
+        )
         self.mock_setSiteWideContext = self.setSiteWideContext_patcher.start()
         self.addCleanup(self.setSiteWideContext_patcher.stop)
 
         self.createSitewideMessage_patcher = mock.patch(
-                'mediaviewer.views.messaging.Message.createSitewideMessage')
-        self.mock_createSiteWideMessage = (
-                self.createSitewideMessage_patcher.start())
+            "mediaviewer.views.messaging.Message.createSitewideMessage"
+        )
+        self.mock_createSiteWideMessage = self.createSitewideMessage_patcher.start()
         self.addCleanup(self.createSitewideMessage_patcher.stop)
 
-        self.render_patcher = mock.patch(
-                'mediaviewer.views.messaging.render')
+        self.render_patcher = mock.patch("mediaviewer.views.messaging.render")
         self.mock_render = self.render_patcher.start()
         self.addCleanup(self.render_patcher.stop)
 
         self.change_password_patcher = mock.patch(
-                'mediaviewer.views.password_reset.change_password')
+            "mediaviewer.views.password_reset.change_password"
+        )
         self.mock_change_password = self.change_password_patcher.start()
         self.addCleanup(self.change_password_patcher.stop)
 
@@ -41,38 +43,34 @@ class TestSubmitSiteWideMessage(TestCase):
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
-        self.request.POST = {'sitemessage': 'test_site_message',
-                             'level': 'Debug'}
+        self.request.POST = {"sitemessage": "test_site_message", "level": "Debug"}
 
     def test_valid(self):
-        expected_context = {'active_page': 'submitsitewidemessage'}
+        expected_context = {"active_page": "submitsitewidemessage"}
 
         expected = self.mock_render.return_value
         actual = submitsitewidemessage(self.request)
 
         self.assertEqual(expected, actual)
         self.mock_setSiteWideContext.assert_called_once_with(
-                expected_context,
-                self.request)
+            expected_context, self.request
+        )
         self.mock_createSiteWideMessage.assert_called_once_with(
-                'test_site_message',
-                level=Message.levelDict['Debug'])
+            "test_site_message", level=Message.levelDict["Debug"]
+        )
         self.mock_render.assert_called_once_with(
-                self.request,
-                'mediaviewer/settingsresults.html',
-                expected_context)
+            self.request, "mediaviewer/settingsresults.html", expected_context
+        )
 
     def test_user_not_staff(self):
         self.user.is_staff = False
 
-        expected_context = {'active_page': 'submitsitewidemessage'}
+        expected_context = {"active_page": "submitsitewidemessage"}
 
-        self.assertRaises(Exception,
-                          submitsitewidemessage,
-                          self.request)
+        self.assertRaises(Exception, submitsitewidemessage, self.request)
         self.mock_setSiteWideContext.assert_called_once_with(
-                expected_context,
-                self.request)
+            expected_context, self.request
+        )
         self.assertFalse(self.mock_createSiteWideMessage.called)
         self.assertFalse(self.mock_render.called)
 
@@ -89,17 +87,18 @@ class TestSubmitSiteWideMessage(TestCase):
 class TestAjaxCloseMessage(TestCase):
     def setUp(self):
         self.HttpResponse_patcher = mock.patch(
-                'mediaviewer.views.messaging.HttpResponse')
+            "mediaviewer.views.messaging.HttpResponse"
+        )
         self.mock_HttpResponse = self.HttpResponse_patcher.start()
         self.addCleanup(self.HttpResponse_patcher.stop)
 
-        self.dumps_patcher = mock.patch(
-                'mediaviewer.views.messaging.json.dumps')
+        self.dumps_patcher = mock.patch("mediaviewer.views.messaging.json.dumps")
         self.mock_dumps = self.dumps_patcher.start()
         self.addCleanup(self.dumps_patcher.stop)
 
         self.filter_patcher = mock.patch(
-                'mediaviewer.views.messaging.Message.objects.filter')
+            "mediaviewer.views.messaging.Message.objects.filter"
+        )
         self.mock_filter = self.filter_patcher.start()
         self.addCleanup(self.filter_patcher.stop)
 
@@ -113,7 +112,7 @@ class TestAjaxCloseMessage(TestCase):
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
-        self.request.POST = {'messageid': '123'}
+        self.request.POST = {"messageid": "123"}
 
     def test_valid(self):
         expected = self.mock_HttpResponse.return_value
@@ -122,10 +121,9 @@ class TestAjaxCloseMessage(TestCase):
         self.assertEqual(expected, actual)
 
         self.mock_HttpResponse.assert_called_once_with(
-                self.mock_dumps.return_value,
-                content_type='application/javascript')
-        self.mock_dumps.assert_called_once_with(
-                {'errmsg': ''})
+            self.mock_dumps.return_value, content_type="application/javascript"
+        )
+        self.mock_dumps.assert_called_once_with({"errmsg": ""})
         self.assertTrue(self.messageObj.sent)
         self.messageObj.save.assert_called_once_with()
 
@@ -138,9 +136,10 @@ class TestAjaxCloseMessage(TestCase):
         self.assertEqual(expected, actual)
 
         self.mock_HttpResponse.assert_called_once_with(
-                self.mock_dumps.return_value,
-                content_type='application/javascript')
-        self.mock_dumps.assert_called_once_with({
-            'errmsg': 'User not authenticated. Refresh and try again.'})
+            self.mock_dumps.return_value, content_type="application/javascript"
+        )
+        self.mock_dumps.assert_called_once_with(
+            {"errmsg": "User not authenticated. Refresh and try again."}
+        )
         self.assertFalse(self.messageObj.sent)
         self.assertFalse(self.messageObj.save.called)

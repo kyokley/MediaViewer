@@ -2,17 +2,16 @@ from django.db import models
 
 
 class Genre(models.Model):
-    genre = models.TextField(blank=False,
-                             null=False)
+    genre = models.TextField(blank=False, null=False)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'genre'
+        app_label = "mediaviewer"
+        db_table = "genre"
 
     def __str__(self):
-        return 'g: %s' % (self.genre,)
+        return "g: %s" % (self.genre,)
 
     @classmethod
     def new(cls, genre):
@@ -27,51 +26,29 @@ class Genre(models.Model):
         return new_obj
 
     @classmethod
-    def get_movie_genres(cls):
-        sql = '''
-select * from genre
-where genre.id in
-(select id from
-    (select g.id, count(*) from genre as g
-    inner join posterfile_genres as pg
-    on pg.genre_id = g.id
-    inner join posterfile as p
-    on p.id = pg.posterfile_id
-    inner join file as f
-    on f.id = p.fileid
-    inner join path
-    on path.id = f.pathid
-    where path.ismovie = 't'
-    group by g.id
-    order by count(*) desc
-    limit 10) as agg_genre
-)
-order by genre.genre;
-        '''
+    def get_movie_genres(cls, limit=10):
+        genres = cls.objects.filter(
+            pk__in=(
+                cls.objects.filter(posterfile__file__path__is_movie=True)
+                .values("posterfile__genres")
+                .annotate(genre_count=models.Count("id"))
+                .order_by("-genre_count")
+                .values("posterfile__genres")[:limit]
+            )
+        ).order_by("genre")
 
-        genres = cls.objects.raw(sql);
         return genres
 
     @classmethod
-    def get_tv_genres(cls):
-        sql = '''
-select * from genre
-where genre.id in
-(select id from
-    (select g.id, count(*) from genre as g
-    inner join posterfile_genres as pg
-    on pg.genre_id = g.id
-    inner join posterfile as p
-    on p.id = pg.posterfile_id
-    inner join path
-    on path.id = p.pathid
-    where path.ismovie = 'f'
-    group by g.id
-    order by count(*) desc
-    limit 10) as agg_genre
-)
-order by genre.genre;
-        '''
+    def get_tv_genres(cls, limit=10):
+        genres = cls.objects.filter(
+            pk__in=(
+                cls.objects.filter(posterfile__file__path__is_movie=False)
+                .values("posterfile__genres")
+                .annotate(genre_count=models.Count("id"))
+                .order_by("-genre_count")
+                .values("posterfile__genres")[:limit]
+            )
+        ).order_by("genre")
 
-        genres = cls.objects.raw(sql);
         return genres

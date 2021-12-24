@@ -10,25 +10,26 @@ from mediaviewer.log import log
 
 def ajaxwaiterstatus(request):
     try:
-        resp = requests.get(settings.WAITER_STATUS_URL,
-                            timeout=settings.REQUEST_TIMEOUT)
+        resp = requests.get(
+            settings.WAITER_STATUS_URL, timeout=settings.REQUEST_TIMEOUT
+        )
         resp.raise_for_status()
         data = resp.json()
 
         log.debug(data)
-        if 'status' not in data or not data['status']:
-            failureReason = 'Bad Symlink'
+        if "status" not in data or not data["status"]:
+            failureReason = "Bad Symlink"
         else:
-            failureReason = ''
+            failureReason = ""
 
-        response = {'status': data.get('status', False),
-                    u'failureReason': failureReason}
+        response = {
+            "status": data.get("status", False),
+            u"failureReason": failureReason,
+        }
     except Exception as e:
-        response = {'status': False, 'failureReason': 'Timedout'}
+        response = {"status": False, "failureReason": "Timedout"}
         log.error(e)
 
-    WaiterStatus.new(response['status'],
-                     response['failureReason'])
+    WaiterStatus.new(response["status"], response["failureReason"])
 
-    return HttpResponse(json.dumps(response),
-                        content_type='application/javascript')
+    return HttpResponse(json.dumps(response), content_type="application/javascript")

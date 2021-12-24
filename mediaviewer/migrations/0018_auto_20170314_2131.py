@@ -6,16 +6,16 @@ from django.db import migrations
 
 
 def regenerate_posterfiles(apps, schema_editor):
-    PosterFile = apps.get_model('mediaviewer', 'PosterFile')
+    PosterFile = apps.get_model("mediaviewer", "PosterFile")
     PosterFile.objects.all().delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0017_actor_order'),
+        ("mediaviewer", "0017_actor_order"),
     ]
 
     operations = [
-            migrations.RunPython(regenerate_posterfiles),
+        migrations.RunPython(regenerate_posterfiles),
     ]

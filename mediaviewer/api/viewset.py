@@ -3,18 +3,20 @@ from rest_framework import viewsets, views
 from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
 from rest_framework import permissions, authentication
-from mediaviewer.api.serializers import (DownloadTokenSerializer,
-                                         DataTransmissionSerializer,
-                                         ErrorSerializer,
-                                         FilenameScrapeFormatSerializer,
-                                         MessageSerializer,
-                                         PosterFileSerializer,
-                                         UserCommentSerializer,
-                                         PathSerializer,
-                                         )
+from mediaviewer.api.serializers import (
+    DownloadTokenSerializer,
+    DataTransmissionSerializer,
+    ErrorSerializer,
+    FilenameScrapeFormatSerializer,
+    MessageSerializer,
+    PosterFileSerializer,
+    UserCommentSerializer,
+    PathSerializer,
+)
 from mediaviewer.models.file import File
-from mediaviewer.models.path import (Path,
-                                     )
+from mediaviewer.models.path import (
+    Path,
+)
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.datatransmission import DataTransmission
 from mediaviewer.models.error import Error
@@ -29,19 +31,18 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
     serializer_class = DownloadTokenSerializer
 
     def retrieve(self, request, pk=None):
-        log.debug('Attempting to find token with guid = %s' % pk)
+        log.debug("Attempting to find token with guid = %s" % pk)
         queryset = DownloadToken.objects.filter(guid=pk)
         obj = get_object_or_404(queryset, guid=pk)
         if obj:
-            log.debug('Found token. isValid: %s' % obj.isvalid)
+            log.debug("Found token. isValid: %s" % obj.isvalid)
         serializer = DownloadTokenSerializer(obj)
         return RESTResponse(serializer.data)
 
     def create(self, request):
         user = request.user
-        file_id = request.data['file_id']
-        file = get_object_or_404(File.objects.filter(hide=False),
-                                 pk=file_id)
+        file_id = request.data["file_id"]
+        file = get_object_or_404(File.objects.filter(hide=False), pk=file_id)
         token = DownloadToken.new(user, file)
         serializer = DownloadTokenSerializer(token)
         return RESTResponse(serializer.data)
@@ -53,7 +54,7 @@ class DataTransmissionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = DataTransmission.objects.all()
-        log.debug('Returning DataTransmission objects')
+        log.debug("Returning DataTransmission objects")
         return queryset
 
 
@@ -63,7 +64,7 @@ class ErrorViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Error.objects.all()
-        log.debug('Returning Error objects')
+        log.debug("Returning Error objects")
         return queryset
 
 
@@ -73,7 +74,7 @@ class FilenameScrapeFormatViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = FilenameScrapeFormat.objects.all()
-        log.debug('Returning FilenameScrapeFormat objects')
+        log.debug("Returning FilenameScrapeFormat objects")
         return queryset
 
 
@@ -83,15 +84,16 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Message.objects.all()
-        log.debug('Returning Message objects')
+        log.debug("Returning Message objects")
         return queryset
 
 
 class InferScrapersView(views.APIView):
     permission_classes = (permissions.IsAdminUser,)
-    authentication_classes = (authentication.BasicAuthentication,
-                              authentication.SessionAuthentication,
-                              )
+    authentication_classes = (
+        authentication.BasicAuthentication,
+        authentication.SessionAuthentication,
+    )
 
     def post(self, request, *args, **kwargs):
         try:
@@ -101,21 +103,19 @@ class InferScrapersView(views.APIView):
             return RESTResponse({"success": False, "error": str(e)})
 
     def get(self, request, *args, **kwargs):
-        title = request.GET.get('title')
+        title = request.GET.get("title")
 
         if not title:
-            return RESTResponse(None,
-                                status=RESTstatus.HTTP_404_NOT_FOUND)
+            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
-        log.debug('Attempting to scrape title = %s' % title)
+        log.debug("Attempting to scrape title = %s" % title)
         path = FilenameScrapeFormat.path_for_filename(title)
 
         if path:
             serializer = PathSerializer(path)
             return RESTResponse(serializer.data)
         else:
-            return RESTResponse(None,
-                                status=RESTstatus.HTTP_404_NOT_FOUND)
+            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
 
 class PosterViewSetByPath(viewsets.ModelViewSet):
@@ -123,15 +123,14 @@ class PosterViewSetByPath(viewsets.ModelViewSet):
     serializer_class = PosterFileSerializer
 
     def retrieve(self, request, pk=None):
-        log.debug('Attempting to find poster with pathid = %s' % pk)
+        log.debug("Attempting to find poster with pathid = %s" % pk)
         path = Path.objects.filter(pk=pk)
         obj = PosterFile.objects.filter(path=path)
         if obj:
             serializer = self.serializer_class(obj[0])
             return RESTResponse(serializer.data)
         else:
-            return RESTResponse(None,
-                                status=RESTstatus.HTTP_404_NOT_FOUND)
+            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
 
 class PosterViewSetByFile(viewsets.ModelViewSet):
@@ -140,15 +139,14 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     def retrieve(self, request, pk=None):
-        log.debug('Attempting to find poster with fileid = %s' % pk)
+        log.debug("Attempting to find poster with fileid = %s" % pk)
         file = File.objects.filter(pk=pk)
         obj = PosterFile.objects.filter(file=file)
         if obj:
             serializer = self.serializer_class(obj[0])
             return RESTResponse(serializer.data)
         else:
-            return RESTResponse(None,
-                                status=RESTstatus.HTTP_404_NOT_FOUND)
+            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
 
 class UserCommentViewSet(viewsets.ModelViewSet):
@@ -159,18 +157,15 @@ class UserCommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = UserComment.objects.filter(user=user)
-        log.debug('Returning UserComment objects')
+        log.debug("Returning UserComment objects")
         return queryset
 
     def retrieve(self, request, pk=None):
         user = request.user
         file = File.objects.get(pk=pk)
-        obj = (UserComment.objects
-                          .filter(user=user)
-                          .filter(file=file))
+        obj = UserComment.objects.filter(user=user).filter(file=file)
         if obj:
             serializer = self.serializer_class(obj[0])
             return RESTResponse(serializer.data)
         else:
-            return RESTResponse(None,
-                                status=RESTstatus.HTTP_404_NOT_FOUND)
+            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)

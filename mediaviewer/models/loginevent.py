@@ -5,21 +5,21 @@ from django.db import models
 
 
 class LoginEvent(models.Model):
-    user = models.ForeignKey('auth.User',
-                             on_delete=models.CASCADE,
-                             null=False,
-                             blank=False,
-                             db_column='userid')
-    datecreated = models.DateTimeField(db_column='datecreated')
+    user = models.ForeignKey(
+        "auth.User",
+        on_delete=models.CASCADE,
+        null=False,
+        blank=False,
+        db_column="userid",
+    )
+    datecreated = models.DateTimeField(db_column="datecreated")
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'loginevent'
+        app_label = "mediaviewer"
+        db_table = "loginevent"
 
     def __str__(self):
-        return 'id: %s u: %s date: %s' % (self.id,
-                                          self.user.username,
-                                          self.datecreated)
+        return "id: %s u: %s date: %s" % (self.id, self.user.username, self.datecreated)
 
     @classmethod
     def new(cls, user):
@@ -29,7 +29,7 @@ class LoginEvent(models.Model):
         le.save()
         number_of_events = cls.objects.count()
         if number_of_events > settings.MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS:
-            oldest_event = cls.objects.order_by('id').first()
+            oldest_event = cls.objects.order_by("id").first()
             if oldest_event:
                 oldest_event.delete()
         return le

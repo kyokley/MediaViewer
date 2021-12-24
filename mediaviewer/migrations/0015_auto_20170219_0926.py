@@ -4,15 +4,17 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+
 def regenerate_posterfiles(apps, schema_editor):
     pass
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0014_auto_20170204_1047'),
+        ("mediaviewer", "0014_auto_20170204_1047"),
     ]
 
     operations = [
-            migrations.RunPython(regenerate_posterfiles),
+        migrations.RunPython(regenerate_posterfiles),
     ]

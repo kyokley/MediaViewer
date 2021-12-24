@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0018_auto_20170314_2131'),
+        ("mediaviewer", "0018_auto_20170314_2131"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='usersettings',
-            name='binge_mode',
+            model_name="usersettings",
+            name="binge_mode",
             field=models.BooleanField(default=True),
         ),
     ]

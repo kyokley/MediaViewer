@@ -1,6 +1,7 @@
 from mediaviewer.models.person import Person
 
+
 class Director(Person):
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'director'
+        app_label = "mediaviewer"
+        db_table = "director"

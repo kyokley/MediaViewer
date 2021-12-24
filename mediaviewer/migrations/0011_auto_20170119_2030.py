@@ -4,15 +4,15 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 
+
 def generate_initial_mediagenre_data(apps, schema_editor):
     pass
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0010_mediagenre'),
+        ("mediaviewer", "0010_mediagenre"),
     ]
 
-    operations = [
-        migrations.RunPython(generate_initial_mediagenre_data)
-    ]
+    operations = [migrations.RunPython(generate_initial_mediagenre_data)]

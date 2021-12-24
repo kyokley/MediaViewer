@@ -6,8 +6,8 @@ class Actor(Person):
     order = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'actor'
+        app_label = "mediaviewer"
+        db_table = "actor"
 
     @classmethod
     def new(cls, name, order=None):

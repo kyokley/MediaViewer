@@ -2,30 +2,31 @@ import re
 from django.db import models
 
 
+class PersonManager(models.Manager):
+    def create(self, *args, **kwargs):
+        return self.get_or_create(*args, **kwargs)[0]
+
+    def get_or_create(self, *args, **kwargs):
+        # Remove anything appearing in parens
+        kwargs["name"] = re.sub(r"\s+\(.*\)", "", kwargs["name"]).title()
+
+        existing = self.filter(name=kwargs["name"]).first()
+
+        if existing:
+            return existing, False
+
+        return super().get_or_create(*args, **kwargs)
+
+
 class Person(models.Model):
-    name = models.TextField(blank=False,
-                            null=False)
+    name = models.TextField(blank=False, null=False)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
+
+    objects = PersonManager()
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return 'id: %s n: %s' % (self.id, self.name)
-
-    @classmethod
-    def new(cls, name):
-        # Remove anything appearing in parens
-        name = re.sub('\s+\(.*\)', '', name)
-
-        existing = cls.objects.filter(name=name.title()).first()
-
-        if existing:
-            return existing
-
-        new_obj = cls()
-        new_obj.name = name.title()
-        new_obj.save()
-        return new_obj
-
+        return "id: %s n: %s" % (self.id, self.name)

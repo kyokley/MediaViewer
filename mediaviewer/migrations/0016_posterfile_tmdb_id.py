@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0015_auto_20170219_0926'),
+        ("mediaviewer", "0015_auto_20170219_0926"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='posterfile',
-            name='tmdb_id',
+            model_name="posterfile",
+            name="tmdb_id",
             field=models.TextField(blank=True, null=True),
         ),
     ]

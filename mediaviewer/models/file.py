@@ -13,73 +13,86 @@ from mediaviewer.models.message import Message
 from datetime import datetime as dateObj
 
 from django.conf import settings as conf_settings
-from mediaviewer.models.usersettings import (LOCAL_IP,
-                                             BANGUP_IP,
-                                             UserSettings)
+from mediaviewer.models.usersettings import LOCAL_IP, BANGUP_IP, UserSettings
 
 from mediaviewer.log import log
 
-yearRegex = re.compile(r'20\d{2}\D?.*$')
-dvdRegex = re.compile(r'[A-Z]{2,}.*$')
-formatRegex = re.compile(r'\b(xvid|avi|XVID|AVI)+\b')
-punctuationRegex = re.compile(r'[^a-zA-Z0-9]+')
+yearRegex = re.compile(r"20\d{2}\D?.*$")
+dvdRegex = re.compile(r"[A-Z]{2,}.*$")
+formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
+punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
+
+
+class FileManager(models.Manager):
+    def create(self, *args, **kwargs):
+        obj = super().create(*args, **kwargs)
+
+        path = kwargs["path"]
+
+        # Generate continue watching messages
+        settings = UserSettings.objects.filter(last_watched=path).all()
+        for setting in settings:
+            Message.createLastWatchedMessage(setting.user, obj)
+
+        return obj
 
 
 class File(models.Model):
-    path = models.ForeignKey('mediaviewer.Path',
-                             on_delete=models.CASCADE,
-                             null=True,
-                             db_column='pathid',
-                             blank=True,
-                             )
+    path = models.ForeignKey(
+        "mediaviewer.Path",
+        on_delete=models.CASCADE,
+        null=True,
+        db_column="pathid",
+        blank=True,
+    )
     filename = models.TextField(blank=True)
-    skip = models.BooleanField(blank=True)
-    finished = models.BooleanField(blank=True)
+    skip = models.BooleanField(blank=True, default=False)
+    finished = models.BooleanField(blank=True, default=True)
     size = models.BigIntegerField(null=True, blank=True)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
-    datatransmission = models.ForeignKey('mediaviewer.DataTransmission',
-                                         on_delete=models.CASCADE,
-                                         null=True,
-                                         db_column='datatransmissionid',
-                                         blank=True)
-    _searchString = models.TextField(db_column='searchstr',
-                                     blank=True,
-                                     null=True)
-    imdb_id = models.TextField(db_column='imdb_id',
-                               blank=True,
-                               null=True)
-    hide = models.BooleanField(db_column='hide', default=False)
-    filenamescrapeformat = models.ForeignKey(
-        'mediaviewer.FilenameScrapeFormat',
+    datatransmission = models.ForeignKey(
+        "mediaviewer.DataTransmission",
         on_delete=models.CASCADE,
         null=True,
-        db_column='filenamescrapeformatid',
-        blank=True)
-    streamable = models.BooleanField(
-        db_column='streamable',
-        null=False,
-        default=True)
+        db_column="datatransmissionid",
+        blank=True,
+    )
+    _searchString = models.TextField(db_column="searchstr", blank=True, null=True)
+    imdb_id = models.TextField(db_column="imdb_id", blank=True, null=True)
+    hide = models.BooleanField(db_column="hide", default=False)
+    filenamescrapeformat = models.ForeignKey(
+        "mediaviewer.FilenameScrapeFormat",
+        on_delete=models.CASCADE,
+        null=True,
+        db_column="filenamescrapeformatid",
+        blank=True,
+    )
+    streamable = models.BooleanField(db_column="streamable", null=False, default=True)
     override_filename = models.TextField(blank=True)
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
 
-    users = models.ManyToManyField('auth.User', through='UserComment')
+    users = models.ManyToManyField("auth.User", through="UserComment")
+
+    objects = FileManager()
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'file'
+        app_label = "mediaviewer"
+        db_table = "file"
 
     @classmethod
-    def new(cls,
-            filename,
-            path,
-            skip=True,
-            finished=True,
-            size=None,
-            datatransmission=None,
-            hide=False,
-            streamable=True):
+    def new(
+        cls,
+        filename,
+        path,
+        skip=True,
+        finished=True,
+        size=None,
+        datatransmission=None,
+        hide=False,
+        streamable=True,
+    ):
         obj = cls()
         obj.filename = filename
         obj.path = path
@@ -110,8 +123,10 @@ class File(models.Model):
 
     def _set_pathid(self, val):
         from mediaviewer.models.path import Path
+
         path = Path.objects.get(pk=val)
         self.path = path
+
     pathid = property(fget=_get_pathid, fset=_set_pathid)
 
     def dateCreatedForSpan(self):
@@ -133,6 +148,7 @@ class File(models.Model):
     def _posterfileset(self, val):
         val.file = self
         val.save()
+
     posterfile = property(fset=_posterfileset, fget=_posterfileget)
 
     def isMovie(self):
@@ -148,26 +164,30 @@ class File(models.Model):
         settings = user.settings()
         if not settings or settings.ip_format == LOCAL_IP:
             if self.isMovie():
-                waiter_server = '%s%s%s/' % (
+                waiter_server = "%s%s%s/" % (
                     conf_settings.WAITER_HEAD,
                     conf_settings.LOCAL_WAITER_IP_FORMAT_MOVIES,
-                    guid)
+                    guid,
+                )
             else:
-                waiter_server = '%s%s%s/' % (
+                waiter_server = "%s%s%s/" % (
                     conf_settings.WAITER_HEAD,
                     conf_settings.LOCAL_WAITER_IP_FORMAT_TVSHOWS,
-                    guid)
+                    guid,
+                )
         elif settings and settings.ip_format == BANGUP_IP:
             if self.isMovie():
-                waiter_server = '%s%s%s/' % (
+                waiter_server = "%s%s%s/" % (
                     conf_settings.WAITER_HEAD,
                     conf_settings.BANGUP_WAITER_IP_FORMAT_MOVIES,
-                    guid)
+                    guid,
+                )
             else:
-                waiter_server = '%s%s%s/' % (
+                waiter_server = "%s%s%s/" % (
                     conf_settings.WAITER_HEAD,
                     conf_settings.BANGUP_WAITER_IP_FORMAT_TVSHOWS,
-                    guid)
+                    guid,
+                )
 
         return waiter_server
 
@@ -175,7 +195,7 @@ class File(models.Model):
         if self.isMovie():
             return None
         else:
-            return self.downloadLink(user, guid) + 'autoplay'
+            return self.downloadLink(user, guid) + "autoplay"
 
     def next(self):
         if self.isMovie():
@@ -214,19 +234,14 @@ class File(models.Model):
 
     @classmethod
     def tvshows(cls):
-        return (cls.objects
-                   .filter(path__is_movie=False))
+        return cls.objects.filter(path__is_movie=False)
 
     @classmethod
     def movies(cls):
-        return (cls.objects
-                   .filter(path__is_movie=True))
+        return cls.objects.filter(path__is_movie=True)
 
     def usercomment(self, user):
-        usercomment = (UserComment.objects
-                                  .filter(file=self)
-                                  .filter(user=user)
-                                  .first())
+        usercomment = UserComment.objects.filter(file=self).filter(user=user).first()
         return usercomment
 
     def markFileViewed(self, user, viewed):
@@ -247,42 +262,44 @@ class File(models.Model):
             Message.clearLastWatchedMessage(user)
 
     def __str__(self):
-        return 'id: %s f: %s' % (self.id, self.fileName)
+        return "id: %s f: %s" % (self.id, self.fileName)
 
     def url(self):
         return '<a href="{}">{}</a>'.format(
-                reverse('mediaviewer:filesdetail', args=(self.id,)),
-                self.displayName())
+            reverse("mediaviewer:filesdetail", args=(self.id,)), self.displayName()
+        )
 
     def getSearchTerm(self):
         if self.isMovie():
-            searchTerm = yearRegex.sub('', self.filename)
-            searchTerm = dvdRegex.sub('', searchTerm)
-            searchTerm = formatRegex.sub('', searchTerm)
-            searchTerm = punctuationRegex.sub(' ', searchTerm)
+            searchTerm = yearRegex.sub("", self.filename)
+            searchTerm = dvdRegex.sub("", searchTerm)
+            searchTerm = formatRegex.sub("", searchTerm)
+            searchTerm = punctuationRegex.sub(" ", searchTerm)
             searchTerm = searchTerm.strip()
         else:
-            searchTerm = self.path.localPath.rpartition('/')[-1]
-            searchTerm = yearRegex.sub('', searchTerm)
-            searchTerm = dvdRegex.sub('', searchTerm)
-            searchTerm = formatRegex.sub('', searchTerm)
-            searchTerm = punctuationRegex.sub(' ', searchTerm)
+            searchTerm = self.path.localPath.rpartition("/")[-1]
+            searchTerm = yearRegex.sub("", searchTerm)
+            searchTerm = dvdRegex.sub("", searchTerm)
+            searchTerm = formatRegex.sub("", searchTerm)
+            searchTerm = punctuationRegex.sub(" ", searchTerm)
             searchTerm = searchTerm.strip()
 
         return searchTerm
 
     def searchString(self):
         searchStr = self.rawSearchString()
-        searchStr = searchStr.replace('&', '%26')
-        searchStr = searchStr.replace(',', '%2C')
-        searchStr = searchStr.replace('+', '%2B')
+        searchStr = searchStr.replace("&", "%26")
+        searchStr = searchStr.replace(",", "%2C")
+        searchStr = searchStr.replace("+", "%2B")
         return searchStr
 
     def rawSearchString(self):
-        searchStr = (self.override_filename or
-                     self.path.override_display_name or
-                     self._searchString or
-                     self.getSearchTerm())
+        searchStr = (
+            self.override_filename
+            or self.path.override_display_name
+            or self._searchString
+            or self.getSearchTerm()
+        )
         return searchStr
 
     def getScrapedName(self):
@@ -298,42 +315,45 @@ class File(models.Model):
         if self.filenamescrapeformat.useSearchTerm:
             name = self.rawSearchString()
         else:
-            nameRegex = re.compile(
-                    self.filenamescrapeformat.nameRegex).findall(self.filename)
+            nameRegex = re.compile(self.filenamescrapeformat.nameRegex).findall(
+                self.filename
+            )
             name = nameRegex and nameRegex[0] or None
-        return name and (self.filenamescrapeformat.subPeriods and
-                         name.replace('.', ' ').replace('-', ' ').title() or
-                         name).strip() or self.filename
+        return (
+            name
+            and (
+                self.filenamescrapeformat.subPeriods
+                and name.replace(".", " ").replace("-", " ").title()
+                or name
+            ).strip()
+            or self.filename
+        )
 
     def getScrapedSeason(self):
         if not self.override_season:
             if not self.filenamescrapeformat:
                 return None
 
-            seasonRegex = re.compile(
-                    self.filenamescrapeformat.seasonRegex).findall(
-                            self.filename)
+            seasonRegex = re.compile(self.filenamescrapeformat.seasonRegex).findall(
+                self.filename
+            )
             season = seasonRegex and seasonRegex[0] or None
         else:
             season = self.override_season
-        return (season and
-                (season.isdigit() and season.zfill(2) or None) or
-                None)
+        return season and (season.isdigit() and season.zfill(2) or None) or None
 
     def getScrapedEpisode(self):
         if not self.override_episode:
             if not self.filenamescrapeformat:
                 return None
 
-            episodeRegex = re.compile(
-                    self.filenamescrapeformat.episodeRegex).findall(
-                            self.filename)
+            episodeRegex = re.compile(self.filenamescrapeformat.episodeRegex).findall(
+                self.filename
+            )
             episode = episodeRegex and episodeRegex[0] or None
         else:
             episode = self.override_episode
-        return (episode and
-                (episode.isdigit() and episode.zfill(2) or None) or
-                None)
+        return episode and (episode.isdigit() and episode.zfill(2) or None) or None
 
     def getScrapedFullName(self, include_path_name=True):
         if self.isMovie():
@@ -348,9 +368,9 @@ class File(models.Model):
             episode = self.getScrapedEpisode()
             if name and season and episode:
                 if include_path_name:
-                    fullname = f'{self.path.displayName()} S{season} E{episode}: {name}'
+                    fullname = f"{self.path.displayName()} S{season} E{episode}: {name}"
                 else:
-                    fullname = f'S{season} E{episode}: {name}'
+                    fullname = f"S{season} E{episode}: {name}"
             else:
                 fullname = name
             return fullname
@@ -372,22 +392,21 @@ class File(models.Model):
             name = self.getScrapedName()
             season = self.getScrapedSeason()
             episode = self.getScrapedEpisode()
-            sFail = re.compile(r'\s[sS]$')
-            if (name and
-                    name != self.filename and
-                    not sFail.findall(name) and
-                    season and
-                    episode and
-                    int(episode) != 64):
+            sFail = re.compile(r"\s[sS]$")
+            if (
+                name
+                and name != self.filename
+                and not sFail.findall(name)
+                and season
+                and episode
+                and int(episode) != 64
+            ):
                 # Success!
                 log.debug("Success!!!")
                 log.debug(
-                    'Name: %s Season: %s Episode: %s Fullname: %s FSid: %s' % (
-                        name,
-                        season,
-                        episode,
-                        self.filename,
-                        scraper.id))
+                    "Name: %s Season: %s Episode: %s Fullname: %s FSid: %s"
+                    % (name, season, episode, self.filename, scraper.id)
+                )
                 self.save()
                 self.destroyPosterFile()
                 break
@@ -396,7 +415,7 @@ class File(models.Model):
 
     @classmethod
     def inferAllScrapers(cls):
-        log.debug('Begin inferring all scrapers')
+        log.debug("Begin inferring all scrapers")
         files = cls.objects.filter(filenamescrapeformat=None)
         scrapers = FilenameScrapeFormat.objects.all()
         for file in files:
@@ -404,21 +423,20 @@ class File(models.Model):
 
     def destroyPosterFile(self):
         try:
-            log.debug('Destroying PosterFile for %s' % (self,))
+            log.debug("Destroying PosterFile for %s" % (self,))
             posterfile = PosterFile.objects.get(file=self)
             posterfile.delete()
         except PosterFile.DoesNotExist:
-            log.debug('Posterfile does not exist. Continuing.')
+            log.debug("Posterfile does not exist. Continuing.")
         except Exception as e:
-            log.error('Got an error destroying posterfile')
+            log.error("Got an error destroying posterfile")
             log.error(e)
 
     @classmethod
     def populate_all_posterfiles(cls, batch=None):
         all_files = cls.objects.exclude(
-            pk__in=PosterFile.objects.filter(
-                file__isnull=False).values('file')
-        ).order_by('-id')
+            pk__in=PosterFile.objects.filter(file__isnull=False).values("file")
+        ).order_by("-id")
 
         if batch:
             all_files = all_files[:batch]
@@ -428,11 +446,11 @@ class File(models.Model):
         for file in all_files:
             file.posterfile
             fixed_count += 1
-            time.sleep(.25)
+            time.sleep(0.25)
 
             if fixed_count % 10 == 0:
-                print(f'Fixed {fixed_count} of {missing_count}')
-        print(f'Fixed {fixed_count} of {missing_count}')
+                print(f"Fixed {fixed_count} of {missing_count}")
+        print(f"Fixed {fixed_count} of {missing_count}")
 
     @classmethod
     def get_movie_genres(cls):
@@ -440,34 +458,38 @@ class File(models.Model):
 
     @classmethod
     def movies_ordered_by_id(cls):
-        files = cls.movies().filter(hide=False).order_by('-id')
+        files = cls.movies().filter(hide=False).order_by("-id")
         return files
 
     # TODO: Test the following functions
     @classmethod
     def movies_by_genre(cls, genre):
-        files = (cls.objects.filter(_posterfile__genres=genre)
-                            .filter(hide=False)
-                            .filter(path__is_movie=True))
+        files = (
+            cls.objects.filter(_posterfile__genres=genre)
+            .filter(hide=False)
+            .filter(path__is_movie=True)
+        )
         return files
 
     @classmethod
     def files_by_localpath(cls, localpath):
-        files = File.objects.filter(
-                path__localpathstr=localpath.localpathstr).filter(hide=False)
+        files = File.objects.filter(path__localpathstr=localpath.localpathstr).filter(
+            hide=False
+        )
         return files
 
     @classmethod
     def most_recent_files(cls, items=10):
-        files = (cls.objects
-                    .filter(hide=False)
-                    .filter(finished=True).order_by('-id')[:items])
+        files = (
+            cls.objects.filter(hide=False).filter(finished=True).order_by("-id")[:items]
+        )
         return files
 
     def display_payload(self):
-        payload = {'id': self.id,
-                   'name': self.displayName(),
-                   'dateCreatedForSpan': self.dateCreatedForSpan(),
-                   'date': self.datecreated.date(),
-                   }
+        payload = {
+            "id": self.id,
+            "name": self.displayName(),
+            "dateCreatedForSpan": self.dateCreatedForSpan(),
+            "date": self.datecreated.date(),
+        }
         return payload

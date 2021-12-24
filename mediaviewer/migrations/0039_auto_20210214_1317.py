@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0038_auto_20210213_1254'),
+        ("mediaviewer", "0038_auto_20210213_1254"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='posterfile',
-            name='poster_url',
+            model_name="posterfile",
+            name="poster_url",
             field=models.TextField(blank=True, null=True),
         ),
     ]

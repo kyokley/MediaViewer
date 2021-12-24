@@ -4,47 +4,35 @@ from django.db import models
 
 class FilenameScrapeFormat(models.Model):
     nameRegex = models.TextField(
-        db_column='nameregex',
+        db_column="nameregex",
         blank=True,
         null=True,
     )
-    seasonRegex = models.TextField(
-        db_column='seasonregex',
-        blank=True,
-        null=True)
-    episodeRegex = models.TextField(
-        db_column='episoderegex',
-        blank=True,
-        null=True)
-    subPeriods = models.BooleanField(
-        db_column='subperiods',
-        blank=True,
-        null=False)
+    seasonRegex = models.TextField(db_column="seasonregex", blank=True, null=True)
+    episodeRegex = models.TextField(db_column="episoderegex", blank=True, null=True)
+    subPeriods = models.BooleanField(db_column="subperiods", blank=True, null=False)
     useSearchTerm = models.BooleanField(
-        db_column='usesearchterm',
-        blank=True,
-        null=False)
+        db_column="usesearchterm", blank=True, null=False
+    )
 
     class Meta:
-        app_label = 'mediaviewer'
-        db_table = 'filenamescrapeformat'
+        app_label = "mediaviewer"
+        db_table = "filenamescrapeformat"
 
     def __str__(self):
-        return 'id: %s n: %s s: %s e: %s subPeriods: %s useSearchTerm: %s' % (
+        return "id: %s n: %s s: %s e: %s subPeriods: %s useSearchTerm: %s" % (
             self.id,
             self.nameRegex,
             self.seasonRegex,
             self.episodeRegex,
             self.subPeriods,
-            self.useSearchTerm)
+            self.useSearchTerm,
+        )
 
     @classmethod
-    def new(cls,
-            nameRegex,
-            seasonRegex,
-            episodeRegex,
-            subPeriods=False,
-            useSearchTerm=False):
+    def new(
+        cls, nameRegex, seasonRegex, episodeRegex, subPeriods=False, useSearchTerm=False
+    ):
         obj = cls()
         obj.nameRegex = nameRegex
         obj.seasonRegex = seasonRegex
@@ -60,7 +48,7 @@ class FilenameScrapeFormat(models.Model):
         path = None
 
         if self.subPeriods:
-            filename = filename.replace('.', ' ')
+            filename = filename.replace(".", " ")
 
         name = re.findall(self.nameRegex, filename)
         name = name[0].strip() if name and len(name[0]) > 1 else None
@@ -68,7 +56,7 @@ class FilenameScrapeFormat(models.Model):
         if not name:
             return None
         else:
-            for p in Path.objects.filter(is_movie=False).order_by('-id'):
+            for p in Path.objects.filter(is_movie=False).order_by("-id"):
                 if name.lower() in p.displayName().lower():
                     path = p
                     break

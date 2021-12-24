@@ -8,19 +8,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0023_auto_20170826_0910'),
+        ("mediaviewer", "0023_auto_20170826_0910"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='downloadclick',
-            name='downloadtoken',
+            model_name="downloadclick",
+            name="downloadtoken",
         ),
         migrations.RemoveField(
-            model_name='downloadclick',
-            name='user',
+            model_name="downloadclick",
+            name="user",
         ),
         migrations.DeleteModel(
-            name='DownloadClick',
+            name="DownloadClick",
         ),
     ]

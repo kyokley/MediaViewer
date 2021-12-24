@@ -8,92 +8,124 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0013_auto_20170204_1045'),
+        ("mediaviewer", "0013_auto_20170204_1045"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Actor',
+            name="Actor",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
-                ('datecreated', models.DateTimeField(auto_now_add=True)),
-                ('dateedited', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField()),
+                ("datecreated", models.DateTimeField(auto_now_add=True)),
+                ("dateedited", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'db_table': 'actor',
+                "db_table": "actor",
             },
         ),
         migrations.CreateModel(
-            name='Director',
+            name="Director",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
-                ('datecreated', models.DateTimeField(auto_now_add=True)),
-                ('dateedited', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField()),
+                ("datecreated", models.DateTimeField(auto_now_add=True)),
+                ("dateedited", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'db_table': 'director',
+                "db_table": "director",
             },
         ),
         migrations.CreateModel(
-            name='Genre',
+            name="Genre",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('genre', models.TextField()),
-                ('datecreated', models.DateTimeField(auto_now_add=True)),
-                ('dateedited', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("genre", models.TextField()),
+                ("datecreated", models.DateTimeField(auto_now_add=True)),
+                ("dateedited", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'db_table': 'genre',
+                "db_table": "genre",
             },
         ),
         migrations.CreateModel(
-            name='Writer',
+            name="Writer",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
-                ('datecreated', models.DateTimeField(auto_now_add=True)),
-                ('dateedited', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField()),
+                ("datecreated", models.DateTimeField(auto_now_add=True)),
+                ("dateedited", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'db_table': 'writer',
+                "db_table": "writer",
             },
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='director',
+            model_name="posterfile",
+            name="director",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='genre',
+            model_name="posterfile",
+            name="genre",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='writer',
+            model_name="posterfile",
+            name="writer",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='actors',
+            model_name="posterfile",
+            name="actors",
         ),
         migrations.AddField(
-            model_name='posterfile',
-            name='directors',
-            field=models.ManyToManyField(to='mediaviewer.Director'),
+            model_name="posterfile",
+            name="directors",
+            field=models.ManyToManyField(to="mediaviewer.Director"),
         ),
         migrations.AddField(
-            model_name='posterfile',
-            name='genres',
-            field=models.ManyToManyField(to='mediaviewer.Genre'),
+            model_name="posterfile",
+            name="genres",
+            field=models.ManyToManyField(to="mediaviewer.Genre"),
         ),
         migrations.AddField(
-            model_name='posterfile',
-            name='writers',
-            field=models.ManyToManyField(to='mediaviewer.Writer'),
+            model_name="posterfile",
+            name="writers",
+            field=models.ManyToManyField(to="mediaviewer.Writer"),
         ),
         migrations.AddField(
-            model_name='posterfile',
-            name='actors',
-            field=models.ManyToManyField(to='mediaviewer.Actor'),
+            model_name="posterfile",
+            name="actors",
+            field=models.ManyToManyField(to="mediaviewer.Actor"),
         ),
     ]

@@ -9,18 +9,23 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0020_auto_20170421_0903'),
+        ("mediaviewer", "0020_auto_20170421_0903"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='usersettings',
-            name='last_watched',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.File'),
+            model_name="usersettings",
+            name="last_watched",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="mediaviewer.File",
+            ),
         ),
         migrations.AddField(
-            model_name='usersettings',
-            name='last_watched_dismissed',
+            model_name="usersettings",
+            name="last_watched_dismissed",
             field=models.BooleanField(default=False),
         ),
     ]

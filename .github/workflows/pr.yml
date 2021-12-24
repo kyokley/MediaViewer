@@ -13,3 +13,6 @@ jobs:
 
     - name: Make tests
       run: make tests
+
+    - name: Run Bandit
+      run: make bandit

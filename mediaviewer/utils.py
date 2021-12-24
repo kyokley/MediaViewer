@@ -17,12 +17,12 @@ import telnetlib  # nosec
 
 from mediaviewer.log import log
 
-SUFFIXES = ('B', 'KB', 'MB', 'GB', 'TB', 'PB')
-COMMASPACE = ', '
+SUFFIXES = ("B", "KB", "MB", "GB", "TB", "PB")
+COMMASPACE = ", "
 
 
 def getSomewhatUniqueID(numBytes=4):
-    return hexlify(os.urandom(numBytes)).decode('ascii')
+    return hexlify(os.urandom(numBytes)).decode("ascii")
 
 
 def logAccessInfo(func):
@@ -35,56 +35,57 @@ def logAccessInfo(func):
             start = datetime.now()
 
         if not request:
-            log.debug('%s: No request' % id)
+            log.debug("%s: No request" % id)
         elif request.user and request.user.username:
             username = request.user.username
-            log.debug('%s: %s is accessing %s' % (id, username, func.__name__))
+            log.debug("%s: %s is accessing %s" % (id, username, func.__name__))
         else:
-            log.debug('%s: Got request but no user' % id)
+            log.debug("%s: Got request but no user" % id)
 
         if kwargs:
-            log.debug('%s: With kwargs:\n%s' % (id, kwargs))
+            log.debug("%s: With kwargs:\n%s" % (id, kwargs))
 
         try:
             res = func(*args, **kwargs)
         except Exception as e:
             # Log unhandled exceptions
-            log.error('%s: %s' % (id, e), exc_info=True)
-            log.error('%s: Access attempted with following vars...' % id)
-            log.error('%s: %s' % (id, locals()))
+            log.error("%s: %s" % (id, e), exc_info=True)
+            log.error("%s: Access attempted with following vars..." % id)
+            log.error("%s: %s" % (id, locals()))
             raise
 
         if settings.LOG_ACCESS_TIMINGS:
             finished = datetime.now()
-            log.debug('%s: page started at: %s' % (id, start))
-            log.debug('%s: page finished at: %s' % (id, finished))
-            log.debug('%s: page total took: %s' % (id, finished - start))
+            log.debug("%s: page started at: %s" % (id, start))
+            log.debug("%s: page finished at: %s" % (id, finished))
+            log.debug("%s: page total took: %s" % (id, finished - start))
 
         return res
+
     return wrap
 
 
 def humansize(nbytes):
     if nbytes == 0:
-        return '0 B'
+        return "0 B"
 
     i = 0
-    while nbytes >= 1024 and i < len(SUFFIXES)-1:
-        nbytes /= 1024.
+    while nbytes >= 1024 and i < len(SUFFIXES) - 1:
+        nbytes /= 1024.0
         i += 1
-    f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
-    return '%s %s' % (f, SUFFIXES[i])
+    f = ("%.2f" % nbytes).rstrip("0").rstrip(".")
+    return "%s %s" % (f, SUFFIXES[i])
 
 
 def sendMail(
-        to_addr,
-        subject,
-        text,
-        from_addr=settings.EMAIL_FROM_ADDR,
-        files=None,
-        server=settings.EMAIL_HOST,
-        port=settings.EMAIL_PORT,
-        use_tls=settings.EMAIL_USE_TLS,
+    to_addr,
+    subject,
+    text,
+    from_addr=settings.EMAIL_FROM_ADDR,
+    files=None,
+    server=settings.EMAIL_HOST,
+    port=settings.EMAIL_PORT,
+    use_tls=settings.EMAIL_USE_TLS,
 ):
     if not isinstance(to_addr, list):
         to_addr = set([to_addr])
@@ -97,19 +98,20 @@ def sendMail(
         files = [files]
 
     msg = MIMEMultipart()
-    msg['From'] = from_addr
-    msg['To'] = COMMASPACE.join(to_addr)
-    msg['Date'] = formatdate(localtime=True)
-    msg['Subject'] = subject
+    msg["From"] = from_addr
+    msg["To"] = COMMASPACE.join(to_addr)
+    msg["Date"] = formatdate(localtime=True)
+    msg["Subject"] = subject
 
-    msg.attach(MIMEText(text, 'html'))
+    msg.attach(MIMEText(text, "html"))
 
     for file in files:
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(open(file, 'rb').read())
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(open(file, "rb").read())
         Encoders.encode_base64(part)
-        part.add_header('Content-Disposition',
-                        'attachment; filename="%s"' % os.path.basename(file))
+        part.add_header(
+            "Content-Disposition", 'attachment; filename="%s"' % os.path.basename(file)
+        )
         msg.attach(part)
 
     # BCC staff members by adding them to recipient list
@@ -119,52 +121,49 @@ def sendMail(
             to_addr.add(user.email)
 
     if use_tls:
-        smtp = smtplib.SMTP(host=server,
-                            port=port)
+        smtp = smtplib.SMTP(host=server, port=port)
         smtp.ehlo()
         smtp.starttls()
     else:
-        smtp = smtplib.SMTP(host=server,
-                            port=port)
+        smtp = smtplib.SMTP(host=server, port=port)
 
     if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
-        smtp.login(settings.EMAIL_HOST_USER,
-                   settings.EMAIL_HOST_PASSWORD)
+        smtp.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
 
     smtp.sendmail(from_addr, to_addr, msg.as_string())
     smtp.close()
 
 
 def send_test_mail(to_addr):
-    subject = 'Test Email from MediaViewer'
-    text = 'This is a test email generated by MediaViewer'
+    subject = "Test Email from MediaViewer"
+    text = "This is a test email generated by MediaViewer"
 
-    sendMail(to_addr,
-             subject,
-             text,
-             )
+    sendMail(
+        to_addr,
+        subject,
+        text,
+    )
 
 
 def checkSMTPServer():
     if not settings.BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(host=settings.EMAIL_HOST,  # nosec
-                                       port=settings.EMAIL_PORT)
+        smtp_server = telnetlib.Telnet(  # nosec
+            host=settings.EMAIL_HOST, port=settings.EMAIL_PORT
+        )
         smtp_server.close()
 
 
 def query_param_to_bool(param):
     if not param:
         return None
-    elif param is True or param.lower() in ('true',
-                                            't',
-                                            'y',
-                                            'yes'):
+    elif param is True or param.lower() in ("true", "t", "y", "yes"):
         return True
-    elif param is False or param.lower() in ('false',
-                                             'f',
-                                             'n',
-                                             'no',
-                                             ):
+    elif param is False or param.lower() in (
+        "false",
+        "f",
+        "n",
+        "no",
+    ):
         return False
     else:
         raise ValueError(f'Could not coerce "{param}" to bool')

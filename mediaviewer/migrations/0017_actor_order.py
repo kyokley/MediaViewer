@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0016_posterfile_tmdb_id'),
+        ("mediaviewer", "0016_posterfile_tmdb_id"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='actor',
-            name='order',
+            model_name="actor",
+            name="order",
             field=models.IntegerField(blank=True, null=True),
         ),
     ]

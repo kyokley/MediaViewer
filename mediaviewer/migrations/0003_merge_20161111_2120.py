@@ -8,9 +8,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0002_auto_20161023_2108'),
-        ('mediaviewer', '0002_auto_20161111_1512'),
+        ("mediaviewer", "0002_auto_20161023_2108"),
+        ("mediaviewer", "0002_auto_20161111_1512"),
     ]
 
-    operations = [
-    ]
+    operations = []

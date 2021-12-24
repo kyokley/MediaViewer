@@ -6,20 +6,20 @@ from django.db import migrations
 
 
 def delete_posterfiles(apps, schema_editor):
-    PosterFile = apps.get_model('mediaviewer', 'PosterFile')
+    PosterFile = apps.get_model("mediaviewer", "PosterFile")
     PosterFile.objects.all().delete()
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0027_posterfile_poster_url'),
+        ("mediaviewer", "0027_posterfile_poster_url"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='posterfile',
-            name='image',
+            model_name="posterfile",
+            name="image",
         ),
         migrations.RunPython(delete_posterfiles),
     ]
