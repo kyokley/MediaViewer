@@ -11,8 +11,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Make tests
-      run: make tests
+    - name: Check migrations
+      run: make check-migrations
 
-    - name: Run Bandit
+    - name: Run pytest
+      run: make pytest
+
+    - name: Run bandit
       run: make bandit
