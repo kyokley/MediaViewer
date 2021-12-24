@@ -30,11 +30,16 @@ shell: ## Open a shell in a mediaviewer container
 db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
-tests: build-dev up ## Run tests
+pytest: build-dev up ## Run tests
 	docker-compose run --rm mediaviewer /venv/bin/pytest
 
 bandit: build-dev ## Run bandit tests
 	docker-compose run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests -r .
+
+check-migrations: build-dev ## Check for missing migrations
+	docker-compose run --rm mediaviewer /venv/bin/python manage.py makemigrations --check
+
+tests: check-migrations pytest bandit ## Run all tests
 
 stop-all-but-db: ## Bring all containers down except postgres
 	docker-compose down
