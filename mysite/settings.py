@@ -135,7 +135,7 @@ MIDDLEWARE = (
 )
 
 # Auto logout delay in minutes
-AUTO_LOGOUT_DELAY = 60
+AUTO_LOGOUT_DELAY = 720
 
 ROOT_URLCONF = "mysite.urls"
 
