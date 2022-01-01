@@ -170,7 +170,6 @@ if not conf_settings.IS_SYNCING:
     router.register(
         r"distinct-tv", path_viewset.DistinctTvPathViewSet, basename="distinct-tv"
     )
-    router.register(r"datatransmission", viewset.DataTransmissionViewSet)
     router.register(r"error", viewset.ErrorViewSet)
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)

@@ -10,7 +10,6 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.path import Path
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.datatransmission import DataTransmission
 
 
 class TestGetScrapedNameReplacements:
@@ -306,16 +305,10 @@ class TestCamelCasedProperties:
             is_movie=False,
         )
 
-        self.datatransmission = DataTransmission()
-
         self.new_file = File.new("test_filename", self.path)
-        self.new_file.datatransmission = self.datatransmission
 
     def test_fileName(self):
         assert self.new_file.fileName == self.new_file.filename
-
-    def test_dataTransmission(self):
-        assert self.new_file.dataTransmission == self.new_file.datatransmission
 
 
 @pytest.mark.django_db
@@ -352,10 +345,7 @@ class TestDownloadLink:
             is_movie=False,
         )
 
-        self.datatransmission = DataTransmission()
-
         self.new_file = File.new("test_filename", self.path)
-        self.new_file.datatransmission = self.datatransmission
 
         self.user = mock.MagicMock(User)
         self.user_settings = mock.MagicMock(UserSettings)

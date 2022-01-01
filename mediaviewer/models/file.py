@@ -51,13 +51,6 @@ class File(models.Model):
     size = models.BigIntegerField(null=True, blank=True)
     datecreated = models.DateTimeField(auto_now_add=True)
     dateedited = models.DateTimeField(auto_now=True)
-    datatransmission = models.ForeignKey(
-        "mediaviewer.DataTransmission",
-        on_delete=models.CASCADE,
-        null=True,
-        db_column="datatransmissionid",
-        blank=True,
-    )
     _searchString = models.TextField(db_column="searchstr", blank=True, null=True)
     imdb_id = models.TextField(db_column="imdb_id", blank=True, null=True)
     hide = models.BooleanField(db_column="hide", default=False)
@@ -89,7 +82,6 @@ class File(models.Model):
         skip=True,
         finished=True,
         size=None,
-        datatransmission=None,
         hide=False,
         streamable=True,
     ):
@@ -99,7 +91,6 @@ class File(models.Model):
         obj.skip = skip
         obj.finished = finished
         obj.size = size
-        obj.datatransmission = datatransmission
         obj.hide = hide
         obj.streamable = streamable
         obj.save()
@@ -135,10 +126,6 @@ class File(models.Model):
     @property
     def fileName(self):
         return self.filename
-
-    @property
-    def dataTransmission(self):
-        return self.datatransmission
 
     def _posterfileget(self):
         posterfile = PosterFile.new(file=self)
