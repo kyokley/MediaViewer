@@ -1,6 +1,5 @@
 from django.db import models
 from dateutil import parser
-from mediaviewer.models.datatransmission import DataTransmission
 
 
 class Error(models.Model):
@@ -20,13 +19,6 @@ class Error(models.Model):
         on_delete=models.CASCADE,
         null=True,
         db_column="pathid",
-        blank=True,
-    )
-    datatransmission = models.ForeignKey(
-        DataTransmission,
-        on_delete=models.CASCADE,
-        null=True,
-        db_column="datatransmissionid",
         blank=True,
     )
 

@@ -1,7 +1,6 @@
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
-from mediaviewer.models.datatransmission import DataTransmission
 from mediaviewer.models.error import Error
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.message import Message
@@ -176,22 +175,6 @@ class FileSerializer(serializers.ModelSerializer):
             if uc and uc.viewed:
                 return True
         return False
-
-
-class DataTransmissionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DataTransmission
-        fields = (
-            "pk",
-            "date",
-            "downloaded",
-        )
-
-    pk = serializers.ReadOnlyField()
-    downloaded = serializers.DecimalField(
-        max_digits=12, decimal_places=0, required=True
-    )
-    date = serializers.DateTimeField(required=True)
 
 
 class ErrorSerializer(serializers.ModelSerializer):
