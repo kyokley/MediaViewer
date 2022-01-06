@@ -11,7 +11,7 @@ class AutoLogout:
         if request.user.is_authenticated:
 
             try:
-                if datetime.now() - request.session["last_touch"] > timedelta(
+                if datetime.now() - datetime.fromisoformat(request.session["last_touch"]) > timedelta(
                     0, settings.AUTO_LOGOUT_DELAY * 60, 0
                 ):
                     auth.logout(request)
@@ -20,5 +20,5 @@ class AutoLogout:
             except KeyError:
                 pass
 
-        request.session["last_touch"] = datetime.now()
+        request.session["last_touch"] = datetime.now().isoformat()
         return self.get_response(request)
