@@ -135,7 +135,7 @@ MIDDLEWARE = (
 )
 
 # Auto logout delay in minutes
-AUTO_LOGOUT_DELAY = 720
+AUTO_LOGOUT_DELAY = 2160
 
 ROOT_URLCONF = "mysite.urls"
 
@@ -171,8 +171,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.PageNumberPagination"),
     "PAGE_SIZE": 100,
 }
-
-SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
