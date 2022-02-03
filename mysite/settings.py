@@ -132,6 +132,7 @@ MIDDLEWARE = (
     "mediaviewer.middleware.AutoLogout",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_referrer_policy.middleware.ReferrerPolicyMiddleware",
+    "mediaviewer.middleware.set_secure_headers",
 )
 
 # Auto logout delay in minutes

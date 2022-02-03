@@ -31,11 +31,6 @@ if DEBUG:
 
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
-    NOSE_ARGS = [
-        "--with-coverage",
-        "--cover-package=mediaviewer",
-    ]
-
 STATICFILES_DIRS += ("/node/node_modules",)
 
 
