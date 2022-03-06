@@ -170,11 +170,11 @@ class TestChangeUserPassword(TestCase):
 @mock.patch("mediaviewer.forms.PasswordResetForm")
 class TestNewUser(TestCase):
     def setUp(self):
-        self.name = "New User"
+        self.name = " New User "
         self.expected_name = "new user"
-        self.email = "test@user.com"
+        self.email = " test@user.com "
 
-        self.existing_user = "Existing User"
+        self.existing_user = " Existing User "
         self.expected_existing_user = 'existing user'
         self.existing_email = "existing@user.com"
 
