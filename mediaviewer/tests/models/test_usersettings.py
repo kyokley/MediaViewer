@@ -171,16 +171,18 @@ class TestChangeUserPassword(TestCase):
 class TestNewUser(TestCase):
     def setUp(self):
         self.name = "New User"
+        self.expected_name = "new user"
         self.email = "test@user.com"
 
         self.existing_user = "Existing User"
+        self.expected_existing_user = 'existing user'
         self.existing_email = "existing@user.com"
 
         helpers.create_user(username=self.existing_user, email=self.existing_email)
 
     def test_new(self, mock_form):
         new_user = UserSettings.new(self.name, self.email, send_email=False)
-        self.assertEqual(new_user.username, self.name)
+        self.assertEqual(new_user.username, self.expected_name)
 
     def test_existing_username(self, mock_form):
         test_username = self.existing_user
