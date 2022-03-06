@@ -96,8 +96,8 @@ class UserSettings(models.Model):
             raise IntegrityError("Email already exists")
 
         newUser = User()
-        newUser.username = name
-        newUser.email = email
+        newUser.username = name.lower().strip()
+        newUser.email = email.lower().strip()
         newUser.is_staff = is_staff
         newUser.is_superuser = is_superuser
         # Password reset emails are only sent for user that have passwords
