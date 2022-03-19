@@ -137,13 +137,13 @@ class UserSettings(models.Model):
 setattr(User, "settings", lambda x: UserSettings.getSettings(x))
 
 
-def case_insensitive_authenticate(username, password):
+def case_insensitive_authenticate(request, username, password):
     try:
         user = User.objects.get(username__iexact=username)
     except User.DoesNotExist:
         return None
 
-    return authenticate(username=user.username, password=password)
+    return authenticate(request=request, username=user.username, password=password)
 
 
 def validate_email(email):

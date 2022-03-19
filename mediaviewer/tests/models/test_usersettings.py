@@ -1,6 +1,7 @@
 import mock
 import pytest
 
+from django.http import HttpRequest
 from django.db.utils import IntegrityError
 from mediaviewer.models.usersettings import (
     UserSettings,
@@ -185,6 +186,8 @@ class TestCaseInsensitiveAuthenticate:
         self.email = "test@user.com"
         self.password = "password"
 
+        self.request = HttpRequest()
+
         self.new_user = helpers.create_user(username=self.name, email=self.email)
         self.new_user.set_password(self.password)
         self.new_user.save()
@@ -193,7 +196,7 @@ class TestCaseInsensitiveAuthenticate:
         test_username = "blah"
         test_password = self.password
         expected = None
-        actual = case_insensitive_authenticate(test_username, test_password)
+        actual = case_insensitive_authenticate(self.request, test_username, test_password)
 
         assert expected == actual
 
@@ -201,7 +204,7 @@ class TestCaseInsensitiveAuthenticate:
         test_username = self.name
         test_password = self.password
         expected = self.new_user
-        actual = case_insensitive_authenticate(test_username, test_password)
+        actual = case_insensitive_authenticate(self.request, test_username, test_password)
 
         assert expected == actual
 
@@ -209,7 +212,7 @@ class TestCaseInsensitiveAuthenticate:
         test_username = "NeW UsEr"
         test_password = self.password
         expected = self.new_user
-        actual = case_insensitive_authenticate(test_username, test_password)
+        actual = case_insensitive_authenticate(self.request, test_username, test_password)
 
         assert expected == actual
 
@@ -217,6 +220,6 @@ class TestCaseInsensitiveAuthenticate:
         test_username = self.name
         test_password = "wrong password"
         expected = None
-        actual = case_insensitive_authenticate(test_username, test_password)
+        actual = case_insensitive_authenticate(self.request, test_username, test_password)
 
         assert expected == actual

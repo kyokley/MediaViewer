@@ -32,6 +32,7 @@ def signin(request):
                 username = request.POST["username"]
                 password = request.POST["password"]
                 user = case_insensitive_authenticate(
+                    request=request,
                     username=username, password=password
                 )
                 if user is None:

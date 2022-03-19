@@ -125,7 +125,7 @@ class TestSignin(TestCase):
             expected_context, self.request
         )
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.mock_login.assert_called_once_with(self.request, self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
@@ -156,7 +156,7 @@ class TestSignin(TestCase):
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.assertFalse(self.mock_login.called)
         self.assertFalse(self.mock_LoginEvent.new.called)
@@ -190,7 +190,7 @@ class TestSignin(TestCase):
             expected_context, self.request
         )
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.mock_login.assert_called_once_with(self.request, self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
@@ -223,7 +223,7 @@ class TestSignin(TestCase):
             expected_context, self.request
         )
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.mock_login.assert_called_once_with(self.request, self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
@@ -258,7 +258,7 @@ class TestSignin(TestCase):
             expected_context, self.request
         )
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.mock_login.assert_called_once_with(self.request, self.authenticated_user)
         self.mock_LoginEvent.new.assert_called_once_with(self.user)
@@ -293,7 +293,7 @@ class TestSignin(TestCase):
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.assertFalse(self.mock_login.called)
         self.assertFalse(self.mock_LoginEvent.new.called)
@@ -321,7 +321,7 @@ class TestSignin(TestCase):
         self.mock_siteGreeting.latestSiteGreeting.assert_called_once_with()
         self.assertFalse(self.mock_setSiteWideContext.called)
         self.mock_case_insensitive_authenticate.assert_called_once_with(
-            username="a@b.c", password="abc123"
+            request=self.request, username="a@b.c", password="abc123"
         )
         self.assertFalse(self.mock_login.called)
         self.assertFalse(self.mock_LoginEvent.new.called)
