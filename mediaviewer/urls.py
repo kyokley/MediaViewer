@@ -55,7 +55,9 @@ urlpatterns = [
         files.movies_by_genre,
         name="movies_by_genre",
     ),
-    re_path(r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"),
+    re_path(
+        r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"
+    ),
     re_path(
         r"^autoplaydownloadlink/(?P<fileid>\d+)/$",
         detail.autoplaydownloadlink,
@@ -81,8 +83,12 @@ urlpatterns = [
     re_path(r"^ajaxvote/", requests.ajaxvote, name="ajaxvote"),
     re_path(r"^ajaxdone/", requests.ajaxdone, name="ajaxdone"),
     re_path(r"^ajaxgiveup/", requests.ajaxgiveup, name="ajaxgiveup"),
-    re_path(r"^ajaxdownloadbutton/", detail.ajaxdownloadbutton, name="ajaxdownloadbutton"),
-    re_path(r"^ajaxwaiterstatus/", waiterstatus.ajaxwaiterstatus, name="ajaxwaiterstatus"),
+    re_path(
+        r"^ajaxdownloadbutton/", detail.ajaxdownloadbutton, name="ajaxdownloadbutton"
+    ),
+    re_path(
+        r"^ajaxwaiterstatus/", waiterstatus.ajaxwaiterstatus, name="ajaxwaiterstatus"
+    ),
     re_path(r"^ajaxclosemessage/", messaging.ajaxclosemessage, name="ajaxclosemessage"),
     re_path(r"^ajaxreport/", files.ajaxreport, name="ajaxreport"),
     re_path(r"^ajaxrunscraper/", home.ajaxrunscraper, name="ajaxrunscraper"),
@@ -91,7 +97,9 @@ urlpatterns = [
         ajax.ajaxvideoprogress,
         name="ajaxvideoprogress",
     ),
-    re_path(r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"),
+    re_path(
+        r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"
+    ),
     re_path(
         r"^user/reset/$",
         PasswordResetView.as_view(
@@ -180,5 +188,7 @@ if not conf_settings.IS_SYNCING:
 
     urlpatterns += [
         re_path(r"^api/", include((router.urls, "mediaviewer"), namespace="api")),
-        re_path(r"^api/inferscrapers/", csrf_exempt(viewset.InferScrapersView.as_view())),
+        re_path(
+            r"^api/inferscrapers/", csrf_exempt(viewset.InferScrapersView.as_view())
+        ),
     ]

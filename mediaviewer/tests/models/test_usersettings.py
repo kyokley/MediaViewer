@@ -31,7 +31,9 @@ class TestChangeUserPassword:
         confirm_password = "new pass"
 
         with pytest.raises(InvalidPasswordException) as err:
-            change_user_password(self.user, old_password, new_password, confirm_password)
+            change_user_password(
+                self.user, old_password, new_password, confirm_password
+            )
         assert err.value.args[0] == "Incorrect password"
 
         self.user.check_password.assert_called_once_with(old_password)
@@ -48,7 +50,9 @@ class TestChangeUserPassword:
         confirm_password = "another pass"
 
         with pytest.raises(InvalidPasswordException) as err:
-            change_user_password(self.user, old_password, new_password, confirm_password)
+            change_user_password(
+                self.user, old_password, new_password, confirm_password
+            )
         assert err.value.args[0] == "New passwords do not match"
 
         self.user.check_password.assert_called_once_with(old_password)
@@ -65,7 +69,9 @@ class TestChangeUserPassword:
         confirm_password = "old pass"
 
         with pytest.raises(InvalidPasswordException) as err:
-            change_user_password(self.user, old_password, new_password, confirm_password)
+            change_user_password(
+                self.user, old_password, new_password, confirm_password
+            )
         assert err.value.args[0] == "New and old passwords must be different"
 
         self.user.check_password.assert_called_once_with(old_password)
@@ -82,8 +88,13 @@ class TestChangeUserPassword:
         confirm_password = "new pass"
 
         with pytest.raises(InvalidPasswordException) as err:
-            change_user_password(self.user, old_password, new_password, confirm_password)
-        assert err.value.args[0] == "Password is too weak. Valid passwords must contain at least one numeric character."
+            change_user_password(
+                self.user, old_password, new_password, confirm_password
+            )
+        assert (
+            err.value.args[0]
+            == "Password is too weak. Valid passwords must contain at least one numeric character."
+        )
         self.user.check_password.assert_called_once_with(old_password)
         self.user.set_password.called = False
         assert not self.settings.force_password_change
@@ -98,8 +109,13 @@ class TestChangeUserPassword:
         confirm_password = "123456"
 
         with pytest.raises(InvalidPasswordException) as err:
-            change_user_password(self.user, old_password, new_password, confirm_password)
-        assert err.value.args[0] == "Password is too weak. Valid passwords must contain at least one alphabetic character."
+            change_user_password(
+                self.user, old_password, new_password, confirm_password
+            )
+        assert (
+            err.value.args[0]
+            == "Password is too weak. Valid passwords must contain at least one alphabetic character."
+        )
         self.user.check_password.assert_called_once_with(old_password)
         self.user.set_password.called = False
         assert not self.settings.force_password_change
@@ -114,8 +130,13 @@ class TestChangeUserPassword:
         confirm_password = "abc12"
 
         with pytest.raises(InvalidPasswordException) as err:
-            change_user_password(self.user, old_password, new_password, confirm_password)
-        assert err.value.args[0] == "Password is too weak. Valid passwords must be at least 6 characters long."
+            change_user_password(
+                self.user, old_password, new_password, confirm_password
+            )
+        assert (
+            err.value.args[0]
+            == "Password is too weak. Valid passwords must be at least 6 characters long."
+        )
         self.user.check_password.assert_called_once_with(old_password)
         self.user.set_password.called = False
         assert not self.settings.force_password_change
@@ -146,7 +167,7 @@ class TestNewUser:
         self.email = " test@user.com "
 
         self.existing_user = " Existing User "
-        self.expected_existing_user = 'existing user'
+        self.expected_existing_user = "existing user"
         self.existing_email = "existing@user.com"
 
         helpers.create_user(username=self.existing_user, email=self.existing_email)
@@ -196,7 +217,9 @@ class TestCaseInsensitiveAuthenticate:
         test_username = "blah"
         test_password = self.password
         expected = None
-        actual = case_insensitive_authenticate(self.request, test_username, test_password)
+        actual = case_insensitive_authenticate(
+            self.request, test_username, test_password
+        )
 
         assert expected == actual
 
@@ -204,7 +227,9 @@ class TestCaseInsensitiveAuthenticate:
         test_username = self.name
         test_password = self.password
         expected = self.new_user
-        actual = case_insensitive_authenticate(self.request, test_username, test_password)
+        actual = case_insensitive_authenticate(
+            self.request, test_username, test_password
+        )
 
         assert expected == actual
 
@@ -212,7 +237,9 @@ class TestCaseInsensitiveAuthenticate:
         test_username = "NeW UsEr"
         test_password = self.password
         expected = self.new_user
-        actual = case_insensitive_authenticate(self.request, test_username, test_password)
+        actual = case_insensitive_authenticate(
+            self.request, test_username, test_password
+        )
 
         assert expected == actual
 
@@ -220,6 +247,8 @@ class TestCaseInsensitiveAuthenticate:
         test_username = self.name
         test_password = "wrong password"
         expected = None
-        actual = case_insensitive_authenticate(self.request, test_username, test_password)
+        actual = case_insensitive_authenticate(
+            self.request, test_username, test_password
+        )
 
         assert expected == actual
