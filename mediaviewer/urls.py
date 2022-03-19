@@ -1,5 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import re_path
 from rest_framework import routers
 from django.shortcuts import redirect
 from django.conf import settings as conf_settings
@@ -35,63 +36,63 @@ from django.contrib.auth.views import (
 router = routers.DefaultRouter()
 
 urlpatterns = [
-    url(r"^$", home.home, name="home"),
-    url(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
-    url(r"^files/(?P<file_id>\d+)/comment/$", comment.comment, name="comment"),
-    url(r"^files/(?P<file_id>\d+)/results/$", comment.results, name="results"),
-    url(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
-    url(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
-    url(r"^tvshows/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
-    url(r"^tvshows/summary/$", files.tvshowsummary, name="tvshowsummary"),
-    url(
+    re_path(r"^$", home.home, name="home"),
+    re_path(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
+    re_path(r"^files/(?P<file_id>\d+)/comment/$", comment.comment, name="comment"),
+    re_path(r"^files/(?P<file_id>\d+)/results/$", comment.results, name="results"),
+    re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
+    re_path(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
+    re_path(r"^tvshows/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
+    re_path(r"^tvshows/summary/$", files.tvshowsummary, name="tvshowsummary"),
+    re_path(
         r"^tvshows/genre/(?P<genre_id>\d+)/$",
         files.tvshows_by_genre,
         name="tvshows_by_genre",
     ),
-    url(r"^movies/$", files.movies, name="movies"),
-    url(
+    re_path(r"^movies/$", files.movies, name="movies"),
+    re_path(
         r"^movies/genre/(?P<genre_id>\d+)/$",
         files.movies_by_genre,
         name="movies_by_genre",
     ),
-    url(r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"),
-    url(
+    re_path(r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"),
+    re_path(
         r"^autoplaydownloadlink/(?P<fileid>\d+)/$",
         detail.autoplaydownloadlink,
         name="autoplaydownloadlink",
     ),
-    url(r"^login/", signin.signin, name="signin"),
-    url(r"^logout/", signout.signout, name="signout"),
-    url(r"^settings/", settings.settings, name="settings"),
-    url(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
-    url(
+    re_path(r"^login/", signin.signin, name="signin"),
+    re_path(r"^logout/", signout.signout, name="signout"),
+    re_path(r"^settings/", settings.settings, name="settings"),
+    re_path(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
+    re_path(
         r"^submitsitesettings/", settings.submitsitesettings, name="submitsitesettings"
     ),
-    url(r"^submitnewuser/", settings.submitnewuser, name="submitnewuser"),
-    url(
+    re_path(r"^submitnewuser/", settings.submitnewuser, name="submitnewuser"),
+    re_path(
         r"^submitsitewidemessage/",
         messaging.submitsitewidemessage,
         name="submitsitewidemessage",
     ),
-    url(r"^requests/", requests.requests, name="requests"),
-    url(r"^addrequests/", requests.addrequests, name="addrequests"),
-    url(r"^ajaxviewed/", detail.ajaxviewed, name="ajaxviewed"),
-    url(r"^ajaxsuperviewed/", detail.ajaxsuperviewed, name="ajaxsuperviewed"),
-    url(r"^ajaxvote/", requests.ajaxvote, name="ajaxvote"),
-    url(r"^ajaxdone/", requests.ajaxdone, name="ajaxdone"),
-    url(r"^ajaxgiveup/", requests.ajaxgiveup, name="ajaxgiveup"),
-    url(r"^ajaxdownloadbutton/", detail.ajaxdownloadbutton, name="ajaxdownloadbutton"),
-    url(r"^ajaxwaiterstatus/", waiterstatus.ajaxwaiterstatus, name="ajaxwaiterstatus"),
-    url(r"^ajaxclosemessage/", messaging.ajaxclosemessage, name="ajaxclosemessage"),
-    url(r"^ajaxreport/", files.ajaxreport, name="ajaxreport"),
-    url(r"^ajaxrunscraper/", home.ajaxrunscraper, name="ajaxrunscraper"),
-    url(
+    re_path(r"^requests/", requests.requests, name="requests"),
+    re_path(r"^addrequests/", requests.addrequests, name="addrequests"),
+    re_path(r"^ajaxviewed/", detail.ajaxviewed, name="ajaxviewed"),
+    re_path(r"^ajaxsuperviewed/", detail.ajaxsuperviewed, name="ajaxsuperviewed"),
+    re_path(r"^ajaxvote/", requests.ajaxvote, name="ajaxvote"),
+    re_path(r"^ajaxdone/", requests.ajaxdone, name="ajaxdone"),
+    re_path(r"^ajaxgiveup/", requests.ajaxgiveup, name="ajaxgiveup"),
+    re_path(r"^ajaxdownloadbutton/", detail.ajaxdownloadbutton, name="ajaxdownloadbutton"),
+    re_path(r"^ajaxwaiterstatus/", waiterstatus.ajaxwaiterstatus, name="ajaxwaiterstatus"),
+    re_path(r"^ajaxclosemessage/", messaging.ajaxclosemessage, name="ajaxclosemessage"),
+    re_path(r"^ajaxreport/", files.ajaxreport, name="ajaxreport"),
+    re_path(r"^ajaxrunscraper/", home.ajaxrunscraper, name="ajaxrunscraper"),
+    re_path(
         r"^ajaxvideoprogress/(?P<guid>[0-9A-Za-z]+)/(?P<hashed_filename>.+)/$",
         ajax.ajaxvideoprogress,
         name="ajaxvideoprogress",
     ),
-    url(r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"),
-    url(
+    re_path(r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"),
+    re_path(
         r"^user/reset/$",
         PasswordResetView.as_view(
             template_name="mediaviewer/password_reset_form.html",
@@ -102,14 +103,14 @@ urlpatterns = [
         ),
         name="password_reset",
     ),
-    url(
+    re_path(
         r"^user/reset/done$",
         PasswordResetDoneView.as_view(
             template_name="mediaviewer/password_reset_done.html",
         ),
         name="password_reset_done",
     ),
-    url(
+    re_path(
         r"^user/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_reset_confirm.html",
@@ -118,7 +119,7 @@ urlpatterns = [
         ),
         name="password_reset_confirm",
     ),
-    url(
+    re_path(
         r"^user/create/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_create_confirm.html",
@@ -127,14 +128,14 @@ urlpatterns = [
         ),
         name="password_create_confirm",
     ),
-    url(
+    re_path(
         r"^user/reset/complete$",
         PasswordResetCompleteView.as_view(
             template_name="mediaviewer/password_reset_complete.html",
         ),
         name="password_reset_complete",
     ),
-    url(
+    re_path(
         r"^user/change_password/$",
         PasswordChangeView.as_view(
             template_name="mediaviewer/change_password.html",
@@ -143,7 +144,7 @@ urlpatterns = [
         ),
         name="change_password",
     ),
-    url(
+    re_path(
         r"^user/change_password_submit/$",
         PasswordChangeDoneView.as_view(
             template_name="mediaviewer/change_password_submit.html",
@@ -178,6 +179,6 @@ if not conf_settings.IS_SYNCING:
     router.register(r"usercomment", viewset.UserCommentViewSet)
 
     urlpatterns += [
-        url(r"^api/", include((router.urls, "mediaviewer"), namespace="api")),
-        url(r"^api/inferscrapers/", csrf_exempt(viewset.InferScrapersView.as_view())),
+        re_path(r"^api/", include((router.urls, "mediaviewer"), namespace="api")),
+        re_path(r"^api/inferscrapers/", csrf_exempt(viewset.InferScrapersView.as_view())),
     ]
