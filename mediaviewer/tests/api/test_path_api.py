@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
+from django.test import override_settings
 from mediaviewer.models.path import Path
 
 
@@ -12,7 +13,9 @@ class TvPathViewSetTests(APITestCase):
         self.test_user = User.objects.create_superuser(
             "test_user", "test@user.com", "password"
         )
-        self.client.login(username="test_user", password="password")
+
+        with override_settings(AXES_ENABLED=False):
+            self.client.login(username="test_user", password="password")
 
         self.tvPath = Path()
         self.tvPath.localpathstr = "/some/local/path"
@@ -138,7 +141,8 @@ class TestUnfinishedTVPaths:
         )
 
         self.client = APIClient()
-        self.client.login(username="test_user", password="password")
+        with override_settings(AXES_ENABLED=False):
+            self.client.login(username="test_user", password="password")
 
         self.tvPath = Path()
         self.tvPath.localpathstr = "/some/local/path"
@@ -242,7 +246,8 @@ class MoviePathViewSetTests(APITestCase):
         self.test_user = User.objects.create_superuser(
             "test_user", "test@user.com", "password"
         )
-        self.client.login(username="test_user", password="password")
+        with override_settings(AXES_ENABLED=False):
+            self.client.login(username="test_user", password="password")
 
         self.tvPath = Path()
         self.tvPath.localpathstr = "/some/local/path"

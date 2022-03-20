@@ -6,19 +6,19 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0040_auto_20211224_0942'),
+        ("mediaviewer", "0040_auto_20211224_0942"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='error',
-            name='datatransmission',
+            model_name="error",
+            name="datatransmission",
         ),
         migrations.RemoveField(
-            model_name='file',
-            name='datatransmission',
+            model_name="file",
+            name="datatransmission",
         ),
         migrations.DeleteModel(
-            name='DataTransmission',
+            name="DataTransmission",
         ),
     ]

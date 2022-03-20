@@ -133,6 +133,12 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_referrer_policy.middleware.ReferrerPolicyMiddleware",
     "mediaviewer.middleware.set_secure_headers",
+    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+    # It only formats user lockout messages and renders Axes lockout responses
+    # on failed user authentication attempts from login views.
+    # If you do not want Axes to override the authentication response
+    # you can skip installing the middleware and use your own views.
+    "axes.middleware.AxesMiddleware",
 )
 
 # Auto logout delay in minutes
@@ -162,6 +168,13 @@ INSTALLED_APPS = (
     "mediaviewer.models",
     "mediaviewer.views",
 )
+
+AUTHENTICATION_BACKENDS = [
+    # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    "axes.backends.AxesBackend",
+    # Django ModelBackend is the default authentication backend.
+    "django.contrib.auth.backends.ModelBackend",
+]
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAdminUser",),
@@ -198,15 +211,13 @@ LOGGING = {
     },
 }
 
-AXES_CACHE = "axes_cache"
 CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-    "axes_cache": {
-        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
-    },
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
 }
+AXES_COOLOFF_TIME = 24  # in hours
 
 SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LOG_DIR = os.path.join(SYSTEM_BASE_PATH, "logs")
@@ -230,6 +241,7 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
+                "django.template.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
             ],
         },

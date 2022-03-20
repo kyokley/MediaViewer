@@ -33,6 +33,12 @@ if DEBUG:
 
 STATICFILES_DIRS += ("/node/node_modules",)
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': 'memcached:11211',
+    }
+}
 
 WAITER_STATUS_URL = "http://mediawaiter:5000/waiter/status"
 WAITER_HEAD = "http://"

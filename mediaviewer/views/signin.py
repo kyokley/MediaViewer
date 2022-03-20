@@ -32,7 +32,7 @@ def signin(request):
                 username = request.POST["username"]
                 password = request.POST["password"]
                 user = case_insensitive_authenticate(
-                    username=username, password=password
+                    request=request, username=username, password=password
                 )
                 if user is None:
                     user_login_failed.send(

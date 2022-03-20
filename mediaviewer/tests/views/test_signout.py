@@ -1,10 +1,11 @@
 import mock
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from mediaviewer.views.signout import signout
 
 
+@override_settings(AXES_ENABLED=False)
 class TestSignout(TestCase):
     def setUp(self):
         self.logout_patcher = mock.patch("mediaviewer.views.signout.logout")

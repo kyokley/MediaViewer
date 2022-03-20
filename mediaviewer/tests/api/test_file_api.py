@@ -7,8 +7,10 @@ from rest_framework.test import APITestCase, APIClient
 from mediaviewer.models.path import Path
 from mediaviewer.models.file import File
 from mediaviewer.models.usersettings import UserSettings
+from django.test import override_settings
 
 
+@override_settings(AXES_ENABLED=False)
 class MovieFileViewSetTests(APITestCase):
     def setUp(self):
         self.tvPath = Path()
@@ -179,6 +181,7 @@ class MovieFileViewSetTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+@override_settings(AXES_ENABLED=False)
 class TvFileViewSetTests(APITestCase):
     def setUp(self):
         self.tvPath = Path()
@@ -421,7 +424,8 @@ class TestBasicAuthAPIAccess:
         else:
             path_id = self.moviePath.id
 
-        self.client.login(username=user.username, password=self.password)
+        with override_settings(AXES_ENABLED=False):
+            self.client.login(username=user.username, password=self.password)
         response = self.client.get(
             reverse(f"mediaviewer:api:{tv_or_movie}-list"), {"pathid": path_id}
         )
