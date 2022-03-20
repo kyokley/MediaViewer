@@ -211,15 +211,13 @@ LOGGING = {
     },
 }
 
-AXES_CACHE = "axes_cache"
 CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-    },
-    "axes_cache": {
-        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
-    },
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
 }
+AXES_COOLOFF_TIME = 24  # in hours
 
 SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LOG_DIR = os.path.join(SYSTEM_BASE_PATH, "logs")
