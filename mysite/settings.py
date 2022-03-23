@@ -218,6 +218,7 @@ CACHES = {
     }
 }
 AXES_COOLOFF_TIME = 24  # in hours
+AXES_FAILURE_LIMIT = 10
 
 SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LOG_DIR = os.path.join(SYSTEM_BASE_PATH, "logs")
