@@ -58,8 +58,7 @@ def addrequests(request):
             for user in users:
                 Message.createNewMessage(
                     user,
-                    "%s has been requested by %s"
-                    % (newrequest.name, createdBy.username),
+                    f"{newrequest.name} has been requested by {createdBy.username}",
                     level=messages.INFO,
                 )
     except Exception as e:
@@ -120,7 +119,7 @@ def ajaxdone(request):
             interjection = interjections.getInterjection()
             Message.createNewMessage(
                 notifyUser,
-                "%s Request for %s is complete!" % (interjection, requestObj.name),
+                f"{interjection} Request for {requestObj.name} is complete!",
                 level=Message.SUCCESS,
             )
     except Exception as e:
@@ -159,7 +158,7 @@ def ajaxgiveup(request):
             interjection = interjections.getFailures()
             Message.createNewMessage(
                 notifyUser,
-                "%s I couldn't find %s" % (interjection, requestObj.name),
+                f"{interjection} I couldn't find {requestObj.name}",
                 level=Message.ERROR,
             )
     except Exception as e:

@@ -63,7 +63,7 @@ class UserSettings(models.Model):
         verbose_name_plural = "User Settings"
 
     def __str__(self):
-        return "id: %s u: %s ip: %s" % (self.id, self.user.username, self.ip_format)
+        return f"id: {self.id} u: {self.user.username} ip: {self.ip_format}"
 
     @classmethod
     def getSettings(cls, user):

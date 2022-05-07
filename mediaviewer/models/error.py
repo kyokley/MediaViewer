@@ -39,4 +39,4 @@ class Error(models.Model):
         return self.datecreated
 
     def __str__(self):
-        return "id: %s e: %s d: %s" % (self.id, self.errorStr, self.date)
+        return f"id: {self.id} e: {self.errorStr} d: {self.date}"

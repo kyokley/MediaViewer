@@ -34,7 +34,7 @@ class UserComment(models.Model):
         db_table = "usercomment"
 
     def __str__(self):
-        return "id: %s f: %s u: %s" % (self.id, self.file.id, self.user.id)
+        return f"id: {self.id} f: {self.file.id} u: {self.user.id}"
 
     @classmethod
     def new(cls, file, user, comment, viewed):

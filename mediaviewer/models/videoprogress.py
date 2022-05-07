@@ -24,11 +24,7 @@ class VideoProgress(models.Model):
         verbose_name_plural = "Video Progress"
 
     def _unicode__(self):
-        return "id: %s f: %s o: %s" % (
-            self.id,
-            self.filename,
-            self.offset,
-        )
+        return f"id: {self.id} f: {self.filename} o: {self.offset}"
 
     @classmethod
     def new(

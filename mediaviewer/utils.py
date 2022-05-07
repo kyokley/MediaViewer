@@ -35,30 +35,30 @@ def logAccessInfo(func):
             start = datetime.now()
 
         if not request:
-            log.debug("%s: No request" % id)
+            log.debug(f"{id}: No request")
         elif request.user and request.user.username:
             username = request.user.username
-            log.debug("%s: %s is accessing %s" % (id, username, func.__name__))
+            log.debug(f"{id}: {username} is accessing {func.__name__}")
         else:
-            log.debug("%s: Got request but no user" % id)
+            log.debug(f"{id}: Got request but no user")
 
         if kwargs:
-            log.debug("%s: With kwargs:\n%s" % (id, kwargs))
+            log.debug(f"{id}: With kwargs:\n{kwargs}")
 
         try:
             res = func(*args, **kwargs)
         except Exception as e:
             # Log unhandled exceptions
-            log.error("%s: %s" % (id, e), exc_info=True)
-            log.error("%s: Access attempted with following vars..." % id)
-            log.error("%s: %s" % (id, locals()))
+            log.error(f"{id}: {e}", exc_info=True)
+            log.error(f"{id}: Access attempted with following vars...")
+            log.error(f"{id}: {locals()}")
             raise
 
         if settings.LOG_ACCESS_TIMINGS:
             finished = datetime.now()
-            log.debug("%s: page started at: %s" % (id, start))
-            log.debug("%s: page finished at: %s" % (id, finished))
-            log.debug("%s: page total took: %s" % (id, finished - start))
+            log.debug(f"{id}: page started at: {start}")
+            log.debug(f"{id}: page finished at: {finished}")
+            log.debug(f"{id}: page total took: {start}")
 
         return res
 
@@ -73,8 +73,8 @@ def humansize(nbytes):
     while nbytes >= 1024 and i < len(SUFFIXES) - 1:
         nbytes /= 1024.0
         i += 1
-    f = ("%.2f" % nbytes).rstrip("0").rstrip(".")
-    return "%s %s" % (f, SUFFIXES[i])
+    val = ("%.2f" % nbytes).rstrip("0").rstrip(".")
+    return f"{val} {SUFFIXES[i]}"
 
 
 def sendMail(
@@ -110,7 +110,7 @@ def sendMail(
         part.set_payload(open(file, "rb").read())
         Encoders.encode_base64(part)
         part.add_header(
-            "Content-Disposition", 'attachment; filename="%s"' % os.path.basename(file)
+            "Content-Disposition", f'attachment; filename="{os.path.basename(file)}"'
         )
         msg.attach(part)
 

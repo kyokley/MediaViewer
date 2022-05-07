@@ -190,7 +190,7 @@ def ajaxreport(request):
         for user in users:
             Message.createNewMessage(
                 user,
-                "%s has been reported by %s" % (file.filename, createdBy.username),
+                f"{file.filename} has been reported by {createdBy.username}",
                 level=messages.WARNING,
             )
     except Http404:

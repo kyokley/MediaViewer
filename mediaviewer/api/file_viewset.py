@@ -20,11 +20,11 @@ class FileViewSet(viewsets.ModelViewSet):
         log.debug("Returning File objects")
         if pathid:
             queryset = queryset.filter(path__id=pathid)
-            log.debug("Filtering file objects by pathid = %s" % pathid)
+            log.debug(f"Filtering file objects by pathid = {pathid}")
         return queryset
 
     def retrieve(self, request, pk=None):
-        log.debug("Attempting to find file with id = %s" % pk)
+        log.debug(f"Attempting to find file with id = {pk}")
         queryset = self.queryset
         obj = get_object_or_404(queryset, pk=pk)
         serializer = self.serializer_class(obj)
@@ -49,7 +49,7 @@ class FileViewSet(viewsets.ModelViewSet):
         ):
             path.lastCreatedFileDate = newFile.datecreated
             path.save()
-        log.info("New file record created for %s" % newFile.filename)
+        log.info(f"New file record created for {newFile.filename}")
         return serializer
 
     def create(self, request):
