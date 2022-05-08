@@ -60,7 +60,7 @@ class TvPathViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_create_tvpath(self):
@@ -84,7 +84,7 @@ class TvPathViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_get_path_detail(self):
@@ -102,7 +102,7 @@ class TvPathViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_get_path_list(self):
@@ -295,7 +295,7 @@ class MoviePathViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_create_moviepath(self):
@@ -321,7 +321,7 @@ class MoviePathViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_get_moviepath(self):

@@ -24,12 +24,7 @@ class Request(models.Model):
         db_table = "request"
 
     def __str__(self):
-        return "id: %s r: %s u: %s d: %s" % (
-            self.id,
-            self.name,
-            self.user.username,
-            self.done,
-        )
+        return f"id: {self.id} r: {self.name} u: {self.user.username} d: {self.done}"
 
     def numberOfVotes(self):
         return RequestVote.objects.filter(request=self).count()
@@ -86,12 +81,7 @@ class RequestVote(models.Model):
         db_table = "requestvote"
 
     def __str__(self):
-        return "id: %s r: %s u: %s d: %s" % (
-            self.id,
-            self.request.name,
-            self.user.username,
-            self.datecreated,
-        )
+        return f"id: {self.id} r: {self.request.name} u: {self.user.username} d: {self.datecreated}"
 
     @classmethod
     def new(cls, request, user):

@@ -151,30 +151,14 @@ class File(models.Model):
         settings = user.settings()
         if not settings or settings.ip_format == LOCAL_IP:
             if self.isMovie():
-                waiter_server = "%s%s%s/" % (
-                    conf_settings.WAITER_HEAD,
-                    conf_settings.LOCAL_WAITER_IP_FORMAT_MOVIES,
-                    guid,
-                )
+                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.LOCAL_WAITER_IP_FORMAT_MOVIES}{guid}/"
             else:
-                waiter_server = "%s%s%s/" % (
-                    conf_settings.WAITER_HEAD,
-                    conf_settings.LOCAL_WAITER_IP_FORMAT_TVSHOWS,
-                    guid,
-                )
+                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.LOCAL_WAITER_IP_FORMAT_TVSHOWS}{guid}/"
         elif settings and settings.ip_format == BANGUP_IP:
             if self.isMovie():
-                waiter_server = "%s%s%s/" % (
-                    conf_settings.WAITER_HEAD,
-                    conf_settings.BANGUP_WAITER_IP_FORMAT_MOVIES,
-                    guid,
-                )
+                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.BANGUP_WAITER_IP_FORMAT_MOVIES}{guid}/"
             else:
-                waiter_server = "%s%s%s/" % (
-                    conf_settings.WAITER_HEAD,
-                    conf_settings.BANGUP_WAITER_IP_FORMAT_TVSHOWS,
-                    guid,
-                )
+                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.BANGUP_WAITER_IP_FORMAT_TVSHOWS}{guid}/"
 
         return waiter_server
 
@@ -249,7 +233,7 @@ class File(models.Model):
             Message.clearLastWatchedMessage(user)
 
     def __str__(self):
-        return "id: %s f: %s" % (self.id, self.fileName)
+        return f"id: {self.id} f: {self.fileName}"
 
     def url(self):
         return '<a href="{}">{}</a>'.format(
@@ -391,8 +375,7 @@ class File(models.Model):
                 # Success!
                 log.debug("Success!!!")
                 log.debug(
-                    "Name: %s Season: %s Episode: %s Fullname: %s FSid: %s"
-                    % (name, season, episode, self.filename, scraper.id)
+                    f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
                 )
                 self.save()
                 self.destroyPosterFile()
@@ -410,7 +393,7 @@ class File(models.Model):
 
     def destroyPosterFile(self):
         try:
-            log.debug("Destroying PosterFile for %s" % (self,))
+            log.debug(f"Destroying PosterFile for {self}")
             posterfile = PosterFile.objects.get(file=self)
             posterfile.delete()
         except PosterFile.DoesNotExist:

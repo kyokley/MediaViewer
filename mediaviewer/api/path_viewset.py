@@ -28,13 +28,12 @@ class PathViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(localpathstr=localpath)
             queryset = queryset.filter(remotepathstr=remotepath)
             log.debug(
-                "Attempting to return path with local = %s and remote = %s"
-                % (localpath, remotepath)
+                f"Attempting to return path with local = {localpath} and remote = {remotepath}"
             )
         return queryset
 
     def retrieve(self, request, pk=None):
-        log.debug("Attempting to find path with id = %s" % pk)
+        log.debug(f"Attempting to find path with id = {pk}")
         obj = get_object_or_404(self.queryset, pk=pk)
         serializer = PathSerializer(obj)
         return RESTResponse(serializer.data)
@@ -69,7 +68,7 @@ class PathViewSet(viewsets.ModelViewSet):
                 serializer.data, status=RESTstatus.HTTP_201_CREATED, headers=headers
             )
         else:
-            log.info("Path for %s already exists. Skipping." % newPath.localpathstr)
+            log.info(f"Path for {newPath.localpathstr} already exists. Skipping.")
             serializer = PathSerializer(newPath)
             headers = self.get_success_headers(serializer.data)
 

@@ -164,7 +164,7 @@ class MovieFileViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_update_invalid_moviefile(self):
@@ -321,7 +321,7 @@ class TvFileViewSetTests(APITestCase):
             self.assertEqual(
                 expected,
                 actual,
-                "attr: %s expected: %s actual: %s" % (k, expected, actual),
+                f"attr: {k} expected: {expected} actual: {actual}",
             )
 
     def test_update_invalid_tvfile(self):

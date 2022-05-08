@@ -29,4 +29,4 @@ class Person(models.Model):
         abstract = True
 
     def __str__(self):
-        return "id: %s n: %s" % (self.id, self.name)
+        return f"id: {self.id} n: {self.name}"

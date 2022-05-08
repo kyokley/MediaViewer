@@ -29,11 +29,11 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
     serializer_class = DownloadTokenSerializer
 
     def retrieve(self, request, pk=None):
-        log.debug("Attempting to find token with guid = %s" % pk)
+        log.debug(f"Attempting to find token with guid = {pk}")
         queryset = DownloadToken.objects.filter(guid=pk)
         obj = get_object_or_404(queryset, guid=pk)
         if obj:
-            log.debug("Found token. isValid: %s" % obj.isvalid)
+            log.debug(f"Found token. isValid: {obj.isvalid}")
         serializer = DownloadTokenSerializer(obj)
         return RESTResponse(serializer.data)
 
@@ -96,7 +96,7 @@ class InferScrapersView(views.APIView):
         if not title:
             return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
-        log.debug("Attempting to scrape title = %s" % title)
+        log.debug(f"Attempting to scrape title = {title}")
         path = FilenameScrapeFormat.path_for_filename(title)
 
         if path:
@@ -111,7 +111,7 @@ class PosterViewSetByPath(viewsets.ModelViewSet):
     serializer_class = PosterFileSerializer
 
     def retrieve(self, request, pk=None):
-        log.debug("Attempting to find poster with pathid = %s" % pk)
+        log.debug(f"Attempting to find poster with pathid = {pk}")
         path = Path.objects.filter(pk=pk)
         obj = PosterFile.objects.filter(path=path)
         if obj:
@@ -127,7 +127,7 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     def retrieve(self, request, pk=None):
-        log.debug("Attempting to find poster with fileid = %s" % pk)
+        log.debug(f"Attempting to find poster with fileid = {pk}")
         file = File.objects.filter(pk=pk)
         obj = PosterFile.objects.filter(file=file)
         if obj:
