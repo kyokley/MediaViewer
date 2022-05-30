@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     "django.contrib.admindocs",
     "widget_tweaks",
     "rest_framework",
+    "rest_framework_jwt",
     "mediaviewer",
     "mediaviewer.models",
     "mediaviewer.views",
