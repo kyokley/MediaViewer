@@ -3,6 +3,11 @@ import os
 import logging
 from django.contrib.messages import constants as message_constants
 
+import json
+from six.moves.urllib import request
+from cryptography.x509 import load_pem_x509_certificate
+from cryptography.hazmat.backends import default_backend
+
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -127,6 +132,7 @@ MIDDLEWARE = (
     "django.contrib.sessions.middleware.SessionMiddleware",
     # 'django.middleware.security.SecurityMiddleware',
     "django.middleware.csrf.CsrfViewMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "mediaviewer.middleware.AutoLogout",
@@ -139,6 +145,10 @@ MIDDLEWARE = (
     # If you do not want Axes to override the authentication response
     # you can skip installing the middleware and use your own views.
     "axes.middleware.AxesMiddleware",
+)
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8080',
 )
 
 # Auto logout delay in minutes
@@ -156,6 +166,7 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "axes",
     "django_extensions",
     # Uncomment the next line to enable the admin:
@@ -181,6 +192,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
     "DEFAULT_PAGINATION_CLASS": ("rest_framework.pagination.PageNumberPagination"),
     "PAGE_SIZE": 100,
@@ -293,3 +305,37 @@ MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
+
+
+AUTH0_DOMAIN = '<YOUR_AUTH0_DOMAIN>'
+API_IDENTIFIER = '<YOUR_API_IDENTIFIER>'
+PUBLIC_KEY = None
+JWT_ISSUER = None
+JWT_AUTH = None
+
+
+def configure_auth0():
+    global AUTH0_DOMAIN, API_IDENTIFIER, PUBLIC_KEY, JWT_ISSUER, JWT_AUTH
+
+    if not AUTH0_DOMAIN or not API_IDENTIFIER:
+        raise Exception('AUTH0_DOMAIN and API_IDENTIFIER must be defined')
+
+    jsonurl = request.urlopen('https://' + AUTH0_DOMAIN + '/.well-known/jwks.json')
+    jwks = json.loads(jsonurl.read().decode('utf-8'))
+    cert = '-----BEGIN CERTIFICATE-----\n' + jwks['keys'][0]['x5c'][0] + '\n-----END CERTIFICATE-----'
+    certificate = load_pem_x509_certificate(cert.encode('utf-8'), default_backend())
+    PUBLIC_KEY = certificate.public_key()
+    JWT_ISSUER = 'https://' + AUTH0_DOMAIN + '/'
+
+    JWT_AUTH = {
+        'JWT_PAYLOAD_GET_USERNAME_HANDLER': jwt_get_username_from_payload_handler,
+        'JWT_PUBLIC_KEY': PUBLIC_KEY,
+        'JWT_ALGORITHM': 'RS256',
+        'JWT_AUDIENCE': API_IDENTIFIER,
+        'JWT_ISSUER': JWT_ISSUER,
+        'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+    }
+
+
+def jwt_get_username_from_payload_handler(payload):
+    return 'auth0user'
