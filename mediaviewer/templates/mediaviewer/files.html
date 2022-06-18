@@ -88,12 +88,25 @@
             </thead>
             <tbody>
                 {% for file in files %}
-                    <tr>
-                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.name }}</a></td>
+                    <tr class="fileentry">
+                        <td>
+                                {% if file.posterfile %}
+                                    <a class="thumbnail" href="/mediaviewer/files/{{ file.id }}/">
+                                        <img src="{{ MEDIA_URL }}{{ file.posterfile.image }}" />
+                                    </a>
+                                {% endif %}
+                                <a class="link" href="/mediaviewer/files/{{ file.id }}/">{{ file.name }}</a>
+                        </td>
                         <td><span class="hidden_span">{{file.dateCreatedForSpan}}</span>{{ file.date }}</td>
                         {% if can_download %}
                             {% if waiterstatus %}
-                                <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>
+                                <td>
+                                    <center>
+                                        <a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">
+                                            Open
+                                        </a>
+                                    </center>
+                                </td>
                             {% else %}
                                 <td>Alfred is down</td>
                             {% endif %}

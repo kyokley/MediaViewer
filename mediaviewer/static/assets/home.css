@@ -111,6 +111,16 @@ body{
     margin: auto;
     margin-bottom: 8px;
 }
+
+.table.table-plain > thead > tr > th,
+.table.table-plain > tbody > tr > th,
+.table.table-plain > tfoot > tr > th,
+.table.table-plain > thead > tr > td,
+.table.table-plain > tbody > tr > td,
+.table.table-plain > tfoot > tr > td{
+    background-color: transparent;
+}
+
 #myTable_wrapper {
     margin-bottom: 15px;
 }
@@ -119,14 +129,6 @@ body{
 }
 .no-sort {
     background-image: none;
-}
-.table.table-plain > thead > tr > th,
-.table.table-plain > tbody > tr > th,
-.table.table-plain > tfoot > tr > th,
-.table.table-plain > thead > tr > td,
-.table.table-plain > tbody > tr > td,
-.table.table-plain > tfoot > tr > td{
-    background-color: transparent;
 }
 #file-displayName{
     text-align: center;
@@ -187,4 +189,41 @@ body{
 }
 .donation-text {
     margin-top:13px;
+}
+
+/*
+.container_image {
+    float:left;
+    position:relative;
+    margin-right:20px;
+}
+
+.container_image:hover{
+    cursor:pointer;
+}
+*/
+
+.fileentry{
+    cursor:pointer;
+    height: 55px;
+    transition: height 1s;
+}
+.fileentry:hover{
+    height: 200px;
+}
+
+.fileentry .thumbnail {
+    position: absolute;
+    border: 0px dashed gray;
+    background-color: transparent;
+    top: -1000000px;
+    z-index:10;
+    width: 100px;
+    height: 142px;
+}
+
+.fileentry:hover .thumbnail {
+    position: relative;
+    left: 100px;
+    top:0px;
 }
