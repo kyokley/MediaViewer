@@ -1,4 +1,6 @@
+from pathlib import Path
 from django.db import models
+from django.conf import settings
 from mediaviewer.log import log
 
 from mediaviewer.models.tvdbconfiguration import (
@@ -17,7 +19,9 @@ from mediaviewer.models.writer import Writer
 from mediaviewer.models.director import Director
 
 
-# Destroy failed posterfiles weekly to allow new attempts
+IMAGE_PATH = Path(settings.MEDIA_ROOT)
+
+
 class PosterFile(models.Model):
     file = models.ForeignKey(
         "mediaviewer.File",
@@ -85,7 +89,17 @@ class PosterFile(models.Model):
 
     @property
     def image(self):
-        return self.poster_url.rpartition("/")[-1] if self.poster_url else None
+        if self.poster_url:
+            image_name = self.poster_url.rpartition("/")[-1]
+            sub_dir = str(self.pk // 1000)
+            return f'{sub_dir}/{image_name}'
+
+    @property
+    def image_path(self):
+        if self.poster_url:
+            image_name = self.poster_url.rpartition("/")[-1]
+            sub_dir = str(self.pk // 1000)
+            return IMAGE_PATH / sub_dir / image_name
 
     @classmethod
     def new(cls, file=None, path=None):
@@ -141,8 +155,8 @@ class PosterFile(models.Model):
 
     def _download_poster(self):
         try:
-            if self.poster_url:
-                saveImageToDisk(self.poster_url, self.image)
+            if self.poster_url and self.image_path:
+                saveImageToDisk(self.poster_url, self.image_path)
         except Exception as e:
             log.error(str(e), exc_info=True)
             log.error("Failed to download image")
