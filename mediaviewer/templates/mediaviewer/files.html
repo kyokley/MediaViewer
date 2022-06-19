@@ -88,14 +88,19 @@
             </thead>
             <tbody>
                 {% for file in files %}
+                    {% if not file.isMovie and file.posterfile %}
                     <tr class="fileentry">
+                    {% else %}
+                    <tr class="fileentry-noposter">
+                    {% endif %}
                         <td>
-                                {% if file.posterfile %}
+                                <a class="link" href="/mediaviewer/files/{{ file.id }}/">{{ file.name }}</a>
+                                {% if not file.isMovie and file.posterfile %}
                                     <a class="thumbnail" href="/mediaviewer/files/{{ file.id }}/">
                                         <img src="{{ MEDIA_URL }}{{ file.posterfile.image }}" />
+                                            {{ file.posterfile.thumbnail_caption }}
                                     </a>
                                 {% endif %}
-                                <a class="link" href="/mediaviewer/files/{{ file.id }}/">{{ file.name }}</a>
                         </td>
                         <td><span class="hidden_span">{{file.dateCreatedForSpan}}</span>{{ file.date }}</td>
                         {% if can_download %}

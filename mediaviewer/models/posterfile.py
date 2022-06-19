@@ -20,6 +20,7 @@ from mediaviewer.models.director import Director
 
 
 IMAGE_PATH = Path(settings.MEDIA_ROOT)
+THUMBNAIL_CAPTION_LENGTH = 100
 
 
 class PosterFile(models.Model):
@@ -74,6 +75,13 @@ class PosterFile(models.Model):
     @property
     def pathname(self):
         return self.path and self.path.remotepathstr
+
+    @property
+    def thumbnail_caption(self):
+        plot = self.extendedplot or self.plot
+        if len(plot) > THUMBNAIL_CAPTION_LENGTH:
+            plot = f'{plot[:THUMBNAIL_CAPTION_LENGTH]}...'
+        return plot
 
     def display_genres(self):
         return ", ".join([x.genre for x in self.genres.all()])

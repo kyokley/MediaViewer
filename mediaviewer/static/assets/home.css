@@ -206,10 +206,10 @@ body{
 .fileentry{
     cursor:pointer;
     height: 55px;
-    transition: height 1s;
 }
+
 .fileentry:hover{
-    height: 200px;
+    height: 250px;
 }
 
 .fileentry .thumbnail {
@@ -218,7 +218,7 @@ body{
     background-color: transparent;
     top: -1000000px;
     z-index:10;
-    width: 100px;
+    width: 250px;
     height: 142px;
 }
 

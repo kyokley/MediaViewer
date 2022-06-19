@@ -461,6 +461,8 @@ class File(models.Model):
             "name": self.displayName(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),
             "date": self.datecreated.date(),
-            "posterfile": self.posterfile,
+            "isMovie": self.isMovie(),
         }
+        if not self.isMovie():
+            payload["posterfile"] = self.posterfile
         return payload
