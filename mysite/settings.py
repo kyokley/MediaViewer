@@ -272,8 +272,6 @@ os.environ["wsgi.url_scheme"] = "https"
 REFERRER_POLICY = "same-origin"
 
 API_KEY = "keykeykey"
-OMDBAPI_KEY = None
-IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 3
 

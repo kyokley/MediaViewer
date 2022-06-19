@@ -1,5 +1,4 @@
 import time
-import os
 from mediaviewer.log import log
 from django.conf import settings
 import requests
@@ -118,27 +117,25 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
     return getJSONData(url)
 
 
-def saveImageToDisk(path, imgName):
+def saveImageToDisk(path, image_path):
     log.debug("Getting image from %s" % (path,))
-    if imgName:
-        exists = os.path.isfile(settings.IMAGE_PATH + imgName)
-        if not exists:
-            r = requests.get(
-                "{url}{poster_size}{path}".format(
-                    url=tvdbConfig.url, poster_size=tvdbConfig.poster_size, path=path
-                ),
-                stream=True,
-                timeout=settings.REQUEST_TIMEOUT,
-            )
-            r.raise_for_status()
-            if r.status_code == 200:
-                with open(settings.IMAGE_PATH + imgName, "wb") as f:
-                    for chunk in r.iter_content(1024):
-                        f.write(chunk)
-        else:
-            log.debug("File already exists. Skipping")
+    if not image_path.exists():
+        image_path.parent.mkdir(parents=True, exist_ok=True)
+
+        r = requests.get(
+            "{url}{poster_size}{path}".format(
+                url=tvdbConfig.url, poster_size=tvdbConfig.poster_size, path=path
+            ),
+            stream=True,
+            timeout=settings.REQUEST_TIMEOUT,
+        )
+        r.raise_for_status()
+        if r.status_code == 200:
+            with open(image_path, "wb") as f:
+                for chunk in r.iter_content(1024):
+                    f.write(chunk)
     else:
-        log.info("No image name given. Skipping")
+        log.debug("File already exists. Skipping")
 
 
 def getDataFromIMDB(ref_obj):
