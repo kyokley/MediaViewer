@@ -31,8 +31,8 @@ class Genre(models.Model):
             pk__in=(
                 cls.objects.filter(posterfile__file__path__is_movie=True)
                 .values("posterfile__genres")
-                .annotate(genre_count=models.Count("id"))
-                .order_by("-genre_count")
+                .annotate(genre_count=models.Count("id", distinct=True))
+                .order_by("-genre_count", "genre")
                 .values("posterfile__genres")[:limit]
             )
         ).order_by("genre")
@@ -45,8 +45,8 @@ class Genre(models.Model):
             pk__in=(
                 cls.objects.filter(posterfile__file__path__is_movie=False)
                 .values("posterfile__genres")
-                .annotate(genre_count=models.Count("id"))
-                .order_by("-genre_count")
+                .annotate(genre_count=models.Count("id", distinct=True))
+                .order_by("-genre_count", "genre")
                 .values("posterfile__genres")[:limit]
             )
         ).order_by("genre")

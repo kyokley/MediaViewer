@@ -570,7 +570,7 @@ class TestDownloadPoster:
             "mediaviewer.models.posterfile.saveImageToDisk"
         )
 
-        self.test_obj = PosterFile()
+        self.test_obj = PosterFile.objects.create()
         self.test_obj.poster_url = "/test_poster_url"
 
     def test_missing_poster_url(self):
@@ -589,9 +589,9 @@ class TestDownloadPoster:
 
         assert expected == actual
         self.mock_saveImageToDisk.assert_called_once_with(
-            self.test_obj.poster_url, self.test_obj.image
+            self.test_obj.poster_url, self.test_obj.image_path
         )
-        assert "test_poster_url" == self.test_obj.image
+        assert f"{self.test_obj.pk//1000}/test_poster_url" == self.test_obj.image
 
 
 @pytest.mark.django_db
