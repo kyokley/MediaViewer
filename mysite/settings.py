@@ -158,6 +158,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "axes",
     "django_extensions",
+    "grappelli",  # Required to come before django.contrib.admin
     # Uncomment the next line to enable the admin:
     "django.contrib.admin",
     # Uncomment the next line to enable admin documentation:
