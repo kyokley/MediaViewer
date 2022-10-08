@@ -158,6 +158,7 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "axes",
     "django_extensions",
+    "grappelli",  # Required to come before django.contrib.admin
     # Uncomment the next line to enable the admin:
     "django.contrib.admin",
     # Uncomment the next line to enable admin documentation:
@@ -248,6 +249,8 @@ TEMPLATES = [
         },
     },
 ]
+
+GRAPPELLI_ADMIN_TITLE = 'MediaViewer Admin'
 
 WAITER_HEAD = "http://"
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"

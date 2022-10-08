@@ -58,7 +58,7 @@ COPY ./pdbrc.py /root/.pdbrc.py
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
 
-RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --no-dev
+RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --without dev
 
 COPY --from=static-builder /code/node_modules /node/node_modules
 

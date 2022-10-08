@@ -14,6 +14,7 @@ urlpatterns = [
     # (r'^cache/', include('django_memcached.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    re_path('grappelli/', include('grappelli.urls')),  # grappelli URLS
     # Uncomment the next line to enable the admin:
     re_path(r"^admin/", admin.site.urls),
     re_path(
