@@ -140,3 +140,6 @@ class GenreAdmin(admin.ModelAdmin):
         "id",
         "genre",
     )
+
+
+admin.site.site_url = '/mediaviewer'
