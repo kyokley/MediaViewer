@@ -53,7 +53,7 @@ class UserSettings(models.Model):
     )
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
     last_watched = models.ForeignKey(
-        "mediaviewer.Path", on_delete=models.CASCADE, null=True, blank=True
+        "mediaviewer.Path", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
 
