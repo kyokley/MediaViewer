@@ -71,6 +71,28 @@ class UserSettings(models.Model):
         return q and q[0] or None
 
     @classmethod
+    def create_user_setting(cls,
+                            user,
+                            ip_format=BANGUP_IP,
+                            default_sort=FILENAME_SORT,
+                            can_download=True,
+                            binge_mode=True,
+                            jump_to_last_watched=True,
+                            ):
+        newSettings = cls()
+        newSettings.datecreated = datetime.now(pytz.timezone(settings.TIME_ZONE))
+        newSettings.dateedited = newSettings.datecreated
+        newSettings.user = user
+        newSettings.ip_format = ip_format
+        newSettings.default_sort = default_sort
+        newSettings.can_download = can_download
+        newSettings.can_login = False
+        newSettings.binge_mode = binge_mode
+        newSettings.jump_to_last_watched = jump_to_last_watched
+        newSettings.save()
+        return newSettings
+
+    @classmethod
     @transaction.atomic
     def new(
         cls,
@@ -105,24 +127,20 @@ class UserSettings(models.Model):
         newUser.set_password(User.objects.make_random_password())
         newUser.save()
 
+        cls.create_user_setting(newUser,
+                                ip_format=ip_format,
+                                default_sort=default_sort,
+                                can_download=can_download,
+                                binge_mode=binge_mode,
+                                jump_to_last_watched=jump_to_last_watched,
+                                )
+
         if group:
             mv_group = group
         else:
             mv_group = Group.objects.get(name="MediaViewer")
         mv_group.user_set.add(newUser)
         mv_group.save()
-
-        newSettings = cls()
-        newSettings.datecreated = datetime.now(pytz.timezone(settings.TIME_ZONE))
-        newSettings.dateedited = newSettings.datecreated
-        newSettings.user = newUser
-        newSettings.ip_format = ip_format
-        newSettings.default_sort = default_sort
-        newSettings.can_download = can_download
-        newSettings.can_login = False
-        newSettings.binge_mode = binge_mode
-        newSettings.jump_to_last_watched = jump_to_last_watched
-        newSettings.save()
 
         if send_email:
             fake_form = FormlessPasswordReset(newUser, email)
