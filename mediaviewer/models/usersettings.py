@@ -75,6 +75,7 @@ class UserSettings(models.Model):
                             user,
                             ip_format=BANGUP_IP,
                             default_sort=FILENAME_SORT,
+                            can_login=False,
                             can_download=True,
                             binge_mode=True,
                             jump_to_last_watched=True,
@@ -86,7 +87,7 @@ class UserSettings(models.Model):
         newSettings.ip_format = ip_format
         newSettings.default_sort = default_sort
         newSettings.can_download = can_download
-        newSettings.can_login = False
+        newSettings.can_login = can_login
         newSettings.binge_mode = binge_mode
         newSettings.jump_to_last_watched = jump_to_last_watched
         newSettings.save()
@@ -130,6 +131,7 @@ class UserSettings(models.Model):
         cls.create_user_setting(newUser,
                                 ip_format=ip_format,
                                 default_sort=default_sort,
+                                can_login=False,
                                 can_download=can_download,
                                 binge_mode=binge_mode,
                                 jump_to_last_watched=jump_to_last_watched,
