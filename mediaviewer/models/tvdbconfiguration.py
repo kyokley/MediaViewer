@@ -186,10 +186,16 @@ def _getDataFromIMDBByID(imdb_id, isMovie=True):
 
     if resp:
         if not isMovie:
-            tmdb_id = resp.get("tv_results")[0]["id"]
-            url = "https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={api_key}".format(
-                tmdb_id=tmdb_id, api_key=settings.API_KEY
-            )
+            if resp.get("tv_results"):
+                tmdb_id = resp.get("tv_results")[0]["id"]
+                url = "https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={api_key}".format(
+                    tmdb_id=tmdb_id, api_key=settings.API_KEY
+                )
+            elif resp.get('tv_episode_results'):
+                tmdb_id = resp.get("tv_episode_results")[0]["id"]
+                url = "https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={api_key}".format(
+                    tmdb_id=tmdb_id, api_key=settings.API_KEY
+                )
         else:
             tmdb_id = resp.get("movie_results")[0]["id"]
             url = "https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={api_key}".format(  # noqa
