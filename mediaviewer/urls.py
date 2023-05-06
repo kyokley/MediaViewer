@@ -64,10 +64,12 @@ urlpatterns = [
         name="autoplaydownloadlink",
     ),
 
-    re_path(r"^login/", signin.login, name="login"),
-    re_path(r"^logout/", signout.logout, name="logout"),
-    re_path(r"^callback/", signin.callback, name="callback"),
-    re_path(r"^verify/", signin.verify, name="verify"),
+    re_path(r"^login/$", signin.login, name="login"),
+    re_path(r"^logout/$", signout.logout, name="logout"),
+    re_path(r"^callback/$", signin.callback, name="callback"),
+    re_path(r"^legacy_verify/$", signin.legacy_verify, name="legacy_verify"),
+    re_path(r"^legacy_user/(?P<email>.*)/$", signin.legacy_user),
+    re_path(r"^legacy_user/$", signin.legacy_user),
 
 
     re_path(r"^settings/", settings.settings, name="settings"),
