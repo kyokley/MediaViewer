@@ -63,8 +63,6 @@ urlpatterns = [
         detail.autoplaydownloadlink,
         name="autoplaydownloadlink",
     ),
-    # re_path(r"^login/", signin.signin, name="signin"),
-    # re_path(r"^logout/", signout.signout, name="signout"),
 
     re_path(r"^login/", signin.login, name="login"),
     re_path(r"^logout/", signout.logout, name="logout"),

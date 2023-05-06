@@ -33,7 +33,7 @@ def logout(request):
         f"https://{conf_settings.AUTH0_DOMAIN}/v2/logout?"
         + urlencode(
             {
-                "returnTo": request.build_absolute_uri(reverse("index")),
+                "returnTo": request.build_absolute_uri(reverse("mediaviewer:home")),
                 "client_id": conf_settings.AUTH0_CLIENT_ID,
             },
             quote_via=quote_plus,

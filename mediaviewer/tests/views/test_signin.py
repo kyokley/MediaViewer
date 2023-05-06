@@ -7,18 +7,6 @@ from mediaviewer.views.signin import signin
 
 class TestSignin(TestCase):
     def setUp(self):
-        self.user_logged_in_patcher = mock.patch(
-            "mediaviewer.views.signin.user_logged_in"
-        )
-        self.mock_user_logged_in = self.user_logged_in_patcher.start()
-        self.addCleanup(self.user_logged_in_patcher.stop)
-
-        self.user_login_failed_patcher = mock.patch(
-            "mediaviewer.views.signin.user_login_failed"
-        )
-        self.mock_user_login_failed = self.user_login_failed_patcher.start()
-        self.addCleanup(self.user_login_failed_patcher.stop)
-
         self.siteGreeting_patcher = mock.patch("mediaviewer.views.signin.SiteGreeting")
         self.mock_siteGreeting = self.siteGreeting_patcher.start()
         self.mock_greeting = mock.MagicMock()
