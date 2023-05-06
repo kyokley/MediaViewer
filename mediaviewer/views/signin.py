@@ -3,7 +3,7 @@ from django.urls import reverse
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render, redirect
 from mediaviewer.views.views_utils import setSiteWideContext
-from django.contrib.auth import login
+from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from mediaviewer.models.loginevent import LoginEvent
@@ -56,7 +56,7 @@ def signin(request):
                     )
                 else:
                     if user.is_active:
-                        login(request, user)
+                        login_user(request, user)
                         context["loggedin"] = True
                         context["user"] = request.user
                         LoginEvent.new(request.user)
@@ -120,6 +120,11 @@ def login(request):
 def callback(request):
     token = oauth.auth0.authorize_access_token(request)
     request.session["user"] = token
+
+    username = token['userinfo']['nickname']
+    user = User.objects.filter(is_active=True).get(username=username)
+    login_user(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    LoginEvent.new(request.user)
     return redirect(request.build_absolute_uri(reverse("mediaviewer:home")))
 
 
