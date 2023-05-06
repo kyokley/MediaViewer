@@ -8,7 +8,6 @@ authors = ["Kevin Yokley <kyokley2@gmail.com>"]
 python = "^3.10"
 django = "^3.2"
 django-memcached = "^0.1.2"
-django-axes = "^5.31"
 psycopg2 = "=2.8.*"
 python-dateutil = "^2.7"
 uwsgi = "^2.0"
