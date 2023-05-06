@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import include
-from django.urls import re_path
+from django.urls import re_path, path
 from rest_framework import routers
 from django.shortcuts import redirect
 from django.conf import settings as conf_settings
@@ -63,8 +63,15 @@ urlpatterns = [
         detail.autoplaydownloadlink,
         name="autoplaydownloadlink",
     ),
-    re_path(r"^login/", signin.signin, name="signin"),
-    re_path(r"^logout/", signout.signout, name="signout"),
+    # re_path(r"^login/", signin.signin, name="signin"),
+    # re_path(r"^logout/", signout.signout, name="signout"),
+
+    re_path(r"^login/", signin.login, name="login"),
+    re_path(r"^logout/", signout.logout, name="logout"),
+    re_path(r"^callback/", signin.callback, name="callback"),
+    re_path(r"^verify/", signin.verify, name="verify"),
+
+
     re_path(r"^settings/", settings.settings, name="settings"),
     re_path(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
     re_path(
