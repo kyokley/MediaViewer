@@ -1,19 +1,12 @@
 import base64
 from django.urls import reverse
-from mediaviewer.models.sitegreeting import SiteGreeting
-from django.shortcuts import render, redirect
-from mediaviewer.views.views_utils import setSiteWideContext
+from django.shortcuts import redirect
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
-from django.contrib.auth.signals import user_logged_in, user_login_failed
 from mediaviewer.models.loginevent import LoginEvent
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.conf import settings as conf_settings
-from mediaviewer.utils import logAccessInfo
-from mediaviewer.models.usersettings import (
-    ImproperLogin,
-    case_insensitive_authenticate,
-)
+from mediaviewer.models.usersettings import case_insensitive_authenticate
 from authlib.integrations.django_client import OAuth
 
 
