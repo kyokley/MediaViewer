@@ -1,6 +1,6 @@
 from django.urls import reverse
 from mediaviewer.models.sitegreeting import SiteGreeting
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth import login
 from django.contrib.auth.models import User
@@ -13,6 +13,7 @@ from mediaviewer.models.usersettings import (
     ImproperLogin,
     case_insensitive_authenticate,
 )
+from authlib.integrations.django_client import OAuth
 
 
 @logAccessInfo
@@ -94,3 +95,28 @@ def signin(request):
                 return HttpResponseRedirect(reverse("mediaviewer:signin"))
 
     return render(request, "mediaviewer/signin.html", context)
+
+
+oauth = OAuth()
+
+oauth.register(
+    "auth0",
+    client_id=conf_settings.AUTH0_CLIENT_ID,
+    client_secret=conf_settings.AUTH0_CLIENT_SECRET,
+    client_kwargs={
+        "scope": "openid profile email",
+    },
+    server_metadata_url=f"https://{conf_settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
+)
+
+
+def login(request):
+    return oauth.auth0.authorize_redirect(
+        request, request.build_absolute_uri(reverse("callback"))
+    )
+
+
+def callback(request):
+    token = oauth.auth0.authorize_access_token(request)
+    request.session["user"] = token
+    return redirect(request.build_absolute_uri(reverse("index")))
