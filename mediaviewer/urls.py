@@ -70,6 +70,7 @@ urlpatterns = [
     re_path(r"^legacy_verify/$", signin.legacy_verify, name="legacy_verify"),
     re_path(r"^legacy_user/(?P<email>.*)/$", signin.legacy_user),
     re_path(r"^legacy_user/$", signin.legacy_user),
+    re_path(r"^legacy_verify_email/$", signin.verify_email),
 
 
     re_path(r"^settings/", settings.settings, name="settings"),

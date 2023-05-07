@@ -41,6 +41,15 @@ def _decode_auth_header(headers):
     return username, password
 
 
+def _user_info_from_body(body):
+    data = json.loads(body) if body else {
+        'email': None,
+        'username': None,
+        'password': None,
+    }
+    return data
+
+
 def _user_info_from_request(request, email=None):
     data = json.loads(request.body) if request.body else {'email': email}
 
@@ -85,8 +94,8 @@ def _validate_auth_auth0(request):
 
 
 def legacy_verify(request):
-    user = _validate_auth_auth0(request)
-    if user is None:
+    request_user = _validate_auth_auth0(request)
+    if request_user is None:
         return JsonResponse({}, status=401)
 
     data = _user_info_from_request(request)
@@ -104,32 +113,44 @@ def legacy_verify(request):
 
 @csrf_exempt
 def legacy_user(request, email=None):
-    user = _validate_auth_auth0(request)
-    if user is None:
-        return JsonResponse({}, status=401)
+    if request.method in ('POST', 'PUT') or email is not None:
+        request_user = _validate_auth_auth0(request)
+        if request_user is None:
+            return JsonResponse({}, status=401)
+
+        data = _user_info_from_body(request.body)
+    else:
+        username, password = _decode_auth_header(request.headers)
+        data = {}
+        data['username'] = username
+        data['password'] = password
 
     user = None
-    data = _user_info_from_request(request, email=email)
-
     if request.method in ('GET', 'PUT'):
         try:
-            if data.get('email'):
-                user = User.objects.get(email__iexact=data['email'])
+            if email:
+                email = email.strip()
+                user = User.objects.get(email__iexact=email)
         except User.DoesNotExist:
+            return JsonResponse({}, status=404)
+
+        if user is None:
             try:
                 user = User.objects.get(username__iexact=data['username'])
             except User.DoesNotExist:
-                return JsonResponse({}, status=404)
+                return JsonResponse({}, status=401)
 
         if request.method == 'PUT':
             user.set_password(data['password'])
             user.save()
     elif request.method == 'POST':
+        data = _user_info_from_body(request.body)
         user = UserSettings.new(
-            data['username'],
+            data.get('username', data['email']),
             data['email'],
             can_download=False,
             send_email=False,
+            verified=False,
         )
         user.set_password(data['password'])
         user.save()
@@ -139,3 +160,15 @@ def legacy_user(request, email=None):
                             'nickname': user.username,
                             'email': user.email})
     return JsonResponse({}, status=400)
+
+
+@csrf_exempt
+def verify_email(request):
+    if request.method == 'PUT':
+        request_user = _validate_auth_auth0(request)
+        if request_user is None:
+            return JsonResponse({}, status=401)
+
+        data = _user_info_from_body(request.body)
+        UserSettings.objects.filter(user__email__iexact=data['email']).update(verified=True)
+        return JsonResponse({})
