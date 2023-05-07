@@ -42,8 +42,8 @@ def _user_info_from_request(request, email=None):
         username = basic_auth.split(':')[0]
         password = basic_auth.split(':')[1]
     except Exception:
-        username = ''
-        password = ''
+        username = None
+        password = None
 
     data['username'] = username
     data['password'] = password
@@ -61,6 +61,7 @@ def callback(request):
         user = User.objects.filter(is_active=True).get(username=username)
     except User.DoesNotExist:
         user = User.objects.filter(is_active=True).get(email=email)
+
     login_user(request, user, backend='django.contrib.auth.backends.ModelBackend')
     LoginEvent.new(request.user)
     return redirect(request.build_absolute_uri(reverse("mediaviewer:home")))
@@ -91,7 +92,7 @@ def legacy_user(request, email=None):
             else:
                 user = User.objects.get(username__iexact=data['username'])
         except User.DoesNotExist:
-            return JsonResponse({'err': 'User not found'}, status=401)
+            return JsonResponse({}, status=401)
 
         if request.method == 'PUT':
             user.set_password(data['password'])
