@@ -184,7 +184,10 @@ class TestFilesDetail:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
+        self.user = UserSettings.new("test_user",
+                                     "a@b.com",
+                                     send_email=False,
+                                     verified=True)
         settings = self.user.settings()
         settings.force_password_change = False
 
