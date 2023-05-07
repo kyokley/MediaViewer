@@ -55,8 +55,7 @@ class DownloadTokenViewSetTests(APITestCase):
         self.download_token.dateedited = datetime.now(pytz.timezone("US/Central"))
         self.download_token.save()
 
-        with override_settings(AXES_ENABLED=False):
-            self.client.login(username="test_user", password="password")
+        self.client.login(username="test_user", password="password")
 
     def test_get_download_token(self):
         response = self.client.get(
