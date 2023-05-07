@@ -113,6 +113,9 @@ class UserSettings(models.Model):
 
         validate_email(email)
 
+        if name is None:
+            name = email
+
         if User.objects.filter(username__iexact=name).exists():
             raise IntegrityError("Username already exists")
         elif User.objects.filter(email__iexact=email).exists():
