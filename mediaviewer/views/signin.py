@@ -2,7 +2,7 @@ import base64
 import json
 from django.urls import reverse
 from django.shortcuts import redirect
-from django.contrib.auth import login as login_user
+from django.contrib.auth import login as login_user, authenticate
 from django.contrib.auth.models import User
 from mediaviewer.models.loginevent import LoginEvent
 from django.http import JsonResponse
@@ -32,15 +32,20 @@ def login(request):
     )
 
 
+def _decode_auth_header(headers):
+    basic_auth = base64.b64decode(
+        headers['Authorization'].split()[-1]).decode('utf-8')
+
+    username = basic_auth.split(':')[0]
+    password = basic_auth.split(':')[1]
+    return username, password
+
+
 def _user_info_from_request(request, email=None):
     data = json.loads(request.body) if request.body else {'email': email}
 
     try:
-        basic_auth = base64.b64decode(
-            request.headers['Authorization'].split()[-1]).decode('utf-8')
-
-        username = basic_auth.split(':')[0]
-        password = basic_auth.split(':')[1]
+        username, password = _decode_auth_header(request.headers)
     except Exception:
         username = None
         password = None
@@ -70,7 +75,20 @@ def callback(request):
     return redirect(request.build_absolute_uri(reverse("mediaviewer:home")))
 
 
+def _validate_auth_auth0(request):
+    username, password = _decode_auth_header(request.headers)
+    user = None
+    if username == conf_settings.AUTH0_LOGIN:
+        user = authenticate(username=username,
+                            password=password)
+    return user
+
+
 def legacy_verify(request):
+    user = _validate_auth_auth0(request)
+    if user is None:
+        return JsonResponse({}, status=401)
+
     data = _user_info_from_request(request)
     user = case_insensitive_authenticate(
         request=request, username=data['username'], password=data['password']
@@ -86,6 +104,10 @@ def legacy_verify(request):
 
 @csrf_exempt
 def legacy_user(request, email=None):
+    user = _validate_auth_auth0(request)
+    if user is None:
+        return JsonResponse({}, status=401)
+
     user = None
     data = _user_info_from_request(request, email=email)
 
