@@ -112,8 +112,8 @@ def legacy_verify(request):
 
 
 @csrf_exempt
-def legacy_user(request, email=None):
-    if request.method in ('POST', 'PUT') or email is not None:
+def legacy_user(request, email=None, pk=None):
+    if request.method in ('POST', 'PUT', 'DELETE') or email is not None:
         request_user = _validate_auth_auth0(request)
         if request_user is None:
             return JsonResponse({}, status=401)
@@ -154,6 +154,10 @@ def legacy_user(request, email=None):
         )
         user.set_password(data['password'])
         user.save()
+    elif request.method == 'DELETE':
+        if pk is not None:
+            User.objects.filter(pk=pk).delete()
+            return JsonResponse({}, status=200)
 
     if user:
         return JsonResponse({'user_id': user.pk,
