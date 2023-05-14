@@ -299,4 +299,4 @@ if USE_AUTH0:
 
 # MediaWaiter Settings
 WAITER_LOGIN = 'waiter'
-WAITER_PASSWORD_HASH = os.environ['WAITER_PASSWORD_HASH']
+WAITER_PASSWORD_HASH = os.environ.get('WAITER_PASSWORD_HASH')
