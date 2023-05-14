@@ -33,23 +33,9 @@
         </div>
 
         <div class="well well-sm">
-            <h2>Password Settings</h2>
-            <ul>
-                <div class="input">
-                    <a href='/mediaviewer/user/change_password/' id='change_password_btn' name='change_password_btn' class="btn btn-info"/>Change Password</a>
-                </div>
-            </ul>
-        </div>
-        <div class="well well-sm">
             <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
                 {% csrf_token %}
                 <h2>Account Settings</h2>
-                <ul>
-                    <label>Email Address:</label>
-                    <div class="input">
-                        <input class="form-control email-field" type="text" name="email_field" placeholder="Email" id="email_field" value="{{ email }}"/>
-                    </div>
-                </ul>
                 <ul>
                     <label>Default Sort Field:</label>
                     <div class="input">
@@ -169,25 +155,6 @@
                         <p></p>
                         <div class="sitemessageinput">
                             <input type='submit' value='Send Message &raquo;' id='submit_site_message' name='submit_site_message' class="btn primary"/>
-                        </div>
-                    </ul>
-                </div>
-            </form>
-        {% endif %}
-        {% if user.is_staff %}
-            <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
-                {% csrf_token %}
-                <div class="well well-sm">
-                    <h2>New User</h2>
-                    <ul>
-                        <label>Email Address:</label>
-                        <div class="input">
-                            <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
-                        </div>
-                    </ul>
-                    <ul>
-                        <div class="sitemessageinput">
-                            <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn primary"/>
                         </div>
                     </ul>
                 </div>
