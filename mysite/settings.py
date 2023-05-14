@@ -163,7 +163,8 @@ INSTALLED_APPS = (
 )
 
 AUTHENTICATION_BACKENDS = [
-    'mediaviewer.authenticators.SettingsBackend',
+    'mediaviewer.authenticators.Auth0SettingsAuthBackend',
+    'mediaviewer.authenticators.WaiterSettingsAuthBackend',
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -289,4 +290,8 @@ AUTH0_CLIENT_ID = os.environ.get('AUTH0_CLIENT_ID')
 AUTH0_CLIENT_SECRET = os.environ.get('AUTH0_CLIENT_SECRET')
 AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
 AUTH0_LOGIN = 'auth0'
-AUTH0_PASSWORD = os.environ.get('AUTH0_PASSWORD')
+AUTH0_PASSWORD_HASH = os.environ.get('AUTH0_PASSWORD_HASH')
+
+# MediaWaiter Settings
+WAITER_LOGIN = 'waiter'
+WAITER_PASSWORD_HASH = os.environ['WAITER_PASSWORD_HASH']
