@@ -285,12 +285,17 @@ MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
 
-# Auth0 Settings
-AUTH0_CLIENT_ID = os.environ.get('AUTH0_CLIENT_ID')
-AUTH0_CLIENT_SECRET = os.environ.get('AUTH0_CLIENT_SECRET')
-AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
-AUTH0_LOGIN = 'auth0'
-AUTH0_PASSWORD_HASH = os.environ.get('AUTH0_PASSWORD_HASH')
+USE_AUTH0 = (
+    os.environ.get('USE_AUTH0', 'true').lower() in ('true', 't', '1', 'y', 'yes')
+)
+
+if USE_AUTH0:
+    # Auth0 Settings
+    AUTH0_CLIENT_ID = os.environ.get('AUTH0_CLIENT_ID')
+    AUTH0_CLIENT_SECRET = os.environ.get('AUTH0_CLIENT_SECRET')
+    AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
+    AUTH0_LOGIN = 'auth0'
+    AUTH0_PASSWORD_HASH = os.environ.get('AUTH0_PASSWORD_HASH')
 
 # MediaWaiter Settings
 WAITER_LOGIN = 'waiter'

@@ -48,6 +48,9 @@ class Auth0SettingsAuthBackend(SettingsBackend):
     'pbkdf2_sha256$260000$k5HZABEEptjiaWOdbTsZDy$BWkdWxyYO2XcQZIICi/5RKbICQvJEcwFZZbFpNENYiw='
     """
     def _validate(self, username, password):
+        if not settings.USE_AUTH0:
+            return False
+
         login_valid = (settings.AUTH0_LOGIN == username)
         pwd_valid = check_password(password, settings.AUTH0_PASSWORD_HASH)
         return login_valid and pwd_valid
