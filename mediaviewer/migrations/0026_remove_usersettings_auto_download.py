@@ -6,7 +6,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0025_usersettings_jump_to_last_watched"),
     ]

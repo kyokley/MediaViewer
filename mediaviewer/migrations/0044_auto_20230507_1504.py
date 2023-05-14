@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0043_alter_usersettings_last_watched'),
+        ("mediaviewer", "0043_alter_usersettings_last_watched"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='usersettings',
-            old_name='can_download',
-            new_name='_can_download',
+            model_name="usersettings",
+            old_name="can_download",
+            new_name="_can_download",
         ),
         migrations.AddField(
-            model_name='usersettings',
-            name='verified',
+            model_name="usersettings",
+            name="verified",
             field=models.BooleanField(default=True),
         ),
     ]

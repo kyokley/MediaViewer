@@ -163,8 +163,8 @@ INSTALLED_APPS = (
 )
 
 AUTHENTICATION_BACKENDS = [
-    'mediaviewer.authenticators.Auth0SettingsAuthBackend',
-    'mediaviewer.authenticators.WaiterSettingsAuthBackend',
+    "mediaviewer.authenticators.Auth0SettingsAuthBackend",
+    "mediaviewer.authenticators.WaiterSettingsAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -204,9 +204,9 @@ LOGGING = {
 }
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211',
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "127.0.0.1:11211",
     }
 }
 SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -238,7 +238,7 @@ TEMPLATES = [
     },
 ]
 
-GRAPPELLI_ADMIN_TITLE = 'MediaViewer Admin'
+GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
 WAITER_HEAD = "http://"
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
@@ -285,18 +285,22 @@ MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
 
-USE_AUTH0 = (
-    os.environ.get('USE_AUTH0', 'true').lower() in ('true', 't', '1', 'y', 'yes')
+USE_AUTH0 = os.environ.get("USE_AUTH0", "true").lower() in (
+    "true",
+    "t",
+    "1",
+    "y",
+    "yes",
 )
 
 if USE_AUTH0:
     # Auth0 Settings
-    AUTH0_CLIENT_ID = os.environ.get('AUTH0_CLIENT_ID')
-    AUTH0_CLIENT_SECRET = os.environ.get('AUTH0_CLIENT_SECRET')
-    AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
-    AUTH0_LOGIN = 'auth0'
-    AUTH0_PASSWORD_HASH = os.environ.get('AUTH0_PASSWORD_HASH')
+    AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
+    AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET")
+    AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
+    AUTH0_LOGIN = "auth0"
+    AUTH0_PASSWORD_HASH = os.environ.get("AUTH0_PASSWORD_HASH")
 
 # MediaWaiter Settings
-WAITER_LOGIN = 'waiter'
-WAITER_PASSWORD_HASH = os.environ.get('WAITER_PASSWORD_HASH')
+WAITER_LOGIN = "waiter"
+WAITER_PASSWORD_HASH = os.environ.get("WAITER_PASSWORD_HASH")

@@ -37,7 +37,7 @@ coverage = "^4.5"
 django-silk = "^4.0"
 pytest-mock = "^3.6.1"
 Faker = "^10.0.0"
-black = "^21.12b0"
+black = "^23.3.0"
 
 [build-system]
 requires = ["poetry>=0.12"]

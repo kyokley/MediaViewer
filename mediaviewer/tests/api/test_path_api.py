@@ -329,9 +329,9 @@ class MoviePathViewSetTests(APITestCase):
         expected = {
             "skip": False,
             "number_of_unwatched_shows": 0,
-            "localpath": u"/another/local/path",
-            "server": u"a.server",
-            "remotepath": u"/another/local/path",
+            "localpath": "/another/local/path",
+            "server": "a.server",
+            "remotepath": "/another/local/path",
             "pk": self.moviePath.id,
             "finished": False,
             "is_movie": True,

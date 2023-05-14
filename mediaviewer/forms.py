@@ -200,18 +200,18 @@ def notify_admin_of_new_user(
     if from_email is None:
         from_email = conf_settings.EMAIL_FROM_ADDR
 
-    context = {'user': new_user}
-    subject = loader.render_to_string('mediaviewer/auth0_create_new_user_subject.txt')
+    context = {"user": new_user}
+    subject = loader.render_to_string("mediaviewer/auth0_create_new_user_subject.txt")
     # Email subject *must not* contain newlines
     subject = "".join(subject.splitlines())
-    body = loader.render_to_string('mediaviewer/auth0_create_new_user_email.html',
-                                   context)
-    to_emails = [user.email
-                 for user in User.objects.filter(is_staff=True) if user.email]
-
-    email_message = EmailMultiAlternatives(
-        subject, body, from_email, to_emails
+    body = loader.render_to_string(
+        "mediaviewer/auth0_create_new_user_email.html", context
     )
+    to_emails = [
+        user.email for user in User.objects.filter(is_staff=True) if user.email
+    ]
+
+    email_message = EmailMultiAlternatives(subject, body, from_email, to_emails)
 
     if html_email_template_name is not None:
         html_email = loader.render_to_string(html_email_template_name, context)

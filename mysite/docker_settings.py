@@ -34,9 +34,9 @@ if DEBUG:
 STATICFILES_DIRS += ("/node/node_modules",)
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': 'memcached:11211',
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "memcached:11211",
     }
 }
 
@@ -57,5 +57,5 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = "/code/mediaviewer/static/media/"
 
-if USE_AUTH0 and os.environ.get('NGROK_DOMAIN'):
-    ALLOWED_HOSTS.append(os.environ['NGROK_DOMAIN'])
+if USE_AUTH0 and os.environ.get("NGROK_DOMAIN"):
+    ALLOWED_HOSTS.append(os.environ["NGROK_DOMAIN"])

@@ -22,7 +22,6 @@ def remove_home_dir(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0033_auto_20190302_2010"),
     ]

@@ -3,9 +3,10 @@ from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 
+
 class SettingsBackend(BaseBackend):
     def _validate(self, username, password):
-        raise NotImplementedError('Function must be implemented by child classes')
+        raise NotImplementedError("Function must be implemented by child classes")
 
     def authenticate(self, request, username=None, password=None):
         valid = self._validate(username, password)
@@ -47,17 +48,18 @@ class Auth0SettingsAuthBackend(SettingsBackend):
     >>> hasher.encode(<password>, hasher.salt())
     'pbkdf2_sha256$260000$k5HZABEEptjiaWOdbTsZDy$BWkdWxyYO2XcQZIICi/5RKbICQvJEcwFZZbFpNENYiw='
     """
+
     def _validate(self, username, password):
         if not settings.USE_AUTH0:
             return False
 
-        login_valid = (settings.AUTH0_LOGIN == username)
+        login_valid = settings.AUTH0_LOGIN == username
         pwd_valid = check_password(password, settings.AUTH0_PASSWORD_HASH)
         return login_valid and pwd_valid
 
 
 class WaiterSettingsAuthBackend(SettingsBackend):
     def _validate(self, username, password):
-        login_valid = (settings.WAITER_LOGIN == username)
+        login_valid = settings.WAITER_LOGIN == username
         pwd_valid = check_password(password, settings.WAITER_PASSWORD_HASH)
         return login_valid and pwd_valid

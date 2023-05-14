@@ -5,15 +5,19 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0042_auto_20220319_1515'),
+        ("mediaviewer", "0042_auto_20220319_1515"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='usersettings',
-            name='last_watched',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='mediaviewer.path'),
+            model_name="usersettings",
+            name="last_watched",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="mediaviewer.path",
+            ),
         ),
     ]
