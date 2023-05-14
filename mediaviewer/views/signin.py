@@ -226,7 +226,7 @@ def signin(request):
                     )
                 else:
                     if user.is_active:
-                        login(request, user)
+                        login_user(request, user)
                         context["loggedin"] = True
                         context["user"] = request.user
                         LoginEvent.new(request.user)
