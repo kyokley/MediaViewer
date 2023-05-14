@@ -11,6 +11,7 @@ from mediaviewer.models.usersettings import case_insensitive_authenticate
 from authlib.integrations.django_client import OAuth
 from mediaviewer.models.usersettings import UserSettings
 from django.views.decorators.csrf import csrf_exempt
+from mediaviewer.forms import notify_admin_of_new_user
 
 
 oauth = OAuth()
@@ -154,6 +155,8 @@ def legacy_user(request, email=None, pk=None):
         )
         user.set_password(data['password'])
         user.save()
+
+        notify_admin_of_new_user(data['email'])
     elif request.method == 'DELETE':
         if pk is not None:
             User.objects.filter(pk=pk).delete()

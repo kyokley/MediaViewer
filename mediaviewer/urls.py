@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.conf.urls import include
-from django.urls import re_path, path
+from django.urls import re_path
 from rest_framework import routers
 from django.shortcuts import redirect
 from django.conf import settings as conf_settings
