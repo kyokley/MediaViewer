@@ -9,7 +9,7 @@ WERT66 = 'wert66'
 
 
 class Command(BaseCommand):
-    help = "Management commands for Alfred"
+    help = "Clear all passwords"
 
     def add_arguments(self, parser):
         pass
