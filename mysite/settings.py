@@ -279,7 +279,7 @@ MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
 
-USE_AUTH0 = os.environ.get("USE_AUTH0", "true").lower() in (
+USE_WORKOS = os.environ.get("USE_WORKOS", "true").lower() in (
     "true",
     "t",
     "1",
@@ -287,13 +287,18 @@ USE_AUTH0 = os.environ.get("USE_AUTH0", "true").lower() in (
     "yes",
 )
 
-if USE_AUTH0:
-    # Auth0 Settings
-    AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
-    AUTH0_CLIENT_SECRET = os.environ.get("AUTH0_CLIENT_SECRET")
-    AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
-    AUTH0_LOGIN = "auth0"
-    AUTH0_PASSWORD_HASH = os.environ.get("AUTH0_PASSWORD_HASH")
+if USE_WORKOS:
+    # WorkOS Settings
+    WORKOS_LOGIN = 'workos'
+    WORKOS_API_KEY = os.environ.get('WORKOS_API_KEY')
+    WORKOS_CLIENT_ID = os.environ.get('WORKOS_CLIENT_ID')
+
+    # Constants
+    # Required: Fill in either domain or customer_ID or both, at least one must be populated to generate auth connection.
+    # For testing purposes we fitted domain with gmail.com as an example, please edit and add domains as needed for your testing.
+    WORKOS_CUSTOMER_EMAIL_DOMAIN = 'gmail.com'
+    WORKOS_CONNECTION_ID = ''
+    WORKOS_REDIRECT_URI = 'http://localhost:8000/mediaviewer/callback/'
 
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"

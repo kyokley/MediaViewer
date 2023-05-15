@@ -1,5 +1,7 @@
 import base64
 import json
+import workos
+
 from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.contrib.auth import login as login_user, authenticate
@@ -8,7 +10,6 @@ from mediaviewer.models.loginevent import LoginEvent
 from django.http import JsonResponse
 from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import ImproperLogin, case_insensitive_authenticate
-from authlib.integrations.django_client import OAuth
 from mediaviewer.models.usersettings import UserSettings
 from django.views.decorators.csrf import csrf_exempt
 from mediaviewer.forms import notify_admin_of_new_user
@@ -19,24 +20,24 @@ from mediaviewer.views.views_utils import setSiteWideContext
 from django.http import HttpResponseRedirect
 
 
-if conf_settings.USE_AUTH0:
-    oauth = OAuth()
-
-    oauth.register(
-        "auth0",
-        client_id=conf_settings.AUTH0_CLIENT_ID,
-        client_secret=conf_settings.AUTH0_CLIENT_SECRET,
-        client_kwargs={
-            "scope": "openid profile email",
-        },
-        server_metadata_url=f"https://{conf_settings.AUTH0_DOMAIN}/.well-known/openid-configuration",
-    )
+if conf_settings.USE_WORKOS:
+    workos.base_api_url = ('http://localhost:8000/'
+                           if conf_settings.DEBUG else workos.base_api_url
+                           )
+    workos.api_key = conf_settings.WORKOS_API_KEY
+    workos.client_id = conf_settings.WORKOS_CLIENT_ID
 
 
 def login(request):
-    return oauth.auth0.authorize_redirect(
-        request, request.build_absolute_uri(reverse("mediaviewer:callback"))
+    import pdb; pdb.set_trace()  # ############################## Breakpoint ##############################
+    # TODO: Switch to just using passwordless logins?
+    authorization_url = workos.client.sso.get_authorization_url(
+        domain = conf_settings.WORKOS_CUSTOMER_EMAIL_DOMAIN,
+        redirect_uri=conf_settings.WORKOS_REDIRECT_URI,
+        state={},
+        connection= conf_settings.WORKOS_CONNECTION_ID
     )
+    return redirect(authorization_url)
 
 
 def _decode_auth_header(headers):
@@ -78,16 +79,21 @@ def _user_info_from_request(request, email=None):
 
 
 def callback(request):
-    token = oauth.auth0.authorize_access_token(request)
-    request.session["user"] = token
+    code = request.GET['code']
+    profile = workos.client.sso.get_profile_and_token(code)
+    p_profile = profile.to_dict()
 
-    username = token["userinfo"].get("nickname")
-    email = token["userinfo"].get("email")
+    raw_profile = p_profile['profile']
 
-    try:
-        user = User.objects.filter(is_active=True).get(username=username)
-    except User.DoesNotExist:
-        user = User.objects.filter(is_active=True).get(email=email)
+    # return render(request, 'sso/login_successful.html', {
+    #     "p_profile": p_profile,
+    #     "first_name": first_name,
+    #     "image": image,
+    #     "raw_profile": raw_profile
+    # })
+
+    email = raw_profile['email']
+    user = User.objects.filter(is_active=True).get(email=email)
 
     login_user(request, user, backend="django.contrib.auth.backends.ModelBackend")
     LoginEvent.new(request.user)

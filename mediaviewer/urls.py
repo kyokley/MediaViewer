@@ -159,17 +159,17 @@ urlpatterns = [
     ),
 ]
 
-if conf_settings.USE_AUTH0:
+if conf_settings.USE_WORKOS:
     urlpatterns.extend(
         [
             re_path(r"^login/$", signin.login, name="login"),
-            re_path(r"^logout/$", signout.logout, name="logout"),
+            # re_path(r"^logout/$", signout.logout, name="logout"),
             re_path(r"^callback/$", signin.callback, name="callback"),
-            re_path(r"^legacy_verify/$", signin.legacy_verify, name="legacy_verify"),
-            re_path(r"^legacy_user/(?P<pk>\d+)/delete$", signin.legacy_user),
-            re_path(r"^legacy_user/(?P<email>.*)/$", signin.legacy_user),
-            re_path(r"^legacy_user/$", signin.legacy_user),
-            re_path(r"^legacy_verify_email/$", signin.verify_email),
+            # re_path(r"^legacy_verify/$", signin.legacy_verify, name="legacy_verify"),
+            # re_path(r"^legacy_user/(?P<pk>\d+)/delete$", signin.legacy_user),
+            # re_path(r"^legacy_user/(?P<email>.*)/$", signin.legacy_user),
+            # re_path(r"^legacy_user/$", signin.legacy_user),
+            # re_path(r"^legacy_verify_email/$", signin.verify_email),
         ]
     )
 else:
