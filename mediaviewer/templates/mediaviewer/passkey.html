@@ -9,16 +9,10 @@
 
 {% block jumbotron %}
     <div class="jumbotron">
-        {% if not loggedin %}
-            <h1>View your media!</h1>
-            <p></p>
-            <p>{{ greeting }}</p>
-            <p></p>
-        {% else %}
-            <h1>Logged In!</h1>
-            <h3>You have logged in successfully</h3>
-            <a href="/mediaviewer/">Go Home</a>
-        {% endif %}
+        <h1>Register Passkey</h1>
+        <p></p>
+        <p>{{ greeting }}</p>
+        <p></p>
     </div>
 {% endblock %}
 
@@ -27,9 +21,9 @@
 {% block main %}
     {% if not loggedin %}
         {{ error_message }}
-        <form>
+        <form class="form-signin" role="form" method='post'>
             {% csrf_token %}
-            <h2 class="form-signin-heading">Please sign in</h2>
+            <h2 class="form-signin-heading">Store Passkey</h2>
             <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required autofocus style="display:none;">
             <input type="hidden" name="username" value="" id="username" />
             <!--
@@ -38,7 +32,7 @@
             <a href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
             <button class="btn btn-lg btn-primary btn-block login-submit-btn" type="submit" onclick="verify_passkey()">Sign in</button>
             -->
-            <button class="btn btn-lg btn-primary btn-block" onclick="verify_passkey()">Sign in</button>
+            <button class="btn btn-lg btn-primary btn-block" onclick="register_passkey()">Register</button>
             <input type="hidden" name="next" value="{{ next }}" id="next" />
         </form>
     {% endif %}
