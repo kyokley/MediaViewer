@@ -163,10 +163,20 @@ urlpatterns.extend(
     [
         re_path(r"^login/", signin.signin, name="signin"),
         re_path(
-            fr"^create-token/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
-            signin.create_token, name="create-token"),
-        re_path(r"^create-token-complete/", signin.create_token_complete, name="create-token-complete"),
-        re_path(r"^create-token-failed/", signin.create_token_failed, name="create-token-failed"),
+            rf"^create-token/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
+            signin.create_token,
+            name="create-token",
+        ),
+        re_path(
+            r"^create-token-complete/",
+            signin.create_token_complete,
+            name="create-token-complete",
+        ),
+        re_path(
+            r"^create-token-failed/",
+            signin.create_token_failed,
+            name="create-token-failed",
+        ),
         re_path(r"^verify-token/", signin.verify_token, name="verify-token"),
         re_path(r"^logout/", signout.signout, name="signout"),
     ]

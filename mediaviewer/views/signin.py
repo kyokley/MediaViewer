@@ -8,16 +8,24 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
-from django.contrib.auth.views import PasswordResetConfirmView, INTERNAL_RESET_SESSION_TOKEN
+from django.contrib.auth.views import (
+    PasswordResetConfirmView,
+    INTERNAL_RESET_SESSION_TOKEN,
+)
 from django.contrib.auth.tokens import default_token_generator
 from mediaviewer.models.loginevent import LoginEvent
 from django.conf import settings as conf_settings
-from mediaviewer.models.usersettings import ImproperLogin, case_insensitive_authenticate, UserSettings
+from mediaviewer.models.usersettings import (
+    ImproperLogin,
+    case_insensitive_authenticate,
+    UserSettings,
+)
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.utils import logAccessInfo
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.http import HttpResponseRedirect, JsonResponse
+
 
 def get_user(uidb64):
     try:
@@ -45,19 +53,20 @@ def create_token(request, uidb64):
     reset_token = request.session.get(INTERNAL_RESET_SESSION_TOKEN)
     ref_user = get_user(uidb64)
     if not default_token_generator.check_token(ref_user, reset_token):
-        raise ImproperLogin('Invalid Token')
+        raise ImproperLogin("Invalid Token")
 
-    payload = {'userId': f'{ref_user.pk}',
-               'username': ref_user.username,
-               'aliases': [ref_user.username, ref_user.email],
-               }
+    payload = {
+        "userId": f"{ref_user.pk}",
+        "username": ref_user.username,
+        "aliases": [ref_user.username, ref_user.email],
+    }
 
     resp = requests.post(
-        f'{conf_settings.PASSKEY_API_URL}/register/token',
+        f"{conf_settings.PASSKEY_API_URL}/register/token",
         json=payload,
         headers={
-            'ApiSecret': conf_settings.PASSKEY_API_PRIVATE_KEY,
-        }
+            "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
+        },
     )
     resp.raise_for_status()
     return JsonResponse(resp.json())
@@ -70,21 +79,21 @@ def create_token_complete(request):
 
 @csrf_exempt
 def verify_token(request):
-    token = request.GET['token']
+    token = request.GET["token"]
 
-    payload = {'token': token}
+    payload = {"token": token}
 
     resp = requests.post(
-        f'{conf_settings.PASSKEY_API_URL}/signin/verify',
+        f"{conf_settings.PASSKEY_API_URL}/signin/verify",
         json=payload,
         headers={
-            'ApiSecret': conf_settings.PASSKEY_API_PRIVATE_KEY,
-        }
+            "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
+        },
     )
     resp.raise_for_status()
     json_data = resp.json()
 
-    user = User.objects.get(pk=json_data['userId'])
+    user = User.objects.get(pk=json_data["userId"])
     context = {"loggedin": True}
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context["active_page"] = "signin"
@@ -100,12 +109,12 @@ def verify_token(request):
                 credentials={"username": user.username},
                 request=request,
             )
-            raise ImproperLogin(
-                "User could not be logged in. E101"
-            )
+            raise ImproperLogin("User could not be logged in. E101")
         else:
             if user.is_active:
-                login_user(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                login_user(
+                    request, user, backend="django.contrib.auth.backends.ModelBackend"
+                )
                 context["loggedin"] = True
                 context["user"] = request.user
                 LoginEvent.new(request.user)
@@ -132,7 +141,7 @@ def verify_token(request):
             context["error_message"] = "Incorrect username or password!"
 
     if user and user.is_authenticated and not context.get("error_message"):
-        context['loggedin'] = True
+        context["loggedin"] = True
         settings = user.settings()
         setSiteWideContext(context, request)
         if not user.email or settings.force_password_change:

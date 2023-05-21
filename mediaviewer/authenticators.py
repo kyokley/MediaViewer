@@ -48,6 +48,7 @@ class WaiterSettingsAuthBackend(SettingsBackend):
     >>> hasher.encode(<password>, hasher.salt())
     'pbkdf2_sha256$260000$k5HZABEEptjiaWOdbTsZDy$BWkdWxyYO2XcQZIICi/5RKbICQvJEcwFZZbFpNENYiw='
     """
+
     def _validate(self, username, password):
         login_valid = settings.WAITER_LOGIN == username
         pwd_valid = check_password(password, settings.WAITER_PASSWORD_HASH)
