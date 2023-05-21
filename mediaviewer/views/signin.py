@@ -67,6 +67,7 @@ def create_token(request, uidb64):
         headers={
             "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
         },
+        timeout=conf_settings.REQUEST_TIMEOUT,
     )
     resp.raise_for_status()
     return JsonResponse(resp.json())
@@ -89,6 +90,7 @@ def verify_token(request):
         headers={
             "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
         },
+        timeout=conf_settings.REQUEST_TIMEOUT,
     )
     resp.raise_for_status()
     json_data = resp.json()
