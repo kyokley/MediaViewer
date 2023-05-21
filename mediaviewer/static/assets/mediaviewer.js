@@ -418,10 +418,14 @@ async function register_passkey(){
 }
 
 async function verify_passkey(){
-    var username = document.getElementById('username-textbox').value;
     const { token, error } =  await passkey_client.signinWithDiscoverable();
 
-    window.location.replace('/mediaviewer/verify-token/?token=' + token);
+    if(token){
+        window.location.href = '/mediaviewer/verify-token/?token=' + token;
+    }
+
+    var username_element = document.getElementById('username-textbox');
+    debugger;
 }
 
 function hasScrolled(){
