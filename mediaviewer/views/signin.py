@@ -1,11 +1,15 @@
 import requests
 import json
 
+from django.core.exceptions import ValidationError
+from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
+from django.contrib.auth.views import PasswordResetConfirmView, INTERNAL_RESET_SESSION_TOKEN
+from django.contrib.auth.tokens import default_token_generator
 from mediaviewer.models.loginevent import LoginEvent
 from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import ImproperLogin, case_insensitive_authenticate, UserSettings
@@ -15,28 +19,36 @@ from django.contrib.auth.signals import user_logged_in, user_login_failed
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.http import HttpResponseRedirect, JsonResponse
 
+def get_user(uidb64):
+    try:
+        # urlsafe_base64_decode() decodes to bytestring
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (
+        TypeError,
+        ValueError,
+        OverflowError,
+        User.DoesNotExist,
+        ValidationError,
+    ):
+        user = None
+    return user
+
+
+def create_token_failed(request):
+    context = {}
+    return render(request, "mediaviewer/passkey_create_failed.html", context)
+
 
 @csrf_exempt
-def create_token(request):
-    json_data = json.loads(request.body)
-    username = json_data["username"]
-    try:
-        ref_user = User.objects.get(username__iexact=username)
-
-    except User.DoesNotExist:
-        try:
-            ref_user = User.objects.get(email__iexact=username)
-        except User.DoesNotExist:
-
-            ref_user = UserSettings.new(username,
-                                        username,
-                                        verified=True,
-                                        can_download=False,
-                                        send_email=False,
-                                        )
+def create_token(request, uidb64):
+    reset_token = request.session.get(INTERNAL_RESET_SESSION_TOKEN)
+    ref_user = get_user(uidb64)
+    if not default_token_generator.check_token(ref_user, reset_token):
+        raise ImproperLogin('Invalid Token')
 
     payload = {'userId': f'{ref_user.pk}',
-               'username': username,
+               'username': ref_user.username,
                'aliases': [ref_user.username, ref_user.email],
                }
 
@@ -49,6 +61,11 @@ def create_token(request):
     )
     resp.raise_for_status()
     return JsonResponse(resp.json())
+
+
+def create_token_complete(request):
+    context = {}
+    return render(request, "mediaviewer/passkey_complete.html", context)
 
 
 @csrf_exempt

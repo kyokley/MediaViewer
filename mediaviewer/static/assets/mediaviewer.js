@@ -1,4 +1,3 @@
-//import { Client } from '@passwordlessdev/passwordless-client';
 const passkey_client = new Passwordless.Client({ apiKey: "mediaviewer:public:8cd7916568ca470cb0738f8ce8d20f18" })
 
 var tableElement;
@@ -388,11 +387,6 @@ function validatePassword(password){
 }
 
 async function register_passkey(){
-    var username = document.getElementById('username-textbox').value;
-
-    user = {
-        "username": username
-    }
     let options = {
             method: 'POST',
             headers: {
@@ -401,15 +395,22 @@ async function register_passkey(){
                     'application/json;charset=utf-8',
                 "csrfmiddlewaretoken": csrf_token,
             },
-            body: JSON.stringify(user)
         }
     try{
-        const fetch_resp = await fetch('/mediaviewer/create-token/', options);
+        create_token_path = document.location.pathname.replace('user/reset', 'create-token');
+        const fetch_resp = await fetch(create_token_path, options);
         fetch_json = await fetch_resp.json();
         if(fetch_json){
             var register_token = fetch_json['token'];
             const { token, error } = await passkey_client.register(register_token);
             console.log('token: ' + token);
+            console.log('error: ' + error);
+            if(token){
+            window.location.href = '/mediaviewer/create-token-complete/';
+            }else{
+            window.location.href = '/mediaviewer/create-token-failed/';
+            }
+            return;
         }
     } catch(err) {
         console.log(err);
@@ -422,10 +423,10 @@ async function verify_passkey(){
 
     if(token){
         window.location.href = '/mediaviewer/verify-token/?token=' + token;
+        return;
     }
 
-    var username_element = document.getElementById('username-textbox');
-    debugger;
+    window.location.href = '/mediaviewer/user/reset/';
 }
 
 function hasScrolled(){

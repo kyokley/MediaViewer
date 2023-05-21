@@ -19,23 +19,20 @@
 {% include messages %}
 
 {% block main %}
-    {% if not loggedin %}
-        {{ error_message }}
-        <form class="form-signin" role="form" method='post'>
-            {% csrf_token %}
-            <h2 class="form-signin-heading">Store Passkey</h2>
-            <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required autofocus style="display:none;">
-            <input type="hidden" name="username" value="" id="username" />
-            <!--
-            <input type="password" id="password-textbox" class="form-control" placeholder="Password" required>
-            <input type="hidden" name="password" value="" id="password" />
-            <a href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
-            <button class="btn btn-lg btn-primary btn-block login-submit-btn" type="submit" onclick="verify_passkey()">Sign in</button>
-            -->
-            <button class="btn btn-lg btn-primary btn-block" onclick="register_passkey()">Register</button>
-            <input type="hidden" name="next" value="{{ next }}" id="next" />
-        </form>
-    {% endif %}
+    <form class="form-signin" role="form" method='post'>
+        {% csrf_token %}
+        <h2 class="form-signin-heading">Store Passkey</h2>
+        <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required autofocus style="display:none;">
+        <input type="hidden" name="username" value="" id="username" />
+        <!--
+        <input type="password" id="password-textbox" class="form-control" placeholder="Password" required>
+        <input type="hidden" name="password" value="" id="password" />
+        <a href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
+        <button class="btn btn-lg btn-primary btn-block login-submit-btn" type="submit" onclick="verify_passkey()">Sign in</button>
+        -->
+        <button class="btn btn-lg btn-primary btn-block" onclick="register_passkey()">Register</button>
+        <input type="hidden" name="next" value="{{ next }}" id="next" />
+    </form>
 {% endblock %}
 
 {% include footer %}

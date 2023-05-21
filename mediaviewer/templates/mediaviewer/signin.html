@@ -27,10 +27,10 @@
 {% block main %}
     {% if not loggedin %}
         {{ error_message }}
-        <form>
+    <form class="form-signin" role="form" method='post'>
             {% csrf_token %}
             <h2 class="form-signin-heading">Please sign in</h2>
-            <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required autofocus style="display:none;">
+            <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required style="display:none;">
             <input type="hidden" name="username" value="" id="username" />
             <!--
             <input type="password" id="password-textbox" class="form-control" placeholder="Password" required>
