@@ -163,7 +163,6 @@ INSTALLED_APPS = (
 )
 
 AUTHENTICATION_BACKENDS = [
-    "mediaviewer.authenticators.Auth0SettingsAuthBackend",
     "mediaviewer.authenticators.WaiterSettingsAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]

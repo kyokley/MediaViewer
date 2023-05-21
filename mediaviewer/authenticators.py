@@ -37,7 +37,7 @@ class WaiterSettingsAuthBackend(SettingsBackend):
 
     Use the login name and a hash of the password. For example:
 
-    WAITER_LOGIN = 'auth0'
+    WAITER_LOGIN = 'waiter'
     WAITER_PASSWORD = (
         'pbkdf2_sha256$30000$Vo0VlMnkR4Bk$qEvtdyZRWTcOsCnI/oQ7fVOu1XAURIZYoOZ3iq8Dr4M='
         )
