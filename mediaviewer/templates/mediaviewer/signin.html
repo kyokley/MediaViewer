@@ -27,17 +27,20 @@
 {% block main %}
     {% if not loggedin %}
         {{ error_message }}
-        <form action="{% url 'mediaviewer:signin' %}" class="form-signin" role="form" method='post'>
+        <div>
             {% csrf_token %}
             <h2 class="form-signin-heading">Please sign in</h2>
-            <input type="text" id="username-textbox" class="form-control" placeholder="Username" required autofocus>
+            <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required autofocus>
             <input type="hidden" name="username" value="" id="username" />
+            <!--
             <input type="password" id="password-textbox" class="form-control" placeholder="Password" required>
             <input type="hidden" name="password" value="" id="password" />
             <a href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
-            <button class="btn btn-lg btn-primary btn-block login-submit-btn" type="submit">Sign in</button>
+            <button class="btn btn-lg btn-primary btn-block login-submit-btn" type="submit" onclick="verify_passkey()">Sign in</button>
+            -->
+            <button class="btn btn-lg btn-primary btn-block" onclick="verify_passkey()">Sign in</button>
             <input type="hidden" name="next" value="{{ next }}" id="next" />
-        </form>
+        </div>
     {% endif %}
 {% endblock %}
 

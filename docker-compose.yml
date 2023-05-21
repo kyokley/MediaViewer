@@ -20,7 +20,7 @@ services:
           context: .
         environment:
             - DJANGO_SETTINGS_MODULE=mysite.docker_settings
-            - USE_AUTH0=false
+            - USE_PASSKEY=false
             - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
         command:
             sh -c "/venv/bin/python manage.py collectstatic --no-input &&

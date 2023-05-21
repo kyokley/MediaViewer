@@ -49,6 +49,3 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = "/code/mediaviewer/static/media/"
-
-if USE_AUTH0 and os.environ.get("NGROK_DOMAIN"):
-    ALLOWED_HOSTS.append(os.environ["NGROK_DOMAIN"])

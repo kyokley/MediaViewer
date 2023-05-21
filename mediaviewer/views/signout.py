@@ -1,28 +1,9 @@
 from django.contrib.auth.models import User
-from django.urls import reverse
-from django.shortcuts import redirect
-from urllib.parse import quote_plus, urlencode
-from django.conf import settings as conf_settings
-from mediaviewer.utils import logAccessInfo
-from mediaviewer.views.views_utils import setSiteWideContext
-from django.contrib.auth.signals import user_logged_out
 from django.shortcuts import render
-
-
-def logout(request):
-    request.session.clear()
-
-    if conf_settings.USE_AUTH0:
-        return redirect(
-            f"https://{conf_settings.AUTH0_DOMAIN}/v2/logout?"
-            + urlencode(
-                {
-                    "returnTo": request.build_absolute_uri(reverse("mediaviewer:home")),
-                    "client_id": conf_settings.AUTH0_CLIENT_ID,
-                },
-                quote_via=quote_plus,
-            ),
-        )
+from mediaviewer.views.views_utils import setSiteWideContext
+from django.contrib.auth import logout
+from django.contrib.auth.signals import user_logged_out
+from mediaviewer.utils import logAccessInfo
 
 
 @logAccessInfo

@@ -1,3 +1,6 @@
+//import { Client } from '@passwordlessdev/passwordless-client';
+const passkey_client = new Passwordless.Client({ apiKey: "mediaviewer:public:8cd7916568ca470cb0738f8ce8d20f18" })
+
 var tableElement;
 var csrf_token;
 var didScroll;
@@ -382,6 +385,43 @@ function validatePassword(password){
     var char_regex = /[^0-9]/;
     var test_string = String(password);
     return test_string.search(digit_regex) !== -1 && test_string.search(char_regex) !== -1 && test_string.length >= 6
+}
+
+async function register_passkey(){
+    var username = document.getElementById('username-textbox').value;
+
+    user = {
+        "username": username
+    }
+    let options = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type':
+                    'application/json;charset=utf-8',
+                "csrfmiddlewaretoken": csrf_token,
+            },
+            body: JSON.stringify(user)
+        }
+    try{
+        const fetch_resp = await fetch('/mediaviewer/create-token/', options);
+        fetch_json = await fetch_resp.json();
+        if(fetch_json){
+            var register_token = fetch_json['token'];
+            const { token, error } = await passkey_client.register(register_token);
+            console.log('token: ' + token);
+        }
+    } catch(err) {
+        console.log(err);
+    }
+
+}
+
+async function verify_passkey(){
+    var username = document.getElementById('username-textbox').value;
+    const { token, error } =  await passkey_client.signinWithDiscoverable();
+
+    window.location.replace('/mediaviewer/verify-token/?token=' + token);
 }
 
 function hasScrolled(){

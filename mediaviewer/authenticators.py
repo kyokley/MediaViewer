@@ -31,14 +31,14 @@ class SettingsBackend(BaseBackend):
             return None
 
 
-class Auth0SettingsAuthBackend(SettingsBackend):
+class WaiterSettingsAuthBackend(SettingsBackend):
     """
-    Authenticate against the settings AUTH0_LOGIN and AUTH0_PASSWORD.
+    Authenticate against the settings WAITER_LOGIN and WAITER_PASSWORD_HASH.
 
     Use the login name and a hash of the password. For example:
 
-    AUTH0_LOGIN = 'auth0'
-    AUTH0_PASSWORD = (
+    WAITER_LOGIN = 'auth0'
+    WAITER_PASSWORD = (
         'pbkdf2_sha256$30000$Vo0VlMnkR4Bk$qEvtdyZRWTcOsCnI/oQ7fVOu1XAURIZYoOZ3iq8Dr4M='
         )
 
@@ -48,17 +48,6 @@ class Auth0SettingsAuthBackend(SettingsBackend):
     >>> hasher.encode(<password>, hasher.salt())
     'pbkdf2_sha256$260000$k5HZABEEptjiaWOdbTsZDy$BWkdWxyYO2XcQZIICi/5RKbICQvJEcwFZZbFpNENYiw='
     """
-
-    def _validate(self, username, password):
-        if not settings.USE_AUTH0:
-            return False
-
-        login_valid = settings.AUTH0_LOGIN == username
-        pwd_valid = check_password(password, settings.AUTH0_PASSWORD_HASH)
-        return login_valid and pwd_valid
-
-
-class WaiterSettingsAuthBackend(SettingsBackend):
     def _validate(self, username, password):
         login_valid = settings.WAITER_LOGIN == username
         pwd_valid = check_password(password, settings.WAITER_PASSWORD_HASH)
