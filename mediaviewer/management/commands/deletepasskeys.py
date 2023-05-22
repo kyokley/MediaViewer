@@ -25,15 +25,21 @@ class Command(BaseCommand):
         user = self.get_user(userid)
 
         if user is None:
-            self.stdout.write(self.style.WARNING(f'Could not find user for userid={userid}'))
-            self.stdout.write(self.style.WARNING(f'Attempting to query bitwarden database directly with {userid}'))
+            self.stdout.write(
+                self.style.WARNING(f"Could not find user for userid={userid}")
+            )
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Attempting to query bitwarden database directly with {userid}"
+                )
+            )
             username = userid
         else:
             username = user.username
 
         resp = requests.get(
             f"{conf_settings.PASSKEY_API_URL}/credentials/list",
-            params={'userId': username},
+            params={"userId": username},
             headers={
                 "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
             },
@@ -42,7 +48,7 @@ class Command(BaseCommand):
         resp.raise_for_status()
         json_data = resp.json()
 
-        creds = [x['descriptor']['id'] for x in json_data['values']]
+        creds = [x["descriptor"]["id"] for x in json_data["values"]]
 
         for cred in creds:
             payload = {
@@ -58,7 +64,7 @@ class Command(BaseCommand):
                 timeout=conf_settings.REQUEST_TIMEOUT,
             )
             resp.raise_for_status()
-            self.stdout.write(self.style.SUCCESS(f'Deleted {cred}'))
+            self.stdout.write(self.style.SUCCESS(f"Deleted {cred}"))
 
     def get_user(self, userid):
         try:
@@ -77,6 +83,8 @@ class Command(BaseCommand):
                 except Exception as e:
                     self.stdout.write("Failed to get user by email")
                     self.stdout.write(self.style.WARNING(e))
-                    self.stdout.write(self.style.ERROR("No remaining methods to attempt"))
+                    self.stdout.write(
+                        self.style.ERROR("No remaining methods to attempt")
+                    )
                     return None
         return user
