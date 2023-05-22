@@ -280,18 +280,9 @@ MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
 
-USE_PASSKEY = os.environ.get("USE_PASSKEY", "true").lower() in (
-    "true",
-    "t",
-    "1",
-    "y",
-    "yes",
-)
-
-if USE_PASSKEY:
-    # PassKey Settings
-    PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")
-    PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
+# PassKey Settings
+PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")
+PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
 
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"
