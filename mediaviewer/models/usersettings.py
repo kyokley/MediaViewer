@@ -144,7 +144,7 @@ class UserSettings(models.Model):
             newUser,
             ip_format=ip_format,
             default_sort=default_sort,
-            can_login=False,
+            can_login=True,
             can_download=can_download,
             binge_mode=binge_mode,
             jump_to_last_watched=jump_to_last_watched,

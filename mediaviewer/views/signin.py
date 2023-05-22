@@ -56,9 +56,9 @@ def create_token(request, uidb64):
         raise ImproperLogin("Invalid Token")
 
     payload = {
-        "userId": f"{ref_user.pk}",
+        "userId": ref_user.username,
         "username": ref_user.username,
-        "aliases": [ref_user.username, ref_user.email],
+        'aliasHashing': False,
     }
 
     resp = requests.post(
@@ -95,8 +95,12 @@ def verify_token(request):
     resp.raise_for_status()
     json_data = resp.json()
 
-    user = User.objects.get(pk=json_data["userId"])
-    context = {"loggedin": True}
+    try:
+        user = User.objects.get(username__iexact=json_data["userId"])
+    except Exception:
+        user = User.objects.get(pk=json_data["userId"])
+
+    context = {"loggedin": False}
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context["active_page"] = "signin"
     context["greeting"] = siteGreeting and siteGreeting.greeting or "SignIn"
@@ -143,7 +147,6 @@ def verify_token(request):
             context["error_message"] = "Incorrect username or password!"
 
     if user and user.is_authenticated and not context.get("error_message"):
-        context["loggedin"] = True
         settings = user.settings()
         setSiteWideContext(context, request)
         if not user.email or settings.force_password_change:

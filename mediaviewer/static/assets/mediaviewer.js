@@ -398,6 +398,7 @@ async function register_passkey(){
         }
     try{
         create_token_path = document.location.pathname.replace('user/reset', 'create-token');
+        create_token_path = create_token_path.replace('user/create', 'create-token');
         const fetch_resp = await fetch(create_token_path, options);
         fetch_json = await fetch_resp.json();
         if(fetch_json){
@@ -414,6 +415,7 @@ async function register_passkey(){
         }
     } catch(err) {
         console.log(err);
+        window.location.href = '/mediaviewer/create-token-failed/';
     }
 
 }
