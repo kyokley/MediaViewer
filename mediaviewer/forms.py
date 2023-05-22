@@ -187,25 +187,3 @@ class FormlessPasswordReset(PasswordResetFormWithBCC):
             from_email=from_email,
             request=request,
         )
-
-
-class EmailBasedLogin(FormlessPasswordReset):
-    def save(
-        self,
-        domain_override=None,
-        subject_template_name="mediaviewer/email_based_login_subject.txt",
-        email_template_name="mediaviewer/email_based_login.html",
-        use_https=False,
-        token_generator=default_token_generator,
-        from_email=None,
-        request=None,
-    ):
-        super().save(
-            domain_override=domain_override,
-            subject_template_name=subject_template_name,
-            email_template_name=email_template_name,
-            use_https=use_https,
-            token_generator=token_generator,
-            from_email=from_email,
-            request=request,
-        )
