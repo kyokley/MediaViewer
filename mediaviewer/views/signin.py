@@ -1,5 +1,4 @@
 import requests
-import json
 
 from django.core.exceptions import ValidationError
 from django.utils.http import urlsafe_base64_decode
@@ -9,7 +8,6 @@ from django.shortcuts import render
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
 from django.contrib.auth.views import (
-    PasswordResetConfirmView,
     INTERNAL_RESET_SESSION_TOKEN,
 )
 from django.contrib.auth.tokens import default_token_generator
@@ -18,7 +16,6 @@ from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import (
     ImproperLogin,
     case_insensitive_authenticate,
-    UserSettings,
 )
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.utils import logAccessInfo
