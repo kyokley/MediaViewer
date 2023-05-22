@@ -58,7 +58,7 @@ def create_token(request, uidb64):
     payload = {
         "userId": ref_user.username,
         "username": ref_user.username,
-        'aliasHashing': False,
+        "aliasHashing": False,
     }
 
     resp = requests.post(

@@ -21,11 +21,11 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):
-        userid = self.get_user(kwargs['user'])
+        userid = self.get_user(kwargs["user"])
         user = self.get_user(userid)
 
         payload = {
-            'credentialId': None,
+            "credentialId": None,
         }
         resp = requests.post(
             f"{conf_settings.PASSKEY_API_URL}/signin/verify",
@@ -42,19 +42,19 @@ class Command(BaseCommand):
         try:
             user = User.objects.get(pk=userid)
         except Exception as e:
-            self.write('Failed to get user by pk')
+            self.write("Failed to get user by pk")
             self.write(self.style.WARNING(e))
             try:
                 user = User.objects.get(username=userid)
             except Exception as e:
-                self.write('Failed to get user by username')
+                self.write("Failed to get user by username")
                 self.write(self.style.WARNING(e))
 
                 try:
                     user = User.objects.get(email__iexact=userid)
                 except Exception as e:
-                    self.write('Failed to get user by email')
+                    self.write("Failed to get user by email")
                     self.write(self.style.WARNING(e))
-                    self.write(self.style.ERROR('No remaining methods to attempt'))
+                    self.write(self.style.ERROR("No remaining methods to attempt"))
                     return None
         return user
