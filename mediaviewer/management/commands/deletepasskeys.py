@@ -25,11 +25,15 @@ class Command(BaseCommand):
         user = self.get_user(userid)
 
         if user is None:
-            raise ValueError(f'Could not find user for userid={userid}')
+            self.stdout.write(self.style.WARNING(f'Could not find user for userid={userid}'))
+            self.stdout.write(self.style.WARNING(f'Attempting to query bitwarden database directly with {userid}'))
+            username = userid
+        else:
+            username = user.username
 
         resp = requests.get(
             f"{conf_settings.PASSKEY_API_URL}/credentials/list",
-            params={'userId': user.username},
+            params={'userId': username},
             headers={
                 "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
             },
