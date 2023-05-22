@@ -87,7 +87,7 @@ class UserSettings(models.Model):
         newSettings.user = user
         newSettings.ip_format = ip_format
         newSettings.default_sort = default_sort
-        newSettings._can_download = can_download
+        newSettings.can_download = can_download
         newSettings.can_login = can_login
         newSettings.binge_mode = binge_mode
         newSettings.jump_to_last_watched = jump_to_last_watched

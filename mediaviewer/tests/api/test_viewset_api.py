@@ -1,4 +1,3 @@
-from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -20,7 +19,7 @@ class DownloadTokenViewSetTests(APITestCase):
         self.user_settings = UserSettings()
         self.user_settings.user = self.test_user
         self.user_settings.ip_format = "bangup"
-        self.user_settings._can_download = True
+        self.user_settings.can_download = True
         self.user_settings.datecreated = datetime.now(pytz.timezone("US/Central"))
         self.user_settings.dateedited = datetime.now(pytz.timezone("US/Central"))
         self.user_settings.save()
