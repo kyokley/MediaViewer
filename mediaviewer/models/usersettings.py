@@ -41,7 +41,7 @@ class UserSettings(models.Model):
         db_column="userid",
         blank=False,
     )
-    _can_download = models.BooleanField(
+    can_download = models.BooleanField(
         db_column="can_download", blank=False, null=False
     )
     default_sort = models.TextField(db_column="default_sort")
@@ -56,7 +56,6 @@ class UserSettings(models.Model):
         "mediaviewer.Path", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
-    verified = models.BooleanField(blank=False, null=False, default=True)
 
     class Meta:
         app_label = "mediaviewer"
@@ -65,10 +64,6 @@ class UserSettings(models.Model):
 
     def __str__(self):
         return f"id: {self.id} u: {self.user.username} ip: {self.ip_format}"
-
-    @property
-    def can_download(self):
-        return self._can_download and self.verified
 
     @classmethod
     def getSettings(cls, user):
@@ -85,7 +80,6 @@ class UserSettings(models.Model):
         can_download=True,
         binge_mode=True,
         jump_to_last_watched=True,
-        verified=False,
     ):
         newSettings = cls()
         newSettings.datecreated = datetime.now(pytz.timezone(settings.TIME_ZONE))
@@ -97,7 +91,6 @@ class UserSettings(models.Model):
         newSettings.can_login = can_login
         newSettings.binge_mode = binge_mode
         newSettings.jump_to_last_watched = jump_to_last_watched
-        newSettings.verified = verified
         newSettings.save()
         return newSettings
 
@@ -109,7 +102,6 @@ class UserSettings(models.Model):
         email,
         is_staff=False,
         is_superuser=False,
-        verified=False,
         ip_format=BANGUP_IP,
         default_sort=FILENAME_SORT,
         can_download=True,
@@ -148,7 +140,6 @@ class UserSettings(models.Model):
             can_download=can_download,
             binge_mode=binge_mode,
             jump_to_last_watched=jump_to_last_watched,
-            verified=verified,
         )
 
         if group:

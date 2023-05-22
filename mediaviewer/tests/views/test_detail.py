@@ -185,7 +185,7 @@ class TestFilesDetail:
         mv_group.save()
 
         self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False, verified=True
+            "test_user", "a@b.com", send_email=False
         )
         settings = self.user.settings()
         settings.force_password_change = False
