@@ -18,7 +18,7 @@ ID_REGEX = re.compile(r"\d+")
 @logAccessInfo
 def submitsitewidemessage(request):
     user = request.user
-    context = {}
+    context = {'successful': True}
     context["active_page"] = "submitsitewidemessage"
     setSiteWideContext(context, request)
 
