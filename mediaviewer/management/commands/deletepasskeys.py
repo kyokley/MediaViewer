@@ -21,7 +21,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):
-        userid = self.get_user(kwargs["user"])
+        userid = kwargs["user"]
         user = self.get_user(userid)
 
         if user is None:
