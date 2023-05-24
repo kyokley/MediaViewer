@@ -7,9 +7,7 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
-from django.contrib.auth.views import (
-    INTERNAL_RESET_SESSION_TOKEN,
-)
+from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 from django.contrib.auth.tokens import default_token_generator
 from mediaviewer.models.loginevent import LoginEvent
 from django.conf import settings as conf_settings
