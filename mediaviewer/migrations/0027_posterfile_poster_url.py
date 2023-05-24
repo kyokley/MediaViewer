@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0026_remove_usersettings_auto_download"),
     ]

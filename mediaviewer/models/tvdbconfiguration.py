@@ -191,7 +191,7 @@ def _getDataFromIMDBByID(imdb_id, isMovie=True):
                 url = "https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={api_key}".format(
                     tmdb_id=tmdb_id, api_key=settings.API_KEY
                 )
-            elif resp.get('tv_episode_results'):
+            elif resp.get("tv_episode_results"):
                 tmdb_id = resp.get("tv_episode_results")[0]["id"]
                 url = "https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={api_key}".format(
                     tmdb_id=tmdb_id, api_key=settings.API_KEY

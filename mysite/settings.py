@@ -129,16 +129,9 @@ MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "mediaviewer.middleware.AutoLogout",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_referrer_policy.middleware.ReferrerPolicyMiddleware",
     "mediaviewer.middleware.set_secure_headers",
-    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
-    # It only formats user lockout messages and renders Axes lockout responses
-    # on failed user authentication attempts from login views.
-    # If you do not want Axes to override the authentication response
-    # you can skip installing the middleware and use your own views.
-    "axes.middleware.AxesMiddleware",
 )
 
 # Auto logout delay in minutes
@@ -156,7 +149,6 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "axes",
     "django_extensions",
     "grappelli",  # Required to come before django.contrib.admin
     # Uncomment the next line to enable the admin:
@@ -171,9 +163,7 @@ INSTALLED_APPS = (
 )
 
 AUTHENTICATION_BACKENDS = [
-    # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    "axes.backends.AxesBackend",
-    # Django ModelBackend is the default authentication backend.
+    "mediaviewer.authenticators.WaiterSettingsAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -212,15 +202,6 @@ LOGGING = {
     },
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
-AXES_COOLOFF_TIME = 24  # in hours
-AXES_FAILURE_LIMIT = 10
-
 SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 LOG_DIR = os.path.join(SYSTEM_BASE_PATH, "logs")
 LOG_FILE_NAME = os.path.join(LOG_DIR, "mediaviewerLog")
@@ -250,7 +231,7 @@ TEMPLATES = [
     },
 ]
 
-GRAPPELLI_ADMIN_TITLE = 'MediaViewer Admin'
+GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
 WAITER_HEAD = "http://"
 LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
@@ -290,9 +271,19 @@ EMAIL_USE_TLS = False
 EMAIL_FROM_ADDR = DEFAULT_FROM_EMAIL = "testing@example.com"
 BYPASS_SMTPD_CHECK = False
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 MINIMUM_PASSWORD_LENGTH = 6
 
 MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
+
+# PassKey Settings
+PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")
+PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
+
+# MediaWaiter Settings
+WAITER_LOGIN = "waiter"
+WAITER_PASSWORD_HASH = os.environ.get("WAITER_PASSWORD_HASH")

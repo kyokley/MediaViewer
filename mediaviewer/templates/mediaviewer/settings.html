@@ -33,23 +33,9 @@
         </div>
 
         <div class="well well-sm">
-            <h2>Password Settings</h2>
-            <ul>
-                <div class="input">
-                    <a href='/mediaviewer/user/change_password/' id='change_password_btn' name='change_password_btn' class="btn btn-info"/>Change Password</a>
-                </div>
-            </ul>
-        </div>
-        <div class="well well-sm">
             <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
                 {% csrf_token %}
                 <h2>Account Settings</h2>
-                <ul>
-                    <label>Email Address:</label>
-                    <div class="input">
-                        <input class="form-control email-field" type="text" name="email_field" placeholder="Email" id="email_field" value="{{ email }}"/>
-                    </div>
-                </ul>
                 <ul>
                     <label>Default Sort Field:</label>
                     <div class="input">

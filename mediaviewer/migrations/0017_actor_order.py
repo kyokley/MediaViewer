@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0016_posterfile_tmdb_id"),
     ]

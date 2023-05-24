@@ -7,7 +7,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0008_auto_20161229_0808"),
     ]

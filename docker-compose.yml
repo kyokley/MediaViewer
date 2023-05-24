@@ -14,20 +14,13 @@ services:
         networks:
           - mediaviewer-backend
 
-    memcached:
-        hostname: memcached
-        image: memcached
-        ports:
-          - "11211:11211"
-        networks:
-          - mediaviewer-backend
-
     mediaviewer:
         image: kyokley/mediaviewer
         build:
           context: .
         environment:
             - DJANGO_SETTINGS_MODULE=mysite.docker_settings
+            - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
         command:
             sh -c "/venv/bin/python manage.py collectstatic --no-input &&
                    /venv/bin/python manage.py migrate &&

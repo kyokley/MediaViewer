@@ -63,8 +63,6 @@ urlpatterns = [
         detail.autoplaydownloadlink,
         name="autoplaydownloadlink",
     ),
-    re_path(r"^login/", signin.signin, name="signin"),
-    re_path(r"^logout/", signout.signout, name="signout"),
     re_path(r"^settings/", settings.settings, name="settings"),
     re_path(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
     re_path(
@@ -160,6 +158,29 @@ urlpatterns = [
         name="change_password_submit",
     ),
 ]
+
+urlpatterns.extend(
+    [
+        re_path(r"^login/", signin.signin, name="signin"),
+        re_path(
+            rf"^create-token/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
+            signin.create_token,
+            name="create-token",
+        ),
+        re_path(
+            r"^create-token-complete/",
+            signin.create_token_complete,
+            name="create-token-complete",
+        ),
+        re_path(
+            r"^create-token-failed/",
+            signin.create_token_failed,
+            name="create-token-failed",
+        ),
+        re_path(r"^verify-token/", signin.verify_token, name="verify-token"),
+        re_path(r"^logout/", signout.signout, name="signout"),
+    ]
+)
 
 if not conf_settings.IS_SYNCING:
     from mediaviewer.api import viewset, path_viewset, file_viewset

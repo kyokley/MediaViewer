@@ -1,3 +1,5 @@
+const passkey_client = new Passwordless.Client({ apiKey: "mediaviewer:public:8cd7916568ca470cb0738f8ce8d20f18" })
+
 var tableElement;
 var csrf_token;
 var didScroll;
@@ -382,6 +384,51 @@ function validatePassword(password){
     var char_regex = /[^0-9]/;
     var test_string = String(password);
     return test_string.search(digit_regex) !== -1 && test_string.search(char_regex) !== -1 && test_string.length >= 6
+}
+
+async function register_passkey(){
+    let options = {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type':
+                    'application/json;charset=utf-8',
+                "csrfmiddlewaretoken": csrf_token,
+            },
+        }
+    try{
+        create_token_path = document.location.pathname.replace('user/reset', 'create-token');
+        create_token_path = create_token_path.replace('user/create', 'create-token');
+        const fetch_resp = await fetch(create_token_path, options);
+        fetch_json = await fetch_resp.json();
+        if(fetch_json){
+            var register_token = fetch_json['token'];
+            const { token, error } = await passkey_client.register(register_token);
+            console.log('token: ' + token);
+            console.log('error: ' + error);
+            if(token){
+            window.location.href = '/mediaviewer/create-token-complete/';
+            }else{
+            window.location.href = '/mediaviewer/create-token-failed/';
+            }
+            return;
+        }
+    } catch(err) {
+        console.log(err);
+        window.location.href = '/mediaviewer/create-token-failed/';
+    }
+
+}
+
+async function verify_passkey(){
+    const { token, error } =  await passkey_client.signinWithDiscoverable();
+
+    if(token){
+        window.location.href = '/mediaviewer/verify-token/?token=' + token;
+        return;
+    }
+
+    window.location.href = '/mediaviewer/user/reset/';
 }
 
 function hasScrolled(){

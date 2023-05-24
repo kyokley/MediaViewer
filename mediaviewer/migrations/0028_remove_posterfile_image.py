@@ -11,7 +11,6 @@ def delete_posterfiles(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0027_posterfile_poster_url"),
     ]

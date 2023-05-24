@@ -26,6 +26,7 @@ def submitsitewidemessage(request):
     level = Message.levelDict[request.POST.get("level")]
 
     if user.is_staff:
+        context["successful"] = True
         Message.createSitewideMessage(message, level=level)
     else:
         raise Exception("User is not a staffer!")

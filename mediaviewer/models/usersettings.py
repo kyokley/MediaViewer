@@ -71,15 +71,16 @@ class UserSettings(models.Model):
         return q and q[0] or None
 
     @classmethod
-    def create_user_setting(cls,
-                            user,
-                            ip_format=BANGUP_IP,
-                            default_sort=FILENAME_SORT,
-                            can_login=False,
-                            can_download=True,
-                            binge_mode=True,
-                            jump_to_last_watched=True,
-                            ):
+    def create_user_setting(
+        cls,
+        user,
+        ip_format=BANGUP_IP,
+        default_sort=FILENAME_SORT,
+        can_login=False,
+        can_download=True,
+        binge_mode=True,
+        jump_to_last_watched=True,
+    ):
         newSettings = cls()
         newSettings.datecreated = datetime.now(pytz.timezone(settings.TIME_ZONE))
         newSettings.dateedited = newSettings.datecreated
@@ -113,6 +114,9 @@ class UserSettings(models.Model):
 
         validate_email(email)
 
+        if name is None:
+            name = email
+
         if User.objects.filter(username__iexact=name).exists():
             raise IntegrityError("Username already exists")
         elif User.objects.filter(email__iexact=email).exists():
@@ -128,14 +132,15 @@ class UserSettings(models.Model):
         newUser.set_password(User.objects.make_random_password())
         newUser.save()
 
-        cls.create_user_setting(newUser,
-                                ip_format=ip_format,
-                                default_sort=default_sort,
-                                can_login=False,
-                                can_download=can_download,
-                                binge_mode=binge_mode,
-                                jump_to_last_watched=jump_to_last_watched,
-                                )
+        cls.create_user_setting(
+            newUser,
+            ip_format=ip_format,
+            default_sort=default_sort,
+            can_login=True,
+            can_download=can_download,
+            binge_mode=binge_mode,
+            jump_to_last_watched=jump_to_last_watched,
+        )
 
         if group:
             mv_group = group

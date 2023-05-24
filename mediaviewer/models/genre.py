@@ -30,10 +30,10 @@ class Genre(models.Model):
         genres = cls.objects.filter(
             pk__in=(
                 cls.objects.filter(posterfile__file__path__is_movie=True)
-                .values("posterfile__genres")
-                .annotate(genre_count=models.Count("id"))
-                .order_by("-genre_count")
-                .values("posterfile__genres")[:limit]
+                .values("id")
+                .annotate(genre_count=models.Count("posterfile"))
+                .order_by("-genre_count", "genre")
+                .values("id")[:limit]
             )
         ).order_by("genre")
 

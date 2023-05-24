@@ -5,19 +5,19 @@ from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 
 sample_good_result = {
-    u"backdrop_path": u"/asdfasdf.jpg",
-    u"first_air_date": u"2016-09-30",
-    u"genre_ids": [18, 10765],
-    u"id": 12345,
-    u"name": u"show name",
-    u"origin_country": [u"US"],
-    u"original_language": u"en",
-    u"original_name": u"show name",
-    u"overview": u"show description",
-    u"popularity": 4.278642,
-    u"poster_path": u"/zxcvzxcv.jpg",
-    u"vote_average": 6.81,
-    u"vote_count": 41,
+    "backdrop_path": "/asdfasdf.jpg",
+    "first_air_date": "2016-09-30",
+    "genre_ids": [18, 10765],
+    "id": 12345,
+    "name": "show name",
+    "origin_country": ["US"],
+    "original_language": "en",
+    "original_name": "show name",
+    "overview": "show description",
+    "popularity": 4.278642,
+    "poster_path": "/zxcvzxcv.jpg",
+    "vote_average": 6.81,
+    "vote_count": 41,
 }
 
 sample_good_crew = {
@@ -52,7 +52,7 @@ sample_good_crew = {
     ],
 }
 
-sample_bad_result = {u"page": 1, u"results": [], u"total_pages": 1, u"total_results": 0}
+sample_bad_result = {"page": 1, "results": [], "total_pages": 1, "total_results": 0}
 
 
 @pytest.mark.django_db

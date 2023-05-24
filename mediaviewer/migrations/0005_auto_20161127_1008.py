@@ -13,7 +13,6 @@ def rename_filename(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0004_auto_20161115_2057"),
     ]

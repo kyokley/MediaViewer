@@ -11,7 +11,6 @@ def regenerate_posterfiles(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("mediaviewer", "0017_actor_order"),
     ]
