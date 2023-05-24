@@ -18,7 +18,7 @@ ID_REGEX = re.compile(r"\d+")
 @logAccessInfo
 def submitsitewidemessage(request):
     user = request.user
-    context = {'successful': True}
+    context = {}
     context["active_page"] = "submitsitewidemessage"
     setSiteWideContext(context, request)
 
@@ -26,6 +26,7 @@ def submitsitewidemessage(request):
     level = Message.levelDict[request.POST.get("level")]
 
     if user.is_staff:
+        context["successful"] = True
         Message.createSitewideMessage(message, level=level)
     else:
         raise Exception("User is not a staffer!")

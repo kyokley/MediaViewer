@@ -46,7 +46,7 @@ class TestSubmitSiteWideMessage(TestCase):
         self.request.POST = {"sitemessage": "test_site_message", "level": "Debug"}
 
     def test_valid(self):
-        expected_context = {"active_page": "submitsitewidemessage"}
+        expected_context = {"successful": True, "active_page": "submitsitewidemessage"}
 
         expected = self.mock_render.return_value
         actual = submitsitewidemessage(self.request)

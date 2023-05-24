@@ -60,9 +60,7 @@ class TestMovies:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -172,9 +170,7 @@ class TestMoviesByGenre:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -249,9 +245,7 @@ class TestTvShowSummary:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -296,9 +290,7 @@ class TestTvShowByGenre404:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -347,9 +339,7 @@ class TestTvShowsByGenre:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -395,9 +385,7 @@ class TestTvShow404:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -453,9 +441,7 @@ class TestTvShows:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -515,9 +501,7 @@ class TestAjaxReport404:
         mv_group = Group(name="MediaViewer")
         mv_group.save()
 
-        self.user = UserSettings.new(
-            "test_user", "a@b.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
         settings = self.user.settings()
         settings.force_password_change = False
 
@@ -559,9 +543,7 @@ class TestAjaxReport:
         self.staff_user.is_staff = True
         self.staff_user.save()
 
-        self.user = UserSettings.new(
-            "test_user", "b@c.com", send_email=False
-        )
+        self.user = UserSettings.new("test_user", "b@c.com", send_email=False)
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
