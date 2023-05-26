@@ -102,8 +102,11 @@ body{
   border-top-right-radius: 0;
 }
 .btn.login-submit-btn{
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+#id_email{
     margin-top: 10px;
-    margin-bottom: 50px;
 }
 /* tables */
 .table{

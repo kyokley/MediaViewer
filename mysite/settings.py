@@ -271,9 +271,6 @@ EMAIL_USE_TLS = False
 EMAIL_FROM_ADDR = DEFAULT_FROM_EMAIL = "testing@example.com"
 BYPASS_SMTPD_CHECK = False
 
-# Display emails in stdout
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
 MINIMUM_PASSWORD_LENGTH = 6
 
 MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000

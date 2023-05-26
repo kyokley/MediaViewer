@@ -28,7 +28,6 @@ from django.contrib.auth.views import (
     PasswordResetView,
     PasswordResetConfirmView,
     PasswordResetDoneView,
-    PasswordResetCompleteView,
     PasswordChangeView,
     PasswordChangeDoneView,
 )
@@ -121,7 +120,6 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_reset_confirm.html",
             form_class=MVSetPasswordForm,
-            success_url=reverse_lazy("mediaviewer:password_reset_complete"),
         ),
         name="password_reset_confirm",
     ),
@@ -130,16 +128,8 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_create_confirm.html",
             form_class=MVSetPasswordForm,
-            success_url=reverse_lazy("mediaviewer:password_reset_complete"),
         ),
         name="password_create_confirm",
-    ),
-    re_path(
-        r"^user/reset/complete$",
-        PasswordResetCompleteView.as_view(
-            template_name="mediaviewer/password_reset_complete.html",
-        ),
-        name="password_reset_complete",
     ),
     re_path(
         r"^user/change_password/$",
