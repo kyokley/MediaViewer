@@ -129,13 +129,14 @@ MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "mediaviewer.middleware.AutoLogout",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_referrer_policy.middleware.ReferrerPolicyMiddleware",
     "mediaviewer.middleware.set_secure_headers",
 )
 
 # Auto logout delay in minutes
-AUTO_LOGOUT_DELAY = 2160
+AUTO_LOGOUT_DELAY = 2880
 
 ROOT_URLCONF = "mysite.urls"
 
