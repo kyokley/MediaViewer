@@ -129,13 +129,14 @@ MIDDLEWARE = (
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "mediaviewer.middleware.AutoLogout",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_referrer_policy.middleware.ReferrerPolicyMiddleware",
     "mediaviewer.middleware.set_secure_headers",
 )
 
 # Auto logout delay in minutes
-AUTO_LOGOUT_DELAY = 2160
+AUTO_LOGOUT_DELAY = 2880
 
 ROOT_URLCONF = "mysite.urls"
 
@@ -270,9 +271,6 @@ EMAIL_HOST_PASSWORD = ""  # nosec
 EMAIL_USE_TLS = False
 EMAIL_FROM_ADDR = DEFAULT_FROM_EMAIL = "testing@example.com"
 BYPASS_SMTPD_CHECK = False
-
-# Display emails in stdout
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MINIMUM_PASSWORD_LENGTH = 6
 

@@ -431,6 +431,17 @@ async function verify_passkey(){
     window.location.href = '/mediaviewer/user/reset/';
 }
 
+function display_help(){
+    var help_text = document.getElementById('help-text');
+    var help_link = document.getElementById('help-link');
+
+    if(help_text){
+        help_text.style = "display:block;";
+        help_link.style = "display:none;";
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+}
+
 function hasScrolled(){
     var st = $(this).scrollTop();
     if (Math.abs(lastScrollTop - st) <= delta)

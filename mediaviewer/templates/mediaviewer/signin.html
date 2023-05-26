@@ -32,11 +32,43 @@
             <h2 class="form-signin-heading">Please sign in</h2>
             <input type="text" id="username-textbox" class="form-control" placeholder="Email / Username" required style="display:none;">
             <input type="hidden" name="username" value="" id="username" />
-            <button class="btn btn-lg btn-primary btn-block" onclick="verify_passkey()">Sign in</button>
+            <button class="btn btn-lg btn-primary btn-block login-submit-btn" onclick="verify_passkey()">Sign In</button>
             <input type="hidden" name="next" value="{{ next }}" id="next" />
+            <a id="help-link" onclick="display_help();">Need help logging in?</a>
         </form>
     {% endif %}
+
+    {% block help_section %}
+        <div id="help-text" class="container" style="display:none;">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    Passkeys are a replacement for passwords. They are unique in that they are created on devices and NEVER leave your machine. Because of this, they are immune to brute-force attacks and phishing.
+                </div>
+            </div>
+            <div class="row" style="margin-top: 10px;">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    <p>In order to create a new passkey, do the following:</p>
+                    <ol>
+                        <li>Click the Sign In button.
+                        On the following dialog, click cancel. This will cause the email prompt to display.</li>
+                        <li>Click the link in the email to go to the Passkey Registration page.</li>
+                        <li>Click the Register Passkey button. Select the device you would like to store the passkey on (I recommend using your phone). Complete the rest of the prompts.</li>
+                        <li>Return to the login page and click the Sign In button. Select the device containing the passkey to complete logging in.</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    NOTE: This process can be repeated to register passkeys on multiple devices.
+                </div>
+            </div>
+        </div>
+    {% endblock %}
 {% endblock %}
+
 
 {% include footer %}
 

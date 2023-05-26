@@ -1,4 +1,4 @@
-{% extends "home.html" %}
+{% extends "signin.html" %}
 <!DOCTYPE html>
 {% load static %}
 {% include title %}
@@ -22,6 +22,10 @@
     Passkey was registered successfully. Future logins from this device will use the stored passkey!
     <p>You may go ahead and log in now.</p>
     <p><a href="{% url 'mediaviewer:signin' %}">Log in</a></p>
+    <p><a id="help-link" onclick="display_help();">Need help logging in?</a></p>
+    {% block help_section %}
+        {{ block.super }}
+    {% endblock %}
 {% endblock %}
 
 {% include footer %}
