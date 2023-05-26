@@ -22,7 +22,6 @@ class AutoLogout:
 
     def __call__(self, request):
         if request.user.is_authenticated:
-
             try:
                 if datetime.now() - datetime.fromisoformat(
                     request.session["last_touch"]
