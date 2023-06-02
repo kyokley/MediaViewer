@@ -9,13 +9,11 @@ from mediaviewer.models.usersettings import (
     BANGUP_IP,
 )
 from mediaviewer.utils import logAccessInfo, humansize
-from mediaviewer.views.password_reset import check_force_password_change
 from django.shortcuts import render, get_object_or_404, redirect
 import json
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def filesdetail(request, file_id):
     user = request.user

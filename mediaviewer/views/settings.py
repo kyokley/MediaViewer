@@ -11,13 +11,11 @@ from django.shortcuts import render
 from datetime import datetime as dateObj
 from django.utils.timezone import utc
 from mediaviewer.utils import logAccessInfo
-from mediaviewer.views.password_reset import check_force_password_change
 from mediaviewer.log import log
 from django.core.exceptions import ValidationError
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def settings(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
@@ -48,7 +46,6 @@ def settings(request):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def submitsettings(request):
     context = {"successful": True}
@@ -95,7 +92,6 @@ def submitsettings(request):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def submitsitesettings(request):
     user = request.user
@@ -117,7 +113,6 @@ def submitsitesettings(request):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def submitnewuser(request):
     user = request.user

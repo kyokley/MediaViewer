@@ -8,7 +8,6 @@ from mediaviewer.models.request import (
 )
 from mediaviewer.models.message import Message
 from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.views.password_reset import check_force_password_change
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.conf import settings
@@ -19,7 +18,6 @@ from mediaviewer import interjections
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def requests(request):
     items = Request.objects.filter(done=False)
@@ -41,7 +39,6 @@ def requests(request):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def addrequests(request):
     name = request.POST["newrequest"]
