@@ -31,8 +31,6 @@ if DEBUG:
 
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
 STATICFILES_DIRS += ("/node/node_modules",)
 
 WAITER_STATUS_URL = "http://mediawaiter:5000/waiter/status"
