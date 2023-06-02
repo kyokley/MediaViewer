@@ -5,9 +5,7 @@ from rest_framework import routers
 from django.shortcuts import redirect
 from django.conf import settings as conf_settings
 from django.urls import reverse_lazy
-from mediaviewer.forms import (
-    PasswordResetFormWithBCC,
-)
+from mediaviewer.forms import PasswordResetFormWithBCC
 
 from mediaviewer.views import (
     home,
@@ -121,7 +119,7 @@ urlpatterns = [
     re_path(
         r"^user/create/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
-            template_name="mediaviewer/password_create_confirm.html",
+            template_name="mediaviewer/password_reset_confirm.html",
         ),
         name="password_create_confirm",
     ),

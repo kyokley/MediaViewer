@@ -404,8 +404,6 @@ async function register_passkey(){
         if(fetch_json){
             var register_token = fetch_json['token'];
             const { token, error } = await passkey_client.register(register_token);
-            console.log('token: ' + token);
-            console.log('error: ' + error);
             if(token){
             window.location.href = '/mediaviewer/create-token-complete/';
             }else{
