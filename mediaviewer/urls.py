@@ -6,8 +6,6 @@ from django.shortcuts import redirect
 from django.conf import settings as conf_settings
 from django.urls import reverse_lazy
 from mediaviewer.forms import (
-    MVSetPasswordForm,
-    MVPasswordChangeForm,
     PasswordResetFormWithBCC,
 )
 
@@ -28,8 +26,6 @@ from django.contrib.auth.views import (
     PasswordResetView,
     PasswordResetConfirmView,
     PasswordResetDoneView,
-    PasswordChangeView,
-    PasswordChangeDoneView,
 )
 
 router = routers.DefaultRouter()
@@ -119,7 +115,6 @@ urlpatterns = [
         r"^user/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_reset_confirm.html",
-            form_class=MVSetPasswordForm,
         ),
         name="password_reset_confirm",
     ),
@@ -127,25 +122,8 @@ urlpatterns = [
         r"^user/create/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_create_confirm.html",
-            form_class=MVSetPasswordForm,
         ),
         name="password_create_confirm",
-    ),
-    re_path(
-        r"^user/change_password/$",
-        PasswordChangeView.as_view(
-            template_name="mediaviewer/change_password.html",
-            success_url=reverse_lazy("mediaviewer:change_password_submit"),
-            form_class=MVPasswordChangeForm,
-        ),
-        name="change_password",
-    ),
-    re_path(
-        r"^user/change_password_submit/$",
-        PasswordChangeDoneView.as_view(
-            template_name="mediaviewer/change_password_submit.html",
-        ),
-        name="change_password_submit",
     ),
 ]
 
