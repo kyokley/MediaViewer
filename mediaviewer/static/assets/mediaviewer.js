@@ -418,6 +418,13 @@ async function register_passkey(){
 
 }
 
+async function bypass_passkey(){
+    bypass_path = document.location.pathname.replace('user/reset', 'bypass-passkey');
+    bypass_path = bypass_path.replace('user/create', 'bypass-passkey');
+    window.location.href = bypass_path;
+    return;
+}
+
 async function verify_passkey(){
     const { token, error } =  await passkey_client.signinWithDiscoverable();
 

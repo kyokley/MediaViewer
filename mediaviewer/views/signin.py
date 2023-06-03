@@ -95,27 +95,26 @@ def bypass_passkey(request, uidb64):
                 request=request,
             )
             raise ImproperLogin("User could not be logged in. E101")
+        elif user.is_active:
+            login_user(
+                request, user, backend="django.contrib.auth.backends.ModelBackend"
+            )
+            context["loggedin"] = True
+            context["user"] = request.user
+            LoginEvent.new(request.user)
+            # TODO: Finish implementing signals
+            user_logged_in.send(
+                sender=User,
+                request=request,
+                user=user,
+            )
         else:
-            if user.is_active:
-                login_user(
-                    request, user, backend="django.contrib.auth.backends.ModelBackend"
-                )
-                context["loggedin"] = True
-                context["user"] = request.user
-                LoginEvent.new(request.user)
-                # TODO: Finish implementing signals
-                user_logged_in.send(
-                    sender=User,
-                    request=request,
-                    user=user,
-                )
-            else:
-                user_login_failed.send(
-                    sender=User,
-                    credentials={"username": user.username},
-                    request=request,
-                )
-                raise ImproperLogin("User is no longer active")
+            user_login_failed.send(
+                sender=User,
+                credentials={"username": user.username},
+                request=request,
+            )
+            raise ImproperLogin("User is no longer active. E102")
 
     except ImproperLogin as e:
         context["error_message"] = str(e)
@@ -123,15 +122,12 @@ def bypass_passkey(request, uidb64):
         if conf_settings.DEBUG:
             context["error_message"] = str(e)
         else:
-            context["error_message"] = "Incorrect username or password!"
+            context["error_message"] = "Something went wrong! E103"
 
     if user and user.is_authenticated and not context.get("error_message"):
-        settings = user.settings()
         setSiteWideContext(context, request)
-        if not user.email or settings.force_password_change:
-            return HttpResponseRedirect(reverse("mediaviewer:settings"))
-        elif "next" in request.POST and request.POST["next"]:
-            return HttpResponseRedirect(request.POST["next"])
+        if "next" in request.GET and request.GET["next"]:
+            return HttpResponseRedirect(request.GET["next"])
         else:
             if request.method == "GET":
                 return render(request, "mediaviewer/signin.html", context)
