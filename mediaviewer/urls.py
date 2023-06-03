@@ -5,11 +5,7 @@ from rest_framework import routers
 from django.shortcuts import redirect
 from django.conf import settings as conf_settings
 from django.urls import reverse_lazy
-from mediaviewer.forms import (
-    MVSetPasswordForm,
-    MVPasswordChangeForm,
-    PasswordResetFormWithBCC,
-)
+from mediaviewer.forms import PasswordResetFormWithBCC
 
 from mediaviewer.views import (
     home,
@@ -28,8 +24,6 @@ from django.contrib.auth.views import (
     PasswordResetView,
     PasswordResetConfirmView,
     PasswordResetDoneView,
-    PasswordChangeView,
-    PasswordChangeDoneView,
 )
 
 router = routers.DefaultRouter()
@@ -119,39 +113,26 @@ urlpatterns = [
         r"^user/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_reset_confirm.html",
-            form_class=MVSetPasswordForm,
         ),
         name="password_reset_confirm",
     ),
     re_path(
         r"^user/create/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
         PasswordResetConfirmView.as_view(
-            template_name="mediaviewer/password_create_confirm.html",
-            form_class=MVSetPasswordForm,
+            template_name="mediaviewer/password_reset_confirm.html",
         ),
         name="password_create_confirm",
-    ),
-    re_path(
-        r"^user/change_password/$",
-        PasswordChangeView.as_view(
-            template_name="mediaviewer/change_password.html",
-            success_url=reverse_lazy("mediaviewer:change_password_submit"),
-            form_class=MVPasswordChangeForm,
-        ),
-        name="change_password",
-    ),
-    re_path(
-        r"^user/change_password_submit/$",
-        PasswordChangeDoneView.as_view(
-            template_name="mediaviewer/change_password_submit.html",
-        ),
-        name="change_password_submit",
     ),
 ]
 
 urlpatterns.extend(
     [
         re_path(r"^login/", signin.signin, name="signin"),
+        re_path(
+            rf"^bypass-passkey/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
+            signin.bypass_passkey,
+            name="bypass-passkey",
+        ),
         re_path(
             rf"^create-token/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
             signin.create_token,

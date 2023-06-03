@@ -5,14 +5,12 @@ from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
 from mediaviewer.models.file import File
 from mediaviewer.utils import logAccessInfo
-from mediaviewer.views.password_reset import check_force_password_change
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.conf import settings
 
 from mediaviewer.log import log
 
 
-@check_force_password_change
 @logAccessInfo
 def home(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()

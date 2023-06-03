@@ -33,12 +33,6 @@ class TestRequests(TestCase):
         self.mock_render = self.render_patcher.start()
         self.addCleanup(self.render_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
-
         self.user = mock.MagicMock(User)
         self.settings = mock.MagicMock()
         self.settings.force_password_change = False
@@ -70,15 +64,6 @@ class TestRequests(TestCase):
             self.request, "mediaviewer/request.html", expected_context
         )
 
-    def test_force_password_change(self):
-        self.settings.force_password_change = True
-
-        expected = self.mock_change_password.return_value
-        actual = requests(self.request)
-        self.assertEqual(expected, actual)
-
-        self.mock_change_password.assert_called_once_with()
-
 
 class TestAddRequests(TestCase):
     def setUp(self):
@@ -101,12 +86,6 @@ class TestAddRequests(TestCase):
         )
         self.mock_request_vote_new = self.request_vote_new_patcher.start()
         self.addCleanup(self.request_vote_new_patcher.stop)
-
-        self.change_password_patcher = mock.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
 
         self.test_user = User.objects.create_superuser(
             "test_user", "test@user.com", "password"
@@ -132,15 +111,6 @@ class TestAddRequests(TestCase):
         self.mock_request_vote_new.assert_called_once_with(
             self.mock_request_new.return_value, self.test_user
         )
-
-    def test_force_password_change(self):
-        self.settings.force_password_change = True
-
-        expected = self.mock_change_password.return_value
-        actual = addrequests(self.request)
-        self.assertEqual(expected, actual)
-
-        self.mock_change_password.assert_called_once_with()
 
 
 class TestAjaxVote(TestCase):

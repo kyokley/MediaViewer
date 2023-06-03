@@ -167,10 +167,6 @@ class TestFilesDetail:
 
         self.mock_render = mocker.patch("mediaviewer.views.detail.render")
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.tv_path = Path.objects.create(
             localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
         )
@@ -249,17 +245,6 @@ class TestFilesDetail:
         self.mock_render.assert_called_once_with(
             self.request, "mediaviewer/filesdetail.html", expected_context
         )
-
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = filesdetail(self.request, self.tv_file.id)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
 
 
 @pytest.mark.django_db

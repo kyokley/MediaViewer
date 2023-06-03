@@ -19,7 +19,6 @@ from mediaviewer.models.message import Message
 from django.contrib import messages
 from django.conf import settings
 from mediaviewer.utils import logAccessInfo
-from mediaviewer.views.password_reset import check_force_password_change
 
 import json
 import re
@@ -28,7 +27,6 @@ ID_REGEX = re.compile(r"\d+")
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def files(request, items):
     user = request.user
@@ -61,7 +59,6 @@ def files(request, items):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def movies(request):
     user = request.user
@@ -88,7 +85,6 @@ def movies(request):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def movies_by_genre(request, genre_id):
     user = request.user
@@ -116,7 +112,6 @@ def movies_by_genre(request, genre_id):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def tvshowsummary(request):
     pathDict = Path.distinctShowFolders()
@@ -130,7 +125,6 @@ def tvshowsummary(request):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def tvshows_by_genre(request, genre_id):
     ref_genre = get_object_or_404(Genre, pk=genre_id)
@@ -145,7 +139,6 @@ def tvshows_by_genre(request, genre_id):
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def tvshows(request, pathid):
     user = request.user

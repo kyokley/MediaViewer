@@ -5,7 +5,6 @@ from mediaviewer.models.message import Message
 from django.shortcuts import render
 from django.conf import settings
 from mediaviewer.utils import logAccessInfo
-from mediaviewer.views.password_reset import check_force_password_change
 
 import json
 import re
@@ -14,7 +13,6 @@ ID_REGEX = re.compile(r"\d+")
 
 
 @login_required(login_url="/mediaviewer/login/")
-@check_force_password_change
 @logAccessInfo
 def submitsitewidemessage(request):
     user = request.user

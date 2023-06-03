@@ -404,8 +404,6 @@ async function register_passkey(){
         if(fetch_json){
             var register_token = fetch_json['token'];
             const { token, error } = await passkey_client.register(register_token);
-            console.log('token: ' + token);
-            console.log('error: ' + error);
             if(token){
             window.location.href = '/mediaviewer/create-token-complete/';
             }else{
@@ -418,6 +416,13 @@ async function register_passkey(){
         window.location.href = '/mediaviewer/create-token-failed/';
     }
 
+}
+
+async function bypass_passkey(){
+    bypass_path = document.location.pathname.replace('user/reset', 'bypass-passkey');
+    bypass_path = bypass_path.replace('user/create', 'bypass-passkey');
+    window.location.href = bypass_path;
+    return;
 }
 
 async function verify_passkey(){

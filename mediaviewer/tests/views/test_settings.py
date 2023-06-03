@@ -147,10 +147,6 @@ class TestSettings:
 
         self.mock_render = mocker.patch("mediaviewer.views.settings.render")
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.user = mock.create_autospec(User)
         self.user.username = "test_logged_in_user"
         self.settings = mock.create_autospec(UserSettings)
@@ -193,8 +189,6 @@ class TestSettings:
             self.request, "mediaviewer/settings.html", expected_context
         )
 
-        assert not self.mock_change_password.called
-
     def test_user_has_no_email(self):
         self.user.email = None
 
@@ -222,17 +216,6 @@ class TestSettings:
             self.request, "mediaviewer/settings.html", expected_context
         )
 
-        assert not self.mock_change_password.called
-
-    def test_force_password_change(self):
-        self.settings.force_password_change = True
-
-        expected = self.mock_change_password.return_value
-        actual = settings(self.request)
-        assert expected == actual
-
-        self.mock_change_password.assert_called_once_with()
-
 
 class TestSubmitSettings:
     @pytest.fixture(autouse=True)
@@ -244,10 +227,6 @@ class TestSubmitSettings:
         )
 
         self.mock_render = mocker.patch("mediaviewer.views.settings.render")
-
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
 
         self.user = mock.create_autospec(User)
         self.user.username = "test_logged_in_user"
@@ -278,8 +257,6 @@ class TestSubmitSettings:
         assert self.settings.binge_mode is False
         assert self.settings.jump_to_last_watched is False
 
-        assert not self.mock_change_password.called
-
     def test_non_defaults(self):
         self.request.POST = {
             "default_sort": "test_default_sort",
@@ -307,17 +284,6 @@ class TestSubmitSettings:
         assert self.settings.jump_to_last_watched is True
         assert self.user.email == "test_new_email"
 
-        assert not self.mock_change_password.called
-
-    def test_force_password_change(self):
-        self.settings.force_password_change = True
-
-        expected = self.mock_change_password.return_value
-        actual = settings(self.request)
-        assert expected == actual
-
-        self.mock_change_password.assert_called_once_with()
-
 
 @pytest.mark.django_db
 class TestSubmitSiteSettings:
@@ -334,10 +300,6 @@ class TestSubmitSiteSettings:
         )
 
         self.mock_render = mocker.patch("mediaviewer.views.settings.render")
-
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
 
         self.old_greeting = mock.MagicMock(SiteGreeting)
         self.old_greeting.greeting = "old_greeting"
@@ -402,14 +364,3 @@ class TestSubmitSiteSettings:
             self.request, "mediaviewer/settingsresults.html", expected_context
         )
         assert not self.mock_new.called
-
-    def test_force_password_change(self):
-        user_settings = self.user.settings()
-        user_settings.force_password_change = True
-        user_settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = submitsitesettings(self.request)
-        assert expected == actual
-
-        self.mock_change_password.assert_called_once_with()

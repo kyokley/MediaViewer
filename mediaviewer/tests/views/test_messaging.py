@@ -30,12 +30,6 @@ class TestSubmitSiteWideMessage(TestCase):
         self.mock_render = self.render_patcher.start()
         self.addCleanup(self.render_patcher.stop)
 
-        self.change_password_patcher = mock.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-        self.mock_change_password = self.change_password_patcher.start()
-        self.addCleanup(self.change_password_patcher.stop)
-
         self.user = mock.MagicMock(User)
         self.settings = mock.MagicMock()
         self.settings.force_password_change = False
@@ -73,15 +67,6 @@ class TestSubmitSiteWideMessage(TestCase):
         )
         self.assertFalse(self.mock_createSiteWideMessage.called)
         self.assertFalse(self.mock_render.called)
-
-    def test_force_password_change(self):
-        self.settings.force_password_change = True
-
-        expected = self.mock_change_password.return_value
-        actual = submitsitewidemessage(self.request)
-        self.assertEqual(expected, actual)
-
-        self.mock_change_password.assert_called_once_with()
 
 
 class TestAjaxCloseMessage(TestCase):
