@@ -64,6 +64,7 @@ class TestRequests(TestCase):
             self.request, "mediaviewer/request.html", expected_context
         )
 
+
 class TestAddRequests(TestCase):
     def setUp(self):
         self.HttpResponseRedirect_patcher = mock.patch(
@@ -110,6 +111,7 @@ class TestAddRequests(TestCase):
         self.mock_request_vote_new.assert_called_once_with(
             self.mock_request_new.return_value, self.test_user
         )
+
 
 class TestAjaxVote(TestCase):
     def setUp(self):
