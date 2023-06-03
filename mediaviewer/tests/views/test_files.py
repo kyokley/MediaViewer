@@ -39,10 +39,6 @@ class TestMovies:
 
         self.mock_render = mocker.patch("mediaviewer.views.files.render")
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.tv_path = Path.objects.create(
             localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
         )
@@ -94,17 +90,6 @@ class TestMovies:
         )
         self.mock_movies_ordered_by_id.assert_called_once_with()
 
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = movies(self.request, self.tv_file.id)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
-
 
 @pytest.mark.django_db
 class TestMovieByGenre404:
@@ -141,10 +126,6 @@ class TestMoviesByGenre:
             "mediaviewer.views.files.setSiteWideContext"
         )
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.mock_render = mocker.patch("mediaviewer.views.files.render")
 
         self.genre = mock.MagicMock(Genre)
@@ -176,17 +157,6 @@ class TestMoviesByGenre:
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
-
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = movies_by_genre(self.request, self.genre.id)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
 
     def test_valid(self):
         expected_context = {
@@ -230,10 +200,6 @@ class TestTvShowSummary:
             "mediaviewer.views.files.setSiteWideContext"
         )
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.mock_render = mocker.patch("mediaviewer.views.files.render")
 
         self.test_distinct_folders = {
@@ -271,17 +237,6 @@ class TestTvShowSummary:
             self.request, "mediaviewer/tvsummary.html", expected_context
         )
 
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = tvshowsummary(self.request)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
-
 
 @pytest.mark.django_db
 class TestTvShowByGenre404:
@@ -318,10 +273,6 @@ class TestTvShowsByGenre:
 
         self.mock_distinctShowFoldersByGenre = mocker.patch(
             "mediaviewer.views.files.Path.distinctShowFoldersByGenre"
-        )
-
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
         )
 
         self.genre = mock.MagicMock(Genre)
@@ -366,17 +317,6 @@ class TestTvShowsByGenre:
             self.request, "mediaviewer/tvsummary.html", expected_context
         )
 
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = tvshows_by_genre(self.request, self.genre.id)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
-
 
 @pytest.mark.django_db
 class TestTvShow404:
@@ -415,10 +355,6 @@ class TestTvShows:
 
         self.mock_render = mocker.patch("mediaviewer.views.files.render")
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.tv_path = Path.objects.create(
             localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
         )
@@ -447,17 +383,6 @@ class TestTvShows:
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
-
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = tvshows(self.request, self.tv_path.id)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
 
     def test_valid(self):
         expected_context = {

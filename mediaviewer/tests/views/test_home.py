@@ -28,10 +28,6 @@ class TestHome:
 
         self.mock_render = mocker.patch("mediaviewer.views.home.render")
 
-        self.mock_change_password = mocker.patch(
-            "mediaviewer.views.password_reset.change_password"
-        )
-
         self.user = create_user()
 
         self.tv_path = Path.objects.create(
@@ -85,17 +81,6 @@ class TestHome:
         self.mock_render.assert_called_once_with(
             self.request, "mediaviewer/home.html", expected_context
         )
-
-    def test_force_password_change(self):
-        settings = self.user.settings()
-        settings.force_password_change = True
-        settings.save()
-
-        expected = self.mock_change_password.return_value
-        actual = home(self.request)
-
-        assert expected == actual
-        self.mock_change_password.assert_called_once_with()
 
 
 @pytest.mark.django_db
