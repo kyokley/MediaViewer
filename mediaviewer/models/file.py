@@ -472,13 +472,19 @@ class File(models.Model):
             "name": self.displayName(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),
             "date": self.datecreated.date(),
-            'posterfile': self.posterfile.image if self.posterfile and self.posterfile.image else ''
+            "posterfile": self.posterfile.image
+            if self.posterfile and self.posterfile.image
+            else "",
         }
         return payload
 
     def ajax_row_payload(self, can_download, waiterstatus, viewed_lookup):
         posterfile = self.posterfile
-        tooltip_img = f"<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />" if posterfile and posterfile.image else ''
+        tooltip_img = (
+            f"<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />"
+            if posterfile and posterfile.image
+            else ""
+        )
 
         payload = [
             f'<a href="/mediaviewer/files/{self.id}/" data-toggle="tooltip" title="{tooltip_img}">{self.displayName()}</a>',
