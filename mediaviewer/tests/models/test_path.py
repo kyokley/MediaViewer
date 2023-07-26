@@ -176,11 +176,7 @@ class TestLastCreatedFileDateForSpan:
 @pytest.mark.django_db
 class TestDistinctShowFolders:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_buildDistinctShowFolderFromPaths = mocker.patch(
-            "mediaviewer.models.path.Path._buildDistinctShowFoldersFromPaths"
-        )
-
+    def setUp(self):
         self.tv_path = Path.objects.create(
             localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
         )
@@ -217,15 +213,6 @@ class TestDistinctShowFolders:
             filename="movie.file", path=self.movie_path
         )
 
-    def test_distinctShowFolders(self):
-        expected = self.mock_buildDistinctShowFolderFromPaths.return_value
-        actual = Path.distinctShowFolders()
-
-        assert expected == actual
-        self.mock_buildDistinctShowFolderFromPaths.assert_called_once_with(
-            set([self.tv_path, self.tv_path2])
-        )
-
 
 @pytest.mark.django_db
 class TestBuildDistinctShowFoldersFromPaths:
@@ -248,14 +235,6 @@ class TestBuildDistinctShowFoldersFromPaths:
             is_movie=False,
         )
         self.tv_path3.lastCreatedFileDate = datetime.now(utc)
-
-    def test_buildDistinctShowFoldersFromPaths(self):
-        expected = {"tv.local.path": self.tv_path, "tv.local.path2": self.tv_path2}
-        actual = Path._buildDistinctShowFoldersFromPaths(
-            [self.tv_path, self.tv_path2, self.tv_path3]
-        )
-
-        assert expected == actual
 
 
 @pytest.mark.django_db

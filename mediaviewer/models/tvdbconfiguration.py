@@ -29,7 +29,7 @@ def getJSONData(url):
         log.error(str(e), exc_info=True)
 
 
-class TVDBConfiguration(object):
+class TVDBConfiguration:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -61,11 +61,15 @@ class TVDBConfiguration(object):
             log.error(str(e), exc_info=True)
             log.debug("Failed to set tvdb values")
 
+    def _get_JSONData(self, url):
+        """Method to aid in testing"""
+        return getJSONData(url)
+
     def _getTVDBConfiguration(self):
         url = "https://api.themoviedb.org/3/configuration?api_key={}".format(
             settings.API_KEY
         )
-        return getJSONData(url)
+        return self._get_JSONData(url)
 
     def _getTVDBGenres(self):
         data = {}
@@ -73,7 +77,7 @@ class TVDBConfiguration(object):
         url = "https://api.themoviedb.org/3/genre/tv/list?api_key={}".format(
             settings.API_KEY
         )
-        resp = getJSONData(url)
+        resp = self._get_JSONData(url)
         genres = resp["genres"]
         for genre in genres:
             data[genre["id"]] = genre["name"]
@@ -81,7 +85,7 @@ class TVDBConfiguration(object):
         url = "https://api.themoviedb.org/3/genre/movie/list?api_key={}".format(
             settings.API_KEY
         )
-        resp = getJSONData(url)
+        resp = self._get_JSONData(url)
         genres = resp["genres"]
         for genre in genres:
             data[genre["id"]] = genre["name"]

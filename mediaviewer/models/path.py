@@ -119,8 +119,6 @@ class Path(models.Model):
             .annotate(num_files=models.Count("file"))
             .filter(num_files__gt=0)
         )
-        # paths = set(paths_qs)
-        # return cls._buildDistinctShowFoldersFromPaths(paths)
 
         subquery = models.Subquery(
             Path.objects.filter(
@@ -135,23 +133,6 @@ class Path(models.Model):
             .values('path_pk')
         ))
         return paths_qs
-
-    @classmethod
-    def _buildDistinctShowFoldersFromPaths(cls, paths):
-        pathDict = dict()
-        for path in paths:
-            lastDate = path.lastCreatedFileDate
-            if path.shortName in pathDict:
-                if lastDate and pathDict[path.shortName].lastCreatedFileDate < lastDate:
-                    pathDict[path.shortName] = path
-            else:
-                pathDict[path.shortName] = path
-        return pathDict
-
-    @classmethod
-    def distinctShowFoldersByGenre(cls, genre):
-        paths = cls.objects.filter(_posterfile__genres=genre)
-        return cls._buildDistinctShowFoldersFromPaths(paths)
 
     def isMovie(self):
         return self.is_movie
