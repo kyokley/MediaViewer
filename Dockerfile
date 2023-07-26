@@ -17,6 +17,8 @@ FROM ${BASE_IMAGE} AS base
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+RUN pip install -U pip
+
 ENV POETRY_VENV=/poetry_venv
 RUN python3 -m venv $POETRY_VENV
 
@@ -50,8 +52,6 @@ RUN apt-get update && apt-get install -y \
         ncurses-dev \
         libpq-dev \
         make
-
-RUN pip install -U pip
 
 COPY ./pdbrc.py /root/.pdbrc.py
 
