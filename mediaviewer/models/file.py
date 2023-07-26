@@ -16,7 +16,7 @@ from datetime import datetime as dateObj
 from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import LOCAL_IP, BANGUP_IP, UserSettings
 from mediaviewer.log import log
-from mediaviewer.utils import get_query
+from mediaviewer.utils import get_search_query
 
 yearRegex = re.compile(r"20\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
@@ -28,7 +28,7 @@ class FileQuerySet(models.QuerySet):
     def search(self, search_str):
         qs = self
         if search_str:
-            filename_query = get_query(search_str, ["filename"])
+            filename_query = get_search_query(search_str, ["filename"])
 
             qs = qs.filter(filename_query)
         return qs

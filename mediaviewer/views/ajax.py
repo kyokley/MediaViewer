@@ -1,6 +1,4 @@
-from django.shortcuts import (
-    get_object_or_404,
-)
+from django.shortcuts import get_object_or_404
 from django.db import models
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress

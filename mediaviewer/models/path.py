@@ -9,14 +9,14 @@ from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
 
-from mediaviewer.utils import get_query
+from mediaviewer.utils import get_search_query
 
 
 class PathQuerySet(models.QuerySet):
     def search(self, search_str):
         qs = self
         if search_str:
-            filename_query = get_query(
+            filename_query = get_search_query(
                 search_str,
                 [
                     "override_display_name",
