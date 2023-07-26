@@ -1,5 +1,7 @@
 import re
 import time
+
+from django.db.models import Q
 from django.db import models
 from django.urls import reverse
 from django.utils.timezone import utc
@@ -14,13 +16,56 @@ from datetime import datetime as dateObj
 
 from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import LOCAL_IP, BANGUP_IP, UserSettings
-
 from mediaviewer.log import log
 
 yearRegex = re.compile(r"20\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
 formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
 punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
+
+def normalize_query(query_string,
+                    findterms=re.compile(r'"([^"]+)"|(\S+)').findall,
+                    normspace=re.compile(r'\s{2,}').sub):
+    ''' Splits the query string in invidual keywords, getting rid of unecessary spaces
+        and grouping quoted words together.
+        Example:
+
+        >>> normalize_query('  some random  words "with   quotes  " and   spaces')
+        ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
+
+    '''
+    return [normspace(' ', (t[0] or t[1]).strip()) for t in findterms(query_string)]
+
+def get_query(query_string, search_fields):
+    ''' Returns a query, that is a combination of Q objects. That combination
+        aims to search keywords within a model by testing the given search fields.
+
+    '''
+    query = None # Query to search for every search term
+    terms = normalize_query(query_string)
+    for term in terms:
+        or_query = None # Query to search for a given term in each field
+        for field_name in search_fields:
+            q = Q(**{"%s__icontains" % field_name: term})
+            if or_query is None:
+                or_query = q
+            else:
+                or_query = or_query | q
+        if query is None:
+            query = or_query
+        else:
+            query = query & or_query
+    return query
+
+
+class FileQuerySet(models.QuerySet):
+    def search(self, search_str):
+        qs = self
+        if search_str:
+            filename_query = get_query(search_str, ['filename'])
+
+            qs = qs.filter(filename_query)
+        return qs
 
 
 class FileManager(models.Manager):
@@ -35,7 +80,6 @@ class FileManager(models.Manager):
             Message.createLastWatchedMessage(setting.user, obj)
 
         return obj
-
 
 class File(models.Model):
     path = models.ForeignKey(
@@ -68,7 +112,7 @@ class File(models.Model):
 
     users = models.ManyToManyField("auth.User", through="UserComment")
 
-    objects = FileManager()
+    objects = FileManager.from_queryset(FileQuerySet)()
 
     class Meta:
         app_label = "mediaviewer"
@@ -443,7 +487,7 @@ class File(models.Model):
 
     @classmethod
     def files_by_localpath(cls, localpath):
-        files = File.objects.filter(path__localpathstr=localpath.localpathstr).filter(
+        files = cls.objects.filter(path__localpathstr=localpath.localpathstr).filter(
             hide=False
         )
         return files
@@ -462,4 +506,29 @@ class File(models.Model):
             "dateCreatedForSpan": self.dateCreatedForSpan(),
             "date": self.datecreated.date(),
         }
+        return payload
+
+    def ajax_row_payload(self, can_download, waiterstatus, viewed_lookup):
+        payload = [
+                    f'<a href="/mediaviewer/files/{self.id}/">{self.displayName()}</a>',
+                    f'''<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%d %b %Y')}''',
+        ]
+
+        if can_download:
+            if waiterstatus:
+                payload.append(
+                            f'''<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}')">Open</a></center>''')
+            else:
+                payload.append('Alfred is down')
+
+        if viewed_lookup.get(self.id, False):
+            cell = f'''<span class="hidden" name="hidden-{ self.id }">true</span><input name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox('{self.id}')" />'''
+        else:
+            cell = f'''<span class="hidden" name="hidden-{ self.id }">false</span><input name="{ self.id }" type="checkbox" onclick="ajaxCheckBox('{self.id}')" />'''
+        cell = f'{cell}<span id="saved-{ self.id }"></span>'
+        payload.extend([
+            cell,
+            f'''<input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}')"/>''',
+            ''
+        ])
         return payload
