@@ -104,6 +104,16 @@ urlpatterns = [
         name="ajaxtvshowssummary",
     ),
     re_path(
+        r"^ajax/ajaxtvshowsbygenre/(?P<genre_id>[0-9]+)/$",
+        ajax.ajaxtvshowsbygenre,
+        name="ajaxtvshowsbygenre",
+    ),
+    re_path(
+        r"^ajax/ajaxtvshows/(?P<path_id>[0-9]+)/$",
+        ajax.ajaxtvshows,
+        name="ajaxtvshows",
+    ),
+    re_path(
         r"^user/reset/$",
         PasswordResetView.as_view(
             template_name="mediaviewer/password_reset_form.html",

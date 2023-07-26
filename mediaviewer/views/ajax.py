@@ -131,6 +131,47 @@ def ajaxrows(request, qs):
     )
 
 
+def ajaxtvshowrows(request, qs):
+    user = request.user
+
+    settings = user.settings()
+    can_download = settings.can_download
+
+    lastStatus = WaiterStatus.getLastStatus()
+    waiterstatus = lastStatus.status if lastStatus else False
+
+    request_params = dict(request.GET)
+    offset = int(request_params["start"][0])
+    length = int(request_params["length"][0])
+    search_str = request_params["search[value]"][0]
+    draw = int(request_params["draw"][0])
+
+    initial_qs = qs
+    qs = initial_qs.search(search_str)
+    files = qs[offset : offset + length]
+
+    viewed_by_file = UserComment.objects.viewed_by_file(user)
+    file_data = [
+        file.ajax_row_payload(
+            can_download,
+            waiterstatus,
+            viewed_by_file,
+        )
+        for file in files
+    ]
+
+    payload = {
+        "draw": draw,
+        "recordsTotal": initial_qs.count(),
+        "recordsFiltered": qs.count(),
+        "data": file_data,
+    }
+
+    return HttpResponse(
+        json.dumps(payload), content_type="application/json", status=200
+    )
+
+
 def ajaxpathrows(request, qs):
     request_params = dict(request.GET)
     offset = int(request_params["start"][0])
@@ -178,8 +219,7 @@ def ajaxmoviesbygenrerows(request, genre_id):
     return ajaxrows(request, qs)
 
 
-@csrf_exempt
-def ajaxtvshowssummary(request):
+def _get_tv_show_rows_query(genre_id=None):
     paths_qs = (
         Path.objects.filter(is_movie=False)
         .filter(file__hide=False)
@@ -199,4 +239,27 @@ def ajaxtvshowssummary(request):
         .annotate(path_pk=subquery)
         .values('path_pk')
     )).order_by('-lastCreatedFileDate')
+
+    if genre_id:
+        genre = get_object_or_404(Genre, pk=genre_id)
+        paths_qs = paths_qs.filter(_posterfile__genres=genre)
+    return paths_qs
+
+
+@csrf_exempt
+def ajaxtvshowssummary(request):
+    paths_qs = _get_tv_show_rows_query()
     return ajaxpathrows(request, paths_qs)
+
+
+@csrf_exempt
+def ajaxtvshowsbygenre(request, genre_id):
+    paths_qs = _get_tv_show_rows_query(genre_id)
+    return ajaxpathrows(request, paths_qs)
+
+
+@csrf_exempt
+def ajaxtvshows(request, path_id):
+    refpath = get_object_or_404(Path, pk=path_id)
+    qs = File.files_by_localpath(refpath).order_by('-display_name')
+    return ajaxrows(request, qs)

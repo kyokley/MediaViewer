@@ -360,7 +360,12 @@ class File(models.Model):
             return fullname
 
     def displayName(self):
-        return self.getScrapedFullName(include_path_name=False)
+        name = self.getScrapedFullName(include_path_name=False)
+        if not self.display_name:
+            self.display_name = name
+            self.save()
+        return name
+
 
     def display_name_with_path(self):
         return self.getScrapedFullName(include_path_name=True)
