@@ -68,15 +68,7 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
         dt_config.ajax = {
             url: ajax_path,
             dataSrc: function ( json ) {
-                options = {
-                    animated: true,
-                    placement: 'bottom',
-                    html: true,
-                    offset: 10,
-                };
-                $(function () {
-                    $('[data-toggle="tooltip"]').tooltip(options)
-                });
+                configureDataTable($);
                 return json.data;
             }
         }
@@ -95,6 +87,18 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
         dt = tableElement.DataTable();
         dt.page(page_number).draw(false);
     }
+}
+
+function configureDataTable($){
+    options = {
+        animated: true,
+        placement: 'bottom',
+        html: true,
+        offset: 10,
+    };
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip(options)
+    });
 }
 
 function prepareTableForRequests($){
