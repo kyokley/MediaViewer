@@ -65,7 +65,13 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     };
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
-        dt_config.ajax = ajax_path;
+        dt_config.ajax = {
+            url: ajax_path,
+            dataSrc: function ( json ) {
+                configureDataTable($);
+                return json.data;
+            }
+        }
     }
 
     tableElement.dataTable(dt_config);
@@ -81,6 +87,18 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
         dt = tableElement.DataTable();
         dt.page(page_number).draw(false);
     }
+}
+
+function configureDataTable($){
+    options = {
+        animated: true,
+        placement: 'bottom',
+        html: true,
+        offset: 10,
+    };
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip(options)
+    });
 }
 
 function prepareTableForRequests($){

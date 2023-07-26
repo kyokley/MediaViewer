@@ -88,7 +88,13 @@
         <tbody>
             {% for file in files %}
                 <tr>
-                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.name }}</a></td>
+                    <td>
+                            {% if file.posterfile %}
+                                <a href="/mediaviewer/files/{{ file.id }}/" data-toggle="tooltip" title="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                            {% else %}
+                                <a href="/mediaviewer/files/{{ file.id }}/">
+                            {% endif %}
+                    {{ file.name }}</a></td>
                     <td><span class="hidden_span">{{file.dateCreatedForSpan}}</span>{{ file.date }}</td>
                     {% if can_download %}
                         {% if waiterstatus %}
@@ -145,6 +151,8 @@
             scrollSetup();
 
             $(".truncated-text").shorten({"showChars": 300});
+
+            configureDataTable($);
         });
 
     </script>
