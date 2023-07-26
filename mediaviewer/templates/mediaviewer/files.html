@@ -78,11 +78,11 @@
                 <th class="all">File Name</th>
                 <th class="desktop">Timestamp</th>
                 {% if can_download %}
-                    <th class="min-tablet-p">Link</th>
+                    <th class="min-tablet-p nosort">Link</th>
                 {% endif %}
-                <th class="all">Viewed</th>
-                <th class="min-tablet-l">Report Bad File</th>
-                <th></th>
+                <th class="all nosort">Viewed</th>
+                <th class="min-tablet-l nosort">Report Bad File</th>
+                <th class='nosort'></th>
             </tr>
         </thead>
         <tbody>
@@ -129,17 +129,17 @@
             csrf_token = '{{ csrf_token }}';
             preparePage($);
             {% if view == 'movies' %}
-                var sortOrder = [[1,1]];
+                var sortOrder = [[1,'desc']];
             {% elif view == 'tvshows' or view == 'files' %}
                 {% if default_sort == 'filename_sort' %}
-                    var sortOrder =  [[0,1]];
+                    var sortOrder =  [[0,'desc']];
                 {% else %}
-                    var sortOrder =  [[1,1]];
+                    var sortOrder =  [[1,'desc']];
                 {% endif %}
             {% elif view == 'paths' %}
-                var sortOrder =  [[1,0]];
+                var sortOrder =  [[1,'asc']];
             {% else %}
-                var sortOrder = [[0,1]];
+                var sortOrder = [[0,'desc']];
             {% endif %}
             prepareTableSorter($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
 
@@ -152,7 +152,7 @@
 
             $(".truncated-text").shorten({"showChars": 300});
 
-            configureDataTable($);
+            configureTooltips($);
         });
 
     </script>
