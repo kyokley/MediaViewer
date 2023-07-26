@@ -367,27 +367,6 @@ function reportButtonClick(id){
 }
 
 function populateUnwatchedBadges(url){
-    jQuery.ajax({url: url,
-                 type: "GET",
-                 dataType: "json",
-                 success: function(json){
-                     var i;
-                     for(i=0; i<json.results.length; i++){
-                         var number_of_shows = json.results[i].number_of_unwatched_shows;
-                         if(number_of_shows > 0){
-                             badgeSpan = tableElement.$("#unwatched-show-badge-" + json.results[i].pk);
-                             badgeSpan.html(number_of_shows);
-                         }
-                     }
-
-                     if(json.next){
-                         populateUnwatchedBadges(json.next);
-                     }
-                 },
-                 error: function(json){
-                     console.log("An error has occurred attempting to set badges");
-                 }
-    });
 }
 
 function validatePassword(password){

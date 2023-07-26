@@ -233,11 +233,12 @@ class Path(models.Model):
     def get_tv_genres(cls):
         return Genre.get_tv_genres()
 
-    def ajax_row_payload(self):
+    def ajax_row_payload(self, user):
+        unwatched_count = self.number_of_unwatched_shows(user)
         payload = [
             (
-                f"""<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>"""
-                f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info"></span>'
+                f"""<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>\n"""
+                f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info">{unwatched_count or ""}</span>'
             ),
             f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%d %b %Y')}""",
             "",

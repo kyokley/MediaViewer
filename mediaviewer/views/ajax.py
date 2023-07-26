@@ -183,7 +183,7 @@ def ajaxpathrows(request, qs):
     qs = initial_qs.search(search_str)
     paths = qs[offset : offset + length]
 
-    path_data = [path.ajax_row_payload() for path in paths]
+    path_data = [path.ajax_row_payload(request.user) for path in paths]
 
     payload = {
         "draw": draw,
