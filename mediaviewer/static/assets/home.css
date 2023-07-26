@@ -1,18 +1,16 @@
 body{
-    padding-bottom: 50px;
+    padding-bottom: 150px;
     padding-top: 110px;
 }
 @media (min-width: 980px) {
       body {
               padding-top: 75px;
-              padding-bottom: 50px;
     }
 }
 
 @media (max-width: 768px) {
       body {
               padding-top: 75px;
-              padding-bottom: 50px;
     }
 }
 
@@ -34,6 +32,17 @@ body{
 .navbar.navbar-fixed-bottom.nav-show {
   bottom: 0;
   transition: bottom 0.3s ease-in-out;
+}
+
+.tooltip-img {
+    height: auto;
+    width: auto;
+    max-width: 175px;
+    max-height: 175px;
+    overflow: hidden;
+}
+.tooltip {
+    opacity: 1 !important;
 }
 
 .request-textbox{
@@ -190,10 +199,4 @@ body{
 }
 .donation-text {
     margin-top:13px;
-}
-.tooltip-img {
-    height: auto;
-    width: auto;
-    max-width: 175px;
-    max-height: 175px;
 }
