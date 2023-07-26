@@ -27,10 +27,8 @@ from mediaviewer.views.files import (
 
 @pytest.fixture(autouse=True)
 def mock_tvdb_config(mocker):
-    mock_get = mocker.patch(
-        "mediaviewer.models.tvdbconfiguration.requests.get"
-    )
-    mock_get.return_value.raise_for_status.side_effect = Exception('Fail Request')
+    mock_get = mocker.patch("mediaviewer.models.tvdbconfiguration.requests.get")
+    mock_get.return_value.raise_for_status.side_effect = Exception("Fail Request")
 
 
 @pytest.mark.django_db
@@ -76,7 +74,7 @@ class TestMovies:
             "jump_to_last": True,
             "active_page": "movies",
             "title": "Movies",
-            'table_data_page': 'ajaxmovierows',
+            "table_data_page": "ajaxmovierows",
         }
         expected = self.mock_render.return_value
         actual = movies(self.request)
@@ -215,8 +213,8 @@ class TestTvShowSummary:
         expected_context = {
             "active_page": "tvshows",
             "title": "TV Shows",
-            'table_data_page': 'ajaxtvshowssummary',
-            'table_data_filter_id': '',
+            "table_data_page": "ajaxtvshowssummary",
+            "table_data_filter_id": "",
         }
 
         expected = self.mock_render.return_value
@@ -284,8 +282,8 @@ class TestTvShowsByGenre:
         expected_context = {
             "active_page": "tvshows",
             "title": "TV Shows: test_genre",
-            'table_data_page': 'ajaxtvshowsbygenre',
-            'table_data_filter_id': self.genre.id,
+            "table_data_page": "ajaxtvshowsbygenre",
+            "table_data_filter_id": self.genre.id,
         }
 
         expected = self.mock_render.return_value
@@ -387,7 +385,7 @@ class TestTvShows:
             "active_page": "tvshows",
             "title": "Tv Local Path",
             "long_plot": "",
-            'table_data_page': 'tvshows',
+            "table_data_page": "tvshows",
         }
 
         expected = self.mock_render.return_value

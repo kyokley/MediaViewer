@@ -16,13 +16,18 @@ class PathQuerySet(models.QuerySet):
     def search(self, search_str):
         qs = self
         if search_str:
-            filename_query = get_query(search_str, ["override_display_name",
-                                                    "defaultsearchstr",
-                                                    'localpathstr',
-                                                    ])
+            filename_query = get_query(
+                search_str,
+                [
+                    "override_display_name",
+                    "defaultsearchstr",
+                    "localpathstr",
+                ],
+            )
 
             qs = qs.filter(filename_query)
         return qs
+
 
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
@@ -121,17 +126,17 @@ class Path(models.Model):
         )
 
         subquery = models.Subquery(
-            Path.objects.filter(
-                localpathstr=models.OuterRef('localpathstr')
+            Path.objects.filter(localpathstr=models.OuterRef("localpathstr"))
+            .order_by("-lastCreatedFileDate")
+            .values("pk")[:1]
         )
-            .order_by('-lastCreatedFileDate')
-            .values('pk')[:1]
+        paths_qs = Path.objects.filter(
+            pk__in=(
+                paths_qs.values("localpathstr")
+                .annotate(path_pk=subquery)
+                .values("path_pk")
+            )
         )
-        paths_qs = Path.objects.filter(pk__in=(
-            paths_qs.values('localpathstr')
-            .annotate(path_pk=subquery)
-            .values('path_pk')
-        ))
         return paths_qs
 
     def isMovie(self):
@@ -230,9 +235,11 @@ class Path(models.Model):
 
     def ajax_row_payload(self):
         payload = [
-            (f'''<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>'''
-             f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info"></span>'),
-            f'''<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%d %b %Y')}''',
-            '',
+            (
+                f"""<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>"""
+                f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info"></span>'
+            ),
+            f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%d %b %Y')}""",
+            "",
         ]
         return payload

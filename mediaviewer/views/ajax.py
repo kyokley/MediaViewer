@@ -183,10 +183,7 @@ def ajaxpathrows(request, qs):
     qs = initial_qs.search(search_str)
     paths = qs[offset : offset + length]
 
-    path_data = [
-        path.ajax_row_payload()
-        for path in paths
-    ]
+    path_data = [path.ajax_row_payload() for path in paths]
 
     payload = {
         "draw": draw,
@@ -228,17 +225,15 @@ def _get_tv_show_rows_query(genre_id=None):
     )
 
     subquery = models.Subquery(
-        Path.objects.filter(
-            localpathstr=models.OuterRef('localpathstr')
+        Path.objects.filter(localpathstr=models.OuterRef("localpathstr"))
+        .order_by("-lastCreatedFileDate")
+        .values("pk")[:1]
     )
-        .order_by('-lastCreatedFileDate')
-        .values('pk')[:1]
-    )
-    paths_qs = Path.objects.filter(pk__in=(
-        paths_qs.values('localpathstr')
-        .annotate(path_pk=subquery)
-        .values('path_pk')
-    )).order_by('-lastCreatedFileDate')
+    paths_qs = Path.objects.filter(
+        pk__in=(
+            paths_qs.values("localpathstr").annotate(path_pk=subquery).values("path_pk")
+        )
+    ).order_by("-lastCreatedFileDate")
 
     if genre_id:
         genre = get_object_or_404(Genre, pk=genre_id)
@@ -261,5 +256,5 @@ def ajaxtvshowsbygenre(request, genre_id):
 @csrf_exempt
 def ajaxtvshows(request, path_id):
     refpath = get_object_or_404(Path, pk=path_id)
-    qs = File.files_by_localpath(refpath).order_by('-display_name')
+    qs = File.files_by_localpath(refpath).order_by("-display_name")
     return ajaxrows(request, qs)
