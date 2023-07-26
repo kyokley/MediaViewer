@@ -9,6 +9,25 @@ from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
 
+from mediaviewer.utils import get_search_query
+
+
+class PathQuerySet(models.QuerySet):
+    def search(self, search_str):
+        qs = self
+        if search_str:
+            filename_query = get_search_query(
+                search_str,
+                [
+                    "override_display_name",
+                    "defaultsearchstr",
+                    "localpathstr",
+                ],
+            )
+
+            qs = qs.filter(filename_query)
+        return qs
+
 
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
@@ -37,6 +56,8 @@ class Path(models.Model):
         null=False,
         default=False,
     )
+
+    objects = models.Manager.from_queryset(PathQuerySet)()
 
     class Meta:
         app_label = "mediaviewer"
@@ -97,31 +118,26 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFolders(cls):
-        paths_QS = (
+        paths_qs = (
             Path.objects.filter(is_movie=False)
             .filter(file__hide=False)
             .annotate(num_files=models.Count("file"))
             .filter(num_files__gt=0)
         )
-        paths = set(paths_QS)
-        return cls._buildDistinctShowFoldersFromPaths(paths)
 
-    @classmethod
-    def _buildDistinctShowFoldersFromPaths(cls, paths):
-        pathDict = dict()
-        for path in paths:
-            lastDate = path.lastCreatedFileDate
-            if path.shortName in pathDict:
-                if lastDate and pathDict[path.shortName].lastCreatedFileDate < lastDate:
-                    pathDict[path.shortName] = path
-            else:
-                pathDict[path.shortName] = path
-        return pathDict
-
-    @classmethod
-    def distinctShowFoldersByGenre(cls, genre):
-        paths = cls.objects.filter(_posterfile__genres=genre)
-        return cls._buildDistinctShowFoldersFromPaths(paths)
+        subquery = models.Subquery(
+            Path.objects.filter(localpathstr=models.OuterRef("localpathstr"))
+            .order_by("-lastCreatedFileDate")
+            .values("pk")[:1]
+        )
+        paths_qs = Path.objects.filter(
+            pk__in=(
+                paths_qs.values("localpathstr")
+                .annotate(path_pk=subquery)
+                .values("path_pk")
+            )
+        )
+        return paths_qs
 
     def isMovie(self):
         return self.is_movie
@@ -216,3 +232,15 @@ class Path(models.Model):
     @classmethod
     def get_tv_genres(cls):
         return Genre.get_tv_genres()
+
+    def ajax_row_payload(self, user):
+        unwatched_count = self.number_of_unwatched_shows(user)
+        payload = [
+            (
+                f"""<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>\n"""
+                f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info">{unwatched_count or ""}</span>'
+            ),
+            f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%b %d, %Y')}""",
+            "",
+        ]
+        return payload

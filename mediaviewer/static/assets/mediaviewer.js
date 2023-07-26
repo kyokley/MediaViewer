@@ -40,10 +40,15 @@ function setHomeFormSubmit($) {
     });
 }
 
-function prepareTableSorter($, sortOrder) {
+function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     tableElement = $('#myTable');
 
-    tableElement.dataTable({
+    if(filter_id){
+        var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/' + String(filter_id) + '/';
+    }else{
+        var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/';
+    }
+    dt_config = {
         order: sortOrder,
         autoWidth: false,
         responsive: {
@@ -57,7 +62,13 @@ function prepareTableSorter($, sortOrder) {
                     orderable: false,
                     targets: -1
         }]
-    });
+    };
+    if(table_data_page !== 'tvshows'){
+        dt_config.serverSide = true;
+        dt_config.ajax = ajax_path;
+    }
+
+    tableElement.dataTable(dt_config);
 
     tableElement.on('page.dt', function(){
         dt = tableElement.DataTable();
@@ -118,9 +129,6 @@ function jumpToLastViewedPage($){
     // Subtract a very small amount to make sure evenly divisible pages round down
     newPage = Math.max(0, Math.floor(maxIndex / pageLength - .00001));
     dt.page(newPage).draw(false);
-}
-
-function prepareViewedCheckBoxes($){
 }
 
 function ajaxCheckBox(file_id){
@@ -186,9 +194,6 @@ function prepareScraperButton($){
     };
 }
 
-function prepareDownloadButtons($, waiterStatus){
-}
-
 function openDownloadWindow(id){
     $.ajax({
     url: '/mediaviewer/ajaxdownloadbutton/',
@@ -233,8 +238,6 @@ function prepareAjaxWaiterStatus($, is_staffer){
                 statusLabel.innerText = json.failureReason;
             }
         }
-
-        prepareDownloadButtons($, json.status);
     },
     error: function(xhr, errmsg, err){}
     });
@@ -248,9 +251,6 @@ function setFileDetailCheckboxes(viewed, hidden){
         jQuery('#toggle-hide').prop('checked', 'checked');
     }
 };
-
-function prepareVoteButton($){
-}
 
 function callAjaxVote(name){
     jQuery.ajax({
@@ -271,9 +271,6 @@ function callAjaxVote(name){
             alert(xhr.status + ": " + xhr.responseText);
         }
     });
-}
-
-function prepareDoneButton($){
 }
 
 function callDoneButton(name){
@@ -352,30 +349,6 @@ function reportButtonClick(id){
     error : function(xhr,errmsg,err) {
         alert(xhr.status + ": " + xhr.responseText);
     }
-    });
-}
-
-function populateUnwatchedBadges(url){
-    jQuery.ajax({url: url,
-                 type: "GET",
-                 dataType: "json",
-                 success: function(json){
-                     var i;
-                     for(i=0; i<json.results.length; i++){
-                         var number_of_shows = json.results[i].number_of_unwatched_shows;
-                         if(number_of_shows > 0){
-                             badgeSpan = tableElement.$("#unwatched-show-badge-" + json.results[i].pk);
-                             badgeSpan.html(number_of_shows);
-                         }
-                     }
-
-                     if(json.next){
-                         populateUnwatchedBadges(json.next);
-                     }
-                 },
-                 error: function(json){
-                     console.log("An error has occurred attempting to set badges");
-                 }
     });
 }
 

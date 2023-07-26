@@ -37,20 +37,15 @@ def files(request, items):
         files = File.objects.order_by("-id")
     files = files.select_related("path")
 
-    viewed_by_file = UserComment.objects.viewed_by_file(user)
-    file_data = [file.display_payload() for file in files]
-    for file in file_data:
-        file["viewed"] = viewed_by_file.get(file["id"], False)
-
     settings = user.settings()
     context = {
-        "files": file_data,
         "items": items,
         "view": "files",
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
         "can_download": (settings and settings.can_download or False),
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
+        "table_data_page": "ajaxfilesrows",
     }
     context["active_page"] = "files"
     context["title"] = "Files"
@@ -62,21 +57,15 @@ def files(request, items):
 @logAccessInfo
 def movies(request):
     user = request.user
-    files = File.movies_ordered_by_id().select_related("path")
-
-    viewed_by_file = UserComment.objects.viewed_by_file(user)
-    file_data = [file.display_payload() for file in files]
-    for file in file_data:
-        file["viewed"] = viewed_by_file.get(file["id"], False)
 
     settings = user.settings()
     context = {
-        "files": file_data,
         "view": "movies",
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
+        "table_data_page": "ajaxmovierows",
     }
     context["active_page"] = "movies"
     context["title"] = "Movies"
@@ -89,21 +78,16 @@ def movies(request):
 def movies_by_genre(request, genre_id):
     user = request.user
     genre = get_object_or_404(Genre, pk=genre_id)
-    files = File.movies_by_genre(genre).select_related("path")
-
-    viewed_by_file = UserComment.objects.viewed_by_file(user)
-    file_data = [file.display_payload() for file in files]
-    for file in file_data:
-        file["viewed"] = viewed_by_file.get(file["id"], False)
 
     settings = user.settings()
     context = {
-        "files": file_data,
         "view": "movies",
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
+        "table_data_page": "ajaxmoviesbygenrerows",
+        "table_data_filter_id": genre.id,
     }
     context["active_page"] = "movies"
     context["title"] = "Movies: {}".format(genre.genre)
@@ -114,12 +98,11 @@ def movies_by_genre(request, genre_id):
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
 def tvshowsummary(request):
-    pathDict = Path.distinctShowFolders()
-    pathSet = [path for name, path in pathDict.items()]
-
-    context = {"pathSet": pathSet}
+    context = {}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows"
+    context["table_data_page"] = "ajaxtvshowssummary"
+    context["table_data_filter_id"] = ""
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
@@ -128,12 +111,11 @@ def tvshowsummary(request):
 @logAccessInfo
 def tvshows_by_genre(request, genre_id):
     ref_genre = get_object_or_404(Genre, pk=genre_id)
-    pathDict = Path.distinctShowFoldersByGenre(ref_genre)
-    pathSet = [path for name, path in pathDict.items()]
-
-    context = {"pathSet": pathSet}
+    context = {}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows: {}".format(ref_genre.genre)
+    context["table_data_page"] = "ajaxtvshowsbygenre"
+    context["table_data_filter_id"] = genre_id
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
@@ -159,6 +141,7 @@ def tvshows(request, pathid):
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
+        "table_data_page": "tvshows",
     }
     context["active_page"] = "tvshows"
     context["title"] = refpath.displayName()

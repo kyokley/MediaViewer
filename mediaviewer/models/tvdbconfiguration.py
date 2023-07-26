@@ -29,7 +29,7 @@ def getJSONData(url):
         log.error(str(e), exc_info=True)
 
 
-class TVDBConfiguration(object):
+class TVDBConfiguration:
     _instance = None
 
     def __new__(cls, *args, **kwargs):

@@ -54,10 +54,8 @@
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            prepareTableSorter($, [[1,1]]);
-
+            prepareTableSorter($, [[1,1]], '{{ table_data_page }}', '{{ table_data_filter_id }}');
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
-            populateUnwatchedBadges("/mediaviewer/api/tvpath/");
             scrollSetup();
         });
 

@@ -25,14 +25,16 @@ from mediaviewer.views.files import (
 )
 
 
+@pytest.fixture(autouse=True)
+def mock_tvdb_config(mocker):
+    mock_get = mocker.patch("mediaviewer.models.tvdbconfiguration.requests.get")
+    mock_get.return_value.raise_for_status.side_effect = Exception("Fail Request")
+
+
 @pytest.mark.django_db
 class TestMovies:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.mock_movies_ordered_by_id = mocker.patch(
-            "mediaviewer.views.files.File.movies_ordered_by_id"
-        )
-
         self.mock_setSiteWideContext = mocker.patch(
             "mediaviewer.views.files.setSiteWideContext"
         )
@@ -65,7 +67,6 @@ class TestMovies:
 
     def test_valid(self):
         expected_context = {
-            "files": [],
             "view": "movies",
             "LOCAL_IP": LOCAL_IP,
             "BANGUP_IP": BANGUP_IP,
@@ -73,6 +74,7 @@ class TestMovies:
             "jump_to_last": True,
             "active_page": "movies",
             "title": "Movies",
+            "table_data_page": "ajaxmovierows",
         }
         expected = self.mock_render.return_value
         actual = movies(self.request)
@@ -88,7 +90,6 @@ class TestMovies:
             "mediaviewer/files.html",
             expected_context,
         )
-        self.mock_movies_ordered_by_id.assert_called_once_with()
 
 
 @pytest.mark.django_db
@@ -160,7 +161,6 @@ class TestMoviesByGenre:
 
     def test_valid(self):
         expected_context = {
-            "files": [],
             "view": "movies",
             "LOCAL_IP": LOCAL_IP,
             "BANGUP_IP": BANGUP_IP,
@@ -168,12 +168,13 @@ class TestMoviesByGenre:
             "jump_to_last": True,
             "active_page": "movies",
             "title": "Movies: test_genre",
+            "table_data_page": "ajaxmoviesbygenrerows",
+            "table_data_filter_id": self.genre.id,
         }
         expected = self.mock_render.return_value
         actual = movies_by_genre(self.request, self.genre.id)
 
         assert expected == actual
-        self.mock_files_movies_by_genre.assert_called_once_with(self.genre)
         self.mock_get_object_or_404.assert_called_once_with(
             Genre,
             pk=self.genre.id,
@@ -192,21 +193,11 @@ class TestMoviesByGenre:
 class TestTvShowSummary:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.mock_distinctShowFolders = mocker.patch(
-            "mediaviewer.views.files.Path.distinctShowFolders"
-        )
-
         self.mock_setSiteWideContext = mocker.patch(
             "mediaviewer.views.files.setSiteWideContext"
         )
 
         self.mock_render = mocker.patch("mediaviewer.views.files.render")
-
-        self.test_distinct_folders = {
-            "test1": "path1",
-            "test2": "path2",
-        }
-        self.mock_distinctShowFolders.return_value = self.test_distinct_folders
 
         mv_group = Group(name="MediaViewer")
         mv_group.save()
@@ -220,16 +211,16 @@ class TestTvShowSummary:
 
     def test_valid(self):
         expected_context = {
-            "pathSet": ["path1", "path2"],
             "active_page": "tvshows",
             "title": "TV Shows",
+            "table_data_page": "ajaxtvshowssummary",
+            "table_data_filter_id": "",
         }
 
         expected = self.mock_render.return_value
         actual = tvshowsummary(self.request)
 
         assert expected == actual
-        self.mock_distinctShowFolders.assert_called_once_with()
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context, self.request, includeMessages=True
         )
@@ -271,21 +262,11 @@ class TestTvShowsByGenre:
 
         self.mock_render = mocker.patch("mediaviewer.views.files.render")
 
-        self.mock_distinctShowFoldersByGenre = mocker.patch(
-            "mediaviewer.views.files.Path.distinctShowFoldersByGenre"
-        )
-
         self.genre = mock.MagicMock(Genre)
         self.genre.id = 123
         self.genre.genre = "test_genre"
 
         self.mock_get_object_or_404.return_value = self.genre
-
-        self.test_distinct_folders = {
-            "test1": "path1",
-            "test2": "path2",
-        }
-        self.mock_distinctShowFoldersByGenre.return_value = self.test_distinct_folders
 
         mv_group = Group(name="MediaViewer")
         mv_group.save()
@@ -299,9 +280,10 @@ class TestTvShowsByGenre:
 
     def test_valid(self):
         expected_context = {
-            "pathSet": ["path1", "path2"],
             "active_page": "tvshows",
             "title": "TV Shows: test_genre",
+            "table_data_page": "ajaxtvshowsbygenre",
+            "table_data_filter_id": self.genre.id,
         }
 
         expected = self.mock_render.return_value
@@ -309,7 +291,6 @@ class TestTvShowsByGenre:
 
         assert expected == actual
         self.mock_get_object_or_404.assert_called_once_with(Genre, pk=self.genre.id)
-        self.mock_distinctShowFoldersByGenre.assert_called_once_with(self.genre)
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context, self.request, includeMessages=True
         )
@@ -404,6 +385,7 @@ class TestTvShows:
             "active_page": "tvshows",
             "title": "Tv Local Path",
             "long_plot": "",
+            "table_data_page": "tvshows",
         }
 
         expected = self.mock_render.return_value

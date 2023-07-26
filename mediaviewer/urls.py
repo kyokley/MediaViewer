@@ -91,6 +91,27 @@ urlpatterns = [
     re_path(
         r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"
     ),
+    re_path(r"^ajax/ajaxmovierows/$", ajax.ajaxmovierows, name="ajaxmovierows"),
+    re_path(
+        r"^ajax/ajaxmoviesbygenrerows/(?P<genre_id>[0-9]+)/$",
+        ajax.ajaxmoviesbygenrerows,
+        name="ajaxmoviesbygenrerows",
+    ),
+    re_path(
+        r"^ajax/ajaxtvshowssummary/$",
+        ajax.ajaxtvshowssummary,
+        name="ajaxtvshowssummary",
+    ),
+    re_path(
+        r"^ajax/ajaxtvshowsbygenre/(?P<genre_id>[0-9]+)/$",
+        ajax.ajaxtvshowsbygenre,
+        name="ajaxtvshowsbygenre",
+    ),
+    re_path(
+        r"^ajax/ajaxtvshows/(?P<path_id>[0-9]+)/$",
+        ajax.ajaxtvshows,
+        name="ajaxtvshows",
+    ),
     re_path(
         r"^user/reset/$",
         PasswordResetView.as_view(
