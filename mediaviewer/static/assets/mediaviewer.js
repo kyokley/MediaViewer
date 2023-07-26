@@ -131,9 +131,6 @@ function jumpToLastViewedPage($){
     dt.page(newPage).draw(false);
 }
 
-function prepareViewedCheckBoxes($){
-}
-
 function ajaxCheckBox(file_id){
     var box = document.getElementsByName(file_id)[0];
     var checked = box.checked;
@@ -197,9 +194,6 @@ function prepareScraperButton($){
     };
 }
 
-function prepareDownloadButtons($, waiterStatus){
-}
-
 function openDownloadWindow(id){
     $.ajax({
     url: '/mediaviewer/ajaxdownloadbutton/',
@@ -244,8 +238,6 @@ function prepareAjaxWaiterStatus($, is_staffer){
                 statusLabel.innerText = json.failureReason;
             }
         }
-
-        prepareDownloadButtons($, json.status);
     },
     error: function(xhr, errmsg, err){}
     });
@@ -259,9 +251,6 @@ function setFileDetailCheckboxes(viewed, hidden){
         jQuery('#toggle-hide').prop('checked', 'checked');
     }
 };
-
-function prepareVoteButton($){
-}
 
 function callAjaxVote(name){
     jQuery.ajax({
@@ -282,9 +271,6 @@ function callAjaxVote(name){
             alert(xhr.status + ": " + xhr.responseText);
         }
     });
-}
-
-function prepareDoneButton($){
 }
 
 function callDoneButton(name){
@@ -364,9 +350,6 @@ function reportButtonClick(id){
         alert(xhr.status + ": " + xhr.responseText);
     }
     });
-}
-
-function populateUnwatchedBadges(url){
 }
 
 function validatePassword(password){
