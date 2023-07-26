@@ -86,6 +86,29 @@
             </tr>
         </thead>
         <tbody>
+            {% for file in files %}
+                <tr>
+                    <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.name }}</a></td>
+                    <td><span class="hidden_span">{{file.dateCreatedForSpan}}</span>{{ file.date }}</td>
+                    {% if can_download %}
+                        {% if waiterstatus %}
+                            <td><center><a class='btn btn-info' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a></center></td>
+                        {% else %}
+                            <td>Alfred is down</td>
+                        {% endif %}
+                    {% endif %}
+                    <td>
+                        {% if file.viewed %}
+                            <span class="hidden" name="hidden-{{ file.id }}">true</span><input name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{file.id}}')" />
+                        {% else %}
+                            <span class="hidden" name="hidden-{{ file.id }}">false</span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
+                        {% endif %}
+                        <span id="saved-{{ file.id }}"></span>
+                    </td>
+                    <td><input class='report' name='report-{{ file.id }}' value='Report' type='button' onclick="reportButtonClick('{{file.id}}')"/></td>
+                    <td></td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 {% endblock %}

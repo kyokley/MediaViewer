@@ -48,11 +48,9 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     }else{
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/';
     }
-    tableElement.dataTable({
+    dt_config = {
         order: sortOrder,
         autoWidth: false,
-        serverSide: true,
-        ajax: ajax_path,
         responsive: {
             details: {
                 type: 'column',
@@ -64,7 +62,13 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
                     orderable: false,
                     targets: -1
         }]
-    });
+    };
+    if(table_data_page !== 'tvshows'){
+        dt_config.serverSide = true;
+        dt_config.ajax = ajax_path;
+    }
+
+    tableElement.dataTable(dt_config);
 
     tableElement.on('page.dt', function(){
         dt = tableElement.DataTable();

@@ -77,8 +77,6 @@ class File(models.Model):
     override_season = models.TextField(blank=True)
     override_episode = models.TextField(blank=True)
 
-    display_name = models.TextField(blank=True, editable=False, null=False, default='')
-
     users = models.ManyToManyField("auth.User", through="UserComment")
 
     objects = FileManager.from_queryset(FileQuerySet)()
@@ -360,12 +358,7 @@ class File(models.Model):
             return fullname
 
     def displayName(self):
-        name = self.getScrapedFullName(include_path_name=False)
-        if not self.display_name:
-            self.display_name = name
-            self.save()
-        return name
-
+        return self.getScrapedFullName(include_path_name=False)
 
     def display_name_with_path(self):
         return self.getScrapedFullName(include_path_name=True)
@@ -395,7 +388,6 @@ class File(models.Model):
                 log.debug(
                     f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
                 )
-                self.display_name = self.displayName()
                 self.save()
                 self.destroyPosterFile()
                 break
@@ -477,7 +469,7 @@ class File(models.Model):
     def display_payload(self):
         payload = {
             "id": self.id,
-            "name": self.display_name,
+            "name": self.displayName(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),
             "date": self.datecreated.date(),
         }
@@ -485,7 +477,7 @@ class File(models.Model):
 
     def ajax_row_payload(self, can_download, waiterstatus, viewed_lookup):
         payload = [
-            f'<a href="/mediaviewer/files/{self.id}/">{self.display_name}</a>',
+            f'<a href="/mediaviewer/files/{self.id}/">{self.displayName()}</a>',
             f"""<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%d %b %Y')}""",
         ]
 
