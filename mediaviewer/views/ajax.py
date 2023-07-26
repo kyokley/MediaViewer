@@ -1,3 +1,6 @@
+from django.shortcuts import (
+    get_object_or_404,
+)
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
@@ -5,6 +8,9 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
+from mediaviewer.models.usercomment import UserComment
+from mediaviewer.models.waiterstatus import WaiterStatus
+from mediaviewer.models.genre import Genre
 
 import json
 import pytz
@@ -81,3 +87,57 @@ def ajaxgenres(request, guid):
         )
     else:
         return HttpResponse(None, content_type="application/json", status=405)
+
+
+def ajaxrows(request, qs):
+    user = request.user
+
+    settings = user.settings()
+    can_download = settings.can_download
+
+    lastStatus = WaiterStatus.getLastStatus()
+    waiterstatus = lastStatus.status if lastStatus else False
+
+    request_params = dict(request.GET)
+    offset = int(request_params['start'][0])
+    length = int(request_params['length'][0])
+    search_str = request_params['search[value]'][0]
+    draw = int(request_params['draw'][0])
+
+    qs = qs.search(search_str)
+    files = qs[offset:offset + length]
+
+    viewed_by_file = UserComment.objects.viewed_by_file(user)
+    file_data = [file.ajax_row_payload(can_download,
+                                       waiterstatus,
+                                       viewed_by_file,
+                                       ) for file in files]
+
+    payload = {
+        'draw': draw,
+        "recordsTotal": File.movies_ordered_by_id().count(),
+        "recordsFiltered": qs.count(),
+        "data": file_data
+    }
+
+    return HttpResponse(
+        json.dumps(payload), content_type="application/json", status=200
+    )
+
+@csrf_exempt
+def ajaxmovierows(request):
+    qs = File.movies_ordered_by_id()
+    return ajaxrows(request, qs)
+
+
+@csrf_exempt
+def ajaxfilesrows(request):
+    qs = File.objects.order_by('-id')
+    return ajaxrows(request, qs)
+
+
+@csrf_exempt
+def ajaxmoviesbygenrerows(request, genre_id):
+    genre = get_object_or_404(Genre, pk=genre_id)
+    qs = File.movies_by_genre(genre).order_by('-id')
+    return ajaxrows(request, qs)

@@ -40,12 +40,19 @@ function setHomeFormSubmit($) {
     });
 }
 
-function prepareTableSorter($, sortOrder) {
+function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     tableElement = $('#myTable');
 
+    if(filter_id){
+        var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/' + String(filter_id) + '/';
+    }else{
+        var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/';
+    }
     tableElement.dataTable({
         order: sortOrder,
         autoWidth: false,
+        serverSide: true,
+        ajax: ajax_path,
         responsive: {
             details: {
                 type: 'column',
