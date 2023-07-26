@@ -26,7 +26,7 @@
             <tr>
                 <th class="all">TV Shows</th>
                 <th class='min-tablet-p'>Last Show</th>
-                <th></th>
+                <th class='nosort'></th>
             </tr>
         </thead>
         <tbody>
@@ -44,7 +44,7 @@
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            prepareTableSorter($, [[1,1]], '{{ table_data_page }}', '{{ table_data_filter_id }}');
+            prepareTableSorter($, [[1,'desc']], '{{ table_data_page }}', '{{ table_data_filter_id }}');
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
         });

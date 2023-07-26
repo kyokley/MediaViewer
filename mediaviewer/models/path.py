@@ -237,7 +237,11 @@ class Path(models.Model):
     def ajax_row_payload(self, user):
         unwatched_count = self.number_of_unwatched_shows(user)
         posterfile = self.posterfile
-        tooltip_img = f"<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />" if posterfile and posterfile.image else ''
+        tooltip_img = (
+            f"<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />"
+            if posterfile and posterfile.image
+            else ""
+        )
         payload = [
             (
                 f"""<a href='/mediaviewer/tvshows/{ self.id }/' data-toggle="tooltip" title="{tooltip_img}">"""

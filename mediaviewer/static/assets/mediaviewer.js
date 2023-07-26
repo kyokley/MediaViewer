@@ -48,31 +48,8 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     }else{
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/';
     }
-    dt_config = {
-        order: sortOrder,
-        autoWidth: false,
-        responsive: {
-            details: {
-                type: 'column',
-                target: -1
-            }
-        },
-        columnDefs: [{
-                    className: 'control',
-                    orderable: false,
-                    targets: -1
-        }]
-    };
-    if(table_data_page !== 'tvshows'){
-        dt_config.serverSide = true;
-        dt_config.ajax = {
-            url: ajax_path,
-            dataSrc: function ( json ) {
-                configureDataTable($);
-                return json.data;
-            }
-        }
-    }
+
+    configureDataTable($, sortOrder, table_data_page, ajax_path);
 
     tableElement.dataTable(dt_config);
 
@@ -89,7 +66,34 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     }
 }
 
-function configureDataTable($){
+function configureDataTable($, sortOrder, table_data_page, ajax_path){
+    dt_config = {
+        order: sortOrder,
+        autoWidth: false,
+        responsive: {
+            details: {
+                type: 'column',
+                target: -1
+            }
+        },
+        columnDefs: [{
+            "targets": 'nosort',
+            "orderable": false
+        }]
+    };
+    if(table_data_page !== 'tvshows'){
+        dt_config.serverSide = true;
+        dt_config.ajax = {
+            url: ajax_path,
+            dataSrc: function ( json ) {
+                configureTooltips($);
+                return json.data;
+            }
+        }
+    }
+}
+
+function configureTooltips($){
     options = {
         animated: true,
         placement: 'bottom',

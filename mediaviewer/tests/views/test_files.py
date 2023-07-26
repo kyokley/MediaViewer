@@ -374,7 +374,7 @@ class TestTvShows:
                     "id": self.tv_file.id,
                     "name": "tv.file",
                     "viewed": False,
-                    'posterfile': '',
+                    "posterfile": "",
                 }
             ],
             "path": self.tv_path,

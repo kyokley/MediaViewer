@@ -103,8 +103,20 @@ def _ajax_file_rows(request, qs):
     search_str = request_params["search[value]"][0]
     draw = int(request_params["draw"][0])
 
+    sort_columns_map = {
+        0: "filename",
+        1: "datecreated",
+    }
+    sort_column = int(request_params["order[0][column]"][0])
+    sort_dir = request_params["order[0][dir]"][0]
+    sort_expr = (
+        f"-{sort_columns_map[sort_column]}"
+        if sort_dir == "desc"
+        else f"{sort_columns_map[sort_column]}"
+    )
+
     initial_qs = qs
-    qs = initial_qs.search(search_str)
+    qs = initial_qs.order_by(sort_expr).search(search_str)
     files = qs[offset : offset + length]
 
     viewed_by_file = UserComment.objects.viewed_by_file(user)
@@ -136,8 +148,20 @@ def _ajax_path_rows(request, qs):
     search_str = request_params["search[value]"][0]
     draw = int(request_params["draw"][0])
 
+    sort_columns_map = {
+        0: "localpathstr",
+        1: "lastCreatedFileDate",
+    }
+    sort_column = int(request_params["order[0][column]"][0])
+    sort_dir = request_params["order[0][dir]"][0]
+    sort_expr = (
+        f"-{sort_columns_map[sort_column]}"
+        if sort_dir == "desc"
+        else f"{sort_columns_map[sort_column]}"
+    )
+
     initial_qs = qs
-    qs = initial_qs.search(search_str)
+    qs = initial_qs.order_by(sort_expr).search(search_str)
     paths = qs[offset : offset + length]
 
     path_data = [path.ajax_row_payload(request.user) for path in paths]
