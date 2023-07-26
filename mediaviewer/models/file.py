@@ -478,7 +478,7 @@ class File(models.Model):
     def ajax_row_payload(self, can_download, waiterstatus, viewed_lookup):
         payload = [
             f'<a href="/mediaviewer/files/{self.id}/">{self.displayName()}</a>',
-            f"""<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%d %b %Y')}""",
+            f"""<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%b %d, %Y')}""",
         ]
 
         if can_download:

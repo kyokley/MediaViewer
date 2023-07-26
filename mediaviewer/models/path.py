@@ -240,7 +240,7 @@ class Path(models.Model):
                 f"""<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>\n"""
                 f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info">{unwatched_count or ""}</span>'
             ),
-            f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%d %b %Y')}""",
+            f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%b %d, %Y')}""",
             "",
         ]
         return payload
