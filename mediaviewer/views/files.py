@@ -45,7 +45,7 @@ def files(request, items):
         "BANGUP_IP": BANGUP_IP,
         "can_download": (settings and settings.can_download or False),
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        'table_data_page': 'ajaxfilesrows',
+        "table_data_page": "ajaxfilesrows",
     }
     context["active_page"] = "files"
     context["title"] = "Files"
@@ -65,7 +65,7 @@ def movies(request):
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        'table_data_page': 'ajaxmovierows',
+        "table_data_page": "ajaxmovierows",
     }
     context["active_page"] = "movies"
     context["title"] = "Movies"
@@ -86,8 +86,8 @@ def movies_by_genre(request, genre_id):
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        'table_data_page': 'ajaxmoviesbygenrerows',
-        'table_data_filter_id': genre.id,
+        "table_data_page": "ajaxmoviesbygenrerows",
+        "table_data_filter_id": genre.id,
     }
     context["active_page"] = "movies"
     context["title"] = "Movies: {}".format(genre.genre)
@@ -104,7 +104,7 @@ def tvshowsummary(request):
     context = {"pathSet": pathSet}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows"
-    context['table_data_page'] = 'tvshowsummary'
+    context["table_data_page"] = "tvshowsummary"
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
@@ -119,7 +119,7 @@ def tvshows_by_genre(request, genre_id):
     context = {"pathSet": pathSet}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows: {}".format(ref_genre.genre)
-    context['table_data_page'] = 'tvshows_by_genre'
+    context["table_data_page"] = "tvshows_by_genre"
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
@@ -145,7 +145,7 @@ def tvshows(request, pathid):
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        'table_data_page': 'tvshows',
+        "table_data_page": "tvshows",
     }
     context["active_page"] = "tvshows"
     context["title"] = refpath.displayName()

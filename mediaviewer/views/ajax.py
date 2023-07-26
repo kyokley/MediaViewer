@@ -99,30 +99,35 @@ def ajaxrows(request, qs):
     waiterstatus = lastStatus.status if lastStatus else False
 
     request_params = dict(request.GET)
-    offset = int(request_params['start'][0])
-    length = int(request_params['length'][0])
-    search_str = request_params['search[value]'][0]
-    draw = int(request_params['draw'][0])
+    offset = int(request_params["start"][0])
+    length = int(request_params["length"][0])
+    search_str = request_params["search[value]"][0]
+    draw = int(request_params["draw"][0])
 
     qs = qs.search(search_str)
-    files = qs[offset:offset + length]
+    files = qs[offset : offset + length]
 
     viewed_by_file = UserComment.objects.viewed_by_file(user)
-    file_data = [file.ajax_row_payload(can_download,
-                                       waiterstatus,
-                                       viewed_by_file,
-                                       ) for file in files]
+    file_data = [
+        file.ajax_row_payload(
+            can_download,
+            waiterstatus,
+            viewed_by_file,
+        )
+        for file in files
+    ]
 
     payload = {
-        'draw': draw,
+        "draw": draw,
         "recordsTotal": File.movies_ordered_by_id().count(),
         "recordsFiltered": qs.count(),
-        "data": file_data
+        "data": file_data,
     }
 
     return HttpResponse(
         json.dumps(payload), content_type="application/json", status=200
     )
+
 
 @csrf_exempt
 def ajaxmovierows(request):
@@ -132,12 +137,12 @@ def ajaxmovierows(request):
 
 @csrf_exempt
 def ajaxfilesrows(request):
-    qs = File.objects.order_by('-id')
+    qs = File.objects.order_by("-id")
     return ajaxrows(request, qs)
 
 
 @csrf_exempt
 def ajaxmoviesbygenrerows(request, genre_id):
     genre = get_object_or_404(Genre, pk=genre_id)
-    qs = File.movies_by_genre(genre).order_by('-id')
+    qs = File.movies_by_genre(genre).order_by("-id")
     return ajaxrows(request, qs)
