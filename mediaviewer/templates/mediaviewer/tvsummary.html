@@ -30,16 +30,6 @@
             </tr>
         </thead>
         <tbody>
-            {% for path in pathSet %}
-                <tr>
-                    <td>
-                        <a href='/mediaviewer/tvshows/{{ path.id }}/'>{{ path.displayName }}</a>
-                        <span id="unwatched-show-badge-{{ path.id }}" class="badge alert-info"></span>
-                    </td>
-                    <td><span class="hidden_span">{{path.lastCreatedFileDateForSpan}}</span>{{ path.lastCreatedFileDate.date }}</td>
-                    <td></td>
-                </tr>
-            {% endfor %}
         </tbody>
     </table>
 

@@ -8,6 +8,7 @@ from mediaviewer.models.genre import Genre
 from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
+from django.conf import settings as conf_settings
 
 from mediaviewer.utils import get_search_query
 
@@ -235,9 +236,12 @@ class Path(models.Model):
 
     def ajax_row_payload(self, user):
         unwatched_count = self.number_of_unwatched_shows(user)
+        posterfile = self.posterfile
+        tooltip_img = f"<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />" if posterfile and posterfile.image else ''
         payload = [
             (
-                f"""<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>\n"""
+                f"""<a href='/mediaviewer/tvshows/{ self.id }/' data-toggle="tooltip" title="{tooltip_img}">"""
+                f"""{ self.displayName() }</a>\n"""
                 f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info">{unwatched_count or ""}</span>'
             ),
             f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%b %d, %Y')}""",

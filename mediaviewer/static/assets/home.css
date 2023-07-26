@@ -191,3 +191,9 @@ body{
 .donation-text {
     margin-top:13px;
 }
+.tooltip-img {
+    height: auto;
+    width: auto;
+    max-width: 150px;
+    max-height: 150px;
+}
