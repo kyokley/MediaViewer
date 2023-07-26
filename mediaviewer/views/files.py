@@ -98,13 +98,15 @@ def movies_by_genre(request, genre_id):
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
 def tvshowsummary(request):
-    pathDict = Path.distinctShowFolders()
-    pathSet = [path for name, path in pathDict.items()]
+    # pathDict = Path.distinctShowFolders()
+    # pathSet = [path for name, path in pathDict.items()]
 
-    context = {"pathSet": pathSet}
+    # context = {"pathSet": pathSet}
+    context = {}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows"
-    context["table_data_page"] = "tvshowsummary"
+    context["table_data_page"] = "ajaxtvshowssummary"
+    context["table_data_filter_id"] = ""
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
@@ -113,13 +115,15 @@ def tvshowsummary(request):
 @logAccessInfo
 def tvshows_by_genre(request, genre_id):
     ref_genre = get_object_or_404(Genre, pk=genre_id)
-    pathDict = Path.distinctShowFoldersByGenre(ref_genre)
-    pathSet = [path for name, path in pathDict.items()]
+    # pathDict = Path.distinctShowFoldersByGenre(ref_genre)
+    # pathSet = [path for name, path in pathDict.items()]
 
-    context = {"pathSet": pathSet}
+    # context = {"pathSet": pathSet}
+    context = {}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows: {}".format(ref_genre.genre)
-    context["table_data_page"] = "tvshows_by_genre"
+    context["table_data_page"] = "ajaxtvshowsbygenre"
+    context["table_data_filter_id"] = ""
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 

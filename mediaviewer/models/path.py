@@ -9,6 +9,20 @@ from datetime import datetime as dateObj
 from datetime import timedelta
 from django.utils.timezone import utc
 
+from mediaviewer.utils import get_query
+
+
+class PathQuerySet(models.QuerySet):
+    def search(self, search_str):
+        qs = self
+        if search_str:
+            filename_query = get_query(search_str, ["override_display_name",
+                                                    "defaultsearchstr",
+                                                    'localpathstr',
+                                                    ])
+
+            qs = qs.filter(filename_query)
+        return qs
 
 class Path(models.Model):
     localpathstr = models.TextField(blank=True)
@@ -37,6 +51,8 @@ class Path(models.Model):
         null=False,
         default=False,
     )
+
+    objects = models.Manager.from_queryset(PathQuerySet)()
 
     class Meta:
         app_label = "mediaviewer"
@@ -97,14 +113,28 @@ class Path(models.Model):
 
     @classmethod
     def distinctShowFolders(cls):
-        paths_QS = (
+        paths_qs = (
             Path.objects.filter(is_movie=False)
             .filter(file__hide=False)
             .annotate(num_files=models.Count("file"))
             .filter(num_files__gt=0)
         )
-        paths = set(paths_QS)
-        return cls._buildDistinctShowFoldersFromPaths(paths)
+        # paths = set(paths_qs)
+        # return cls._buildDistinctShowFoldersFromPaths(paths)
+
+        subquery = models.Subquery(
+            Path.objects.filter(
+                localpathstr=models.OuterRef('localpathstr')
+        )
+            .order_by('-lastCreatedFileDate')
+            .values('pk')[:1]
+        )
+        paths_qs = Path.objects.filter(pk__in=(
+            paths_qs.values('localpathstr')
+            .annotate(path_pk=subquery)
+            .values('path_pk')
+        ))
+        return paths_qs
 
     @classmethod
     def _buildDistinctShowFoldersFromPaths(cls, paths):
@@ -216,3 +246,12 @@ class Path(models.Model):
     @classmethod
     def get_tv_genres(cls):
         return Genre.get_tv_genres()
+
+    def ajax_row_payload(self):
+        payload = [
+            (f'''<a href='/mediaviewer/tvshows/{ self.id }/'>{ self.displayName() }</a>'''
+             f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info"></span>'),
+            f'''<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%d %b %Y')}''',
+            '',
+        ]
+        return payload

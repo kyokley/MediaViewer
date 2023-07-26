@@ -1,6 +1,7 @@
 from django.shortcuts import (
     get_object_or_404,
 )
+from django.db import models
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
@@ -104,7 +105,8 @@ def ajaxrows(request, qs):
     search_str = request_params["search[value]"][0]
     draw = int(request_params["draw"][0])
 
-    qs = qs.search(search_str)
+    initial_qs = qs
+    qs = initial_qs.search(search_str)
     files = qs[offset : offset + length]
 
     viewed_by_file = UserComment.objects.viewed_by_file(user)
@@ -119,9 +121,37 @@ def ajaxrows(request, qs):
 
     payload = {
         "draw": draw,
-        "recordsTotal": File.movies_ordered_by_id().count(),
+        "recordsTotal": initial_qs.count(),
         "recordsFiltered": qs.count(),
         "data": file_data,
+    }
+
+    return HttpResponse(
+        json.dumps(payload), content_type="application/json", status=200
+    )
+
+
+def ajaxpathrows(request, qs):
+    request_params = dict(request.GET)
+    offset = int(request_params["start"][0])
+    length = int(request_params["length"][0])
+    search_str = request_params["search[value]"][0]
+    draw = int(request_params["draw"][0])
+
+    initial_qs = qs
+    qs = initial_qs.search(search_str)
+    paths = qs[offset : offset + length]
+
+    path_data = [
+        path.ajax_row_payload()
+        for path in paths
+    ]
+
+    payload = {
+        "draw": draw,
+        "recordsTotal": initial_qs.count(),
+        "recordsFiltered": qs.count(),
+        "data": path_data,
     }
 
     return HttpResponse(
@@ -146,3 +176,27 @@ def ajaxmoviesbygenrerows(request, genre_id):
     genre = get_object_or_404(Genre, pk=genre_id)
     qs = File.movies_by_genre(genre).order_by("-id")
     return ajaxrows(request, qs)
+
+
+@csrf_exempt
+def ajaxtvshowssummary(request):
+    paths_qs = (
+        Path.objects.filter(is_movie=False)
+        .filter(file__hide=False)
+        .annotate(num_files=models.Count("file"))
+        .filter(num_files__gt=0)
+    )
+
+    subquery = models.Subquery(
+        Path.objects.filter(
+            localpathstr=models.OuterRef('localpathstr')
+    )
+        .order_by('-lastCreatedFileDate')
+        .values('pk')[:1]
+    )
+    paths_qs = Path.objects.filter(pk__in=(
+        paths_qs.values('localpathstr')
+        .annotate(path_pk=subquery)
+        .values('path_pk')
+    )).order_by('-lastCreatedFileDate')
+    return ajaxpathrows(request, paths_qs)
