@@ -423,8 +423,15 @@ async function bypass_passkey(){
 async function verify_passkey(){
     const { token, error } =  await passkey_client.signinWithDiscoverable();
 
+    const search_params = new URLSearchParams(this.document.location.search);
+    const next = search_params.get('next');
+
     if(token){
-        window.location.href = '/mediaviewer/verify-token/?token=' + token;
+        new_location = '/mediaviewer/verify-token/?token=' + token;
+        if(next){
+            new_location = new_location + '&next=' + next;
+        }
+        window.location.href = new_location;
         return;
     }
 

@@ -140,6 +140,7 @@ def bypass_passkey(request, uidb64):
 @csrf_exempt
 def verify_token(request):
     token = request.GET["token"]
+    next = request.GET.get('next') or request.POST.get('next')
 
     payload = {"token": token}
 
@@ -154,6 +155,9 @@ def verify_token(request):
     resp.raise_for_status()
     json_data = resp.json()
 
+    if next:
+        payload['next'] = next
+
     try:
         user = User.objects.get(username__iexact=json_data["userId"])
     except Exception:
@@ -164,8 +168,8 @@ def verify_token(request):
     context["active_page"] = "signin"
     context["greeting"] = siteGreeting and siteGreeting.greeting or "SignIn"
 
-    if "next" in request.GET:
-        context["next"] = request.GET["next"]
+    if next:
+        context["next"] = next
 
     try:
         if not user.settings().can_login:
@@ -210,8 +214,8 @@ def verify_token(request):
         setSiteWideContext(context, request)
         if not user.email or settings.force_password_change:
             return HttpResponseRedirect(reverse("mediaviewer:settings"))
-        elif "next" in request.POST and request.POST["next"]:
-            return HttpResponseRedirect(request.POST["next"])
+        elif next:
+            return HttpResponseRedirect(next)
         else:
             if request.method == "GET":
                 return render(request, "mediaviewer/signin.html", context)
