@@ -49,7 +49,7 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/';
     }
 
-    configureDataTable($, sortOrder, table_data_page, ajax_path);
+    dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path);
 
     tableElement.dataTable(dt_config);
 
@@ -66,7 +66,7 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
     }
 }
 
-function configureDataTable($, sortOrder, table_data_page, ajax_path){
+function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config = {
         order: sortOrder,
         autoWidth: false,
@@ -79,18 +79,18 @@ function configureDataTable($, sortOrder, table_data_page, ajax_path){
         columnDefs: [{
             "targets": 'nosort',
             "orderable": false
-        }]
+        }],
+        drawCallback: function (settings) {
+            configureTooltips($);
+        }
     };
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
         dt_config.ajax = {
             url: ajax_path,
-            dataSrc: function ( json ) {
-                configureTooltips($);
-                return json.data;
-            }
         }
     }
+    return dt_config;
 }
 
 function configureTooltips($){
