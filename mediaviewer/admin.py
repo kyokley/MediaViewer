@@ -91,9 +91,13 @@ class FilenameScrapeFormatAdmin(admin.ModelAdmin):
 class UserSettingsAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "user",
+        "username",
         "last_watched",
     )
+    search_fields = (
+        "user__username",
+    )
+    ordering = ("user__username",)
 
 
 @admin.register(PosterFile)

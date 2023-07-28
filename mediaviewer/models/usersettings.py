@@ -66,6 +66,10 @@ class UserSettings(models.Model):
     def __str__(self):
         return f"id: {self.id} u: {self.user.username} ip: {self.ip_format}"
 
+    @property
+    def username(self):
+        return self.user.username
+
     @classmethod
     def getSettings(cls, user):
         q = cls.objects.filter(user=user).only()
