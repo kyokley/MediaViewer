@@ -149,6 +149,7 @@ urlpatterns = [
 urlpatterns.extend(
     [
         re_path(r"^login/", signin.signin, name="signin"),
+        re_path(r"^legacy-login/", signin.legacy_signin, name="legacy-signin"),
         re_path(
             rf"^bypass-passkey/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
             signin.bypass_passkey,
