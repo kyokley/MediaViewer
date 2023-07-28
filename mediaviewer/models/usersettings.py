@@ -56,6 +56,7 @@ class UserSettings(models.Model):
         "mediaviewer.Path", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
+    allow_password_logins = models.BooleanField(blank=True, null=False, default=False)
 
     class Meta:
         app_label = "mediaviewer"
@@ -163,8 +164,12 @@ setattr(User, "settings", lambda x: UserSettings.getSettings(x))
 
 
 def case_insensitive_authenticate(request, username, password):
+    """Attempt password-based user login"""
     try:
         user = User.objects.get(username__iexact=username)
+        settings = user.settings()
+        if not settings.allow_password_logins:
+            return None
     except User.DoesNotExist:
         return None
 
