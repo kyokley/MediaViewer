@@ -66,6 +66,24 @@ class TestCaseInsensitiveAuthenticate:
         self.new_user.set_password(self.password)
         self.new_user.save()
 
+        settings = self.new_user.settings()
+        settings.allow_password_logins = True
+        settings.save()
+
+    def test_password_logins_not_allowed(self):
+        settings = self.new_user.settings()
+        settings.allow_password_logins = False
+        settings.save()
+
+        test_username = self.name
+        test_password = self.password
+        expected = None
+        actual = case_insensitive_authenticate(
+            self.request, test_username, test_password
+        )
+
+        assert expected == actual
+
     def test_invalid_user(self):
         test_username = "blah"
         test_password = self.password
