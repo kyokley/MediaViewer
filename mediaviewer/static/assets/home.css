@@ -1,5 +1,5 @@
 body{
-    padding-bottom: 150px;
+    padding-bottom: 200px;
     padding-top: 110px;
 }
 @media (min-width: 980px) {
@@ -37,8 +37,8 @@ body{
 .tooltip-img {
     height: auto;
     width: auto;
-    max-width: 175px;
-    max-height: 175px;
+    max-width: 250px;
+    max-height: 250px;
     overflow: hidden;
 }
 .tooltip {
