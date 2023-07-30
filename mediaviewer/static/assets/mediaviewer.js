@@ -82,7 +82,8 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         }],
         drawCallback: function (settings) {
             configureTooltips($);
-        }
+        },
+        stateSave: true
     };
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
