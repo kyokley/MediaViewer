@@ -89,6 +89,15 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         dt_config.ajax = {
             url: ajax_path,
         }
+        dt_config.scrollY = 500;
+        dt_config.scrollCollapse = true;
+        dt_config.deferRender = true;
+        dt_config.scroller = {
+            loadingIndicator: true
+        };
+        // dt_config.paging = true;
+        // dt_config.ordering = false;
+        // dt_config.searching = false;
     }
     return dt_config;
 }

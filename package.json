@@ -29,6 +29,7 @@
     "@bower_components/datatables.net-responsive-bs": "DataTables/Dist-DataTables-Responsive-Bootstrap#^2.4.1",
     "@bower_components/jquery": "jquery/jquery-dist#^3.7.0",
     "@popperjs/core": "^2.11.8",
+    "datatables.net-scroller-bs": "^2.2.0",
     "jquery.shorten": "^1.0.0",
     "yarn": "^1.22.19"
   },
