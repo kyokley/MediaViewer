@@ -260,10 +260,10 @@ function prepareAjaxWaiterStatus($, is_staffer){
     success: function(json){
         var statusLabel = document.getElementById('waiter-status');
         if(json.status === true){
-            statusLabel.className = 'label label-success';
+            statusLabel.className = 'badge text-bg-success';
             statusLabel.innerText = 'Connected';
         } else {
-            statusLabel.className = 'label label-danger';
+            statusLabel.className = 'badge text-bg-danger';
             if(is_staffer === 'false'){
                 statusLabel.innerText = 'Disconnected';
             } else {
