@@ -120,14 +120,15 @@ def _ajax_file_rows(request, qs):
     files = qs[offset : offset + length]
 
     viewed_by_file = UserComment.objects.viewed_by_file(user)
-    file_data = [
+    file_data = []
+    for file in files:
+        file_data.append(
         file.ajax_row_payload(
             can_download,
             waiterstatus,
             viewed_by_file,
         )
-        for file in files
-    ]
+        )
 
     payload = {
         "draw": draw,

@@ -20,15 +20,16 @@
             {% if error_message %}
                 <p><strong>{{ error_message }}</strong></p>
             {% endif %}
+        <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 {% if file.isMovie %}
-                    <li><a href="/mediaviewer/">Home</a></li>
-                    <li><a href="/mediaviewer/movies/">Movies</a></li>
-                    <li class="active">{{ file.rawSearchString }}</li>
+                    <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
+                    <li class="breadcrumb-item active">{{ file.rawSearchString }}</li>
                 {% else %}
-                    <li><a href="/mediaviewer/">Home</a></li>
-                    <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-                    <li class="active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
+                    <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                    <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
                 {% endif %}
             </ol>
             <div class="row text-center">

@@ -73,7 +73,7 @@ function prepareDataTable($, sortOrder, table_data_page, filter_id) {
 function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config = {
         order: sortOrder,
-        autoWidth: false,
+        autoWidth: true,
         responsive: {
             details: {
                 type: 'column',
@@ -85,29 +85,31 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             "orderable": false
         }],
         drawCallback: function (settings) {
-            sleep(500).then(() => {
+            sleep(2000).then(() => {
             configureTooltips($);
             });
         },
-        stateSave: false
+        stateSave: true
     };
+
+    dt_config.scroller = {
+        loadingIndicator: true
+    };
+    dt_config.scrollY = 500;
+    dt_config.scrollCollapse = true;
+    dt_config.deferRender = true;
+
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
         dt_config.ajax = {
             url: ajax_path,
             dataSrc: function(json){
-                sleep(500).then(() => {
+                sleep(2000).then(() => {
                 configureTooltips($);
                 });
                 return json.data;
             },
         }
-        dt_config.scrollY = 500;
-        dt_config.scrollCollapse = true;
-        dt_config.deferRender = true;
-        dt_config.scroller = {
-            loadingIndicator: true
-        };
         // dt_config.paging = true;
         // dt_config.ordering = false;
         // dt_config.searching = false;
