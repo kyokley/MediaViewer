@@ -8,20 +8,21 @@
 {% include navbar %}
 
 {% block jumbotron %}
-    <div class="jumbotron">
-        <ol class="breadcrumb">
-            <li><a href="/mediaviewer/">Home</a></li>
-            <li class="active">TV Shows</li>
-        </ol>
-        <h1>{{ title }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item active">TV Shows</li>
+            </ol>
+        </nav>
+
+        <h1 class="display-5 fw-bold">{{ title }}</h1>
         <h3>Select from the following TV Shows:</h3>
-    </div>
 {% endblock %}
 
 {% include messages %}
 
 {% block main %}
-    <table id="myTable" class="table table-striped table-hover cell-border no-wrap dt-responsive">
+    <table id="myTable" class="table table-dark table-striped table-hover">
         <thead>
             <tr>
                 <th class="all">TV Shows</th>
@@ -29,7 +30,7 @@
                 <th class='nosort'></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
         </tbody>
     </table>
 
@@ -44,7 +45,7 @@
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            prepareTableSorter($, [[1,'desc']], '{{ table_data_page }}', '{{ table_data_filter_id }}');
+            prepareDataTable($, [[1,'desc']], '{{ table_data_page }}', '{{ table_data_filter_id }}');
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
         });

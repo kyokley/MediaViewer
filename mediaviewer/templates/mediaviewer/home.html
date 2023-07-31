@@ -114,12 +114,13 @@
             </div>
         </nav>
 
+<div class="container py-5">
             {% block jumbotron %}
-            <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
                 <p class="col-md-8 fs-4">{{ greeting }}</p>
             </div>
             {% endblock %}
+            </div>
 
             {% block messages %}
             <div class="container-fluid py-5">
@@ -138,7 +139,7 @@
             </div>
         {% endblock %}
 
-        <div class="container-fluid py-5">
+        <div class="container py-5">
         {% block main %}
             {% if loggedin %}
                 <table id="newFileTable" class="table table-dark table-striped">

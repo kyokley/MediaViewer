@@ -40,7 +40,11 @@ function setHomeFormSubmit($) {
     });
 }
 
-function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function prepareDataTable($, sortOrder, table_data_page, filter_id) {
     tableElement = $('#myTable');
 
     if(filter_id){
@@ -81,14 +85,22 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             "orderable": false
         }],
         drawCallback: function (settings) {
+            sleep(500).then(() => {
             configureTooltips($);
+            });
         },
-        stateSave: true
+        stateSave: false
     };
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
         dt_config.ajax = {
             url: ajax_path,
+            dataSrc: function(json){
+                sleep(500).then(() => {
+                configureTooltips($);
+                });
+                return json.data;
+            },
         }
         dt_config.scrollY = 500;
         dt_config.scrollCollapse = true;
@@ -106,12 +118,12 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
 function configureTooltips($){
     options = {
         animated: true,
-        placement: 'bottom',
+        placement: 'auto',
         html: true,
-        offset: 10,
+        offset: [10, 10],
     };
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip(options)
+        $('[data-bs-toggle="tooltip"]').tooltip(options)
     });
 }
 
