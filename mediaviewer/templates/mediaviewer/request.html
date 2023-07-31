@@ -9,26 +9,26 @@
 
 <div class="container">
     {% block jumbotron %}
-        <div class="jumbotron">
-            <form action="{% url 'mediaviewer:addrequests' %}" method="post">
-                <ol class="breadcrumb">
-                    <li><a href="/mediaviewer/">Home</a></li>
-                    <li class="active">Requests</li>
-                </ol>
-                <h1>Requests</h1>
-                <h3>
-                    Welcome to the requests page. Feel free to make submissions but don't be surprised when I ignore them! Votes are limited to one per request per user per day.
-                </h3>
-                {% csrf_token %}
-                <table>
-                    <tr>
-                        <td>New Request:</td>
-                        <td><input type="text" name="newrequest" id="request-textbox" class="form-control request-textbox" value=""></td>
-                        <td><input class='btn btn-info addrequestbutton' name="addrequestbutton" type="submit" value="Add" /></td>
-                    </tr>
-                </table>
-            </form>
-        </div>
+        <form action="{% url 'mediaviewer:addrequests' %}" method="post">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item active">Requests</li>
+            </ol>
+        </nav>
+            <h1>Requests</h1>
+            <h3>
+                Welcome to the requests page. Feel free to make submissions but don't be surprised when I ignore them! Votes are limited to one per request per user per day.
+            </h3>
+            {% csrf_token %}
+            <table>
+                <tr>
+                    <td>New Request:</td>
+                    <td><input type="text" name="newrequest" id="request-textbox" class="form-control request-textbox" value=""></td>
+                    <td><input class='btn btn-info addrequestbutton' name="addrequestbutton" type="submit" value="Add" /></td>
+                </tr>
+            </table>
+        </form>
     {% endblock %}
 
     {% block main %}

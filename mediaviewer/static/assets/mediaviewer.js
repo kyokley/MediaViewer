@@ -97,7 +97,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     };
     dt_config.scrollY = 500;
     dt_config.scrollCollapse = true;
-    dt_config.deferRender = true;
+    dt_config.deferRender = false;
 
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
