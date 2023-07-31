@@ -185,8 +185,8 @@
 
 <footer>
 {% block footer %}
-    <nav class="navbar navbar-expand-md navbar-dark fixed-bottom bg-body-tertiary navbar-fixed-bottom" data-bs-theme="dark">
-        <div class="container-fluid">
+    <div class="container-fluid">
+    <nav class="navbar navbar-dark fixed-bottom bg-body-tertiary" data-bs-theme="dark">
             {% if waiterstatus %}
                 <p class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-success">Connected</span></p>
             {% else %}
@@ -195,8 +195,8 @@
             {% if donation_site_name and donation_site_url %}
                 <p class="navbar-text text-right donation-text">If you can, please consider donating to <a href="{{ donation_site_url }}">{{ donation_site_name }}</a></p>
             {% endif %}
-        </div>
     </nav>
+    </div>
 {% endblock %}
 </footer>
 

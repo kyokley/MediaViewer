@@ -38,7 +38,7 @@
             </div>
             <div class="row">
             {% if posterfile.image %}
-                <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-responsive center-block"/>
+                <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-fluid center-block"/>
             {% else %}
                 <h4>
                     No Image
@@ -55,52 +55,49 @@
                 </h2>
             </div>
             {% if file.finished and can_download and waiterstatus %}
-                <div class="row">
-                    <div class="col-xs-4"></div>
-                    <div class="col-xs-4">
-                        <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
-                    </div>
-                    <div class="col-xs-4"></div>
+                <div class="d-grid gap-2 col-4 mx-auto">
+                    <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
                 </div>
             {% endif %}
-            <div class="row">
                 <h4>
+                            <div class="row gy-3">
                         {% if posterfile.display_genres %}
-                            <dt>Genre:</dt>
-                            <dd><div class="truncated-text">{{ posterfile.display_genres }}</div></dd>
+                                <div class="col-3">Genre:</div>
+                                <div class="col-9 truncated-text">{{ posterfile.display_genres }}</div>
                         {% endif %}
                         {% if posterfile.display_writers %}
-                            <dt>Writer:</dt>
-                            <dd><div class="truncated-text">{{ posterfile.display_writers }}</div></dd>
+                                <div class="col-3">Writer:</div>
+                                <div class="col-9 truncated-text">{{ posterfile.display_writers }}</div>
                         {% endif %}
                         {% if posterfile.display_directors %}
-                            <dt>Director:</dt>
-                            <dd><div class="truncated-text">{{ posterfile.display_directors }}</div></dd>
+                                <div class="col-3">Director:</div>
+                                <div class="col-9 truncated-text">{{ posterfile.display_directors }}</div>
                         {% endif %}
                         {% if posterfile.display_actors %}
-                            <dt>Actors:</dt>
-                            <dd><div class="truncated-text">{{ posterfile.display_actors }}</div></dd>
+                                <div class="col-3">Actors:</div>
+                                <div class="col-9 truncated-text">{{ posterfile.display_actors }}</div>
                         {% endif %}
                         {% if posterfile.extendedplot or posterfile.plot %}
-                            <dt>Description:</dt>
+                            <div class="col-3">Description:</div>
                             {% if posterfile.extendedplot %}
-                                <dd><div class="truncated-text">{{ posterfile.extendedplot }}</div></dd>
+                                <div class="col-9 truncated-text">{{ posterfile.extendedplot }}</div>
                             {% else %}
-                                <dd><div class="truncated-text">{{ posterfile.plot }}</div></dd>
+                                <div class="col-9 truncated-text">{{ posterfile.plot }}</div>
                             {% endif %}
                         {% endif %}
                         {% if posterfile.rated %}
-                            <dt>Rated:</dt>
-                            <dd>{{ posterfile.rated }}</dd>
+                                <div class="col-3">Rated:</div>
+                                <div class="col-9">{{ posterfile.rated }}</div>
                         {% endif %}
                         {% if posterfile.rating and posterfile.rating != 'N/A' %}
-                            <dt>Rating:</dt>
-                            <dd>{{ posterfile.rating }}/10</dd>
+                                <div class="col-3">Rating:</div>
+                                <div class="col-9">{{ posterfile.rating }}/10</div>
                         {% endif %}
                         {% if file_size and can_download %}
-                            <dt>Size:</dt>
-                            <dd>{{ file_size }}</dd>
+                                <div class="col-3">Size:</div>
+                                <div class="col-9">{{ file_size }}</div>
                         {% endif %}
+                            </div>
                     <div class="form-group">
                         <label for="comment">Comment:</label>
                         <textarea class="form-control file-comment" rows="5" id="comment" class="comment" name="comment">{{ comment }}</textarea>
@@ -124,7 +121,7 @@
         </div>
     </form>
     {% if user.is_staff %}
-        <div class="jumbotron">
+        <div class="container">
             <h1>File Detail</h1>
             <h4>
                 <div class="row">
@@ -180,7 +177,7 @@
         </div>
         <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
             {% csrf_token %}
-            <div class="jumbotron">
+            <div class="container">
                 <p><h1>File Admin Info</h1></p>
                 <h4>
                     <div class="form-group">

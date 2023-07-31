@@ -208,3 +208,6 @@ tbody > tr > td > a, nav > ol > li > a {
 tbody > tr > td > a:hover, nav > ol > li > a:hover {
     text-decoration: underline;
 }
+.allcontent {
+    height: 90%;
+}
