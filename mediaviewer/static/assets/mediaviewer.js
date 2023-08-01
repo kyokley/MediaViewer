@@ -5,7 +5,6 @@ var csrf_token;
 var didScroll;
 var lastScrollTop = 0;
 var delta = 10;
-var navbarHeight = $('.navbar-fixed-top').outerHeight() + 20;
 var viewedCheckboxColumn = 3;
 
 function bindAlertMessage($) {
@@ -474,16 +473,25 @@ function display_help(){
 }
 
 function hasScrolled(){
+    var topNavbarHeight = $('.navbar-fixed-top').outerHeight() + 20;
+    var bottomNavbarHeight = $('.navbar-fixed-bottom').outerHeight() + 20;
+
     var st = $(this).scrollTop();
     if (Math.abs(lastScrollTop - st) <= delta)
         return;
 
-    if(st > lastScrollTop && st > navbarHeight){
+    if(st > lastScrollTop && st > topNavbarHeight){
         $('.navbar-fixed-top').removeClass('nav-show').addClass('nav-hide');
-        $('.navbar-fixed-bottom').removeClass('nav-show').addClass('nav-hide');
     } else {
         if(st + $(window).height() < $(document).height()){
             $('.navbar-fixed-top').removeClass('nav-hide').addClass('nav-show');
+        }
+    }
+
+    if(st > lastScrollTop && st > bottomNavbarHeight){
+        $('.navbar-fixed-bottom').removeClass('nav-show').addClass('nav-hide');
+    } else {
+        if(st + $(window).height() < $(document).height()){
             $('.navbar-fixed-bottom').removeClass('nav-hide').addClass('nav-show');
         }
     }

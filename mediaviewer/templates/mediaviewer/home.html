@@ -32,7 +32,7 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-md fixed-top navbar-dark bg-dark bg-body-tertiary navbar-fixed-top" role="navigation" data-bs-theme="dark">
+        <nav class="navbar navbar-expand-md fixed-top navbar-dark bg-dark bg-body-tertiary navbar-fixed-top nav-show" role="navigation" data-bs-theme="dark">
             <div class="container-fluid">
             {% block navbar%}
                 <a class="navbar-brand" href="/mediaviewer/">MediaViewer <span class="glyphicon glyphicon-film"></span></a>
@@ -59,10 +59,10 @@
                             {% endif %}
 
                             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="nav-link dropdown-item" href="/mediaviewer/movies/">All</a>
-                                {% for genre in movie_genres %}
-                                    <a class="nav-link dropdown-item" href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a>
-                                {% endfor %}
+                                <a class="nav-link dropdown-item" href="/mediaviewer/movies/">All</a>
+                                    {% for genre in movie_genres %}
+                                        <a class="nav-link dropdown-item" href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a>
+                                    {% endfor %}
                             </div>
                             </li>
 
@@ -102,7 +102,7 @@
                             {% endif %}
                         </ul>
                         {% if loggedin %}
-                            <p class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></p>
+                            <span class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></span>
                         {% endif %}
                     {% else %}
                         <nav class="nav navbar-nav">
@@ -123,7 +123,7 @@
             </div>
 
             {% block messages %}
-            <div class="container-fluid py-5">
+            <div class="container py-5">
                 {% for message in messages %}
                     {% if 'last_watched' in message.extra_tags %}
                         {% autoescape off %}
@@ -185,18 +185,24 @@
 
 <footer>
 {% block footer %}
-    <div class="container-fluid">
-    <nav class="navbar navbar-dark fixed-bottom bg-body-tertiary" data-bs-theme="dark">
-            {% if waiterstatus %}
-                <p class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-success">Connected</span></p>
-            {% else %}
-                <p class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-danger">Disconnected</span></p>
-            {% endif %}
-            {% if donation_site_name and donation_site_url %}
-                <p class="navbar-text text-right donation-text">If you can, please consider donating to <a href="{{ donation_site_url }}">{{ donation_site_name }}</a></p>
-            {% endif %}
+    <nav class="navbar navbar-dark fixed-bottom bg-body-tertiary navbar-fixed-bottom nav-show" data-bs-theme="dark">
+        <div class="container-fluid text-center">
+            <div class="row justify-content-between">
+                <div class="col-4">
+                    {% if waiterstatus %}
+                        <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-success">Connected</span></span>
+                    {% else %}
+                        <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-danger">Disconnected</span></span>
+                    {% endif %}
+                </div>
+                <div class="col-6">
+                    {% if donation_site_name and donation_site_url %}
+                        <span class="navbar-text">If you can, please consider donating to <a href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </nav>
-    </div>
 {% endblock %}
 </footer>
 

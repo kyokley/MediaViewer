@@ -8,17 +8,6 @@
 {% include navbar %}
 
 {% block jumbotron %}
-{% endblock %}
-
-{% block messages %}
-{% endblock %}
-
-{% block main %}
-    <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
-        {% csrf_token %}
-        {% if error_message %}
-            <p><strong>{{ error_message }}</strong></p>
-        {% endif %}
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 {% if file.isMovie %}
@@ -31,6 +20,18 @@
                     <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
                 {% endif %}
             </ol>
+        </nav>
+{% endblock %}
+
+{% block messages %}
+{% endblock %}
+
+{% block main %}
+    <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
+        {% csrf_token %}
+        {% if error_message %}
+            <p><strong>{{ error_message }}</strong></p>
+        {% endif %}
             <div class="row text-center">
                 <h2>
                     {{ file.displayName }}
