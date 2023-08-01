@@ -119,12 +119,12 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
 function configureTooltips($){
     options = {
         animated: true,
-        placement: 'auto',
+        placement: 'bottom',
         html: true,
         offset: [10, 10],
     };
     $(function () {
-        $('[data-bs-toggle="tooltip"]').tooltip(options)
+        $('.img-preview').popover(options)
     });
 }
 

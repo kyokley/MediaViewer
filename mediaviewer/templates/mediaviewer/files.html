@@ -93,7 +93,7 @@
                 <tr>
                     <td>
                             {% if file.posterfile %}
-                                <a href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="tooltip" data-bs-title="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
                             {% else %}
                                 <a href="/mediaviewer/files/{{ file.id }}/">
                             {% endif %}
