@@ -1,5 +1,4 @@
 body{
-    padding-bottom: 200px;
     padding-top: 55px;
 }
 @media (min-width: 980px) {
@@ -196,6 +195,16 @@ tbody > tr > td > a, nav > ol > li > a {
 tbody > tr > td > a:hover, nav > ol > li > a:hover {
     text-decoration: underline;
 }
+
+.navbar-text a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.navbar-text a:hover {
+    text-decoration: underline;
+}
+
 .allcontent {
     height: 90%;
 }
