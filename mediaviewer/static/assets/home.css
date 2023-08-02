@@ -143,6 +143,9 @@ body{
 #myTable_wrapper {
     margin-bottom: 15px;
 }
+.large-img {
+    max-width: 85%;
+}
 .hidden_span {
     display: none;
 }

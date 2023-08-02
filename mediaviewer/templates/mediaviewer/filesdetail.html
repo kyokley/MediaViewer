@@ -37,23 +37,27 @@
                     {{ file.displayName }}
                 </h2>
             </div>
+            <div class="container">
             <div class="row">
-            {% if posterfile.image %}
-                <img src="{{ MEDIA_URL }}{{ posterfile.image }}" /class="img-fluid center-block"/>
-            {% else %}
-                <h4>
-                    No Image
-                </h4>
-            {% endif %}
-            </div>
-            <div class="row">
-                <h2>
-                    {% if posterfile.tagline %}
-                        <div class="row text-center">
-                            {{ posterfile.tagline }}
-                        </div>
+                <div class="col">
+                    {% if posterfile.image %}
+                        <img src="{{ MEDIA_URL }}{{ posterfile.image }}" class="large-img mx-auto d-block"/>
+                    {% else %}
+                        <h4>
+                            No Image
+                        </h4>
                     {% endif %}
-                </h2>
+                </div>
+            </div>
+            </div>
+            <div class="row text-center justify-content-center">
+                <div class="col-10">
+                    <h2>
+                        {% if posterfile.tagline %}
+                                {{ posterfile.tagline }}
+                        {% endif %}
+                    </h2>
+                </div>
             </div>
             {% if file.finished and can_download and waiterstatus %}
                 <div class="d-grid gap-2 col-4 mx-auto">
