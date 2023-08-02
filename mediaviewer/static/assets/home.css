@@ -126,6 +126,11 @@ body{
     margin-top: 5px;
     margin-bottom: 10px;
 }
+#toggle-viewed{
+    height: 30px;
+    width: 30px;
+}
+
 #id_email{
     margin-top: 10px;
 }

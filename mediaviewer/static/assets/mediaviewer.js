@@ -180,8 +180,6 @@ function ajaxCheckBox(file_id){
     var box = document.getElementsByName(file_id)[0];
     var checked = box.checked;
 
-    box.previousSibling.innerHTML = checked;
-
     jQuery.ajax({
         url : "/mediaviewer/ajaxviewed/",
         type : "POST",
