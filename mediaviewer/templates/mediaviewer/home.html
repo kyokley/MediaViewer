@@ -106,7 +106,7 @@
                         {% endif %}
                     {% else %}
                         <nav class="nav navbar-nav">
-                            <div class="navbar-right"><a href="/mediaviewer/login/">Log In</a></div>
+                            <div class="navbar-right"><a class="nav-link" href="/mediaviewer/login/">Log In</a></div>
                         </nav>
                     {% endif %}
                 </div><!--/.nav-collapse -->
@@ -118,9 +118,8 @@
             {% block jumbotron %}
                 <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
                 <p class="col-md-8 fs-4">{{ greeting }}</p>
-            </div>
             {% endblock %}
-            </div>
+        </div>
 
             {% block messages %}
             <div class="container py-2">

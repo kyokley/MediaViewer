@@ -1,4 +1,4 @@
-{% extends "home.html" %}
+{% extends "signin.html" %}
 <!DOCTYPE html>
 {% load static %}
 {% include title %}
@@ -7,20 +7,7 @@
 
 {% include navbar %}
 
-{% block jumbotron %}
-    <div class="jumbotron">
-        {% if not loggedin %}
-            <h1>View your media!</h1>
-            <p></p>
-            <p>{{ greeting }}</p>
-            <p></p>
-        {% else %}
-            <h1>Logged In!</h1>
-            <h3>You have logged in successfully</h3>
-            <a href="/mediaviewer/">Go Home</a>
-        {% endif %}
-    </div>
-{% endblock %}
+{% include jumbotron %}
 
 {% include messages %}
 

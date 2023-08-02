@@ -232,6 +232,8 @@ def signin(request):
     context["active_page"] = "signin"
     context["greeting"] = siteGreeting and siteGreeting.greeting or "SignIn"
 
+    setSiteWideContext(context, request)
+
     if "next" in request.GET:
         context["next"] = request.GET["next"]
 
