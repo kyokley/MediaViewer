@@ -20,16 +20,22 @@
         </h3>
     <form action="{% url 'mediaviewer:addrequests' %}" method="post">
         {% csrf_token %}
-        <div class="row justify-content-around gy-3">
-            <span class="col-2">New Request:</span>
-            <input type="text" name="newrequest" id="request-textbox" class="col-8" value="">
-            <input class='col-4 btn btn-info btn-sm addrequestbutton' name="addrequestbutton" type="submit" value="Add" />
+        <div class="container text-center">
+            <div class="row justify-content-center gy-3">
+                <span class="col-12">
+                    New Request:
+                    <span class="p-3">
+                        <input type="text" name="newrequest" id="request-textbox" value="">
+                    </span>
+                </span>
+                <input class='col-4 btn btn-info addrequestbutton' name="addrequestbutton" type="submit" value="Add" />
+            </div>
         </div>
     </form>
 {% endblock %}
 
     {% block main %}
-        <table id="myTable" class="table table-striped cell-border">
+        <table id="myTable" class="table table-dark table-striped">
             <thead>
                 <tr>
                     <th class="all"><center>File Name</center></th>
