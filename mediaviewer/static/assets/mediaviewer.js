@@ -471,26 +471,19 @@ function display_help(){
 }
 
 function hasScrolled(){
-    var topNavbarHeight = $('.navbar-fixed-top').outerHeight() + 20;
-    var bottomNavbarHeight = $('.navbar-fixed-bottom').outerHeight() + 20;
+    var topNavbarHeight = $('#top-navbar').outerHeight() + 20;
 
     var st = $(this).scrollTop();
     if (Math.abs(lastScrollTop - st) <= delta)
         return;
 
     if(st > lastScrollTop && st > topNavbarHeight){
-        $('.navbar-fixed-top').removeClass('nav-show').addClass('nav-hide');
+        $('#top-navbar').removeClass('nav-show').addClass('nav-hide');
+        $('#bottom-navbar').removeClass('nav-show').addClass('nav-hide');
     } else {
         if(st + $(window).height() < $(document).height()){
-            $('.navbar-fixed-top').removeClass('nav-hide').addClass('nav-show');
-        }
-    }
-
-    if(st > lastScrollTop && st > bottomNavbarHeight){
-        $('.navbar-fixed-bottom').removeClass('nav-show').addClass('nav-hide');
-    } else {
-        if(st + $(window).height() < $(document).height()){
-            $('.navbar-fixed-bottom').removeClass('nav-hide').addClass('nav-show');
+            $('#top-navbar').removeClass('nav-hide').addClass('nav-show');
+            $('#bottom-navbar').removeClass('nav-hide').addClass('nav-show');
         }
     }
 
