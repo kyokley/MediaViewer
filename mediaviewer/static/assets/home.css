@@ -134,9 +134,6 @@ body{
     vertical-align: middle;
     float: none;
 }
-.form-control.email-field {
-    width: 50%;
-}
 .password-description-text {
     text-align: center;
     margin-bottom: 50px;
