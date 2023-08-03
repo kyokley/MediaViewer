@@ -7,29 +7,26 @@
 
 {% include navbar %}
 
-<div class="container">
-    {% block jumbotron %}
-        <form action="{% url 'mediaviewer:addrequests' %}" method="post">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item active">Requests</li>
-            </ol>
-        </nav>
-            <h1>Requests</h1>
-            <h3>
-                Welcome to the requests page. Feel free to make submissions but don't be surprised when I ignore them! Votes are limited to one per request per user per day.
-            </h3>
-            {% csrf_token %}
-            <table>
-                <tr>
-                    <td>New Request:</td>
-                    <td><input type="text" name="newrequest" id="request-textbox" class="form-control request-textbox" value=""></td>
-                    <td><input class='btn btn-info addrequestbutton' name="addrequestbutton" type="submit" value="Add" /></td>
-                </tr>
-            </table>
-        </form>
-    {% endblock %}
+{% block jumbotron %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+            <li class="breadcrumb-item active">Requests</li>
+        </ol>
+    </nav>
+        <h1>Requests</h1>
+        <h3>
+            Welcome to the requests page. Feel free to make submissions but don't be surprised when I ignore them! Votes are limited to one per request per user per day.
+        </h3>
+    <form action="{% url 'mediaviewer:addrequests' %}" method="post">
+        {% csrf_token %}
+        <div class="row justify-content-around gy-3">
+            <span class="col-2">New Request:</span>
+            <input type="text" name="newrequest" id="request-textbox" class="col-8" value="">
+            <input class='col-4 btn btn-info btn-sm addrequestbutton' name="addrequestbutton" type="submit" value="Add" />
+        </div>
+    </form>
+{% endblock %}
 
     {% block main %}
         <table id="myTable" class="table table-striped cell-border">
