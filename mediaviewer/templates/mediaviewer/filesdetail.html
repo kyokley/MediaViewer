@@ -27,100 +27,97 @@
 {% endblock %}
 
 {% block main %}
-    <form action="{% url 'mediaviewer:comment' file.id %}" method="post">
-        {% csrf_token %}
-        {% if error_message %}
-            <p><strong>{{ error_message }}</strong></p>
-        {% endif %}
-            <div class="row text-center">
-                <h2>
-                    {{ file.displayName }}
-                </h2>
-            </div>
-            <div class="container">
-            <div class="row">
-                <div class="col">
-                    {% if posterfile.image %}
-                        <img src="{{ MEDIA_URL }}{{ posterfile.image }}" class="large-img mx-auto d-block"/>
-                    {% else %}
-                        <h4>
-                            No Image
-                        </h4>
-                    {% endif %}
-                </div>
-            </div>
-            </div>
-            <div class="row text-center justify-content-center">
-                <div class="col-10">
-                    <h2>
-                        {% if posterfile.tagline %}
-                                {{ posterfile.tagline }}
-                        {% endif %}
-                    </h2>
-                </div>
-            </div>
-            {% if file.finished and can_download and waiterstatus %}
-                <div class="d-grid gap-2 col-4 mx-auto">
-                    <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
-                </div>
-            {% endif %}
-                <h4>
-                            <div class="row gy-3">
-                        {% if posterfile.display_genres %}
-                                <div class="col-sm-3">Genre:</div>
-                                <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_genres }}</div>
-                        {% endif %}
-                        {% if posterfile.display_writers %}
-                                <div class="col-sm-3">Writer:</div>
-                                <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_writers }}</div>
-                        {% endif %}
-                        {% if posterfile.display_directors %}
-                                <div class="col-sm-3">Director:</div>
-                                <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_directors }}</div>
-                        {% endif %}
-                        {% if posterfile.display_actors %}
-                                <div class="col-sm-3">Actors:</div>
-                                <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_actors }}</div>
-                        {% endif %}
-                        {% if posterfile.extendedplot or posterfile.plot %}
-                            <div class="col-sm-3">Description:</div>
-                            {% if posterfile.extendedplot %}
-                                <div class="col-12 col-sm-9 truncated-text">{{ posterfile.extendedplot }}</div>
-                            {% else %}
-                                <div class="col-12 col-sm-9 truncated-text">{{ posterfile.plot }}</div>
-                            {% endif %}
-                        {% endif %}
-                        {% if posterfile.rated %}
-                                <div class="col-3">Rated:</div>
-                                <div class="col-9">{{ posterfile.rated }}</div>
-                        {% endif %}
-                        {% if posterfile.rating and posterfile.rating != 'N/A' %}
-                                <div class="col-3">Rating:</div>
-                                <div class="col-9">{{ posterfile.rating }}/10</div>
-                        {% endif %}
-                        {% if file_size and can_download %}
-                                <div class="col-3">Size:</div>
-                                <div class="col-9">{{ file_size }}</div>
-                        {% endif %}
-                        <div class="col-3">
-                        <input type="hidden" name="viewed" value="" id="checkbox-input" />
-                        <label for="toggle-viewed">
-                            Viewed:
-                        </label>
-                        </div>
-                        <div class="col-9">
-                        {% if viewed %}
-                            <span class="hidden" name="hidden-{{ file.id }}"></span><input id="toggle-viewed" name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{file.id}}')" />
-                        {% else %}
-                            <span class="hidden" name="hidden-{{ file.id }}"></span><input id="toggle-viewed" name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
-                        {% endif %}
-                        <span id="saved-{{ file.id }}"></span>
-                        </div>
-                            </div>
-                </h4>
+    {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p>
+    {% endif %}
+        <div class="row text-center">
+            <h2>
+                {{ file.displayName }}
+            </h2>
+        </div>
+        <div class="container">
+        <div class="row">
+            <div class="col">
+                {% if posterfile.image %}
+                    <img src="{{ MEDIA_URL }}{{ posterfile.image }}" class="large-img mx-auto d-block"/>
+                {% else %}
+                    <h4>
+                        No Image
+                    </h4>
+                {% endif %}
             </div>
         </div>
-    </form>
+        </div>
+        <div class="row text-center justify-content-center">
+            <div class="col-10">
+                <h2>
+                    {% if posterfile.tagline %}
+                            {{ posterfile.tagline }}
+                    {% endif %}
+                </h2>
+            </div>
+        </div>
+        {% if file.finished and can_download and waiterstatus %}
+            <div class="d-grid gap-2 col-4 mx-auto">
+                <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
+            </div>
+        {% endif %}
+            <h4>
+                        <div class="row gy-3">
+                    {% if posterfile.display_genres %}
+                            <div class="col-sm-3">Genre:</div>
+                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_genres }}</div>
+                    {% endif %}
+                    {% if posterfile.display_writers %}
+                            <div class="col-sm-3">Writer:</div>
+                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_writers }}</div>
+                    {% endif %}
+                    {% if posterfile.display_directors %}
+                            <div class="col-sm-3">Director:</div>
+                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_directors }}</div>
+                    {% endif %}
+                    {% if posterfile.display_actors %}
+                            <div class="col-sm-3">Actors:</div>
+                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_actors }}</div>
+                    {% endif %}
+                    {% if posterfile.extendedplot or posterfile.plot %}
+                        <div class="col-sm-3">Description:</div>
+                        {% if posterfile.extendedplot %}
+                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.extendedplot }}</div>
+                        {% else %}
+                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.plot }}</div>
+                        {% endif %}
+                    {% endif %}
+                    {% if posterfile.rated %}
+                            <div class="col-3">Rated:</div>
+                            <div class="col-9">{{ posterfile.rated }}</div>
+                    {% endif %}
+                    {% if posterfile.rating and posterfile.rating != 'N/A' %}
+                            <div class="col-3">Rating:</div>
+                            <div class="col-9">{{ posterfile.rating }}/10</div>
+                    {% endif %}
+                    {% if file_size and can_download %}
+                            <div class="col-3">Size:</div>
+                            <div class="col-9">{{ file_size }}</div>
+                    {% endif %}
+                    <div class="col-3">
+                    <input type="hidden" name="viewed" value="" id="checkbox-input" />
+                    <label for="toggle-viewed">
+                        Viewed:
+                    </label>
+                    </div>
+                    <div class="col-9">
+                    {% if viewed %}
+                        <span class="hidden" name="hidden-{{ file.id }}"></span><input id="toggle-viewed" name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{file.id}}')" />
+                    {% else %}
+                        <span class="hidden" name="hidden-{{ file.id }}"></span><input id="toggle-viewed" name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
+                    {% endif %}
+                    <span id="saved-{{ file.id }}"></span>
+                    </div>
+                        </div>
+            </h4>
+        </div>
+    </div>
 {% endblock %}
 
 {% include footer %}
