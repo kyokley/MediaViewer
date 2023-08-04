@@ -19,13 +19,11 @@
         <!-- Bootstrap core CSS -->
         {% block css %}
 
-            <!--
-            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
-            -->
             <link href="{% static "bootswatch/bootstrap.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" %}" rel="stylesheet">
+            <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
 
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
@@ -35,7 +33,7 @@
         <nav id="top-navbar" class="navbar navbar-expand-md fixed-top navbar-dark bg-dark bg-body-tertiary nav-show" role="navigation" data-bs-theme="dark">
             <div class="container-fluid">
             {% block navbar%}
-                <a class="navbar-brand" href="/mediaviewer/">MediaViewer <img src="{% static "bootstrap-icons/icons/film.svg" %}" width="25" height="25" /></a>
+                <a class="navbar-brand" href="/mediaviewer/">MediaViewer <i class="bi-film"></i></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-content">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -88,12 +86,12 @@
                                 <a class="nav-link" href="/mediaviewer/requests/">Requests</a></li>
                             {% endif %}
 
+                            <li class="nav-item">
                             {% if active_page == 'settings' %}
-                                <li class="nav-item active">
+                                <a class="nav-link active" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                             {% else %}
-                                <li class="nav-item">
+                                <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                             {% endif %}
-                            <a class="nav-link" href="/mediaviewer/settings/"><img src="{% static "bootstrap-icons/icons/gear.svg" %}" width="25" height="25" /></a>
 
                             {% if loggedin %}
                                 <li class="navbar-right"><a class="nav-link" href="/mediaviewer/logout/">Log out</a></li>
