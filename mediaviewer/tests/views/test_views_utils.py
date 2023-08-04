@@ -55,7 +55,9 @@ class TestSetSiteWideContext:
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {"loggedin": False, "is_staff": "true"}
+        expected = {"loggedin": False, "is_staff": "true",
+                    'donation_site_name': '',
+                    'donation_site_url': ''}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
         assert not self.mock_add_message.called
@@ -67,7 +69,9 @@ class TestSetSiteWideContext:
         context = dict()
         setSiteWideContext(context, self.request, includeMessages=False)
 
-        expected = {"loggedin": False, "is_staff": "false"}
+        expected = {"loggedin": False, "is_staff": "false",
+                    'donation_site_name': '',
+                    'donation_site_url': ''}
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
         assert not self.mock_add_message.called
