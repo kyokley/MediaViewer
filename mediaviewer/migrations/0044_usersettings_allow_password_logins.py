@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0043_alter_usersettings_last_watched'),
+        ("mediaviewer", "0043_alter_usersettings_last_watched"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='usersettings',
-            name='allow_password_logins',
+            model_name="usersettings",
+            name="allow_password_logins",
             field=models.BooleanField(blank=True, default=False),
         ),
     ]

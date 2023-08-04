@@ -123,11 +123,11 @@ def _ajax_file_rows(request, qs):
     file_data = []
     for file in files:
         file_data.append(
-        file.ajax_row_payload(
-            can_download,
-            waiterstatus,
-            viewed_by_file,
-        )
+            file.ajax_row_payload(
+                can_download,
+                waiterstatus,
+                viewed_by_file,
+            )
         )
 
     payload = {

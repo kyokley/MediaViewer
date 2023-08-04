@@ -140,7 +140,7 @@ def bypass_passkey(request, uidb64):
 @csrf_exempt
 def verify_token(request):
     token = request.GET["token"]
-    next = request.GET.get('next') or request.POST.get('next')
+    next = request.GET.get("next") or request.POST.get("next")
 
     payload = {"token": token}
 
@@ -156,7 +156,7 @@ def verify_token(request):
     json_data = resp.json()
 
     if next:
-        payload['next'] = next
+        payload["next"] = next
 
     try:
         user = User.objects.get(username__iexact=json_data["userId"])
@@ -281,7 +281,9 @@ def legacy_signin(request):
                 else:
                     if user.is_active:
                         login_user(
-                            request, user, backend="django.contrib.auth.backends.ModelBackend"
+                            request,
+                            user,
+                            backend="django.contrib.auth.backends.ModelBackend",
                         )
                         context["loggedin"] = True
                         context["user"] = request.user
