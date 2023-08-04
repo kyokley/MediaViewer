@@ -44,7 +44,7 @@ def filesdetail(request, file_id):
         "can_download": settings and settings.can_download or False,
         "file_size": file.size and humansize(file.size),
     }
-    context["active_page"] = "filesdetail"
+    context["active_page"] = "movies" if file.isMovie() else "tvshows"
     context["title"] = (
         file.isMovie() and file.rawSearchString() or file.path.displayName()
     )
