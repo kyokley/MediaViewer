@@ -122,17 +122,15 @@
             {% block messages %}
             <div class="container py-2">
                 {% for message in messages %}
-                    {% if 'last_watched' in message.extra_tags %}
-                        {% autoescape off %}
-                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} alert-dismissible fade show" id="alert-{{ message.extra_tags }}" role="alert">
-                    {% endautoescape %}
-                    {% else %}
-                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} alert-dismissible fade show" id="alert-{{ message.extra_tags }}" role="alert">
-                    {% endif %}
+                    <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} alert-dismissible fade show" id="alert-{{ message.extra_tags }}" role="alert">
+                        {% if 'last_watched' in message.extra_tags %}
+                            {{ message | safe }}
+                        {% else %}
+                            {{ message }}
+                        {% endif %}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        {{ message }}
                     </div>
-            {% endfor %}
+                {% endfor %}
             </div>
         {% endblock %}
 
