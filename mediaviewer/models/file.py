@@ -487,7 +487,7 @@ class File(models.Model):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/files/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" {tooltip_img}>{self.displayName()}</a>',
+            f'<a class="img-preview" href="/mediaviewer/files/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.displayName()}</a>',
             f"""<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%b %d, %Y')}""",
         ]
 
