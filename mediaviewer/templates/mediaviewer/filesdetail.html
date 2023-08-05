@@ -63,30 +63,30 @@
             </div>
         {% endif %}
             <h4>
-                        <div class="row gy-3">
-                    {% if posterfile.display_genres %}
-                            <div class="col-sm-3">Genre:</div>
-                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_genres }}</div>
-                    {% endif %}
-                    {% if posterfile.display_writers %}
-                            <div class="col-sm-3">Writer:</div>
-                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_writers }}</div>
-                    {% endif %}
-                    {% if posterfile.display_directors %}
-                            <div class="col-sm-3">Director:</div>
-                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_directors }}</div>
-                    {% endif %}
-                    {% if posterfile.display_actors %}
-                            <div class="col-sm-3">Actors:</div>
-                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.display_actors }}</div>
-                    {% endif %}
+                    <div class="row gy-3 py-3">
                     {% if posterfile.extendedplot or posterfile.plot %}
                         <div class="col-sm-3">Description:</div>
                         {% if posterfile.extendedplot %}
-                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.extendedplot }}</div>
+                            <div class="col-12 col-sm-9 truncated-long">{{ posterfile.extendedplot }}</div>
                         {% else %}
-                            <div class="col-12 col-sm-9 truncated-text">{{ posterfile.plot }}</div>
+                            <div class="col-12 col-sm-9 truncated-long">{{ posterfile.plot }}</div>
                         {% endif %}
+                    {% endif %}
+                    {% if posterfile.display_genres %}
+                            <div class="col-sm-3">Genre:</div>
+                            <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_genres }}</div>
+                    {% endif %}
+                    {% if posterfile.display_writers %}
+                            <div class="col-sm-3">Writer:</div>
+                            <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_writers }}</div>
+                    {% endif %}
+                    {% if posterfile.display_directors %}
+                            <div class="col-sm-3">Director:</div>
+                            <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_directors }}</div>
+                    {% endif %}
+                    {% if posterfile.display_actors %}
+                            <div class="col-sm-3">Actors:</div>
+                            <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_actors }}</div>
                     {% endif %}
                     {% if posterfile.rated %}
                             <div class="col-3">Rated:</div>
@@ -149,7 +149,8 @@
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
 
-            $(".truncated-text").shorten({"showChars": 1000});
+            $(".truncated-short").shorten({"showChars": 150});
+            $(".truncated-long").shorten({"showChars": 1000});
         });
     </script>
 {% endblock %}
