@@ -149,7 +149,7 @@
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
 
-            $(".truncated-text").shorten();
+            $(".truncated-text").shorten({"showChars": 1000});
         });
     </script>
 {% endblock %}
