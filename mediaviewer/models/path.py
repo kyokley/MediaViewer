@@ -244,9 +244,9 @@ class Path(models.Model):
         )
         payload = [
             (
-                f"""<a href='/mediaviewer/tvshows/{ self.id }/' data-toggle="tooltip" title="{tooltip_img}">"""
+                f"""<a class="img-preview" href='/mediaviewer/tvshows/{ self.id }/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="{tooltip_img}">"""
                 f"""{ self.displayName() }</a>\n"""
-                f'<span id="unwatched-show-badge-{ self.id }" class="badge alert-info">{unwatched_count or ""}</span>'
+                f'<span id="unwatched-show-badge-{ self.id }" class="badge text-bg-primary">{unwatched_count or ""}</span>'
             ),
             f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%b %d, %Y')}""",
             "",

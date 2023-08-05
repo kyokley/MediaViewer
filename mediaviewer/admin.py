@@ -94,9 +94,7 @@ class UserSettingsAdmin(admin.ModelAdmin):
         "username",
         "last_watched",
     )
-    search_fields = (
-        "user__username",
-    )
+    search_fields = ("user__username",)
     ordering = ("user__username",)
 
 

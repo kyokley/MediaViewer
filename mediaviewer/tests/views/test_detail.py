@@ -199,7 +199,7 @@ class TestFilesDetail:
             "viewed": False,
             "can_download": True,
             "file_size": None,
-            "active_page": "filesdetail",
+            "active_page": "tvshows",
             "title": "Tv Local Path",
         }
         expected = self.mock_render.return_value
@@ -232,7 +232,7 @@ class TestFilesDetail:
             "viewed": True,
             "can_download": True,
             "file_size": None,
-            "active_page": "filesdetail",
+            "active_page": "tvshows",
             "title": "Tv Local Path",
         }
         expected = self.mock_render.return_value

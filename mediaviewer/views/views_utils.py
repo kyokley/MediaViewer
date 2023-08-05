@@ -17,13 +17,6 @@ def setSiteWideContext(context, request, includeMessages=False):
         context["loggedin"] = True
         context["user"] = user
         context["default_sort"] = settings and settings.default_sort or FILENAME_SORT
-        donation_site = DonationSite.objects.random()
-        if donation_site:
-            context["donation_site_name"] = donation_site.site_name
-            context["donation_site_url"] = donation_site.url
-        else:
-            context["donation_site_name"] = ""
-            context["donation_site_url"] = ""
 
         if includeMessages:
             for message in Message.getMessagesForUser(
@@ -49,6 +42,15 @@ def setSiteWideContext(context, request, includeMessages=False):
         context["loggedin"] = False
 
     context["is_staff"] = user.is_staff and "true" or "false"
+
+    donation_site = DonationSite.objects.random()
+    if donation_site:
+        context["donation_site_name"] = donation_site.site_name
+        context["donation_site_url"] = donation_site.url
+    else:
+        context["donation_site_name"] = ""
+        context["donation_site_url"] = ""
+
     getLastWaiterStatus(context)
 
 

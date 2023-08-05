@@ -10,35 +10,37 @@
 
 <!-- Main component for a primary marketing message or call to action -->
 {% block jumbotron %}
-    <div class="jumbotron">
+        <nav aria-label="breadcrumb">
         {% if view == 'files' %}
             <ol class="breadcrumb">
-                <li><a href="/mediaviewer/">Home</a></li>
-                <li class="active">Files</li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item active">Files</li>
             </ol>
             <h1>Files</h1>
             Below is a list of all files being tracked by the autodownloader.
         {% elif view == 'movies' %}
             <ol class="breadcrumb">
-                <li><a href="/mediaviewer/">Home</a></li>
-                <li class="active">Movies</li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item active">Movies</li>
             </ol>
             <h1>{{ title }}</h1>
             <h3>Select from the following movies:</h3>
         {% elif view == 'tvshows' %}
             <ol class="breadcrumb">
-                <li><a href="/mediaviewer/">Home</a></li>
-                <li><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-                <li class="active">{{ path.displayName }}</li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                <li class="breadcrumb-item active">{{ path.displayName }}</li>
             </ol>
             <div class="container">
                 <div class="row">
                     <div class="col-xs-12 col-md-12">
                         <h1 class="text-center" id="file-displayName">{{ path.displayName }}</h1>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-xs-12 col-md-6">
                         {% if path.posterfile.image %}
-                            <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" class="img-responsive center-block"/>
+                            <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" class="img-fluid center-block"/>
                         {% else %}
                             No Image
                         {% endif %}
@@ -66,13 +68,14 @@
                 </div>
             </div>
         {% endif %}
+        </nav>
     </div>
 {% endblock %}
 
 {% include messages %}
 
 {% block main %}
-    <table id="myTable" class="table display table-striped table-hover">
+    <table id="myTable" class="table table-dark table-striped table-hover">
         <thead>
             <tr>
                 <th class="all">File Name</th>
@@ -85,12 +88,12 @@
                 <th class='nosort'></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="table-group-divider">
             {% for file in files %}
                 <tr>
                     <td>
                             {% if file.posterfile %}
-                                <a href="/mediaviewer/files/{{ file.id }}/" data-toggle="tooltip" title="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
                             {% else %}
                                 <a href="/mediaviewer/files/{{ file.id }}/">
                             {% endif %}
@@ -105,9 +108,9 @@
                     {% endif %}
                     <td>
                         {% if file.viewed %}
-                            <span class="hidden" name="hidden-{{ file.id }}">true</span><input name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{file.id}}')" />
+                            <span class="hidden" name="hidden-{{ file.id }}"></span><input name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox('{{file.id}}')" />
                         {% else %}
-                            <span class="hidden" name="hidden-{{ file.id }}">false</span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
+                            <span class="hidden" name="hidden-{{ file.id }}"></span><input name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox('{{file.id}}')" />
                         {% endif %}
                         <span id="saved-{{ file.id }}"></span>
                     </td>
@@ -141,7 +144,7 @@
             {% else %}
                 var sortOrder = [[0,'desc']];
             {% endif %}
-            prepareTableSorter($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
+            prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
 
             {% if jump_to_last and view == 'tvshows' %}
                 jumpToLastViewedPage($);
@@ -150,7 +153,7 @@
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
 
-            $(".truncated-text").shorten({"showChars": 300});
+            $(".truncated-text").shorten({"showChars": 1000});
         });
 
     </script>

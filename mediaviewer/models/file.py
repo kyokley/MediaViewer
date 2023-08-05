@@ -481,13 +481,13 @@ class File(models.Model):
     def ajax_row_payload(self, can_download, waiterstatus, viewed_lookup):
         posterfile = self.posterfile
         tooltip_img = (
-            f"<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />"
+            f"""data-bs-content="<img class='tooltip-img' src='{conf_settings.MEDIA_URL}{posterfile.image}' />\""""
             if posterfile and posterfile.image
             else ""
         )
 
         payload = [
-            f'<a href="/mediaviewer/files/{self.id}/" data-toggle="tooltip" title="{tooltip_img}">{self.displayName()}</a>',
+            f'<a class="img-preview" href="/mediaviewer/files/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.displayName()}</a>',
             f"""<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%b %d, %Y')}""",
         ]
 
@@ -500,9 +500,9 @@ class File(models.Model):
                 payload.append("Alfred is down")
 
         if viewed_lookup.get(self.id, False):
-            cell = f"""<span class="hidden" name="hidden-{ self.id }">true</span><input name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox('{self.id}')" />"""
+            cell = f"""<span class="hidden" name="hidden-{ self.id }"></span><input name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox('{self.id}')" />"""
         else:
-            cell = f"""<span class="hidden" name="hidden-{ self.id }">false</span><input name="{ self.id }" type="checkbox" onclick="ajaxCheckBox('{self.id}')" />"""
+            cell = f"""<span class="hidden" name="hidden-{ self.id }"></span><input name="{ self.id }" type="checkbox" onclick="ajaxCheckBox('{self.id}')" />"""
         cell = f'{cell}<span id="saved-{ self.id }"></span>'
         payload.extend(
             [

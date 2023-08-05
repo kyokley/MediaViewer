@@ -5,7 +5,6 @@ var csrf_token;
 var didScroll;
 var lastScrollTop = 0;
 var delta = 10;
-var navbarHeight = $('.navbar-fixed-top').outerHeight() + 20;
 var viewedCheckboxColumn = 3;
 
 function bindAlertMessage($) {
@@ -40,7 +39,11 @@ function setHomeFormSubmit($) {
     });
 }
 
-function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+function prepareDataTable($, sortOrder, table_data_page, filter_id) {
     tableElement = $('#myTable');
 
     if(filter_id){
@@ -69,7 +72,7 @@ function prepareTableSorter($, sortOrder, table_data_page, filter_id) {
 function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config = {
         order: sortOrder,
-        autoWidth: false,
+        autoWidth: true,
         responsive: {
             details: {
                 type: 'column',
@@ -81,14 +84,34 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             "orderable": false
         }],
         drawCallback: function (settings) {
+            sleep(2000).then(() => {
             configureTooltips($);
-        }
+            });
+        },
+        stateSave: true
     };
+
+    dt_config.scroller = {
+        loadingIndicator: true
+    };
+    dt_config.scrollY = 500;
+    dt_config.scrollCollapse = true;
+    dt_config.deferRender = false;
+
     if(table_data_page !== 'tvshows'){
         dt_config.serverSide = true;
         dt_config.ajax = {
             url: ajax_path,
+            dataSrc: function(json){
+                sleep(2000).then(() => {
+                configureTooltips($);
+                });
+                return json.data;
+            },
         }
+        // dt_config.paging = true;
+        // dt_config.ordering = false;
+        // dt_config.searching = false;
     }
     return dt_config;
 }
@@ -98,10 +121,10 @@ function configureTooltips($){
         animated: true,
         placement: 'bottom',
         html: true,
-        offset: 10,
+        offset: [10, 10],
     };
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip(options)
+        $('.img-preview').popover(options)
     });
 }
 
@@ -156,8 +179,6 @@ function jumpToLastViewedPage($){
 function ajaxCheckBox(file_id){
     var box = document.getElementsByName(file_id)[0];
     var checked = box.checked;
-
-    box.previousSibling.innerHTML = checked;
 
     jQuery.ajax({
         url : "/mediaviewer/ajaxviewed/",
@@ -250,10 +271,10 @@ function prepareAjaxWaiterStatus($, is_staffer){
     success: function(json){
         var statusLabel = document.getElementById('waiter-status');
         if(json.status === true){
-            statusLabel.className = 'label label-success';
+            statusLabel.className = 'badge text-bg-success';
             statusLabel.innerText = 'Connected';
         } else {
-            statusLabel.className = 'label label-danger';
+            statusLabel.className = 'badge text-bg-danger';
             if(is_staffer === 'false'){
                 statusLabel.innerText = 'Disconnected';
             } else {
@@ -450,21 +471,22 @@ function display_help(){
 }
 
 function hasScrolled(){
+    var topNavbarHeight = $('#top-navbar').outerHeight() + 20;
+
     var st = $(this).scrollTop();
-    if (Math.abs(lastScrollTop - st) <= delta)
+    var diff = Math.abs(lastScrollTop - st);
+    if (diff <= delta)
         return;
 
-    if(st > lastScrollTop && st > navbarHeight){
-        $('.navbar-fixed-top').removeClass('nav-show').addClass('nav-hide');
-        $('.navbar-fixed-bottom').removeClass('nav-show').addClass('nav-hide');
-    } else {
-        if(st + $(window).height() < $(document).height()){
-            $('.navbar-fixed-top').removeClass('nav-hide').addClass('nav-show');
-            $('.navbar-fixed-bottom').removeClass('nav-hide').addClass('nav-show');
-        }
+    if(st > lastScrollTop && diff > topNavbarHeight){
+        $('#top-navbar').removeClass('nav-show').addClass('nav-hide');
+        $('#bottom-navbar').removeClass('nav-show').addClass('nav-hide');
+        lastScrollTop = st;
+    } else if(st < lastScrollTop && diff > topNavbarHeight){
+            $('#top-navbar').removeClass('nav-hide').addClass('nav-show');
+            $('#bottom-navbar').removeClass('nav-hide').addClass('nav-show');
+        lastScrollTop = st;
     }
-
-    lastScrollTop = st;
 }
 
 function scrollSetup(){

@@ -18,128 +18,126 @@
 
         <!-- Bootstrap core CSS -->
         {% block css %}
-            <link href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
-            <link href="{% static "@bower_components/datatables.net-responsive-bs/css/responsive.bootstrap.min.css" %}" rel="stylesheet">
 
-            <link href="{% static "@bower_components/bootswatch-dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "bootswatch/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" %}" rel="stylesheet">
+            <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
+
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
     </head>
 
     <body>
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <nav id="top-navbar" class="navbar navbar-expand-md fixed-top navbar-dark bg-dark bg-body-tertiary nav-show" role="navigation" data-bs-theme="dark">
+            <div class="container-fluid">
             {% block navbar%}
-                <div class="container">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="/mediaviewer/">MediaViewer <span class="glyphicon glyphicon-film"></span></a>
-                    </div>
-                    <div class="navbar-collapse collapse">
-                        {% if loggedin %}
-                            <ul class="nav navbar-nav">
-                                {% if active_page == 'home' %}
-                                    <li class="active"><a href="/mediaviewer/">Home</a></li>
-                                {% else %}
-                                    <li><a href="/mediaviewer/">Home</a></li>
-                                {% endif %}
+                <a class="navbar-brand" href="/mediaviewer/">MediaViewer <i class="bi-film"></i></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-content">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-                                {% if active_page == 'movies' %}
-                                    <li class="active dropdown">
-                                {% else %}
-                                    <li class="dropdown">
-                                {% endif %}
-                                <a href="/mediaviewer/movies/" role="button" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
-
-                                <ul class="dropdown-menu">
-                                    {% for genre in movie_genres %}
-                                        <li><a href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a></li>
-                                    {% endfor %}
-                                </ul>
-                                </li>
-
-                                {% if active_page == 'tvshows' %}
-                                    <li class="active dropdown">
-                                {% else %}
-                                    <li class="dropdown">
-                                {% endif %}
-                                <a href="/mediaviewer/tvshows/summary/" role="button" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
-
-                                <ul class="dropdown-menu">
-                                    {% for genre in tv_genres %}
-                                        <li><a href="/mediaviewer/tvshows/genre/{{genre.id}}/">{{genre.genre}}</a></li>
-                                    {% endfor %}
-                                </ul>
-                                </li>
-
-                                {% if active_page == 'requests' %}
-                                    <li class="active">
-                                {% else %}
-                                    <li>
-                                {% endif %}
-                                <a href="/mediaviewer/requests/">Requests</a></li>
-
-                                {% if active_page == 'settings' %}
-                                    <li class="active">
-                                {% else %}
-                                    <li>
-                                {% endif %}
-                                <a href="/mediaviewer/settings/"><span class="glyphicon glyphicon-cog"></span></a></li>
-
-                                {% if loggedin %}
-                                    <li class="navbar-right"><a href="/mediaviewer/logout/">Log out</a></li>
-                                {% else %}
-                                    <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
-                                {% endif %}
-                            </ul>
-                            {% if loggedin %}
-                                <p class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/" class="navbar-link">{{ user.username }}</a></p>
+                <div class="collapse navbar-collapse" id="navbar-content">
+                    {% if loggedin %}
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                            {% if active_page == 'home' %}
+                                <a class="nav-link active" href="/mediaviewer/">Home</a>
+                            {% else %}
+                                <a class="nav-link" href="/mediaviewer/">Home</a>
                             {% endif %}
-                        {% else %}
-                            <ul class="nav navbar-nav">
-                                <li class="navbar-right"><a href="/mediaviewer/login/">Log In</a></li>
-                            </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                            {% if active_page == 'movies' %}
+                                <a class="nav-link active dropdown-toggle" href="/mediaviewer/movies/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                            {% else %}
+                                <a class="nav-link dropdown-toggle" href="/mediaviewer/movies/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                            {% endif %}
+
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="nav-link dropdown-item" href="/mediaviewer/movies/">All</a>
+                                    {% for genre in movie_genres %}
+                                        <a class="nav-link dropdown-item" href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a>
+                                    {% endfor %}
+                            </div>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                            {% if active_page == 'tvshows' %}
+                                <a class="nav-link active dropdown-toggle" href="/mediaviewer/tvshows/summary/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+                            {% else %}
+                                <a class="nav-link dropdown-toggle" href="/mediaviewer/tvshows/summary/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+                            {% endif %}
+
+                            <div class="dropdown-menu">
+                                <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/summary/">All</a>
+                                {% for genre in tv_genres %}
+                                    <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/genre/{{genre.id}}/">{{genre.genre}}</a>
+                                {% endfor %}
+                            </div>
+                            </li>
+
+                            <li class="nav-item">
+                            {% if active_page == 'requests' %}
+                                <a class="nav-link active" href="/mediaviewer/requests/">Requests</a></li>
+                            {% else %}
+                                <a class="nav-link" href="/mediaviewer/requests/">Requests</a></li>
+                            {% endif %}
+
+                            <li class="nav-item">
+                            {% if active_page == 'settings' %}
+                                <a class="nav-link active" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                            {% else %}
+                                <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                            {% endif %}
+
+                            {% if loggedin %}
+                                <li class="navbar-right"><a class="nav-link" href="/mediaviewer/logout/">Log out</a></li>
+                            {% else %}
+                                <li class="navbar-right"><a class="nav-link" href="/mediaviewer/login/">Log In</a></li>
+                            {% endif %}
+                        </ul>
+                        {% if loggedin %}
+                            <span class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/">{{ user.username }}</a></span>
                         {% endif %}
-                    </div><!--/.nav-collapse -->
-                </div>
+                    {% else %}
+                        <nav class="nav navbar-nav">
+                            <div class="navbar-right"><a class="nav-link" href="/mediaviewer/login/">Log In</a></div>
+                        </nav>
+                    {% endif %}
+                </div><!--/.nav-collapse -->
+            {% endblock %}
+            </div>
+        </nav>
+
+        <div class="container py-2">
+            {% block jumbotron %}
+                <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
+                <p class="col-md-8 fs-4">{{ greeting }}</p>
             {% endblock %}
         </div>
 
-        <div class="container">
-            {% block jumbotron %}
-                <div class="jumbotron">
-                    <h1>Welcome to the MediaViewer</h1>
-                    <p></p>
-                    <p>{{ greeting }}</p>
-                    <p></p>
-                </div>
-            {% endblock %}
-
             {% block messages %}
+            <div class="container py-2">
                 {% for message in messages %}
-                    {% if 'last_watched' in message.extra_tags %}
-                        {% autoescape off %}
-                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
-                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                    <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} alert-dismissible fade show" id="alert-{{ message.extra_tags }}" role="alert">
+                        {% if 'last_watched' in message.extra_tags %}
+                            {{ message | safe }}
+                        {% else %}
                             {{ message }}
-                        </div>
-                    {% endautoescape %}
-                    {% else %}
-                        <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} fade in" id="alert-{{ message.extra_tags }}">
-                            <a href="#" class="close" data-dismiss="alert">&times;</a>
-                            {{ message }}
-                        </div>
-                    {% endif %}
-            {% endfor %}
+                        {% endif %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
         {% endblock %}
 
+        <div class="container py-2">
         {% block main %}
             {% if loggedin %}
-                <table id="newFileTable" class="table table-plain">
+                <table id="newFileTable" class="table table-dark table-striped">
                     <thead>
                         <tr>
                             <th>Latest Files</th>
@@ -175,30 +173,31 @@
 
             {% endif %}
         {% endblock %}
+        </div>
     </div> <!-- /container -->
 
 </body>
 
 <footer>
 {% block footer %}
-    <div class="navbar navbar-default navbar-fixed-bottom">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-3">
+    <nav id="bottom-navbar" class="navbar navbar-expand-md fixed-bottom navbar-dark bg-body-tertiary nav-show" data-bs-theme="dark">
+        <div class="container-fluid text-center">
+            <div class="row justify-content-between">
+                <div class="col-5">
                     {% if waiterstatus %}
-                        <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-success">Connected</span></p>
+                        <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-success">Connected</span></span>
                     {% else %}
-                        <p class="navbar-text">Alfred status is <span id="waiter-status" class="label label-danger">Disconnected</span></p>
+                        <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-danger">Disconnected</span></span>
                     {% endif %}
                 </div>
-                <div class="col-md-9">
+                <div class="col-7">
                     {% if donation_site_name and donation_site_url %}
-                        <p class="text-right donation-text">If you can, please consider donating to <a href="{{ donation_site_url }}">{{ donation_site_name }}</a></p>
+                        <span class="navbar-text">If you can, please consider donating to <a href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+    </nav>
 {% endblock %}
 </footer>
 
@@ -208,10 +207,13 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
     <script src="{% static "datatables.net/js/jquery.dataTables.min.js" %}"></script>
-    <script src="{% static "datatables.net-bs/js/dataTables.bootstrap.min.js" %}"></script>
+    <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
     <script src="{% static "datatables.net-responsive/js/dataTables.responsive.min.js" %}"></script>
+    <script src="{% static "datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js" %}"></script>
+    <script src="{% static "datatables.net-scroller/js/dataTables.scroller.min.js" %}"></script>
+    <script src="{% static "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js" %}"></script>
     <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
-    <script src="{% static "@bower_components/bootswatch-dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
     <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
     <script src="https://cdn.passwordless.dev/dist/1.1.0/umd/passwordless.umd.min.js" crossorigin="anonymous"></script>
 
