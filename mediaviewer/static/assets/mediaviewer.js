@@ -103,9 +103,6 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         dt_config.ajax = {
             url: ajax_path,
             dataSrc: function(json){
-                sleep(2000).then(() => {
-                configureTooltips($);
-                });
                 return json.data;
             },
         }
