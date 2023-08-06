@@ -249,6 +249,5 @@ class Path(models.Model):
                 f'<span id="unwatched-show-badge-{ self.id }" class="badge text-bg-primary">{unwatched_count or ""}</span>'
             ),
             f"""<span class="hidden_span">{self.lastCreatedFileDateForSpan()}</span>{ self.lastCreatedFileDate.date().strftime('%b %d, %Y')}""",
-            "",
         ]
         return payload
