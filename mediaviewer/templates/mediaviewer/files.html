@@ -83,9 +83,8 @@
                 {% if can_download %}
                     <th class="min-tablet-p nosort">Link</th>
                 {% endif %}
-                <th class="min-tablet-l nosort">Viewed</th>
+                <th class="all nosort">Viewed</th>
                 <th class="min-tablet-l nosort">Report Bad File</th>
-                <th class='nosort'></th>
             </tr>
         </thead>
         <tbody class="table-group-divider">
@@ -115,7 +114,6 @@
                         <span id="saved-{{ file.id }}"></span>
                     </td>
                     <td><input class='report' name='report-{{ file.id }}' value='Report' type='button' onclick="reportButtonClick('{{file.id}}')"/></td>
-                    <td></td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -154,7 +152,6 @@
             scrollSetup();
 
             $(".truncated-text").shorten({"showChars": 1000});
-
         });
 
     </script>

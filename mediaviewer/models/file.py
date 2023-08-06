@@ -508,7 +508,6 @@ class File(models.Model):
             [
                 cell,
                 f"""<input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}')"/>""",
-                "",
             ]
         )
         return payload
