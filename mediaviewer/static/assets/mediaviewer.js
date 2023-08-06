@@ -119,13 +119,33 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
 function configureTooltips($){
     options = {
         animated: true,
-        placement: 'bottom',
+        placement: placePopover,
         html: true,
         offset: [10, 10],
+        delay: 200
     };
     $(function () {
         $('.img-preview').popover(options)
     });
+}
+
+function placePopover(popover_node, trigger_node){
+    if(!popover_node._element.matches(':hover')){
+        $(trigger).hide();
+        return 'manual';
+    }
+
+    $('.popover-body').on('click', function () {
+        var popover = popover_node;
+        var trigger = trigger_node;
+        $(this).hide();
+    });
+    $('.popover-body').on('mouseleave', function () {
+        var popover = popover_node;
+        var trigger = trigger_node;
+        $(this).hide();
+    });
+    return 'auto';
 }
 
 function prepareTableForRequests($){
