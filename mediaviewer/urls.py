@@ -58,9 +58,6 @@ urlpatterns = [
     ),
     re_path(r"^settings/", settings.settings, name="settings"),
     re_path(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
-    re_path(
-        r"^submitsitesettings/", settings.submitsitesettings, name="submitsitesettings"
-    ),
     re_path(r"^submitnewuser/", settings.submitnewuser, name="submitnewuser"),
     re_path(
         r"^submitsitewidemessage/",

@@ -41,7 +41,7 @@ class TestHome:
         self.request.user = self.user
 
     def test_with_greeting(self):
-        SiteGreeting.new(self.user, "test_greeting")
+        SiteGreeting.new("test_greeting")
 
         expected_context = {
             "greeting": "test_greeting",

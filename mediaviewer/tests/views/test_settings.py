@@ -7,13 +7,10 @@ from mediaviewer.views.settings import (
     submitnewuser,
     settings,
     submitsettings,
-    submitsitesettings,
 )
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.core.exceptions import ValidationError
-
-from mediaviewer.tests.helpers import create_user
 
 
 # TODO: Drop mock patch decorators
@@ -283,84 +280,3 @@ class TestSubmitSettings:
         assert self.settings.binge_mode is True
         assert self.settings.jump_to_last_watched is True
         assert self.user.email == "test_new_email"
-
-
-@pytest.mark.django_db
-class TestSubmitSiteSettings:
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_new = mocker.patch("mediaviewer.views.settings.SiteGreeting.new")
-
-        self.mock_latestSiteGreeting = mocker.patch(
-            "mediaviewer.views.settings.SiteGreeting.latestSiteGreeting"
-        )
-
-        self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.settings.setSiteWideContext"
-        )
-
-        self.mock_render = mocker.patch("mediaviewer.views.settings.render")
-
-        self.old_greeting = mock.MagicMock(SiteGreeting)
-        self.old_greeting.greeting = "old_greeting"
-
-        self.mock_latestSiteGreeting.return_value = self.old_greeting
-
-        self.user = create_user()
-
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
-        self.request.POST = {"greeting": "new_greeting"}
-
-    def test_new_greeting(self):
-        self.user.is_staff = True
-
-        expected_context = {
-            "successful": True,
-            "active_page": "submitsitesettings",
-        }
-
-        expected = self.mock_render.return_value
-        actual = submitsitesettings(self.request)
-        assert expected == actual
-
-        self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/settingsresults.html", expected_context
-        )
-        self.mock_new.assert_called_once_with(self.user, "new_greeting")
-
-    def test_no_greeting_change(self):
-        self.user.is_staff = True
-        self.request.POST["greeting"] = "old_greeting"
-
-        expected_context = {
-            "successful": True,
-            "active_page": "submitsitesettings",
-        }
-
-        expected = self.mock_render.return_value
-        actual = submitsitesettings(self.request)
-        assert expected == actual
-
-        self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/settingsresults.html", expected_context
-        )
-        assert not self.mock_new.called
-
-    def test_is_not_staff(self):
-        self.user.is_staff = False
-
-        expected_context = {
-            "successful": False,
-            "active_page": "submitsitesettings",
-            "errMsg": "Unauthorized access attempted",
-        }
-
-        expected = self.mock_render.return_value
-        actual = submitsitesettings(self.request)
-        assert expected == actual
-
-        self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/settingsresults.html", expected_context
-        )
-        assert not self.mock_new.called
