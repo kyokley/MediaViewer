@@ -3,13 +3,6 @@ from django.db import models
 
 class SiteGreeting(models.Model):
     greeting = models.TextField(blank=True, null=False, db_column="greeting")
-    user = models.ForeignKey(
-        "auth.User",
-        on_delete=models.CASCADE,
-        null=False,
-        blank=False,
-        db_column="userid",
-    )
     datecreated = models.DateTimeField(
         db_column="datecreated", blank=True, auto_now_add=True
     )
@@ -19,12 +12,7 @@ class SiteGreeting(models.Model):
         db_table = "sitegreeting"
 
     def __str__(self):
-        return "id: %s g: %s\nu: %s\nd: %s" % (
-            self.id,
-            self.greeting,
-            self.user.id,
-            self.datecreated,
-        )
+        return f"id: {self.id} g: {self.greeting}\nd: {self.datecreated}"
 
     @classmethod
     def latestSiteGreeting(cls):
@@ -32,9 +20,8 @@ class SiteGreeting(models.Model):
         return greetings and greetings[0] or None
 
     @classmethod
-    def new(cls, user, greeting):
+    def new(cls, greeting):
         new_obj = cls()
         new_obj.greeting = greeting
-        new_obj.user = user
         new_obj.save()
         return new_obj

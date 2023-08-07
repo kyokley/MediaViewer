@@ -93,27 +93,6 @@ def submitsettings(request):
 
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
-def submitsitesettings(request):
-    user = request.user
-    context = {"successful": True}
-    context["active_page"] = "submitsitesettings"
-    setSiteWideContext(context, request)
-
-    newGreeting = request.POST.get("greeting")
-    latestGreeting = SiteGreeting.latestSiteGreeting()
-
-    if user.is_staff:
-        if not latestGreeting or newGreeting != latestGreeting.greeting:
-            SiteGreeting.new(request.user, newGreeting)
-    else:
-        log.error("User is not a staffer!")
-        context["errMsg"] = "Unauthorized access attempted"
-        context["successful"] = False
-    return render(request, "mediaviewer/settingsresults.html", context)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
 def submitnewuser(request):
     user = request.user
     context = {"successful": True}

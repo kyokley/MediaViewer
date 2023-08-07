@@ -9,6 +9,7 @@ from mediaviewer.models.request import Request
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.donation_site import DonationSite
 from mediaviewer.models.videoprogress import VideoProgress
+from mediaviewer.models.sitegreeting import SiteGreeting
 
 
 @admin.register(Path)
@@ -142,6 +143,11 @@ class GenreAdmin(admin.ModelAdmin):
         "id",
         "genre",
     )
+
+
+@admin.register(SiteGreeting)
+class SiteGreetingAdmin(admin.ModelAdmin):
+    ordering = ('-id',)
 
 
 admin.site.site_url = "/mediaviewer"
