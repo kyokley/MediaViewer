@@ -12,8 +12,6 @@ from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.core.exceptions import ValidationError
 
-from mediaviewer.tests.helpers import create_user
-
 
 # TODO: Drop mock patch decorators
 @mock.patch("mediaviewer.views.settings.UserSettings.new")
