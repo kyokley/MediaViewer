@@ -148,15 +148,31 @@
                             <tr>
                                 {% if file.isMovie %}
                                     {% if loggedin %}
-                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.rawSearchString }}</a></td>
+                                        <td>
+                                            {% if file.posterfile %}
+                                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                            {% else %}
+                                                <a href="/mediaviewer/files/{{ file.id }}/">
+                                            {% endif %}
+                                                    {{ file.name }}
+                                                </a>
+                                        </td>
                                     {% else %}
-                                        <td>{{ file.rawSearchString }}</td>
+                                        <td>{{ file.name }}</td>
                                     {% endif %}
                                 {% else %}
                                     {% if loggedin %}
-                                        <td><a href="/mediaviewer/files/{{ file.id }}/">{{ file.display_name_with_path }}</a></td>
+                                        <td>
+                                            {% if file.posterfile %}
+                                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                            {% else %}
+                                                <a href="/mediaviewer/files/{{ file.id }}/">
+                                            {% endif %}
+                                                    {{ file.name }}
+                                                </a>
+                                        </td>
                                     {% else %}
-                                        <td>{{ file.display_name_with_path }}</td>
+                                        <td>{{ file.name }}</td>
                                     {% endif %}
                                 {% endif %}
                             </tr>
@@ -229,6 +245,7 @@
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             prepareScraperButton($);
             scrollSetup();
+            configureTooltips($);
         });
     </script>
 {% endblock %}

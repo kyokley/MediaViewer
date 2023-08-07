@@ -464,7 +464,7 @@ class File(models.Model):
         files = (
             cls.objects.filter(hide=False).filter(finished=True).order_by("-id")[:items]
         )
-        return files
+        return [file.display_payload() for file in files]
 
     def display_payload(self):
         payload = {
@@ -475,6 +475,7 @@ class File(models.Model):
             "posterfile": self.posterfile.image
             if self.posterfile and self.posterfile.image
             else "",
+            "isMovie": self.isMovie(),
         }
         return payload
 
