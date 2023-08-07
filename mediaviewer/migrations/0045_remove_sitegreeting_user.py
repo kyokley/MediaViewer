@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0044_usersettings_allow_password_logins'),
+        ("mediaviewer", "0044_usersettings_allow_password_logins"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='sitegreeting',
-            name='user',
+            model_name="sitegreeting",
+            name="user",
         ),
     ]

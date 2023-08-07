@@ -147,7 +147,7 @@ class GenreAdmin(admin.ModelAdmin):
 
 @admin.register(SiteGreeting)
 class SiteGreetingAdmin(admin.ModelAdmin):
-    ordering = ('-id',)
+    ordering = ("-id",)
 
 
 admin.site.site_url = "/mediaviewer"
