@@ -375,6 +375,7 @@ class TestTvShows:
                     "name": "tv.file",
                     "viewed": False,
                     "posterfile": "",
+                    "isMovie": False,
                 }
             ],
             "path": self.tv_path,
