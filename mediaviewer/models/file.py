@@ -464,12 +464,12 @@ class File(models.Model):
         files = (
             cls.objects.filter(hide=False).filter(finished=True).order_by("-id")[:items]
         )
-        return [file.display_payload() for file in files]
+        return [file.display_payload(include_fullname=True) for file in files]
 
-    def display_payload(self):
+    def display_payload(self, include_fullname=False):
         payload = {
             "id": self.id,
-            "name": self.displayName(),
+            "name": self.displayName() if not include_fullname else self.display_name_with_path(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),
             "date": self.datecreated.date(),
             "posterfile": self.posterfile.image
