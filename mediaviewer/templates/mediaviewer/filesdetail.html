@@ -94,7 +94,7 @@
                     {% endif %}
                     {% if posterfile.rating and posterfile.rating != 'N/A' %}
                             <div class="col-3">Rating:</div>
-                            <div class="col-9">{{ posterfile.rating }}/10</div>
+                            <div class="col-9">{{ posterfile.rating | floatformat }}/10</div>
                     {% endif %}
                     {% if file_size and can_download %}
                             <div class="col-3">Size:</div>
