@@ -108,6 +108,9 @@ class File(models.Model):
         obj.streamable = streamable
         obj.save()
 
+        obj.inferScraper()
+        obj.displayName()
+
         # Generate continue watching messages
         settings = UserSettings.objects.filter(last_watched=path).all()
         for setting in settings:
