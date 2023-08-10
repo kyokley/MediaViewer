@@ -79,6 +79,8 @@ class File(models.Model):
 
     users = models.ManyToManyField("auth.User", through="UserComment")
 
+    _display_name = models.TextField(blank=True, default="")
+
     objects = FileManager.from_queryset(FileQuerySet)()
 
     class Meta:
@@ -357,8 +359,11 @@ class File(models.Model):
                 fullname = name
             return fullname
 
-    def displayName(self):
-        return self.getScrapedFullName(include_path_name=False)
+    def displayName(self, save=True):
+        self._display_name = self.getScrapedFullName(include_path_name=False)
+        if save:
+            self.save()
+        return self._display_name
 
     def display_name_with_path(self):
         return self.getScrapedFullName(include_path_name=True)
@@ -490,7 +495,7 @@ class File(models.Model):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/files/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.displayName()}</a>',
+            f'<a class="img-preview" href="/mediaviewer/files/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self._display_name}</a>',
             f"""<span class="hidden_span">{self.dateCreatedForSpan()}</span>{self.datecreated.date().strftime('%b %d, %Y')}""",
         ]
 
