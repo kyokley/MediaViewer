@@ -389,10 +389,14 @@ class File(models.Model):
                 and int(episode) != 64
             ):
                 # Success!
+                display_name = self.displayName(save=False)
+
                 log.debug("Success!!!")
                 log.debug(
                     f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
                 )
+                log.debug(f'Display Name: {display_name}')
+
                 self.save()
                 self.destroyPosterFile()
                 break

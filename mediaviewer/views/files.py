@@ -13,7 +13,6 @@ from mediaviewer.models.usersettings import (
 )
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.path import Path
-from mediaviewer.models.usercomment import UserComment
 from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
