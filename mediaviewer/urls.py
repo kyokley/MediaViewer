@@ -11,7 +11,6 @@ from mediaviewer.views import (
     home,
     files,
     detail,
-    comment,
     signin,
     signout,
     settings,
@@ -31,8 +30,6 @@ router = routers.DefaultRouter()
 urlpatterns = [
     re_path(r"^$", home.home, name="home"),
     re_path(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
-    re_path(r"^files/(?P<file_id>\d+)/comment/$", comment.comment, name="comment"),
-    re_path(r"^files/(?P<file_id>\d+)/results/$", comment.results, name="results"),
     re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
     re_path(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
     re_path(r"^tvshows/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
