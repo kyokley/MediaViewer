@@ -98,20 +98,15 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config.scrollCollapse = true;
     dt_config.deferRender = false;
 
-    if(table_data_page !== 'tvshows'){
-        dt_config.serverSide = true;
-        dt_config.ajax = {
-            url: ajax_path,
-            dataSrc: function(json){
-                sleep(2000).then(() => {
-                configureTooltips($);
-                });
-                return json.data;
-            },
-        }
-        // dt_config.paging = true;
-        // dt_config.ordering = false;
-        // dt_config.searching = false;
+    dt_config.serverSide = true;
+    dt_config.ajax = {
+        url: ajax_path,
+        dataSrc: function(json){
+            sleep(2000).then(() => {
+            configureTooltips($);
+            });
+            return json.data;
+        },
     }
     return dt_config;
 }

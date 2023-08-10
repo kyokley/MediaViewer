@@ -125,24 +125,18 @@ def tvshows_by_genre(request, genre_id):
 def tvshows(request, pathid):
     user = request.user
     refpath = get_object_or_404(Path, pk=pathid)
-    files = File.files_by_localpath(refpath).select_related("path")
-
-    viewed_by_file = UserComment.objects.viewed_by_file(user)
-    file_data = [file.display_payload() for file in files]
-    for file in file_data:
-        file["viewed"] = viewed_by_file.get(file["id"], False)
 
     settings = user.settings()
     context = {
-        "files": file_data,
         "path": refpath,
         "view": "tvshows",
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        "table_data_page": "tvshows",
+        "table_data_page": "ajaxtvshows",
     }
+    context["table_data_filter_id"] = pathid
     context["active_page"] = "tvshows"
     context["title"] = refpath.displayName()
     context["long_plot"] = (
