@@ -395,7 +395,7 @@ class File(models.Model):
                 log.debug(
                     f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
                 )
-                log.debug(f'Display Name: {display_name}')
+                log.debug(f"Display Name: {display_name}")
 
                 self.save()
                 self.destroyPosterFile()

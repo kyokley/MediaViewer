@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0045_remove_sitegreeting_user'),
+        ("mediaviewer", "0045_remove_sitegreeting_user"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='file',
-            name='_display_name',
-            field=models.TextField(blank=True, default=''),
+            model_name="file",
+            name="_display_name",
+            field=models.TextField(blank=True, default=""),
         ),
     ]
