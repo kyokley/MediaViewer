@@ -34,6 +34,7 @@ def filesdetail(request, file_id):
     settings = user.settings()
     context = {
         "file": file,
+        "displayName": file.displayName(save=False),
         "posterfile": posterfile,
         "comment": comment,
         "skip": skip,

@@ -186,7 +186,7 @@ class File(models.Model):
             return None
         else:
             shows = [x for x in self.path.files()]
-            shows.sort(key=lambda x: x.displayName())
+            shows.sort(key=lambda x: x._display_name)
 
             index = shows.index(self)
             if index + 1 >= len(shows):
@@ -199,7 +199,7 @@ class File(models.Model):
             return None
         else:
             shows = [x for x in self.path.files()]
-            shows.sort(key=lambda x: x.displayName())
+            shows.sort(key=lambda x: x._display_name)
 
             index = shows.index(self)
             if index - 1 < 0:
@@ -250,7 +250,7 @@ class File(models.Model):
 
     def url(self):
         return '<a href="{}">{}</a>'.format(
-            reverse("mediaviewer:filesdetail", args=(self.id,)), self.displayName()
+            reverse("mediaviewer:filesdetail", args=(self.id,)), self._display_name
         )
 
     def getSearchTerm(self):
@@ -478,7 +478,7 @@ class File(models.Model):
     def display_payload(self, include_fullname=False):
         payload = {
             "id": self.id,
-            "name": self.displayName()
+            "name": self.displayName(save=False)
             if not include_fullname
             else self.display_name_with_path(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),
