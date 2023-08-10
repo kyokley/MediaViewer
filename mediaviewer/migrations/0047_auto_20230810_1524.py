@@ -3,6 +3,15 @@
 from django.db import migrations
 
 
+def forward(apps, schema_editor):
+    File = apps.get_model('mediaviewer', 'File')
+
+    count = File.objects.count()
+    for idx, file in enumerate(File.objects.all()):
+        file.displayName()
+        print(f'{idx}/{count}')
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,4 +19,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(forward),
     ]
