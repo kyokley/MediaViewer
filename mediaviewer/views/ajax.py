@@ -232,5 +232,5 @@ def ajaxtvshowsbygenre(request, genre_id):
 @csrf_exempt
 def ajaxtvshows(request, path_id):
     refpath = get_object_or_404(Path, pk=path_id)
-    qs = File.files_by_localpath(refpath).order_by("-display_name")
+    qs = File.files_by_localpath(refpath).order_by("-_display_name")
     return _ajax_file_rows(request, qs)

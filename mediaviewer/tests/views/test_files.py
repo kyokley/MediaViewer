@@ -367,17 +367,6 @@ class TestTvShows:
 
     def test_valid(self):
         expected_context = {
-            "files": [
-                {
-                    "date": self.tv_file.datecreated.date(),
-                    "dateCreatedForSpan": self.tv_file.dateCreatedForSpan(),
-                    "id": self.tv_file.id,
-                    "name": "tv.file",
-                    "viewed": False,
-                    "posterfile": "",
-                    "isMovie": False,
-                }
-            ],
             "path": self.tv_path,
             "view": "tvshows",
             "LOCAL_IP": LOCAL_IP,
@@ -387,7 +376,8 @@ class TestTvShows:
             "active_page": "tvshows",
             "title": "Tv Local Path",
             "long_plot": "",
-            "table_data_page": "tvshows",
+            "table_data_page": "ajaxtvshows",
+            "table_data_filter_id": self.tv_path.id,
         }
 
         expected = self.mock_render.return_value

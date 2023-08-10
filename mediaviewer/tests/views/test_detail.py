@@ -201,6 +201,7 @@ class TestFilesDetail:
             "file_size": None,
             "active_page": "tvshows",
             "title": "Tv Local Path",
+            "displayName": "tv.file",
         }
         expected = self.mock_render.return_value
         actual = filesdetail(self.request, self.tv_file.id)
@@ -234,6 +235,7 @@ class TestFilesDetail:
             "file_size": None,
             "active_page": "tvshows",
             "title": "Tv Local Path",
+            "displayName": "tv.file",
         }
         expected = self.mock_render.return_value
         actual = filesdetail(self.request, self.tv_file.id)
