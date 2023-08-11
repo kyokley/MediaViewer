@@ -186,7 +186,7 @@ class File(models.Model):
             return None
         else:
             shows = [x for x in self.path.files()]
-            shows.sort(key=lambda x: x._display_name)
+            shows.sort(key=lambda x: x.displayName())
 
             index = shows.index(self)
             if index + 1 >= len(shows):
@@ -199,7 +199,7 @@ class File(models.Model):
             return None
         else:
             shows = [x for x in self.path.files()]
-            shows.sort(key=lambda x: x._display_name)
+            shows.sort(key=lambda x: x.displayName())
 
             index = shows.index(self)
             if index - 1 < 0:
