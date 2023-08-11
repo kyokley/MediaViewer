@@ -181,14 +181,20 @@ class TestGetIMDBData:
         actual = self.test_obj._getIMDBData()
 
         assert expected == actual
-        assert self.mock_getDataFromIMDB.called
-        assert self.mock_cast_and_crew.called
+        self.mock_getDataFromIMDB.assert_called_once_with(self.movie_file)
+        self.mock_cast_and_crew.assert_called_once_with()
         assert "test_poster" == self.test_obj.poster_url
-        assert self.mock_assign_tvdb_info.called
-        assert self.mock_store_extended_info.called
-        assert self.mock_store_plot.called
-        assert self.mock_store_genres.called
-        assert self.mock_store_rated.called
+        self.mock_assign_tvdb_info.assert_called_once_with()
+        self.mock_store_extended_info.assert_called_once_with()
+        self.mock_store_plot.assert_called_once_with(
+            self.mock_getDataFromIMDB.return_value
+        )
+        self.mock_store_genres.assert_called_once_with(
+            self.mock_getDataFromIMDB.return_value
+        )
+        self.mock_store_rated.assert_called_once_with(
+            self.mock_getDataFromIMDB.return_value
+        )
 
     def test_path_for_tv(self):
         self.test_obj.path = self.tv_path
@@ -198,14 +204,20 @@ class TestGetIMDBData:
 
         assert expected == actual
         self.mock_getDataFromIMDBByPath.assert_called_once_with(self.tv_path)
-        assert self.mock_cast_and_crew.called
+        self.mock_cast_and_crew.assert_called_once_with()
         assert "test_poster" == self.test_obj.poster_url
-        assert self.mock_assign_tvdb_info.called
+        self.mock_assign_tvdb_info.assert_called_once_with()
 
-        assert self.mock_store_extended_info.called
-        assert self.mock_store_plot.called
-        assert self.mock_store_genres.called
-        assert self.mock_store_rated.called
+        self.mock_store_extended_info.assert_called_once_with()
+        self.mock_store_plot.assert_called_once_with(
+            self.mock_getDataFromIMDBByPath.return_value
+        )
+        self.mock_store_genres.assert_called_once_with(
+            self.mock_getDataFromIMDBByPath.return_value
+        )
+        self.mock_store_rated.assert_called_once_with(
+            self.mock_getDataFromIMDBByPath.return_value
+        )
 
     def test_file_for_tv(self):
         self.test_obj.file = self.tv_file
@@ -214,15 +226,21 @@ class TestGetIMDBData:
         actual = self.test_obj._getIMDBData()
 
         assert expected == actual
-        assert self.mock_getDataFromIMDB.called
-        assert self.mock_cast_and_crew.called
+        self.mock_getDataFromIMDB.assert_called_once_with(self.tv_file)
+        self.mock_cast_and_crew.assert_called_once_with()
         assert "test_poster" == self.test_obj.poster_url
-        assert self.mock_assign_tvdb_info.called
+        self.mock_assign_tvdb_info.assert_called_once_with()
 
-        assert self.mock_store_extended_info.called
-        assert self.mock_store_plot.called
-        assert self.mock_store_genres.called
-        assert self.mock_store_rated.called
+        self.mock_store_extended_info.assert_called_once_with()
+        self.mock_store_plot.assert_called_once_with(
+            self.mock_getDataFromIMDB.return_value
+        )
+        self.mock_store_genres.assert_called_once_with(
+            self.mock_getDataFromIMDB.return_value
+        )
+        self.mock_store_rated.assert_called_once_with(
+            self.mock_getDataFromIMDB.return_value
+        )
 
     def test_no_data_for_movie(self):
         self.mock_getDataFromIMDB.return_value = None
@@ -232,14 +250,14 @@ class TestGetIMDBData:
         actual = self.test_obj._getIMDBData()
 
         assert expected == actual
-        assert self.mock_getDataFromIMDB.called
-        assert self.mock_cast_and_crew.called
+        self.mock_getDataFromIMDB.assert_called_once_with(self.movie_file)
+        assert not self.mock_cast_and_crew.called
         assert self.test_obj.poster_url is None
-        assert self.mock_assign_tvdb_info.called
-        assert self.mock_store_extended_info.called
-        assert self.mock_store_plot.called
-        assert self.mock_store_genres.called
-        assert self.mock_store_rated.called
+        self.mock_assign_tvdb_info.assert_called_once_with()
+        assert not self.mock_store_extended_info.called
+        assert not self.mock_store_plot.called
+        assert not self.mock_store_genres.called
+        assert not self.mock_store_rated.called
 
     def test_no_data_for_path_for_tv(self):
         self.mock_getDataFromIMDBByPath.return_value = None
@@ -250,13 +268,13 @@ class TestGetIMDBData:
 
         assert expected == actual
         self.mock_getDataFromIMDBByPath.assert_called_once_with(self.tv_path)
-        assert self.mock_cast_and_crew.called
+        assert not self.mock_cast_and_crew.called
         assert self.test_obj.poster_url is None
-        assert self.mock_assign_tvdb_info.called
-        assert self.mock_store_extended_info.called
-        assert self.mock_store_plot.called
-        assert self.mock_store_genres.called
-        assert self.mock_store_rated.called
+        self.mock_assign_tvdb_info.assert_called_once_with()
+        assert not self.mock_store_extended_info.called
+        assert not self.mock_store_plot.called
+        assert not self.mock_store_genres.called
+        assert not self.mock_store_rated.called
 
     def test_no_data_for_file_for_tv(self):
         self.mock_getDataFromIMDB.return_value = None
@@ -266,13 +284,13 @@ class TestGetIMDBData:
         actual = self.test_obj._getIMDBData()
 
         assert expected == actual
-        assert self.mock_getDataFromIMDB.called
-        assert self.mock_cast_and_crew.called
+        self.mock_getDataFromIMDB.assert_called_once_with(self.tv_file)
+        assert not self.mock_cast_and_crew.called
         assert self.test_obj.poster_url is None
-        assert self.mock_store_extended_info.called
-        assert self.mock_store_plot.called
-        assert self.mock_store_genres.called
-        assert self.mock_store_rated.called
+        assert not self.mock_store_extended_info.called
+        assert not self.mock_store_plot.called
+        assert not self.mock_store_genres.called
+        assert not self.mock_store_rated.called
 
 
 @pytest.mark.django_db
