@@ -108,9 +108,6 @@ class File(models.Model):
         obj.streamable = streamable
         obj.save()
 
-        obj.inferScraper()
-        obj.displayName()
-
         # Generate continue watching messages
         settings = UserSettings.objects.filter(last_watched=path).all()
         for setting in settings:
@@ -189,7 +186,7 @@ class File(models.Model):
             return None
         else:
             shows = [x for x in self.path.files()]
-            shows.sort(key=lambda x: x._display_name)
+            shows.sort(key=lambda x: x.displayName())
 
             index = shows.index(self)
             if index + 1 >= len(shows):
@@ -202,7 +199,7 @@ class File(models.Model):
             return None
         else:
             shows = [x for x in self.path.files()]
-            shows.sort(key=lambda x: x._display_name)
+            shows.sort(key=lambda x: x.displayName())
 
             index = shows.index(self)
             if index - 1 < 0:
@@ -362,11 +359,12 @@ class File(models.Model):
                 fullname = name
             return fullname
 
-    def displayName(self, save=True):
-        self._display_name = self.getScrapedFullName(include_path_name=False)
-        if save:
+    def displayName(self):
+        display_name = self.getScrapedFullName(include_path_name=False)
+        if display_name != self._display_name:
+            self._display_name = display_name
             self.save()
-        return self._display_name
+        return display_name
 
     def display_name_with_path(self):
         return self.getScrapedFullName(include_path_name=True)
@@ -389,19 +387,20 @@ class File(models.Model):
                 and not sFail.findall(name)
                 and season
                 and episode
-                and int(episode) != 64
+                and int(episode) not in (64, 65)
             ):
                 # Success!
-                display_name = self.displayName(save=False)
 
                 log.debug("Success!!!")
                 log.debug(
                     f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
                 )
-                log.debug(f"Display Name: {display_name}")
 
                 self.save()
                 self.destroyPosterFile()
+
+                display_name = self.displayName()
+                log.debug(f"Display Name: {display_name}")
                 break
         else:
             self.filenamescrapeformat = None
@@ -481,7 +480,7 @@ class File(models.Model):
     def display_payload(self, include_fullname=False):
         payload = {
             "id": self.id,
-            "name": self.displayName(save=False)
+            "name": self.displayName()
             if not include_fullname
             else self.display_name_with_path(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),
