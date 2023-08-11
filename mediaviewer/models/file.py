@@ -362,11 +362,12 @@ class File(models.Model):
                 fullname = name
             return fullname
 
-    def displayName(self, save=True):
-        self._display_name = self.getScrapedFullName(include_path_name=False)
-        if save:
+    def displayName(self):
+        display_name = self.getScrapedFullName(include_path_name=False)
+        if display_name != self._display_name:
+            self._display_name = display_name
             self.save()
-        return self._display_name
+        return display_name
 
     def display_name_with_path(self):
         return self.getScrapedFullName(include_path_name=True)
@@ -389,19 +390,20 @@ class File(models.Model):
                 and not sFail.findall(name)
                 and season
                 and episode
-                and int(episode) != 64
+                and int(episode) not in (64, 65)
             ):
                 # Success!
-                display_name = self.displayName(save=False)
 
                 log.debug("Success!!!")
                 log.debug(
                     f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
                 )
-                log.debug(f"Display Name: {display_name}")
 
                 self.save()
                 self.destroyPosterFile()
+
+                display_name = self.displayName()
+                log.debug(f"Display Name: {display_name}")
                 break
         else:
             self.filenamescrapeformat = None
