@@ -108,9 +108,6 @@ class File(models.Model):
         obj.streamable = streamable
         obj.save()
 
-        obj.inferScraper()
-        obj.displayName()
-
         # Generate continue watching messages
         settings = UserSettings.objects.filter(last_watched=path).all()
         for setting in settings:
@@ -483,7 +480,7 @@ class File(models.Model):
     def display_payload(self, include_fullname=False):
         payload = {
             "id": self.id,
-            "name": self.displayName(save=False)
+            "name": self.displayName()
             if not include_fullname
             else self.display_name_with_path(),
             "dateCreatedForSpan": self.dateCreatedForSpan(),

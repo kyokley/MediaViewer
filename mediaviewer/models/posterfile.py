@@ -65,7 +65,7 @@ class PosterFile(models.Model):
 
     @property
     def filename(self):
-        return self.file and self.file.displayName(save=False)
+        return self.file and self.file.displayName()
 
     @property
     def pathname(self):
