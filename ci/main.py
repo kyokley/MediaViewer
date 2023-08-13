@@ -1,12 +1,15 @@
 import sys
 import os
+import subprocess  # nosec
+from aiofiles import tempfile
+from pathlib import Path
 
 import anyio
 
 import dagger
 
 
-config = dagger.Config(log_output=sys.stdout)
+DAGGER_CONFIG = dagger.Config(log_output=sys.stdout)
 
 async def run_cmd(image, cmd, context_dir, services=None):
     container = (
@@ -26,7 +29,7 @@ async def run_cmd(image, cmd, context_dir, services=None):
 async def test():
     build_event = anyio.Event()
 
-    async with dagger.Connection(config) as dagger_client:
+    async with dagger.Connection(DAGGER_CONFIG) as dagger_client:
         context_dir = dagger_client.host().directory(".")
 
         image = await _build(dagger_client, build_event, 'dev')
@@ -55,16 +58,17 @@ async def test():
 
 
 async def publish():
-    # create Dagger client
-    async with dagger.Connection(dagger.Config(log_output=sys.stderr)) as client:
-        context_dir = client.host().directory(".")
+    build_event = anyio.Event()
 
+    # create Dagger client
+    async with dagger.Connection(DAGGER_CONFIG) as dagger_client:
         user = os.environ['DOCKER_USER']
 
         # set secret as string value
-        secret = client.set_secret("password", os.environ['DOCKER_PASSWORD'])
+        secret = dagger_client.set_secret("password", os.environ['DOCKER_PASSWORD'])
 
-        image = await context_dir.docker_build(target='prod')
+        image = await _build(dagger_client, build_event, 'prod')
+        await build_event.wait()
 
         addr = await image.with_registry_auth(
             "docker.io", user, secret
@@ -76,7 +80,7 @@ async def publish():
 async def build(target='prod'):
     event = anyio.Event()
 
-    async with dagger.Connection(config) as dagger_client:
+    async with dagger.Connection(DAGGER_CONFIG) as dagger_client:
         await _build(dagger_client, event, target)
         await event.wait()
 
@@ -87,9 +91,16 @@ async def _build(dagger_client, event, target='prod'):
 
     # build using Dockerfile
     # publish the resulting container to a registry
-    image_ref = await context_dir.docker_build(target=target)
+    image = await context_dir.docker_build(target=target)
     event.set()
-    return image_ref
+
+    async with tempfile.TemporaryDirectory() as dir:
+        path = Path(dir) / 'mv.tar'
+        await image.export(str(path))
+        result = await anyio.run_process(['docker', 'load', '--input', str(path)], stderr=subprocess.STDOUT)
+    print(result.stdout.decode())
+
+    return image
 
 
 if __name__ == '__main__':
@@ -98,5 +109,7 @@ if __name__ == '__main__':
             anyio.run(publish)
         elif sys.argv[-1].lower() == 'test':
             anyio.run(test)
+        elif sys.argv[-1].lower() == 'build-dev':
+            anyio.run(build, 'dev')
     else:
-        anyio.run(build)
+        anyio.run(build, 'prod')
