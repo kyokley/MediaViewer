@@ -156,7 +156,6 @@
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            setSettingsRadioButtons('{{ ip_format }}', '{{ LOCAL_IP }}', '{{ BANGUP_IP }}');
 
             {% if default_sort == 'filename_sort' %}
                 jQuery('#filename_sort').prop('checked', 'checked');
@@ -175,15 +174,6 @@
             {% else %}
                 jQuery('#jump_to_last_no').prop('checked', 'checked');
             {% endif %}
-
-            var input = document.getElementById('btn-input');
-            jQuery("#local_ip", "#bangup").change(function () {
-                if(jQuery("#local_ip").is(":checked")) {
-                    input.value = 'local_ip';
-                } else if(jQuery("#bangup").is(":checked")) {
-                    input.value = 'bangup';
-                }
-            });
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
 

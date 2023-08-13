@@ -116,10 +116,6 @@
             {% endif %}
             prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
 
-            {% if jump_to_last and view == 'tvshows' %}
-                jumpToLastViewedPage($);
-            {% endif %}
-
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
 
