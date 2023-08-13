@@ -55,18 +55,6 @@ function prepareDataTable($, sortOrder, table_data_page, filter_id) {
     dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path);
 
     tableElement.dataTable(dt_config);
-
-    tableElement.on('page.dt', function(){
-        dt = tableElement.DataTable();
-        var info = dt.page.info();
-        store_page_info(window.location.href, info.page);
-    });
-
-    page_number = get_page_info(window.location.href);
-    if(page_number){
-        dt = tableElement.DataTable();
-        dt.page(page_number).draw(false);
-    }
 }
 
 function dataTableConfig($, sortOrder, table_data_page, ajax_path){
@@ -94,9 +82,10 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config.scroller = {
         loadingIndicator: true
     };
-    dt_config.scrollY = 500;
+    dt_config.scrollY = 450;
     dt_config.scrollCollapse = true;
-    dt_config.deferRender = false;
+    dt_config.deferRender = true;
+    dt_config.pageLength = 15;
 
     dt_config.serverSide = true;
     dt_config.ajax = {
@@ -515,39 +504,4 @@ function scrollSetup(){
             didScroll = false;
             }
             }, 250);
-}
-
-function store_page_info(url, page_number){
-    page_info = localStorage.getItem('page_info');
-    if(page_info){
-        page_info = JSON.parse(page_info)
-        page_info[url] = {'page_number': page_number,
-                          'date': new Date()};
-    } else {
-        var page_info = {};
-        page_info[url] = {'page_number': page_number,
-                          'date': new Date()};
-    }
-    localStorage.setItem('page_info', JSON.stringify(page_info));
-}
-
-function get_page_info(url){
-    page_info = localStorage.getItem('page_info');
-    if(page_info){
-        page_info = JSON.parse(page_info);
-        if(page_info[url]){
-            data = page_info[url];
-            var day = 1000 * 60 * 60 * 24;
-            var current_date = new Date();
-            date = new Date(data.date);
-            var diff = Math.ceil((current_date.getTime()-date.getTime())/(day));
-
-            if(diff > 1){
-                return null;
-            } else {
-                return data.page_number;
-            }
-        }
-    }
-    return null;
 }
