@@ -79,7 +79,11 @@
         <thead>
             <tr>
                 <th class="all">File Name</th>
-                <th class="desktop">Timestamp</th>
+                <th class="desktop
+            {% if view == 'tvshows' %}
+                nosort
+            {% endif %}
+                    ">Timestamp</th>
                 {% if can_download %}
                     <th class="min-tablet-p nosort">Link</th>
                 {% endif %}
