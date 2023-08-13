@@ -30,7 +30,7 @@ async def main():
             container = (
                 image_ref
                 .with_env_variable("DJANGO_SETTINGS_MODULE", "mysite.docker_settings")
-                .with_env_variable("WAITER_PASSWORD_HASH", os.environ.get("WAITER_PASSWORD_HASH"))
+                .with_env_variable("WAITER_PASSWORD_HASH", os.environ.get("WAITER_PASSWORD_HASH", ""))
                 .with_directory("/code", context_dir)
                 .with_service_binding("postgres", postgres)
                 .with_exec(["sh", "-c", cmd])
