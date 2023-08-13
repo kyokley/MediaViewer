@@ -55,18 +55,6 @@ function prepareDataTable($, sortOrder, table_data_page, filter_id) {
     dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path);
 
     tableElement.dataTable(dt_config);
-
-    tableElement.on('page.dt', function(){
-        dt = tableElement.DataTable();
-        var info = dt.page.info();
-        store_page_info(window.location.href, info.page);
-    });
-
-    page_number = get_page_info(window.location.href);
-    if(page_number){
-        dt = tableElement.DataTable();
-        dt.page(page_number).draw(false);
-    }
 }
 
 function dataTableConfig($, sortOrder, table_data_page, ajax_path){
@@ -94,9 +82,10 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config.scroller = {
         loadingIndicator: true
     };
-    dt_config.scrollY = 500;
+    dt_config.scrollY = 450;
     dt_config.scrollCollapse = true;
-    dt_config.deferRender = false;
+    dt_config.deferRender = true;
+    dt_config.pageLength = 15;
 
     dt_config.serverSide = true;
     dt_config.ajax = {
@@ -167,30 +156,6 @@ function prepareTableForRequests($){
     });
 }
 
-function jumpToLastViewedPage($){
-    tableElement = $('#myTable');
-    dt = tableElement.DataTable();
-    if(dt.page.len() === -1){
-        return;
-    }
-
-    pageLength = dt.page.len();
-
-    maxIndex = dt.rows().data().length;
-    data = dt.column(viewedCheckboxColumn).data();
-    for(var i = 0; i < dt.rows().data().length; i++){
-        value = data[i];
-          if(value.indexOf('true') >= 0){
-              maxIndex = Math.min(maxIndex, i);
-              break;
-          }
-    }
-
-    // Subtract a very small amount to make sure evenly divisible pages round down
-    newPage = Math.max(0, Math.floor(maxIndex / pageLength - .00001));
-    dt.page(newPage).draw(false);
-}
-
 function ajaxCheckBox(file_id){
     var box = document.getElementsByName(file_id)[0];
     var checked = box.checked;
@@ -221,35 +186,6 @@ function ajaxCheckBox(file_id){
             alert(xhr.status + ": " + xhr.responseText);
         }
     });
-}
-
-function prepareScraperButton($){
-    scrapeBtn = document.getElementById('scraper-btn');
-    if(scrapeBtn === null){
-        return;
-    }
-    scrapeBtn.onclick = function() {
-        scrapeBtn.innerHTML = "Running";
-        $.ajax({
-            url : "/mediaviewer/ajaxrunscraper/",
-            type : "POST",
-            dataType: "json",
-            data : {
-                csrfmiddlewaretoken: csrf_token
-            },
-            success : function(json) {
-                if(json.errmsg !== ''){
-                    alert(json.errmsg);
-                } else {
-                    scrapeBtn.innerHTML = "Done";
-                }
-            },
-            error : function(xhr,errmsg,err) {
-                alert(xhr.status + ": " + xhr.responseText);
-            }
-        });
-        scrapeBtn.className = scrapeBtn.className + " disabled";
-    };
 }
 
 function openDownloadWindow(id){
@@ -379,14 +315,6 @@ function callGiveUpButton(name){
     });
 }
 
-function setSettingsRadioButtons(ip_format, local_ip, bangup_ip){
-    if(ip_format === local_ip){
-        jQuery('#local_ip').prop("checked", "checked");
-    } else if (ip_format === bangup_ip) {
-        jQuery('#bangup').prop("checked", "checked");
-    }
-}
-
 function reportButtonClick(id){
     jQuery.ajax({
     url : "/mediaviewer/ajaxreport/",
@@ -408,13 +336,6 @@ function reportButtonClick(id){
         alert(xhr.status + ": " + xhr.responseText);
     }
     });
-}
-
-function validatePassword(password){
-    var digit_regex = /\d/;
-    var char_regex = /[^0-9]/;
-    var test_string = String(password);
-    return test_string.search(digit_regex) !== -1 && test_string.search(char_regex) !== -1 && test_string.length >= 6
 }
 
 async function register_passkey(){
@@ -515,39 +436,4 @@ function scrollSetup(){
             didScroll = false;
             }
             }, 250);
-}
-
-function store_page_info(url, page_number){
-    page_info = localStorage.getItem('page_info');
-    if(page_info){
-        page_info = JSON.parse(page_info)
-        page_info[url] = {'page_number': page_number,
-                          'date': new Date()};
-    } else {
-        var page_info = {};
-        page_info[url] = {'page_number': page_number,
-                          'date': new Date()};
-    }
-    localStorage.setItem('page_info', JSON.stringify(page_info));
-}
-
-function get_page_info(url){
-    page_info = localStorage.getItem('page_info');
-    if(page_info){
-        page_info = JSON.parse(page_info);
-        if(page_info[url]){
-            data = page_info[url];
-            var day = 1000 * 60 * 60 * 24;
-            var current_date = new Date();
-            date = new Date(data.date);
-            var diff = Math.ceil((current_date.getTime()-date.getTime())/(day));
-
-            if(diff > 1){
-                return null;
-            } else {
-                return data.page_number;
-            }
-        }
-    }
-    return null;
 }

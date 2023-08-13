@@ -177,13 +177,6 @@
                                 {% endif %}
                             </tr>
                         {% endfor %}
-                        {% if loggedin and user.is_staff %}
-                            <tr>
-                                <td>
-                                    <a class='btn btn-info' name='scraper-btn' id='scraper-btn'>Run Scraper</a>
-                                </td>
-                            </tr>
-                        {% endif %}
                     </tbody>
                 </table>
 
@@ -243,7 +236,6 @@
             preparePage($);
             setHomeFormSubmit($);
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
-            prepareScraperButton($);
             scrollSetup();
             configureTooltips($);
         });

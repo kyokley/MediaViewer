@@ -79,7 +79,11 @@
         <thead>
             <tr>
                 <th class="all">File Name</th>
-                <th class="desktop">Timestamp</th>
+                <th class="desktop
+            {% if view == 'tvshows' %}
+                nosort
+            {% endif %}
+                    ">Timestamp</th>
                 {% if can_download %}
                     <th class="min-tablet-p nosort">Link</th>
                 {% endif %}
@@ -115,10 +119,6 @@
                 var sortOrder = [[0,'desc']];
             {% endif %}
             prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
-
-            {% if jump_to_last and view == 'tvshows' %}
-                jumpToLastViewedPage($);
-            {% endif %}
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();

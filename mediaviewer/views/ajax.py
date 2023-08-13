@@ -104,7 +104,7 @@ def _ajax_file_rows(request, qs):
     draw = int(request_params["draw"][0])
 
     sort_columns_map = {
-        0: "filename",
+        0: "_display_name",
         1: "datecreated",
     }
     sort_column = int(request_params["order[0][column]"][0])
@@ -232,5 +232,5 @@ def ajaxtvshowsbygenre(request, genre_id):
 @csrf_exempt
 def ajaxtvshows(request, path_id):
     refpath = get_object_or_404(Path, pk=path_id)
-    qs = File.files_by_localpath(refpath).order_by("-_display_name")
+    qs = File.files_by_localpath(refpath)
     return _ajax_file_rows(request, qs)
