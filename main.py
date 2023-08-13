@@ -14,7 +14,7 @@ async def main():
 
         # build using Dockerfile
         # publish the resulting container to a registry
-        image_ref = await context_dir.docker_build()
+        image_ref = context_dir.docker_build()
 
         # create postgres DB
         postgres = (
@@ -26,22 +26,27 @@ async def main():
             .with_exposed_port(5432)
         )
 
-        async def run_cmd(cmd):
+        async def run_cmd(cmd, run_deps=True):
             container = (
                 image_ref
                 .with_env_variable("DJANGO_SETTINGS_MODULE", "mysite.docker_settings")
                 .with_env_variable("WAITER_PASSWORD_HASH", os.environ.get("WAITER_PASSWORD_HASH", ""))
                 .with_directory("/code", context_dir)
-                .with_service_binding("postgres", postgres)
-                .with_exec(["sh", "-c", cmd])
             )
+
+            if run_deps:
+                container = container.with_service_binding("postgres", postgres)
+
+            container = container.with_exec(["sh", "-c", cmd])
             await container.stdout()
 
         # when this block exits, all tasks will be awaited (i.e., executed)
         async with anyio.create_task_group() as tg:
-            for cmd in ('/venv/bin/pytest',
-                        '/venv/bin/bandit -x ./mediaviewer/tests -r .',
-                        '/venv/bin/python manage.py makemigrations --check',):
-                tg.start_soon(run_cmd, cmd)
+            for cmd, run_deps in (
+                ('/venv/bin/pytest', True),
+                ('/venv/bin/bandit -x ./mediaviewer/tests -r .', False),
+                ('/venv/bin/python manage.py makemigrations --check', True),
+            ):
+                tg.start_soon(run_cmd, cmd, run_deps)
 
 anyio.run(main)
