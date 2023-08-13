@@ -39,9 +39,9 @@ async def main():
 
         # when this block exits, all tasks will be awaited (i.e., executed)
         async with anyio.create_task_group() as tg:
-            tg.start_soon(run_cmd, '/venv/bin/pytest -vx')
-
-    print(f"Published image to: {image_ref}")
-
+            for cmd in ('/venv/bin/pytest',
+                        '/venv/bin/bandit -x ./mediaviewer/tests -r .',
+                        '/venv/bin/python manage.py makemigrations --check',):
+                tg.start_soon(run_cmd, cmd)
 
 anyio.run(main)
