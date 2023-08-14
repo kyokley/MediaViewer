@@ -1,7 +1,7 @@
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
-from mediaviewer.models.usersettings import FILENAME_SORT
+from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
 from mediaviewer.models.message import (
     Message,
     REGULAR,
@@ -11,6 +11,7 @@ from mediaviewer.models.donation_site import DonationSite
 
 
 def setSiteWideContext(context, request, includeMessages=False):
+    context['theme'] = UserSettings.DARK
     user = request.user
     if user.is_authenticated:
         settings = user.settings()
@@ -38,6 +39,7 @@ def setSiteWideContext(context, request, includeMessages=False):
 
         context["movie_genres"] = File.get_movie_genres()
         context["tv_genres"] = Path.get_tv_genres()
+        context['theme'] = settings.theme
     else:
         context["loggedin"] = False
 

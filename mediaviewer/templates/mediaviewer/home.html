@@ -18,18 +18,23 @@
 
         {% block css %}
 
-            <link href="{% static "bootswatch/bootstrap-dark.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
 
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
+            {% if theme == 'light' %}
+                <link href="{% static "bootswatch/bootstrap-light.min.css" %}" rel="stylesheet">
+            {% else %}
+                <link href="{% static "bootswatch/bootstrap-dark.min.css" %}" rel="stylesheet">
+                <link href="{% static "assets/dark.css" %}" rel="stylesheet">
+            {% endif %}
         {% endblock %}
     </head>
 
     <body>
-        <nav id="top-navbar" class="navbar navbar-expand-md fixed-top navbar-dark bg-dark bg-body-tertiary nav-show" role="navigation" data-bs-theme="dark">
+        <nav id="top-navbar" class="navbar navbar-expand-md fixed-top navbar-{{ theme }} bg-{{ theme }} bg-body-tertiary nav-show" role="navigation" data-bs-theme="{{ theme }}">
             <div class="container-fluid">
             {% block navbar%}
                 <a class="navbar-brand" href="/mediaviewer/">MediaViewer <i class="bi-film"></i></a>
@@ -136,7 +141,7 @@
         <div class="container py-2">
         {% block main %}
             {% if loggedin %}
-                <table id="newFileTable" class="table table-dark table-striped">
+                <table id="newFileTable" class="table table-{{ theme }} table-striped">
                     <thead>
                         <tr>
                             <th>Latest Files</th>
@@ -188,7 +193,7 @@
 
 <footer>
 {% block footer %}
-    <nav id="bottom-navbar" class="navbar navbar-expand-md fixed-bottom navbar-dark bg-body-tertiary nav-show" data-bs-theme="dark">
+    <nav id="bottom-navbar" class="navbar navbar-expand-md fixed-bottom navbar-{{ theme }} bg-body-tertiary nav-show" data-bs-theme="{{ theme }}">
         <div class="container-fluid text-center">
             <div class="row justify-content-between">
                 <div class="col-5">
