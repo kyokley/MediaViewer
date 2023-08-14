@@ -32,25 +32,6 @@
             <h2 class="col">Account Settings</h2>
         </div>
         <ul>
-            <label>Default Sort Field:</label>
-            <div class="input">
-                <ul class="inputs-list">
-                    <ul>
-                        <label>
-                            <input type="radio"  checked name="default_sort" value="timestamp_sort" id="timestamp_sort"/>
-                            <span>Timestamp</span>
-                        </label>
-                    </ul>
-                    <ul>
-                        <label>
-                            <input type="radio" name="default_sort" value="filename_sort" id="filename_sort"/>
-                            <span>Filename</span>
-                        </label>
-                    </ul>
-                </ul>
-            </div>
-        </ul>
-        <ul>
             <label>Binge Watch Mode:</label>
             <div class="input">
                 <ul class="inputs-list">
@@ -63,25 +44,6 @@
                     <ul>
                         <label>
                             <input type="radio" name="binge_mode" value=false id="binge_mode_no"/>
-                            <span>No</span>
-                        </label>
-                    </ul>
-                </ul>
-            </div>
-        </ul>
-        <ul>
-            <label>Jump to Last Viewed:</label>
-            <div class="input">
-                <ul class="inputs-list">
-                    <ul>
-                        <label>
-                            <input type="radio" checked name="jump_to_last" value=true id="jump_to_last_yes"/>
-                            <span>Yes</span>
-                        </label>
-                    </ul>
-                    <ul>
-                        <label>
-                            <input type="radio" name="jump_to_last" value=false id="jump_to_last_no"/>
                             <span>No</span>
                         </label>
                     </ul>
@@ -176,22 +138,10 @@
             csrf_token = '{{ csrf_token }}';
             preparePage($);
 
-            {% if default_sort == 'filename_sort' %}
-                jQuery('#filename_sort').prop('checked', 'checked');
-            {% elif default_sort == 'timestamp_sort' %}
-                jQuery('#timestamp_sort').prop('checked', 'checked');
-            {% endif %}
-
             {% if binge_mode == True %}
                 jQuery('#binge_mode_yes').prop('checked', 'checked');
             {% else %}
                 jQuery('#binge_mode_no').prop('checked', 'checked');
-            {% endif %}
-
-            {% if jump_to_last == True %}
-                jQuery('#jump_to_last_yes').prop('checked', 'checked');
-            {% else %}
-                jQuery('#jump_to_last_no').prop('checked', 'checked');
             {% endif %}
 
             {% if selected_theme == light_theme_option %}

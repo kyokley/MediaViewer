@@ -119,7 +119,7 @@
         <div class="container py-2">
             {% block jumbotron %}
                 <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
-                <p class="col-md-8 fs-4">{{ greeting }}</p>
+                <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
             {% endblock %}
         </div>
 
