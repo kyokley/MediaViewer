@@ -31,12 +31,12 @@ EMAIL_REGEX = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
 
 class UserSettings(models.Model):
-    DARK = 'dark'
-    LIGHT = 'light'
+    DARK = "dark"
+    LIGHT = "light"
 
     THEME_CHOICES = (
-        (DARK, 'Dark'),
-        (LIGHT, 'Light'),
+        (DARK, "Dark"),
+        (LIGHT, "Light"),
     )
 
     datecreated = models.DateTimeField(db_column="datecreated", blank=True)
@@ -66,11 +66,9 @@ class UserSettings(models.Model):
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
     allow_password_logins = models.BooleanField(blank=True, null=False, default=False)
 
-    theme = models.CharField(max_length=32,
-                             blank=False,
-                             null=False,
-                             default=DARK,
-                             choices=THEME_CHOICES)
+    theme = models.CharField(
+        max_length=32, blank=False, null=False, default=DARK, choices=THEME_CHOICES
+    )
 
     class Meta:
         app_label = "mediaviewer"

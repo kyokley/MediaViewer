@@ -33,9 +33,9 @@ def settings(request):
     context["title"] = "Settings"
     context["binge_mode"] = settings.binge_mode
     context["jump_to_last"] = settings.jump_to_last_watched
-    context['light_theme_option'] = UserSettings.LIGHT
-    context['dark_theme_option'] = UserSettings.DARK
-    context['selected_theme'] = settings.theme
+    context["light_theme_option"] = UserSettings.LIGHT
+    context["dark_theme_option"] = UserSettings.DARK
+    context["selected_theme"] = settings.theme
 
     context["email"] = user.email
     if not user.email:
@@ -86,8 +86,8 @@ def submitsettings(request):
     settings.jump_to_last_watched = jump_to_last
     settings.default_sort = default_sort
     settings.theme = theme
-    context['theme'] = theme
-    request.session['theme'] = theme
+    context["theme"] = theme
+    request.session["theme"] = theme
 
     user.email = request.POST.get("email_field", user.email)
     context["default_sort"] = settings.default_sort

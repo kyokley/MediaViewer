@@ -15,8 +15,8 @@ def signout(request):
     context["loggedin"] = False
     context["title"] = "Signed out"
     setSiteWideContext(context, request)
-    context['theme'] = settings.theme
-    request.session['theme'] = context['theme']
+    context["theme"] = settings.theme
+    request.session["theme"] = context["theme"]
 
     user_logged_out.send(
         sender=User,

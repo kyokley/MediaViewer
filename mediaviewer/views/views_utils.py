@@ -11,7 +11,7 @@ from mediaviewer.models.donation_site import DonationSite
 
 
 def setSiteWideContext(context, request, includeMessages=False):
-    context['theme'] = request.session.get('theme', UserSettings.DARK)
+    context["theme"] = request.session.get("theme", UserSettings.DARK)
     user = request.user
     if user.is_authenticated:
         settings = user.settings()
@@ -39,7 +39,7 @@ def setSiteWideContext(context, request, includeMessages=False):
 
         context["movie_genres"] = File.get_movie_genres()
         context["tv_genres"] = Path.get_tv_genres()
-        context['theme'] = settings.theme
+        context["theme"] = settings.theme
     else:
         context["loggedin"] = False
 
