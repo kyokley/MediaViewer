@@ -88,6 +88,25 @@
                 </ul>
             </div>
         </ul>
+        <ul>
+            <label>Theme:</label>
+            <div class="input">
+                <ul class="inputs-list">
+                    <ul>
+                        <label>
+                            <input type="radio" checked name="theme" value="{{ light_theme_option }}" id="light_theme_option"/>
+                            <span>Light <i class="bi-sun"></i></span>
+                        </label>
+                    </ul>
+                    <ul>
+                        <label>
+                            <input type="radio" name="theme" value="{{ dark_theme_option }}" id="dark_theme_option"/>
+                            <span>Dark <i class="bi-moon-stars"></i></span>
+                        </label>
+                    </ul>
+                </ul>
+            </div>
+        </ul>
     {% if user.is_staff %}
         <div class="well well-sm">
             <h2>Sitewide Message</h2>
@@ -173,6 +192,12 @@
                 jQuery('#jump_to_last_yes').prop('checked', 'checked');
             {% else %}
                 jQuery('#jump_to_last_no').prop('checked', 'checked');
+            {% endif %}
+
+            {% if selected_theme == light_theme_option %}
+                jQuery('#light_theme_option').prop('checked', 'checked');
+            {% else %}
+                jQuery('#dark_theme_option').prop('checked', 'checked');
             {% endif %}
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');

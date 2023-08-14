@@ -108,6 +108,7 @@ def bypass_passkey(request, uidb64):
             )
             context["loggedin"] = True
             context["user"] = request.user
+
             LoginEvent.new(request.user)
             # TODO: Finish implementing signals
             user_logged_in.send(
@@ -134,6 +135,7 @@ def bypass_passkey(request, uidb64):
     setSiteWideContext(context, request)
 
     if user and user.is_authenticated and not context.get("error_message"):
+        request.session['theme'] = context['theme']
         if "next" in request.GET and request.GET["next"]:
             return HttpResponseRedirect(request.GET["next"])
         else:
@@ -219,6 +221,7 @@ def verify_token(request):
 
     setSiteWideContext(context, request)
     if user and user.is_authenticated and not context.get("error_message"):
+        request.session['theme'] = context['theme']
         settings = user.settings()
         if not user.email or settings.force_password_change:
             return HttpResponseRedirect(reverse("mediaviewer:settings"))
@@ -320,6 +323,7 @@ def legacy_signin(request):
 
     setSiteWideContext(context, request)
     if user and user.is_authenticated and not context.get("error_message"):
+        request.session['theme'] = context['theme']
         settings = user.settings()
         if not user.email or settings.force_password_change:
             return HttpResponseRedirect(reverse("mediaviewer:settings"))
