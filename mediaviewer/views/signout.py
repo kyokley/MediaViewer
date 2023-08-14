@@ -8,7 +8,7 @@ from mediaviewer.utils import logAccessInfo
 
 @logAccessInfo
 def signout(request):
-    settings = request.user.settings() if hasattr(request.user, 'settings') else None
+    settings = request.user.settings() if hasattr(request.user, "settings") else None
     logout(request)
     context = {}
     context["active_page"] = "logout"
