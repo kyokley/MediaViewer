@@ -42,6 +42,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "binge_mode",
             "donation_site",
             "download_link",
+            'theme',
         )
 
     guid = serializers.CharField(required=True, max_length=32)

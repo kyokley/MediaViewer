@@ -11,7 +11,7 @@ from mediaviewer.models.donation_site import DonationSite
 
 
 def setSiteWideContext(context, request, includeMessages=False):
-    context['theme'] = UserSettings.DARK
+    context['theme'] = request.session.get('theme', UserSettings.DARK)
     user = request.user
     if user.is_authenticated:
         settings = user.settings()

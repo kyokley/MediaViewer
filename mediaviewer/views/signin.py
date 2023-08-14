@@ -7,7 +7,12 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
-from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
+from django.contrib.auth.views import (
+    PasswordResetView as DjangoPasswordResetView,
+    PasswordResetConfirmView as DjangoPasswordResetConfirmView,
+    PasswordResetDoneView as DjangoPasswordResetDoneView,
+    INTERNAL_RESET_SESSION_TOKEN,
+)
 from django.contrib.auth.tokens import default_token_generator
 from mediaviewer.models.loginevent import LoginEvent
 from django.conf import settings as conf_settings
@@ -37,6 +42,7 @@ def get_user(uidb64):
 
 def create_token_failed(request):
     context = {}
+    setSiteWideContext(context, request)
     return render(request, "mediaviewer/passkey_create_failed.html", context)
 
 
@@ -67,6 +73,7 @@ def create_token(request, uidb64):
 
 def create_token_complete(request):
     context = {}
+    setSiteWideContext(context, request)
     return render(request, "mediaviewer/passkey_complete.html", context)
 
 
@@ -124,8 +131,9 @@ def bypass_passkey(request, uidb64):
         else:
             context["error_message"] = "Something went wrong! E103"
 
+    setSiteWideContext(context, request)
+
     if user and user.is_authenticated and not context.get("error_message"):
-        setSiteWideContext(context, request)
         if "next" in request.GET and request.GET["next"]:
             return HttpResponseRedirect(request.GET["next"])
         else:
@@ -209,9 +217,9 @@ def verify_token(request):
         else:
             context["error_message"] = "Incorrect username or password!"
 
+    setSiteWideContext(context, request)
     if user and user.is_authenticated and not context.get("error_message"):
         settings = user.settings()
-        setSiteWideContext(context, request)
         if not user.email or settings.force_password_change:
             return HttpResponseRedirect(reverse("mediaviewer:settings"))
         elif next:
@@ -310,9 +318,9 @@ def legacy_signin(request):
             else:
                 context["error_message"] = "Incorrect username or password!"
 
+    setSiteWideContext(context, request)
     if user and user.is_authenticated and not context.get("error_message"):
         settings = user.settings()
-        setSiteWideContext(context, request)
         if not user.email or settings.force_password_change:
             return HttpResponseRedirect(reverse("mediaviewer:settings"))
         elif "next" in request.POST and request.POST["next"]:
@@ -324,3 +332,22 @@ def legacy_signin(request):
                 return HttpResponseRedirect(reverse("mediaviewer:legacy-signin"))
 
     return render(request, "mediaviewer/legacy-signin.html", context)
+
+
+class ContextMixin:
+    def get(self, *args, **kwargs):
+        resp = super().get(*args, **kwargs)
+        setSiteWideContext(resp.context_data, args[0])
+        return resp
+
+
+class PasswordResetView(ContextMixin, DjangoPasswordResetView):
+    pass
+
+
+class PasswordResetConfirmView(ContextMixin, DjangoPasswordResetConfirmView):
+    pass
+
+
+class PasswordResetDoneView(ContextMixin, DjangoPasswordResetDoneView):
+    pass

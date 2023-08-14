@@ -19,11 +19,6 @@ from mediaviewer.views import (
     waiterstatus,
     ajax,
 )
-from django.contrib.auth.views import (
-    PasswordResetView,
-    PasswordResetConfirmView,
-    PasswordResetDoneView,
-)
 
 router = routers.DefaultRouter()
 
@@ -108,7 +103,7 @@ urlpatterns = [
     ),
     re_path(
         r"^user/reset/$",
-        PasswordResetView.as_view(
+        signin.PasswordResetView.as_view(
             template_name="mediaviewer/password_reset_form.html",
             email_template_name="mediaviewer/password_reset_email.html",
             subject_template_name="mediaviewer/password_reset_subject.txt",
@@ -119,21 +114,21 @@ urlpatterns = [
     ),
     re_path(
         r"^user/reset/done$",
-        PasswordResetDoneView.as_view(
+        signin.PasswordResetDoneView.as_view(
             template_name="mediaviewer/password_reset_done.html",
         ),
         name="password_reset_done",
     ),
     re_path(
         r"^user/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
-        PasswordResetConfirmView.as_view(
+        signin.PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_reset_confirm.html",
         ),
         name="password_reset_confirm",
     ),
     re_path(
         r"^user/create/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$",
-        PasswordResetConfirmView.as_view(
+        signin.PasswordResetConfirmView.as_view(
             template_name="mediaviewer/password_reset_confirm.html",
         ),
         name="password_create_confirm",
@@ -145,12 +140,12 @@ urlpatterns.extend(
         re_path(r"^login/", signin.signin, name="signin"),
         re_path(r"^legacy-login/", signin.legacy_signin, name="legacy-signin"),
         re_path(
-            rf"^bypass-passkey/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
+            rf"^bypass-passkey/(?P<uidb64>[0-9A-Za-z]+)-{signin.PasswordResetConfirmView.reset_url_token}/$",
             signin.bypass_passkey,
             name="bypass-passkey",
         ),
         re_path(
-            rf"^create-token/(?P<uidb64>[0-9A-Za-z]+)-{PasswordResetConfirmView.reset_url_token}/$",
+            rf"^create-token/(?P<uidb64>[0-9A-Za-z]+)-{signin.PasswordResetConfirmView.reset_url_token}/$",
             signin.create_token,
             name="create-token",
         ),
