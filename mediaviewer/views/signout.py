@@ -8,14 +8,15 @@ from mediaviewer.utils import logAccessInfo
 
 @logAccessInfo
 def signout(request):
-    settings = request.user.settings()
+    settings = request.user.settings() if hasattr(request.user, 'settings') else None
     logout(request)
     context = {}
     context["active_page"] = "logout"
     context["loggedin"] = False
     context["title"] = "Signed out"
     setSiteWideContext(context, request)
-    context["theme"] = settings.theme
+    if settings:
+        context["theme"] = settings.theme
     request.session["theme"] = context["theme"]
 
     user_logged_out.send(
