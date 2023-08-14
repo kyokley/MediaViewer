@@ -42,6 +42,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "binge_mode",
             "donation_site",
             "download_link",
+            "theme",
         )
 
     guid = serializers.CharField(required=True, max_length=32)
@@ -63,6 +64,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     binge_mode = serializers.SerializerMethodField()
     donation_site = serializers.SerializerMethodField()
     download_link = serializers.SerializerMethodField()
+    theme = serializers.SerializerMethodField()
 
     def get_username(self, obj):
         return obj.user.username
@@ -97,6 +99,10 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
 
     def get_download_link(self, obj):
         return obj.file.downloadLink(obj.user, obj.guid)
+
+    def get_theme(self, obj):
+        user_settings = UserSettings.getSettings(obj.user)
+        return user_settings.theme
 
 
 class PathSerializer(serializers.ModelSerializer):

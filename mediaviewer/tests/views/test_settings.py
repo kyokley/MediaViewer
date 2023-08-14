@@ -173,6 +173,9 @@ class TestSettings:
             "jump_to_last": self.settings.jump_to_last_watched,
             "email": self.user.email,
             "display_missing_email_modal": False,
+            "light_theme_option": UserSettings.LIGHT,
+            "dark_theme_option": UserSettings.DARK,
+            "selected_theme": self.settings.theme,
         }
         expected = self.mock_render.return_value
         actual = settings(self.request)
@@ -200,6 +203,9 @@ class TestSettings:
             "jump_to_last": self.settings.jump_to_last_watched,
             "email": self.user.email,
             "display_missing_email_modal": True,
+            "light_theme_option": UserSettings.LIGHT,
+            "dark_theme_option": UserSettings.DARK,
+            "selected_theme": self.settings.theme,
         }
         expected = self.mock_render.return_value
         actual = settings(self.request)
@@ -233,13 +239,15 @@ class TestSubmitSettings:
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
-        self.request.POST = {}
+        self.request.POST = {"theme": UserSettings.LIGHT}
+        self.request.session = {}
 
     def test_defaults(self):
         expected_context = {
             "successful": True,
             "active_page": "submitsettings",
             "default_sort": "test_filename_sort",
+            "theme": UserSettings.LIGHT,
         }
 
         expected = self.mock_render.return_value
@@ -260,12 +268,14 @@ class TestSubmitSettings:
             "binge_mode": "true",
             "jump_to_last": "true",
             "email_field": "test_new_email",
+            "theme": "light",
         }
 
         expected_context = {
             "successful": True,
             "active_page": "submitsettings",
             "default_sort": "test_default_sort",
+            "theme": "light",
         }
 
         expected = self.mock_render.return_value

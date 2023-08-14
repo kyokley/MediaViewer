@@ -109,7 +109,8 @@ function configureTooltips($){
         delay: 200
     };
     $(function () {
-        $('.img-preview').popover(options)
+        $('.img-preview').popover(options);
+        $('[data-bs-toggle="tooltip"]').tooltip();
     });
 }
 
