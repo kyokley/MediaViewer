@@ -60,6 +60,7 @@ class TestSetSiteWideContext:
             "is_staff": "true",
             "donation_site_name": "",
             "donation_site_url": "",
+            "theme": mock.ANY,
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
@@ -77,6 +78,7 @@ class TestSetSiteWideContext:
             "is_staff": "false",
             "donation_site_name": "",
             "donation_site_url": "",
+            "theme": mock.ANY,
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
@@ -99,6 +101,7 @@ class TestSetSiteWideContext:
             "user": self.user,
             "movie_genres": self.mock_get_movie_genres.return_value,
             "tv_genres": self.mock_get_tv_genres.return_value,
+            "theme": "dark",
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
@@ -121,6 +124,7 @@ class TestSetSiteWideContext:
             "user": self.user,
             "movie_genres": self.mock_get_movie_genres.return_value,
             "tv_genres": self.mock_get_tv_genres.return_value,
+            "theme": "dark",
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         self.mock_add_message.assert_has_calls(

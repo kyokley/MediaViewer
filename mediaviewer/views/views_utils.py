@@ -39,7 +39,8 @@ def setSiteWideContext(context, request, includeMessages=False):
 
         context["movie_genres"] = File.get_movie_genres()
         context["tv_genres"] = Path.get_tv_genres()
-        context["theme"] = settings.theme
+
+        context["theme"] = settings.theme if settings else UserSettings.DARK
     else:
         context["loggedin"] = False
 
