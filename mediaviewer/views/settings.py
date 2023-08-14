@@ -71,7 +71,7 @@ def submitsettings(request):
     else:
         jump_to_last = jump_to_last == "true"
 
-    theme = request.POST["theme"]
+    theme = request.POST.get("theme", context['theme'])
 
     user = request.user
     settings = user.settings()
