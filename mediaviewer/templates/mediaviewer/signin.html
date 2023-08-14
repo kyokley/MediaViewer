@@ -11,7 +11,7 @@
     <div class="jumbotron">
         {% if not loggedin %}
                 <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
-                <p class="col-md-8 fs-4">{{ greeting }}</p>
+                <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
         {% else %}
             <h1 class="display-5 fw-bold">Logged In!</h1>
             <h3 class="col-md-8 fs-4">You have logged in successfully</h3>
