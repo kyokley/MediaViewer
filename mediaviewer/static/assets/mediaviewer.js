@@ -97,6 +97,11 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             return json.data;
         },
     }
+
+    if(table_data_page == 'ajaxtvshows'){
+        dt_config.buttons = ['selectall'];
+        dt_config.dom = 'Bfrtip';
+    }
     return dt_config;
 }
 
