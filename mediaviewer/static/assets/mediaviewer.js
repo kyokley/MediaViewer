@@ -103,7 +103,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             {
                 text: 'Clear All Viewed',
                 action: function (e, dt, node, config) {
-                    selected_rows = $(".viewed-checkbox[checked]");
+                    selected_rows = $(".viewed-checkbox:checked");
                     file_ids = [];
                     selected_rows.each(
                         (idx, elem)=>{
@@ -117,12 +117,12 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             {
                 text: 'Mark All Viewed',
                 action: function (e, dt, node, config) {
-                    selected_rows = $(".viewed-checkbox:not([checked])");
+                    selected_rows = $(".viewed-checkbox:not(:checked)");
                     file_ids = [];
                     selected_rows.each(
                         (idx, elem)=>{
                             file_ids.push(elem.name);
-                            elem.setAttribute('checked', 'checked');
+                            elem.setAttribute('checked', 'true');
                         }
                     )
                     ajaxCheckBox(file_ids);
@@ -283,10 +283,10 @@ function prepareAjaxWaiterStatus($, is_staffer){
 
 function setFileDetailCheckboxes(viewed, hidden){
     if(viewed === 'True'){
-        jQuery('#toggle-viewed').prop('checked', 'checked');
+        jQuery('#toggle-viewed').prop('checked', 'true');
     }
     if(hidden === 'True'){
-        jQuery('#toggle-hide').prop('checked', 'checked');
+        jQuery('#toggle-hide').prop('checked', 'true');
     }
 };
 
