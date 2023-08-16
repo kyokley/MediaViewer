@@ -56,14 +56,9 @@ def filesdetail(request, file_id):
 @csrf_exempt
 @logAccessInfo
 def ajaxviewed(request):
-    fileid = int(request.POST["fileid"])
-    viewed = request.POST["viewed"] == "true" and True or False
-    file = get_object_or_404(File, pk=fileid)
-    response = {"errmsg": ""}
-
-    errmsg = ""
-
+    errmsg = None
     user = request.user
+    response = {"errmsg": ""}
     if not user.is_authenticated:
         errmsg = "User not authenticated. Refresh and try again."
 
@@ -71,10 +66,17 @@ def ajaxviewed(request):
         response["errmsg"] = errmsg
         return HttpResponse(json.dumps(response), content_type="application/javascript")
 
-    file.markFileViewed(user, viewed)
+    data = dict(request.POST)
+    data.pop('csrfmiddlewaretoken', None)
 
-    response["fileid"] = fileid
-    response["viewed"] = viewed
+    updated = []
+    for fileid, checked in data.items():
+        file = get_object_or_404(File, pk=fileid)
+        viewed = checked[0].lower() == "true" and True or False
+        file.markFileViewed(user, viewed)
+        updated.append(fileid)
+
+    response["data"] = data
 
     return HttpResponse(json.dumps(response), content_type="application/javascript")
 

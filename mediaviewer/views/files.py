@@ -64,7 +64,7 @@ def movies(request):
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        "table_data_page": "ajaxmovie",
+        "table_data_page": "ajaxmovierows",
     }
     context["active_page"] = "movies"
     context["title"] = "Movies"
@@ -85,7 +85,7 @@ def movies_by_genre(request, genre_id):
         "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        "table_data_page": "ajaxmovies",
+        "table_data_page": "ajaxmoviesbygenrerows",
         "table_data_filter_id": genre.id,
     }
     context["active_page"] = "movies"
@@ -113,7 +113,7 @@ def tvshows_by_genre(request, genre_id):
     context = {}
     context["active_page"] = "tvshows"
     context["title"] = "TV Shows: {}".format(ref_genre.genre)
-    context["table_data_page"] = "ajaxtvshows"
+    context["table_data_page"] = "ajaxtvshowsbygenre"
     context["table_data_filter_id"] = genre_id
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)

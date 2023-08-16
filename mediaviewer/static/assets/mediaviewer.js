@@ -99,8 +99,37 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     }
 
     if(table_data_page == 'ajaxtvshows'){
-        dt_config.buttons = ['selectall'];
-        dt_config.dom = 'Bfrtip';
+        dt_config.buttons = [
+            {
+                text: 'Clear All Viewed',
+                action: function (e, dt, node, config) {
+                    selected_rows = $(".viewed-checkbox[checked]");
+                    file_ids = [];
+                    selected_rows.each(
+                        (idx, elem)=>{
+                            file_ids.push(elem.name);
+                            elem.removeAttribute('checked');
+                        }
+                    )
+                    ajaxCheckBox(file_ids);
+                }
+            },
+            {
+                text: 'Mark All Viewed',
+                action: function (e, dt, node, config) {
+                    selected_rows = $(".viewed-checkbox:not([checked])");
+                    file_ids = [];
+                    selected_rows.each(
+                        (idx, elem)=>{
+                            file_ids.push(elem.name);
+                            elem.setAttribute('checked', 'checked');
+                        }
+                    )
+                    ajaxCheckBox(file_ids);
+                }
+            },
+        ];
+        dt_config.dom = 'frtip<"row justify-content-center" <"col-auto" B>>';
     }
     return dt_config;
 }
@@ -162,30 +191,39 @@ function prepareTableForRequests($){
     });
 }
 
-function ajaxCheckBox(file_id){
-    var box = document.getElementsByName(file_id)[0];
-    var checked = box.checked;
+function ajaxCheckBox(file_ids){
+    update_payload = {csrfmiddlewaretoken: csrf_token};
+
+    file_ids.forEach((val, idx)=>{
+        var box = document.getElementsByName(val)[0];
+        var checked = box.checked;
+        update_payload[val] = checked;
+        box.setAttribute('disabled', 'disabled');
+    });
 
     jQuery.ajax({
         url : "/mediaviewer/ajaxviewed/",
         type : "POST",
         dataType: "json",
-        data : {
-            fileid : file_id,
-            viewed : checked,
-            csrfmiddlewaretoken: csrf_token
-        },
+        data : update_payload,
         success : function(json) {
             if(json.errmsg !== ''){
                 alert(json.errmsg);
             } else {
-                var res = jQuery('#saved-' + json.fileid);
-                var savedField = res[0];
-                savedField.innerText = "Saved";
-                res.fadeOut(2000, function() {
-                    savedField.innerText = "";
-                    res.show(0);
-                });
+                for(let file_id in json.data){
+                    viewed = Boolean(json.data[file_id][0]);
+
+                    var res = jQuery('#saved-' + file_id);
+                    var savedField = res[0];
+                    savedField.setAttribute('style', '');
+                    savedField.innerText = "Saved";
+                    res.fadeOut(2000, function() {
+                        savedField.innerText = "";
+                        res.show(0);
+                    });
+                    var box = document.getElementsByName(file_id)[0];
+                    box.removeAttribute('disabled');
+                };
             }
         },
         error : function(xhr,errmsg,err) {
