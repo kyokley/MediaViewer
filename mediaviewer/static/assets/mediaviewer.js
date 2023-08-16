@@ -104,11 +104,13 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
                 text: 'Clear All Viewed',
                 action: function (e, dt, node, config) {
                     selected_rows = $(".viewed-checkbox:checked");
+
                     file_ids = [];
                     selected_rows.each(
                         (idx, elem)=>{
                             file_ids.push(elem.name);
                             elem.removeAttribute('checked');
+                            elem.checked = false;
                         }
                     )
                     ajaxCheckBox(file_ids);
@@ -123,6 +125,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
                         (idx, elem)=>{
                             file_ids.push(elem.name);
                             elem.setAttribute('checked', 'true');
+                            elem.checked = true;
                         }
                     )
                     ajaxCheckBox(file_ids);

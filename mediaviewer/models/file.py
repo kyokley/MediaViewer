@@ -513,11 +513,12 @@ class File(models.Model):
             else:
                 payload.append("Alfred is down")
 
+        cell = """<div class="row text-center">"""
         if viewed_lookup.get(self.id, False):
-            cell = f"""<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
         else:
-            cell = f"""<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
-        cell = f'{cell}<span id="saved-{ self.id }"></span>'
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
+        cell = f'{cell}<span id="saved-{ self.id }"></span></div>'
         payload.extend(
             [
                 cell,
