@@ -281,14 +281,6 @@ function prepareAjaxWaiterStatus($, is_staffer){
     });
 }
 
-function setFileDetailCheckboxes(viewed, hidden){
-    if(viewed === 'True'){
-        jQuery('#toggle-viewed').prop('checked', 'true');
-    }
-    if(hidden === 'True'){
-        jQuery('#toggle-hide').prop('checked', 'true');
-    }
-};
 
 function callAjaxVote(name){
     jQuery.ajax({
