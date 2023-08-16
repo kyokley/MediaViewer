@@ -103,31 +103,31 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             {
                 text: 'Clear All Viewed',
                 action: function (e, dt, node, config) {
-                    selected_rows = $(".viewed-checkbox:checked");
-
+                    selected_rows = $(".viewed-checkbox:checked").get();
                     file_ids = [];
-                    selected_rows.each(
-                        (idx, elem)=>{
-                            file_ids.push(elem.name);
-                            elem.removeAttribute('checked');
-                            elem.checked = false;
-                        }
-                    )
+
+                    for(var i = 0; i < selected_rows.length; i++){
+                        elem = selected_rows[i];
+                        file_ids.push(elem.name);
+                        elem.removeAttribute('checked');
+                        elem.checked = false;
+                    }
+
                     ajaxCheckBox(file_ids);
                 }
             },
             {
                 text: 'Mark All Viewed',
                 action: function (e, dt, node, config) {
-                    selected_rows = $(".viewed-checkbox:not(:checked)");
+                    selected_rows = $(".viewed-checkbox:not(:checked)").get();
                     file_ids = [];
-                    selected_rows.each(
-                        (idx, elem)=>{
-                            file_ids.push(elem.name);
-                            elem.setAttribute('checked', 'true');
-                            elem.checked = true;
-                        }
-                    )
+
+                    for(var i = 0; i < selected_rows.length; i++){
+                        elem = selected_rows[i];
+                        file_ids.push(elem.name);
+                        elem.setAttribute('checked', 'true');
+                        elem.checked = true;
+                    }
                     ajaxCheckBox(file_ids);
                 }
             },
@@ -213,20 +213,34 @@ function ajaxCheckBox(file_ids){
             if(json.errmsg !== ''){
                 alert(json.errmsg);
             } else {
+                selectors = []
+
                 for(let file_id in json.data){
                     viewed = Boolean(json.data[file_id][0]);
 
-                    var res = jQuery('#saved-' + file_id);
-                    var savedField = res[0];
-                    savedField.setAttribute('style', '');
-                    savedField.innerText = "Saved";
-                    res.fadeOut(2000, function() {
-                        savedField.innerText = "";
-                        res.show(0);
-                    });
+                    selectors.push('#saved-' + file_id);
+
                     var box = document.getElementsByName(file_id)[0];
                     box.removeAttribute('disabled');
-                };
+                }
+
+                var selector_str = '';
+                for(var i = 0; i < selectors.length; i++){
+                    if(i == selectors.length - 1){
+                        selector_str += selectors[i];
+                    } else {
+                        selector_str += selectors[i] + ',';
+                    }
+                }
+
+                savedFields = $(selector_str);
+                savedFields.html("Saved");
+
+                savedFields.attr('style', '');
+                savedFields.fadeOut(2000, function() {
+                    savedFields.html("");
+                    savedFields.attr('style', 'display: none;');
+                });
             }
         },
         error : function(xhr,errmsg,err) {
