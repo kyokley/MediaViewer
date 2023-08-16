@@ -8,6 +8,7 @@ from mediaviewer.models.usersettings import (
     LOCAL_IP,
     BANGUP_IP,
 )
+from mediaviewer.models.usercomment import UserComment
 from mediaviewer.utils import logAccessInfo, humansize
 from django.shortcuts import render, get_object_or_404, redirect
 import json
@@ -56,14 +57,9 @@ def filesdetail(request, file_id):
 @csrf_exempt
 @logAccessInfo
 def ajaxviewed(request):
-    fileid = int(request.POST["fileid"])
-    viewed = request.POST["viewed"] == "true" and True or False
-    file = get_object_or_404(File, pk=fileid)
-    response = {"errmsg": ""}
-
-    errmsg = ""
-
+    errmsg = None
     user = request.user
+    response = {"errmsg": ""}
     if not user.is_authenticated:
         errmsg = "User not authenticated. Refresh and try again."
 
@@ -71,10 +67,37 @@ def ajaxviewed(request):
         response["errmsg"] = errmsg
         return HttpResponse(json.dumps(response), content_type="application/javascript")
 
-    file.markFileViewed(user, viewed)
+    data = dict(request.POST)
+    data.pop("csrfmiddlewaretoken", None)
 
-    response["fileid"] = fileid
-    response["viewed"] = viewed
+    updated = []
+    updated_comments = []
+    created_comments = []
+
+    qs = File.objects.filter(pk__in=data.keys())
+    uc_qs = UserComment.objects.filter(user=user).filter(file__in=qs)
+    uc_lookup = {uc.file: uc for uc in uc_qs}
+
+    for file in qs:
+        checked = data[str(file.pk)]
+        viewed = checked[0].lower() == "true" and True or False
+        comment, was_created = file.markFileViewed(
+            user, viewed, save=False, uc_lookup=uc_lookup
+        )
+        if was_created:
+            created_comments.append(comment)
+        else:
+            updated_comments.append(comment)
+
+        updated.append(str(file.pk))
+
+    if created_comments:
+        UserComment.objects.bulk_create(created_comments)
+
+    if updated_comments:
+        UserComment.objects.bulk_update(updated_comments, ["viewed", "dateedited"])
+
+    response["data"] = data
 
     return HttpResponse(json.dumps(response), content_type="application/javascript")
 

@@ -228,22 +228,34 @@ class File(models.Model):
         usercomment = UserComment.objects.filter(file=self).filter(user=user).first()
         return usercomment
 
-    def markFileViewed(self, user, viewed):
-        usercomment = self.usercomment(user)
+    def markFileViewed(self, user, viewed, save=True, uc_lookup=None):
+        was_created = False
+
+        if uc_lookup is None:
+            usercomment = self.usercomment(user)
+        else:
+            usercomment = uc_lookup.get(self)
+
         if usercomment:
             usercomment.viewed = viewed
+            was_created = False
         else:
             usercomment = UserComment()
             usercomment.file = self
             usercomment.user = user
             usercomment.viewed = viewed
             usercomment.datecreated = dateObj.utcnow().replace(tzinfo=utc)
+            was_created = True
 
         usercomment.dateedited = dateObj.utcnow().replace(tzinfo=utc)
-        usercomment.save()
 
-        if not self.next():
-            Message.clearLastWatchedMessage(user)
+        if save:
+            usercomment.save()
+
+            if not self.next():
+                Message.clearLastWatchedMessage(user)
+
+        return usercomment, was_created
 
     def __str__(self):
         return f"id: {self.id} f: {self.fileName}"
@@ -513,11 +525,12 @@ class File(models.Model):
             else:
                 payload.append("Alfred is down")
 
+        cell = """<div class="row text-center">"""
         if viewed_lookup.get(self.id, False):
-            cell = f"""<span class="hidden" name="hidden-{ self.id }"></span><input name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox('{self.id}')" />"""
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
         else:
-            cell = f"""<span class="hidden" name="hidden-{ self.id }"></span><input name="{ self.id }" type="checkbox" onclick="ajaxCheckBox('{self.id}')" />"""
-        cell = f'{cell}<span id="saved-{ self.id }"></span>'
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
+        cell = f'{cell}<span id="saved-{ self.id }"></span></div>'
         payload.extend(
             [
                 cell,
