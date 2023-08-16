@@ -81,7 +81,9 @@ def ajaxviewed(request):
     for file in qs:
         checked = data[str(file.pk)]
         viewed = checked[0].lower() == "true" and True or False
-        comment, was_created = file.markFileViewed(user, viewed, save=False, uc_lookup=uc_lookup)
+        comment, was_created = file.markFileViewed(
+            user, viewed, save=False, uc_lookup=uc_lookup
+        )
         if was_created:
             created_comments.append(comment)
         else:
@@ -93,7 +95,7 @@ def ajaxviewed(request):
         UserComment.objects.bulk_create(created_comments)
 
     if updated_comments:
-        UserComment.objects.bulk_update(updated_comments, ['viewed', 'dateedited'])
+        UserComment.objects.bulk_update(updated_comments, ["viewed", "dateedited"])
 
     response["data"] = data
 
