@@ -67,7 +67,7 @@ def ajaxviewed(request):
         return HttpResponse(json.dumps(response), content_type="application/javascript")
 
     data = dict(request.POST)
-    data.pop('csrfmiddlewaretoken', None)
+    data.pop("csrfmiddlewaretoken", None)
 
     updated = []
     for fileid, checked in data.items():
