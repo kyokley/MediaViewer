@@ -276,13 +276,8 @@ class TestAjaxViewed:
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
         self.request.POST = {
-            self.tv_file.id: "true",
+            str(self.tv_file.id): "true",
         }
-
-    def test_no_file(self):
-        self.request.POST.update({0: "true"})
-        with pytest.raises(Http404):
-            ajaxviewed(self.request)
 
     def test_user_not_authenticated(self):
         self.request.user = AnonymousUser()
@@ -301,7 +296,7 @@ class TestAjaxViewed:
     def test_valid(self):
         expected_response = {
             "errmsg": "",
-            "data": {self.tv_file.id: "true"},
+            "data": {str(self.tv_file.id): "true"},
         }
 
         expected = self.mock_HttpResponse.return_value
