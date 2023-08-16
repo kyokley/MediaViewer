@@ -77,9 +77,12 @@ body{
     margin-top: 5px;
     margin-bottom: 10px;
 }
-#toggle-viewed{
-    height: 30px;
-    width: 30px;
+
+.viewed-checkbox {
+    margin-right: 5px;
+    margin-top: 5px;
+    height: 25px;
+    width: 25px;
 }
 
 #id_email{
@@ -151,8 +154,4 @@ tbody > tr > td > a:hover, nav > ol > li > a:hover {
     overflow-y: scroll;
     max-height: 200px;
     overscroll-behavior: none;
-}
-
-.viewed-checkbox {
-    margin-right: 5px;
 }
