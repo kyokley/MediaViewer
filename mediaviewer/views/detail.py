@@ -8,6 +8,7 @@ from mediaviewer.models.usersettings import (
     LOCAL_IP,
     BANGUP_IP,
 )
+from mediaviewer.models.message import Message
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.utils import logAccessInfo, humansize
 from django.shortcuts import render, get_object_or_404, redirect
@@ -96,6 +97,9 @@ def ajaxviewed(request):
 
     if updated_comments:
         UserComment.objects.bulk_update(updated_comments, ["viewed", "dateedited"])
+
+    if created_comments or updated_comments:
+        Message.clearLastWatchedMessage(user)
 
     response["data"] = data
 

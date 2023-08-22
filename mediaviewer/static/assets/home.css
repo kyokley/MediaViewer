@@ -2,17 +2,6 @@ body{
     padding-top: 75px;
     padding-bottom: 100px;
 }
-@media (min-width: 980px) {
-      body {
-              padding-top: 75px;
-    }
-}
-
-@media (max-width: 768px) {
-      body {
-              padding-top: 75px;
-    }
-}
 
 #top-navbar.nav-hide {
   top: -100px;
@@ -145,6 +134,10 @@ tbody > tr > td > a:hover, nav > ol > li > a:hover {
 
 .navbar-text a:hover {
     text-decoration: underline;
+}
+
+.nav-link.dropdown-item {
+    padding-left: 10px;
 }
 
 .dropdown-menu {

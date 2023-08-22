@@ -2,15 +2,8 @@
 <!DOCTYPE html>
 {% load static %}
 
-{% include title %}
-
-{% include css %}
-
-{% include navbar %}
-
-<!-- Main component for a primary marketing message or call to action -->
 {% block jumbotron %}
-        <nav aria-label="breadcrumb">
+    <nav aria-label="breadcrumb">
         {% if view == 'files' %}
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
@@ -68,11 +61,8 @@
                 </div>
             </div>
         {% endif %}
-        </nav>
-    </div>
+    </nav>
 {% endblock %}
-
-{% include messages %}
 
 {% block main %}
     <table id="myTable" class="table table-{{ theme }} table-striped table-hover">
@@ -95,10 +85,6 @@
         </tbody>
     </table>
 {% endblock %}
-
-{% include footer %}
-
-{% include javascript_include %}
 
 {% block javascript %}
     <script type="text/javascript">

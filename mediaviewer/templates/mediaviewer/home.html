@@ -55,54 +55,58 @@
                             </li>
 
                             <li class="nav-item dropdown">
-                            {% if active_page == 'movies' %}
-                                <a class="nav-link active dropdown-toggle" href="/mediaviewer/movies/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
-                            {% else %}
-                                <a class="nav-link dropdown-toggle" href="/mediaviewer/movies/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
-                            {% endif %}
+                                {% if active_page == 'movies' %}
+                                    <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                                {% else %}
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                                {% endif %}
 
-                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <a class="nav-link dropdown-item" href="/mediaviewer/movies/">All</a>
-                                    {% for genre in movie_genres %}
-                                        <a class="nav-link dropdown-item" href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a>
-                                    {% endfor %}
-                            </div>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="nav-link dropdown-item" href="/mediaviewer/movies/">All</a>
+                                        {% for genre in movie_genres %}
+                                            <a class="nav-link dropdown-item" href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a>
+                                        {% endfor %}
+                                </div>
                             </li>
 
                             <li class="nav-item dropdown">
-                            {% if active_page == 'tvshows' %}
-                                <a class="nav-link active dropdown-toggle" href="/mediaviewer/tvshows/summary/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
-                            {% else %}
-                                <a class="nav-link dropdown-toggle" href="/mediaviewer/tvshows/summary/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
-                            {% endif %}
+                                {% if active_page == 'tvshows' %}
+                                    <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+                                {% else %}
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+                                {% endif %}
 
-                            <div class="dropdown-menu">
-                                <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/summary/">All</a>
-                                {% for genre in tv_genres %}
-                                    <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/genre/{{genre.id}}/">{{genre.genre}}</a>
-                                {% endfor %}
-                            </div>
+                                <div class="dropdown-menu">
+                                    <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/summary/">All</a>
+                                    {% for genre in tv_genres %}
+                                        <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/genre/{{genre.id}}/">{{genre.genre}}</a>
+                                    {% endfor %}
+                                </div>
                             </li>
 
                             <li class="nav-item">
-                            {% if active_page == 'requests' %}
-                                <a class="nav-link active" href="/mediaviewer/requests/">Requests</a></li>
-                            {% else %}
-                                <a class="nav-link" href="/mediaviewer/requests/">Requests</a></li>
-                            {% endif %}
+                                {% if active_page == 'requests' %}
+                                    <a class="nav-link active" href="/mediaviewer/requests/">Requests</a>
+                                {% else %}
+                                    <a class="nav-link" href="/mediaviewer/requests/">Requests</a>
+                                {% endif %}
+                            </li>
 
                             <li class="nav-item">
-                            {% if active_page == 'settings' %}
-                                <a class="nav-link active" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
-                            {% else %}
-                                <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
-                            {% endif %}
+                                {% if active_page == 'settings' %}
+                                    <a class="nav-link active" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                                {% else %}
+                                    <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                                {% endif %}
+                            </li>
 
-                            {% if loggedin %}
-                                <li class="navbar-right"><a class="nav-link" href="/mediaviewer/logout/">Log out</a></li>
-                            {% else %}
-                                <li class="navbar-right"><a class="nav-link" href="/mediaviewer/login/">Log In</a></li>
-                            {% endif %}
+                            <li class="navbar-right">
+                                {% if loggedin %}
+                                    <a class="nav-link" href="/mediaviewer/logout/">Log out</a>
+                                {% else %}
+                                    <a class="nav-link" href="/mediaviewer/login/">Log In</a>
+                                {% endif %}
+                            </li>
                         </ul>
                         {% if loggedin %}
                             <span class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/">{{ user.username }}</a></span>
@@ -124,7 +128,7 @@
             {% endblock %}
         </div>
 
-            {% block messages %}
+        {% block messages %}
             <div class="container py-2">
                 {% for message in messages %}
                     <div class="alert alert-{% if 'success' in message.tags %}success{% elif 'info' in message.tags %}info{% elif 'danger' in message.tags %}danger{% elif 'warning' in message.tags %}warning{% elif 'debug' in message.tags %}debug{% endif %} alert-dismissible fade show" id="alert-{{ message.extra_tags }}" role="alert">
