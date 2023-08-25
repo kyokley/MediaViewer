@@ -56,7 +56,7 @@ stop-all-but-db: ## Bring all containers down except postgres
 	docker-compose up -d postgres
 
 down: ## Bring all containers down
-	docker-compose down
+	docker-compose down --remove-orphans
 
 static: ## Install static files
 	yarn install

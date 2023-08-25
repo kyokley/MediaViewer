@@ -2,6 +2,8 @@ services:
   playwright:
     image: kyokley/playwright
     hostname: playwright
+    environment:
+      - DJANGO_SETTINGS_MODULE=mysite.docker_settings
     build:
       context: .
       target: playwright
