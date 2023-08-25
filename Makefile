@@ -30,6 +30,9 @@ shell: ## Open a shell in a mediaviewer container
 db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
+e2e-shell:
+	docker-compose -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash
+
 pytest: build-dev up ## Run tests
 	docker-compose run --rm mediaviewer /venv/bin/pytest
 
