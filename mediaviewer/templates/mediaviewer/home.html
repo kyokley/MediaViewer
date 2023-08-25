@@ -61,7 +61,7 @@
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
                                 {% endif %}
 
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <div class="dropdown-menu slide-in" aria-labelledby="navbarDropdown">
                                     <a class="nav-link dropdown-item" href="/mediaviewer/movies/">All</a>
                                         {% for genre in movie_genres %}
                                             <a class="nav-link dropdown-item" href="/mediaviewer/movies/genre/{{genre.id}}/">{{genre.genre}}</a>
@@ -76,7 +76,7 @@
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
                                 {% endif %}
 
-                                <div class="dropdown-menu">
+                                <div class="dropdown-menu slide-in">
                                     <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/summary/">All</a>
                                     {% for genre in tv_genres %}
                                         <a class="nav-link dropdown-item" href="/mediaviewer/tvshows/genre/{{genre.id}}/">{{genre.genre}}</a>
