@@ -12,6 +12,10 @@ build: ## Build prod-like container
 build-dev: ## Build dev container
 	docker build --tag=kyokley/mediaviewer --target=dev .
 
+build-playwright: build-dev
+	docker-compose -f docker-compose.yml -f docker-compose.playwright.yml build playwright
+
+
 up: ## Bring up containers and daemonize
 	docker-compose up -d
 
@@ -30,8 +34,11 @@ shell: ## Open a shell in a mediaviewer container
 db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
-e2e-shell:
+e2e-shell: build-playwright
 	docker-compose -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash
+
+test-e2e: build-playwright
+	docker-compose -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash -c "echo 'Waiting for MediaViewer to start up...' && sleep 10 && pytest mediaviewer/tests/e2e"
 
 pytest: build-dev up ## Run tests
 	docker-compose run --rm mediaviewer /venv/bin/pytest

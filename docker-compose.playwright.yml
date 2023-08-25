@@ -1,7 +1,13 @@
 services:
   playwright:
-    image: mcr.microsoft.com/playwright/python:v1.37.0-jammy
+    image: kyokley/playwright
+    hostname: playwright
+    build:
+      context: .
+      target: playwright
     depends_on:
-      - "mediaviewer"
+      - mediaviewer
     volumes:
       - .:/code
+    networks:
+      - mediaviewer-backend
