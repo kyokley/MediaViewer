@@ -1,11 +1,12 @@
 import re
+import pytest
 from playwright.sync_api import Page, expect
 
 
 URL = 'http://mediaviewer:8000/mediaviewer/'
 
 
-def test_homepage_has_Playwright_in_title_and_get_started_link_linking_to_the_intro_page(page: Page):
+def test_home_not_logged_in(page: Page):
     page.goto(URL)
 
     # Expect a title "to contain" a substring.
@@ -22,3 +23,12 @@ def test_homepage_has_Playwright_in_title_and_get_started_link_linking_to_the_in
 
     # Expects the URL to contain intro.
     expect(page).to_have_url(re.compile(".*/mediaviewer/login/"))
+
+
+class TestLogin:
+    @pytest.fixture(autouse=True)
+    def setUp(self, page):
+        self.page = page
+
+    def test_login(self):
+        pass

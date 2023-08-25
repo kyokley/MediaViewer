@@ -10,8 +10,6 @@ from mediaviewer.utils import (
     query_param_to_bool,
 )
 
-from mediaviewer.tests import helpers
-
 SOMEWHAT_UNIQUE_TEST_ATTEMPTS = 100
 
 
@@ -77,13 +75,13 @@ class TestHumanSize:
 @pytest.mark.django_db
 class TestSendMail:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, create_user, mocker):
         self.mock_SMTP = mocker.patch("mediaviewer.utils.smtplib.SMTP")
 
         self.mock_MIMEMultipart = mocker.patch("mediaviewer.utils.MIMEMultipart")
 
-        self.staff_user = helpers.create_user(is_staff=True)
-        self.normal_user = helpers.create_user(username="normal_user", email="b@c.com")
+        self.staff_user = create_user(is_staff=True)
+        self.normal_user = create_user(username="normal_user", email="b@c.com")
 
         self.to_addr = "test@example.com"
 

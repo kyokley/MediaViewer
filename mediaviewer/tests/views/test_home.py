@@ -11,13 +11,11 @@ from mediaviewer.views.home import (
     ajaxrunscraper,
 )
 
-from mediaviewer.tests.helpers import create_user
-
 
 @pytest.mark.django_db
 class TestHome:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, create_user, mocker):
         self.mock_most_recent_files = mocker.patch(
             "mediaviewer.views.home.File.most_recent_files"
         )
@@ -86,7 +84,7 @@ class TestHome:
 @pytest.mark.django_db
 class TestAjaxRunScraper:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, create_user, mocker):
         self.mock_inferAllScrapers = mocker.patch(
             "mediaviewer.views.home.File.inferAllScrapers"
         )

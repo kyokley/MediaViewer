@@ -1,5 +1,6 @@
 import mock
 import pytz
+import pytest
 
 from django.test import TestCase
 from django.http import HttpRequest
@@ -10,30 +11,21 @@ from mediaviewer.models.genre import Genre
 
 from mediaviewer.views.ajax import ajaxvideoprogress, ajaxgenres
 
-from mediaviewer.tests.helpers import create_user
-
 from datetime import datetime, timedelta
 
 
-class TestAjaxVideoProgress(TestCase):
-    def setUp(self):
-        rewind_patcher = mock.patch("mediaviewer.views.ajax.REWIND_THRESHOLD", 10)
-        rewind_patcher.start()
-        self.addCleanup(rewind_patcher.stop)
+class TestAjaxVideoProgress:
+    @pytest.fixture(autouse=True)
+    def setUp(self, mocker):
+        mocker.patch("mediaviewer.views.ajax.REWIND_THRESHOLD", 10)
 
-        dt_patcher = mock.patch("mediaviewer.views.ajax.DownloadToken")
-        self.mock_downloadTokenClass = dt_patcher.start()
-        self.addCleanup(dt_patcher.stop)
+        self.mock_downloadTokenClass = mocker.patch("mediaviewer.views.ajax.DownloadToken")
 
-        json_patcher = mock.patch("mediaviewer.views.ajax.json")
-        self.mock_jsonClass = json_patcher.start()
-        self.addCleanup(json_patcher.stop)
+        self.mock_jsonClass = mocker.patch("mediaviewer.views.ajax.json")
         self.fake_json_data = "json_data"
         self.mock_jsonClass.dumps.return_value = self.fake_json_data
 
-        vp_patcher = mock.patch("mediaviewer.views.ajax.VideoProgress")
-        self.mock_vpClass = vp_patcher.start()
-        self.addCleanup(vp_patcher.stop)
+        self.mock_vpClass = mocker.patch("mediaviewer.views.ajax.VideoProgress")
         self.vp = mock.create_autospec(VideoProgress)
         self.date_edited = datetime.now(pytz.timezone("utc"))
         self.vp.offset = 345.123
@@ -41,9 +33,7 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_vpClass.get.return_value = self.vp
         self.mock_vpClass.createOrUpdate.return_value = self.vp
 
-        http_response_patcher = mock.patch("mediaviewer.views.ajax.HttpResponse")
-        self.mock_httpResponseClass = http_response_patcher.start()
-        self.addCleanup(http_response_patcher.stop)
+        self.mock_httpResponseClass = mocker.patch("mediaviewer.views.ajax.HttpResponse")
         self.fake_httpresponse = "fake_httpresponse"
         self.mock_httpResponseClass.return_value = self.fake_httpresponse
 
@@ -184,28 +174,18 @@ class TestAjaxVideoProgress(TestCase):
 
 
 class TestAjaxGenres(TestCase):
-    def setUp(self):
-        getByGUID_patcher = mock.patch("mediaviewer.views.ajax.DownloadToken.getByGUID")
-        self.mock_getByGUID = getByGUID_patcher.start()
-        self.addCleanup(getByGUID_patcher.stop)
+    def setUp(self, create_user, mocker):
+        self.mock_getByGUID = mocker.patch("mediaviewer.views.ajax.DownloadToken.getByGUID")
 
-        get_movie_genres_patcher = mock.patch(
+        self.mock_get_movie_genres = mocker.patch(
             "mediaviewer.views.ajax.File.get_movie_genres"
         )
-        self.mock_get_movie_genres = get_movie_genres_patcher.start()
-        self.addCleanup(get_movie_genres_patcher.stop)
 
-        get_tv_genres_patcher = mock.patch("mediaviewer.views.ajax.Path.get_tv_genres")
-        self.mock_get_tv_genres = get_tv_genres_patcher.start()
-        self.addCleanup(get_tv_genres_patcher.stop)
+        self.mock_get_tv_genres = mocker.patch("mediaviewer.views.ajax.Path.get_tv_genres")
 
-        dumps_patcher = mock.patch("mediaviewer.views.ajax.json.dumps")
-        self.mock_dumps = dumps_patcher.start()
-        self.addCleanup(dumps_patcher.stop)
+        self.mock_dumps = mocker.patch("mediaviewer.views.ajax.json.dumps")
 
-        HttpResponse_patcher = mock.patch("mediaviewer.views.ajax.HttpResponse")
-        self.mock_HttpResponse = HttpResponse_patcher.start()
-        self.addCleanup(HttpResponse_patcher.stop)
+        self.mock_HttpResponse = mocker.patch("mediaviewer.views.ajax.HttpResponse")
 
         self.user = create_user()
 

@@ -1,7 +1,6 @@
 import mock
 import pytest
 
-from mediaviewer.tests import helpers
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
@@ -11,7 +10,7 @@ from django.conf import settings
 @pytest.mark.django_db
 class TestDownloadToken:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, create_user, mocker):
         self.mock_save = mocker.patch(
             "mediaviewer.models.downloadtoken.DownloadToken.save"
         )
@@ -24,7 +23,7 @@ class TestDownloadToken:
             "mediaviewer.models.downloadtoken.Message.createLastWatchedMessage"
         )
 
-        self.user = helpers.create_user()
+        self.user = create_user()
 
         self.path = Path.objects.create(
             localpathstr="/path/to/file",
