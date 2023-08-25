@@ -3,3 +3,5 @@ services:
     image: mcr.microsoft.com/playwright/python:v1.37.0-jammy
     depends_on:
       - "mediaviewer"
+    volumes:
+      - .:/code
