@@ -1,12 +1,8 @@
+from mediaviewer.core import TimeStampModel
 from django.db import models
 
 
-class Media(models.Model):
-    date_created = models.DateTimeField(
-        blank=True, auto_now_add=True
-    )
-    date_edited = models.DateTimeField(blank=True, auto_now=True)
-
+class Media(TimeStampModel):
     name = models.CharField(null=False,
                             blank=False,
                             max_length=256)
@@ -31,3 +27,9 @@ class Media(models.Model):
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return f'<{self.__class__.__name__} n:{self.name} f:{self.finished}>'
+
+    def __repr__(self):
+        return str(self)

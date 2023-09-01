@@ -2,18 +2,14 @@
 Re-implementation of PosterFile
 """
 from django.db import models
+from mediaviewer.core import TimeStampModel
 # from mediaviewer.models.genre import Genre
 # from mediaviewer.models.actor import Actor
 # from mediaviewer.models.writer import Writer
 # from mediaviewer.models.director import Director
 
 
-class Poster(models.Model):
-    datecreated = models.DateTimeField(
-        db_column="datecreated", blank=True, auto_now_add=True
-    )
-    dateedited = models.DateTimeField(db_column="dateedited", blank=True, auto_now=True)
-
+class Poster(TimeStampModel):
     plot = models.TextField(blank=True, null=False, default='')
     extendedplot = models.TextField(blank=True, null=False, default='')
     genres = models.ManyToManyField("mediaviewer.Genre", blank=True)
