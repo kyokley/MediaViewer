@@ -4,14 +4,14 @@ from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
 
-from mediaviewer.tests import helpers
 from mediaviewer.utils import getSomewhatUniqueID
 
 
 class BaseVPTest:
-    def setUp(self):
-        self.user = helpers.create_user(random=True)
-        self.user2 = helpers.create_user(random=True)
+    @pytest.fixture(autouse=True)
+    def _setUp(self, create_user):
+        self.user = create_user(random=True)
+        self.user2 = create_user(random=True)
 
         self.path = Path.objects.create(
             localpathstr="local_path", remotepathstr="remote_path", is_movie=False
@@ -38,8 +38,6 @@ class TestDestroy(BaseVPTest):
         self.mock_clearLastWatchedMessage = mocker.patch(
             "mediaviewer.models.videoprogress.Message.clearLastWatchedMessage"
         )
-
-        super().setUp()
 
     def test_no_videoprogress(self):
         expected = None
@@ -70,10 +68,6 @@ class TestDestroy(BaseVPTest):
 
 @pytest.mark.django_db
 class TestCreateOrUpdate(BaseVPTest):
-    @pytest.fixture(autouse=True)
-    def setUp(self):
-        super().setUp()
-
     def test_new_file_vp(self):
         vp = VideoProgress.createOrUpdate(
             self.user, self.filename2, self.hashed_filename2, 100, self.file2
@@ -95,10 +89,6 @@ class TestCreateOrUpdate(BaseVPTest):
 
 @pytest.mark.django_db
 class TestGet(BaseVPTest):
-    @pytest.fixture(autouse=True)
-    def setUp(self):
-        super().setUp()
-
     def test_no_matching_vp(self):
         vp = VideoProgress.get(self.user, self.hashed_filename2)
         assert vp is None
@@ -114,10 +104,6 @@ class TestGet(BaseVPTest):
 
 @pytest.mark.django_db
 class TestNew(BaseVPTest):
-    @pytest.fixture(autouse=True)
-    def setUp(self):
-        super().setUp()
-
     def test_new(self):
         test_filename = getSomewhatUniqueID()
         hashed_filename = getSomewhatUniqueID()

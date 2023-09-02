@@ -72,3 +72,32 @@ CMD uwsgi --ini /code/uwsgi/uwsi.conf
 # ********************* Begin Dev Image ******************
 FROM base AS dev
 RUN $POETRY_VENV/bin/poetry install
+
+
+# ********************* Begin Playwright Image ******************
+FROM mcr.microsoft.com/playwright/python:v1.37.0-jammy AS playwright
+RUN apt-get update && apt-get install -y \
+        python3-venv \
+        python3-dev \
+        gnupg \
+        g++ \
+        git \
+        apt-transport-https \
+        ncurses-dev \
+        libpq-dev
+
+ENV POETRY_VENV=/poetry_venv
+RUN python3 -m venv $POETRY_VENV
+
+ENV VIRTUAL_ENV=/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+WORKDIR /code
+
+COPY ./pdbrc.py /root/.pdbrc.py
+COPY poetry.lock pyproject.toml /code/
+
+RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install
+
+RUN $VIRTUAL_ENV/bin/pip install playwright
