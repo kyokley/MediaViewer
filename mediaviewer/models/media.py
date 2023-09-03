@@ -1,5 +1,20 @@
 from mediaviewer.core import TimeStampModel
 from django.db import models
+from mediaviewer.utils import get_search_query
+
+
+class MediaQuerySet(models.QuerySet):
+    def search(self, search_str):
+        qs = self
+        if search_str:
+            filename_query = get_search_query(search_str, ["name"])
+
+            qs = qs.filter(filename_query)
+        return qs
+
+
+class MediaManager(models.Manager):
+    pass
 
 
 class Media(TimeStampModel):
