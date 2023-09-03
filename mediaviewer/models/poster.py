@@ -22,14 +22,14 @@ from mediaviewer.models.tvdbconfiguration import (
 from django.conf import settings
 
 
-def _getDataFromIMDBByID(imdb_id, is_movie=True):
-    log.debug(f"Getting data from IMDB using {imdb_id}")
+def _get_data_from_imdb(media):
+    log.debug(f"Getting data from IMDB using {media.imdb}")
 
-    url = f"https://api.themoviedb.org/3/find/{imdb_id}?api_key={settings.API_KEY}&external_source=imdb_id"
+    url = f"https://api.themoviedb.org/3/find/{media.imdb}?api_key={settings.API_KEY}&external_source=media.imdb"
     resp = getJSONData(url)
 
     if resp:
-        if not is_movie:
+        if not media.is_movie():
             if resp.get("tv_results"):
                 tmdb_id = resp.get("tv_results")[0]["id"]
             elif resp.get("tv_episode_results"):
@@ -47,6 +47,27 @@ def _getDataFromIMDBByID(imdb_id, is_movie=True):
         else:
             return None
         return data
+
+
+def _getDataFromIMDBBySearchString(searchString, is_movie=True):
+    log.debug(f"Getting data from IMDB using {searchString}")
+
+    if not is_movie:
+        url = f"https://api.themoviedb.org/3/search/tv?query={searchString}&api_key={settings.API_KEY}"  # noqa
+    else:
+        url = f"https://api.themoviedb.org/3/search/movie?query={searchString}&api_key={settings.API_KEY}"  # noqa
+
+    data = getJSONData(url)
+    data = (
+        data["results"][0]
+        if data and data.get("results") and data.get("results")[0]
+        else None
+    )
+    if data:
+        data["url"] = url
+    else:
+        return None
+    return data
 
 
 class Poster(TimeStampModel):
@@ -88,15 +109,10 @@ class Poster(TimeStampModel):
     def _getIMDBData(self):
         log.debug("Attempt to get data from IMDB")
 
-        if self.media.is_movie():
-            data = getDataFromIMDB(self.media)
-        elif self.path:
-            data = getDataFromIMDBByPath(self.media)
-        else:
-            data = getDataFromIMDB(self.media)
+        data = _get_data_from_imdb(self.media)
 
         if data:
-            self.tmdb_id = data["id"]
+            self.tmdb = data["id"]
 
             self.poster_url = data.get("Poster") or data.get("poster_path")
             self._cast_and_crew()
