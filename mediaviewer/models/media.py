@@ -48,3 +48,9 @@ class Media(TimeStampModel):
 
     def __repr__(self):
         return str(self)
+
+    def is_movie(self):
+        return not self.is_tv()
+
+    def is_tv(self):
+        raise NotImplementedError('This method must be defined by subclasses')

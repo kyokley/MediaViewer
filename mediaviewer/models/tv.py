@@ -17,3 +17,6 @@ class TV(Media):
                             max_length=64)
 
     objects = TVManager.from_queryset(TVQuerySet)()
+
+    def is_tv(self):
+        return True

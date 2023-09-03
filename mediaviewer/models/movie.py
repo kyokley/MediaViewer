@@ -11,3 +11,6 @@ class MovieManager(MediaManager):
 
 class Movie(Media):
     objects = MovieManager.from_queryset(MovieQuerySet)()
+
+    def is_tv(self):
+        return False
