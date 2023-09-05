@@ -12,10 +12,10 @@ class Media(TimeStampModel):
                                blank=True)
     finished = models.BooleanField(null=False,
                                    default=False)
-    default_search = models.CharField(null=False,
-                                      default='',
-                                      blank=True,
-                                      max_length=256)
+    search_terms = models.CharField(null=False,
+                                    default='',
+                                    blank=True,
+                                    max_length=256)
     override_display_name = models.CharField(null=False,
                                              default='',
                                              blank=True,
