@@ -1,5 +1,25 @@
 from mediaviewer.core import TimeStampModel
 from django.db import models
+from mediaviewer.utils import get_search_query
+from mediaviewer.poster import Poster
+
+
+class MediaQuerySet(models.QuerySet):
+    def search(self, search_str):
+        qs = self
+        if search_str:
+            filename_query = get_search_query(search_str, ["name"])
+
+            qs = qs.filter(filename_query)
+        return qs
+
+    def delete(self, *args, **kwargs):
+        Poster.objects.filter(pk__in=self.values('poster')).delete()
+        return super().delete(*args, **kwargs)
+
+
+class MediaManager(models.Manager):
+    pass
 
 
 class Media(TimeStampModel):
@@ -33,3 +53,21 @@ class Media(TimeStampModel):
 
     def __repr__(self):
         return str(self)
+
+    def is_movie(self):
+        return not self.is_tv()
+
+    def is_tv(self):
+        raise NotImplementedError('This method must be defined by subclasses')
+
+    def delete(self, *args, **kwargs):
+        if self.poster:
+            self.poster.delete()
+        return super().delete(*args, **kwargs)
+
+    @property
+    def display_name(self):
+        if self.override_display_name:
+            return self.override_display_name
+        else:
+            return self.name

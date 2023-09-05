@@ -1,5 +1,16 @@
-from mediaviewer.media import Media
+from mediaviewer.media import Media, MediaManager, MediaQuerySet
+
+
+class MovieQuerySet(MediaQuerySet):
+    pass
+
+
+class MovieManager(MediaManager):
+    pass
 
 
 class Movie(Media):
-    pass
+    objects = MovieManager.from_queryset(MovieQuerySet)()
+
+    def is_tv(self):
+        return False
