@@ -1,6 +1,8 @@
 """
 Re-implementation of PosterFile
 """
+from io import BytesIO
+import requests
 from django.db import models
 from mediaviewer.core import TimeStampModel
 from mediaviewer.log import log
@@ -11,11 +13,11 @@ from mediaviewer.models.director import Director
 from mediaviewer.models.tvdbconfiguration import (
     getDataFromIMDB,
     getDataFromIMDBByPath,
-    saveImageToDisk,
     tvdbConfig,
     getTVDBEpisodeInfo,
     getJSONData,
 )
+from django.core.files.images import ImageFile
 from django.conf import settings
 
 
@@ -171,16 +173,41 @@ class Poster(TimeStampModel):
 
         data = _get_data_from_imdb(self.media)
 
-        if data:
-            self.tmdb = data["id"]
+        if not data:
+            return None
 
-            self.poster_url = data.get("Poster") or data.get("poster_path")
-            self._cast_and_crew()
-            self._store_extended_info()
-            self._store_plot(data)
-            self._store_genres(data)
-            self._store_rated(data)
-            self._assign_tvdb_info()
+        self.tmdb = data["id"]
+
+        self._cast_and_crew()
+        self._store_extended_info()
+        self._store_plot(data)
+        self._store_genres(data)
+        self._store_rated(data)
+        self._assign_tvdb_info()
+
+        poster_url = data.get("Poster") or data.get("poster_path")
+        poster_name = poster_url.rpartition("/")[-1] if poster_url else None
+
+        if poster_name:
+            r = requests.get(
+                "{url}{poster_size}{path}".format(
+                    url=tvdbConfig.url, poster_size=tvdbConfig.poster_size, path=poster_url
+                ),
+                stream=True,
+                timeout=settings.REQUEST_TIMEOUT,
+            )
+            r.raise_for_status()
+
+            io = BytesIO()
+
+            if r.status_code == 200:
+                for chunk in r.iter_content(1024):
+                    io.write(chunk)
+
+                io.seek(0)
+
+                image = ImageFile(io, name=poster_name)
+                self.image = image
 
         return data
 
