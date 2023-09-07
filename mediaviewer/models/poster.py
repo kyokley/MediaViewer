@@ -12,7 +12,6 @@ from mediaviewer.models.tvdbconfiguration import (
     getDataFromIMDB,
     getDataFromIMDBByPath,
     saveImageToDisk,
-    searchTVDBByName,
     tvdbConfig,
     getTVDBEpisodeInfo,
     getJSONData,
@@ -68,6 +67,19 @@ def _getDataFromIMDBBySearchString(searchString, is_movie=True):
     return data
 
 
+def _search_TVDB_by_name(name):
+    if not tvdbConfig.connected:
+        return {}
+
+    name = name.replace("&", "%26")
+    name = name.replace(",", "%2C")
+    name = name.replace("+", "%2B")
+
+    url = (
+        f"https://api.themoviedb.org/3/search/tv?query={name}&api_key={settings.API_KEY}")
+    return getJSONData(url)
+
+
 def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     log.debug("Getting data from TVDb using %s" % (tmdb_id,))
 
@@ -109,12 +121,11 @@ def _get_extended_info(tmdb_id, is_movie=True):
 
 class PosterManager(models.Manager):
     def create_from_media(self, media):
-        poster = self.__model__()
-
-        data = _get_data_from_imdb(media)
-
-        poster.save()
-        return poster
+        new_poster = self.__model__()
+        new_poster._media = media
+        new_poster._populate_data()
+        new_poster.save()
+        return new_poster
 
 
 class Poster(TimeStampModel):
@@ -155,7 +166,7 @@ class Poster(TimeStampModel):
     def display_directors(self):
         return ", ".join([x.name for x in self.directors.all()])
 
-    def _get_imdb_data(self):
+    def _populate_data(self):
         log.debug("Attempt to get data from IMDB")
 
         data = _get_data_from_imdb(self.media)
@@ -169,7 +180,7 @@ class Poster(TimeStampModel):
             self._store_plot(data)
             self._store_genres(data)
             self._store_rated(data)
-        self._assign_tvdb_info()
+            self._assign_tvdb_info()
 
         return data
 
@@ -178,32 +189,35 @@ class Poster(TimeStampModel):
             return
 
         # Having season and episode implies that we must be a tv file
-        if self.ref_obj.path and not self.ref_obj.path.tvdb_id:
+        if not self.media.tvdb:
             log.debug("No tvdb id for this path. " "Continue search by tv show name")
-            tvinfo = searchTVDBByName(self.ref_obj.searchString())
+            tvinfo = _search_TVDB_by_name(self.media.display_name)
 
             try:
                 tvdb_id = tvinfo["results"][0]["id"] if tvinfo else None
             except Exception as e:
                 log.error(
-                    "Got bad response during searchTVDBByName: {}".format(
-                        self.ref_obj.searchString()
-                    )
-                )
+                    f"Got bad response during _search_TVDB_by_name: {self.media.display_name}")
                 log.error(e)
                 tvdb_id = None
 
             if tvdb_id:
                 log.debug("Set tvdb id for this path to {}".format(tvdb_id))
-                self.ref_obj.path.tvdb_id = tvdb_id
-                self.ref_obj.path.save()
-        elif self.ref_obj.path:
-            tvdb_id = self.ref_obj.path.tvdb_id
+                self.media.tvdb = tvdb_id
+                self.media.save()
         else:
             tvdb_id = None
 
         if tvdb_id:
             self._tvdb_episode_info(tvdb_id)
+
+    def _tvdb_episode_info(self, tvdb_id):
+        tvinfo = getTVDBEpisodeInfo(tvdb_id, self.season, self.episode)
+
+        if tvinfo:
+            self.poster_url = tvinfo.get("still_path") or self.poster_url
+            self.extendedplot = tvinfo.get("overview", "")
+            self.episodename = tvinfo.get("name")
 
     def _store_plot(self, imdb_data):
         plot = (
