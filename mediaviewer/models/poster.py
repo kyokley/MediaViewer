@@ -122,9 +122,9 @@ def _get_extended_info(tmdb_id, is_movie=True):
 
 
 class PosterManager(models.Manager):
-    def create_from_media(self, media):
+    def create_from_ref_obj(self, ref_obj):
         new_poster = self.__model__()
-        new_poster._media = media
+        new_poster._ref_obj = ref_obj
         new_poster._populate_data()
         new_poster.save()
         return new_poster
@@ -153,8 +153,14 @@ class Poster(TimeStampModel):
         return self._media
 
     @property
+    def ref_obj(self):
+        if not getattr(self, '_ref_obj', None):
+            self._ref_obj = self.media_file or self.tv or self.movie
+        return self._ref_obj
+
+    @property
     def name(self):
-        return self.media.name
+        return self.ref_obj.name
 
     def display_genres(self):
         return ", ".join([x.genre for x in self.genres.all()])
@@ -171,7 +177,7 @@ class Poster(TimeStampModel):
     def _populate_data(self):
         log.debug("Attempt to get data from IMDB")
 
-        data = _get_data_from_imdb(self.media)
+        data = _get_data_from_imdb(self.ref_obj)
 
         if not data:
             return None
@@ -212,26 +218,26 @@ class Poster(TimeStampModel):
         return data
 
     def _assign_tvdb_info(self):
-        if self.media.is_movie() or not self.media.season or not self.media.episode:
+        if self.ref_obj.is_movie() or self.ref_obj.season is None or self.ref_obj.episode is None:
             return
 
         # Having season and episode implies that we must be a tv file
-        if not self.media.tvdb:
+        if not self.ref_obj.tvdb:
             log.debug("No tvdb id for this path. " "Continue search by tv show name")
-            tvinfo = _search_TVDB_by_name(self.media.display_name)
+            tvinfo = _search_TVDB_by_name(self.ref_obj.display_name)
 
             try:
                 tvdb_id = tvinfo["results"][0]["id"] if tvinfo else None
             except Exception as e:
                 log.error(
-                    f"Got bad response during _search_TVDB_by_name: {self.media.display_name}")
+                    f"Got bad response during _search_TVDB_by_name: {self.ref_obj.display_name}")
                 log.error(e)
                 tvdb_id = None
 
             if tvdb_id:
                 log.debug("Set tvdb id for this path to {}".format(tvdb_id))
-                self.media.tvdb = tvdb_id
-                self.media.save()
+                self.ref_obj.tvdb = tvdb_id
+                self.ref_obj.save()
         else:
             tvdb_id = None
 
@@ -257,7 +263,7 @@ class Poster(TimeStampModel):
         self.plot = plot if plot and plot != "undefined" else None
 
     def _store_extended_info(self):
-        extended_info = _get_extended_info(self.tmdb, is_movie=self.media.is_movie())
+        extended_info = _get_extended_info(self.tmdb, is_movie=self.ref_obj.is_movie())
 
         self._store_rating(extended_info)
         self._store_tagline(extended_info)
@@ -297,7 +303,7 @@ class Poster(TimeStampModel):
             self.tmdb,
             season=self.season,
             episode=self.episode,
-            is_movie=self.media.is_movie(),
+            is_movie=self.ref_obj.is_movie(),
         )
 
         if cast_and_crew:

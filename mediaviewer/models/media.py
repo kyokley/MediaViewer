@@ -26,10 +26,6 @@ class Media(TimeStampModel):
     name = models.CharField(null=False,
                             blank=False,
                             max_length=256)
-    poster = models.ForeignKey('mediaviewer.Poster',
-                               null=True,
-                               on_delete=models.SET_NULL,
-                               blank=True)
     finished = models.BooleanField(null=False,
                                    default=False)
     search_terms = models.CharField(null=False,

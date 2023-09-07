@@ -1,6 +1,17 @@
 import re
 from django.db import models
 from mediaviewer.core import TimeStampModel
+from mediaviewer.poster import Poster
+
+
+class MediaFileQuerySet(models.QuerySet):
+    def delete(self, *args, **kwargs):
+        Poster.objects.filter(pk__in=self.values('poster')).delete()
+        return super().delete(*args, **kwargs)
+
+
+class MediaFileManager(models.Manager):
+    pass
 
 
 class MediaFile(TimeStampModel):
@@ -21,20 +32,35 @@ class MediaFile(TimeStampModel):
         'mediaviewer.FilenameScrapeFormat',
         null=True,
         on_delete=models.SET_NULL)
-    poster = models.ForeignKey(
+    poster = models.OneToOneField(
         'mediaviewer.Poster',
         null=True,
-        on_delete=models.SET_NULL)
+        on_delete=models.SET_NULL,
+        blank=True,
+    )
     skip = models.BooleanField(null=False,
                                blank=True,
                                default=False)
     size = models.BigIntegerField(null=True, blank=True)
+
+    objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
     def __str__(self):
         return f'<{self.__class__.__name__} f:{self.filename} s:{self.season} e:{self.episode}>'
 
     def __repr__(self):
         return str(self)
+
+    def _get_tvdb(self):
+        return self.media_path.tv.tvdb if self.media_path.tv else None
+
+    def _set_tvdb(self, val):
+        if not self.media_path.tv:
+            raise ValueError(f'{self} is not a TV media file')
+
+        self.media_path.tv.tvdb = val
+
+    tvdb = property(fget=_get_tvdb, fset=_set_tvdb)
 
     @property
     def media(self):
@@ -43,7 +69,7 @@ class MediaFile(TimeStampModel):
         return self._media
 
     def is_tv(self):
-        return bool(self.tv)
+        return bool(self.media_path.tv)
 
     def is_movie(self):
         return not self.is_tv()
@@ -53,6 +79,13 @@ class MediaFile(TimeStampModel):
             return self.override_display_name
         else:
             return self.media.display_name
+
+    @property
+    def name(self):
+        if self.season is not None and self.episode is not None:
+            return f'{self.display_name} S{self.season} E{self.episode}'
+        else:
+            return f'{self.display_name}'
 
     @property
     def season(self):

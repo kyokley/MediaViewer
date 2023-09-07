@@ -31,3 +31,7 @@ class MediaPath(TimeStampModel):
             return Path(self._path)
         else:
             return None
+
+    @property
+    def media(self):
+        return self.tv or self.movie
