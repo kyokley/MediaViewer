@@ -11,8 +11,6 @@ from mediaviewer.models.actor import Actor
 from mediaviewer.models.writer import Writer
 from mediaviewer.models.director import Director
 from mediaviewer.models.tvdbconfiguration import (
-    getDataFromIMDB,
-    getDataFromIMDBByPath,
     tvdbConfig,
     getTVDBEpisodeInfo,
     getJSONData,
