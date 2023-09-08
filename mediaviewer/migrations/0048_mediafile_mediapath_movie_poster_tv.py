@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('date_edited', models.DateTimeField(auto_now=True)),
-                ('_path', models.CharField(blank=True, max_length=100)),
+                ('_path', models.CharField(blank=True, max_length=256)),
                 ('skip', models.BooleanField(blank=True, default=False)),
                 ('movie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.movie')),
                 ('tv', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.tv')),
