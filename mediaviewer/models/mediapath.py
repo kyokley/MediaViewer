@@ -1,6 +1,6 @@
 from pathlib import Path
 from django.db import models
-from mediaviewer.core import TimeStampModel
+from .core import TimeStampModel
 
 
 class MediaPath(TimeStampModel):

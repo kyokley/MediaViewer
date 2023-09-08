@@ -1,7 +1,7 @@
 import re
 from django.db import models
-from mediaviewer.core import TimeStampModel
-from mediaviewer.poster import Poster
+from .core import TimeStampModel
+from .poster import Poster
 
 
 class MediaFileQuerySet(models.QuerySet):
@@ -27,7 +27,7 @@ class MediaFile(TimeStampModel):
     override_season = models.PositiveSmallIntegerField(
         null=True, blank=True)
     override_episode = models.PositiveSmallIntegerField(
-        nul=True, blank=True)
+        null=True, blank=True)
     scraper = models.ForeignKey(
         'mediaviewer.FilenameScrapeFormat',
         null=True,

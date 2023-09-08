@@ -4,13 +4,13 @@ Re-implementation of PosterFile
 from io import BytesIO
 import requests
 from django.db import models
-from mediaviewer.core import TimeStampModel
+from .core import TimeStampModel
 from mediaviewer.log import log
-from mediaviewer.models.genre import Genre
-from mediaviewer.models.actor import Actor
-from mediaviewer.models.writer import Writer
-from mediaviewer.models.director import Director
-from mediaviewer.models.tvdbconfiguration import (
+from .genre import Genre
+from .actor import Actor
+from .writer import Writer
+from .director import Director
+from .tvdbconfiguration import (
     tvdbConfig,
     getTVDBEpisodeInfo,
     getJSONData,

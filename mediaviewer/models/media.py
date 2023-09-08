@@ -1,7 +1,7 @@
-from mediaviewer.core import TimeStampModel
+from .core import TimeStampModel
 from django.db import models
 from mediaviewer.utils import get_search_query
-from mediaviewer.poster import Poster
+from .poster import Poster
 
 
 class MediaQuerySet(models.QuerySet):

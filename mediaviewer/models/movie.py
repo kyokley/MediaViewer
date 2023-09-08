@@ -1,5 +1,5 @@
 from django.db import models
-from mediaviewer.media import Media, MediaManager, MediaQuerySet
+from .media import Media, MediaManager, MediaQuerySet
 
 
 class MovieQuerySet(MediaQuerySet):

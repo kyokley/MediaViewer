@@ -159,8 +159,6 @@ INSTALLED_APPS = (
     "widget_tweaks",
     "rest_framework",
     "mediaviewer",
-    "mediaviewer.models",
-    "mediaviewer.views",
 )
 
 AUTHENTICATION_BACKENDS = [
