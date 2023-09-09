@@ -163,6 +163,7 @@ class TVAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
     )
+    list_filter = ("finished",)
 
 
 @admin.register(Movie)
@@ -176,6 +177,7 @@ class MovieAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
     )
+    list_filter = ("finished",)
 
 
 @admin.register(MediaPath)
@@ -183,10 +185,14 @@ class MediaPathAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'path',
+        'tv',
+        'movie',
+        'skip',
     )
     search_fields = (
-        "path",
+        '_path',
     )
+    list_filter = ("skip",)
 
 
 @admin.register(MediaFile)
@@ -194,10 +200,14 @@ class MediaFileAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'filename',
+        'override_display_name',
+        'media_path',
+        'hide',
     )
     search_fields = (
         "filename",
     )
+    list_filter = ("hide",)
 
 
 admin.site.site_url = "/mediaviewer"
