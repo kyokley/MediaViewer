@@ -68,6 +68,36 @@ def file_short_name(obj):
     )
 
 
+def file_season(obj):
+    if obj.override_season:
+        return obj.override_season
+    else:
+        if not obj.filenamescrapeformat:
+            return None
+
+        seasonRegex = re.compile(obj.filenamescrapeformat.seasonRegex).findall(
+            obj.filename
+        )
+        season = seasonRegex and seasonRegex[0] or None
+    scraped_season = season and (season.isdigit() and season.zfill(2) or None) or None
+    return int(scraped_season) if scraped_season else None
+
+
+def file_episode(obj):
+    if obj.override_episode:
+        return obj.override_episode
+    else:
+        if not obj.filenamescrapeformat:
+            return None
+
+        episodeRegex = re.compile(obj.filenamescrapeformat.episodeRegex).findall(
+            obj.filename
+        )
+        episode = episodeRegex and episodeRegex[0] or None
+    scraped_episode = episode and (episode.isdigit() and episode.zfill(2) or None) or None
+    return int(scraped_episode) if scraped_episode else None
+
+
 def forward(apps, schema_editor):
     TV = apps.get_model('mediaviewer', 'TV')
     Movie = apps.get_model('mediaviewer', 'Movie')
@@ -94,8 +124,8 @@ def forward(apps, schema_editor):
             MediaFile.objects.create(media_path=mp,
                                      filename=file.filename,
                                      display_name=file._display_name,
-                                     season=int(file.override_season) if file.override_season is not None and file.override_season != '' else None,
-                                     episode=int(file.override_episode) if file.override_episode is not None and file.override_episode != '' else None,
+                                     season=file_season(file),
+                                     episode=file_episode(file),
                                      scraper=file.filenamescrapeformat,
                                      hide=file.hide,
                                      size=file.size,

@@ -189,7 +189,7 @@ class MovieAdmin(admin.ModelAdmin):
     inlines = [MediaPathInline]
 
 
-class MediaFileInline(admin.StackedInline):
+class MediaFileInline(admin.TabularInline):
     model = MediaFile
     show_change_link = True
     ordering = ('season', 'episode')
