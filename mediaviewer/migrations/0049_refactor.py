@@ -85,9 +85,10 @@ def forward(apps, schema_editor):
                                                               tvdb=path.tvdb_id or '',
                                                               )
                                                 )
-        mp = MediaPath.objects.create(_path=path.localpathstr,
-                                      skip=path.skip,
-                                      tv=obj)
+        mp, created = MediaPath.objects.get_or_create(_path=path.localpathstr,
+                                                      defaults=dict(tv=obj))
+        if path.skip:
+            mp.skip = True
 
         for file in path.file_set.all():
             MediaFile.objects.create(media_path=mp,

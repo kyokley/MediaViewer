@@ -151,6 +151,12 @@ class SiteGreetingAdmin(admin.ModelAdmin):
     ordering = ("-id",)
 
 
+class MediaPathInline(admin.TabularInline):
+    model = MediaPath
+    readonly_fields = ['tv', 'movie']
+    show_change_link = True
+
+
 @admin.register(TV)
 class TVAdmin(admin.ModelAdmin):
     list_display = (
@@ -164,6 +170,7 @@ class TVAdmin(admin.ModelAdmin):
         "name",
     )
     list_filter = ("finished",)
+    inlines = [MediaPathInline]
 
 
 @admin.register(Movie)
@@ -178,6 +185,13 @@ class MovieAdmin(admin.ModelAdmin):
         "name",
     )
     list_filter = ("finished",)
+    inlines = [MediaPathInline]
+
+
+class MediaFileInline(admin.StackedInline):
+    model = MediaFile
+    show_change_link = True
+    ordering = ('override_season', 'override_episode')
 
 
 @admin.register(MediaPath)
@@ -193,6 +207,7 @@ class MediaPathAdmin(admin.ModelAdmin):
         '_path',
     )
     list_filter = ("skip",)
+    inlines = [MediaFileInline]
 
 
 @admin.register(MediaFile)
