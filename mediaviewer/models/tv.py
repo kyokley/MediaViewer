@@ -23,5 +23,8 @@ class TV(Media):
 
     objects = TVManager.from_queryset(TVQuerySet)()
 
+    class Meta:
+        verbose_name_plural = "TV"
+
     def is_tv(self):
         return True

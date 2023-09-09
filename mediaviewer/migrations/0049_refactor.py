@@ -107,7 +107,6 @@ def forward(apps, schema_editor):
         movie = Movie.objects.create(name=file_short_name(movie_file),
                                      finished=movie_file.finished,
                                      imdb=imdb,
-                                     hide=movie_file.hide,
                                      )
 
         path = Pathlib(movie_file.path.localpathstr) / movie_file.filename

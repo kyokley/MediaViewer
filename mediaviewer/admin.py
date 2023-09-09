@@ -1,15 +1,16 @@
 from django.contrib import admin
-from mediaviewer.models.genre import Genre
-from mediaviewer.models.path import Path
-from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.file import File
-from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.request import Request
-from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.donation_site import DonationSite
-from mediaviewer.models.videoprogress import VideoProgress
-from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.models import Genre
+from mediaviewer.models import Path
+from mediaviewer.models import FilenameScrapeFormat
+from mediaviewer.models import UserSettings
+from mediaviewer.models import File
+from mediaviewer.models import PosterFile
+from mediaviewer.models import Request
+from mediaviewer.models import DownloadToken
+from mediaviewer.models import DonationSite
+from mediaviewer.models import VideoProgress
+from mediaviewer.models import SiteGreeting
+from mediaviewer.models import TV, Movie, MediaFile, MediaPath
 
 
 @admin.register(Path)
@@ -148,6 +149,55 @@ class GenreAdmin(admin.ModelAdmin):
 @admin.register(SiteGreeting)
 class SiteGreetingAdmin(admin.ModelAdmin):
     ordering = ("-id",)
+
+
+@admin.register(TV)
+class TVAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'finished',
+        'imdb',
+        'tvdb',
+    )
+    search_fields = (
+        "name",
+    )
+
+
+@admin.register(Movie)
+class MovieAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'finished',
+        'imdb',
+    )
+    search_fields = (
+        "name",
+    )
+
+
+@admin.register(MediaPath)
+class MediaPathAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'path',
+    )
+    search_fields = (
+        "path",
+    )
+
+
+@admin.register(MediaFile)
+class MediaFileAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'filename',
+    )
+    search_fields = (
+        "filename",
+    )
 
 
 admin.site.site_url = "/mediaviewer"

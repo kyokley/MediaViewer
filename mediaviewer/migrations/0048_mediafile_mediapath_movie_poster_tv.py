@@ -47,7 +47,6 @@ class Migration(migrations.Migration):
                 ('imdb', models.CharField(blank=True, default='', max_length=64)),
                 ('tvdb', models.CharField(blank=True, default='', max_length=64)),
                 ('poster', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tv', to='mediaviewer.poster')),
-                ('hide', models.BooleanField(blank=True, default=False)),
             ],
             options={
                 'abstract': False,
@@ -65,7 +64,6 @@ class Migration(migrations.Migration):
                 ('override_display_name', models.CharField(blank=True, default='', max_length=256)),
                 ('imdb', models.CharField(blank=True, default='', max_length=64)),
                 ('poster', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='movie', to='mediaviewer.poster')),
-                ('hide', models.BooleanField(blank=True, default=False)),
             ],
             options={
                 'abstract': False,
