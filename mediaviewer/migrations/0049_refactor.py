@@ -96,7 +96,7 @@ def forward(apps, schema_editor):
                                      override_season=int(file.override_season) if file.override_season is not None and file.override_season != '' else None,
                                      override_episode=int(file.override_episode) if file.override_episode is not None and file.override_episode != '' else None,
                                      scraper=file.filenamescrapeformat,
-                                     skip=file.skip,
+                                     hide=file.hide,
                                      size=file.size,
                                      )
 
@@ -107,18 +107,19 @@ def forward(apps, schema_editor):
         movie = Movie.objects.create(name=file_short_name(movie_file),
                                      finished=movie_file.finished,
                                      imdb=imdb,
+                                     hide=movie_file.hide,
                                      )
 
         path = Pathlib(movie_file.path.localpathstr) / movie_file.filename
         mp = MediaPath.objects.create(_path=str(path),
-                                      skip=movie_file.skip,
+                                      skip=movie_file.hide,
                                       movie=movie)
 
         MediaFile.objects.create(media_path=mp,
                                  filename=movie_file.filename,
                                  override_display_name=movie_file.override_filename,
                                  scraper=movie_file.filenamescrapeformat,
-                                 skip=movie_file.skip,
+                                 hide=movie_file.hide,
                                  size=movie_file.size,
                                  )
 

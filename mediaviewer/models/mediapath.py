@@ -6,7 +6,7 @@ from .core import TimeStampModel
 class MediaPath(TimeStampModel):
     _path = models.CharField(null=False,
                              blank=True,
-                             max_length=100)
+                             max_length=256)
     skip = models.BooleanField(null=False,
                                blank=True,
                                default=False)

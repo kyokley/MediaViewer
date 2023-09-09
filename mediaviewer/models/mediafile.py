@@ -38,7 +38,7 @@ class MediaFile(TimeStampModel):
         on_delete=models.SET_NULL,
         blank=True,
     )
-    skip = models.BooleanField(null=False,
+    hide = models.BooleanField(null=False,
                                blank=True,
                                default=False)
     size = models.BigIntegerField(null=True, blank=True)
