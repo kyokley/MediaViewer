@@ -155,6 +155,7 @@ class MediaPathInline(admin.TabularInline):
     model = MediaPath
     readonly_fields = ['tv', 'movie']
     show_change_link = True
+    extra = 0
 
 
 @admin.register(TV)
@@ -191,7 +192,8 @@ class MovieAdmin(admin.ModelAdmin):
 class MediaFileInline(admin.StackedInline):
     model = MediaFile
     show_change_link = True
-    ordering = ('override_season', 'override_episode')
+    ordering = ('season', 'episode')
+    extra = 0
 
 
 @admin.register(MediaPath)
@@ -215,7 +217,7 @@ class MediaFileAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'filename',
-        'override_display_name',
+        'display_name',
         'media_path',
         'hide',
     )

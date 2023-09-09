@@ -20,13 +20,13 @@ class MediaFile(TimeStampModel):
                                    on_delete=models.CASCADE)
     filename = models.CharField(null=False,
                                 max_length=256)
-    override_display_name = models.CharField(null=False,
+    display_name = models.CharField(null=False,
                                          blank=True,
                                          default='',
                                          max_length=256)
-    override_season = models.PositiveSmallIntegerField(
+    season = models.PositiveSmallIntegerField(
         null=True, blank=True)
-    override_episode = models.PositiveSmallIntegerField(
+    episode = models.PositiveSmallIntegerField(
         null=True, blank=True)
     scraper = models.ForeignKey(
         'mediaviewer.FilenameScrapeFormat',
@@ -74,12 +74,6 @@ class MediaFile(TimeStampModel):
     def is_movie(self):
         return not self.is_tv()
 
-    def display_name(self):
-        if self.override_display_name:
-            return self.override_display_name
-        else:
-            return self.media.display_name
-
     @property
     def name(self):
         if self.season is not None and self.episode is not None:
@@ -88,7 +82,7 @@ class MediaFile(TimeStampModel):
             return f'{self.display_name}'
 
     @property
-    def season(self):
+    def _season(self):
         if self.is_movie():
             return None
 
@@ -112,7 +106,7 @@ class MediaFile(TimeStampModel):
         return season and (season.isdigit() and season.zfill(2) or None) or None
 
     @property
-    def episode(self):
+    def _episode(self):
         if self.is_movie():
             return None
 

@@ -32,10 +32,6 @@ class Media(TimeStampModel):
                                     default='',
                                     blank=True,
                                     max_length=256)
-    override_display_name = models.CharField(null=False,
-                                             default='',
-                                             blank=True,
-                                             max_length=256)
     imdb = models.CharField(null=False,
                             default='',
                             blank=True,
@@ -60,10 +56,3 @@ class Media(TimeStampModel):
         if self.poster:
             self.poster.delete()
         return super().delete(*args, **kwargs)
-
-    @property
-    def display_name(self):
-        if self.override_display_name:
-            return self.override_display_name
-        else:
-            return self.name

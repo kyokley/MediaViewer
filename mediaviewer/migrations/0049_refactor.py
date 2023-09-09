@@ -93,9 +93,9 @@ def forward(apps, schema_editor):
         for file in path.file_set.all():
             MediaFile.objects.create(media_path=mp,
                                      filename=file.filename,
-                                     override_display_name=file.override_filename,
-                                     override_season=int(file.override_season) if file.override_season is not None and file.override_season != '' else None,
-                                     override_episode=int(file.override_episode) if file.override_episode is not None and file.override_episode != '' else None,
+                                     display_name=file._display_name,
+                                     season=int(file.override_season) if file.override_season is not None and file.override_season != '' else None,
+                                     episode=int(file.override_episode) if file.override_episode is not None and file.override_episode != '' else None,
                                      scraper=file.filenamescrapeformat,
                                      hide=file.hide,
                                      size=file.size,
@@ -117,7 +117,7 @@ def forward(apps, schema_editor):
 
         MediaFile.objects.create(media_path=mp,
                                  filename=movie_file.filename,
-                                 override_display_name=movie_file.override_filename,
+                                 display_name=movie_file._display_name,
                                  scraper=movie_file.filenamescrapeformat,
                                  hide=movie_file.hide,
                                  size=movie_file.size,
