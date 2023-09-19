@@ -105,23 +105,32 @@ def forward(apps, schema_editor):
     File = apps.get_model('mediaviewer', 'File')
     MediaPath = apps.get_model('mediaviewer', 'MediaPath')
     MediaFile = apps.get_model('mediaviewer', 'MediaFile')
+    Poster = apps.get_model('mediaviewer', 'Poster')
+    PosterFile = apps.get_model('mediaviewer', 'PosterFile')
 
-    tv_path_qs = Path.objects.filter(is_movie=False)
+    tv_path_qs = Path.objects.filter(is_movie=False).filter(skip=False)
 
     for path in tv_path_qs:
         obj, created = TV.objects.get_or_create(name=path_display_name(path),
                                                 defaults=dict(finished=path.finished,
-                                                              imdb=path.imdb_id or '',
-                                                              tvdb=path.tvdb_id or '',
                                                               )
                                                 )
+        if created:
+            poster_file = PosterFile.objects.get(path=path)
+            path_imdb = path.imdb_id if path.imdb_id and path.imdb_id.lower() != 'none' else ''
+            poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
+            poster = Poster.objects.create(imdb=path_imdb,
+                                           tmdb=poster_file_tmdb)
+            obj.poster = poster
+            obj.save()
+
         mp, created = MediaPath.objects.get_or_create(_path=path.localpathstr,
                                                       defaults=dict(tv=obj))
         if path.skip:
             mp.skip = True
 
-        for file in path.file_set.all():
-            MediaFile.objects.create(media_path=mp,
+        for file in path.file_set.filter(skip=False).filter(hide=False):
+            mf = MediaFile.objects.create(media_path=mp,
                                      filename=file.filename,
                                      display_name=file._display_name,
                                      season=file_season(file),
@@ -130,14 +139,19 @@ def forward(apps, schema_editor):
                                      hide=file.hide,
                                      size=file.size,
                                      )
+            poster_file = PosterFile.objects.filter(file=file).order_by('tmdb_id').first()
+            file_imdb = file.imdb_id if file.imdb_id and file.imdb_id.lower() != 'none' else ''
+            poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
+            poster = Poster.objects.create(imdb=file_imdb,
+                                           tmdb=poster_file_tmdb)
+            mf.poster = poster
+            mf.save()
 
-    movie_file_qs = File.objects.filter(path__is_movie=True).select_related('path', 'filenamescrapeformat')
+    movie_file_qs = File.objects.filter(path__is_movie=True).filter(skip=False).select_related('path', 'filenamescrapeformat')
 
     for movie_file in movie_file_qs:
-        imdb = movie_file.imdb_id if movie_file.imdb_id and movie_file.imdb_id.lower() != 'none' else ''
         movie = Movie.objects.create(name=file_short_name(movie_file),
                                      finished=movie_file.finished,
-                                     imdb=imdb,
                                      )
 
         path = Pathlib(movie_file.path.localpathstr) / movie_file.filename
@@ -145,13 +159,21 @@ def forward(apps, schema_editor):
                                       skip=movie_file.hide,
                                       movie=movie)
 
-        MediaFile.objects.create(media_path=mp,
-                                 filename=movie_file.filename,
-                                 display_name=movie_file._display_name,
-                                 scraper=movie_file.filenamescrapeformat,
-                                 hide=movie_file.hide,
-                                 size=movie_file.size,
-                                 )
+        # media_file = MediaFile.objects.create(media_path=mp,
+        #                                       filename=movie_file.filename,
+        #                                       display_name=movie_file._display_name,
+        #                                       scraper=movie_file.filenamescrapeformat,
+        #                                       hide=movie_file.hide,
+        #                                       size=movie_file.size,
+        #                                       )
+
+        movie_file_imdb = movie_file.imdb_id if movie_file.imdb_id and movie_file.imdb_id.lower() != 'none' else ''
+        poster_file = PosterFile.objects.filter(file=movie_file).order_by('tmdb_id').first()
+        poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
+        poster = Poster.objects.create(imdb=movie_file_imdb,
+                                       tmdb=poster_file_tmdb)
+        movie.poster = poster
+        movie.save()
 
 
 class Migration(migrations.Migration):

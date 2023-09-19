@@ -32,10 +32,6 @@ class Media(TimeStampModel):
                                     default='',
                                     blank=True,
                                     max_length=256)
-    imdb = models.CharField(null=False,
-                            default='',
-                            blank=True,
-                            max_length=64)
 
     class Meta:
         abstract = True

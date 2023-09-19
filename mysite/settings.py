@@ -254,8 +254,7 @@ os.environ["wsgi.url_scheme"] = "https"
 # Use django_referrer_policy middleware
 REFERRER_POLICY = "same-origin"
 
-API_KEY = "keykeykey"
-OMDBAPI_KEY = None
+API_KEY = os.environ.get('TVDB_API_KEY', "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 3

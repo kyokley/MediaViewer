@@ -11,10 +11,6 @@ class TVManager(MediaManager):
 
 
 class TV(Media):
-    tvdb = models.CharField(null=False,
-                            default='',
-                            blank=True,
-                            max_length=64)
     poster = models.OneToOneField('mediaviewer.Poster',
                                   null=True,
                                   on_delete=models.SET_NULL,

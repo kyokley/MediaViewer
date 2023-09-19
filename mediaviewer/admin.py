@@ -10,7 +10,7 @@ from mediaviewer.models import DownloadToken
 from mediaviewer.models import DonationSite
 from mediaviewer.models import VideoProgress
 from mediaviewer.models import SiteGreeting
-from mediaviewer.models import TV, Movie, MediaFile, MediaPath
+from mediaviewer.models import TV, Movie, MediaFile, MediaPath, Poster
 
 
 @admin.register(Path)
@@ -164,8 +164,6 @@ class TVAdmin(admin.ModelAdmin):
         'id',
         'name',
         'finished',
-        'imdb',
-        'tvdb',
     )
     search_fields = (
         "name",
@@ -180,7 +178,6 @@ class MovieAdmin(admin.ModelAdmin):
         'id',
         'name',
         'finished',
-        'imdb',
     )
     search_fields = (
         "name",
@@ -225,6 +222,21 @@ class MediaFileAdmin(admin.ModelAdmin):
         "filename",
     )
     list_filter = ("hide",)
+
+
+@admin.register(Poster)
+class PosterAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+        'season',
+        'episode',
+        'ref_obj',
+    )
+    search_fields = (
+        'name',
+    )
+    ordering = ('-id',)
 
 
 admin.site.site_url = "/mediaviewer"
