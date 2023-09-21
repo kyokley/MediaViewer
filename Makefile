@@ -58,3 +58,4 @@ publish: push ## Alias for push
 
 autoformat:
 	docker-compose run --rm --no-deps mediaviewer /venv/bin/black .
+	docker-compose run --rm --no-deps mediaviewer /venv/bin/isort .
