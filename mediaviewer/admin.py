@@ -232,11 +232,20 @@ class PosterAdmin(admin.ModelAdmin):
         'season',
         'episode',
         'ref_obj',
+        'imdb',
+        'tmdb',
+        'has_image',
     )
     search_fields = (
-        'name',
+        'tv__name',
+        'movie__name',
+        'media_file__filename',
     )
     ordering = ('-id',)
+
+    def has_image(self, obj):
+        return bool(obj.image)
+    has_image.short_description = 'Image'
 
 
 admin.site.site_url = "/mediaviewer"
