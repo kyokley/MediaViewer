@@ -159,14 +159,6 @@ def forward(apps, schema_editor):
                                       skip=movie_file.hide,
                                       movie=movie)
 
-        # media_file = MediaFile.objects.create(media_path=mp,
-        #                                       filename=movie_file.filename,
-        #                                       display_name=movie_file._display_name,
-        #                                       scraper=movie_file.filenamescrapeformat,
-        #                                       hide=movie_file.hide,
-        #                                       size=movie_file.size,
-        #                                       )
-
         movie_file_imdb = movie_file.imdb_id if movie_file.imdb_id and movie_file.imdb_id.lower() != 'none' else ''
         poster_file = PosterFile.objects.filter(file=movie_file).order_by('tmdb_id').first()
         poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''

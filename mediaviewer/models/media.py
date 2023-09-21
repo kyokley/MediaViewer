@@ -52,3 +52,7 @@ class Media(TimeStampModel):
         if self.poster:
             self.poster.delete()
         return super().delete(*args, **kwargs)
+
+    @property
+    def full_name(self):
+        return self.name

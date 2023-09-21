@@ -19,52 +19,6 @@ from django.core.files.images import ImageFile
 from django.conf import settings
 
 
-def _get_data_from_imdb(media):
-    if media.tmdb:
-        log.debug(f"Getting data from TVDB using {media.tmdb}")
-
-        if media.is_movie():
-            url = f"https://api.themoviedb.org/3/movie/{media.tmdb}?language=en-US&api_key={settings.API_KEY}"
-        else:
-            url = f"https://api.themoviedb.org/3/tv/{media.tmdb}?language=en-US&api_key={settings.API_KEY}"
-    elif media.imdb:
-        log.debug(f"Getting data from IMDB using {media.imdb}")
-
-        url = f"https://api.themoviedb.org/3/find/{media.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
-    else:
-        if media.is_movie():
-            url = f"https://api.themoviedb.org/3/search/movie?query={media.name}&api_key={settings.API_KEY}"
-        else:
-            url = f"https://api.themoviedb.org/3/search/tv?query={media.name}&api_key={settings.API_KEY}"
-    resp = getJSONData(url)
-
-    if media.tmdb:
-        resp['url'] = url
-        return resp
-    if resp:
-        tmdb_id = None
-        if not media.is_movie():
-            if resp.get("tv_results"):
-                tmdb_id = resp.get("tv_results")[0]["id"]
-            elif resp.get("tv_episode_results"):
-                tmdb_id = resp.get("tv_episode_results")[0]["id"]
-
-            url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={settings.API_KEY}"
-        else:
-            tmdb_id = resp.get("movie_results")[0]["id"]
-            url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={settings.API_KEY}"
-
-        if tmdb_id:
-            data = getJSONData(url)
-            media.tmdb = tmdb_id
-
-        if data:
-            data["url"] = url
-        else:
-            return None
-        return data
-
-
 def _getDataFromIMDBBySearchString(searchString, is_movie=True):
     log.debug(f"Getting data from IMDB using {searchString}")
 
@@ -196,7 +150,7 @@ class Poster(TimeStampModel):
 
     @property
     def name(self):
-        return self.ref_obj.name
+        return self.ref_obj.full_name
 
     def display_genres(self):
         return ", ".join([x.genre for x in self.genres.all()])
@@ -210,10 +164,55 @@ class Poster(TimeStampModel):
     def display_directors(self):
         return ", ".join([x.name for x in self.directors.all()])
 
+    def _get_data_from_imdb(self):
+        if self.tmdb:
+            log.debug(f"Getting data from TVDB using {self.tmdb}")
+
+            if self.ref_obj.is_movie():
+                url = f"https://api.themoviedb.org/3/movie/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+            else:
+                url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+        elif self.imdb:
+            log.debug(f"Getting data from IMDB using {self.imdb}")
+
+            url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
+        else:
+            if self.ref_obj.is_movie():
+                url = f"https://api.themoviedb.org/3/search/movie?query={self.name}&api_key={settings.API_KEY}"
+            else:
+                url = f"https://api.themoviedb.org/3/search/tv?query={self.name}&api_key={settings.API_KEY}"
+        resp = getJSONData(url)
+
+        if self.tmdb:
+            resp['url'] = url
+            return resp
+        if resp:
+            tmdb_id = None
+            if not self.ref_obj.is_movie():
+                if resp.get("tv_results"):
+                    tmdb_id = resp.get("tv_results")[0]["id"]
+                elif resp.get("tv_episode_results"):
+                    tmdb_id = resp.get("tv_episode_results")[0]["id"]
+
+                url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={settings.API_KEY}"
+            else:
+                tmdb_id = resp.get("movie_results")[0]["id"]
+                url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={settings.API_KEY}"
+
+            if tmdb_id:
+                data = getJSONData(url)
+                self.tmdb = tmdb_id
+
+            if data:
+                data["url"] = url
+            else:
+                return None
+            return data
+
     def _populate_data(self):
         log.debug("Attempt to get data from IMDB")
 
-        data = _get_data_from_imdb(self.ref_obj)
+        data = self._get_data_from_imdb()
 
         if not data:
             return None
@@ -258,7 +257,7 @@ class Poster(TimeStampModel):
             return
 
         # Having season and episode implies that we must be a tv file
-        if not self.ref_obj.tmdb:
+        if not self.tmdb:
             log.debug("No tmdb id for this path. " "Continue search by tv show name")
             tvinfo = _search_TVDB_by_name(self.ref_obj.display_name)
 
@@ -272,21 +271,21 @@ class Poster(TimeStampModel):
 
             if tmdb_id:
                 log.debug("Set tmdb id for this path to {}".format(tmdb_id))
-                self.ref_obj.tmdb = tmdb_id
-                self.ref_obj.save()
-        else:
-            tmdb_id = None
+                self.tmdb = tmdb_id
 
-        if tmdb_id:
-            self._tmdb_episode_info(tmdb_id)
+        self._tmdb_episode_info(self.tmdb)
 
     def _tmdb_episode_info(self, tmdb_id):
+        if not tmdb_id:
+            return None
+
         tvinfo = getTVDBEpisodeInfo(tmdb_id, self.season, self.episode)
 
         if tvinfo:
             self.poster_url = tvinfo.get("still_path") or self.poster_url
             self.extendedplot = tvinfo.get("overview", "")
             self.episodename = tvinfo.get("name")
+            self.tmdb = tvinfo.get('id', self.tmdb)
 
     def _store_plot(self, imdb_data):
         plot = (

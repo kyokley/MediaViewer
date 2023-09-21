@@ -37,6 +37,7 @@ class MediaFile(TimeStampModel):
         null=True,
         on_delete=models.SET_NULL,
         blank=True,
+        related_name='media_file',
     )
     hide = models.BooleanField(null=False,
                                blank=True,
@@ -76,10 +77,14 @@ class MediaFile(TimeStampModel):
 
     @property
     def name(self):
-        if self.season is not None and self.episode is not None:
-            return f'{self.display_name} S{self.season} E{self.episode}'
+        return self.display_name
+
+    @property
+    def full_name(self):
+        if self.is_tv():
+            return f'{self.media.name} {self.name}'
         else:
-            return f'{self.display_name}'
+            return self.name
 
     @property
     def _season(self):

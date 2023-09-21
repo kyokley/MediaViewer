@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                 ('hide', models.BooleanField(blank=True, default=False)),
                 ('size', models.BigIntegerField(blank=True, null=True)),
                 ('media_path', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mediaviewer.mediapath')),
-                ('poster', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='mediaviewer.poster')),
+                ('poster', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='media_file', to='mediaviewer.poster')),
                 ('scraper', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='mediaviewer.filenamescrapeformat')),
             ],
             options={
