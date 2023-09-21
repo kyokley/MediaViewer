@@ -226,7 +226,7 @@ class Poster(TimeStampModel):
         self._store_rated(data)
         self._assign_tmdb_info()
 
-        poster_url = data.get("Poster") or data.get("poster_path")
+        poster_url = self.poster_url or data.get("Poster") or data.get("poster_path")
         poster_name = poster_url.rpartition("/")[-1] if poster_url else None
 
         if poster_name:
