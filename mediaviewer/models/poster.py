@@ -127,6 +127,15 @@ class Poster(TimeStampModel):
 
     objects = PosterManager()
 
+    def __str__(self):
+        if self.season is None or self.episode is None:
+            return f'<Poster n:{self.ref_obj.short_name} i:{bool(self.image)}>'
+        else:
+            return f'<Poster n:{self.ref_obj.short_name} s:{self.season} e:{self.episode} i:{bool(self.image)}>'
+
+    def __repr__(self):
+        return str(self)
+
     @property
     def season(self):
         return getattr(self.ref_obj, 'season', None)

@@ -21,9 +21,7 @@ class MediaFile(TimeStampModel):
     filename = models.CharField(null=False,
                                 max_length=256)
     display_name = models.CharField(null=False,
-                                         blank=True,
-                                         default='',
-                                         max_length=256)
+                                    max_length=256)
     season = models.PositiveSmallIntegerField(
         null=True, blank=True)
     episode = models.PositiveSmallIntegerField(
@@ -85,6 +83,14 @@ class MediaFile(TimeStampModel):
             return f'{self.media.name} {self.name}'
         else:
             return self.name
+
+    @property
+    def short_name(self):
+        if self.is_tv() and self.season is not None and self.episode is not None:
+            name = f'{self.media.short_name} S{self.season} E{self.episode}'
+        else:
+            name = f'{self.media.short_name}'
+        return name
 
     @property
     def search_terms(self):

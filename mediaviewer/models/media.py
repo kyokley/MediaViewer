@@ -57,6 +57,10 @@ class Media(TimeStampModel):
     def full_name(self):
         return self.name
 
+    @property
+    def short_name(self):
+        return self.name
+
     def _get_search_terms(self):
         return self._search_terms or self.name
 
