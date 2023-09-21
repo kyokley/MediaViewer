@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 ('date_edited', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=256)),
                 ('finished', models.BooleanField(default=False)),
-                ('search_terms', models.CharField(blank=True, default='', max_length=256)),
+                ('_search_terms', models.CharField(blank=True, default='', max_length=256)),
                 ('poster', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tv', to='mediaviewer.poster')),
             ],
             options={
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                 ('date_edited', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=256)),
                 ('finished', models.BooleanField(default=False)),
-                ('search_terms', models.CharField(blank=True, default='', max_length=256)),
+                ('_search_terms', models.CharField(blank=True, default='', max_length=256)),
                 ('poster', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='movie', to='mediaviewer.poster')),
             ],
             options={

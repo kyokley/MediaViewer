@@ -87,6 +87,10 @@ class MediaFile(TimeStampModel):
             return self.name
 
     @property
+    def search_terms(self):
+        return self.media.search_terms
+
+    @property
     def _season(self):
         if self.is_movie():
             return None

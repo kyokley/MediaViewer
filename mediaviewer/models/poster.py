@@ -165,6 +165,26 @@ class Poster(TimeStampModel):
         return ", ".join([x.name for x in self.directors.all()])
 
     def _get_data_from_imdb(self):
+        if not self.tmdb:
+            self.tmdb = self.ref_obj.media.poster.tmdb
+
+        if not self.imdb:
+            self.imdb = self.ref_obj.media.poster.imdb
+
+        if not self.tmdb:
+            if self.imdb:
+                log.debug(f"Getting data from IMDB using {self.imdb}")
+
+                url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
+            else:
+                if self.ref_obj.is_movie():
+                    url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.search_terms}&api_key={settings.API_KEY}"
+                else:
+                    url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.search_terms}&api_key={settings.API_KEY}"
+            resp = getJSONData(url)
+            if resp.get('results'):
+                self.tmdb = resp['results'][0]['id']
+
         if self.tmdb:
             log.debug(f"Getting data from TVDB using {self.tmdb}")
 
@@ -172,42 +192,12 @@ class Poster(TimeStampModel):
                 url = f"https://api.themoviedb.org/3/movie/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
             else:
                 url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
-        elif self.imdb:
-            log.debug(f"Getting data from IMDB using {self.imdb}")
 
-            url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
-        else:
-            if self.ref_obj.is_movie():
-                url = f"https://api.themoviedb.org/3/search/movie?query={self.name}&api_key={settings.API_KEY}"
-            else:
-                url = f"https://api.themoviedb.org/3/search/tv?query={self.name}&api_key={settings.API_KEY}"
-        resp = getJSONData(url)
+            resp = getJSONData(url)
 
-        if self.tmdb:
-            resp['url'] = url
-            return resp
-        if resp:
-            tmdb_id = None
-            if not self.ref_obj.is_movie():
-                if resp.get("tv_results"):
-                    tmdb_id = resp.get("tv_results")[0]["id"]
-                elif resp.get("tv_episode_results"):
-                    tmdb_id = resp.get("tv_episode_results")[0]["id"]
-
-                url = f"https://api.themoviedb.org/3/tv/{tmdb_id}?api_key={settings.API_KEY}"
-            else:
-                tmdb_id = resp.get("movie_results")[0]["id"]
-                url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={settings.API_KEY}"
-
-            if tmdb_id:
-                data = getJSONData(url)
-                self.tmdb = tmdb_id
-
-            if data:
-                data["url"] = url
-            else:
-                return None
-            return data
+            if resp:
+                resp['url'] = url
+                return resp
 
     def _populate_data(self):
         log.debug("Attempt to get data from IMDB")
@@ -224,7 +214,7 @@ class Poster(TimeStampModel):
         self._store_plot(data)
         self._store_genres(data)
         self._store_rated(data)
-        self._assign_tmdb_info()
+        self._tmdb_episode_info()
 
         poster_url = self.poster_url or data.get("Poster") or data.get("poster_path")
         poster_name = poster_url.rpartition("/")[-1] if poster_url else None
@@ -252,34 +242,11 @@ class Poster(TimeStampModel):
 
         return data
 
-    def _assign_tmdb_info(self):
-        if self.ref_obj.is_movie() or self.season is None or self.episode is None:
-            return
-
-        # Having season and episode implies that we must be a tv file
+    def _tmdb_episode_info(self):
         if not self.tmdb:
-            log.debug("No tmdb id for this path. " "Continue search by tv show name")
-            tvinfo = _search_TVDB_by_name(self.ref_obj.display_name)
-
-            try:
-                tmdb_id = tvinfo["results"][0]["id"] if tvinfo else None
-            except Exception as e:
-                log.error(
-                    f"Got bad response during _search_TVDB_by_name: {self.ref_obj.display_name}")
-                log.error(e)
-                tmdb_id = None
-
-            if tmdb_id:
-                log.debug("Set tmdb id for this path to {}".format(tmdb_id))
-                self.tmdb = tmdb_id
-
-        self._tmdb_episode_info(self.tmdb)
-
-    def _tmdb_episode_info(self, tmdb_id):
-        if not tmdb_id:
             return None
 
-        tvinfo = getTVDBEpisodeInfo(tmdb_id, self.season, self.episode)
+        tvinfo = getTVDBEpisodeInfo(self.tmdb, self.season, self.episode)
 
         if tvinfo:
             self.poster_url = tvinfo.get("still_path") or self.poster_url

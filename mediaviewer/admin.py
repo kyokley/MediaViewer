@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db import transaction
 from mediaviewer.models import Genre
 from mediaviewer.models import Path
 from mediaviewer.models import FilenameScrapeFormat
@@ -242,10 +243,27 @@ class PosterAdmin(admin.ModelAdmin):
         'media_file__filename',
     )
     ordering = ('-id',)
+    actions = ('repopulate_data', 'clear_and_populate')
 
     def has_image(self, obj):
         return bool(obj.image)
     has_image.short_description = 'Image'
+
+    def repopulate_data(self, request, queryset):
+        for poster in queryset:
+            with transaction.atomic():
+                poster._populate_data()
+
+    repopulate_data.description = 'Re-populate Data'
+
+    def clear_and_populate(self, request, queryset):
+        queryset.update(imdb='', tmdb='')
+        for poster in queryset:
+            with transaction.atomic():
+                poster._populate_data()
+                poster.save()
+
+    clear_and_populate.description = 'Clear and Populate'
 
 
 admin.site.site_url = "/mediaviewer"
