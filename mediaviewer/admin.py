@@ -245,10 +245,6 @@ class PosterAdmin(admin.ModelAdmin):
     ordering = ('-id',)
     actions = ('repopulate_data', 'clear_and_populate')
 
-    def has_image(self, obj):
-        return bool(obj.image)
-    has_image.short_description = 'Image'
-
     def repopulate_data(self, request, queryset):
         for poster in queryset:
             with transaction.atomic():

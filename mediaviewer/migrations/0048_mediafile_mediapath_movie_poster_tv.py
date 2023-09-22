@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('date_edited', models.DateTimeField(auto_now=True)),
                 ('filename', models.CharField(max_length=256)),
-                ('display_name', models.CharField(blank=True, default='', max_length=256)),
+                ('display_name', models.CharField(max_length=256)),
                 ('season', models.PositiveSmallIntegerField(blank=True, null=True)),
                 ('episode', models.PositiveSmallIntegerField(blank=True, null=True)),
                 ('hide', models.BooleanField(blank=True, default=False)),

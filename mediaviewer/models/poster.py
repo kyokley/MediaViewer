@@ -1,6 +1,7 @@
 """
 Re-implementation of PosterFile
 """
+from django.contrib import admin
 from io import BytesIO
 import requests
 from django.db import models
@@ -160,6 +161,10 @@ class Poster(TimeStampModel):
     @property
     def name(self):
         return self.ref_obj.full_name
+
+    @admin.display(boolean=True, description='Image')
+    def has_image(self):
+        return bool(self.image)
 
     def display_genres(self):
         return ", ".join([x.genre for x in self.genres.all()])
