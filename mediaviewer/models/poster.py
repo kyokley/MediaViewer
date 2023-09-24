@@ -230,7 +230,7 @@ class Poster(TimeStampModel):
         self._store_rated(data)
         self._tmdb_episode_info()
 
-        poster_url = self.poster_url or data.get("Poster") or data.get("poster_path")
+        poster_url = getattr(self, 'poster_url', None) or data.get("Poster") or data.get("poster_path")
         poster_name = poster_url.rpartition("/")[-1] if poster_url else None
 
         if poster_name:

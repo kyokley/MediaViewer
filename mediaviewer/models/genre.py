@@ -29,9 +29,9 @@ class Genre(models.Model):
     def get_movie_genres(cls, limit=10):
         genres = cls.objects.filter(
             pk__in=(
-                cls.objects.filter(posterfile__file__path__is_movie=True)
+                cls.objects.filter(poster__movie__isnull=False)
                 .values("id")
-                .annotate(genre_count=models.Count("posterfile"))
+                .annotate(genre_count=models.Count("poster__movie"))
                 .order_by("-genre_count", "genre")
                 .values("id")[:limit]
             )
@@ -43,11 +43,11 @@ class Genre(models.Model):
     def get_tv_genres(cls, limit=10):
         genres = cls.objects.filter(
             pk__in=(
-                cls.objects.filter(posterfile__file__path__is_movie=False)
-                .values("posterfile__genres")
-                .annotate(genre_count=models.Count("id"))
+                cls.objects.filter(poster__tv__isnull=False)
+                .values("id")
+                .annotate(genre_count=models.Count("poster__tv"))
                 .order_by("-genre_count")
-                .values("posterfile__genres")[:limit]
+                .values("id")[:limit]
             )
         ).order_by("genre")
 
