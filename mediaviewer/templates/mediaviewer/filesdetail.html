@@ -37,8 +37,8 @@
     </div>
     <div class="row">
         <div class="col">
-            {% if posterfile.image %}
-                <img src="{{ MEDIA_URL }}{{ posterfile.image }}" class="large-img mx-auto d-block"/>
+            {% if poster.image %}
+                <img src="{{ poster.image.url }}" class="large-img mx-auto d-block"/>
             {% else %}
                 <h4>
                     No Image
@@ -49,8 +49,8 @@
     <div class="row text-center justify-content-center">
         <div class="col-10">
             <h2>
-                {% if posterfile.tagline %}
-                    {{ posterfile.tagline }}
+                {% if poster.tagline %}
+                    {{ poster.tagline }}
                 {% endif %}
             </h2>
         </div>
@@ -63,37 +63,37 @@
     {% endif %}
         <h4>
             <div class="row gy-3 py-3">
-                {% if posterfile.extendedplot or posterfile.plot %}
+                {% if poster.extendedplot or poster.plot %}
                     <div class="col-sm-3">Description:</div>
-                    {% if posterfile.extendedplot %}
-                        <div class="col-12 col-sm-9 truncated-long">{{ posterfile.extendedplot }}</div>
+                    {% if poster.extendedplot %}
+                        <div class="col-12 col-sm-9 truncated-long">{{ poster.extendedplot }}</div>
                     {% else %}
-                        <div class="col-12 col-sm-9 truncated-long">{{ posterfile.plot }}</div>
+                        <div class="col-12 col-sm-9 truncated-long">{{ poster.plot }}</div>
                     {% endif %}
                 {% endif %}
-                {% if posterfile.display_genres %}
+                {% if poster.display_genres %}
                     <div class="col-sm-3">Genre:</div>
-                    <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_genres }}</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_genres }}</div>
                 {% endif %}
-                {% if posterfile.display_writers %}
+                {% if poster.display_writers %}
                     <div class="col-sm-3">Writer:</div>
-                    <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_writers }}</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_writers }}</div>
                 {% endif %}
-                {% if posterfile.display_directors %}
+                {% if poster.display_directors %}
                     <div class="col-sm-3">Director:</div>
-                    <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_directors }}</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_directors }}</div>
                 {% endif %}
-                {% if posterfile.display_actors %}
+                {% if poster.display_actors %}
                     <div class="col-sm-3">Actors:</div>
-                    <div class="col-12 col-sm-9 truncated-short">{{ posterfile.display_actors }}</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_actors }}</div>
                 {% endif %}
-                {% if posterfile.rated %}
+                {% if poster.rated %}
                     <div class="col-3">Rated:</div>
-                    <div class="col-9">{{ posterfile.rated }}</div>
+                    <div class="col-9">{{ poster.rated }}</div>
                 {% endif %}
-                {% if posterfile.rating and posterfile.rating != 'N/A' %}
+                {% if poster.rating and poster.rating != 'N/A' %}
                     <div class="col-3">Rating:</div>
-                    <div class="col-9">{{ posterfile.rating | floatformat }}/10</div>
+                    <div class="col-9">{{ poster.rating | floatformat }}/10</div>
                 {% endif %}
                 {% if file_size and can_download %}
                     <div class="col-3">Size:</div>

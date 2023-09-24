@@ -10,6 +10,7 @@ from mediaviewer.models.usersettings import (
 )
 from mediaviewer.models.message import Message
 from mediaviewer.models.usercomment import UserComment
+from mediaviewer.models import Poster
 from mediaviewer.utils import logAccessInfo, humansize
 from django.shortcuts import render, get_object_or_404, redirect
 import json
@@ -31,13 +32,13 @@ def filesdetail(request, file_id):
         viewed = False
         comment = ""
 
-    posterfile = file.posterfile
+    poster = Poster.objects.get(media_file__filename=file.filename)
 
     settings = user.settings()
     context = {
         "file": file,
         "displayName": file.displayName(),
-        "posterfile": posterfile,
+        'poster': poster,
         "comment": comment,
         "skip": skip,
         "finished": finished,
