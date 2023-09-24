@@ -16,9 +16,17 @@ class Command(BaseCommand):
             help="Only attempt to populate LIMIT number of Poster objects",
         )
 
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='Clear existing imdb and tmdb fields before populating objects',
+        )
+
     def handle(self, *args, **kwargs):
         limit = kwargs['limit']
         limit = int(limit) if limit else DEFAULT_LIMIT
+
+        force = kwargs['force']
 
         poster_qs = Poster.objects.filter(image='').order_by('id')
 
@@ -29,6 +37,10 @@ class Command(BaseCommand):
 
             if count > limit:
                 break
+
+            if force:
+                poster.imdb = ''
+                poster.tmdb = ''
 
             poster._populate_data()
             poster.save()

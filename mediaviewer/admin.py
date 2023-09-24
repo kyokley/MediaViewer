@@ -245,19 +245,20 @@ class PosterAdmin(admin.ModelAdmin):
     ordering = ('-id',)
     actions = ('repopulate_data', 'clear_and_populate')
 
-    def repopulate_data(self, request, queryset):
+    def _populate(self, queryset):
         for poster in queryset:
             with transaction.atomic():
                 poster._populate_data()
+                poster.save()
+
+    def repopulate_data(self, request, queryset):
+        self._populate(queryset)
 
     repopulate_data.description = 'Re-populate Data'
 
     def clear_and_populate(self, request, queryset):
         queryset.update(imdb='', tmdb='')
-        for poster in queryset:
-            with transaction.atomic():
-                poster._populate_data()
-                poster.save()
+        self._populate(queryset)
 
     clear_and_populate.description = 'Clear and Populate'
 
