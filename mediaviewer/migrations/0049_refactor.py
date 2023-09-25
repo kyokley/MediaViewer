@@ -107,6 +107,8 @@ def forward(apps, schema_editor):
     MediaFile = apps.get_model('mediaviewer', 'MediaFile')
     Poster = apps.get_model('mediaviewer', 'Poster')
     PosterFile = apps.get_model('mediaviewer', 'PosterFile')
+    Comment = apps.get_model('mediaviewer', 'Comment')
+    UserComment = apps.get_model('mediaviewer', 'UserComment')
 
     tv_path_qs = Path.objects.filter(is_movie=False).filter(skip=False)
 
@@ -147,6 +149,11 @@ def forward(apps, schema_editor):
             mf.poster = poster
             mf.save()
 
+            for uc in UserComment.objects.filter(file=file):
+                Comment.objects.create(media_file=mf,
+                                       user=uc.user,
+                                       viewed=uc.viewed)
+
     movie_file_qs = File.objects.filter(path__is_movie=True).filter(skip=False).select_related('path', 'filenamescrapeformat')
 
     for movie_file in movie_file_qs:
@@ -171,7 +178,7 @@ def forward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0048_mediafile_mediapath_movie_poster_tv'),
+        ('mediaviewer', '0048_auto_20230925_1643'),
     ]
 
     operations = [
