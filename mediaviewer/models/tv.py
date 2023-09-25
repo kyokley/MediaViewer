@@ -16,9 +16,6 @@ class TV(Media):
                                   on_delete=models.SET_NULL,
                                   blank=True,
                                   related_name='tv')
-    last_episode_created_at = models.DateTimeField(
-        null=True, blank=True
-    )
 
     objects = TVManager.from_queryset(TVQuerySet)()
 

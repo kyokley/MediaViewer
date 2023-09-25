@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.db import models
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
@@ -10,6 +9,7 @@ from mediaviewer.models.path import Path
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.genre import Genre
+from mediaviewer.models import TV, Movie
 
 import json
 import pytz
@@ -150,8 +150,8 @@ def _ajax_path_rows(request, qs):
     draw = int(request_params["draw"][0])
 
     sort_columns_map = {
-        0: "localpathstr",
-        1: "lastCreatedFileDate",
+        0: "name",
+        1: "mediapath__mediafile__date_created",
     }
     sort_column = int(request_params["order[0][column]"][0])
     sort_dir = request_params["order[0][dir]"][0]
@@ -181,40 +181,24 @@ def _ajax_path_rows(request, qs):
 
 @csrf_exempt
 def ajaxmovierows(request):
-    qs = File.movies_ordered_by_id()
+    qs = Movie.objects.order_by('-id')
     return _ajax_file_rows(request, qs)
 
 
 @csrf_exempt
 def ajaxmoviesbygenrerows(request, genre_id):
     genre = get_object_or_404(Genre, pk=genre_id)
-    qs = File.movies_by_genre(genre).order_by("-id")
+    qs = Movie.objects.filter(poster__genres=genre).order_by('-id')
     return _ajax_file_rows(request, qs)
 
 
 def _get_tv_show_rows_query(genre_id=None):
-    paths_qs = (
-        Path.objects.filter(is_movie=False)
-        .filter(file__hide=False)
-        .annotate(num_files=models.Count("file"))
-        .filter(num_files__gt=0)
-    )
-
-    subquery = models.Subquery(
-        Path.objects.filter(localpathstr=models.OuterRef("localpathstr"))
-        .order_by("-lastCreatedFileDate")
-        .values("pk")[:1]
-    )
-    paths_qs = Path.objects.filter(
-        pk__in=(
-            paths_qs.values("localpathstr").annotate(path_pk=subquery).values("path_pk")
-        )
-    ).order_by("-lastCreatedFileDate")
+    tv_qs = TV.objects.order_by('-mediapath__media_file__created')
 
     if genre_id:
         genre = get_object_or_404(Genre, pk=genre_id)
-        paths_qs = paths_qs.filter(_posterfile__genres=genre)
-    return paths_qs
+        tv_qs = tv_qs.filter(poster__genres=genre)
+    return tv_qs
 
 
 @csrf_exempt
