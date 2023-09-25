@@ -1,4 +1,5 @@
 from .actor import Actor
+from .comment import Comment
 from .core import TimeStampModel
 from .director import Director
 from .donation_site import DonationSite

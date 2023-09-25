@@ -142,7 +142,7 @@ def _ajax_file_rows(request, qs):
     )
 
 
-def _ajax_path_rows(request, qs):
+def _ajax_tv_rows(request, qs):
     request_params = dict(request.GET)
     offset = int(request_params["start"][0])
     length = int(request_params["length"][0])
@@ -163,15 +163,15 @@ def _ajax_path_rows(request, qs):
 
     initial_qs = qs
     qs = initial_qs.order_by(sort_expr).search(search_str)
-    paths = qs[offset : offset + length]
+    tvs = qs[offset : offset + length]
 
-    path_data = [path.ajax_row_payload(request.user) for path in paths]
+    tv_data = [tv.ajax_row_payload(request.user) for tv in tvs]
 
     payload = {
         "draw": draw,
         "recordsTotal": initial_qs.count(),
         "recordsFiltered": qs.count(),
-        "data": path_data,
+        "data": tv_data,
     }
 
     return HttpResponse(
@@ -204,13 +204,13 @@ def _get_tv_show_rows_query(genre_id=None):
 @csrf_exempt
 def ajaxtvshowssummary(request):
     paths_qs = _get_tv_show_rows_query()
-    return _ajax_path_rows(request, paths_qs)
+    return _ajax_tv_rows(request, paths_qs)
 
 
 @csrf_exempt
 def ajaxtvshowsbygenre(request, genre_id):
     paths_qs = _get_tv_show_rows_query(genre_id)
-    return _ajax_path_rows(request, paths_qs)
+    return _ajax_tv_rows(request, paths_qs)
 
 
 @csrf_exempt

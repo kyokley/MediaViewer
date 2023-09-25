@@ -41,6 +41,8 @@ class MediaFile(TimeStampModel):
                                blank=True,
                                default=False)
     size = models.BigIntegerField(null=True, blank=True)
+    viewed_by = models.ManyToManyField(
+        'auth.User', through='mediaviewer.Comment')
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
