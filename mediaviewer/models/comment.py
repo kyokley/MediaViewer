@@ -14,6 +14,12 @@ class Comment(TimeStampModel):
     media_file = models.ForeignKey(
         "mediaviewer.MediaFile",
         on_delete=models.CASCADE,
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
+    )
+    movie = models.ForeignKey(
+        "mediaviewer.Movie",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )

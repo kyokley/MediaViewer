@@ -16,6 +16,8 @@ class Movie(Media):
                                   on_delete=models.SET_NULL,
                                   blank=True,
                                   related_name='movie')
+    comments = models.ManyToManyField(
+        'auth.User', through='mediaviewer.Comment')
 
     objects = MovieManager.from_queryset(MovieQuerySet)()
 
