@@ -110,37 +110,42 @@ def forward(apps, schema_editor):
     Comment = apps.get_model('mediaviewer', 'Comment')
     UserComment = apps.get_model('mediaviewer', 'UserComment')
 
-    tv_path_qs = Path.objects.filter(is_movie=False).filter(skip=False)
+    tv_path_qs = Path.objects.filter(is_movie=False)
 
     for path in tv_path_qs:
-        obj, created = TV.objects.get_or_create(name=path_display_name(path),
-                                                defaults=dict(finished=path.finished,
-                                                              )
-                                                )
-        if created:
-            poster_file = PosterFile.objects.get(path=path)
-            path_imdb = path.imdb_id if path.imdb_id and path.imdb_id.lower() != 'none' else ''
-            poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
-            poster = Poster.objects.create(imdb=path_imdb,
-                                           tmdb=poster_file_tmdb)
-            obj.poster = poster
-            obj.save()
+        if mp := MediaPath.objects.filter(_path=path.localpathstr).first():
+            pass
+        else:
+            obj, created = TV.objects.get_or_create(name=path_display_name(path),
+                                                    defaults=dict(finished=path.finished,
+                                                                )
+                                                    )
+            if created:
+                poster_file = PosterFile.objects.get(path=path)
+                path_imdb = path.imdb_id if path.imdb_id and path.imdb_id.lower() != 'none' else ''
+                poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
+                poster = Poster.objects.create(imdb=path_imdb,
+                                            tmdb=poster_file_tmdb)
+                obj.poster = poster
+                obj.save()
 
-        mp, created = MediaPath.objects.get_or_create(_path=path.localpathstr,
-                                                      defaults=dict(tv=obj))
-        if path.skip:
-            mp.skip = True
+            mp, created = MediaPath.objects.get_or_create(_path=path.localpathstr,
+                                                        defaults=dict(tv=obj))
+            if path.skip:
+                mp.skip = True
 
-        for file in path.file_set.filter(skip=False).filter(hide=False):
+        for file in path.file_set.filter(hide=False):
             mf = MediaFile.objects.create(media_path=mp,
-                                     filename=file.filename,
-                                     display_name=file._display_name,
-                                     season=file_season(file),
-                                     episode=file_episode(file),
-                                     scraper=file.filenamescrapeformat,
-                                     hide=file.hide,
-                                     size=file.size,
-                                     )
+                                          filename=file.filename,
+                                          display_name=file._display_name,
+                                          season=file_season(file),
+                                          episode=file_episode(file),
+                                          scraper=file.filenamescrapeformat,
+                                          hide=file.hide,
+                                          size=file.size,
+                                          date_created=file.datecreated,
+                                          date_edited=file.dateedited,
+                                          )
             poster_file = PosterFile.objects.filter(file=file).order_by('tmdb_id').first()
             file_imdb = file.imdb_id if file.imdb_id and file.imdb_id.lower() != 'none' else ''
             poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
@@ -154,11 +159,13 @@ def forward(apps, schema_editor):
                                        user=uc.user,
                                        viewed=uc.viewed)
 
-    movie_file_qs = File.objects.filter(path__is_movie=True).filter(skip=False).select_related('path', 'filenamescrapeformat')
+    movie_file_qs = File.objects.filter(path__is_movie=True).select_related('path', 'filenamescrapeformat')
 
     for movie_file in movie_file_qs:
         movie = Movie.objects.create(name=file_short_name(movie_file),
                                      finished=movie_file.finished,
+                                     date_created=movie_file.datecreated,
+                                     date_edited=movie_file.dateedited,
                                      )
 
         path = Pathlib(movie_file.path.localpathstr) / movie_file.filename
