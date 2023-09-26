@@ -9,8 +9,8 @@ from mediaviewer.models.path import Path
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.genre import Genre
-from mediaviewer.models import TV, Movie, MediaFile
-from django.db.models import OuterRef, Subquery
+from mediaviewer.models import TV, Movie, MediaFile, Comment
+from django.db.models import OuterRef, Subquery, Prefetch
 
 import json
 import pytz
@@ -143,6 +143,62 @@ def _ajax_file_rows(request, qs):
     )
 
 
+def _ajax_media_file_rows(request, qs):
+    user = request.user
+
+    settings = user.settings()
+    can_download = settings.can_download
+
+    lastStatus = WaiterStatus.getLastStatus()
+    waiterstatus = lastStatus.status if lastStatus else False
+
+    request_params = dict(request.GET)
+    offset = int(request_params["start"][0])
+    length = int(request_params["length"][0])
+    search_str = request_params["search[value]"][0]
+    draw = int(request_params["draw"][0])
+
+    sort_columns_map = {
+        0: "display_name",
+        1: "datecreated",
+    }
+    sort_column = int(request_params["order[0][column]"][0])
+    sort_dir = request_params["order[0][dir]"][0]
+    sort_expr = (
+        f"-{sort_columns_map[sort_column]}"
+        if sort_dir == "desc"
+        else f"{sort_columns_map[sort_column]}"
+    )
+
+    initial_qs = qs
+    qs = initial_qs.order_by(sort_expr).search(search_str)
+
+    # Must Prefetch to get viewed Comments
+    qs = qs.prefetch_related(
+        Prefetch('comments', queryset=Comment.objects.filter(user=user, viewed=True)))
+
+    mfs = qs[offset : offset + length]
+
+    mf_data = []
+    for mf in mfs:
+        mf_data.append(
+            mf.ajax_row_payload(
+                can_download,
+                waiterstatus,
+            )
+        )
+
+    payload = {
+        "draw": draw,
+        "recordsTotal": initial_qs.count(),
+        "recordsFiltered": qs.count(),
+        "data": mf_data,
+    }
+
+    return HttpResponse(
+        json.dumps(payload), content_type="application/json", status=200
+    )
+
 def _ajax_tv_rows(request, qs):
     request_params = dict(request.GET)
     offset = int(request_params["start"][0])
@@ -218,7 +274,9 @@ def ajaxtvshowsbygenre(request, genre_id):
 
 
 @csrf_exempt
-def ajaxtvshows(request, path_id):
-    refpath = get_object_or_404(Path, pk=path_id)
-    qs = File.files_by_localpath(refpath)
+def ajaxtvshows(request, tv_id):
+    ref_tv = get_object_or_404(TV, pk=tv_id)
+
+    qs = MediaFile.objects.filter(media_path__tv=ref_tv).order_by('display_name')
+
     return _ajax_file_rows(request, qs)

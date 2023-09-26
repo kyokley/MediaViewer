@@ -2,12 +2,21 @@ import re
 from django.db import models
 from .core import TimeStampModel
 from .poster import Poster
+from mediaviewer.utils import get_search_query
 
 
 class MediaFileQuerySet(models.QuerySet):
     def delete(self, *args, **kwargs):
         Poster.objects.filter(pk__in=self.values('poster')).delete()
         return super().delete(*args, **kwargs)
+
+    def search(self, search_str):
+        qs = self
+        if search_str:
+            filename_query = get_search_query(search_str, ["display_name"])
+
+            qs = qs.filter(filename_query)
+        return qs
 
 
 class MediaFileManager(models.Manager):
@@ -145,3 +154,41 @@ class MediaFile(TimeStampModel):
         else:
             episode = self.override_episode
         return episode and (episode.isdigit() and episode.zfill(2) or None) or None
+
+    def ajax_row_payload(self, can_download, waiterstatus):
+        poster = self.poster
+        tooltip_img = (
+            f"""data-bs-content="<img class='tooltip-img' src='{ poster.image.url }' />\""""
+            if poster and poster.image
+            else ""
+        )
+
+        payload = [
+            f'<a class="img-preview" href="/mediaviewer/mediafile/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.display_name}</a>',
+            f"""<span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}""",
+        ]
+
+        if can_download:
+            if waiterstatus:
+                payload.append(
+                    f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}')">Open</a></center>"""
+                )
+            else:
+                payload.append("Alfred is down")
+
+        cell = """<div class="row text-center">"""
+
+        # NOTE: the existence of a Comment works here because Prefetch must have already populated the only relavant Comment.
+        # i.e. BE SURE TO Prefetch before calling this method
+        if self.comments.exists():
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
+        else:
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
+        cell = f'{cell}<span id="saved-{ self.id }"></span></div>'
+        payload.extend(
+            [
+                cell,
+                f"""<input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}')"/>""",
+            ]
+        )
+        return payload
