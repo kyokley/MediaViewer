@@ -174,11 +174,16 @@ def forward(apps, schema_editor):
         movie.poster = poster
         movie.save()
 
+        for uc in UserComment.objects.filter(file=movie_file):
+            Comment.objects.create(movie=movie,
+                                   user=uc.user,
+                                   viewed=uc.viewed)
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0048_auto_20230925_1931'),
+        ('mediaviewer', '0048_auto_20230925_1937'),
     ]
 
     operations = [
