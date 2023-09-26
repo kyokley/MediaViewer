@@ -9,7 +9,8 @@ from mediaviewer.models.path import Path
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.genre import Genre
-from mediaviewer.models import TV, Movie
+from mediaviewer.models import TV, Movie, MediaFile
+from django.db.models import OuterRef, Subquery
 
 import json
 import pytz
@@ -151,7 +152,7 @@ def _ajax_tv_rows(request, qs):
 
     sort_columns_map = {
         0: "name",
-        1: "mediapath__mediafile__date_created",
+        1: "max_date_created",
     }
     sort_column = int(request_params["order[0][column]"][0])
     sort_dir = request_params["order[0][dir]"][0]
@@ -193,7 +194,10 @@ def ajaxmoviesbygenrerows(request, genre_id):
 
 
 def _get_tv_show_rows_query(genre_id=None):
-    tv_qs = TV.objects.order_by('-mediapath__media_file__created')
+    tv_qs = TV.objects.annotate(max_date_created=Subquery(
+        MediaFile.objects.filter(media_path__tv=OuterRef('pk')).order_by('-date_created').values('date_created')[:1]
+    )
+                                ).order_by('-max_date_created')
 
     if genre_id:
         genre = get_object_or_404(Genre, pk=genre_id)
