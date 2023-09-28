@@ -18,48 +18,6 @@
             </ol>
             <h1>{{ title }}</h1>
             <h3>Select from the following movies:</h3>
-        {% elif view == 'tvshows' %}
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-                <li class="breadcrumb-item active">{{ path.displayName }}</li>
-            </ol>
-            <div class="container">
-                <div class="row">
-                    <div class="col-xs-12 col-md-12">
-                        <h1 class="text-center" id="file-displayName">{{ path.displayName }}</h1>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12 col-md-6">
-                        {% if path.posterfile.image %}
-                            <img src="{{ MEDIA_URL }}{{ path.posterfile.image }}" class="img-fluid center-block"/>
-                        {% else %}
-                            No Image
-                        {% endif %}
-                    </div>
-                    <div class="col-xs-12 col-md-6">
-                        <h4>
-                            <dl class="dl-horizontal">
-                                {% if path.posterfile.display_genres %}
-                                    <dt>Genre:</dt>
-                                    <dd>{{ path.posterfile.display_genres }}</dd>
-                                {% endif %}
-                                <dt>Summary:</dt>
-                                <dd><div class="truncated-text">{{ path.posterfile.plot }}</div></dd>
-                                {% if path.posterfile.rated %}
-                                    <dt>Rated:</dt>
-                                    <dd>{{ path.posterfile.rated }}</dd>
-                                {% endif %}
-                                {% if path.posterfile.rating and path.posterfile.rating != 'N/A' %}
-                                    <dt>Rating:</dt>
-                                    <dd>{{ path.posterfile.rating }}/10</dd>
-                                {% endif %}
-                            </dl>
-                        </h4>
-                    </div>
-                </div>
-            </div>
         {% endif %}
     </nav>
 {% endblock %}

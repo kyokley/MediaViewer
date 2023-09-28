@@ -35,4 +35,4 @@ def tvshows(request, tv_id):
         len(tv.poster.plot) > 300 if tv.poster.plot else ""
     )
     setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/files.html", context)
+    return render(request, "mediaviewer/tvshows.html", context)
