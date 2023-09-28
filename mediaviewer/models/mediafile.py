@@ -76,8 +76,20 @@ class MediaFile(TimeStampModel):
             self._media = self.media_path.media
         return self._media
 
+    @property
+    def tv(self):
+        if not hasattr(self, '_tv'):
+            self._tv = self.media_path.tv
+        return self._tv
+
+    @property
+    def movie(self):
+        if not hasattr(self, '_movie'):
+            self._movie = self.media_path.movie
+        return self._movie
+
     def is_tv(self):
-        return bool(self.media_path.tv)
+        return bool(self.tv)
 
     def is_movie(self):
         return not self.is_tv()
@@ -162,7 +174,7 @@ class MediaFile(TimeStampModel):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/mediafile/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.display_name}</a>',
+            f'<a class="img-preview" href="/mediaviewer/tvdetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.display_name}</a>',
             f"""<span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}""",
         ]
 

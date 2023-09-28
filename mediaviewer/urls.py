@@ -26,6 +26,7 @@ router = routers.DefaultRouter()
 urlpatterns = [
     re_path(r"^$", home.home, name="home"),
     re_path(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
+    re_path(r"^tvdetail/(?P<mf_id>\d+)/$", tv.tvdetail, name="tvdetail"),
     re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
     re_path(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
     re_path(r"^tvshows/(?P<tv_id>\d+)/$", tv.tvshows, name="tvshows"),

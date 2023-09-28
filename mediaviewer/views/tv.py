@@ -1,4 +1,4 @@
-from mediaviewer.utils import logAccessInfo
+from mediaviewer.utils import logAccessInfo, humansize
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import (
     render,
@@ -9,7 +9,7 @@ from mediaviewer.models.usersettings import (
     BANGUP_IP,
 )
 from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.models import TV
+from mediaviewer.models import TV, MediaFile, Comment
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -36,3 +36,34 @@ def tvshows(request, tv_id):
     )
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvshows.html", context)
+
+
+@login_required(login_url="/mediaviewer/login/")
+@logAccessInfo
+def tvdetail(request, mf_id):
+    user = request.user
+    file = MediaFile.objects.get(pk=mf_id)
+
+    comment, _ = Comment.objects.get_or_create(
+        user=user,
+        media_file=file,
+        defaults={'viewed': False})
+
+    settings = user.settings()
+    context = {
+        "file": file,
+        "display_name": file.tv.name,
+        'episode_name': file.display_name,
+        'poster': file.poster,
+        "LOCAL_IP": LOCAL_IP,
+        "BANGUP_IP": BANGUP_IP,
+        "viewed": comment.viewed,
+        "can_download": settings and settings.can_download or False,
+        "file_size": file.size and humansize(file.size),
+    }
+    context["active_page"] = "tvshows"
+    context["title"] = (
+        file.full_name
+    )
+    setSiteWideContext(context, request)
+    return render(request, "mediaviewer/tvdetail.html", context)

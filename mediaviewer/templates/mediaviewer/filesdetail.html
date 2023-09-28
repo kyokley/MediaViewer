@@ -1,24 +1,12 @@
 {% extends "home.html" %}
 <!DOCTYPE html>
 {% load static %}
-{% include title %}
-
-{% include css %}
-
-{% include navbar %}
-
 {% block jumbotron %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            {% if file.isMovie %}
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
-                <li class="breadcrumb-item active">{{ file.rawSearchString }}</li>
-            {% else %}
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-                <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ file.path.id }}/">{{ file.path.displayName }}</a></li>
-            {% endif %}
+            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
+            <li class="breadcrumb-item active">{{ file.rawSearchString }}</li>
         </ol>
     </nav>
 {% endblock %}
@@ -32,7 +20,7 @@
     {% endif %}
     <div class="row text-center">
         <h2>
-            {{ displayName }}
+            {{ display_name }}
         </h2>
     </div>
     <div class="row">
@@ -49,6 +37,13 @@
     <div class="row text-center justify-content-center">
         <div class="col-10">
             <h2>
+                {{ episode_name }}
+            </h2>
+        </div>
+    </div>
+    <div class="row text-center justify-content-center">
+        <div class="col-10">
+            <h2>
                 {% if poster.tagline %}
                     {{ poster.tagline }}
                 {% endif %}
@@ -56,7 +51,7 @@
         </div>
     </div>
     <div class="row">
-    {% if file.finished and can_download and waiterstatus %}
+    {% if finished and can_download and waiterstatus %}
         <div class="d-grid gap-2 col-4 mx-auto">
             <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
         </div>
@@ -116,10 +111,6 @@
         </h4>
     </div>
 {% endblock %}
-
-{% include footer %}
-
-{% include javascript_include %}
 
 {% block javascript %}
     <script type="text/javascript">
