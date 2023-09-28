@@ -6,11 +6,10 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
-from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.genre import Genre
-from mediaviewer.models import TV, Movie, MediaFile, Comment
-from django.db.models import OuterRef, Subquery, Prefetch
+from mediaviewer.models import TV, Movie, MediaFile
+from django.db.models import OuterRef, Subquery
 
 import json
 import pytz
@@ -89,7 +88,7 @@ def ajaxgenres(request, guid):
         return HttpResponse(None, content_type="application/json", status=405)
 
 
-def _ajax_file_rows(request, qs):
+def _ajax_movie_rows(request, qs):
     user = request.user
 
     settings = user.settings()
@@ -105,8 +104,8 @@ def _ajax_file_rows(request, qs):
     draw = int(request_params["draw"][0])
 
     sort_columns_map = {
-        0: "_display_name",
-        1: "datecreated",
+        0: "name",
+        1: "date_created",
     }
     sort_column = int(request_params["order[0][column]"][0])
     sort_dir = request_params["order[0][dir]"][0]
@@ -120,14 +119,13 @@ def _ajax_file_rows(request, qs):
     qs = initial_qs.order_by(sort_expr).search(search_str)
     files = qs[offset : offset + length]
 
-    viewed_by_file = UserComment.objects.viewed_by_file(user)
     file_data = []
     for file in files:
         file_data.append(
             file.ajax_row_payload(
                 can_download,
                 waiterstatus,
-                viewed_by_file,
+                user,
             )
         )
 
@@ -236,14 +234,14 @@ def _ajax_tv_rows(request, qs):
 @csrf_exempt
 def ajaxmovierows(request):
     qs = Movie.objects.order_by('-id')
-    return _ajax_file_rows(request, qs)
+    return _ajax_movie_rows(request, qs)
 
 
 @csrf_exempt
 def ajaxmoviesbygenrerows(request, genre_id):
     genre = get_object_or_404(Genre, pk=genre_id)
     qs = Movie.objects.filter(poster__genres=genre).order_by('-id')
-    return _ajax_file_rows(request, qs)
+    return _ajax_movie_rows(request, qs)
 
 
 def _get_tv_show_rows_query(genre_id=None):

@@ -22,7 +22,7 @@ class Movie(Media):
     def is_tv(self):
         return False
 
-    def ajax_row_payload(self, can_download, waiterstatus, viewed_lookup):
+    def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster
         tooltip_img = (
             f"""data-bs-content="<img class='tooltip-img' src='{ poster.image.url }' />\""""
@@ -31,7 +31,7 @@ class Movie(Media):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/movie/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self._display_name}</a>',
+            f'<a class="img-preview" href="/mediaviewer/movie/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.name}</a>',
             f"""<span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}""",
         ]
 
@@ -44,7 +44,8 @@ class Movie(Media):
                 payload.append("Alfred is down")
 
         cell = """<div class="row text-center">"""
-        if viewed_lookup.get(self.id, False):
+        if self.comments.filter(user=user,
+                                viewed=True).exists():
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
