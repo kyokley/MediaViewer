@@ -1,0 +1,152 @@
+{% extends "home.html" %}
+<!DOCTYPE html>
+{% load static %}
+{% include title %}
+
+{% include css %}
+
+{% include navbar %}
+
+{% block jumbotron %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% if file.isMovie %}
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
+                <li class="breadcrumb-item active">{{ file.rawSearchString }}</li>
+            {% else %}
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ file.tv.id }}/">{{ file.tv.name }}</a></li>
+            {% endif %}
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block messages %}
+{% endblock %}
+
+{% block main %}
+    {% if error_message %}
+        <p><strong>{{ error_message }}</strong></p>
+    {% endif %}
+    <div class="row text-center">
+        <h2>
+            {{ displayName }}
+        </h2>
+    </div>
+    <div class="row">
+        <div class="col">
+            {% if poster.image %}
+                <img src="{{ poster.image.url }}" class="large-img mx-auto d-block"/>
+            {% else %}
+                <h4>
+                    No Image
+                </h4>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row text-center justify-content-center">
+        <div class="col-10">
+            <h2>
+                {% if poster.tagline %}
+                    {{ poster.tagline }}
+                {% endif %}
+            </h2>
+        </div>
+    </div>
+    <div class="row">
+    {% if file.finished and can_download and waiterstatus %}
+        <div class="d-grid gap-2 col-4 mx-auto">
+            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
+        </div>
+    {% endif %}
+        <h4>
+            <div class="row gy-3 py-3">
+                {% if poster.extendedplot or poster.plot %}
+                    <div class="col-sm-3">Description:</div>
+                    {% if poster.extendedplot %}
+                        <div class="col-12 col-sm-9 truncated-long">{{ poster.extendedplot }}</div>
+                    {% else %}
+                        <div class="col-12 col-sm-9 truncated-long">{{ poster.plot }}</div>
+                    {% endif %}
+                {% endif %}
+                {% if poster.display_genres %}
+                    <div class="col-sm-3">Genre:</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_genres }}</div>
+                {% endif %}
+                {% if poster.display_writers %}
+                    <div class="col-sm-3">Writer:</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_writers }}</div>
+                {% endif %}
+                {% if poster.display_directors %}
+                    <div class="col-sm-3">Director:</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_directors }}</div>
+                {% endif %}
+                {% if poster.display_actors %}
+                    <div class="col-sm-3">Actors:</div>
+                    <div class="col-12 col-sm-9 truncated-short">{{ poster.display_actors }}</div>
+                {% endif %}
+                {% if poster.rated %}
+                    <div class="col-3">Rated:</div>
+                    <div class="col-9">{{ poster.rated }}</div>
+                {% endif %}
+                {% if poster.rating and poster.rating != 'N/A' %}
+                    <div class="col-3">Rating:</div>
+                    <div class="col-9">{{ poster.rating | floatformat }}/10</div>
+                {% endif %}
+                {% if file_size and can_download %}
+                    <div class="col-3">Size:</div>
+                    <div class="col-9">{{ file_size }}</div>
+                {% endif %}
+                <div class="col-3">
+                    <label for="toggle-viewed">
+                        Viewed:
+                    </label>
+                </div>
+                <div class="col-9">
+                    {% if viewed %}
+                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox(['{{file.id}}'])" />
+                    {% else %}
+                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox(['{{file.id}}'])" />
+                    {% endif %}
+                    <span id="saved-{{ file.id }}"></span>
+                </div>
+            </div>
+        </h4>
+    </div>
+{% endblock %}
+
+{% include footer %}
+
+{% include javascript_include %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            csrf_token = '{{ csrf_token }}';
+            preparePage($);
+            var input = document.getElementById('checkbox-input');
+            var viewedInput = document.getElementById('toggle-viewed')
+            if (viewedInput !== null){
+                viewedInput.addEventListener('click', function() {
+                    input.value = this.checked;
+                });
+            }
+
+            var hideInput = document.getElementById('hide-checkbox-input');
+            var toggleHide = document.getElementById('toggle-hide');
+            if (toggleHide !== null){
+                toggleHide.addEventListener('click', function() {
+                    hideInput.value = this.checked;
+                });
+            }
+
+            prepareAjaxWaiterStatus($, '{{ is_staff }}');
+            scrollSetup();
+
+            $(".truncated-short").shorten({"showChars": 150});
+            $(".truncated-long").shorten({"showChars": 1000});
+        });
+    </script>
+{% endblock %}
