@@ -173,10 +173,6 @@ def _ajax_media_file_rows(request, qs):
     initial_qs = qs
     qs = initial_qs.order_by(sort_expr).search(search_str)
 
-    # Must Prefetch to get viewed Comments
-    qs = qs.prefetch_related(
-        Prefetch('comments', queryset=Comment.objects.filter(user=user, viewed=True)))
-
     mfs = qs[offset : offset + length]
 
     mf_data = []
@@ -185,6 +181,7 @@ def _ajax_media_file_rows(request, qs):
             mf.ajax_row_payload(
                 can_download,
                 waiterstatus,
+                user
             )
         )
 
@@ -279,4 +276,4 @@ def ajaxtvshows(request, tv_id):
 
     qs = MediaFile.objects.filter(media_path__tv=ref_tv).order_by('display_name')
 
-    return _ajax_file_rows(request, qs)
+    return _ajax_media_file_rows(request, qs)

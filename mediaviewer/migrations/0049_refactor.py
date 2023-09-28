@@ -190,7 +190,7 @@ def forward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0048_auto_20230925_1937'),
+        ('mediaviewer', '0048_auto_20230927_2146'),
     ]
 
     operations = [

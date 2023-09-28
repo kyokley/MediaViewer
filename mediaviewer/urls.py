@@ -18,6 +18,7 @@ from mediaviewer.views import (
     requests,
     waiterstatus,
     ajax,
+    tv,
 )
 
 router = routers.DefaultRouter()
@@ -27,7 +28,7 @@ urlpatterns = [
     re_path(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
     re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
     re_path(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
-    re_path(r"^tvshows/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
+    re_path(r"^tvshows/(?P<tv_id>\d+)/$", tv.tvshows, name="tvshows"),
     re_path(r"^tvshows/summary/$", files.tvshowsummary, name="tvshowsummary"),
     re_path(
         r"^tvshows/genre/(?P<genre_id>\d+)/$",
@@ -97,7 +98,7 @@ urlpatterns = [
         name="ajaxtvshowsbygenre",
     ),
     re_path(
-        r"^ajax/ajaxtvshows/(?P<path_id>[0-9]+)/$",
+        r"^ajax/ajaxtvshows/(?P<tv_id>[0-9]+)/$",
         ajax.ajaxtvshows,
         name="ajaxtvshows",
     ),

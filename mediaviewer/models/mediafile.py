@@ -50,8 +50,6 @@ class MediaFile(TimeStampModel):
                                blank=True,
                                default=False)
     size = models.BigIntegerField(null=True, blank=True)
-    comments = models.ManyToManyField(
-        'auth.User', through='mediaviewer.Comment')
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
@@ -155,7 +153,7 @@ class MediaFile(TimeStampModel):
             episode = self.override_episode
         return episode and (episode.isdigit() and episode.zfill(2) or None) or None
 
-    def ajax_row_payload(self, can_download, waiterstatus):
+    def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster
         tooltip_img = (
             f"""data-bs-content="<img class='tooltip-img' src='{ poster.image.url }' />\""""
@@ -178,9 +176,8 @@ class MediaFile(TimeStampModel):
 
         cell = """<div class="row text-center">"""
 
-        # NOTE: the existence of a Comment works here because Prefetch must have already populated the only relavant Comment.
-        # i.e. BE SURE TO Prefetch before calling this method
-        if self.comments.exists():
+        if self.comments.filter(user=user,
+                                viewed=True).exists():
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
