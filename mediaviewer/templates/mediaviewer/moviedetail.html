@@ -6,7 +6,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
             <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
-            <li class="breadcrumb-item active">{{ file.rawSearchString }}</li>
+            <li class="breadcrumb-item active">{{ display_name }}</li>
         </ol>
     </nav>
 {% endblock %}
@@ -89,10 +89,6 @@
                 {% if poster.rating and poster.rating != 'N/A' %}
                     <div class="col-3">Rating:</div>
                     <div class="col-9">{{ poster.rating | floatformat }}/10</div>
-                {% endif %}
-                {% if file_size and can_download %}
-                    <div class="col-3">Size:</div>
-                    <div class="col-9">{{ file_size }}</div>
                 {% endif %}
                 <div class="col-3">
                     <label for="toggle-viewed">

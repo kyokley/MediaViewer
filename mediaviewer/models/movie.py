@@ -31,7 +31,7 @@ class Movie(Media):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/movie/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.name}</a>',
+            f'<a class="img-preview" href="/mediaviewer/moviedetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.name}</a>',
             f"""<span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}""",
         ]
 

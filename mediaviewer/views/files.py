@@ -11,8 +11,6 @@ from mediaviewer.models.usersettings import (
     LOCAL_IP,
     BANGUP_IP,
 )
-from mediaviewer.models.genre import Genre
-from mediaviewer.models.path import Path
 from django.contrib.auth.models import User
 from mediaviewer.models.message import Message
 from django.contrib import messages
@@ -48,99 +46,6 @@ def files(request, items):
     }
     context["active_page"] = "files"
     context["title"] = "Files"
-    setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/files.html", context)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def movies(request):
-    user = request.user
-
-    settings = user.settings()
-    context = {
-        "view": "movies",
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
-        "can_download": settings and settings.can_download or False,
-        "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        "table_data_page": "ajaxmovierows",
-    }
-    context["active_page"] = "movies"
-    context["title"] = "Movies"
-    setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/files.html", context)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def movies_by_genre(request, genre_id):
-    user = request.user
-    genre = get_object_or_404(Genre, pk=genre_id)
-
-    settings = user.settings()
-    context = {
-        "view": "movies",
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
-        "can_download": settings and settings.can_download or False,
-        "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        "table_data_page": "ajaxmoviesbygenrerows",
-        "table_data_filter_id": genre.id,
-    }
-    context["active_page"] = "movies"
-    context["title"] = "Movies: {}".format(genre.genre)
-    setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/files.html", context)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def tvshowsummary(request):
-    context = {}
-    context["active_page"] = "tvshows"
-    context["title"] = "TV Shows"
-    context["table_data_page"] = "ajaxtvshowssummary"
-    context["table_data_filter_id"] = ""
-    setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/tvsummary.html", context)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def tvshows_by_genre(request, genre_id):
-    ref_genre = get_object_or_404(Genre, pk=genre_id)
-    context = {}
-    context["active_page"] = "tvshows"
-    context["title"] = "TV Shows: {}".format(ref_genre.genre)
-    context["table_data_page"] = "ajaxtvshowsbygenre"
-    context["table_data_filter_id"] = genre_id
-    setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/tvsummary.html", context)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def tvshows(request, pathid):
-    user = request.user
-    refpath = get_object_or_404(Path, pk=pathid)
-
-    settings = user.settings()
-    context = {
-        "path": refpath,
-        "view": "tvshows",
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
-        "can_download": settings and settings.can_download or False,
-        "jump_to_last": (settings and settings.jump_to_last_watched or False),
-        "table_data_page": "ajaxtvshows",
-    }
-    context["table_data_filter_id"] = pathid
-    context["active_page"] = "tvshows"
-    context["title"] = refpath.displayName()
-    context["long_plot"] = (
-        len(refpath.posterfile.plot) > 300 if refpath.posterfile.plot else ""
-    )
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/files.html", context)
 

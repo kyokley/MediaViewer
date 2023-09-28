@@ -9,7 +9,32 @@ from mediaviewer.models.usersettings import (
     BANGUP_IP,
 )
 from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.models import TV, MediaFile, Comment
+from mediaviewer.models import TV, MediaFile, Comment, Genre
+
+
+@login_required(login_url="/mediaviewer/login/")
+@logAccessInfo
+def tvshowsummary(request):
+    context = {}
+    context["active_page"] = "tvshows"
+    context["title"] = "TV Shows"
+    context["table_data_page"] = "ajaxtvshowssummary"
+    context["table_data_filter_id"] = ""
+    setSiteWideContext(context, request, includeMessages=True)
+    return render(request, "mediaviewer/tvsummary.html", context)
+
+
+@login_required(login_url="/mediaviewer/login/")
+@logAccessInfo
+def tvshows_by_genre(request, genre_id):
+    ref_genre = get_object_or_404(Genre, pk=genre_id)
+    context = {}
+    context["active_page"] = "tvshows"
+    context["title"] = "TV Shows: {}".format(ref_genre.genre)
+    context["table_data_page"] = "ajaxtvshowsbygenre"
+    context["table_data_filter_id"] = genre_id
+    setSiteWideContext(context, request, includeMessages=True)
+    return render(request, "mediaviewer/tvsummary.html", context)
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -42,7 +67,7 @@ def tvshows(request, tv_id):
 @logAccessInfo
 def tvdetail(request, mf_id):
     user = request.user
-    file = MediaFile.objects.get(pk=mf_id)
+    file = get_object_or_404(MediaFile, pk=mf_id)
 
     comment, _ = Comment.objects.get_or_create(
         user=user,

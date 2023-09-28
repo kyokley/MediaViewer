@@ -19,29 +19,29 @@ from mediaviewer.views import (
     waiterstatus,
     ajax,
     tv,
+    movie,
 )
 
 router = routers.DefaultRouter()
 
 urlpatterns = [
     re_path(r"^$", home.home, name="home"),
-    re_path(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
     re_path(r"^tvdetail/(?P<mf_id>\d+)/$", tv.tvdetail, name="tvdetail"),
     re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
-    re_path(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
     re_path(r"^tvshows/(?P<tv_id>\d+)/$", tv.tvshows, name="tvshows"),
-    re_path(r"^tvshows/summary/$", files.tvshowsummary, name="tvshowsummary"),
+    re_path(r"^tvshows/summary/$", tv.tvshowsummary, name="tvshowsummary"),
     re_path(
         r"^tvshows/genre/(?P<genre_id>\d+)/$",
-        files.tvshows_by_genre,
+        tv.tvshows_by_genre,
         name="tvshows_by_genre",
     ),
-    re_path(r"^movies/$", files.movies, name="movies"),
+    re_path(r"^movies/$", movie.movies, name="movies"),
     re_path(
         r"^movies/genre/(?P<genre_id>\d+)/$",
-        files.movies_by_genre,
+        movie.movies_by_genre,
         name="movies_by_genre",
     ),
+    re_path(r"^moviedetail/(?P<movie_id>\d+)/$", movie.moviedetail, name="moviedetail"),
     re_path(
         r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"
     ),
