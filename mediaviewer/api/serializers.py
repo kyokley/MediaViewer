@@ -25,17 +25,15 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         fields = (
             "guid",
             "userid",
-            "fileid",
             "username",
             "path",
             "filename",
             "ismovie",
-            "datecreated",
+            "date_created",
             "tokenid",
             "isvalid",
             "displayname",
-            "pathid",
-            "pathname",
+            "tv_name",
             "videoprogresses",
             "next_id",
             "previous_id",
@@ -43,21 +41,20 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "donation_site",
             "download_link",
             "theme",
+            'tv_id',
         )
 
     guid = serializers.CharField(required=True, max_length=32)
     userid = serializers.IntegerField(required=True, source="user.id")
-    fileid = serializers.IntegerField(required=True, source="file.id")
     username = serializers.SerializerMethodField()
     path = serializers.CharField(required=True)
     filename = serializers.CharField(required=True)
     ismovie = serializers.BooleanField(required=True)
-    datecreated = serializers.DateTimeField(required=True)
+    # date_created = serializers.DateTimeField(required=True)
     tokenid = serializers.IntegerField(required=True, source="id")
     isvalid = serializers.BooleanField(required=True)
     displayname = serializers.CharField(required=True)
-    pathid = serializers.SerializerMethodField()
-    pathname = serializers.SerializerMethodField()
+    tv_name = serializers.SerializerMethodField()
     videoprogresses = serializers.SerializerMethodField()
     next_id = serializers.SerializerMethodField()
     previous_id = serializers.SerializerMethodField()
@@ -65,28 +62,27 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     donation_site = serializers.SerializerMethodField()
     download_link = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
+    tv_id = serializers.SerializerMethodField()
 
     def get_username(self, obj):
         return obj.user.username
 
-    def get_pathid(self, obj):
-        return obj.file.path.id
-
-    def get_pathname(self, obj):
-        return obj.file.path.displayName()
+    def get_tv_name(self, obj):
+        tv = obj.media_file.tv if obj.media_file else None
+        return tv.name if tv else None
 
     def get_videoprogresses(self, obj):
         return [
             x.hashed_filename
-            for x in VideoProgress.objects.filter(user=obj.user).filter(file=obj.file)
+            for x in VideoProgress.objects.filter(user=obj.user).filter(media_file=obj.media_file, movie=obj.movie)
         ]
 
     def get_next_id(self, obj):
-        next_obj = obj.file.next()
+        next_obj = obj.media_file.next() if obj.media_file else None
         return next_obj and next_obj.id
 
     def get_previous_id(self, obj):
-        previous_obj = obj.file.previous()
+        previous_obj = obj.media_file.previous() if obj.media_file else None
         return previous_obj and previous_obj.id
 
     def get_binge_mode(self, obj):
@@ -104,6 +100,10 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     def get_theme(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.theme
+
+    def get_tv_id(self, obj):
+        tv = obj.media_file.tv if obj.media_file else None
+        return tv and tv.id
 
 
 class PathSerializer(serializers.ModelSerializer):

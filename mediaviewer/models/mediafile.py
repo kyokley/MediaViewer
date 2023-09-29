@@ -128,8 +128,8 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         if self.is_movie():
             return None
         else:
-            shows = list(self.tv.episodes().values_list('display_name', flat=True))
-            index = shows.index(self.display_name)
+            shows = list(self.tv.episodes())
+            index = shows.index(self)
             if index + 1 >= len(shows):
                 return None
             else:
@@ -139,9 +139,8 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         if self.is_movie():
             return None
         else:
-            shows = list(self.tv.episodes().values_list('display_name', flat=True))
-
-            index = shows.index(self.display_name)
+            shows = list(self.tv.episodes())
+            index = shows.index(self)
             if index - 1 < 0:
                 return None
             else:
