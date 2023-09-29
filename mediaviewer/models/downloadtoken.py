@@ -5,6 +5,7 @@ from django.conf import settings as conf_settings
 from mediaviewer.models.message import Message
 from django.utils import timezone
 
+
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
 

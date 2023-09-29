@@ -124,6 +124,29 @@ class MediaFile(TimeStampModel):
                 reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
             )
 
+    def next(self):
+        if self.is_movie():
+            return None
+        else:
+            shows = list(self.tv.episodes().values_list('display_name', flat=True))
+            index = shows.index(self.display_name)
+            if index + 1 >= len(shows):
+                return None
+            else:
+                return shows[index + 1]
+
+    def previous(self):
+        if self.is_movie():
+            return None
+        else:
+            shows = list(self.tv.episodes().values_list('display_name', flat=True))
+
+            index = shows.index(self.display_name)
+            if index - 1 < 0:
+                return None
+            else:
+                return shows[index - 1]
+
     @property
     def search_terms(self):
         return self.media.search_terms

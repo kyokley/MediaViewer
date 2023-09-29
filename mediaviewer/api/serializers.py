@@ -25,7 +25,8 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         fields = (
             "guid",
             "userid",
-            "fileid",
+            "mediafileid",
+            "movieid",
             "username",
             "path",
             "filename",

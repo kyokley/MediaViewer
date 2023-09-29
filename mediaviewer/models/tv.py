@@ -28,10 +28,7 @@ class TV(Media):
 
     def episodes(self):
         base_qs = MediaFile.objects.filter(media_path__tv=self)
-        if base_qs.exists():
-            return base_qs.order_by('date_created')
-        else:
-            return None
+        return base_qs.order_by('display_name')
 
     def last_created_episode_at(self):
         if not hasattr(self, '_last_created_episode_at'):
