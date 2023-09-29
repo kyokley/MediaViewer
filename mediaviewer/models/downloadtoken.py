@@ -1,11 +1,9 @@
 from django.db import models
 from datetime import timedelta
-from datetime import datetime
-import pytz
 from mediaviewer.utils import getSomewhatUniqueID
 from django.conf import settings as conf_settings
 from mediaviewer.models.message import Message
-
+from django.utils import timezone
 
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
@@ -110,10 +108,10 @@ class DownloadToken(models.Model):
     @property
     def isvalid(self):
         # Tokens are only valid for a certain amount of time
-        refDate = self.datecreated + timedelta(
+        refDate = self.date_created + timedelta(
             hours=conf_settings.TOKEN_VALIDITY_LENGTH
         )
-        return refDate > datetime.now(pytz.timezone(conf_settings.TIME_ZONE))
+        return refDate > timezone.now()
 
     @property
     def ismovie(self):
