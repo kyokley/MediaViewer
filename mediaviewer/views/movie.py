@@ -74,6 +74,7 @@ def moviedetail(request, movie_id):
         "BANGUP_IP": BANGUP_IP,
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
+        'obj_type': 'movie',
     }
     context["active_page"] = "movies"
     context["title"] = (

@@ -189,7 +189,7 @@ def forward(apps, schema_editor):
 def clean_up_old_objects(apps, schema_editor):
     DownloadToken = apps.get_model('mediaviewer', 'DownloadToken')
 
-    DownloadToken.objects.delete()
+    DownloadToken.objects.all().delete()
 
 
 class Migration(migrations.Migration):

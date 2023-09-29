@@ -85,6 +85,7 @@ def tvdetail(request, mf_id):
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
         "file_size": file.size and humansize(file.size),
+        'obj_type': 'media_file',
     }
     context["active_page"] = "tvshows"
     context["title"] = (
