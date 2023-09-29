@@ -1,6 +1,7 @@
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
 from django.urls import reverse
+from .core import ViewableObjectMixin
 
 
 class MovieQuerySet(MediaQuerySet):
@@ -11,7 +12,7 @@ class MovieManager(MediaManager):
     pass
 
 
-class Movie(Media):
+class Movie(Media, ViewableObjectMixin):
     poster = models.OneToOneField('mediaviewer.Poster',
                                   null=True,
                                   on_delete=models.SET_NULL,

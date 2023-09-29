@@ -1,6 +1,6 @@
 import re
 from django.db import models
-from .core import TimeStampModel
+from .core import TimeStampModel, ViewableObjectMixin
 from .poster import Poster
 from mediaviewer.utils import get_search_query
 from django.urls import reverse
@@ -24,7 +24,7 @@ class MediaFileManager(models.Manager):
     pass
 
 
-class MediaFile(TimeStampModel):
+class MediaFile(TimeStampModel, ViewableObjectMixin):
     media_path = models.ForeignKey('mediaviewer.MediaPath',
                                    null=False,
                                    on_delete=models.CASCADE)

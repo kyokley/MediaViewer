@@ -1,3 +1,7 @@
+import json
+from itertools import chain
+
+from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -9,11 +13,9 @@ from mediaviewer.models.usersettings import (
     BANGUP_IP,
 )
 from mediaviewer.models.message import Message
-from mediaviewer.models.usercomment import UserComment
-from mediaviewer.models import Poster
+from mediaviewer.models import Poster, Comment, MediaFile, Movie
 from mediaviewer.utils import logAccessInfo, humansize
 from django.shortcuts import render, get_object_or_404, redirect
-import json
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -58,6 +60,7 @@ def filesdetail(request, file_id):
 
 @csrf_exempt
 @logAccessInfo
+@transaction.atomic
 def ajaxviewed(request):
     errmsg = None
     user = request.user
@@ -72,32 +75,41 @@ def ajaxviewed(request):
     data = dict(request.POST)
     data.pop("csrfmiddlewaretoken", None)
 
-    updated = []
+    media_files = data.pop('media_files', [])
+    movies = data.pop('movies', [])
+
     updated_comments = []
     created_comments = []
 
-    qs = File.objects.filter(pk__in=data.keys())
-    uc_qs = UserComment.objects.filter(user=user).filter(file__in=qs)
-    uc_lookup = {uc.file: uc for uc in uc_qs}
+    mf_qs = MediaFile.objects.filter(pk__in=media_files.keys())
+    movie_qs = Movie.objects.filter(pk__in=movies.keys())
 
-    for file in qs:
-        checked = data[str(file.pk)]
+    mf_comment_qs = Comment.objects.filter(user=user).filter(media_file__in=mf_qs)
+    movie_comment_qs = Comment.objects.filter(user=user).filter(movie__in=movie_qs)
+
+    comment_lookup = {comment.media_file: comment for comment in mf_comment_qs}
+    comment_lookup.update({comment.movie: comment for comment in movie_comment_qs})
+
+    for obj in chain(mf_qs, movie_qs):
+        if isinstance(obj, MediaFile):
+            checked = media_files[str(obj.pk)]
+        else:
+            checked = movies[str(obj.pk)]
+
         viewed = checked[0].lower() == "true" and True or False
-        comment, was_created = file.markFileViewed(
-            user, viewed, save=False, uc_lookup=uc_lookup
-        )
+        comment, was_created = obj.mark_viewed(user, viewed, save=False, comment_lookup=comment_lookup)
+
         if was_created:
             created_comments.append(comment)
         else:
             updated_comments.append(comment)
 
-        updated.append(str(file.pk))
 
     if created_comments:
-        UserComment.objects.bulk_create(created_comments)
+        Comment.objects.bulk_create(created_comments)
 
     if updated_comments:
-        UserComment.objects.bulk_update(updated_comments, ["viewed", "dateedited"])
+        Comment.objects.bulk_update(updated_comments, ["viewed"])
 
     if created_comments or updated_comments:
         Message.clearLastWatchedMessage(user)
@@ -115,7 +127,8 @@ def ajaxsuperviewed(request):
 
     token = DownloadToken.objects.filter(guid=guid).first()
     if token and token.isvalid:
-        token.file.markFileViewed(token.user, viewed)
+        obj = token.media_file or token.movie
+        obj.mark_viewed(token.user, viewed)
     else:
         errmsg = "Token is invalid"
 
