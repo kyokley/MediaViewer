@@ -74,11 +74,8 @@ class Message(models.Model):
             cls.createNewMessage(user, body, level=level)
 
     @classmethod
-    def createLastWatchedMessage(cls, user, file, level=messages.WARNING):
-        if file.isTVShow():
-            body = CONTINUE_MESSAGE.format(file.path.url())
-        else:
-            body = CONTINUE_MESSAGE.format(file.url())
+    def createLastWatchedMessage(cls, user, movie_or_media_file, level=messages.WARNING):
+        body = CONTINUE_MESSAGE.format(movie_or_media_file.url())
 
         old_messages = (
             cls.objects.filter(touser=user)

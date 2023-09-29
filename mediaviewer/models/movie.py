@@ -1,5 +1,6 @@
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
+from django.urls import reverse
 
 
 class MovieQuerySet(MediaQuerySet):
@@ -21,6 +22,11 @@ class Movie(Media):
 
     def is_tv(self):
         return False
+
+    def url(self):
+        return '<a href="{}">{}</a>'.format(
+            reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
+        )
 
     def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster

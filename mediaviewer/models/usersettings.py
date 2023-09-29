@@ -60,8 +60,11 @@ class UserSettings(models.Model):
         db_column="can_login", blank=False, null=False, default=True
     )
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
-    last_watched = models.ForeignKey(
-        "mediaviewer.Path", on_delete=models.SET_NULL, null=True, blank=True
+    last_watched_tv = models.ForeignKey(
+        "mediaviewer.TV", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    last_watched_movie = models.ForeignKey(
+        "mediaviewer.Movie", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
     allow_password_logins = models.BooleanField(blank=True, null=False, default=False)

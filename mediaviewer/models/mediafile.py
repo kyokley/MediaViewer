@@ -3,6 +3,7 @@ from django.db import models
 from .core import TimeStampModel
 from .poster import Poster
 from mediaviewer.utils import get_search_query
+from django.urls import reverse
 
 
 class MediaFileQuerySet(models.QuerySet):
@@ -112,6 +113,16 @@ class MediaFile(TimeStampModel):
         else:
             name = f'{self.media.short_name}'
         return name
+
+    def url(self):
+        if self.is_tv():
+            return '<a href="{}">{}</a>'.format(
+                reverse("mediaviewer:tvdetail", args=(self.id,)), self.full_name
+            )
+        else:
+            return '<a href="{}">{}</a>'.format(
+                reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
+            )
 
     @property
     def search_terms(self):
