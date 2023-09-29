@@ -44,16 +44,9 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             'tv_id',
         )
 
-    guid = serializers.CharField(required=True, max_length=32)
     userid = serializers.IntegerField(required=True, source="user.id")
     username = serializers.SerializerMethodField()
-    path = serializers.CharField(required=True)
-    filename = serializers.CharField(required=True)
-    ismovie = serializers.BooleanField(required=True)
-    # date_created = serializers.DateTimeField(required=True)
     tokenid = serializers.IntegerField(required=True, source="id")
-    isvalid = serializers.BooleanField(required=True)
-    displayname = serializers.CharField(required=True)
     tv_name = serializers.SerializerMethodField()
     videoprogresses = serializers.SerializerMethodField()
     next_id = serializers.SerializerMethodField()
