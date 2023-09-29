@@ -58,7 +58,7 @@ class DownloadTokenAdmin(admin.ModelAdmin):
         "user",
         "displayname",
         "ismovie",
-        "datecreated",
+        "date_created",
     )
     search_fields = (
         "id",
@@ -95,7 +95,8 @@ class UserSettingsAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "username",
-        "last_watched",
+        "last_watched_tv",
+        "last_watched_movie",
     )
     search_fields = ("user__username",)
     ordering = ("user__username",)

@@ -98,7 +98,8 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return DonationSiteSerializer(donation_site).data
 
     def get_download_link(self, obj):
-        return obj.file.downloadLink(obj.user, obj.guid)
+        movie_or_media_file = obj.movie or obj.media_file
+        return movie_or_media_file.downloadLink(obj.user, obj.guid)
 
     def get_theme(self, obj):
         user_settings = UserSettings.getSettings(obj.user)

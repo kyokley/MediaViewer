@@ -43,10 +43,7 @@ urlpatterns = [
     ),
     re_path(r"^moviedetail/(?P<movie_id>\d+)/$", movie.moviedetail, name="moviedetail"),
     re_path(
-        r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"
-    ),
-    re_path(
-        r"^autoplaydownloadlink/(?P<fileid>\d+)/$",
+        r"^autoplaydownloadlink/(?P<mf_id>\d+)/$",
         detail.autoplaydownloadlink,
         name="autoplaydownloadlink",
     ),

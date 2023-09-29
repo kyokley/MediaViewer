@@ -142,16 +142,30 @@ def ajaxsuperviewed(request):
 @logAccessInfo
 def ajaxdownloadbutton(request):
     response = {"errmsg": ""}
-    fileid = int(request.POST["fileid"])
-    file = get_object_or_404(File, pk=fileid)
+    mf_id = request.POST.get("mf_id")
+    movie_id = request.POST.get("movie_id")
+
+    # Need to raise error
+    if mf_id is None and movie_id is None:
+        pass
+    elif mf_id is not None and movie_id is not None:
+        pass
+
+    if mf_id is not None:
+        obj = get_object_or_404(MediaFile, pk=mf_id)
+    else:
+        obj = get_object_or_404(Movie, pk=movie_id)
     user = request.user
 
     if not user.is_authenticated:
         response = {"errmsg": "User not authenticated. Refresh and try again."}
-    elif file and user:
-        dt = DownloadToken.new(user, file)
+    elif obj and user:
+        if isinstance(obj, MediaFile):
+            dt = DownloadToken.objects.from_media_file(user, obj)
+        else:
+            dt = DownloadToken.objects.from_movie(user, obj)
 
-        downloadlink = file.downloadLink(user, dt.guid)
+        downloadlink = obj.downloadLink(user, dt.guid)
         response = {
             "guid": dt.guid,
             "isMovie": dt.ismovie,
@@ -166,21 +180,10 @@ def ajaxdownloadbutton(request):
 
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
-def downloadlink(request, fileid):
+def autoplaydownloadlink(request, mf_id):
     user = request.user
-    file = get_object_or_404(File, pk=fileid)
-    dt = DownloadToken.new(user, file)
+    mf = get_object_or_404(MediaFile, pk=mf_id)
+    dt = DownloadToken.new(user, mf)
 
-    downloadlink = file.downloadLink(user, dt.guid)
-    return redirect(downloadlink)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def autoplaydownloadlink(request, fileid):
-    user = request.user
-    file = get_object_or_404(File, pk=fileid)
-    dt = DownloadToken.new(user, file)
-
-    downloadlink = file.autoplayDownloadLink(user, dt.guid)
+    downloadlink = mf.autoplayDownloadLink(user, dt.guid)
     return redirect(downloadlink)
