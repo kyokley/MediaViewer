@@ -11,9 +11,8 @@ def _createId():
 
 class DownloadTokenManager(models.Manager):
     def get_by_guid(self, guid):
-        return self.get(guid=guid)
+        return self.filter(guid=guid).first()
 
-    @classmethod
     def from_media_file(
         self,
         user,
@@ -28,7 +27,6 @@ class DownloadTokenManager(models.Manager):
         )
         return self._post_token_create(dt, user)
 
-    @classmethod
     def from_movie(
         self,
         user,

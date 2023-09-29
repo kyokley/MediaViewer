@@ -2,6 +2,20 @@ from django.db import models
 from mediaviewer.models.message import Message
 
 
+class VideoProgressManager(models.Manager):
+    def destroy(self, user, hashed_filename):
+        vp = (
+            self.filter(user=user)
+            .filter(hashed_filename=hashed_filename)
+            .first()
+        )
+        if vp:
+            if not vp.file.next():
+                Message.clearLastWatchedMessage(user)
+
+            vp.delete()
+
+
 class VideoProgress(models.Model):
     user = models.ForeignKey(
         "auth.User",
@@ -14,8 +28,11 @@ class VideoProgress(models.Model):
     hashed_filename = models.TextField(db_column="hashedfilename")
     offset = models.DecimalField(max_digits=9, decimal_places=3)
     date_edited = models.DateTimeField(auto_now=True)
-    file = models.ForeignKey(
-        "mediaviewer.File", on_delete=models.CASCADE, null=True, blank=True
+    media_file = models.ForeignKey(
+        "mediaviewer.MediaFile", on_delete=models.CASCADE, null=True, blank=True
+    )
+    movie = models.ForeignKey(
+        "mediaviewer.Movie", on_delete=models.CASCADE, null=True, blank=True
     )
 
     class Meta:
@@ -75,16 +92,3 @@ class VideoProgress(models.Model):
             record = cls.new(user, filename, hashed_filename, offset, file)
 
         return record
-
-    @classmethod
-    def destroy(cls, user, hashed_filename):
-        vp = (
-            cls.objects.filter(user=user)
-            .filter(hashed_filename=hashed_filename)
-            .first()
-        )
-        if vp:
-            if not vp.file.next():
-                Message.clearLastWatchedMessage(user)
-
-            vp.delete()

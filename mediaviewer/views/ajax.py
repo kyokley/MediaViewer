@@ -20,7 +20,7 @@ REWIND_THRESHOLD = 10  # in minutes
 @csrf_exempt
 def ajaxvideoprogress(request, guid, hashed_filename):
     data = {"offset": 0}
-    dt = DownloadToken.getByGUID(guid)
+    dt = DownloadToken.objects.get_by_guid(guid)
     if not dt or not dt.user or not dt.isvalid:
         return HttpResponse(
             json.dumps(data), content_type="application/json", status=412
@@ -29,7 +29,7 @@ def ajaxvideoprogress(request, guid, hashed_filename):
     user = dt.user
 
     if request.method == "GET":
-        vp = VideoProgress.get(user, hashed_filename)
+        vp = VideoProgress.objects.filter(user=user, hashed_filename=hashed_filename).first()
         if vp:
             offset = float(vp.offset)
             date_edited = vp.date_edited
@@ -46,19 +46,21 @@ def ajaxvideoprogress(request, guid, hashed_filename):
             json.dumps(data), content_type="application/json", status=200
         )
     elif request.method == "POST":
-        vp = VideoProgress.createOrUpdate(
-            user,
-            dt.filename,
-            hashed_filename,
-            request.POST["offset"],
-            dt.file,
+        vp, _ = VideoProgress.objects.update_or_create(
+            user=user,
+            hashed_filename=hashed_filename,
+            defaults=dict(
+                offset=request.POST['offset'],
+                movie=dt.movie,
+                media_file=dt.media_file,
+            )
         )
         data["offset"] = float(vp.offset)
         return HttpResponse(
             json.dumps(data), content_type="application/json", status=200
         )
     elif request.method == "DELETE":
-        VideoProgress.destroy(user, hashed_filename)
+        VideoProgress.objects.destroy(user, hashed_filename)
         return HttpResponse(
             json.dumps(data), content_type="application/json", status=204
         )
@@ -70,7 +72,7 @@ def ajaxvideoprogress(request, guid, hashed_filename):
 
 @csrf_exempt
 def ajaxgenres(request, guid):
-    dt = DownloadToken.getByGUID(guid)
+    dt = DownloadToken.objects.get_by_guid(guid)
     if not dt or not dt.user or not dt.isvalid:
         return HttpResponse(None, content_type="application/json", status=412)
 
