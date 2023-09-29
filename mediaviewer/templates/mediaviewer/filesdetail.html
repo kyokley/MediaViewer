@@ -53,7 +53,7 @@
     <div class="row">
     {% if finished and can_download and waiterstatus %}
         <div class="d-grid gap-2 col-4 mx-auto">
-            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}')">Open</a>
+            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}', 'media_file')">Open</a>
         </div>
     {% endif %}
         <h4>

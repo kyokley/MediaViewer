@@ -186,13 +186,19 @@ def forward(apps, schema_editor):
                                    user=uc.user,
                                    viewed=uc.viewed)
 
+def clean_up_old_objects(apps, schema_editor):
+    DownloadToken = apps.get_model('mediaviewer', 'DownloadToken')
+
+    DownloadToken.objects.delete()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mediaviewer', '0048_auto_20230927_2146'),
+        ('mediaviewer', '0048_auto_20230929_0836'),
     ]
 
     operations = [
-        migrations.RunPython(forward)
+        migrations.RunPython(forward),
+        migrations.RunPython(clean_up_old_objects)
     ]

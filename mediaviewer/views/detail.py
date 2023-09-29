@@ -147,9 +147,12 @@ def ajaxdownloadbutton(request):
 
     # Need to raise error
     if mf_id is None and movie_id is None:
-        pass
+        return HttpResponse('Neither mf_id nor movie_id were provided', status=404)
     elif mf_id is not None and movie_id is not None:
-        pass
+        return HttpResponse(
+            'Only mf_id or movie_id can be provided. Got both.',
+            status=400
+        )
 
     if mf_id is not None:
         obj = get_object_or_404(MediaFile, pk=mf_id)

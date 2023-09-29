@@ -249,15 +249,20 @@ function ajaxCheckBox(file_ids){
     });
 }
 
-function openDownloadWindow(id){
+function openDownloadWindow(id, obj_type){
+    payload = {csrfmiddlewaretoken: csrf_token}
+    if(obj_type === 'movie'){
+        payload['movie_id'] = id
+    } else {
+        payload['mf_id'] = id
+    }
+
+
     $.ajax({
     url: '/mediaviewer/ajaxdownloadbutton/',
     type: 'POST',
     dataType: 'json',
-    data: {
-        fileid: id,
-        csrfmiddlewaretoken: csrf_token
-    },
+    data: payload,
     success: function(json){
         if(json.errmsg === ""){
             var win = window.open(json.downloadLink, "_self");

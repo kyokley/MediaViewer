@@ -49,12 +49,12 @@ class ViewableObjectMixin:
     def downloadLink(self, user, guid):
         settings = user.settings()
         if not settings or settings.ip_format == LOCAL_IP:
-            if self.isMovie():
+            if self.is_movie():
                 waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.LOCAL_WAITER_IP_FORMAT_MOVIES}{guid}/"
             else:
                 waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.LOCAL_WAITER_IP_FORMAT_TVSHOWS}{guid}/"
         elif settings and settings.ip_format == BANGUP_IP:
-            if self.isMovie():
+            if self.is_movie():
                 waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.BANGUP_WAITER_IP_FORMAT_MOVIES}{guid}/"
             else:
                 waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.BANGUP_WAITER_IP_FORMAT_TVSHOWS}{guid}/"

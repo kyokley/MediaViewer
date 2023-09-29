@@ -74,7 +74,7 @@ class DownloadToken(models.Model):
     path = models.TextField(db_column="path")
     filename = models.TextField(db_column="filename")
     date_created = models.DateTimeField(
-        blank=True, auto_now_add=True
+        blank=True, auto_now_add=True, null=True
     )
     displayname = models.TextField(db_column="display_name")
     media_file = models.ForeignKey(
