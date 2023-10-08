@@ -177,31 +177,6 @@ class FileSerializer(serializers.ModelSerializer):
         return False
 
 
-class ErrorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Error
-        fields = (
-            "pk",
-            "date",
-            "error",
-            "ignore",
-            "file",
-            "path",
-            "datatransmission",
-        )
-
-    pk = serializers.ReadOnlyField()
-    downloaded = serializers.DecimalField(
-        max_digits=12, decimal_places=0, required=True
-    )
-    date = serializers.DateTimeField(required=True)
-    error = serializers.CharField(required=True, source="errorstr")
-    ignore = serializers.BooleanField(required=True)
-    file = serializers.CharField(required=True)
-    path = serializers.CharField(required=True)
-    datatransmission = serializers.IntegerField(required=True)
-
-
 class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
     class Meta:
         model = FilenameScrapeFormat

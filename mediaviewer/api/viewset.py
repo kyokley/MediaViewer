@@ -5,7 +5,6 @@ from rest_framework.response import Response as RESTResponse
 from rest_framework import permissions, authentication
 from mediaviewer.api.serializers import (
     DownloadTokenSerializer,
-    ErrorSerializer,
     FilenameScrapeFormatSerializer,
     MessageSerializer,
     PosterFileSerializer,
@@ -17,7 +16,6 @@ from mediaviewer.models.path import (
     Path,
 )
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.error import Error
 from mediaviewer.models.message import Message
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.posterfile import PosterFile
@@ -44,16 +42,6 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
         token = DownloadToken.new(user, file)
         serializer = DownloadTokenSerializer(token)
         return RESTResponse(serializer.data)
-
-
-class ErrorViewSet(viewsets.ModelViewSet):
-    queryset = Error.objects.all()
-    serializer_class = ErrorSerializer
-
-    def get_queryset(self):
-        queryset = Error.objects.all()
-        log.debug("Returning Error objects")
-        return queryset
 
 
 class FilenameScrapeFormatViewSet(viewsets.ModelViewSet):

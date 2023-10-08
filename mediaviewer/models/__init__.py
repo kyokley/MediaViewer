@@ -4,7 +4,6 @@ from .core import TimeStampModel
 from .director import Director
 from .donation_site import DonationSite
 from .downloadtoken import DownloadToken
-from .error import Error
 from .file import File
 from .filenamescrapeformat import FilenameScrapeFormat
 from .genre import Genre

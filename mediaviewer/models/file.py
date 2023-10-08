@@ -6,7 +6,6 @@ from django.urls import reverse
 from django.utils.timezone import utc
 
 from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.error import Error
 from mediaviewer.models.usercomment import UserComment
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 from mediaviewer.models.genre import Genre
@@ -206,15 +205,6 @@ class File(models.Model):
                 return None
             else:
                 return shows[index - 1]
-
-    def hasErrors(self):
-        return Error.objects.filter(file=self).exclude(ignore=True).exists()
-
-    def errors(self, includeIgnored=False):
-        if includeIgnored:
-            return self.error_set.all()
-        else:
-            return Error.objects.filter(file=self).exclude(ignore=True)
 
     @classmethod
     def tvshows(cls):
