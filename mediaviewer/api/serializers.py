@@ -1,14 +1,13 @@
-from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
-from mediaviewer.models.error import Error
-from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.message import Message
-from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.usercomment import UserComment
-from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.videoprogress import VideoProgress
-from mediaviewer.models.donation_site import DonationSite
+from mediaviewer.models import DownloadToken
+from mediaviewer.models import Path
+from mediaviewer.models import FilenameScrapeFormat
+from mediaviewer.models import Message
+from mediaviewer.models import PosterFile
+from mediaviewer.models import UserComment
+from mediaviewer.models import UserSettings
+from mediaviewer.models import VideoProgress
+from mediaviewer.models import DonationSite
+from mediaviewer.models import TV, Movie, MediaPath, MediaFile
 
 from rest_framework import serializers
 
@@ -132,17 +131,67 @@ class PathSerializer(serializers.ModelSerializer):
             return 0
 
 
-class MoviePathSerializer(PathSerializer):
-    is_movie = serializers.BooleanField(default=True)
-
-
-class TvPathSerializer(PathSerializer):
-    is_movie = serializers.BooleanField(default=False)
-
-
-class FileSerializer(serializers.ModelSerializer):
+class MediaPathSerializer(serializers.ModelSerializer):
     class Meta:
-        model = File
+        model = MediaPath
+        fields = (
+            'path',
+            'tv',
+            'movie',
+        )
+    path = serializers.SerializerMethodField("get_path")
+
+    def get_path(self, obj):
+        return str(obj.path)
+
+
+class TVSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TV
+        fields = (
+            'pk',
+            'name'
+            'number_of_unwatched_shows',
+            'paths',
+        )
+        number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
+        paths = MediaPathSerializer(many=True,
+                                    read_only=True,
+                                    source='media_path_set')
+
+    def unwatched_shows(self, obj):
+        request = self.context.get("request")
+        if request is not None:
+            return obj.number_of_unwatched_shows(request.user)
+        else:
+            return 0
+
+
+class MovieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = (
+            'pk',
+            'name',
+            'path',
+            "localpath",
+            "filename",
+            "skip",
+            "finished",
+            "size",
+            "streamable",
+            "ismovie",
+            "displayname",
+            "watched",
+        )
+        path = MediaPathSerializer(many=False,
+                                   read_only=True,
+                                   source='media_path_set')
+
+
+class MediaFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaFile
         fields = (
             "pk",
             "path",
@@ -156,8 +205,6 @@ class FileSerializer(serializers.ModelSerializer):
             "displayname",
             "watched",
         )
-
-    pk = serializers.ReadOnlyField()
     localpath = serializers.CharField(required=False, source="path.localpathstr")
     filename = serializers.CharField(required=False)
     skip = serializers.BooleanField(required=False)
