@@ -10,3 +10,13 @@
         </ol>
     </nav>
 {% endblock %}
+
+{% block checkbox %}
+    <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox"
+                                                                           {% if viewed %}
+                                                                               checked
+                                                                       {% endif %}
+                                                                           onclick="
+                                                                           ajaxTVCheckBox(['{{file.id}}'])
+                                                                           " />
+{% endblock %}

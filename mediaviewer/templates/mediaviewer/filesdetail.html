@@ -51,11 +51,11 @@
         </div>
     </div>
     <div class="row">
-    {% if can_download and waiterstatus %}
-        <div class="d-grid gap-2 col-4 mx-auto">
-            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}', '{{ obj_type }}')">Open</a>
-        </div>
-    {% endif %}
+        {% if can_download and waiterstatus %}
+            <div class="d-grid gap-2 col-4 mx-auto">
+                <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}', '{{ obj_type }}')">Open</a>
+            </div>
+        {% endif %}
         <h4>
             <div class="row gy-3 py-3">
                 {% if poster.extendedplot or poster.plot %}
@@ -100,11 +100,16 @@
                     </label>
                 </div>
                 <div class="col-9">
-                    {% if viewed %}
-                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox(['{{file.id}}'])" />
-                    {% else %}
-                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox(['{{file.id}}'])" />
-                    {% endif %}
+                    {% block checkbox %}
+                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox"
+                                                                                               {% if viewed %}
+                                                                                                   checked
+                                                                                           {% endif %}
+                                                                                               onclick="
+                                                                                               ajaxMovieCheckBox(['{{file.id}}'])
+                                                                                               " />
+                    {% endblock %}
+
                     <span id="saved-{{ file.id }}"></span>
                 </div>
             </div>

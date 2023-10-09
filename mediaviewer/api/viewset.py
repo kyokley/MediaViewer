@@ -126,7 +126,7 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.none()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticated,)
 

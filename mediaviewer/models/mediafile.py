@@ -223,9 +223,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
         if self.comments.filter(user=user,
                                 viewed=True).exists():
-            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxCheckBox(['{self.id}'])" />"""
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxTVCheckBox(['{self.id}'])" />"""
         else:
-            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxCheckBox(['{self.id}'])" />"""
+            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxTVCheckBox(['{self.id}'])" />"""
         cell = f'{cell}<span id="saved-{ self.id }"></span></div>'
         payload.extend(
             [

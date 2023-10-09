@@ -72,11 +72,11 @@ def ajaxviewed(request):
         response["errmsg"] = errmsg
         return HttpResponse(json.dumps(response), content_type="application/javascript")
 
-    data = dict(request.POST)
+    data = json.loads(request.body)
     data.pop("csrfmiddlewaretoken", None)
 
-    media_files = data.pop('media_files', [])
-    movies = data.pop('movies', [])
+    media_files = data.get('media_files', {})
+    movies = data.get('movies', {})
 
     updated_comments = []
     created_comments = []
@@ -96,8 +96,7 @@ def ajaxviewed(request):
         else:
             checked = movies[str(obj.pk)]
 
-        viewed = checked[0].lower() == "true" and True or False
-        comment, was_created = obj.mark_viewed(user, viewed, save=False, comment_lookup=comment_lookup)
+        comment, was_created = obj.mark_viewed(user, checked, save=False, comment_lookup=comment_lookup)
 
         if was_created:
             created_comments.append(comment)

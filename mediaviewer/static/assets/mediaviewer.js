@@ -194,29 +194,60 @@ function prepareTableForRequests($){
     });
 }
 
-function ajaxCheckBox(file_ids){
-    update_payload = {csrfmiddlewaretoken: csrf_token};
+function ajaxMovieCheckBox(file_ids){
+    update_payload = {
+        csrfmiddlewaretoken: csrf_token,
+        'movies': {}
+    };
 
     file_ids.forEach((val, idx)=>{
         var box = document.getElementsByName(val)[0];
         var checked = box.checked;
-        update_payload[val] = checked;
+        update_payload["movies"][val] = checked;
         box.setAttribute('disabled', 'disabled');
     });
 
+    _ajaxCheckBox(update_payload, 'movie');
+}
+
+function ajaxTVCheckBox(file_ids){
+    update_payload = {
+        csrfmiddlewaretoken: csrf_token,
+        "media_files": {}
+    };
+
+    file_ids.forEach((val, idx)=>{
+        var box = document.getElementsByName(val)[0];
+        var checked = box.checked;
+        update_payload["media_files"][val] = checked;
+        box.setAttribute('disabled', 'disabled');
+    });
+
+    _ajaxCheckBox(update_payload, 'media_file');
+}
+
+function _ajaxCheckBox(update_payload, movie_or_media_file){
     jQuery.ajax({
         url : "/mediaviewer/ajaxviewed/",
         type : "POST",
-        dataType: "json",
-        data : update_payload,
-        success : function(json) {
+        contentType: "application/json",
+        processData: false,
+        data : JSON.stringify(update_payload),
+        success : function(json_str) {
+            json = JSON.parse(json_str);
             if(json.errmsg !== ''){
                 alert(json.errmsg);
             } else {
                 selectors = []
 
-                for(let file_id in json.data){
-                    viewed = Boolean(json.data[file_id][0]);
+                if(movie_or_media_file === 'movie'){
+                    res_data = json.data['movies'];
+                }else{
+                    res_data = json.data['media_files'];
+                }
+
+                for(let file_id in res_data){
+                    viewed = Boolean(res_data[file_id][0]);
 
                     selectors.push('#saved-' + file_id);
 
