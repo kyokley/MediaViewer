@@ -8,18 +8,18 @@ from mediaviewer.api.serializers import (
     FilenameScrapeFormatSerializer,
     MessageSerializer,
     PosterFileSerializer,
-    UserCommentSerializer,
+    CommentSerializer,
     PathSerializer,
 )
-from mediaviewer.models.file import File
-from mediaviewer.models.path import (
+from mediaviewer.models import File
+from mediaviewer.models import (
     Path,
 )
-from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.message import Message
-from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.usercomment import UserComment
+from mediaviewer.models import DownloadToken
+from mediaviewer.models import Message
+from mediaviewer.models import FilenameScrapeFormat
+from mediaviewer.models import PosterFile
+from mediaviewer.models import Comment
 from mediaviewer.log import log
 
 
@@ -125,23 +125,13 @@ class PosterViewSetByFile(viewsets.ModelViewSet):
             return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
 
-class UserCommentViewSet(viewsets.ModelViewSet):
-    queryset = UserComment.objects.all()
-    serializer_class = UserCommentSerializer
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
-        queryset = UserComment.objects.filter(user=user)
+        queryset = Comment.objects.filter(user=user)
         log.debug("Returning UserComment objects")
         return queryset
-
-    def retrieve(self, request, pk=None):
-        user = request.user
-        file = File.objects.get(pk=pk)
-        obj = UserComment.objects.filter(user=user).filter(file=file)
-        if obj:
-            serializer = self.serializer_class(obj[0])
-            return RESTResponse(serializer.data)
-        else:
-            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)

@@ -3,7 +3,6 @@ from mediaviewer.models import Path
 from mediaviewer.models import FilenameScrapeFormat
 from mediaviewer.models import Message
 from mediaviewer.models import PosterFile
-from mediaviewer.models import UserComment
 from mediaviewer.models import UserSettings
 from mediaviewer.models import VideoProgress
 from mediaviewer.models import DonationSite
@@ -287,19 +286,6 @@ class PosterFileSerializer(serializers.ModelSerializer):
         writer = serializers.CharField()
         director = serializers.CharField()
         episodename = serializers.CharField()
-
-
-class UserCommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserComment
-        fields = (
-            "pk",
-            "comment",
-            "viewed",
-        )
-        pk = serializers.ReadOnlyField()
-        comment = serializers.CharField()
-        viewed = serializers.BooleanField(required=True)
 
 
 class CommentSerializer(serializers.ModelSerializer):
