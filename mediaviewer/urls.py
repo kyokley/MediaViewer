@@ -164,24 +164,13 @@ urlpatterns.extend(
 )
 
 if not conf_settings.IS_SYNCING:
-    from mediaviewer.api import viewset, path_viewset, file_viewset
+    from mediaviewer.api import viewset, tv_viewset, movie_viewset
 
     router.register(
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"
     )
-    router.register(
-        r"unstreamablefile",
-        file_viewset.UnstreamableFileViewSet,
-        basename="unstreamablefile",
-    )
-    router.register(r"movie", file_viewset.MovieFileViewSet, basename="movie")
-    router.register(r"tv", file_viewset.TvFileViewSet, basename="tv")
-    router.register(r"tvpath", path_viewset.TvPathViewSet, basename="tvpath")
-    router.register(r"moviepath", path_viewset.MoviePathViewSet, basename="moviepath")
-    router.register(
-        r"distinct-tv", path_viewset.DistinctTvPathViewSet, basename="distinct-tv"
-    )
-    router.register(r"error", viewset.ErrorViewSet)
+    router.register(r"movie", movie_viewset.MovieViewSet, basename="movie")
+    router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
     router.register(r"posterfilebypath", viewset.PosterViewSetByPath)

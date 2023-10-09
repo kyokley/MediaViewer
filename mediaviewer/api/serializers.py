@@ -7,7 +7,7 @@ from mediaviewer.models import UserComment
 from mediaviewer.models import UserSettings
 from mediaviewer.models import VideoProgress
 from mediaviewer.models import DonationSite
-from mediaviewer.models import TV, Movie, MediaPath, MediaFile
+from mediaviewer.models import TV, Movie, MediaPath, MediaFile, Comment
 
 from rest_framework import serializers
 
@@ -299,4 +299,17 @@ class UserCommentSerializer(serializers.ModelSerializer):
         )
         pk = serializers.ReadOnlyField()
         comment = serializers.CharField()
+        viewed = serializers.BooleanField(required=True)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = (
+            "pk",
+            "media_file",
+            "movie",
+            "viewed",
+        )
+        pk = serializers.ReadOnlyField()
         viewed = serializers.BooleanField(required=True)
