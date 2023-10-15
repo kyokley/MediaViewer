@@ -87,7 +87,7 @@ class TestMovies:
         )
         self.mock_render.assert_called_once_with(
             self.request,
-            "mediaviewer/files.html",
+            "mediaviewer/movies.html",
             expected_context,
         )
 
@@ -185,7 +185,7 @@ class TestMoviesByGenre:
             includeMessages=True,
         )
         self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/files.html", expected_context
+            self.request, "mediaviewer/movies.html", expected_context
         )
 
 
@@ -389,7 +389,7 @@ class TestTvShows:
             expected_context, self.request, includeMessages=True
         )
         self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/files.html", expected_context
+            self.request, "mediaviewer/movies.html", expected_context
         )
 
 

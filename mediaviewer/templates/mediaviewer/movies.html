@@ -4,21 +4,12 @@
 
 {% block jumbotron %}
     <nav aria-label="breadcrumb">
-        {% if view == 'files' %}
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item active">Files</li>
-            </ol>
-            <h1>Files</h1>
-            Below is a list of all files being tracked by the autodownloader.
-        {% elif view == 'movies' %}
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item active">Movies</li>
-            </ol>
-            <h1>{{ title }}</h1>
-            <h3>Select from the following movies:</h3>
-        {% endif %}
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+            <li class="breadcrumb-item active">Movies</li>
+        </ol>
+        <h1>{{ title }}</h1>
+        <h3>Select from the following movies:</h3>
     </nav>
 {% endblock %}
 

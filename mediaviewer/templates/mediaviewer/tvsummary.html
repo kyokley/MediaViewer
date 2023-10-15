@@ -1,12 +1,6 @@
-{% extends "files.html" %}
+{% extends "movies.html" %}
 <!DOCTYPE html>
 {% load static %}
-{% include title %}
-
-{% include css %}
-
-{% include navbar %}
-
 {% block jumbotron %}
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
@@ -18,8 +12,6 @@
         <h1 class="display-5 fw-bold">{{ title }}</h1>
         <h3>Select from the following TV Shows:</h3>
 {% endblock %}
-
-{% include messages %}
 
 {% block main %}
     <table id="myTable" class="table table-{{ theme }} table-striped table-hover">
@@ -34,10 +26,6 @@
     </table>
 
 {% endblock %}
-
-{% include footer %}
-
-{% include javascript_include %}
 
 {% block javascript %}
     <script type="text/javascript">

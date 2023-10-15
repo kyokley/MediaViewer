@@ -29,7 +29,7 @@ def movies(request):
     context["active_page"] = "movies"
     context["title"] = "Movies"
     setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/files.html", context)
+    return render(request, "mediaviewer/movies.html", context)
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -51,7 +51,7 @@ def movies_by_genre(request, genre_id):
     context["active_page"] = "movies"
     context["title"] = "Movies: {}".format(genre.genre)
     setSiteWideContext(context, request, includeMessages=True)
-    return render(request, "mediaviewer/files.html", context)
+    return render(request, "mediaviewer/movies.html", context)
 
 
 @login_required(login_url="/mediaviewer/login/")
