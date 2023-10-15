@@ -53,7 +53,7 @@
     <div class="row">
     {% if finished and can_download and waiterstatus %}
         <div class="d-grid gap-2 col-4 mx-auto">
-            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ file.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{file.id}}', 'movie')">Open</a>
+            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ movie.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{movie.id}}', 'movie')">Open</a>
         </div>
     {% endif %}
         <h4>
@@ -96,12 +96,12 @@
                     </label>
                 </div>
                 <div class="col-9">
-                    {% if viewed %}
-                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox" checked onclick="ajaxCheckBox(['{{file.id}}'])" />
-                    {% else %}
-                        <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox" onclick="ajaxCheckBox(['{{file.id}}'])" />
-                    {% endif %}
-                    <span id="saved-{{ file.id }}"></span>
+                    <input class="viewed-checkbox" id="toggle-viewed" name="{{ movie.id }}" type="checkbox"
+                                                                                           {% if viewed %}
+                                                                                               checked
+                                                                                       {% endif %}
+                                                                                           onclick="ajaxMovieCheckBox(['{{movie.id}}'])" />
+                    <span id="saved-{{ movie.id }}"></span>
                 </div>
             </div>
         </h4>
@@ -113,21 +113,6 @@
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            var input = document.getElementById('checkbox-input');
-            var viewedInput = document.getElementById('toggle-viewed')
-            if (viewedInput !== null){
-                viewedInput.addEventListener('click', function() {
-                    input.value = this.checked;
-                });
-            }
-
-            var hideInput = document.getElementById('hide-checkbox-input');
-            var toggleHide = document.getElementById('toggle-hide');
-            if (toggleHide !== null){
-                toggleHide.addEventListener('click', function() {
-                    hideInput.value = this.checked;
-                });
-            }
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();

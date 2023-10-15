@@ -6,17 +6,17 @@
         <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
                 <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
-                <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ file.tv.id }}/">{{ file.tv.name }}</a></li>
+                <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ mf.tv.id }}/">{{ mf.tv.name }}</a></li>
         </ol>
     </nav>
 {% endblock %}
 
 {% block checkbox %}
-    <input class="viewed-checkbox" id="toggle-viewed" name="{{ file.id }}" type="checkbox"
+    <input class="viewed-checkbox" id="toggle-viewed" name="{{ mf.id }}" type="checkbox"
                                                                            {% if viewed %}
                                                                                checked
                                                                        {% endif %}
                                                                            onclick="
-                                                                           ajaxTVCheckBox(['{{file.id}}'])
+                                                                           ajaxMovieCheckBox(['{{mf.id}}'])
                                                                            " />
 {% endblock %}

@@ -67,29 +67,29 @@ def tvshows(request, tv_id):
 @logAccessInfo
 def tvdetail(request, mf_id):
     user = request.user
-    file = get_object_or_404(MediaFile, pk=mf_id)
+    mf = get_object_or_404(MediaFile, pk=mf_id)
 
     comment, _ = Comment.objects.get_or_create(
         user=user,
-        media_file=file,
+        media_file=mf,
         defaults={'viewed': False})
 
     settings = user.settings()
     context = {
-        "file": file,
-        "display_name": file.tv.name,
-        'episode_name': file.display_name,
-        'poster': file.poster,
+        "mf": mf,
+        "display_name": mf.tv.name,
+        'episode_name': mf.display_name,
+        'poster': mf.poster,
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
-        "file_size": file.size and humansize(file.size),
+        "file_size": mf.size and humansize(mf.size),
         'obj_type': 'media_file',
     }
     context["active_page"] = "tvshows"
     context["title"] = (
-        file.full_name
+        mf.full_name
     )
     setSiteWideContext(context, request)
     return render(request, "mediaviewer/tvdetail.html", context)
