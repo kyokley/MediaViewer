@@ -117,7 +117,17 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     def url(self):
         if self.is_tv():
             return '<a href="{}">{}</a>'.format(
-                reverse("mediaviewer:tvdetail", args=(self.id,)), self.full_name
+                reverse("mediaviewer:tvdetail", args=(self.id,)), self.media.name
+            )
+        else:
+            return '<a href="{}">{}</a>'.format(
+                reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
+            )
+
+    def last_watched_url(self):
+        if self.is_tv():
+            return '<a href="{}">{}</a>'.format(
+                reverse("mediaviewer:tvshows", args=(self.media.id,)), self.media.name
             )
         else:
             return '<a href="{}">{}</a>'.format(

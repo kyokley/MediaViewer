@@ -29,6 +29,9 @@ class Movie(Media, ViewableObjectMixin):
             reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
         )
 
+    def last_watched_url(self):
+        return self.url()
+
     def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster
         tooltip_img = (
