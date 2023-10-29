@@ -139,7 +139,7 @@ def ajaxdownloadbutton(request):
 def autoplaydownloadlink(request, mf_id):
     user = request.user
     mf = get_object_or_404(MediaFile, pk=mf_id)
-    dt = DownloadToken.new(user, mf)
+    dt = DownloadToken.objects.from_media_file(user, mf)
 
     downloadlink = mf.autoplayDownloadLink(user, dt.guid)
     return redirect(downloadlink)
