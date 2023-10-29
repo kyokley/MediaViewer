@@ -5,57 +5,11 @@ from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from mediaviewer.models.file import File
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.models.usersettings import (
-    LOCAL_IP,
-    BANGUP_IP,
-)
 from mediaviewer.models.message import Message
-from mediaviewer.models import Poster, Comment, MediaFile, Movie
-from mediaviewer.utils import logAccessInfo, humansize
-from django.shortcuts import render, get_object_or_404, redirect
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def filesdetail(request, file_id):
-    user = request.user
-    file = File.objects.get(pk=file_id)
-    skip = file.skip
-    finished = file.finished
-    usercomment = file.usercomment(user)
-    if usercomment:
-        viewed = usercomment.viewed
-        comment = usercomment.comment or ""
-        setattr(file, "usercomment", usercomment)
-    else:
-        viewed = False
-        comment = ""
-
-    poster = Poster.objects.get(media_file__filename=file.filename)
-
-    settings = user.settings()
-    context = {
-        "file": file,
-        "displayName": file.displayName(),
-        'poster': poster,
-        "comment": comment,
-        "skip": skip,
-        "finished": finished,
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
-        "viewed": viewed,
-        "can_download": settings and settings.can_download or False,
-        "file_size": file.size and humansize(file.size),
-    }
-    context["active_page"] = "movies" if file.isMovie() else "tvshows"
-    context["title"] = (
-        file.isMovie() and file.rawSearchString() or file.path.displayName()
-    )
-    setSiteWideContext(context, request)
-    return render(request, "mediaviewer/filesdetail.html", context)
+from mediaviewer.models import Comment, MediaFile, Movie
+from mediaviewer.utils import logAccessInfo
+from django.shortcuts import get_object_or_404, redirect
 
 
 @csrf_exempt

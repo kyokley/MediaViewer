@@ -48,7 +48,7 @@ class Movie(Media, ViewableObjectMixin):
         if can_download:
             if waiterstatus:
                 payload.append(
-                    f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}')">Open</a></center>"""
+                    f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}', 'movie')">Open</a></center>"""
                 )
             else:
                 payload.append("Alfred is down")

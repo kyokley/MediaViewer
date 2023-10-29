@@ -32,7 +32,7 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
         obj = get_object_or_404(queryset, guid=pk)
         if obj:
             log.debug(f"Found token. isValid: {obj.isvalid}")
-        serializer = DownloadTokenSerializer(obj)
+        serializer = self.serializer_class(obj)
         return RESTResponse(serializer.data)
 
     def create(self, request):
@@ -40,7 +40,7 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
         file_id = request.data["file_id"]
         file = get_object_or_404(File.objects.filter(hide=False), pk=file_id)
         token = DownloadToken.new(user, file)
-        serializer = DownloadTokenSerializer(token)
+        serializer = self.serializer_class(token)
         return RESTResponse(serializer.data)
 
 

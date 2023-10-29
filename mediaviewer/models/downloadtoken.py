@@ -36,7 +36,7 @@ class DownloadTokenManager(models.Manager):
         dt = self.create(
             user=user,
             filename=movie.name,
-            path=movie.media_path_set.first().path,
+            path=movie.mediapath_set.first().path,
             displayname=movie.full_name,
             movie=movie,
         )
