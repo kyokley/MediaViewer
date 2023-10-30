@@ -2,19 +2,26 @@ from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.conf import settings
 from mediaviewer.models.file import File
 from mediaviewer.models.path import Path
+from mediaviewer.models.message import Message
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.genre import Genre
 from mediaviewer.models import TV, Movie, MediaFile
 from django.db.models import OuterRef, Subquery
+from mediaviewer.utils import logAccessInfo
 
 import json
 import pytz
+import re
 
 REWIND_THRESHOLD = 10  # in minutes
+ID_REGEX = re.compile(r"\d+")
 
 
 @csrf_exempt
@@ -277,3 +284,30 @@ def ajaxtvshows(request, tv_id):
     qs = MediaFile.objects.filter(media_path__tv=ref_tv).order_by('display_name')
 
     return _ajax_media_file_rows(request, qs)
+
+
+@logAccessInfo
+def ajaxreport(request):
+    response = {"errmsg": ""}
+    try:
+        createdBy = request.user
+        reportid = ID_REGEX.findall(request.POST["reportid"])[0]
+        reportid = int(reportid)
+        response["reportid"] = reportid
+        file = get_object_or_404(File, pk=reportid)
+        users = User.objects.filter(is_staff=True)
+
+        for user in users:
+            Message.createNewMessage(
+                user,
+                f"{file.filename} has been reported by {createdBy.username}",
+                level=messages.WARNING,
+            )
+    except Http404:
+        raise
+    except Exception as e:
+        if settings.DEBUG:
+            response["errmsg"] = str(e)
+        else:
+            response["errmsg"] = "An error has occurred"
+    return HttpResponse(json.dumps(response), content_type="application/javascript")

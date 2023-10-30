@@ -66,3 +66,6 @@ class ViewableObjectMixin:
             return None
         else:
             return self.downloadLink(user, guid) + "autoplay"
+
+    def url(self):
+        raise NotImplementedError('Method must be implemented by child classes')

@@ -3,12 +3,12 @@ import json
 from django.http import HttpResponse
 from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
-from mediaviewer.models.file import File
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 from django.conf import settings
 
 from mediaviewer.log import log
+from mediaviewer.models import MediaFile
 
 
 @logAccessInfo
@@ -19,7 +19,7 @@ def home(request):
         siteGreeting and siteGreeting.greeting or "Check out the new downloads!"
     )
     context["active_page"] = "home"
-    files = File.most_recent_files()
+    files = MediaFile.objects.most_recent_files()
     context["files"] = files
     context["title"] = "Home"
     setSiteWideContext(context, request, includeMessages=True)
@@ -33,7 +33,9 @@ def ajaxrunscraper(request):
     response = {"errmsg": ""}
     try:
         if request.user.is_staff:
-            File.inferAllScrapers()
+            # WIP: Need to figure out what to do here
+            # File.inferAllScrapers()
+            pass
     except Exception as e:
         if settings.DEBUG:
             response["errmsg"] = str(e)

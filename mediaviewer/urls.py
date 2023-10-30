@@ -69,7 +69,7 @@ urlpatterns = [
         r"^ajaxwaiterstatus/", waiterstatus.ajaxwaiterstatus, name="ajaxwaiterstatus"
     ),
     re_path(r"^ajaxclosemessage/", messaging.ajaxclosemessage, name="ajaxclosemessage"),
-    re_path(r"^ajaxreport/", files.ajaxreport, name="ajaxreport"),
+    re_path(r"^ajaxreport/", ajax.ajaxreport, name="ajaxreport"),
     re_path(r"^ajaxrunscraper/", home.ajaxrunscraper, name="ajaxrunscraper"),
     re_path(
         r"^ajaxvideoprogress/(?P<guid>[0-9A-Za-z]+)/(?P<hashed_filename>.+)/$",

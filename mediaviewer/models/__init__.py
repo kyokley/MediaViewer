@@ -4,7 +4,6 @@ from .core import TimeStampModel
 from .director import Director
 from .donation_site import DonationSite
 from .downloadtoken import DownloadToken
-from .file import File
 from .filenamescrapeformat import FilenameScrapeFormat
 from .genre import Genre
 from .loginevent import LoginEvent
@@ -13,7 +12,6 @@ from .mediafile import MediaFile
 from .mediapath import MediaPath
 from .message import Message
 from .movie import Movie
-from .path import Path
 from .person import Person
 from .poster import Poster
 from .posterfile import PosterFile

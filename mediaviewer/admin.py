@@ -1,10 +1,8 @@
 from django.contrib import admin
 from django.db import transaction
 from mediaviewer.models import Genre
-from mediaviewer.models import Path
 from mediaviewer.models import FilenameScrapeFormat
 from mediaviewer.models import UserSettings
-from mediaviewer.models import File
 from mediaviewer.models import PosterFile
 from mediaviewer.models import Request
 from mediaviewer.models import DownloadToken
@@ -13,42 +11,6 @@ from mediaviewer.models import VideoProgress
 from mediaviewer.models import SiteGreeting
 from mediaviewer.models import TV, Movie, MediaFile, MediaPath, Poster
 
-
-@admin.register(Path)
-class PathAdmin(admin.ModelAdmin):
-    fields = (
-        "remotepathstr",
-        "localpathstr",
-        "finished",
-        "defaultsearchstr",
-        "override_display_name",
-        "imdb_id",
-    )
-    list_filter = ("finished",)
-    search_fields = (
-        "localpathstr",
-        "remotepathstr",
-        "override_display_name",
-    )
-    list_display = (
-        "id",
-        "remotepathstr",
-        "finished",
-    )
-
-
-@admin.register(File)
-class FileAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "filename",
-        "hide",
-        "datecreated",
-    )
-    search_fields = (
-        "id",
-        "filename",
-    )
 
 
 @admin.register(DownloadToken)
