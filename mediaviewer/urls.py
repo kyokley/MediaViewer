@@ -9,7 +9,6 @@ from mediaviewer.forms import PasswordResetFormWithBCC
 
 from mediaviewer.views import (
     home,
-    files,
     detail,
     signin,
     signout,

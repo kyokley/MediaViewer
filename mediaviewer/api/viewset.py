@@ -7,18 +7,13 @@ from mediaviewer.api.serializers import (
     DownloadTokenSerializer,
     FilenameScrapeFormatSerializer,
     MessageSerializer,
-    PosterFileSerializer,
     CommentSerializer,
     PathSerializer,
 )
 from mediaviewer.models import File
-from mediaviewer.models import (
-    Path,
-)
 from mediaviewer.models import DownloadToken
 from mediaviewer.models import Message
 from mediaviewer.models import FilenameScrapeFormat
-from mediaviewer.models import PosterFile
 from mediaviewer.models import Comment
 from mediaviewer.log import log
 
@@ -89,37 +84,6 @@ class InferScrapersView(views.APIView):
 
         if path:
             serializer = PathSerializer(path)
-            return RESTResponse(serializer.data)
-        else:
-            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
-
-
-class PosterViewSetByPath(viewsets.ModelViewSet):
-    queryset = PosterFile.objects.all()
-    serializer_class = PosterFileSerializer
-
-    def retrieve(self, request, pk=None):
-        log.debug(f"Attempting to find poster with pathid = {pk}")
-        path = Path.objects.filter(pk=pk)
-        obj = PosterFile.objects.filter(path=path)
-        if obj:
-            serializer = self.serializer_class(obj[0])
-            return RESTResponse(serializer.data)
-        else:
-            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
-
-
-class PosterViewSetByFile(viewsets.ModelViewSet):
-    queryset = PosterFile.objects.all()
-    serializer_class = PosterFileSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-    def retrieve(self, request, pk=None):
-        log.debug(f"Attempting to find poster with fileid = {pk}")
-        file = File.objects.filter(pk=pk)
-        obj = PosterFile.objects.filter(file=file)
-        if obj:
-            serializer = self.serializer_class(obj[0])
             return RESTResponse(serializer.data)
         else:
             return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)

@@ -7,8 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.conf import settings
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
 from mediaviewer.models.message import Message
 from mediaviewer.models.waiterstatus import WaiterStatus
 from mediaviewer.models.genre import Genre
@@ -84,8 +82,8 @@ def ajaxgenres(request, guid):
         return HttpResponse(None, content_type="application/json", status=412)
 
     if request.method == "GET":
-        movie_genres = File.get_movie_genres()
-        tv_genres = Path.get_tv_genres()
+        movie_genres = Genre.get_movie_genres()
+        tv_genres = Genre.get_tv_genres()
         data = {
             "movie_genres": [(mg.id, mg.genre) for mg in movie_genres],
             "tv_genres": [(mg.id, mg.genre) for mg in tv_genres],
@@ -291,16 +289,29 @@ def ajaxreport(request):
     response = {"errmsg": ""}
     try:
         createdBy = request.user
-        reportid = ID_REGEX.findall(request.POST["reportid"])[0]
-        reportid = int(reportid)
-        response["reportid"] = reportid
-        file = get_object_or_404(File, pk=reportid)
+        mf_id = request.POST.get("mf_id")
+        movie_id = request.POST.get("movie_id")
+
+        mf_id = int(mf_id) if mf_id is not None else None
+        movie_id = int(movie_id) if movie_id is not None else None
+
+        if mf_id is not None:
+            obj = get_object_or_404(MediaFile,
+                                    pk=mf_id)
+        elif movie_id is not None:
+            obj = get_object_or_404(Movie,
+                                    pk=movie_id)
+        else:
+            raise  HttpResponse('Either mf_id or movie_id must be provided.',
+                                status=400)
+
+        response["reportid"] = obj.pk
         users = User.objects.filter(is_staff=True)
 
         for user in users:
             Message.createNewMessage(
                 user,
-                f"{file.filename} has been reported by {createdBy.username}",
+                f"{obj.filename} has been reported by {createdBy.username}",
                 level=messages.WARNING,
             )
     except Http404:

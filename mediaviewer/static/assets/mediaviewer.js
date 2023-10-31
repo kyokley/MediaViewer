@@ -404,15 +404,20 @@ function callGiveUpButton(name){
     });
 }
 
-function reportButtonClick(id){
+function reportButtonClick(id, type){
+    payload = {csrfmiddlewaretoken: csrf_token}
+
+    if(type === 'movie'){
+        payload['movie_id'] = id
+    } else if(type === 'media_file'){
+        payload['mf_id'] = id
+    }
+
     jQuery.ajax({
     url : "/mediaviewer/ajaxreport/",
     type : "POST",
     dataType: "json",
-    data : {
-        reportid : id,
-        csrfmiddlewaretoken: csrf_token
-    },
+    data : payload,
     success : function(json) {
         if(json.errmsg !== ''){
             alert(json.errmsg);

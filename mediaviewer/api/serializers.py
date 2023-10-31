@@ -1,5 +1,4 @@
 from mediaviewer.models import DownloadToken
-from mediaviewer.models import Path
 from mediaviewer.models import FilenameScrapeFormat
 from mediaviewer.models import Message
 from mediaviewer.models import PosterFile
@@ -95,39 +94,6 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     def get_tv_id(self, obj):
         tv = obj.media_file.tv if obj.media_file else None
         return tv and tv.id
-
-
-class PathSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Path
-        fields = (
-            "pk",
-            "localpath",
-            "remotepath",
-            "server",
-            "skip",
-            "number_of_unwatched_shows",
-            "is_movie",
-            "finished",
-            "short_name",
-        )
-
-    pk = serializers.ReadOnlyField()
-    localpath = serializers.CharField(required=True, source="localpathstr")
-    remotepath = serializers.CharField(required=True, source="remotepathstr")
-    server = serializers.CharField(required=True)
-    skip = serializers.BooleanField(required=True)
-    number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
-    is_movie = serializers.BooleanField(required=True)
-    finished = serializers.BooleanField(required=False)
-    short_name = serializers.ReadOnlyField(source="shortName")
-
-    def unwatched_shows(self, obj):
-        request = self.context.get("request")
-        if request is not None:
-            return obj.number_of_unwatched_shows(request.user)
-        else:
-            return 0
 
 
 class MediaPathSerializer(serializers.ModelSerializer):

@@ -21,7 +21,7 @@ class GenreManager(models.Manager):
                 self.filter(poster__tv__isnull=False)
                 .values("id")
                 .annotate(genre_count=models.Count("poster__tv"))
-                .order_by("-genre_count")
+                .order_by("-genre_count", "genre")
                 .values("id")[:limit]
             )
         ).order_by("genre")
