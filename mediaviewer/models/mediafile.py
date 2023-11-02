@@ -4,6 +4,13 @@ from .core import TimeStampModel, ViewableObjectMixin
 from .poster import Poster
 from mediaviewer.utils import get_search_query
 from django.urls import reverse
+from .filenamescrapeformat import FilenameScrapeFormat
+from mediaviewer.log import log
+
+yearRegex = re.compile(r"20\d{2}\D?.*$")
+dvdRegex = re.compile(r"[A-Z]{2,}.*$")
+formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
+punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
 
 
 class MediaFileQuerySet(models.QuerySet):
@@ -21,7 +28,9 @@ class MediaFileQuerySet(models.QuerySet):
 
 
 class MediaFileManager(models.Manager):
-    pass
+    def infer_all_scrapers(self):
+        for mf in self.all():
+            mf.infer_scraper()
 
 
 class MediaFile(TimeStampModel, ViewableObjectMixin):
@@ -51,6 +60,13 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
                                blank=True,
                                default=False)
     size = models.BigIntegerField(null=True, blank=True)
+
+    filenamescrapeformat = models.ForeignKey(
+        "mediaviewer.FilenameScrapeFormat",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
@@ -113,6 +129,61 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         else:
             name = f'{self.media.short_name}'
         return name
+
+    def get_search_term(self):
+        if self.movie:
+            searchTerm = yearRegex.sub("", self.filename)
+            searchTerm = dvdRegex.sub("", searchTerm)
+            searchTerm = formatRegex.sub("", searchTerm)
+            searchTerm = punctuationRegex.sub(" ", searchTerm)
+            searchTerm = searchTerm.strip()
+        else:
+            searchTerm = self.tv.name
+
+        return searchTerm
+
+    def searchString(self):
+        searchStr = self.get_search_term()
+        searchStr = searchStr.replace("&", "%26")
+        searchStr = searchStr.replace(",", "%2C")
+        searchStr = searchStr.replace("+", "%2B")
+        return searchStr
+
+    def infer_scraper(self, scrapers=None):
+        if self.movie:
+            return
+
+        if not scrapers:
+            scrapers = FilenameScrapeFormat.objects.all()
+        for scraper in scrapers:
+            self.filenamescrapeformat = scraper
+            name = self.getScrapedName()
+            season = self.getScrapedSeason()
+            episode = self.getScrapedEpisode()
+            sFail = re.compile(r"\s[sS]$")
+            if (
+                name
+                and name != self.filename
+                and not sFail.findall(name)
+                and season
+                and episode
+                and int(episode) not in (64, 65)
+            ):
+                # Success!
+
+                log.debug("Success!!!")
+                log.debug(
+                    f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
+                )
+
+                self.save()
+                self.destroyPosterFile()
+
+                display_name = self.displayName()
+                log.debug(f"Display Name: {display_name}")
+                break
+        else:
+            self.filenamescrapeformat = None
 
     def url(self):
         if self.is_tv():

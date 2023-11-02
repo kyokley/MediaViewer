@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, views
-from rest_framework import status as RESTstatus
 from rest_framework.response import Response as RESTResponse
 from rest_framework import permissions, authentication
 from mediaviewer.api.serializers import (
@@ -8,13 +7,11 @@ from mediaviewer.api.serializers import (
     FilenameScrapeFormatSerializer,
     MessageSerializer,
     CommentSerializer,
-    PathSerializer,
 )
-from mediaviewer.models import File
 from mediaviewer.models import DownloadToken
 from mediaviewer.models import Message
 from mediaviewer.models import FilenameScrapeFormat
-from mediaviewer.models import Comment
+from mediaviewer.models import Comment, MediaFile
 from mediaviewer.log import log
 
 
@@ -28,14 +25,6 @@ class DownloadTokenViewSet(viewsets.ModelViewSet):
         if obj:
             log.debug(f"Found token. isValid: {obj.isvalid}")
         serializer = self.serializer_class(obj)
-        return RESTResponse(serializer.data)
-
-    def create(self, request):
-        user = request.user
-        file_id = request.data["file_id"]
-        file = get_object_or_404(File.objects.filter(hide=False), pk=file_id)
-        token = DownloadToken.new(user, file)
-        serializer = self.serializer_class(token)
         return RESTResponse(serializer.data)
 
 
@@ -68,25 +57,10 @@ class InferScrapersView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            File.inferAllScrapers()
+            MediaFile.objects.infer_all_scrapers()
             return RESTResponse({"success": True})
         except Exception as e:
             return RESTResponse({"success": False, "error": str(e)})
-
-    def get(self, request, *args, **kwargs):
-        title = request.GET.get("title")
-
-        if not title:
-            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
-
-        log.debug(f"Attempting to scrape title = {title}")
-        path = FilenameScrapeFormat.path_for_filename(title)
-
-        if path:
-            serializer = PathSerializer(path)
-            return RESTResponse(serializer.data)
-        else:
-            return RESTResponse(None, status=RESTstatus.HTTP_404_NOT_FOUND)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
