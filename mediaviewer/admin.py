@@ -3,7 +3,6 @@ from django.db import transaction
 from mediaviewer.models import Genre
 from mediaviewer.models import FilenameScrapeFormat
 from mediaviewer.models import UserSettings
-from mediaviewer.models import PosterFile
 from mediaviewer.models import Request
 from mediaviewer.models import DownloadToken
 from mediaviewer.models import DonationSite
@@ -62,16 +61,6 @@ class UserSettingsAdmin(admin.ModelAdmin):
     )
     search_fields = ("user__username",)
     ordering = ("user__username",)
-
-
-@admin.register(PosterFile)
-class PosterFileAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "filename",
-        "pathname",
-        "poster_url",
-    )
 
 
 @admin.register(DonationSite)

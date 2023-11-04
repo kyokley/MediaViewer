@@ -1,7 +1,6 @@
 from mediaviewer.models import DownloadToken
 from mediaviewer.models import FilenameScrapeFormat
 from mediaviewer.models import Message
-from mediaviewer.models import PosterFile
 from mediaviewer.models import UserSettings
 from mediaviewer.models import VideoProgress
 from mediaviewer.models import DonationSite
@@ -227,31 +226,6 @@ class MessageSerializer(serializers.ModelSerializer):
     sent = serializers.BooleanField(required=True)
     level = serializers.IntegerField(required=True)
     datecreated = serializers.DateTimeField(required=True)
-
-
-class PosterFileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PosterFile
-        fields = (
-            "pk",
-            "image",
-            "plot",
-            "extendedplot",
-            "genre",
-            "actors",
-            "writer",
-            "director",
-            "episodename",
-        )
-        pk = serializers.ReadOnlyField()
-        image = serializers.CharField()
-        plot = serializers.CharField()
-        extendedplot = serializers.CharField()
-        genre = serializers.CharField()
-        actors = serializers.CharField()
-        writer = serializers.CharField()
-        director = serializers.CharField()
-        episodename = serializers.CharField()
 
 
 class CommentSerializer(serializers.ModelSerializer):

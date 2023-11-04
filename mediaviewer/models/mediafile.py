@@ -61,13 +61,6 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
                                default=False)
     size = models.BigIntegerField(null=True, blank=True)
 
-    filenamescrapeformat = models.ForeignKey(
-        "mediaviewer.FilenameScrapeFormat",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
     def __str__(self):
@@ -156,7 +149,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         if not scrapers:
             scrapers = FilenameScrapeFormat.objects.all()
         for scraper in scrapers:
-            self.filenamescrapeformat = scraper
+            self.scraper = scraper
             name = self.getScrapedName()
             season = self.getScrapedSeason()
             episode = self.getScrapedEpisode()
@@ -183,7 +176,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
                 log.debug(f"Display Name: {display_name}")
                 break
         else:
-            self.filenamescrapeformat = None
+            self.scraper = None
 
     def url(self):
         if self.is_tv():

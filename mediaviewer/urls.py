@@ -172,8 +172,6 @@ if not conf_settings.IS_SYNCING:
     router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
-    router.register(r"posterfilebypath", viewset.PosterViewSetByPath)
-    router.register(r"posterfilebyfile", viewset.PosterViewSetByFile)
     router.register(r"comment", viewset.CommentViewSet)
 
     urlpatterns += [

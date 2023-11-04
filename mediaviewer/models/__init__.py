@@ -14,7 +14,6 @@ from .message import Message
 from .movie import Movie
 from .person import Person
 from .poster import Poster
-from .posterfile import PosterFile
 from .request import Request
 from .request import RequestVote
 from .sitegreeting import SiteGreeting
