@@ -19,7 +19,6 @@ from .request import RequestVote
 from .sitegreeting import SiteGreeting
 from .tv import TV
 from .tvdbconfiguration import TVDBConfiguration
-from .usercomment import UserComment
 from .usersettings import BadEmail
 from .usersettings import ImproperLogin
 from .usersettings import UserSettings

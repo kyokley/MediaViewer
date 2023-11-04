@@ -71,5 +71,5 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = Comment.objects.filter(user=user)
-        log.debug("Returning UserComment objects")
+        log.debug("Returning Comment objects")
         return queryset
