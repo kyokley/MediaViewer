@@ -32,7 +32,7 @@ class TV(Media):
 
     def last_created_episode_at(self):
         if not hasattr(self, '_last_created_episode_at'):
-            if episodes := self.episodes():
+            if episodes := self.episodes().order_by('-date_created'):
                 self._last_created_episode_at = episodes.values_list('date_created', flat=True)[0]
             else:
                 self._last_created_episode_at = None

@@ -143,9 +143,12 @@ def forward(apps, schema_editor):
                                           scraper=file.filenamescrapeformat,
                                           hide=file.hide,
                                           size=file.size,
-                                          date_created=file.datecreated,
-                                          date_edited=file.dateedited,
                                           )
+            # auto_now fields must be set after object creation
+            mf.date_created=file.datecreated
+            mf.date_edited=file.dateedited
+            mf.save()
+
             poster_file = PosterFile.objects.filter(file=file).order_by('tmdb_id').first()
             file_imdb = file.imdb_id if file.imdb_id and file.imdb_id.lower() != 'none' else ''
             poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
@@ -164,9 +167,10 @@ def forward(apps, schema_editor):
     for movie_file in movie_file_qs:
         movie = Movie.objects.create(name=file_short_name(movie_file),
                                      finished=movie_file.finished,
-                                     date_created=movie_file.datecreated,
-                                     date_edited=movie_file.dateedited,
                                      )
+        movie.date_created=movie_file.datecreated
+        movie.date_edited=movie_file.dateedited
+        movie.save()
 
         path = Pathlib(movie_file.path.localpathstr) / movie_file.filename
         mp = MediaPath.objects.create(_path=str(path),
