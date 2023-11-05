@@ -1,5 +1,6 @@
 import logging
 from django.core.management.base import BaseCommand
+from django.db.models.functions import Coalesce
 
 from mediaviewer.models import Poster
 
@@ -28,15 +29,15 @@ class Command(BaseCommand):
 
         force = kwargs['force']
 
-        poster_qs = Poster.objects.filter(image='').order_by('id')
+        poster_qs = Poster.objects.filter(image='').annotate(obj_created=Coalesce('movie__date_created',
+                                                                                  'tv__date_created',
+                                                                                  'media_file__date_created')).order_by('-obj_created')
 
         total = poster_qs.count()
         count = 0
+        poster_qs = poster_qs[:limit]
         for poster in poster_qs:
             count += 1
-
-            if count > limit:
-                break
 
             if force:
                 poster.imdb = ''
@@ -45,5 +46,6 @@ class Command(BaseCommand):
             poster._populate_data()
             poster.save()
 
-            print(f'{count}/{total}', end='\r')
-        print()
+            self.stdout.write(f' {count}/{total} - {str(poster.ref_obj):<100}')
+        self.stdout.write()
+        self.stdout.write(self.style.SUCCESS('Done'))

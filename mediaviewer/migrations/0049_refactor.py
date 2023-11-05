@@ -115,10 +115,13 @@ def forward(apps, schema_editor):
     for path in tv_path_qs:
         if not MediaPath.objects.filter(_path=path.localpathstr).exists():
             obj, created = TV.objects.get_or_create(name=path_display_name(path),
-                                                    defaults=dict(finished=path.finished,
-                                                                )
+                                                    defaults=dict(finished=path.finished)
                                                     )
             if created:
+                date_created = path.file_set.order_by('-datecreated').values_list('datecreated', flat=True).first()
+                obj.date_created = date_created
+                obj.save()
+
                 poster_file = PosterFile.objects.get(path=path)
                 path_imdb = path.imdb_id if path.imdb_id and path.imdb_id.lower() != 'none' else ''
                 poster_file_tmdb = poster_file.tmdb_id if poster_file.tmdb_id and poster_file.tmdb_id.lower() != 'none' else ''
@@ -128,9 +131,10 @@ def forward(apps, schema_editor):
                 obj.save()
 
             mp, created = MediaPath.objects.get_or_create(_path=path.localpathstr,
-                                                        defaults=dict(tv=obj))
+                                                          defaults=dict(tv=obj))
             if path.skip:
                 mp.skip = True
+                mp.save()
 
         for file in path.file_set.filter(hide=False):
             mf = MediaFile.objects.create(media_path=mp,
@@ -160,7 +164,7 @@ def forward(apps, schema_editor):
                                        user=uc.user,
                                        viewed=uc.viewed)
 
-    movie_file_qs = File.objects.filter(path__is_movie=True).select_related('path', 'filenamescrapeformat')
+    movie_file_qs = File.objects.filter(path__is_movie=True).select_related('path', 'filenamescrapeformat').exclude(hide=True)
 
     for movie_file in movie_file_qs:
         movie = Movie.objects.create(name=file_short_name(movie_file),
@@ -190,7 +194,6 @@ def forward(apps, schema_editor):
 
 def clean_up_old_objects(apps, schema_editor):
     DownloadToken = apps.get_model('mediaviewer', 'DownloadToken')
-
     DownloadToken.objects.all().delete()
 
 
