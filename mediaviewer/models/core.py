@@ -65,7 +65,7 @@ class ViewableObjectMixin:
         if self.is_movie():
             return None
         else:
-            return self.downloadLink(user, guid) + "autoplay"
+            return f"{self.downloadLink(user, guid)}autoplay"
 
     def url(self):
         raise NotImplementedError('Method must be implemented by child classes')

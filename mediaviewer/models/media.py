@@ -4,7 +4,6 @@ from .core import TimeStampModel
 from django.db import models
 from mediaviewer.utils import get_search_query
 from .poster import Poster
-from mediaviewer.log import log
 from mediaviewer.models import FilenameScrapeFormat
 
 
@@ -23,6 +22,25 @@ class MediaQuerySet(models.QuerySet):
 
 
 class MediaManager(models.Manager):
+    def from_filename(self, filename, **kwargs):
+        for scraper in FilenameScrapeFormat.objects.all():
+            res = scraper.nameRegex.findall(
+                filename
+            )
+            name = res and res[0] or None
+            sFail = re.compile(r"\s[sS]$")
+            if (
+                name
+                and name != filename
+                and not sFail.findall(name)
+            ):
+                break
+        else:
+            name = None
+
+        kwargs['name'] = name
+        return self.create(**kwargs)
+
     def most_recent_media(self, limit=10):
         from mediaviewer.models import MediaFile, Movie
         recent_movies = Movie.objects.order_by('-pk')[:limit]
@@ -32,39 +50,6 @@ class MediaManager(models.Manager):
                 recent_movies, recent_tv)],
             key=lambda x: x.created)
         return recent_files[:limit]
-
-    def inferScraper(self, scrapers=None):
-        if not scrapers:
-            scrapers = FilenameScrapeFormat.objects.all()
-        for scraper in scrapers:
-            self.filenamescrapeformat = scraper
-            name = self.getScrapedName()
-            season = self.getScrapedSeason()
-            episode = self.getScrapedEpisode()
-            sFail = re.compile(r"\s[sS]$")
-            if (
-                name
-                and name != self.filename
-                and not sFail.findall(name)
-                and season
-                and episode
-                and int(episode) not in (64, 65)
-            ):
-                # Success!
-
-                log.debug("Success!!!")
-                log.debug(
-                    f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
-                )
-
-                self.save()
-                self.destroyPosterFile()
-
-                display_name = self.displayName()
-                log.debug(f"Display Name: {display_name}")
-                break
-        else:
-            self.filenamescrapeformat = None
 
 
 class Media(TimeStampModel):

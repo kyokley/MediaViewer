@@ -12,6 +12,8 @@ dvdRegex = re.compile(r"[A-Z]{2,}.*$")
 formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
 punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
 
+EPISODE = 'episode'
+SEASON = 'season'
 
 class MediaFileQuerySet(models.QuerySet):
     def delete(self, *args, **kwargs):
@@ -142,6 +144,30 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         searchStr = searchStr.replace("+", "%2B")
         return searchStr
 
+    def _scraped_name(self):
+        if self.path.override_display_name:
+            return self.path.override_display_name
+
+        if not self.filenamescrapeformat:
+            return self.filename
+
+        if self.filenamescrapeformat.useSearchTerm:
+            name = self.rawSearchString()
+        else:
+            nameRegex = re.compile(self.filenamescrapeformat.nameRegex).findall(
+                self.filename
+            )
+            name = nameRegex and nameRegex[0] or None
+        return (
+            name
+            and (
+                self.filenamescrapeformat.subPeriods
+                and name.replace(".", " ").replace("-", " ").title()
+                or name
+            ).strip()
+            or self.filename
+        )
+
     def infer_scraper(self, scrapers=None):
         if self.movie:
             return
@@ -150,9 +176,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             scrapers = FilenameScrapeFormat.objects.all()
         for scraper in scrapers:
             self.scraper = scraper
-            name = self.getScrapedName()
-            season = self.getScrapedSeason()
-            episode = self.getScrapedEpisode()
+            name = self.media.name
+            season = self._scraped_season()
+            episode = self._scraped_episode()
             sFail = re.compile(r"\s[sS]$")
             if (
                 name
@@ -224,53 +250,28 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     def search_terms(self):
         return self.media.search_terms
 
-    @property
-    def _season(self):
-        if self.is_movie():
-            return None
-
-        if self.override_season is not None:
-            return self.override_season
-
-        scraped_season = self._scraped_season()
-        return int(scraped_season) if scraped_season else None
-
     def _scraped_season(self):
-        if self.override_season is None:
-            if not self.scraper:
-                return None
-
-            seasonRegex = re.compile(self.scraper.seasonRegex).findall(
-                self.filename
-            )
-            season = seasonRegex and seasonRegex[0] or None
-        else:
-            season = self.override_season
-        return season and (season.isdigit() and season.zfill(2) or None) or None
-
-    @property
-    def _episode(self):
-        if self.is_movie():
-            return None
-
-        if self.override_episode is not None:
-            return self.override_episode
-
-        scraped_episode = self._scraped_episode()
-        return int(scraped_episode) if scraped_episode else None
+        return self._scraped_episode_or_season(SEASON)
 
     def _scraped_episode(self):
-        if self.override_episode is None:
-            if not self.scraper:
-                return None
+        return self._scraped_episode_or_season(EPISODE)
 
-            episodeRegex = re.compile(self.scraper.episodeRegex).findall(
-                self.filename
-            )
-            episode = episodeRegex and episodeRegex[0] or None
+    def _scraped_episode_or_season(self, episode_or_season):
+        if self.movie:
+            return None
+
+        if episode_or_season == EPISODE:
+            regex = self.scraper.episodeRegex
+        elif episode_or_season == SEASON:
+            regex = self.scraper.seasonRegex
         else:
-            episode = self.override_episode
-        return episode and (episode.isdigit() and episode.zfill(2) or None) or None
+            raise Exception(f'Invalid episode_or_season. Got {episode_or_season}')
+
+        res = regex.findall(
+            self.filename
+        )
+        val = res and res[0] or None
+        return val and (val.isdigit() and val.zfill(2) or None) or None
 
     def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster
