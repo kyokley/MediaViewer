@@ -1,3 +1,4 @@
+import itertools
 from django.db import models
 from django.conf import settings as conf_settings
 from mediaviewer.models.usersettings import LOCAL_IP, BANGUP_IP
@@ -11,6 +12,18 @@ class TimeStampModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class ViewableManagerMixin:
+    def most_recent_media(self, limit=10):
+        from mediaviewer.models import MediaFile, Movie
+        recent_movies = Movie.objects.order_by('-date_created')[:limit]
+        recent_tv = MediaFile.objects.order_by('-date_created')[:limit]
+        recent_files = sorted(
+            [file for file in itertools.chain(
+                recent_movies, recent_tv)],
+            key=lambda x: x.date_created, reverse=True)
+        return recent_files[:limit]
 
 
 class ViewableObjectMixin:

@@ -163,34 +163,26 @@
                     <tbody>
                         {% for file in files %}
                             <tr>
-                                {% if file.isMovie %}
-                                    {% if loggedin %}
+                                {% if file.is_movie %}
                                         <td>
                                             {% if file.posterfile %}
-                                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                                <a class="img-preview" href="/mediaviewer/moviedetail/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
                                             {% else %}
-                                                <a href="/mediaviewer/files/{{ file.id }}/">
+                                                <a href="/mediaviewer/moviedetail/{{ file.id }}/">
                                             {% endif %}
-                                                    {{ file.name }}
+                                                    {{ file.full_name }}
                                                 </a>
                                         </td>
-                                    {% else %}
-                                        <td>{{ file.name }}</td>
-                                    {% endif %}
                                 {% else %}
-                                    {% if loggedin %}
                                         <td>
                                             {% if file.posterfile %}
-                                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                                <a class="img-preview" href="/mediaviewer/tvdetail/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
                                             {% else %}
-                                                <a href="/mediaviewer/files/{{ file.id }}/">
+                                                <a href="/mediaviewer/tvdetail/{{ file.id }}/">
                                             {% endif %}
-                                                    {{ file.name }}
+                                                    {{ file.full_name }}
                                                 </a>
                                         </td>
-                                    {% else %}
-                                        <td>{{ file.name }}</td>
-                                    {% endif %}
                                 {% endif %}
                             </tr>
                         {% endfor %}

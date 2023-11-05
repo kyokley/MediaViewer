@@ -19,7 +19,7 @@ def home(request):
         siteGreeting and siteGreeting.greeting or "Check out the new downloads!"
     )
     context["active_page"] = "home"
-    files = MediaFile.objects.most_recent_files()
+    files = MediaFile.objects.most_recent_media()
     context["files"] = files
     context["title"] = "Home"
     setSiteWideContext(context, request, includeMessages=True)

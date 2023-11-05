@@ -27,6 +27,7 @@ def getJSONData(url):
         return data
     except Exception as e:
         log.error(str(e), exc_info=True)
+        raise
 
 
 class TVDBConfiguration:
@@ -105,12 +106,16 @@ def searchTVDBByName(name):
 
 
 def getTVDBEpisodeInfo(tvdb_id, season, episode):
+    if not tvdbConfig.connected or season is None or episode is None:
+        log.debug(
+            f"Could not get episode specific information. S={season} E={episode} connected?={tvdbConfig.connected}"
+        )
+        return {}
+
     log.debug(
         f"Getting tvdb episode info for {tvdb_id}, "
         f"season: {season}, episode: {episode}"
     )
-    if not tvdbConfig.connected:
-        return {}
 
     url = "https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={api_key}".format(  # noqa
         tvdb_id=tvdb_id, season=season, episode=episode, api_key=settings.API_KEY

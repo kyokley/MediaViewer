@@ -1,6 +1,6 @@
 import re
 from django.db import models
-from .core import TimeStampModel, ViewableObjectMixin
+from .core import TimeStampModel, ViewableObjectMixin, ViewableManagerMixin
 from .poster import Poster
 from mediaviewer.utils import get_search_query
 from django.urls import reverse
@@ -29,7 +29,7 @@ class MediaFileQuerySet(models.QuerySet):
         return qs
 
 
-class MediaFileManager(models.Manager):
+class MediaFileManager(models.Manager, ViewableManagerMixin):
     def infer_all_scrapers(self):
         for mf in self.all():
             mf.infer_scraper()

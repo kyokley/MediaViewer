@@ -113,9 +113,7 @@ def forward(apps, schema_editor):
     tv_path_qs = Path.objects.filter(is_movie=False)
 
     for path in tv_path_qs:
-        if mp := MediaPath.objects.filter(_path=path.localpathstr).first():
-            pass
-        else:
+        if not MediaPath.objects.filter(_path=path.localpathstr).exists():
             obj, created = TV.objects.get_or_create(name=path_display_name(path),
                                                     defaults=dict(finished=path.finished,
                                                                 )

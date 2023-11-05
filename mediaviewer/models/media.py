@@ -1,5 +1,4 @@
 import re
-import itertools
 from .core import TimeStampModel
 from django.db import models
 from mediaviewer.utils import get_search_query
@@ -52,16 +51,6 @@ class MediaManager(models.Manager):
 
         kwargs['name'] = name
         return self.create(**kwargs)
-
-    def most_recent_media(self, limit=10):
-        from mediaviewer.models import MediaFile, Movie
-        recent_movies = Movie.objects.order_by('-pk')[:limit]
-        recent_tv = MediaFile.objects.order_by('-pk')[:limit]
-        recent_files = sorted(
-            [file for file in itertools.chain(
-                recent_movies, recent_tv)],
-            key=lambda x: x.created)
-        return recent_files[:limit]
 
 
 class Media(TimeStampModel):

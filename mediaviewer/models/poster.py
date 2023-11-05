@@ -192,9 +192,9 @@ class Poster(TimeStampModel):
                 url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
             else:
                 if self.ref_obj.is_movie():
-                    url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.search_terms}&api_key={settings.API_KEY}"
+                    url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.name}&api_key={settings.API_KEY}"
                 else:
-                    url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.search_terms}&api_key={settings.API_KEY}"
+                    url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.name}&api_key={settings.API_KEY}"
             resp = getJSONData(url)
             if resp.get('results'):
                 self.tmdb = resp['results'][0]['id']
@@ -207,7 +207,16 @@ class Poster(TimeStampModel):
             else:
                 url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
 
-            resp = getJSONData(url)
+            try:
+                resp = getJSONData(url)
+            except Exception:
+                log.debug(f"Got bad tmdb_id={self.tmdb}. Revert to parent tmdb")
+                self.tmdb = self.ref_obj.media.poster.tmdb
+                if self.ref_obj.is_movie():
+                    url = f"https://api.themoviedb.org/3/movie/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                else:
+                    url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                resp = getJSONData(url)
 
             if resp:
                 resp['url'] = url

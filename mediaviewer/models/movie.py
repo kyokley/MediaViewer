@@ -1,14 +1,14 @@
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
 from django.urls import reverse
-from .core import ViewableObjectMixin
+from .core import ViewableObjectMixin, ViewableManagerMixin
 
 
 class MovieQuerySet(MediaQuerySet):
     pass
 
 
-class MovieManager(MediaManager):
+class MovieManager(MediaManager, ViewableManagerMixin):
     pass
 
 
