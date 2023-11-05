@@ -57,24 +57,30 @@ def _search_TVDB_by_name(name):
 def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     log.debug("Getting data from TVDb using %s" % (tmdb_id,))
 
+    urls = []
+
     if not is_movie:
         if episode and season:
-            url = "https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={api_key}".format(  # noqa
-                season=season,
-                episode=episode,
-                tmdb_id=tmdb_id,
-                api_key=settings.API_KEY,
-            )
-        else:
-            url = "https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={api_key}".format(  # noqa
-                tmdb_id=tmdb_id, api_key=settings.API_KEY
-            )
-    else:
-        url = "https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={api_key}".format(  # noqa
-            tmdb_id=tmdb_id, api_key=settings.API_KEY
-        )
+            urls.append(f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={settings.API_KEY}")
 
-    return getJSONData(url)
+        if season:
+            urls.append(f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/credits?api_key={settings.API_KEY}")
+
+        urls.append(f"https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={settings.API_KEY}")
+    else:
+        urls.append(f"https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={settings.API_KEY}")
+
+    resp = None
+    for url in urls:
+        try:
+            resp = getJSONData(url)
+        except Exception:
+            continue
+
+        if resp:
+            break
+    return resp
+
 
 
 def _get_extended_info(tmdb_id, is_movie=True):
@@ -274,7 +280,7 @@ class Poster(TimeStampModel):
         tvinfo = getTVDBEpisodeInfo(self.tmdb, self.season, self.episode)
 
         if tvinfo:
-            self.poster_url = tvinfo.get("still_path") or self.poster_url
+            self.poster_url = tvinfo.get("still_path") or tvinfo.get('poster_path') or getattr(self, 'poster_url', None)
             self.extendedplot = tvinfo.get("overview", "")
             self.episodename = tvinfo.get("name")
             self.tmdb = tvinfo.get('id', self.tmdb)

@@ -106,9 +106,9 @@ def searchTVDBByName(name):
 
 
 def getTVDBEpisodeInfo(tvdb_id, season, episode):
-    if not tvdbConfig.connected or season is None or episode is None:
+    if not tvdbConfig.connected:
         log.debug(
-            f"Could not get episode specific information. S={season} E={episode} connected?={tvdbConfig.connected}"
+            f"Could not get episode specific information. tvdbConfig.connected={tvdbConfig.connected}"
         )
         return {}
 
@@ -117,10 +117,26 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
         f"season: {season}, episode: {episode}"
     )
 
-    url = "https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={api_key}".format(  # noqa
-        tvdb_id=tvdb_id, season=season, episode=episode, api_key=settings.API_KEY
-    )
-    return getJSONData(url)
+    urls = []
+
+    if episode and season:
+        urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={settings.API_KEY}")
+
+    if season:
+        urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}?api_key={settings.API_KEY}")
+
+    urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}?api_key={settings.API_KEY}")
+
+    resp = {}
+    for url in urls:
+        try:
+            resp = getJSONData(url)
+        except Exception:
+            continue
+
+        if resp:
+            break
+    return resp
 
 
 def saveImageToDisk(path, imgName):
