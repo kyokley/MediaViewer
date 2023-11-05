@@ -165,20 +165,20 @@
                             <tr>
                                 {% if file.is_movie %}
                                         <td>
-                                            {% if file.posterfile %}
-                                                <a class="img-preview" href="/mediaviewer/moviedetail/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                            {% if file.poster.image %}
+                                                <a class="img-preview" href="{% url 'mediaviewer:moviedetail' file.pk %}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
                                             {% else %}
-                                                <a href="/mediaviewer/moviedetail/{{ file.id }}/">
+                                                <a href="{% url 'mediaviewer:moviedetail' file.pk %}">
                                             {% endif %}
                                                     {{ file.full_name }}
                                                 </a>
                                         </td>
                                 {% else %}
                                         <td>
-                                            {% if file.posterfile %}
-                                                <a class="img-preview" href="/mediaviewer/tvdetail/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                            {% if file.poster.image %}
+                                                <a class="img-preview" href="{% url 'mediaviewer:tvdetail' file.pk %}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
                                             {% else %}
-                                                <a href="/mediaviewer/tvdetail/{{ file.id }}/">
+                                                <a href="{% url 'mediaviewer:tvdetail' file.pk %}">
                                             {% endif %}
                                                     {{ file.full_name }}
                                                 </a>
