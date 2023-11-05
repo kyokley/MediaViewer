@@ -51,7 +51,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         'mediaviewer.FilenameScrapeFormat',
         null=True,
         on_delete=models.SET_NULL)
-    poster = models.OneToOneField(
+    _poster = models.OneToOneField(
         'mediaviewer.Poster',
         null=True,
         on_delete=models.SET_NULL,
@@ -107,6 +107,13 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         return not self.is_tv()
 
     @property
+    def poster(self):
+        if self._poster is None:
+            self._poster = Poster.objects.create_from_ref_obj(self)
+            self._poster._populate_data()
+        return self._poster
+
+    @property
     def name(self):
         return self.display_name
 
@@ -125,49 +132,6 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             name = f'{self.media.short_name}'
         return name
 
-    def get_search_term(self):
-        if self.movie:
-            searchTerm = yearRegex.sub("", self.filename)
-            searchTerm = dvdRegex.sub("", searchTerm)
-            searchTerm = formatRegex.sub("", searchTerm)
-            searchTerm = punctuationRegex.sub(" ", searchTerm)
-            searchTerm = searchTerm.strip()
-        else:
-            searchTerm = self.tv.name
-
-        return searchTerm
-
-    def searchString(self):
-        searchStr = self.get_search_term()
-        searchStr = searchStr.replace("&", "%26")
-        searchStr = searchStr.replace(",", "%2C")
-        searchStr = searchStr.replace("+", "%2B")
-        return searchStr
-
-    def _scraped_name(self):
-        if self.path.override_display_name:
-            return self.path.override_display_name
-
-        if not self.filenamescrapeformat:
-            return self.filename
-
-        if self.filenamescrapeformat.useSearchTerm:
-            name = self.rawSearchString()
-        else:
-            nameRegex = re.compile(self.filenamescrapeformat.nameRegex).findall(
-                self.filename
-            )
-            name = nameRegex and nameRegex[0] or None
-        return (
-            name
-            and (
-                self.filenamescrapeformat.subPeriods
-                and name.replace(".", " ").replace("-", " ").title()
-                or name
-            ).strip()
-            or self.filename
-        )
-
     def infer_scraper(self, scrapers=None):
         if self.movie:
             return
@@ -179,12 +143,8 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             name = self.media.name
             season = self._scraped_season()
             episode = self._scraped_episode()
-            sFail = re.compile(r"\s[sS]$")
             if (
-                name
-                and name != self.filename
-                and not sFail.findall(name)
-                and season
+                season
                 and episode
                 and int(episode) not in (64, 65)
             ):
@@ -192,11 +152,11 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
                 log.debug("Success!!!")
                 log.debug(
-                    f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.filename} FSid: {scraper.id}"
+                    f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.full_name} FSid: {scraper.id}"
                 )
 
                 self.save()
-                self.destroyPosterFile()
+                self.poster.delete()
 
                 display_name = self.displayName()
                 log.debug(f"Display Name: {display_name}")
@@ -245,10 +205,6 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
                 return None
             else:
                 return shows[index - 1]
-
-    @property
-    def search_terms(self):
-        return self.media.search_terms
 
     def _scraped_season(self):
         return self._scraped_episode_or_season(SEASON)

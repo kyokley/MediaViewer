@@ -29,6 +29,18 @@ class MediaManager(models.Manager):
             )
             name = res and res[0] or None
             sFail = re.compile(r"\s[sS]$")
+
+            if not name:
+                continue
+
+            name = (
+                (
+                    scraper.subPeriods
+                    and name.replace(".", " ").replace("-", " ").title()
+                    or name
+                ).strip()
+            )
+
             if (
                 name
                 and name != filename
@@ -36,7 +48,7 @@ class MediaManager(models.Manager):
             ):
                 break
         else:
-            name = None
+            name = filename
 
         kwargs['name'] = name
         return self.create(**kwargs)
