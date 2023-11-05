@@ -70,10 +70,6 @@ class Media(TimeStampModel):
                             max_length=256)
     finished = models.BooleanField(null=False,
                                    default=False)
-    _search_terms = models.CharField(null=False,
-                                     default='',
-                                     blank=True,
-                                     max_length=256)
 
     class Meta:
         abstract = True
@@ -102,15 +98,6 @@ class Media(TimeStampModel):
     @property
     def short_name(self):
         return self.name
-
-    def _get_search_terms(self):
-        return self._search_terms or self.name
-
-    def _set_search_terms(self, val):
-        self._search_terms = val
-
-    search_terms = property(fget=_get_search_terms,
-                            fset=_set_search_terms)
 
     @property
     def media(self):

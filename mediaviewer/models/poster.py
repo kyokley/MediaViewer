@@ -254,6 +254,8 @@ class Poster(TimeStampModel):
                 image = ImageFile(io, name=poster_name)
                 self.image = image
 
+        self.save()
+
         return data
 
     def _tmdb_episode_info(self):
