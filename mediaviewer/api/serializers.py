@@ -138,19 +138,10 @@ class MovieSerializer(serializers.ModelSerializer):
             'pk',
             'name',
             'path',
-            "localpath",
-            "filename",
-            "skip",
-            "finished",
-            "size",
-            "streamable",
-            "ismovie",
-            "displayname",
-            "watched",
         )
-        path = MediaPathSerializer(many=False,
-                                   read_only=True,
-                                   source='media_path_set')
+    path = MediaPathSerializer(many=False,
+                                read_only=True,
+                                source='media_path_set')
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
