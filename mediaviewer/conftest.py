@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.utils import getSomewhatUniqueID
 
-from mediaviewer.models import Movie
+from mediaviewer.models import Movie, TV
 
 DEFAULT_USERNAME = "test_user"
 DEFAULT_EMAIL = "asdf@example.com"
@@ -28,7 +28,7 @@ def create_movie():
     def _create_movie(
         name=None,
         finished=False,
-        poster=None,
+        poster=None
     ):
         if name is None:
             name = f'Movie {next(_count)}'
@@ -37,6 +37,22 @@ def create_movie():
             finished=finished,
             poster=poster)
     return _create_movie
+
+
+@pytest.fixture
+def create_tv():
+    def _create_tv(
+        name=None,
+        finished=False,
+        poster=None
+    ):
+        if name is None:
+            name = f'TV {next(_count)}'
+        return TV.objects.create(
+            name=name,
+            finished=finished,
+            poster=poster)
+    return _create_tv
 
 
 @pytest.fixture

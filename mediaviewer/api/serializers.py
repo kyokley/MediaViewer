@@ -114,14 +114,14 @@ class TVSerializer(serializers.ModelSerializer):
         model = TV
         fields = (
             'pk',
-            'name'
+            'name',
             'number_of_unwatched_shows',
             'paths',
         )
-        number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
-        paths = MediaPathSerializer(many=True,
-                                    read_only=True,
-                                    source='media_path_set')
+    number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
+    paths = MediaPathSerializer(many=True,
+                                read_only=True,
+                                source='media_path_set')
 
     def unwatched_shows(self, obj):
         request = self.context.get("request")
