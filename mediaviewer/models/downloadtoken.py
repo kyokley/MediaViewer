@@ -36,7 +36,7 @@ class DownloadTokenManager(models.Manager):
         dt = self.create(
             user=user,
             filename=movie.name,
-            path=movie.mediapath_set.first().path,
+            path=movie.mediapath_set.first(),
             displayname=movie.full_name,
             movie=movie,
         )
@@ -101,7 +101,7 @@ class DownloadToken(models.Model):
             self.id,
             self.filename,
             self.path,
-            self.datecreated,
+            self.date_created,
         )
 
     @property
@@ -115,3 +115,7 @@ class DownloadToken(models.Model):
     @property
     def ismovie(self):
         return bool(self.movie)
+
+    @property
+    def ref_obj(self):
+        return self.media_file or self.movie

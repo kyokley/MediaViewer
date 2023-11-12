@@ -1,6 +1,6 @@
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
-from mediaviewer.models import MediaFile, Comment
+from mediaviewer.models import MediaFile, Comment, MediaPath
 
 
 class TVQuerySet(MediaQuerySet):
@@ -8,7 +8,16 @@ class TVQuerySet(MediaQuerySet):
 
 
 class TVManager(MediaManager):
-    pass
+    def create(self,
+               *args,
+               path=None,
+               **kwargs):
+        tv = super().create(*args, **kwargs)
+        if path:
+            mp, created = MediaPath.objects.get_or_create(
+                _path=path,
+                defaults=dict(tv=tv))
+        return tv
 
 
 class TV(Media):
@@ -25,6 +34,18 @@ class TV(Media):
 
     def is_tv(self):
         return True
+
+    def add_episode(self, filename, display_name):
+        media_path = self.mediapath_set.order_by('-pk').first()
+        if not media_path:
+            raise Exception('No MediaPath exists for use')
+
+        mf = MediaFile.objects.create(
+            media_path=media_path,
+            filename=filename,
+            display_name=display_name
+        )
+        return mf
 
     def episodes(self):
         base_qs = MediaFile.objects.filter(media_path__tv=self)

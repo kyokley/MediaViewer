@@ -1,5 +1,6 @@
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
+from mediaviewer.models import MediaPath
 from django.urls import reverse
 from .core import ViewableObjectMixin, ViewableManagerMixin
 
@@ -9,7 +10,16 @@ class MovieQuerySet(MediaQuerySet):
 
 
 class MovieManager(MediaManager, ViewableManagerMixin):
-    pass
+    def create(self,
+               *args,
+               path=None,
+               **kwargs):
+        movie = super().create(*args, **kwargs)
+        if path:
+            mp, created = MediaPath.objects.get_or_create(
+                _path=path,
+                defaults=dict(movie=movie))
+        return movie
 
 
 class Movie(Media, ViewableObjectMixin):

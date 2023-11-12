@@ -120,7 +120,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     @property
     def full_name(self):
         if self.is_tv():
-            return f'{self.media.name} {self.name}'
+            return f'{self.media.name} {self.name}'.strip()
         else:
             return self.name
 

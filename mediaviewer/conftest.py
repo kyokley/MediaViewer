@@ -1,4 +1,5 @@
 import pytest
+import shutil
 from faker import Faker
 
 from django.contrib.auth.models import Group
@@ -24,35 +25,74 @@ _count = _counter_gen()
 
 
 @pytest.fixture
-def create_movie():
+def temp_dir(tmp_path):
+    dir = tmp_path
+    yield dir
+    if dir.exists():
+        shutil.rmtree(dir)
+
+
+@pytest.fixture
+def create_movie(temp_dir):
     def _create_movie(
         name=None,
         finished=False,
+        path=None,
         poster=None
     ):
         if name is None:
             name = f'Movie {next(_count)}'
-        return Movie.objects.create(
+
+        if not path:
+            path = temp_dir
+
+        movie = Movie.objects.create(
             name=name,
             finished=finished,
+            path=path,
             poster=poster)
+        return movie
     return _create_movie
 
 
 @pytest.fixture
-def create_tv():
+def create_tv(temp_dir):
     def _create_tv(
         name=None,
         finished=False,
+        path=None,
         poster=None
     ):
         if name is None:
             name = f'TV {next(_count)}'
+
+        if not path:
+            path = temp_dir
+
         return TV.objects.create(
             name=name,
             finished=finished,
+            path=path,
             poster=poster)
     return _create_tv
+
+
+@pytest.fixture
+def create_tv_media_file(create_tv):
+    def _create_tv_media_file(tv=None,
+                              filename=None,
+                              display_name=None):
+        if tv is None:
+            tv = create_tv()
+
+        if filename is None:
+            filename = f'foo{next(_count)}.mp4'
+
+        if display_name is None:
+            display_name = filename
+
+        return tv.add_episode(filename, display_name)
+    return _create_tv_media_file
 
 
 @pytest.fixture
