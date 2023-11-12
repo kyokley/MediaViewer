@@ -98,31 +98,20 @@ def create_tv_media_file(create_tv):
 @pytest.fixture
 def create_user():
     def _create_user(
-        username=DEFAULT_USERNAME,
-        email=DEFAULT_EMAIL,
+        username=None,
+        email=None,
         group_name="MediaViewer",
         send_email=False,
         force_password_change=False,
         is_staff=False,
-        random=False,
     ):
-        mv_group = Group.objects.filter(name=group_name).first()
+        mv_group, _ = Group.objects.get_or_create(name=group_name)
 
-        if not mv_group:
-            mv_group = Group(name=group_name)
-            mv_group.save()
+        if not username:
+            username = f'{DEFAULT_USERNAME}{next(_count)}'
 
-        if random:
-            if username != DEFAULT_USERNAME or email != DEFAULT_EMAIL:
-                raise ValueError(
-                    "Username and email are not expected to be populated"
-                    " when used with random kwarg"
-                )
-
-            username = getSomewhatUniqueID()
-            email = "{}@{}.com".format(
-                str(getSomewhatUniqueID()), str(getSomewhatUniqueID())
-            )
+        if not email:
+            email = f'asdf{next(_count)}@example.com'
 
         user = UserSettings.new(
             username, email, send_email=send_email, group=mv_group, is_staff=is_staff
