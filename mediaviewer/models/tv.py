@@ -1,6 +1,6 @@
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
-from mediaviewer.models import MediaFile, Comment, MediaPath
+from mediaviewer.models import MediaFile, Comment, MediaPath, Poster
 
 
 class TVQuerySet(MediaQuerySet):
@@ -8,16 +8,27 @@ class TVQuerySet(MediaQuerySet):
 
 
 class TVManager(MediaManager):
-    def create(self,
-               *args,
-               path=None,
-               **kwargs):
-        tv = super().create(*args, **kwargs)
-        if path:
-            mp, created = MediaPath.objects.get_or_create(
+    def from_filename(self, filename, path, display_name=''):
+        mp = MediaPath.objects.filter(_path=path).first()
+        if mp:
+            tv = mp.tv
+            if not tv:
+                raise ValueError(f'No tv found for the given path {path}')
+        else:
+            tv, created = super().from_filename(filename)
+            Poster.objects.from_ref_obj(tv)
+
+            mp = MediaPath.objects.create(
                 _path=path,
-                defaults=dict(tv=tv))
-        return tv
+                tv=tv)
+
+        mf = MediaFile.objects.create(
+            media_path=mp,
+            filename=filename,
+            display_name=display_name,
+        )
+        Poster.objects.from_ref_obj(mf)
+        return tv, mf
 
 
 class TV(Media):

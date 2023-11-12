@@ -109,7 +109,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     @property
     def poster(self):
         if self._poster is None:
-            self._poster = Poster.objects.create_from_ref_obj(self)
+            self._poster = Poster.objects.from_ref_obj(self)
             self._poster._populate_data()
         return self._poster
 

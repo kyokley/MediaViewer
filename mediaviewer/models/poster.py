@@ -100,7 +100,7 @@ def _get_extended_info(tmdb_id, is_movie=True):
 
 
 class PosterManager(models.Manager):
-    def create_from_ref_obj(self, ref_obj, imdb='', tmdb=''):
+    def from_ref_obj(self, ref_obj, imdb='', tmdb=''):
         new_poster = self.model()
         new_poster.imdb = imdb
         new_poster.tmdb = tmdb

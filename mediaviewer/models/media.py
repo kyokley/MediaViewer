@@ -21,7 +21,7 @@ class MediaQuerySet(models.QuerySet):
 
 
 class MediaManager(models.Manager):
-    def from_filename(self, filename, **kwargs):
+    def from_filename(self, filename):
         for scraper in FilenameScrapeFormat.objects.all():
             res = scraper.nameRegex.findall(
                 filename
@@ -49,8 +49,7 @@ class MediaManager(models.Manager):
         else:
             name = filename
 
-        kwargs['name'] = name
-        return self.create(**kwargs)
+        return self.get_or_create(name=name)
 
 
 class Media(TimeStampModel):

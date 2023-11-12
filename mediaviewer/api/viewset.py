@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, views
 from rest_framework.response import Response as RESTResponse
-from rest_framework import permissions, authentication
+from rest_framework import permissions
 from mediaviewer.api.serializers import (
     DownloadTokenSerializer,
     FilenameScrapeFormatSerializer,
@@ -32,28 +32,13 @@ class FilenameScrapeFormatViewSet(viewsets.ModelViewSet):
     queryset = FilenameScrapeFormat.objects.all()
     serializer_class = FilenameScrapeFormatSerializer
 
-    def get_queryset(self):
-        queryset = FilenameScrapeFormat.objects.all()
-        log.debug("Returning FilenameScrapeFormat objects")
-        return queryset
-
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
-    def get_queryset(self):
-        queryset = Message.objects.all()
-        log.debug("Returning Message objects")
-        return queryset
-
 
 class InferScrapersView(views.APIView):
-    permission_classes = (permissions.IsAdminUser,)
-    authentication_classes = (
-        authentication.BasicAuthentication,
-        authentication.SessionAuthentication,
-    )
 
     def post(self, request, *args, **kwargs):
         try:

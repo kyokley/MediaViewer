@@ -1,8 +1,16 @@
+import re
+
 from django.db import models
 from .media import Media, MediaManager, MediaQuerySet
-from mediaviewer.models import MediaPath
+from mediaviewer.models import MediaPath, MediaFile
+from .poster import Poster
 from django.urls import reverse
 from .core import ViewableObjectMixin, ViewableManagerMixin
+
+yearRegex = re.compile(r"(19|20)\d{2}\D?.*$")
+dvdRegex = re.compile(r"[A-Z]{2,}.*$")
+formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
+punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
 
 
 class MovieQuerySet(MediaQuerySet):
@@ -10,16 +18,40 @@ class MovieQuerySet(MediaQuerySet):
 
 
 class MovieManager(MediaManager, ViewableManagerMixin):
-    def create(self,
-               *args,
-               path=None,
-               **kwargs):
-        movie = super().create(*args, **kwargs)
-        if path:
-            mp, created = MediaPath.objects.get_or_create(
+    def from_filename(self,
+                      filename,
+                      path,
+                      display_name='',
+                      ):
+        mp = MediaPath.objects.filter(_path=path).first()
+        if mp:
+            movie = mp.movie
+            if not movie:
+                raise ValueError(f'No movie found for the given path {path}')
+        else:
+            movie, created = super().from_filename(filename)
+            Poster.objects.from_ref_obj(movie)
+
+            mp = MediaPath.objects.create(
                 _path=path,
-                defaults=dict(movie=movie))
-        return movie
+                movie=movie)
+
+        mf = MediaFile.objects.create(
+            media_path=mp,
+            filename=filename,
+            display_name=display_name,
+        )
+        Poster.objects.from_ref_obj(mf)
+        return movie, mf
+
+    @staticmethod
+    def scrape_filename(filename):
+        searchTerm = yearRegex.sub("", filename)
+        searchTerm = dvdRegex.sub("", searchTerm)
+        searchTerm = formatRegex.sub("", searchTerm)
+        searchTerm = punctuationRegex.sub(" ", searchTerm)
+        searchTerm = searchTerm.strip()
+        return searchTerm
 
 
 class Movie(Media, ViewableObjectMixin):

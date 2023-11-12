@@ -4,9 +4,8 @@ from faker import Faker
 
 from django.contrib.auth.models import Group
 from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.utils import getSomewhatUniqueID
 
-from mediaviewer.models import Movie, TV
+from mediaviewer.models import Movie, TV, MediaPath
 
 DEFAULT_USERNAME = "test_user"
 DEFAULT_EMAIL = "asdf@example.com"
@@ -43,14 +42,17 @@ def create_movie(temp_dir):
         if name is None:
             name = f'Movie {next(_count)}'
 
-        if not path:
-            path = temp_dir
-
         movie = Movie.objects.create(
             name=name,
             finished=finished,
-            path=path,
             poster=poster)
+
+        if not path:
+            path = temp_dir
+            MediaPath.objects.create(
+                _path=path,
+                movie=movie)
+
         return movie
     return _create_movie
 
@@ -66,14 +68,18 @@ def create_tv(temp_dir):
         if name is None:
             name = f'TV {next(_count)}'
 
-        if not path:
-            path = temp_dir
-
-        return TV.objects.create(
+        tv = TV.objects.create(
             name=name,
             finished=finished,
-            path=path,
             poster=poster)
+
+        if not path:
+            path = temp_dir
+            MediaPath.objects.create(
+                _path=path,
+                tv=tv)
+        return tv
+
     return _create_tv
 
 
