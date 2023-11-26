@@ -58,9 +58,15 @@ class Media(TimeStampModel):
                             max_length=256)
     finished = models.BooleanField(null=False,
                                    default=False)
+    hide = models.BooleanField(null=False,
+                               default=False)
 
     class Meta:
         abstract = True
+
+    @property
+    def media_path(self):
+        return self.mediapath_set.order_by('-pk').first()
 
     def __str__(self):
         return f'<{self.__class__.__name__} n:{self.name} f:{self.finished}>'

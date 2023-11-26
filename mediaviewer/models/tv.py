@@ -43,16 +43,20 @@ class TV(Media):
     class Meta:
         verbose_name_plural = "TV"
 
+    def add_path(self, path):
+        return MediaPath.objects.create(
+            tv=self,
+            _path=path)
+
     def is_tv(self):
         return True
 
     def add_episode(self, filename, display_name):
-        media_path = self.mediapath_set.order_by('-pk').first()
-        if not media_path:
+        if not self.media_path:
             raise Exception('No MediaPath exists for use')
 
         mf = MediaFile.objects.create(
-            media_path=media_path,
+            media_path=self.media_path,
             filename=filename,
             display_name=display_name
         )
