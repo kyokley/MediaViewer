@@ -40,55 +40,5 @@ class VideoProgress(models.Model):
         db_table = "videoprogress"
         verbose_name_plural = "Video Progress"
 
-    def _unicode__(self):
+    def __str__(self):
         return f"id: {self.id} f: {self.filename} o: {self.offset}"
-
-    @classmethod
-    def new(
-        cls,
-        user,
-        filename,
-        hashed_filename,
-        offset,
-        file,
-    ):
-        vp = cls()
-        vp.user = user
-        vp.filename = filename
-        vp.hashed_filename = hashed_filename
-        vp.offset = offset
-        vp.file = file
-        vp.save()
-        return vp
-
-    @classmethod
-    def get(cls, user, hashed_filename):
-        vp = (
-            cls.objects.filter(user=user)
-            .filter(hashed_filename=hashed_filename)
-            .first()
-        )
-        return vp
-
-    @classmethod
-    def createOrUpdate(
-        cls,
-        user,
-        filename,
-        hashed_filename,
-        offset,
-        file,
-    ):
-        record = (
-            cls.objects.filter(user=user)
-            .filter(hashed_filename=hashed_filename)
-            .first()
-        )
-        if record:
-            record.offset = offset
-            record.file = file
-            record.save()
-        else:
-            record = cls.new(user, filename, hashed_filename, offset, file)
-
-        return record
