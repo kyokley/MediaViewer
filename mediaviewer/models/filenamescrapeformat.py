@@ -43,9 +43,9 @@ class FilenameScrapeFormat(models.Model):
         return obj
 
     def valid_for_filename(self, filename):
-        from mediaviewer.models.path import Path
+        from mediaviewer.models import TV
 
-        path = None
+        tv = None
 
         if self.subPeriods:
             filename = filename.replace(".", " ")
@@ -56,11 +56,8 @@ class FilenameScrapeFormat(models.Model):
         if not name:
             return None
         else:
-            for p in Path.objects.filter(is_movie=False).order_by("-id"):
-                if name.lower() in p.displayName().lower():
-                    path = p
-                    break
-            else:
+            tv = TV.objects.filter(name__icontains=name).order_by('-pk').first()
+            if not tv:
                 return None
 
         season = re.findall(self.seasonRegex, filename)
@@ -85,16 +82,4 @@ class FilenameScrapeFormat(models.Model):
         if int(season) == 2 and int(episode) == 64:
             return None
 
-        return (path, name, season, episode)
-
-    @classmethod
-    def path_for_filename(cls, filename):
-        paths = []
-
-        for scraper in FilenameScrapeFormat.objects.all():
-            path = scraper.valid_for_filename(filename)
-            if path:
-                paths.append(path)
-
-        paths.sort(key=lambda x: len(x[1]), reverse=True)
-        return paths[0][0] if paths else None
+        return (tv, name, season, episode)
