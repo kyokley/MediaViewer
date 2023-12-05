@@ -3,21 +3,20 @@ import pytest
 
 from django.http import HttpRequest
 
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.views.home import (
     home,
     ajaxrunscraper,
 )
 
-from mediaviewer.tests.helpers import create_user
-
 
 @pytest.mark.django_db
 class TestHome:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self,
+              mocker,
+              create_user,
+              create_tv_media_file):
         self.mock_most_recent_files = mocker.patch(
             "mediaviewer.views.home.File.most_recent_files"
         )
@@ -30,10 +29,7 @@ class TestHome:
 
         self.user = create_user()
 
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_file = File.objects.create(filename="tv.file", path=self.tv_path)
+        self.tv_file = create_tv_media_file(filename="tv.file")
 
         self.mock_most_recent_files.return_value = [self.tv_file]
 
@@ -86,7 +82,7 @@ class TestHome:
 @pytest.mark.django_db
 class TestAjaxRunScraper:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, mocker, create_user):
         self.mock_inferAllScrapers = mocker.patch(
             "mediaviewer.views.home.File.inferAllScrapers"
         )

@@ -5,9 +5,11 @@ from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 @pytest.mark.django_db
 class TestValidForFilename:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_tv_media_file):
-        self.tv_mf = create_tv_media_file()
-        self.tv_mf.display_name = "Foo Is Bar"
+    def setUp(self,
+              create_tv,
+              create_tv_media_file):
+        self.tv = create_tv(name='Foo Is Bar')
+        self.tv_mf = create_tv_media_file(tv=self.tv)
 
         self.scraper = FilenameScrapeFormat.new(
             nameRegex=r"[fF]oo[\.\s\-][Ii]s[\.\s\-][Bb]ar",
@@ -22,7 +24,7 @@ class TestValidForFilename:
     def test_is_valid(self):
         test_filename = "Foo.is.bar.S02E01.mpg"
 
-        expected = (self.tv_mf, "Foo is bar", "02", "01")
+        expected = (self.tv, "Foo is bar", "02", "01")
         actual = self.scraper.valid_for_filename(test_filename)
 
         assert expected == actual

@@ -9,7 +9,7 @@ from django.conf import settings
 @pytest.mark.parametrize(
     'use_movie', (True, False))
 class TestIsValid:
-    @pytest.fixture
+    @pytest.fixture(autouse=True)
     def setUp(self,
               create_tv_media_file,
               create_movie_media_file,
