@@ -82,7 +82,6 @@ def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     return resp
 
 
-
 def _get_extended_info(tmdb_id, is_movie=True):
     log.debug("Getting IMDB rating for tmdb_id = %s" % tmdb_id)
 
@@ -100,13 +99,21 @@ def _get_extended_info(tmdb_id, is_movie=True):
 
 
 class PosterManager(models.Manager):
-    def from_ref_obj(self, ref_obj, imdb='', tmdb=''):
+    def from_ref_obj(self,
+                     ref_obj,
+                     imdb='',
+                     tmdb='',
+                     genres=None):
         new_poster = self.model()
         new_poster.imdb = imdb
         new_poster.tmdb = tmdb
         new_poster.save()
 
-        ref_obj.poster = new_poster
+        if genres:
+            for genre in genres:
+                new_poster.genres.add(genre)
+
+        ref_obj._poster = new_poster
         ref_obj.save()
         return new_poster
 

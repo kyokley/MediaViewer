@@ -65,6 +65,13 @@ class Media(TimeStampModel):
         abstract = True
 
     @property
+    def poster(self):
+        if self._poster is None:
+            self._poster = Poster.objects.from_ref_obj(self)
+            self._poster._populate_data()
+        return self._poster
+
+    @property
     def media_path(self):
         return self.mediapath_set.order_by('-pk').first()
 

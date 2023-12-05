@@ -55,11 +55,11 @@ class MovieManager(MediaManager, ViewableManagerMixin):
 
 
 class Movie(Media, ViewableObjectMixin):
-    poster = models.OneToOneField('mediaviewer.Poster',
-                                  null=True,
-                                  on_delete=models.SET_NULL,
-                                  blank=True,
-                                  related_name='movie')
+    _poster = models.OneToOneField('mediaviewer.Poster',
+                                   null=True,
+                                   on_delete=models.SET_NULL,
+                                   blank=True,
+                                   related_name='movie')
 
     objects = MovieManager.from_queryset(MovieQuerySet)()
 

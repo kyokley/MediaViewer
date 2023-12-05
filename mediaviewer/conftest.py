@@ -70,7 +70,7 @@ def create_movie(create_media_path):
         movie = Movie.objects.create(
             name=name,
             finished=finished,
-            poster=poster,
+            _poster=poster,
             hide=hide,
         )
 
@@ -94,7 +94,7 @@ def create_tv(create_media_path):
         tv = TV.objects.create(
             name=name,
             finished=finished,
-            poster=poster,
+            _poster=poster,
             hide=hide,
         )
 

@@ -32,7 +32,7 @@ class TVManager(MediaManager):
 
 
 class TV(Media):
-    poster = models.OneToOneField('mediaviewer.Poster',
+    _poster = models.OneToOneField('mediaviewer.Poster',
                                   null=True,
                                   on_delete=models.SET_NULL,
                                   blank=True,
