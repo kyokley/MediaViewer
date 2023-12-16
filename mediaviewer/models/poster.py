@@ -20,6 +20,9 @@ from django.core.files.images import ImageFile
 from django.conf import settings
 
 
+SENTINEL = object()
+
+
 def _getDataFromIMDBBySearchString(searchString, is_movie=True):
     log.debug(f"Getting data from IMDB using {searchString}")
 
@@ -143,9 +146,13 @@ class Poster(TimeStampModel):
 
     def __str__(self):
         if self.season is None or self.episode is None:
-            return f'<Poster n:{self.ref_obj.short_name} i:{bool(self.image)}>'
+            return f'<Poster n:{self.short_name} i:{bool(self.image)}>'
         else:
-            return f'<Poster n:{self.ref_obj.short_name} s:{self.season} e:{self.episode} i:{bool(self.image)}>'
+            return f'<Poster n:{self.short_name} s:{self.season} e:{self.episode} i:{bool(self.image)}>'
+
+    @property
+    def short_name(self):
+        return self.ref_obj.short_name if self.ref_obj else ''
 
     def __repr__(self):
         return str(self)
@@ -165,10 +172,13 @@ class Poster(TimeStampModel):
 
         This object will be one of a MediaFile, TV, or Movie.
         """
-        if not getattr(self, '_ref_obj', None):
-            self._ref_obj = getattr(self, 'media_file', None) or getattr(self, 'tv', None) or getattr(self, 'movie', None)
-            if self._ref_obj is None:
-                raise Exception(f'{self} has no media_file, tv, or movie')
+        if not hasattr(self, '_ref_obj'):
+            self._ref_obj = (getattr(self, 'media_file', None) or
+                             getattr(self, 'tv', None) or
+                             getattr(self, 'movie', SENTINEL))
+
+        if self._ref_obj == SENTINEL:
+            return None
         return self._ref_obj
 
     @property

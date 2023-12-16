@@ -92,61 +92,6 @@ class TestFromRefObj:
 
 
 @pytest.mark.django_db
-class TestPopulatePosterData:
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_getIMDBData = mocker.patch(
-            "mediaviewer.models.posterfile.PosterFile._getIMDBData"
-        )
-
-        self.mock_download_poster = mocker.patch(
-            "mediaviewer.models.posterfile.PosterFile._download_poster"
-        )
-
-        self.test_obj = Poster()
-
-    def test_valid(self):
-        expected = None
-        actual = self.test_obj._populate_poster_data()
-
-        assert expected == actual
-        self.mock_getIMDBData.assert_called_once_with()
-        self.mock_download_poster.assert_called_once_with()
-
-
-@pytest.mark.django_db
-class TestDownloadPoster:
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_saveImageToDisk = mocker.patch(
-            "mediaviewer.models.posterfile.saveImageToDisk"
-        )
-
-        self.test_obj = Poster()
-        self.test_obj.poster_url = "/test_poster_url"
-
-    def test_missing_poster_url(self):
-        self.test_obj.poster_url = None
-
-        expected = None
-        actual = self.test_obj._download_poster()
-
-        assert expected == actual
-        assert not self.mock_saveImageToDisk.called
-        assert self.test_obj.image is None
-
-    def test_valid(self):
-        expected = None
-        actual = self.test_obj._download_poster()
-
-        assert expected == actual
-        self.mock_saveImageToDisk.assert_called_once_with(
-            self.test_obj.poster_url, self.test_obj.image
-        )
-        assert "test_poster_url" == self.test_obj.image
-
-
-@pytest.mark.django_db
 class TestStorePlot:
     @pytest.fixture(autouse=True)
     def setUp(self):
@@ -186,23 +131,21 @@ class TestStorePlot:
     def test_plot_undefined(self):
         test_data = {"Plot": "undefined"}
 
-        expected = None
-        actual = self.test_obj._store_plot(test_data)
+        self.test_obj._store_plot(test_data)
 
-        assert expected == actual
-        assert self.test_obj.plot is None
+        assert self.test_obj.plot == ''
 
 
 @pytest.mark.django_db
 class TestStoreGenres:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_tvdbConfig = mocker.patch("mediaviewer.models.posterfile.tvdbConfig")
+    def setUp(self, mocker, create_tv):
+        self.mock_tvdbConfig = mocker.patch("mediaviewer.models.poster.tvdbConfig")
 
         self.mock_tvdbConfig.genres = {123: "test_genre"}
 
-        self.test_obj = Poster()
-        self.test_obj.save()
+        self.tv = create_tv()
+        self.test_obj = Poster.objects.from_ref_obj(self.tv)
 
     def test_has_results(self):
         imdb_data = {
@@ -273,11 +216,8 @@ class TestStoreRating:
             "vote_average": "undefined",
         }
 
-        expected = None
-        actual = self.test_obj._store_rating(test_data)
-
-        assert expected == actual
-        assert self.test_obj.rating is None
+        self.test_obj._store_rating(test_data)
+        assert self.test_obj.rating == ''
 
 
 @pytest.mark.django_db
@@ -302,11 +242,8 @@ class TestStoreTagline:
             "tagline": "undefined",
         }
 
-        expected = None
-        actual = self.test_obj._store_tagline(test_data)
-
-        assert expected == actual
-        assert self.test_obj.tagline is None
+        self.test_obj._store_tagline(test_data)
+        assert self.test_obj.tagline == ''
 
 
 class TestStoreRated:
@@ -317,26 +254,18 @@ class TestStoreRated:
         self.test_obj = Poster()
 
     def test_has_rated(self):
-        expected = None
-        actual = self.test_obj._store_rated(self.test_data)
+        self.test_obj._store_rated(self.test_data)
 
-        assert expected == actual
         assert "test_rated" == self.test_obj.rated
 
     def test_no_rated(self):
         self.test_data = {}
 
-        expected = None
-        actual = self.test_obj._store_rated(self.test_data)
-
-        assert expected == actual
-        assert self.test_obj.rated is None
+        self.test_obj._store_rated(self.test_data)
+        assert self.test_obj.rated == ''
 
     def test_undefined(self):
         self.test_data = {"Rated": "undefined"}
 
-        expected = None
-        actual = self.test_obj._store_rated(self.test_data)
-
-        assert expected == actual
-        assert self.test_obj.rated is None
+        self.test_obj._store_rated(self.test_data)
+        assert self.test_obj.rated == ''
