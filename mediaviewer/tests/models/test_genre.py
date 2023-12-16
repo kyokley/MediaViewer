@@ -46,27 +46,29 @@ class TestGetGenres:
         Poster.objects.from_ref_obj(self.tv, genres=[self.drama, self.thriller])
 
         # Movie posters
-        Poster.objects.from_ref_obj(self.movie, genres=[self.thriller, self.mystery])
-        Poster.objects.from_ref_obj(self.movie, genres=[self.thriller, self.action])
-        Poster.objects.from_ref_obj(self.movie, genres=[self.thriller, self.action])
-        Poster.objects.from_ref_obj(self.movie, genres=[self.mystery, self.drama])
+        Poster.objects.from_ref_obj(create_movie(), genres=[self.thriller, self.mystery])
+        Poster.objects.from_ref_obj(create_movie(), genres=[self.thriller, self.action])
+        Poster.objects.from_ref_obj(create_movie(), genres=[self.thriller, self.action])
+        Poster.objects.from_ref_obj(create_movie(), genres=[self.mystery, self.drama])
 
-    def test_get_movie_genres(self):
-        expected = [self.action, self.drama, self.mystery, self.thriller]
-        actual = list(Genre.objects.get_movie_genres())
+    @pytest.mark.parametrize('use_limit',
+                             (True, False))
+    def test_get_movie_genres(self, use_limit):
+        if use_limit:
+            expected = [self.action, self.thriller]
+            actual = list(Genre.objects.get_movie_genres(limit=2))
+        else:
+            expected = [self.action, self.drama, self.mystery, self.thriller]
+            actual = list(Genre.objects.get_movie_genres())
         assert expected == actual
 
-    def test_tv_genres(self):
-        expected = [self.action, self.comedy, self.drama, self.mystery, self.thriller]
-        actual = list(Genre.objects.get_tv_genres())
-        assert expected == actual
-
-    def test_get_movie_genres_limit(self):
-        expected = [self.action, self.thriller]
-        actual = list(Genre.objects.get_movie_genres(limit=2))
-        assert expected == actual
-
-    def test_get_tv_genres_limit(self):
-        expected = [self.action, self.thriller]
-        actual = list(Genre.objects.get_tv_genres(limit=2))
+    @pytest.mark.parametrize('use_limit',
+                             (True, False))
+    def test_tv_genres(self, use_limit):
+        if use_limit:
+            expected = [self.action, self.comedy]
+            actual = list(Genre.objects.get_tv_genres(limit=2))
+        else:
+            expected = [self.action, self.comedy, self.drama, self.mystery, self.thriller]
+            actual = list(Genre.objects.get_tv_genres())
         assert expected == actual

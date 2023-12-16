@@ -104,7 +104,7 @@ class PosterManager(models.Manager):
                      imdb='',
                      tmdb='',
                      genres=None):
-        new_poster = self.model()
+        new_poster = ref_obj._poster or self.model()
         new_poster.imdb = imdb
         new_poster.tmdb = tmdb
         new_poster.save()

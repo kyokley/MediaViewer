@@ -41,7 +41,7 @@ class Genre(models.Model):
         db_table = "genre"
 
     def __str__(self):
-        return "g: %s" % (self.genre,)
+        return f"g: {self.genre}"
 
     @classmethod
     def new(cls, genre):
