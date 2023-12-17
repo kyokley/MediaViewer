@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.downloadtoken import DownloadToken
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -82,8 +82,8 @@ def ajaxgenres(request, guid):
         return HttpResponse(None, content_type="application/json", status=412)
 
     if request.method == "GET":
-        movie_genres = Genre.get_movie_genres()
-        tv_genres = Genre.get_tv_genres()
+        movie_genres = Genre.objects.get_movie_genres()
+        tv_genres = Genre.objects.get_tv_genres()
         data = {
             "movie_genres": [(mg.id, mg.genre) for mg in movie_genres],
             "tv_genres": [(mg.id, mg.genre) for mg in tv_genres],
@@ -302,7 +302,7 @@ def ajaxreport(request):
             obj = get_object_or_404(Movie,
                                     pk=movie_id)
         else:
-            raise  HttpResponse('Either mf_id or movie_id must be provided.',
+            return HttpResponse('Either mf_id or movie_id must be provided.',
                                 status=400)
 
         response["reportid"] = obj.pk
@@ -311,7 +311,7 @@ def ajaxreport(request):
         for user in users:
             Message.createNewMessage(
                 user,
-                f"{obj.filename} has been reported by {createdBy.username}",
+                f"{obj.name} has been reported by {createdBy.username}",
                 level=messages.WARNING,
             )
     except Http404:
@@ -321,4 +321,4 @@ def ajaxreport(request):
             response["errmsg"] = str(e)
         else:
             response["errmsg"] = "An error has occurred"
-    return HttpResponse(json.dumps(response), content_type="application/javascript")
+    return JsonResponse(response)

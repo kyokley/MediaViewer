@@ -88,7 +88,7 @@ class Media(TimeStampModel):
         raise NotImplementedError('This method must be defined by subclasses')
 
     def delete(self, *args, **kwargs):
-        if self.poster:
+        if self._poster:
             self.poster.delete()
         return super().delete(*args, **kwargs)
 
