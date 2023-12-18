@@ -3,10 +3,9 @@ import pytest
 
 from datetime import timedelta
 from django.http import HttpRequest, Http404
-from django.urls import reverse
+from django.urls import reverse, resolve
 
 from mediaviewer.views.detail import (
-    ajaxdownloadbutton,
     ajaxsuperviewed,
     autoplaydownloadlink,
 )
@@ -245,10 +244,8 @@ class TestAjaxDownloadButton:
 
     def test_valid(self, use_movie):
         if use_movie:
-            obj = self.movie
             payload = {'movie_id': self.movie.pk}
         else:
-            obj = self.tv_mf
             payload = {'mf_id': self.tv_mf.pk}
 
         self.client.force_login(self.user)
@@ -257,63 +254,39 @@ class TestAjaxDownloadButton:
         assert resp.status_code == 200
         json_data = resp.json()
 
-        expected_response = {
-            "guid": self.mock_downloadtoken_new.return_value.guid,
-            "isMovie": self.mock_downloadtoken_new.return_value.ismovie,
-            "downloadLink": self.mock_downloadLink.return_value,
-            "errmsg": "",
-        }
+        dt_guid = json_data['guid']
+        dt = DownloadToken.objects.get_by_guid(dt_guid)
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxdownloadbutton(self.request)
-
-        assert expected == actual
-        self.mock_dumps.assert_called_once_with(expected_response)
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
-        )
+        assert dt.ismovie == use_movie
+        assert dt.user == self.user
+        assert dt.isvalid
 
 
 @pytest.mark.django_db
 class TestAutoPlayDownloadLink:
     @pytest.fixture(autouse=True)
     def setUp(self,
-              mocker,
               create_user,
-              create_tv_media_file):
-        self.mock_autoplayDownloadLink = mocker.patch(
-            "mediaviewer.views.detail.File.autoplayDownloadLink"
-        )
-
-        self.mock_downloadtoken_new = mocker.patch(
-            "mediaviewer.views.detail.DownloadToken.new"
-        )
-
-        self.mock_redirect = mocker.patch("mediaviewer.views.detail.redirect")
-
+              create_tv_media_file,
+              client):
+        self.client = client
         self.tv_mf = create_tv_media_file()
 
-        mv_group = Group(name="MediaViewer")
-        mv_group.save()
-
         self.user = create_user()
+        self.url = reverse('mediaviewer:autoplaydownloadlink', kwargs=dict(mf_id=self.tv_mf.pk))
 
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
+    def test_user_is_unauthenticated(self):
+        resp = self.client.post(self.url)
 
-    def test_no_file(self):
-        with pytest.raises(Http404):
-            autoplaydownloadlink(self.request, 0)
+        assert resp.status_code == 302
+
+        resolve_match = resolve(resp.url)
+        assert resolve_match.url_name == 'signin'
 
     def test_valid(self):
-        expected = self.mock_redirect.return_value
-        actual = autoplaydownloadlink(self.request, self.tv_mf.id)
+        self.client.force_login(self.user)
+        resp = self.client.post(self.url)
 
-        assert expected == actual
-        self.mock_downloadtoken_new.assert_called_once_with(self.user, self.tv_mf)
-        self.mock_autoplayDownloadLink.assert_called_once_with(
-            self.user, self.mock_downloadtoken_new.return_value.guid
-        )
-        self.mock_redirect.assert_called_once_with(
-            self.mock_autoplayDownloadLink.return_value
-        )
+        assert resp.status_code == 302
+        import pdb; pdb.set_trace()  # ############################## Breakpoint ##############################
+        pass

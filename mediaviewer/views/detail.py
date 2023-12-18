@@ -1,4 +1,3 @@
-import json
 from itertools import chain
 
 from django.db import transaction
@@ -133,7 +132,8 @@ def ajaxdownloadbutton(request):
     else:
         response = {"errmsg": "An error has occurred"}
 
-    return HttpResponse(json.dumps(response), content_type="application/javascript")
+    status = 200 if response['errmsg'] == '' else 400
+    return JsonResponse(response, status=status)
 
 
 @login_required(login_url="/mediaviewer/login/")
