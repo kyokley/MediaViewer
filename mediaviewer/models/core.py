@@ -82,3 +82,9 @@ class ViewableObjectMixin:
 
     def url(self):
         raise NotImplementedError('Method must be implemented by child classes')
+
+    def next(self):
+        raise NotImplementedError('Method must be implemented by child classes')
+
+    def previous(self):
+        raise NotImplementedError('Method must be implemented by child classes')

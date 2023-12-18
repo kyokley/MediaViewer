@@ -4,7 +4,7 @@ from itertools import chain
 from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.message import Message
 from mediaviewer.models import Comment, MediaFile, Movie
@@ -24,10 +24,9 @@ def ajaxviewed(request):
 
     if errmsg:
         response["errmsg"] = errmsg
-        return HttpResponse(json.dumps(response), content_type="application/javascript")
+        return JsonResponse(response, status=400)
 
-    data = json.loads(request.body)
-    data.pop("csrfmiddlewaretoken", None)
+    data = dict(request.POST)
 
     media_files = data.get('media_files', {})
     movies = data.get('movies', {})
@@ -69,26 +68,29 @@ def ajaxviewed(request):
 
     response["data"] = data
 
-    return HttpResponse(json.dumps(response), content_type="application/javascript")
+    return JsonResponse(response)
 
 
 @csrf_exempt
 def ajaxsuperviewed(request):
     errmsg = ""
-    guid = request.POST["guid"]
+    guid = request.POST.get("guid", '')
     viewed = request.POST["viewed"] == "True" and True or False
 
-    token = DownloadToken.objects.filter(guid=guid).first()
-    if token and token.isvalid:
-        obj = token.media_file or token.movie
-        obj.mark_viewed(token.user, viewed)
+    if guid:
+        token = DownloadToken.objects.filter(guid=guid).first()
+        if token and token.isvalid:
+            obj = token.media_file or token.movie
+            obj.mark_viewed(token.user, viewed)
+        else:
+            errmsg = "Token is invalid"
     else:
-        errmsg = "Token is invalid"
+        errmsg = 'Token is invalid'
 
     response = {"errmsg": errmsg, "guid": guid, "viewed": viewed}
-    response = json.dumps(response)
-    return HttpResponse(
-        response, status=200 if not errmsg else 400, content_type="application/json"
+    return JsonResponse(
+        response,
+        status=200 if not errmsg else 400,
     )
 
 

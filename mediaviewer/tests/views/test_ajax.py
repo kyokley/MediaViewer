@@ -10,7 +10,6 @@ from django.urls import reverse
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.genre import Genre
-from mediaviewer.models import TV
 
 from mediaviewer.views.ajax import ajaxvideoprogress, ajaxgenres, ajaxreport
 

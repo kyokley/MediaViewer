@@ -71,6 +71,12 @@ class Movie(Media, ViewableObjectMixin):
             reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
         )
 
+    def next(self):
+        return None
+
+    def previous(self):
+        return None
+
     def last_watched_url(self):
         return self.url()
 
