@@ -137,6 +137,9 @@ class TestTvShows:
               create_user,
               create_tv_media_file,
               create_movie_media_file):
+        mocker.patch(
+            "mediaviewer.models.poster.Poster._populate_data")
+
         self.mock_get_object_or_404 = mocker.patch(
             "mediaviewer.views.tv.get_object_or_404"
         )
@@ -159,14 +162,14 @@ class TestTvShows:
 
     def test_valid(self):
         expected_context = {
-            "path": self.tv_file.tv,
+            "tv": self.tv_file.tv,
             "view": "tvshows",
             "LOCAL_IP": LOCAL_IP,
             "BANGUP_IP": BANGUP_IP,
             "can_download": True,
             "jump_to_last": True,
             "active_page": "tvshows",
-            "title": "Tv Local Path",
+            "title": self.tv_file.tv.name,
             "long_plot": "",
             "table_data_page": "ajaxtvshows",
             "table_data_filter_id": self.tv_file.tv.id,
@@ -181,5 +184,5 @@ class TestTvShows:
             expected_context, self.request, includeMessages=True
         )
         self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/movies.html", expected_context
+            self.request, "mediaviewer/tvshows.html", expected_context
         )

@@ -24,6 +24,13 @@ def _counter_gen():
 _count = _counter_gen()
 
 
+@pytest.fixture(autouse=True)
+def mock_requests(mocker):
+    mock = mocker.patch(
+        'mediaviewer.models.tvdbconfiguration.requests.get')
+    mock.side_effect = Exception('Failing external requests on purpose')
+
+
 @pytest.fixture
 def temp_dir(tmp_path):
     base_dir = Path(tmp_path)
