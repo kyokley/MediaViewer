@@ -29,11 +29,11 @@ class TestSetSiteWideContext:
         )
 
         self.mock_get_movie_genres = mocker.patch(
-            "mediaviewer.views.views_utils.File.get_movie_genres"
+            "mediaviewer.views.views_utils.Genre.objects.get_movie_genres"
         )
 
         self.mock_get_tv_genres = mocker.patch(
-            "mediaviewer.views.views_utils.Path.get_tv_genres"
+            "mediaviewer.views.views_utils.Genre.objects.get_tv_genres"
         )
 
         self.first_message = mock.MagicMock(Message)
