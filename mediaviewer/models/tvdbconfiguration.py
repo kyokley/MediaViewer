@@ -1,8 +1,10 @@
-import time
 import os
-from mediaviewer.log import log
-from django.conf import settings
+import time
+
 import requests
+from django.conf import settings
+
+from mediaviewer.log import log
 
 
 def getJSONData(url):
@@ -120,10 +122,14 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
     urls = []
 
     if episode and season:
-        urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={settings.API_KEY}")
+        urls.append(
+            f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={settings.API_KEY}"
+        )
 
     if season:
-        urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}?api_key={settings.API_KEY}")
+        urls.append(
+            f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}?api_key={settings.API_KEY}"
+        )
 
     urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}?api_key={settings.API_KEY}")
 

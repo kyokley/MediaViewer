@@ -1,9 +1,12 @@
 import re
-from .core import TimeStampModel
+
 from django.db import models
-from mediaviewer.utils import get_search_query
-from .poster import Poster
+
 from mediaviewer.models import FilenameScrapeFormat
+from mediaviewer.utils import get_search_query
+
+from .core import TimeStampModel
+from .poster import Poster
 
 
 class MediaQuerySet(models.QuerySet):
@@ -16,16 +19,14 @@ class MediaQuerySet(models.QuerySet):
         return qs
 
     def delete(self, *args, **kwargs):
-        Poster.objects.filter(pk__in=self.values('poster')).delete()
+        Poster.objects.filter(pk__in=self.values("poster")).delete()
         return super().delete(*args, **kwargs)
 
 
 class MediaManager(models.Manager):
     def from_filename(self, filename):
         for scraper in FilenameScrapeFormat.objects.all():
-            res = scraper.nameRegex.findall(
-                filename
-            )
+            res = scraper.nameRegex.findall(filename)
             name = res and res[0] or None
             sFail = re.compile(r"\s[sS]$")
 
@@ -33,18 +34,12 @@ class MediaManager(models.Manager):
                 continue
 
             name = (
-                (
-                    scraper.subPeriods
-                    and name.replace(".", " ").replace("-", " ").title()
-                    or name
-                ).strip()
-            )
+                scraper.subPeriods
+                and name.replace(".", " ").replace("-", " ").title()
+                or name
+            ).strip()
 
-            if (
-                name
-                and name != filename
-                and not sFail.findall(name)
-            ):
+            if name and name != filename and not sFail.findall(name):
                 break
         else:
             name = filename
@@ -53,13 +48,9 @@ class MediaManager(models.Manager):
 
 
 class Media(TimeStampModel):
-    name = models.CharField(null=False,
-                            blank=False,
-                            max_length=256)
-    finished = models.BooleanField(null=False,
-                                   default=False)
-    hide = models.BooleanField(null=False,
-                               default=False)
+    name = models.CharField(null=False, blank=False, max_length=256)
+    finished = models.BooleanField(null=False, default=False)
+    hide = models.BooleanField(null=False, default=False)
 
     class Meta:
         abstract = True
@@ -73,10 +64,10 @@ class Media(TimeStampModel):
 
     @property
     def media_path(self):
-        return self.mediapath_set.order_by('-pk').first()
+        return self.mediapath_set.order_by("-pk").first()
 
     def __str__(self):
-        return f'<{self.__class__.__name__} n:{self.name} f:{self.finished}>'
+        return f"<{self.__class__.__name__} n:{self.name} f:{self.finished}>"
 
     def __repr__(self):
         return str(self)
@@ -85,7 +76,7 @@ class Media(TimeStampModel):
         return not self.is_tv()
 
     def is_tv(self):
-        raise NotImplementedError('This method must be defined by subclasses')
+        raise NotImplementedError("This method must be defined by subclasses")
 
     def delete(self, *args, **kwargs):
         if self._poster:

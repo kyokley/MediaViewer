@@ -1,19 +1,16 @@
-import pytest
-
 from datetime import timedelta
-from mediaviewer.models.downloadtoken import DownloadToken
+
+import pytest
 from django.conf import settings
+
+from mediaviewer.models.downloadtoken import DownloadToken
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    'use_movie', (True, False))
+@pytest.mark.parametrize("use_movie", (True, False))
 class TestIsValid:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              create_tv_media_file,
-              create_movie_media_file,
-              create_user):
+    def setUp(self, create_tv_media_file, create_movie_media_file, create_user):
         self.user = create_user()
 
         self.tv_mf = create_tv_media_file()
@@ -35,5 +32,7 @@ class TestIsValid:
             mf = self.tv_mf
 
         dt = DownloadToken.objects.from_media_file(self.user, mf)
-        dt.date_created = dt.date_created - timedelta(hours=settings.TOKEN_VALIDITY_LENGTH, seconds=1)
+        dt.date_created = dt.date_created - timedelta(
+            hours=settings.TOKEN_VALIDITY_LENGTH, seconds=1
+        )
         assert not dt.isvalid

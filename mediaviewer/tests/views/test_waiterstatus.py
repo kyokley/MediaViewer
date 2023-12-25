@@ -1,7 +1,7 @@
 import mock
-
-from requests.exceptions import HTTPError
 from django.test import TestCase
+from requests.exceptions import HTTPError
+
 from mediaviewer.views.waiterstatus import ajaxwaiterstatus
 
 

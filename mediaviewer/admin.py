@@ -1,15 +1,10 @@
 from django.contrib import admin
 from django.db import transaction
-from mediaviewer.models import Genre
-from mediaviewer.models import FilenameScrapeFormat
-from mediaviewer.models import UserSettings
-from mediaviewer.models import Request
-from mediaviewer.models import DownloadToken
-from mediaviewer.models import DonationSite
-from mediaviewer.models import VideoProgress
-from mediaviewer.models import SiteGreeting
-from mediaviewer.models import TV, Movie, MediaFile, MediaPath, Poster
 
+from mediaviewer.models import (TV, DonationSite, DownloadToken,
+                                FilenameScrapeFormat, Genre, MediaFile,
+                                MediaPath, Movie, Poster, Request,
+                                SiteGreeting, UserSettings, VideoProgress)
 
 
 @admin.register(DownloadToken)
@@ -106,7 +101,7 @@ class SiteGreetingAdmin(admin.ModelAdmin):
 
 class MediaPathInline(admin.TabularInline):
     model = MediaPath
-    readonly_fields = ['tv', 'movie']
+    readonly_fields = ["tv", "movie"]
     show_change_link = True
     extra = 0
 
@@ -114,13 +109,11 @@ class MediaPathInline(admin.TabularInline):
 @admin.register(TV)
 class TVAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'name',
-        'finished',
-    )
-    search_fields = (
+        "id",
         "name",
+        "finished",
     )
+    search_fields = ("name",)
     list_filter = ("finished",)
     inlines = [MediaPathInline]
 
@@ -128,13 +121,11 @@ class TVAdmin(admin.ModelAdmin):
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'name',
-        'finished',
-    )
-    search_fields = (
+        "id",
         "name",
+        "finished",
     )
+    search_fields = ("name",)
     list_filter = ("finished",)
     inlines = [MediaPathInline]
 
@@ -142,22 +133,20 @@ class MovieAdmin(admin.ModelAdmin):
 class MediaFileInline(admin.TabularInline):
     model = MediaFile
     show_change_link = True
-    ordering = ('season', 'episode')
+    ordering = ("season", "episode")
     extra = 0
 
 
 @admin.register(MediaPath)
 class MediaPathAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'path',
-        'tv',
-        'movie',
-        'skip',
+        "id",
+        "path",
+        "tv",
+        "movie",
+        "skip",
     )
-    search_fields = (
-        '_path',
-    )
+    search_fields = ("_path",)
     list_filter = ("skip",)
     inlines = [MediaFileInline]
 
@@ -165,37 +154,35 @@ class MediaPathAdmin(admin.ModelAdmin):
 @admin.register(MediaFile)
 class MediaFileAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'filename',
-        'display_name',
-        'media_path',
-        'hide',
-    )
-    search_fields = (
+        "id",
         "filename",
+        "display_name",
+        "media_path",
+        "hide",
     )
+    search_fields = ("filename",)
     list_filter = ("hide",)
 
 
 @admin.register(Poster)
 class PosterAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'name',
-        'season',
-        'episode',
-        'ref_obj',
-        'imdb',
-        'tmdb',
-        'has_image',
+        "id",
+        "name",
+        "season",
+        "episode",
+        "ref_obj",
+        "imdb",
+        "tmdb",
+        "has_image",
     )
     search_fields = (
-        'tv__name',
-        'movie__name',
-        'media_file__filename',
+        "tv__name",
+        "movie__name",
+        "media_file__filename",
     )
-    ordering = ('-id',)
-    actions = ('repopulate_data', 'clear_and_populate')
+    ordering = ("-id",)
+    actions = ("repopulate_data", "clear_and_populate")
 
     def _populate(self, queryset):
         for poster in queryset:
@@ -206,13 +193,13 @@ class PosterAdmin(admin.ModelAdmin):
     def repopulate_data(self, request, queryset):
         self._populate(queryset)
 
-    repopulate_data.description = 'Re-populate Data'
+    repopulate_data.description = "Re-populate Data"
 
     def clear_and_populate(self, request, queryset):
-        queryset.update(imdb='', tmdb='')
+        queryset.update(imdb="", tmdb="")
         self._populate(queryset)
 
-    clear_and_populate.description = 'Clear and Populate'
+    clear_and_populate.description = "Clear and Populate"
 
 
 admin.site.site_url = "/mediaviewer"

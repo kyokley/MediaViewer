@@ -1,9 +1,9 @@
-from mediaviewer.models.sitegreeting import SiteGreeting
 from django.shortcuts import render
-from mediaviewer.utils import logAccessInfo
-from mediaviewer.views.views_utils import setSiteWideContext
 
 from mediaviewer.models import MediaFile
+from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.views_utils import setSiteWideContext
 
 
 @logAccessInfo

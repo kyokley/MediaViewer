@@ -1,11 +1,13 @@
 from __future__ import absolute_import
-from django.http import HttpResponse
-from django.conf import settings
-from mediaviewer.models.waiterstatus import WaiterStatus
 
 import json
+
 import requests
+from django.conf import settings
+from django.http import HttpResponse
+
 from mediaviewer.log import log
+from mediaviewer.models.waiterstatus import WaiterStatus
 
 
 def ajaxwaiterstatus(request):

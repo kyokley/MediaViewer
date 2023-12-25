@@ -1,9 +1,11 @@
-from django.db import models
 from datetime import timedelta
-from mediaviewer.utils import getSomewhatUniqueID
+
 from django.conf import settings as conf_settings
-from mediaviewer.models.message import Message
+from django.db import models
 from django.utils import timezone
+
+from mediaviewer.models.message import Message
+from mediaviewer.utils import getSomewhatUniqueID
 
 
 def _createId():
@@ -73,18 +75,16 @@ class DownloadToken(models.Model):
     )
     path = models.TextField(db_column="path")
     filename = models.TextField(db_column="filename")
-    date_created = models.DateTimeField(
-        blank=True, auto_now_add=True, null=True
-    )
+    date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
     displayname = models.TextField(db_column="display_name")
     media_file = models.ForeignKey(
-        'mediaviewer.MediaFile',
+        "mediaviewer.MediaFile",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
     movie = models.ForeignKey(
-        'mediaviewer.Movie',
+        "mediaviewer.Movie",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

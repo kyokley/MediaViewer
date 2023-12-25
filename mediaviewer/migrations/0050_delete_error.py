@@ -4,13 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0049_refactor'),
+        ("mediaviewer", "0049_refactor"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='Error',
+            name="Error",
         ),
     ]

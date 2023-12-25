@@ -1,14 +1,11 @@
 from django.db import models
+
 from mediaviewer.models.message import Message
 
 
 class VideoProgressManager(models.Manager):
     def destroy(self, user, hashed_filename):
-        vp = (
-            self.filter(user=user)
-            .filter(hashed_filename=hashed_filename)
-            .first()
-        )
+        vp = self.filter(user=user).filter(hashed_filename=hashed_filename).first()
         if vp:
             if not vp.file.next():
                 Message.clearLastWatchedMessage(user)

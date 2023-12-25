@@ -1,27 +1,17 @@
 import mock
 import pytest
+from django.http import Http404, HttpRequest
 
-from django.http import HttpRequest, Http404
-from mediaviewer.models.genre import Genre
-
-from mediaviewer.models.usersettings import (
-    LOCAL_IP,
-    BANGUP_IP,
-)
-from mediaviewer.views.tv import (
-    tvshowsummary,
-    tvshows_by_genre,
-    tvshows,
-)
 from mediaviewer.models import TV
+from mediaviewer.models.genre import Genre
+from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
+from mediaviewer.views.tv import tvshows, tvshows_by_genre, tvshowsummary
 
 
 @pytest.mark.django_db
 class TestTvShowSummary:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              mocker,
-              create_user):
+    def setUp(self, mocker, create_user):
         self.mock_setSiteWideContext = mocker.patch(
             "mediaviewer.views.tv.setSiteWideContext"
         )
@@ -70,9 +60,7 @@ class TestTvShowByGenre404:
 @pytest.mark.django_db
 class TestTvShowsByGenre:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              mocker,
-              create_user):
+    def setUp(self, mocker, create_user):
         self.mock_get_object_or_404 = mocker.patch(
             "mediaviewer.views.tv.get_object_or_404"
         )
@@ -132,13 +120,8 @@ class TestTvShow404:
 @pytest.mark.django_db
 class TestTvShows:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              mocker,
-              create_user,
-              create_tv_media_file,
-              create_movie_media_file):
-        mocker.patch(
-            "mediaviewer.models.poster.Poster._populate_data")
+    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file):
+        mocker.patch("mediaviewer.models.poster.Poster._populate_data")
 
         self.mock_get_object_or_404 = mocker.patch(
             "mediaviewer.views.tv.get_object_or_404"

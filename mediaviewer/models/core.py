@@ -1,13 +1,13 @@
 import itertools
-from django.db import models
+
 from django.conf import settings as conf_settings
-from mediaviewer.models.usersettings import LOCAL_IP, BANGUP_IP
+from django.db import models
+
+from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 
 
 class TimeStampModel(models.Model):
-    date_created = models.DateTimeField(
-        blank=True, auto_now_add=True
-    )
+    date_created = models.DateTimeField(blank=True, auto_now_add=True)
     date_edited = models.DateTimeField(blank=True, auto_now=True)
 
     class Meta:
@@ -17,24 +17,28 @@ class TimeStampModel(models.Model):
 class ViewableManagerMixin:
     def most_recent_media(self, limit=10):
         from mediaviewer.models import MediaFile, Movie
-        recent_movies = Movie.objects.order_by('-date_created')[:limit]
-        recent_tv = MediaFile.objects.order_by('-date_created')[:limit]
+
+        recent_movies = Movie.objects.order_by("-date_created")[:limit]
+        recent_tv = MediaFile.objects.order_by("-date_created")[:limit]
         recent_files = sorted(
-            [file for file in itertools.chain(
-                recent_movies, recent_tv)],
-            key=lambda x: x.date_created, reverse=True)
+            [file for file in itertools.chain(recent_movies, recent_tv)],
+            key=lambda x: x.date_created,
+            reverse=True,
+        )
         return recent_files[:limit]
 
 
 class ViewableObjectMixin:
     def mark_viewed(self, user, viewed, save=True, comment_lookup=None):
-        from mediaviewer.models import Comment, Message, MediaFile
+        from mediaviewer.models import Comment, MediaFile, Message
 
         was_created = False
 
         if comment_lookup is None:
-            media_filter = 'media_file' if isinstance(self, MediaFile) else 'movie'
-            comment = Comment.objects.filter(user=user).filter(**{media_filter: self}).first()
+            media_filter = "media_file" if isinstance(self, MediaFile) else "movie"
+            comment = (
+                Comment.objects.filter(user=user).filter(**{media_filter: self}).first()
+            )
         else:
             comment = comment_lookup.get(self)
 
@@ -81,10 +85,10 @@ class ViewableObjectMixin:
             return f"{self.downloadLink(user, guid)}autoplay"
 
     def url(self):
-        raise NotImplementedError('Method must be implemented by child classes')
+        raise NotImplementedError("Method must be implemented by child classes")
 
     def next(self):
-        raise NotImplementedError('Method must be implemented by child classes')
+        raise NotImplementedError("Method must be implemented by child classes")
 
     def previous(self):
-        raise NotImplementedError('Method must be implemented by child classes')
+        raise NotImplementedError("Method must be implemented by child classes")

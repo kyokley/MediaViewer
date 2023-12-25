@@ -1,15 +1,16 @@
 import json
 from itertools import chain
 
-from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
+
+from mediaviewer.models import Comment, MediaFile, Movie
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.message import Message
-from mediaviewer.models import Comment, MediaFile, Movie
 from mediaviewer.utils import logAccessInfo
-from django.shortcuts import get_object_or_404, redirect
 
 
 @csrf_exempt
@@ -28,8 +29,8 @@ def ajaxviewed(request):
 
     data = dict(json.loads(request.body))
 
-    media_files = data.get('media_files', {})
-    movies = data.get('movies', {})
+    media_files = data.get("media_files", {})
+    movies = data.get("movies", {})
 
     updated_comments = []
     created_comments = []
@@ -49,13 +50,14 @@ def ajaxviewed(request):
         else:
             checked = movies[str(obj.pk)]
 
-        comment, was_created = obj.mark_viewed(user, checked, save=False, comment_lookup=comment_lookup)
+        comment, was_created = obj.mark_viewed(
+            user, checked, save=False, comment_lookup=comment_lookup
+        )
 
         if was_created:
             created_comments.append(comment)
         else:
             updated_comments.append(comment)
-
 
     if created_comments:
         Comment.objects.bulk_create(created_comments)
@@ -74,7 +76,7 @@ def ajaxviewed(request):
 @csrf_exempt
 def ajaxsuperviewed(request):
     errmsg = ""
-    guid = request.POST.get("guid", '')
+    guid = request.POST.get("guid", "")
     viewed = request.POST["viewed"] == "True" and True or False
 
     if guid:
@@ -85,7 +87,7 @@ def ajaxsuperviewed(request):
         else:
             errmsg = "Token is invalid"
     else:
-        errmsg = 'Token is invalid'
+        errmsg = "Token is invalid"
 
     response = {"errmsg": errmsg, "guid": guid, "viewed": viewed}
     return JsonResponse(
@@ -102,11 +104,10 @@ def ajaxdownloadbutton(request):
 
     # Need to raise error
     if mf_id is None and movie_id is None:
-        return HttpResponse('Neither mf_id nor movie_id were provided', status=404)
+        return HttpResponse("Neither mf_id nor movie_id were provided", status=404)
     elif mf_id is not None and movie_id is not None:
         return HttpResponse(
-            'Only mf_id or movie_id can be provided. Got both.',
-            status=400
+            "Only mf_id or movie_id can be provided. Got both.", status=400
         )
 
     if mf_id is not None:
@@ -133,7 +134,7 @@ def ajaxdownloadbutton(request):
     else:
         response = {"errmsg": "An error has occurred"}
 
-    status = 200 if response['errmsg'] == '' else 400
+    status = 200 if response["errmsg"] == "" else 400
     return JsonResponse(response, status=status)
 
 

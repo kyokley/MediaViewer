@@ -1,4 +1,5 @@
 import random
+
 from django.db import models
 
 sys_random = random.SystemRandom()

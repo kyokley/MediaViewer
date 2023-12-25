@@ -13,14 +13,11 @@ from .message import Message
 from .movie import Movie
 from .person import Person
 from .poster import Poster
-from .request import Request
-from .request import RequestVote
+from .request import Request, RequestVote
 from .sitegreeting import SiteGreeting
 from .tv import TV
 from .tvdbconfiguration import TVDBConfiguration
-from .usersettings import BadEmail
-from .usersettings import ImproperLogin
-from .usersettings import UserSettings
+from .usersettings import BadEmail, ImproperLogin, UserSettings
 from .videoprogress import VideoProgress
 from .waiterstatus import WaiterStatus
 from .writer import Writer

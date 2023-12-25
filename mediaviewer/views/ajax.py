@@ -1,22 +1,23 @@
-from django.shortcuts import get_object_or_404
-from datetime import datetime, timedelta
-from mediaviewer.models.videoprogress import VideoProgress
-from mediaviewer.models.downloadtoken import DownloadToken
-from django.http import HttpResponse, Http404, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.conf import settings
-from mediaviewer.models.message import Message
-from mediaviewer.models.waiterstatus import WaiterStatus
-from mediaviewer.models.genre import Genre
-from mediaviewer.models import TV, Movie, MediaFile
-from django.db.models import OuterRef, Subquery
-from mediaviewer.utils import logAccessInfo
-
 import json
-import pytz
 import re
+from datetime import datetime, timedelta
+
+import pytz
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.db.models import OuterRef, Subquery
+from django.http import Http404, HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+
+from mediaviewer.models import TV, MediaFile, Movie
+from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models.genre import Genre
+from mediaviewer.models.message import Message
+from mediaviewer.models.videoprogress import VideoProgress
+from mediaviewer.models.waiterstatus import WaiterStatus
+from mediaviewer.utils import logAccessInfo
 
 REWIND_THRESHOLD = 10  # in minutes
 ID_REGEX = re.compile(r"\d+")
@@ -34,7 +35,9 @@ def ajaxvideoprogress(request, guid, hashed_filename):
     user = dt.user
 
     if request.method == "GET":
-        vp = VideoProgress.objects.filter(user=user, hashed_filename=hashed_filename).first()
+        vp = VideoProgress.objects.filter(
+            user=user, hashed_filename=hashed_filename
+        ).first()
         if vp:
             offset = float(vp.offset)
             date_edited = vp.date_edited
@@ -55,10 +58,10 @@ def ajaxvideoprogress(request, guid, hashed_filename):
             user=user,
             hashed_filename=hashed_filename,
             defaults=dict(
-                offset=request.POST['offset'],
+                offset=request.POST["offset"],
                 movie=dt.movie,
                 media_file=dt.media_file,
-            )
+            ),
         )
         data["offset"] = float(vp.offset)
         return HttpResponse(
@@ -182,13 +185,7 @@ def _ajax_media_file_rows(request, qs):
 
     mf_data = []
     for mf in mfs:
-        mf_data.append(
-            mf.ajax_row_payload(
-                can_download,
-                waiterstatus,
-                user
-            )
-        )
+        mf_data.append(mf.ajax_row_payload(can_download, waiterstatus, user))
 
     payload = {
         "draw": draw,
@@ -200,6 +197,7 @@ def _ajax_media_file_rows(request, qs):
     return HttpResponse(
         json.dumps(payload), content_type="application/json", status=200
     )
+
 
 def _ajax_tv_rows(request, qs):
     request_params = dict(request.GET)
@@ -240,22 +238,25 @@ def _ajax_tv_rows(request, qs):
 
 @csrf_exempt
 def ajaxmovierows(request):
-    qs = Movie.objects.order_by('-id')
+    qs = Movie.objects.order_by("-id")
     return _ajax_movie_rows(request, qs)
 
 
 @csrf_exempt
 def ajaxmoviesbygenrerows(request, genre_id):
     genre = get_object_or_404(Genre, pk=genre_id)
-    qs = Movie.objects.filter(poster__genres=genre).order_by('-id')
+    qs = Movie.objects.filter(poster__genres=genre).order_by("-id")
     return _ajax_movie_rows(request, qs)
 
 
 def _get_tv_show_rows_query(genre_id=None):
-    tv_qs = TV.objects.annotate(max_date_created=Subquery(
-        MediaFile.objects.filter(media_path__tv=OuterRef('pk')).order_by('-date_created').values('date_created')[:1]
-    )
-                                ).order_by('-max_date_created')
+    tv_qs = TV.objects.annotate(
+        max_date_created=Subquery(
+            MediaFile.objects.filter(media_path__tv=OuterRef("pk"))
+            .order_by("-date_created")
+            .values("date_created")[:1]
+        )
+    ).order_by("-max_date_created")
 
     if genre_id:
         genre = get_object_or_404(Genre, pk=genre_id)
@@ -279,7 +280,7 @@ def ajaxtvshowsbygenre(request, genre_id):
 def ajaxtvshows(request, tv_id):
     ref_tv = get_object_or_404(TV, pk=tv_id)
 
-    qs = MediaFile.objects.filter(media_path__tv=ref_tv).order_by('display_name')
+    qs = MediaFile.objects.filter(media_path__tv=ref_tv).order_by("display_name")
 
     return _ajax_media_file_rows(request, qs)
 
@@ -296,14 +297,13 @@ def ajaxreport(request):
         movie_id = int(movie_id) if movie_id is not None else None
 
         if mf_id is not None:
-            obj = get_object_or_404(MediaFile,
-                                    pk=mf_id)
+            obj = get_object_or_404(MediaFile, pk=mf_id)
         elif movie_id is not None:
-            obj = get_object_or_404(Movie,
-                                    pk=movie_id)
+            obj = get_object_or_404(Movie, pk=movie_id)
         else:
-            return HttpResponse('Either mf_id or movie_id must be provided.',
-                                status=400)
+            return HttpResponse(
+                "Either mf_id or movie_id must be provided.", status=400
+            )
 
         response["reportid"] = obj.pk
         users = User.objects.filter(is_staff=True)

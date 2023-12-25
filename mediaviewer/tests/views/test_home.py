@@ -1,21 +1,15 @@
 import mock
 import pytest
-
 from django.http import HttpRequest
 
 from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.views.home import (
-    home,
-)
+from mediaviewer.views.home import home
 
 
 @pytest.mark.django_db
 class TestHome:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              mocker,
-              create_user,
-              create_tv_media_file):
+    def setUp(self, mocker, create_user, create_tv_media_file):
         self.mock_most_recent_files = mocker.patch(
             "mediaviewer.views.home.MediaFile.objects.most_recent_media"
         )

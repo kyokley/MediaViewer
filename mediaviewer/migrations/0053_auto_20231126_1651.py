@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0052_auto_20231104_2316'),
+        ("mediaviewer", "0052_auto_20231104_2316"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='movie',
-            name='hide',
+            model_name="movie",
+            name="hide",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='tv',
-            name='hide',
+            model_name="tv",
+            name="hide",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='mediapath',
-            name='_path',
+            model_name="mediapath",
+            name="_path",
             field=models.CharField(blank=True, max_length=256, unique=True),
         ),
     ]

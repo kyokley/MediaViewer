@@ -1,16 +1,14 @@
-from django.db import models
-from django.contrib.auth.models import (
-    User,
-    Group,
-)
-from django.contrib.auth import authenticate
-from django.db import transaction
-from django.db.utils import IntegrityError
-from django.conf import settings
-from mediaviewer.forms import FormlessPasswordReset
-from datetime import datetime
-import pytz
 import re
+from datetime import datetime
+
+import pytz
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import Group, User
+from django.db import models, transaction
+from django.db.utils import IntegrityError
+
+from mediaviewer.forms import FormlessPasswordReset
 
 LOCAL_IP = "local_ip"
 BANGUP_IP = "bangup"

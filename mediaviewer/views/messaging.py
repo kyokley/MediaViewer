@@ -1,13 +1,14 @@
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.models.message import Message
-from django.shortcuts import render
-from django.conf import settings
-from mediaviewer.utils import logAccessInfo
-
 import json
 import re
+
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render
+
+from mediaviewer.models.message import Message
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.views_utils import setSiteWideContext
 
 ID_REGEX = re.compile(r"\d+")
 

@@ -1,18 +1,14 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, views
+from rest_framework import permissions, views, viewsets
 from rest_framework.response import Response as RESTResponse
-from rest_framework import permissions
-from mediaviewer.api.serializers import (
-    DownloadTokenSerializer,
-    FilenameScrapeFormatSerializer,
-    MessageSerializer,
-    CommentSerializer,
-)
-from mediaviewer.models import DownloadToken
-from mediaviewer.models import Message
-from mediaviewer.models import FilenameScrapeFormat
-from mediaviewer.models import Comment, MediaFile
+
+from mediaviewer.api.serializers import (CommentSerializer,
+                                         DownloadTokenSerializer,
+                                         FilenameScrapeFormatSerializer,
+                                         MessageSerializer)
 from mediaviewer.log import log
+from mediaviewer.models import (Comment, DownloadToken, FilenameScrapeFormat,
+                                MediaFile, Message)
 
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):
@@ -39,7 +35,6 @@ class MessageViewSet(viewsets.ModelViewSet):
 
 
 class InferScrapersView(views.APIView):
-
     def post(self, request, *args, **kwargs):
         try:
             MediaFile.objects.infer_all_scrapers()

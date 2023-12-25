@@ -1,15 +1,12 @@
-import pytest
-
-from mediaviewer.views.views_utils import (
-    setSiteWideContext,
-    getLastWaiterStatus,
-)
-from mediaviewer.models.usersettings import FILENAME_SORT
-from mediaviewer.models.message import Message
-from django.contrib.auth.models import User
-
 import mock
+import pytest
+from django.contrib.auth.models import User
 from mock import call
+
+from mediaviewer.models.message import Message
+from mediaviewer.models.usersettings import FILENAME_SORT
+from mediaviewer.views.views_utils import (getLastWaiterStatus,
+                                           setSiteWideContext)
 
 
 @pytest.mark.django_db

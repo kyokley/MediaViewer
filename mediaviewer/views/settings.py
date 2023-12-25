@@ -1,18 +1,16 @@
-from django.contrib.auth.decorators import login_required
-from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.models.usersettings import (
-    UserSettings,
-    LOCAL_IP,
-    BANGUP_IP,
-    FILENAME_SORT,
-)
-from mediaviewer.views.views_utils import setSiteWideContext
-from django.shortcuts import render
 from datetime import datetime as dateObj
-from django.utils.timezone import utc
-from mediaviewer.utils import logAccessInfo
-from mediaviewer.log import log
+
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
+from django.utils.timezone import utc
+
+from mediaviewer.log import log
+from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.models.usersettings import (BANGUP_IP, FILENAME_SORT,
+                                             LOCAL_IP, UserSettings)
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.views_utils import setSiteWideContext
 
 
 @login_required(login_url="/mediaviewer/login/")

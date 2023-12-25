@@ -1,4 +1,5 @@
 import re
+
 from django.db import models
 
 
@@ -56,7 +57,7 @@ class FilenameScrapeFormat(models.Model):
         if not name:
             return None
         else:
-            tv = TV.objects.filter(name__icontains=name).order_by('-pk').first()
+            tv = TV.objects.filter(name__icontains=name).order_by("-pk").first()
             if not tv:
                 return None
 

@@ -1,25 +1,13 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.conf.urls import include
-from django.urls import re_path
-from rest_framework import routers
-from django.shortcuts import redirect
 from django.conf import settings as conf_settings
-from django.urls import reverse_lazy
-from mediaviewer.forms import PasswordResetFormWithBCC
+from django.conf.urls import include
+from django.shortcuts import redirect
+from django.urls import re_path, reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import routers
 
-from mediaviewer.views import (
-    home,
-    detail,
-    signin,
-    signout,
-    settings,
-    messaging,
-    requests,
-    waiterstatus,
-    ajax,
-    tv,
-    movie,
-)
+from mediaviewer.forms import PasswordResetFormWithBCC
+from mediaviewer.views import (ajax, detail, home, messaging, movie, requests,
+                               settings, signin, signout, tv, waiterstatus)
 
 router = routers.DefaultRouter()
 
@@ -162,7 +150,7 @@ urlpatterns.extend(
 )
 
 if not conf_settings.IS_SYNCING:
-    from mediaviewer.api import viewset, tv_viewset, movie_viewset
+    from mediaviewer.api import movie_viewset, tv_viewset, viewset
 
     router.register(
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"

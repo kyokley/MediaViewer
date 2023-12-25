@@ -1,12 +1,8 @@
-from mediaviewer.models.waiterstatus import WaiterStatus
-from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
-from mediaviewer.models.message import (
-    Message,
-    REGULAR,
-    LAST_WATCHED,
-)
-from mediaviewer.models.donation_site import DonationSite
 from mediaviewer.models import Genre
+from mediaviewer.models.donation_site import DonationSite
+from mediaviewer.models.message import LAST_WATCHED, REGULAR, Message
+from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
+from mediaviewer.models.waiterstatus import WaiterStatus
 
 
 def setSiteWideContext(context, request, includeMessages=False):

@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0053_auto_20231126_1651'),
+        ("mediaviewer", "0053_auto_20231126_1651"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='movie',
-            old_name='poster',
-            new_name='_poster',
+            model_name="movie",
+            old_name="poster",
+            new_name="_poster",
         ),
         migrations.RenameField(
-            model_name='tv',
-            old_name='poster',
-            new_name='_poster',
+            model_name="tv",
+            old_name="poster",
+            new_name="_poster",
         ),
     ]

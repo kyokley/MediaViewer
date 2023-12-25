@@ -1,23 +1,27 @@
 import re
+
 from django.db import models
-from .core import TimeStampModel, ViewableObjectMixin, ViewableManagerMixin
-from .poster import Poster
-from mediaviewer.utils import get_search_query
 from django.urls import reverse
-from .filenamescrapeformat import FilenameScrapeFormat
+
 from mediaviewer.log import log
+from mediaviewer.utils import get_search_query
+
+from .core import TimeStampModel, ViewableManagerMixin, ViewableObjectMixin
+from .filenamescrapeformat import FilenameScrapeFormat
+from .poster import Poster
 
 yearRegex = re.compile(r"20\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
 formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
 punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
 
-EPISODE = 'episode'
-SEASON = 'season'
+EPISODE = "episode"
+SEASON = "season"
+
 
 class MediaFileQuerySet(models.QuerySet):
     def delete(self, *args, **kwargs):
-        Poster.objects.filter(pk__in=self.values('poster')).delete()
+        Poster.objects.filter(pk__in=self.values("poster")).delete()
         return super().delete(*args, **kwargs)
 
     def search(self, search_str):
@@ -36,37 +40,30 @@ class MediaFileManager(models.Manager, ViewableManagerMixin):
 
 
 class MediaFile(TimeStampModel, ViewableObjectMixin):
-    media_path = models.ForeignKey('mediaviewer.MediaPath',
-                                   null=False,
-                                   on_delete=models.CASCADE)
-    filename = models.CharField(null=False,
-                                max_length=256)
-    display_name = models.CharField(null=False,
-                                    max_length=256)
-    season = models.PositiveSmallIntegerField(
-        null=True, blank=True)
-    episode = models.PositiveSmallIntegerField(
-        null=True, blank=True)
+    media_path = models.ForeignKey(
+        "mediaviewer.MediaPath", null=False, on_delete=models.CASCADE
+    )
+    filename = models.CharField(null=False, max_length=256)
+    display_name = models.CharField(null=False, max_length=256)
+    season = models.PositiveSmallIntegerField(null=True, blank=True)
+    episode = models.PositiveSmallIntegerField(null=True, blank=True)
     scraper = models.ForeignKey(
-        'mediaviewer.FilenameScrapeFormat',
-        null=True,
-        on_delete=models.SET_NULL)
+        "mediaviewer.FilenameScrapeFormat", null=True, on_delete=models.SET_NULL
+    )
     _poster = models.OneToOneField(
-        'mediaviewer.Poster',
+        "mediaviewer.Poster",
         null=True,
         on_delete=models.SET_NULL,
         blank=True,
-        related_name='media_file',
+        related_name="media_file",
     )
-    hide = models.BooleanField(null=False,
-                               blank=True,
-                               default=False)
+    hide = models.BooleanField(null=False, blank=True, default=False)
     size = models.BigIntegerField(null=True, blank=True)
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
     def __str__(self):
-        return f'<{self.__class__.__name__} f:{self.filename} s:{self.season} e:{self.episode}>'
+        return f"<{self.__class__.__name__} f:{self.filename} s:{self.season} e:{self.episode}>"
 
     def __repr__(self):
         return str(self)
@@ -76,7 +73,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
     def _set_tvdb(self, val):
         if not self.media_path.tv:
-            raise ValueError(f'{self} is not a TV media file')
+            raise ValueError(f"{self} is not a TV media file")
 
         self.media_path.tv.tvdb = val
 
@@ -84,19 +81,19 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
     @property
     def media(self):
-        if not hasattr(self, '_media'):
+        if not hasattr(self, "_media"):
             self._media = self.media_path.media
         return self._media
 
     @property
     def tv(self):
-        if not hasattr(self, '_tv'):
+        if not hasattr(self, "_tv"):
             self._tv = self.media_path.tv
         return self._tv
 
     @property
     def movie(self):
-        if not hasattr(self, '_movie'):
+        if not hasattr(self, "_movie"):
             self._movie = self.media_path.movie
         return self._movie
 
@@ -120,16 +117,16 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     @property
     def full_name(self):
         if self.is_tv():
-            return f'{self.media.name} {self.name}'.strip()
+            return f"{self.media.name} {self.name}".strip()
         else:
             return self.name
 
     @property
     def short_name(self):
         if self.is_tv() and self.season is not None and self.episode is not None:
-            name = f'{self.media.short_name} S{self.season} E{self.episode}'
+            name = f"{self.media.short_name} S{self.season} E{self.episode}"
         else:
-            name = f'{self.media.short_name}'
+            name = f"{self.media.short_name}"
         return name
 
     def infer_scraper(self, scrapers=None):
@@ -143,11 +140,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             name = self.media.name
             season = self._scraped_season()
             episode = self._scraped_episode()
-            if (
-                season
-                and episode
-                and int(episode) not in (64, 65)
-            ):
+            if season and episode and int(episode) not in (64, 65):
                 # Success!
 
                 log.debug("Success!!!")
@@ -221,11 +214,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         elif episode_or_season == SEASON:
             regex = self.scraper.seasonRegex
         else:
-            raise Exception(f'Invalid episode_or_season. Got {episode_or_season}')
+            raise Exception(f"Invalid episode_or_season. Got {episode_or_season}")
 
-        res = regex.findall(
-            self.filename
-        )
+        res = regex.findall(self.filename)
         val = res and res[0] or None
         return val and (val.isdigit() and val.zfill(2) or None) or None
 
@@ -252,8 +243,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
         cell = """<div class="row text-center">"""
 
-        if self.comments.filter(user=user,
-                                viewed=True).exists():
+        if self.comments.filter(user=user, viewed=True).exists():
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxTVCheckBox(['{self.id}'])" />"""
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxTVCheckBox(['{self.id}'])" />"""

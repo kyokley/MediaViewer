@@ -4,58 +4,57 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0050_delete_error'),
+        ("mediaviewer", "0050_delete_error"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='path',
-            name='defaultScraper',
+            model_name="path",
+            name="defaultScraper",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='actors',
+            model_name="posterfile",
+            name="actors",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='directors',
+            model_name="posterfile",
+            name="directors",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='file',
+            model_name="posterfile",
+            name="file",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='genres',
+            model_name="posterfile",
+            name="genres",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='path',
+            model_name="posterfile",
+            name="path",
         ),
         migrations.RemoveField(
-            model_name='posterfile',
-            name='writers',
+            model_name="posterfile",
+            name="writers",
         ),
         migrations.RemoveField(
-            model_name='usercomment',
-            name='file',
+            model_name="usercomment",
+            name="file",
         ),
         migrations.RemoveField(
-            model_name='usercomment',
-            name='user',
+            model_name="usercomment",
+            name="user",
         ),
         migrations.DeleteModel(
-            name='File',
+            name="File",
         ),
         migrations.DeleteModel(
-            name='Path',
+            name="Path",
         ),
         migrations.DeleteModel(
-            name='PosterFile',
+            name="PosterFile",
         ),
         migrations.DeleteModel(
-            name='UserComment',
+            name="UserComment",
         ),
     ]

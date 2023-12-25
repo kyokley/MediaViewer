@@ -1,24 +1,22 @@
 """
 Re-implementation of PosterFile
 """
-from django.contrib import admin
 from io import BytesIO
-import requests
-from django.db import models
-from .core import TimeStampModel
-from mediaviewer.log import log
-from .genre import Genre
-from .actor import Actor
-from .writer import Writer
-from .director import Director
-from .tvdbconfiguration import (
-    tvdbConfig,
-    getTVDBEpisodeInfo,
-    getJSONData,
-)
-from django.core.files.images import ImageFile
-from django.conf import settings
 
+import requests
+from django.conf import settings
+from django.contrib import admin
+from django.core.files.images import ImageFile
+from django.db import models
+
+from mediaviewer.log import log
+
+from .actor import Actor
+from .core import TimeStampModel
+from .director import Director
+from .genre import Genre
+from .tvdbconfiguration import getJSONData, getTVDBEpisodeInfo, tvdbConfig
+from .writer import Writer
 
 SENTINEL = object()
 
@@ -52,8 +50,7 @@ def _search_TVDB_by_name(name):
     name = name.replace(",", "%2C")
     name = name.replace("+", "%2B")
 
-    url = (
-        f"https://api.themoviedb.org/3/search/tv?query={name}&api_key={settings.API_KEY}")
+    url = f"https://api.themoviedb.org/3/search/tv?query={name}&api_key={settings.API_KEY}"
     return getJSONData(url)
 
 
@@ -64,14 +61,22 @@ def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
 
     if not is_movie:
         if episode and season:
-            urls.append(f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={settings.API_KEY}")
+            urls.append(
+                f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={settings.API_KEY}"
+            )
 
         if season:
-            urls.append(f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/credits?api_key={settings.API_KEY}")
+            urls.append(
+                f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/credits?api_key={settings.API_KEY}"
+            )
 
-        urls.append(f"https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={settings.API_KEY}")
+        urls.append(
+            f"https://api.themoviedb.org/3/tv/{tmdb_id}/credits?api_key={settings.API_KEY}"
+        )
     else:
-        urls.append(f"https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={settings.API_KEY}")
+        urls.append(
+            f"https://api.themoviedb.org/3/movie/{tmdb_id}/credits?api_key={settings.API_KEY}"
+        )
 
     resp = None
     for url in urls:
@@ -103,11 +108,7 @@ def _get_extended_info(tmdb_id, is_movie=True):
 
 
 class PosterManager(models.Manager):
-    def from_ref_obj(self,
-                     ref_obj,
-                     imdb='',
-                     tmdb='',
-                     genres=None):
+    def from_ref_obj(self, ref_obj, imdb="", tmdb="", genres=None):
         new_poster = ref_obj._poster or self.model()
         new_poster.imdb = imdb
         new_poster.tmdb = tmdb
@@ -123,48 +124,42 @@ class PosterManager(models.Manager):
 
 
 class Poster(TimeStampModel):
-    plot = models.TextField(blank=True, null=False, default='')
-    extendedplot = models.TextField(blank=True, null=False, default='')
+    plot = models.TextField(blank=True, null=False, default="")
+    extendedplot = models.TextField(blank=True, null=False, default="")
     genres = models.ManyToManyField("mediaviewer.Genre", blank=True)
     actors = models.ManyToManyField("mediaviewer.Actor", blank=True)
     writers = models.ManyToManyField("mediaviewer.Writer", blank=True)
     directors = models.ManyToManyField("mediaviewer.Director", blank=True)
-    episodename = models.CharField(blank=True, null=False, default='', max_length=100)
-    rated = models.CharField(blank=True, null=False, default='', max_length=100)
-    rating = models.CharField(blank=True, null=False, default='', max_length=32)
-    tmdb = models.CharField(null=False,
-                            default='',
-                            blank=True,
-                            max_length=32)
-    imdb = models.CharField(null=False,
-                            default='',
-                            blank=True,
-                            max_length=32)
-    image = models.ImageField(upload_to='uploads/%Y/%m/%d/')
-    tagline = models.CharField(blank=True, null=False, default='', max_length=100)
+    episodename = models.CharField(blank=True, null=False, default="", max_length=100)
+    rated = models.CharField(blank=True, null=False, default="", max_length=100)
+    rating = models.CharField(blank=True, null=False, default="", max_length=32)
+    tmdb = models.CharField(null=False, default="", blank=True, max_length=32)
+    imdb = models.CharField(null=False, default="", blank=True, max_length=32)
+    image = models.ImageField(upload_to="uploads/%Y/%m/%d/")
+    tagline = models.CharField(blank=True, null=False, default="", max_length=100)
 
     objects = PosterManager()
 
     def __str__(self):
         if self.season is None or self.episode is None:
-            return f'<Poster n:{self.short_name} i:{bool(self.image)}>'
+            return f"<Poster n:{self.short_name} i:{bool(self.image)}>"
         else:
-            return f'<Poster n:{self.short_name} s:{self.season} e:{self.episode} i:{bool(self.image)}>'
+            return f"<Poster n:{self.short_name} s:{self.season} e:{self.episode} i:{bool(self.image)}>"
 
     @property
     def short_name(self):
-        return self.ref_obj.short_name if self.ref_obj else ''
+        return self.ref_obj.short_name if self.ref_obj else ""
 
     def __repr__(self):
         return str(self)
 
     @property
     def season(self):
-        return getattr(self.ref_obj, 'season', None)
+        return getattr(self.ref_obj, "season", None)
 
     @property
     def episode(self):
-        return getattr(self.ref_obj, 'episode', None)
+        return getattr(self.ref_obj, "episode", None)
 
     @property
     def ref_obj(self):
@@ -173,10 +168,12 @@ class Poster(TimeStampModel):
 
         This object will be one of a MediaFile, TV, or Movie.
         """
-        if not hasattr(self, '_ref_obj'):
-            self._ref_obj = (getattr(self, 'media_file', None) or
-                             getattr(self, 'tv', None) or
-                             getattr(self, 'movie', SENTINEL))
+        if not hasattr(self, "_ref_obj"):
+            self._ref_obj = (
+                getattr(self, "media_file", None)
+                or getattr(self, "tv", None)
+                or getattr(self, "movie", SENTINEL)
+            )
 
         if self._ref_obj == SENTINEL:
             return None
@@ -186,7 +183,7 @@ class Poster(TimeStampModel):
     def name(self):
         return self.ref_obj.full_name
 
-    @admin.display(boolean=True, description='Image')
+    @admin.display(boolean=True, description="Image")
     def has_image(self):
         return bool(self.image)
 
@@ -220,8 +217,8 @@ class Poster(TimeStampModel):
                 else:
                     url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.name}&api_key={settings.API_KEY}"
             resp = getJSONData(url)
-            if resp.get('results'):
-                self.tmdb = resp['results'][0]['id']
+            if resp.get("results"):
+                self.tmdb = resp["results"][0]["id"]
 
         if self.tmdb:
             log.debug(f"Getting data from TVDB using {self.tmdb}")
@@ -243,7 +240,7 @@ class Poster(TimeStampModel):
                 resp = getJSONData(url)
 
             if resp:
-                resp['url'] = url
+                resp["url"] = url
                 return resp
 
     def _populate_data(self):
@@ -263,13 +260,19 @@ class Poster(TimeStampModel):
         self._store_rated(data)
         self._tmdb_episode_info()
 
-        poster_url = getattr(self, 'poster_url', None) or data.get("Poster") or data.get("poster_path")
+        poster_url = (
+            getattr(self, "poster_url", None)
+            or data.get("Poster")
+            or data.get("poster_path")
+        )
         poster_name = poster_url.rpartition("/")[-1] if poster_url else None
 
         if poster_name:
             r = requests.get(
                 "{url}{poster_size}{path}".format(
-                    url=tvdbConfig.url, poster_size=tvdbConfig.poster_size, path=poster_url
+                    url=tvdbConfig.url,
+                    poster_size=tvdbConfig.poster_size,
+                    path=poster_url,
                 ),
                 stream=True,
                 timeout=settings.REQUEST_TIMEOUT,
@@ -298,10 +301,14 @@ class Poster(TimeStampModel):
         tvinfo = getTVDBEpisodeInfo(self.tmdb, self.season, self.episode)
 
         if tvinfo:
-            self.poster_url = tvinfo.get("still_path") or tvinfo.get('poster_path') or getattr(self, 'poster_url', None)
+            self.poster_url = (
+                tvinfo.get("still_path")
+                or tvinfo.get("poster_path")
+                or getattr(self, "poster_url", None)
+            )
             self.extendedplot = tvinfo.get("overview", "")
             self.episodename = tvinfo.get("name")
-            self.tmdb = tvinfo.get('id', self.tmdb)
+            self.tmdb = tvinfo.get("id", self.tmdb)
 
     def _store_plot(self, imdb_data):
         plot = (
@@ -311,7 +318,7 @@ class Poster(TimeStampModel):
             and imdb_data["results"]
             and imdb_data["results"][0].get("overview")
         )
-        self.plot = plot if plot and plot != "undefined" else ''
+        self.plot = plot if plot and plot != "undefined" else ""
 
     def _store_extended_info(self):
         extended_info = _get_extended_info(self.tmdb, is_movie=self.ref_obj.is_movie())
@@ -321,15 +328,15 @@ class Poster(TimeStampModel):
 
     def _store_tagline(self, extended_info):
         tagline = extended_info.get("tagline")
-        self.tagline = tagline if tagline and tagline != "undefined" else ''
+        self.tagline = tagline if tagline and tagline != "undefined" else ""
 
     def _store_rating(self, extended_info):
         rating = extended_info.get("imdbRating") or extended_info.get("vote_average")
-        self.rating = rating if rating and rating != "undefined" else ''
+        self.rating = rating if rating and rating != "undefined" else ""
 
     def _store_rated(self, imdb_data):
         rated = imdb_data.get("Rated")
-        self.rated = rated if rated and rated != "undefined" else ''
+        self.rated = rated if rated and rated != "undefined" else ""
 
     def _store_genres(self, imdb_data):
         if imdb_data.get("results") or imdb_data.get("genre_ids"):

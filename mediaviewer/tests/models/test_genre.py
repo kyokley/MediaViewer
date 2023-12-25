@@ -1,17 +1,15 @@
 import pytest
 
-from mediaviewer.models.genre import Genre
 from mediaviewer.models import Poster
+from mediaviewer.models.genre import Genre
 
 
 @pytest.mark.django_db
 class TestGetGenres:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              create_tv,
-              create_movie,
-              create_tv_media_file,
-              create_movie_media_file):
+    def setUp(
+        self, create_tv, create_movie, create_tv_media_file, create_movie_media_file
+    ):
         self.action = Genre.objects.create(genre="Action")
         self.mystery = Genre.objects.create(genre="Mystery")
         self.thriller = Genre.objects.create(genre="Thriller")
@@ -46,13 +44,14 @@ class TestGetGenres:
         Poster.objects.from_ref_obj(self.tv, genres=[self.drama, self.thriller])
 
         # Movie posters
-        Poster.objects.from_ref_obj(create_movie(), genres=[self.thriller, self.mystery])
+        Poster.objects.from_ref_obj(
+            create_movie(), genres=[self.thriller, self.mystery]
+        )
         Poster.objects.from_ref_obj(create_movie(), genres=[self.thriller, self.action])
         Poster.objects.from_ref_obj(create_movie(), genres=[self.thriller, self.action])
         Poster.objects.from_ref_obj(create_movie(), genres=[self.mystery, self.drama])
 
-    @pytest.mark.parametrize('use_limit',
-                             (True, False))
+    @pytest.mark.parametrize("use_limit", (True, False))
     def test_get_movie_genres(self, use_limit):
         if use_limit:
             expected = [self.action, self.thriller]
@@ -62,13 +61,18 @@ class TestGetGenres:
             actual = list(Genre.objects.get_movie_genres())
         assert expected == actual
 
-    @pytest.mark.parametrize('use_limit',
-                             (True, False))
+    @pytest.mark.parametrize("use_limit", (True, False))
     def test_tv_genres(self, use_limit):
         if use_limit:
             expected = [self.action, self.comedy]
             actual = list(Genre.objects.get_tv_genres(limit=2))
         else:
-            expected = [self.action, self.comedy, self.drama, self.mystery, self.thriller]
+            expected = [
+                self.action,
+                self.comedy,
+                self.drama,
+                self.mystery,
+                self.thriller,
+            ]
             actual = list(Genre.objects.get_tv_genres())
         assert expected == actual

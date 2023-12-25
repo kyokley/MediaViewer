@@ -1,6 +1,7 @@
 # Django settings for site project.
-import os
 import logging
+import os
+
 from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
@@ -255,7 +256,7 @@ os.environ["wsgi.url_scheme"] = "https"
 # Use django_referrer_policy middleware
 REFERRER_POLICY = "same-origin"
 
-API_KEY = os.environ.get('TVDB_API_KEY', "keykeykey")
+API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 3

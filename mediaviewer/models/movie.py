@@ -1,11 +1,13 @@
 import re
 
 from django.db import models
-from .media import Media, MediaManager, MediaQuerySet
-from mediaviewer.models import MediaPath, MediaFile
-from .poster import Poster
 from django.urls import reverse
-from .core import ViewableObjectMixin, ViewableManagerMixin
+
+from mediaviewer.models import MediaFile, MediaPath
+
+from .core import ViewableManagerMixin, ViewableObjectMixin
+from .media import Media, MediaManager, MediaQuerySet
+from .poster import Poster
 
 yearRegex = re.compile(r"(19|20)\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
@@ -18,23 +20,22 @@ class MovieQuerySet(MediaQuerySet):
 
 
 class MovieManager(MediaManager, ViewableManagerMixin):
-    def from_filename(self,
-                      filename,
-                      path,
-                      display_name='',
-                      ):
+    def from_filename(
+        self,
+        filename,
+        path,
+        display_name="",
+    ):
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
             movie = mp.movie
             if not movie:
-                raise ValueError(f'No movie found for the given path {path}')
+                raise ValueError(f"No movie found for the given path {path}")
         else:
             movie, created = super().from_filename(filename)
             Poster.objects.from_ref_obj(movie)
 
-            mp = MediaPath.objects.create(
-                _path=path,
-                movie=movie)
+            mp = MediaPath.objects.create(_path=path, movie=movie)
 
         mf = MediaFile.objects.create(
             media_path=mp,
@@ -55,11 +56,13 @@ class MovieManager(MediaManager, ViewableManagerMixin):
 
 
 class Movie(Media, ViewableObjectMixin):
-    _poster = models.OneToOneField('mediaviewer.Poster',
-                                   null=True,
-                                   on_delete=models.SET_NULL,
-                                   blank=True,
-                                   related_name='movie')
+    _poster = models.OneToOneField(
+        "mediaviewer.Poster",
+        null=True,
+        on_delete=models.SET_NULL,
+        blank=True,
+        related_name="movie",
+    )
 
     objects = MovieManager.from_queryset(MovieQuerySet)()
 
@@ -102,8 +105,7 @@ class Movie(Media, ViewableObjectMixin):
                 payload.append("Alfred is down")
 
         cell = """<div class="row text-center">"""
-        if self.comments.filter(user=user,
-                                viewed=True).exists():
+        if self.comments.filter(user=user, viewed=True).exists():
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxMovieCheckBox(['{self.id}'])" />"""

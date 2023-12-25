@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group
+
 from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.utils import getSomewhatUniqueID
 

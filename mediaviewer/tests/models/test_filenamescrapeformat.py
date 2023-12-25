@@ -1,14 +1,13 @@
 import pytest
+
 from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
 
 
 @pytest.mark.django_db
 class TestValidForFilename:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              create_tv,
-              create_tv_media_file):
-        self.tv = create_tv(name='Foo Is Bar')
+    def setUp(self, create_tv, create_tv_media_file):
+        self.tv = create_tv(name="Foo Is Bar")
         self.tv_mf = create_tv_media_file(tv=self.tv)
 
         self.scraper = FilenameScrapeFormat.new(

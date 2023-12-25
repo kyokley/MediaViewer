@@ -2,7 +2,6 @@ import pytest
 
 from mediaviewer.models import Poster
 
-
 sample_good_result = {
     "backdrop_path": "/asdfasdf.jpg",
     "first_air_date": "2016-09-30",
@@ -55,26 +54,20 @@ sample_bad_result = {"page": 1, "results": [], "total_pages": 1, "total_results"
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    'use_tv', (True, False))
-@pytest.mark.parametrize(
-    'use_mf', (True, False))
+@pytest.mark.parametrize("use_tv", (True, False))
+@pytest.mark.parametrize("use_mf", (True, False))
 class TestFromRefObj:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              create_tv,
-              create_movie,
-              create_tv_media_file,
-              create_movie_media_file):
+    def setUp(
+        self, create_tv, create_movie, create_tv_media_file, create_movie_media_file
+    ):
         self.tv = create_tv()
         self.movie = create_movie()
 
         self.tv_mf = create_tv_media_file(tv=self.tv)
         self.movie_mf = create_movie_media_file(movie=self.movie)
 
-    def test_obj(self,
-                 use_tv,
-                 use_mf):
+    def test_obj(self, use_tv, use_mf):
         if use_tv:
             if use_mf:
                 ref_obj = self.tv_mf
@@ -133,7 +126,7 @@ class TestStorePlot:
 
         self.test_obj._store_plot(test_data)
 
-        assert self.test_obj.plot == ''
+        assert self.test_obj.plot == ""
 
 
 @pytest.mark.django_db
@@ -217,7 +210,7 @@ class TestStoreRating:
         }
 
         self.test_obj._store_rating(test_data)
-        assert self.test_obj.rating == ''
+        assert self.test_obj.rating == ""
 
 
 @pytest.mark.django_db
@@ -243,7 +236,7 @@ class TestStoreTagline:
         }
 
         self.test_obj._store_tagline(test_data)
-        assert self.test_obj.tagline == ''
+        assert self.test_obj.tagline == ""
 
 
 class TestStoreRated:
@@ -262,10 +255,10 @@ class TestStoreRated:
         self.test_data = {}
 
         self.test_obj._store_rated(self.test_data)
-        assert self.test_obj.rated == ''
+        assert self.test_obj.rated == ""
 
     def test_undefined(self):
         self.test_data = {"Rated": "undefined"}
 
         self.test_obj._store_rated(self.test_data)
-        assert self.test_obj.rated == ''
+        assert self.test_obj.rated == ""

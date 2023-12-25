@@ -1,21 +1,18 @@
+from datetime import datetime, timedelta
+
 import mock
 import pytest
 import pytz
-
-from django.test import TestCase
-from django.http import HttpRequest, Http404
 from django.contrib import messages
+from django.http import Http404, HttpRequest
+from django.test import TestCase
 from django.urls import reverse
 
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.genre import Genre
-
-from mediaviewer.views.ajax import ajaxvideoprogress, ajaxgenres, ajaxreport
-
+from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.tests.helpers import create_user
-
-from datetime import datetime, timedelta
+from mediaviewer.views.ajax import ajaxgenres, ajaxreport, ajaxvideoprogress
 
 
 class TestAjaxVideoProgress(TestCase):
@@ -94,8 +91,9 @@ class TestAjaxVideoProgress(TestCase):
         self.request.method = "GET"
         self.token.ismovie = True
         ret_val = ajaxvideoprogress(self.request, self.guid, self.filename)
-        self.mock_vpClass.objects.filter.assert_called_once_with(user=self.user,
-                                                                 hashed_filename=self.filename)
+        self.mock_vpClass.objects.filter.assert_called_once_with(
+            user=self.user, hashed_filename=self.filename
+        )
         self.mock_httpResponseClass.assert_called_once_with(
             self.fake_json_data, content_type="application/json", status=200
         )
@@ -108,8 +106,9 @@ class TestAjaxVideoProgress(TestCase):
         self.request.method = "GET"
         self.token.ismovie = False
         ret_val = ajaxvideoprogress(self.request, self.guid, self.filename)
-        self.mock_vpClass.objects.filter.assert_called_once_with(user=self.user,
-                                                                 hashed_filename=self.filename)
+        self.mock_vpClass.objects.filter.assert_called_once_with(
+            user=self.user, hashed_filename=self.filename
+        )
         self.mock_httpResponseClass.assert_called_once_with(
             self.fake_json_data, content_type="application/json", status=200
         )
@@ -123,8 +122,9 @@ class TestAjaxVideoProgress(TestCase):
         self.token.ismovie = True
         self.vp.date_edited = self.vp.date_edited - timedelta(minutes=11)
         ret_val = ajaxvideoprogress(self.request, self.guid, self.filename)
-        self.mock_vpClass.objects.filter.assert_called_once_with(user=self.user,
-                                                                 hashed_filename=self.filename)
+        self.mock_vpClass.objects.filter.assert_called_once_with(
+            user=self.user, hashed_filename=self.filename
+        )
         self.mock_httpResponseClass.assert_called_once_with(
             self.fake_json_data, content_type="application/json", status=200
         )
@@ -138,8 +138,9 @@ class TestAjaxVideoProgress(TestCase):
         self.token.ismovie = False
         self.vp.date_edited = self.vp.date_edited - timedelta(minutes=11)
         ret_val = ajaxvideoprogress(self.request, self.guid, self.filename)
-        self.mock_vpClass.objects.filter.assert_called_once_with(user=self.user,
-                                                                 hashed_filename=self.filename)
+        self.mock_vpClass.objects.filter.assert_called_once_with(
+            user=self.user, hashed_filename=self.filename
+        )
         self.mock_httpResponseClass.assert_called_once_with(
             self.fake_json_data, content_type="application/json", status=200
         )
@@ -158,9 +159,9 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_vpClass.objects.update_or_create.assert_called_once_with(
             user=self.user,
             hashed_filename=self.filename,
-            defaults=dict(offset=987,
-                          media_file=self.token.media_file,
-                          movie=self.token.movie)
+            defaults=dict(
+                offset=987, media_file=self.token.media_file, movie=self.token.movie
+            ),
         )
         self.mock_httpResponseClass.assert_called_once_with(
             self.fake_json_data, content_type="application/json", status=200
@@ -177,9 +178,9 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_vpClass.objects.update_or_create.assert_called_once_with(
             user=self.user,
             hashed_filename=self.filename,
-            defaults=dict(offset=987,
-                          media_file=self.token.media_file,
-                          movie=self.token.movie)
+            defaults=dict(
+                offset=987, media_file=self.token.media_file, movie=self.token.movie
+            ),
         )
         self.mock_httpResponseClass.assert_called_once_with(
             self.fake_json_data, content_type="application/json", status=200
@@ -194,13 +195,17 @@ class TestAjaxVideoProgress(TestCase):
         self.mock_httpResponseClass.assert_called_once_with(
             "json_data", content_type="application/json", status=204
         )
-        self.mock_vpClass.objects.destroy.assert_called_once_with(self.user, self.filename)
+        self.mock_vpClass.objects.destroy.assert_called_once_with(
+            self.user, self.filename
+        )
         self.assertEqual(ret_val, self.fake_httpresponse)
 
 
 class TestAjaxGenres(TestCase):
     def setUp(self):
-        get_by_guid_patcher = mock.patch("mediaviewer.views.ajax.DownloadToken.objects.get_by_guid")
+        get_by_guid_patcher = mock.patch(
+            "mediaviewer.views.ajax.DownloadToken.objects.get_by_guid"
+        )
         self.mock_get_by_guid = get_by_guid_patcher.start()
         self.addCleanup(get_by_guid_patcher.stop)
 
@@ -210,7 +215,9 @@ class TestAjaxGenres(TestCase):
         self.mock_get_movie_genres = get_movie_genres_patcher.start()
         self.addCleanup(get_movie_genres_patcher.stop)
 
-        get_tv_genres_patcher = mock.patch("mediaviewer.views.ajax.Genre.objects.get_tv_genres")
+        get_tv_genres_patcher = mock.patch(
+            "mediaviewer.views.ajax.Genre.objects.get_tv_genres"
+        )
         self.mock_get_tv_genres = get_tv_genres_patcher.start()
         self.addCleanup(get_tv_genres_patcher.stop)
 
@@ -325,14 +332,12 @@ class TestAjaxReport404:
         resp = ajaxreport(self.request)
         assert resp.status_code == 400
 
-    @pytest.mark.parametrize(
-        'use_movie',
-        (True, False))
+    @pytest.mark.parametrize("use_movie", (True, False))
     def test_404(self, use_movie):
         if use_movie:
-            self.request.POST.update({'movie_id': '-100'})
+            self.request.POST.update({"movie_id": "-100"})
         else:
-            self.request.POST.update({'mf_id': '-100'})
+            self.request.POST.update({"mf_id": "-100"})
 
         with pytest.raises(Http404):
             ajaxreport(self.request)
@@ -341,20 +346,15 @@ class TestAjaxReport404:
 @pytest.mark.django_db
 class TestAjaxReport:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              mocker,
-              create_user,
-              create_tv,
-              create_tv_media_file,
-              create_movie,
-              client):
+    def setUp(
+        self, mocker, create_user, create_tv, create_tv_media_file, create_movie, client
+    ):
         self.mock_createNewMessage = mocker.patch(
             "mediaviewer.views.ajax.Message.createNewMessage"
         )
 
         self.tv = create_tv()
-        self.tv_mf = create_tv_media_file(tv=self.tv,
-                                          filename='test_filename')
+        self.tv_mf = create_tv_media_file(tv=self.tv, filename="test_filename")
 
         self.movie = create_movie()
 
@@ -365,27 +365,25 @@ class TestAjaxReport:
 
         self.payload = {"reportid": "file-123"}
 
-        self.url = reverse('mediaviewer:ajaxreport')
+        self.url = reverse("mediaviewer:ajaxreport")
 
-    @pytest.mark.parametrize(
-        'use_movie',
-        (True, False))
+    @pytest.mark.parametrize("use_movie", (True, False))
     def test_valid(self, use_movie):
         self.client.force_login(self.user)
 
         if use_movie:
             obj = self.movie
-            self.payload.update({'movie_id': self.movie.pk})
+            self.payload.update({"movie_id": self.movie.pk})
         else:
             obj = self.tv_mf
-            self.payload.update({'mf_id': self.tv_mf.pk})
+            self.payload.update({"mf_id": self.tv_mf.pk})
 
         resp = self.client.post(self.url, data=self.payload)
         assert resp.status_code == 200
 
         json_data = resp.json()
-        assert json_data['reportid'] == obj.pk
-        assert json_data['errmsg'] == ''
+        assert json_data["reportid"] == obj.pk
+        assert json_data["errmsg"] == ""
         self.mock_createNewMessage.assert_called_once_with(
             self.staff_user,
             f"{obj.name} has been reported by {self.user.username}",

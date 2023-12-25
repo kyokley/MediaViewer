@@ -1,15 +1,10 @@
-from mediaviewer.utils import logAccessInfo, humansize
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import (
-    render,
-    get_object_or_404,
-)
-from mediaviewer.models.usersettings import (
-    LOCAL_IP,
-    BANGUP_IP,
-)
+from django.shortcuts import get_object_or_404, render
+
+from mediaviewer.models import TV, Comment, Genre, MediaFile
+from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
+from mediaviewer.utils import humansize, logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.models import TV, MediaFile, Comment, Genre
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -45,7 +40,7 @@ def tvshows(request, tv_id):
 
     settings = user.settings()
     context = {
-        'tv': tv,
+        "tv": tv,
         "view": "tvshows",
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
@@ -56,9 +51,7 @@ def tvshows(request, tv_id):
     context["table_data_filter_id"] = tv_id
     context["active_page"] = "tvshows"
     context["title"] = tv.name
-    context["long_plot"] = (
-        len(tv.poster.plot) > 300 if tv.poster.plot else ""
-    )
+    context["long_plot"] = len(tv.poster.plot) > 300 if tv.poster.plot else ""
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvshows.html", context)
 
@@ -70,26 +63,23 @@ def tvdetail(request, mf_id):
     mf = get_object_or_404(MediaFile, pk=mf_id)
 
     comment, _ = Comment.objects.get_or_create(
-        user=user,
-        media_file=mf,
-        defaults={'viewed': False})
+        user=user, media_file=mf, defaults={"viewed": False}
+    )
 
     settings = user.settings()
     context = {
         "mf": mf,
         "display_name": mf.tv.name,
-        'episode_name': mf.display_name,
-        'poster': mf.poster,
+        "episode_name": mf.display_name,
+        "poster": mf.poster,
         "LOCAL_IP": LOCAL_IP,
         "BANGUP_IP": BANGUP_IP,
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
         "file_size": mf.size and humansize(mf.size),
-        'obj_type': 'media_file',
+        "obj_type": "media_file",
     }
     context["active_page"] = "tvshows"
-    context["title"] = (
-        mf.full_name
-    )
+    context["title"] = mf.full_name
     setSiteWideContext(context, request)
     return render(request, "mediaviewer/tvdetail.html", context)
