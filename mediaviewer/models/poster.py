@@ -77,7 +77,8 @@ def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     for url in urls:
         try:
             resp = getJSONData(url)
-        except Exception:
+        except Exception as e:
+            log.debug(e)
             continue
 
         if resp:

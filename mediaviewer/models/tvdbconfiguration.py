@@ -131,7 +131,8 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
     for url in urls:
         try:
             resp = getJSONData(url)
-        except Exception:
+        except Exception as e:
+            log.debug(e)
             continue
 
         if resp:
