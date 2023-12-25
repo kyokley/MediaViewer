@@ -23,10 +23,10 @@ class TestTvShowSummary:
               mocker,
               create_user):
         self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.files.setSiteWideContext"
+            "mediaviewer.views.tv.setSiteWideContext"
         )
 
-        self.mock_render = mocker.patch("mediaviewer.views.files.render")
+        self.mock_render = mocker.patch("mediaviewer.views.tv.render")
 
         self.user = create_user()
 
@@ -74,14 +74,14 @@ class TestTvShowsByGenre:
               mocker,
               create_user):
         self.mock_get_object_or_404 = mocker.patch(
-            "mediaviewer.views.files.get_object_or_404"
+            "mediaviewer.views.tv.get_object_or_404"
         )
 
         self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.files.setSiteWideContext"
+            "mediaviewer.views.tv.setSiteWideContext"
         )
 
-        self.mock_render = mocker.patch("mediaviewer.views.files.render")
+        self.mock_render = mocker.patch("mediaviewer.views.tv.render")
 
         self.genre = mock.MagicMock(Genre)
         self.genre.id = 123
@@ -141,23 +141,16 @@ class TestTvShows:
             "mediaviewer.views.tv.get_object_or_404"
         )
 
-        self.mock_files_by_localpath = mocker.patch(
-            "mediaviewer.views.files.File.files_by_localpath"
-        )
-
         self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.files.setSiteWideContext"
+            "mediaviewer.views.tv.setSiteWideContext"
         )
 
-        self.mock_render = mocker.patch("mediaviewer.views.files.render")
+        self.mock_render = mocker.patch("mediaviewer.views.tv.render")
 
         self.tv_file = create_tv_media_file()
         self.movie_file = create_movie_media_file()
 
-        self.mock_get_object_or_404.return_value = self.tv_path
-        self.mock_files_by_localpath.return_value.select_related.return_value = [
-            self.tv_file
-        ]
+        self.mock_get_object_or_404.return_value = self.tv_file.tv
 
         self.user = create_user()
 
@@ -166,7 +159,7 @@ class TestTvShows:
 
     def test_valid(self):
         expected_context = {
-            "path": self.tv_path,
+            "path": self.tv_file.tv,
             "view": "tvshows",
             "LOCAL_IP": LOCAL_IP,
             "BANGUP_IP": BANGUP_IP,
@@ -176,14 +169,14 @@ class TestTvShows:
             "title": "Tv Local Path",
             "long_plot": "",
             "table_data_page": "ajaxtvshows",
-            "table_data_filter_id": self.tv_path.id,
+            "table_data_filter_id": self.tv_file.tv.id,
         }
 
         expected = self.mock_render.return_value
-        actual = tvshows(self.request, self.tv_path.id)
+        actual = tvshows(self.request, self.tv_file.tv.id)
 
         assert expected == actual
-        self.mock_get_object_or_404.assert_called_once_with(TV, pk=self.tv_path.id)
+        self.mock_get_object_or_404.assert_called_once_with(TV, pk=self.tv_file.tv.id)
         self.mock_setSiteWideContext.assert_called_once_with(
             expected_context, self.request, includeMessages=True
         )

@@ -22,10 +22,10 @@ class TestMovies:
               create_tv_media_file,
               create_movie_media_file):
         self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.files.setSiteWideContext"
+            "mediaviewer.views.movie.setSiteWideContext"
         )
 
-        self.mock_render = mocker.patch("mediaviewer.views.files.render")
+        self.mock_render = mocker.patch("mediaviewer.views.movie.render")
 
         self.tv_file = create_tv_media_file()
         self.movie_file = create_movie_media_file()
@@ -85,18 +85,14 @@ class TestMoviesByGenre:
               create_tv_media_file,
               create_movie_media_file):
         self.mock_get_object_or_404 = mocker.patch(
-            "mediaviewer.views.files.get_object_or_404"
-        )
-
-        self.mock_files_movies_by_genre = mocker.patch(
-            "mediaviewer.views.files.File.movies_by_genre"
+            "mediaviewer.views.movie.get_object_or_404"
         )
 
         self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.files.setSiteWideContext"
+            "mediaviewer.views.movie.setSiteWideContext"
         )
 
-        self.mock_render = mocker.patch("mediaviewer.views.files.render")
+        self.mock_render = mocker.patch("mediaviewer.views.movie.render")
 
         self.genre = mock.MagicMock(Genre)
         self.genre.id = 123
@@ -140,4 +136,3 @@ class TestMoviesByGenre:
         self.mock_render.assert_called_once_with(
             self.request, "mediaviewer/movies.html", expected_context
         )
-

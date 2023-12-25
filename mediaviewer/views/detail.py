@@ -1,3 +1,4 @@
+import json
 from itertools import chain
 
 from django.db import transaction
@@ -25,7 +26,7 @@ def ajaxviewed(request):
         response["errmsg"] = errmsg
         return JsonResponse(response, status=400)
 
-    data = dict(request.POST)
+    data = dict(json.loads(request.body))
 
     media_files = data.get('media_files', {})
     movies = data.get('movies', {})

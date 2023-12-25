@@ -2,15 +2,11 @@ import mock
 import pytest
 
 from datetime import timedelta
-from django.http import HttpRequest, Http404
+from django.http import HttpRequest
 from django.urls import reverse, resolve
 
 from mediaviewer.views.detail import (
     ajaxsuperviewed,
-    autoplaydownloadlink,
-)
-from django.contrib.auth.models import (
-    Group,
 )
 from mediaviewer.models.downloadtoken import DownloadToken
 
@@ -116,8 +112,6 @@ class TestAjaxSuperViewedResponseStatusCode:
         self.mock_filter = mocker.patch(
             "mediaviewer.views.detail.DownloadToken.objects.filter", autospec=True
         )
-
-        self.mock_dumps = mocker.patch("mediaviewer.views.detail.json.dumps")
 
         self.token = mock.MagicMock(DownloadToken)
         self.token.isvalid = True
@@ -288,5 +282,4 @@ class TestAutoPlayDownloadLink:
         resp = self.client.post(self.url)
 
         assert resp.status_code == 302
-        import pdb; pdb.set_trace()  # ############################## Breakpoint ##############################
-        pass
+        assert 'waiter' in resp.url
