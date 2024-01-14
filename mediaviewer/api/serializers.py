@@ -116,6 +116,7 @@ class TVSerializer(serializers.ModelSerializer):
             "name",
             "number_of_unwatched_shows",
             "media_paths",
+            'finished',
         )
 
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
@@ -139,6 +140,7 @@ class MovieSerializer(serializers.ModelSerializer):
             "pk",
             "name",
             "media_path",
+            'finished',
         )
 
     media_path = serializers.SerializerMethodField('get_media_path')

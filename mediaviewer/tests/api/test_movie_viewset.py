@@ -22,6 +22,7 @@ class TestMovies:
             assert movie.name == json_data["name"]
             assert movie.pk == json_data["pk"]
             assert str(movie.media_path.path) == json_data['media_path']
+            assert movie.finished == json_data['finished']
 
     def test_list(self, client):
         client.force_login(self.user)
@@ -38,13 +39,19 @@ class TestMovies:
             "results": [
                 {"pk": self.movies[0].pk,
                  "name": self.movies[0].name,
-                 'media_path': str(self.movies[0].media_path.path)},
+                 'media_path': str(self.movies[0].media_path.path),
+                 'finished': self.movies[0].finished,
+                 },
                 {"pk": self.movies[1].pk,
                  "name": self.movies[1].name,
-                 'media_path': str(self.movies[1].media_path.path)},
+                 'media_path': str(self.movies[1].media_path.path),
+                 'finished': self.movies[1].finished,
+                 },
                 {"pk": self.movies[2].pk,
                  "name": self.movies[2].name,
-                 'media_path': str(self.movies[2].media_path.path)},
+                 'media_path': str(self.movies[2].media_path.path),
+                 'finished': self.movies[2].finished,
+                 },
             ],
         }
         assert expected == json_data
