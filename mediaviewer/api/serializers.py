@@ -115,11 +115,11 @@ class TVSerializer(serializers.ModelSerializer):
             "pk",
             "name",
             "number_of_unwatched_shows",
-            "paths",
+            "media_paths",
         )
 
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
-    paths = MediaPathSerializer(many=True, read_only=True, source="media_path_set")
+    media_paths = serializers.SerializerMethodField('get_media_paths')
 
     def unwatched_shows(self, obj):
         request = self.context.get("request")
@@ -128,6 +128,9 @@ class TVSerializer(serializers.ModelSerializer):
         else:
             return 0
 
+    def get_media_paths(self, obj):
+        return list(obj.mediapath_set.order_by('-pk').values_list('_path', flat=True))
+
 
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
@@ -135,10 +138,13 @@ class MovieSerializer(serializers.ModelSerializer):
         fields = (
             "pk",
             "name",
-            "path",
+            "media_path",
         )
 
-    path = MediaPathSerializer(many=False, read_only=True, source="media_path_set")
+    media_path = serializers.SerializerMethodField('get_media_path')
+
+    def get_media_path(self, obj):
+        return str(obj.media_path.path)
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
