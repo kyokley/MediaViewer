@@ -3,7 +3,7 @@ import re
 from django.db import models
 from django.urls import reverse
 
-from mediaviewer.models import MediaFile, MediaPath
+from mediaviewer.models import MediaPath
 
 from .core import ViewableManagerMixin, ViewableObjectMixin
 from .media import Media, MediaManager, MediaQuerySet
@@ -20,11 +20,10 @@ class MovieQuerySet(MediaQuerySet):
 
 
 class MovieManager(MediaManager, ViewableManagerMixin):
-    def from_filename(
+    def from_path(
         self,
-        filename,
         path,
-        display_name="",
+        name=None,
     ):
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
@@ -32,18 +31,12 @@ class MovieManager(MediaManager, ViewableManagerMixin):
             if not movie:
                 raise ValueError(f"No movie found for the given path {path}")
         else:
-            movie, created = super().from_filename(filename)
+            movie, created = super().from_path(path, name=name)
             Poster.objects.from_ref_obj(movie)
 
             mp = MediaPath.objects.create(_path=path, movie=movie)
 
-        mf = MediaFile.objects.create(
-            media_path=mp,
-            filename=filename,
-            display_name=display_name,
-        )
-        Poster.objects.from_ref_obj(mf)
-        return movie, mf
+        return movie
 
     @staticmethod
     def scrape_filename(filename):

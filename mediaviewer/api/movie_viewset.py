@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from rest_framework.response import Response
 
 from mediaviewer.api.permissions import IsStaffOrReadOnly
@@ -13,9 +13,14 @@ class MovieViewSet(viewsets.ModelViewSet):
 
     # TODO: Check this method name and call sig
     def create(self, request):
-        name = request.POST['name']
-        path = request.POST['path']
+        if 'media_path' not in request.POST:
+            raise serializers.ValidationError(
+                "'media_path' is a required argument"
+            )
 
-        movie = Movie.objects.from_filename(name, path)
+        name = request.POST.get('name')
+        media_path = request.POST['media_path']
+
+        movie = Movie.objects.from_path(media_path, name=name)
         serializer = self.serializer_class(movie)
         return Response(serializer.data)

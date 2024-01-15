@@ -1,9 +1,10 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, serializers
 from rest_framework.response import Response
 
 from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.api.serializers import TVSerializer
 from mediaviewer.models import TV
+
 
 
 class TVViewSet(viewsets.ModelViewSet):
@@ -13,9 +14,14 @@ class TVViewSet(viewsets.ModelViewSet):
 
     # TODO: Check this method name and call sig
     def create(self, request):
-        name = request.POST['name']
-        path = request.POST['path']
+        if 'media_path' not in request.POST:
+            raise serializers.ValidationError(
+                "'media_path' is a required argument"
+            )
 
-        tv = TV.objects.from_filename(name, path)
+        name = request.POST.get('name')
+        media_path = request.POST['media_path']
+
+        tv = TV.objects.from_path(media_path, name=name)
         serializer = self.serializer_class(tv)
         return Response(serializer.data)

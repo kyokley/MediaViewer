@@ -24,25 +24,26 @@ class MediaQuerySet(models.QuerySet):
 
 
 class MediaManager(models.Manager):
-    def from_filename(self, filename):
-        for scraper in FilenameScrapeFormat.objects.all():
-            res = scraper.nameRegex.findall(filename)
-            name = res and res[0] or None
-            sFail = re.compile(r"\s[sS]$")
+    def from_path(self, path, name=None):
+        if name is None:
+            for scraper in FilenameScrapeFormat.objects.all():
+                res = scraper.nameRegex.findall(path)
+                name = res and res[0] or None
+                sFail = re.compile(r"\s[sS]$")
 
-            if not name:
-                continue
+                if not name:
+                    continue
 
-            name = (
-                scraper.subPeriods
-                and name.replace(".", " ").replace("-", " ").title()
-                or name
-            ).strip()
+                name = (
+                    scraper.subPeriods
+                    and name.replace(".", " ").replace("-", " ").title()
+                    or name
+                ).strip()
 
-            if name and name != filename and not sFail.findall(name):
-                break
-        else:
-            name = filename
+                if name and name != path and not sFail.findall(name):
+                    break
+            else:
+                name = path
 
         return self.get_or_create(name=name)
 

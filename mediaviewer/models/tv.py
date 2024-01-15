@@ -10,25 +10,19 @@ class TVQuerySet(MediaQuerySet):
 
 
 class TVManager(MediaManager):
-    def from_filename(self, filename, path, display_name=""):
+    def from_path(self, path, name=None):
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
             tv = mp.tv
             if not tv:
                 raise ValueError(f"No tv found for the given path {path}")
         else:
-            tv, created = super().from_filename(filename)
+            tv, created = super().from_path(path, name=name)
             Poster.objects.from_ref_obj(tv)
 
             mp = MediaPath.objects.create(_path=path, tv=tv)
 
-        mf = MediaFile.objects.create(
-            media_path=mp,
-            filename=filename,
-            display_name=display_name,
-        )
-        Poster.objects.from_ref_obj(mf)
-        return tv, mf
+        return tv
 
 
 class TV(Media):
