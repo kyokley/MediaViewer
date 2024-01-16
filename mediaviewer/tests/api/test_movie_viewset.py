@@ -15,7 +15,7 @@ class TestMovies:
 
         self.movies = [create_movie() for i in range(3)]
 
-    def test_detail(self, client, is_staff):
+    def test_detail(self, is_staff):
         if not is_staff:
             self.client.force_login(self.non_staff_user)
         else:
@@ -23,7 +23,7 @@ class TestMovies:
 
         for movie in self.movies:
             url = reverse("mediaviewer:api:movie-detail", args=[movie.pk])
-            response = client.get(url)
+            response = self.client.get(url)
             assert response.status_code == 200
 
             json_data = response.json()
@@ -32,14 +32,14 @@ class TestMovies:
             assert str(movie.media_path.path) == json_data['media_path']
             assert movie.finished == json_data['finished']
 
-    def test_list(self, client, is_staff):
+    def test_list(self, is_staff):
         if not is_staff:
             self.client.force_login(self.non_staff_user)
         else:
             self.client.force_login(self.user)
 
         url = reverse("mediaviewer:api:movie-list")
-        response = client.get(url)
+        response = self.client.get(url)
         assert response.status_code == 200
 
         json_data = response.json()

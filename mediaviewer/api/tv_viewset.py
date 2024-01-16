@@ -12,7 +12,6 @@ class TVViewSet(viewsets.ModelViewSet):
     queryset = TV.objects.order_by("id")
     serializer_class = TVSerializer
 
-    # TODO: Check this method name and call sig
     def create(self, request):
         if 'media_path' not in request.POST:
             raise serializers.ValidationError(
