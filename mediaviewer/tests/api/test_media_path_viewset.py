@@ -1,7 +1,6 @@
 import pytest
 
 from django.urls import reverse
-from mediaviewer.models import MediaPath
 
 
 @pytest.mark.django_db

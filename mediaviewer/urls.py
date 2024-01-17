@@ -150,7 +150,7 @@ urlpatterns.extend(
 )
 
 if not conf_settings.IS_SYNCING:
-    from mediaviewer.api import movie_viewset, tv_viewset, viewset, media_path_viewset
+    from mediaviewer.api import movie_viewset, tv_viewset, viewset, media_path_viewset, media_file_viewset
 
     router.register(
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"
@@ -158,6 +158,7 @@ if not conf_settings.IS_SYNCING:
     router.register(r"movie", movie_viewset.MovieViewSet, basename="movie")
     router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
     router.register(r"mediapath", media_path_viewset.MediaPathViewSet, basename="mediapath")
+    router.register(r"mediafile", media_file_viewset.MediaPathViewSet, basename="mediafile")
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
     router.register(r"comment", viewset.CommentViewSet)

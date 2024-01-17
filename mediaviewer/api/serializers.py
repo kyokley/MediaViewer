@@ -1,8 +1,16 @@
 from rest_framework import serializers
 
-from mediaviewer.models import (TV, Comment, DonationSite, DownloadToken,
-                                FilenameScrapeFormat, MediaFile, MediaPath,
-                                Message, Movie, UserSettings, VideoProgress)
+from mediaviewer.models import (TV,
+                                Comment,
+                                DonationSite,
+                                DownloadToken,
+                                FilenameScrapeFormat,
+                                MediaFile,
+                                MediaPath,
+                                Message,
+                                Movie,
+                                UserSettings,
+                                VideoProgress)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -154,32 +162,26 @@ class MediaFileSerializer(serializers.ModelSerializer):
         model = MediaFile
         fields = (
             "pk",
-            "path",
-            "localpath",
+            "media_path",
             "filename",
-            "skip",
-            "finished",
+            "display_name",
             "size",
-            "streamable",
             "ismovie",
-            "displayname",
             "watched",
         )
 
-    localpath = serializers.CharField(required=False, source="path.localpathstr")
-    filename = serializers.CharField(required=False)
-    skip = serializers.BooleanField(required=False)
-    finished = serializers.BooleanField(required=False)
+    display_name = serializers.CharField(required=False)
     size = serializers.IntegerField(required=False)
-    streamable = serializers.BooleanField(required=False)
-    ismovie = serializers.ReadOnlyField(source="path.is_movie")
-    displayname = serializers.ReadOnlyField(source="displayName")
+    ismovie = serializers.SerializerMethodField("get_ismovie")
     watched = serializers.SerializerMethodField("get_watched")
+
+    def get_ismovie(self, obj):
+        return bool(obj.movie)
 
     def get_watched(self, obj):
         request = self.context.get("request")
         if request is not None:
-            uc = obj.usercomment(request.user)
+            uc = obj.comments.filter(user=request.user).first()
             if uc and uc.viewed:
                 return True
         return False
