@@ -108,12 +108,17 @@ class MediaPathSerializer(serializers.ModelSerializer):
             "path",
             "tv",
             "movie",
+            "media_files",
         )
 
     path = serializers.SerializerMethodField("get_path")
+    media_files = serializers.SerializerMethodField("get_media_files")
 
     def get_path(self, obj):
         return str(obj.path)
+
+    def get_media_files(self, obj):
+        return obj.mediafile_set.values("filename")
 
 
 class TVSerializer(serializers.ModelSerializer):

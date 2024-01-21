@@ -6,6 +6,8 @@ from django.urls import reverse
 @pytest.mark.django_db
 @pytest.mark.parametrize('is_staff',
                          (True, False))
+@pytest.mark.parametrize('use_tv',
+                         (True, False))
 class TestMediaPath:
     @pytest.fixture(autouse=True)
     def setUp(self, client, create_tv, create_movie, create_user):
@@ -16,8 +18,6 @@ class TestMediaPath:
         self.tv = create_tv()
         self.movie = create_movie()
 
-    @pytest.mark.parametrize('use_tv',
-                             (True, False))
     def test_detail(self, is_staff, use_tv):
         if not is_staff:
             self.client.force_login(self.non_staff_user)
@@ -29,7 +29,7 @@ class TestMediaPath:
         else:
             ref_media = self.movie
 
-        url = reverse("mediaviewer:api:mediapath-detail", args=[ref_media.media_path.pk])
+        url = reverse(f"mediaviewer:api:{'tv' if use_tv else 'movie'}mediapath-detail", args=[ref_media.media_path.pk])
 
         response = self.client.get(url)
         assert response.status_code == 200

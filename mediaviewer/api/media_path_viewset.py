@@ -3,15 +3,15 @@ from rest_framework.response import Response
 
 from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.api.serializers import MediaPathSerializer
-from mediaviewer.models import MediaPath, TV
+from mediaviewer.models import MediaPath, TV, Movie
 
 
-class MediaPathViewSet(viewsets.ModelViewSet):
+class _MediaPathViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffOrReadOnly,)
-    queryset = MediaPath.objects.order_by("id")
+    queryset = MediaPath.objects.none()
     serializer_class = MediaPathSerializer
 
-    def create(self, request):
+    def _create(self, media_class, request):
         if 'path' not in request.POST:
             raise serializers.ValidationError(
                 "'path' is a required argument"
@@ -22,8 +22,22 @@ class MediaPathViewSet(viewsets.ModelViewSet):
         mp = MediaPath.objects.filter(_path=path).first()
 
         if not mp:
-            TV.objects.from_path(path)
+            media_class.objects.from_path(path)
             mp = MediaPath.objects.get(_path=path)
 
         serializer = self.serializer_class(mp)
         return Response(serializer.data)
+
+
+class TVMediaPathViewSet(_MediaPathViewSet):
+    queryset = MediaPath.objects.filter(tv__isnull=False).order_by("id")
+
+    def create(self, request):
+        return self._create(TV, request)
+
+
+class MovieMediaPathViewSet(_MediaPathViewSet):
+    queryset = MediaPath.objects.filter(movie__isnull=False).order_by("id")
+
+    def create(self, request):
+        return self._create(Movie, request)
