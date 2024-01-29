@@ -105,6 +105,7 @@ class MediaPathSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediaPath
         fields = (
+            "pk",
             "path",
             "tv",
             "movie",
