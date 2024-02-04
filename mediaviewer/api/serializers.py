@@ -119,7 +119,7 @@ class MediaPathSerializer(serializers.ModelSerializer):
         return str(obj.path)
 
     def get_media_files(self, obj):
-        return obj.mediafile_set.values("filename")
+        return obj.mediafile_set.values_list("filename", flat=True)
 
 
 class TVSerializer(serializers.ModelSerializer):
@@ -144,7 +144,12 @@ class TVSerializer(serializers.ModelSerializer):
             return 0
 
     def get_media_paths(self, obj):
-        return list(obj.mediapath_set.order_by('-pk').values_list('_path', flat=True))
+        return [
+            dict(pk=mp['pk'],
+                 path=mp['_path'])
+            for mp in
+            obj.mediapath_set.order_by('-pk').values('pk', '_path')
+        ]
 
 
 class MovieSerializer(serializers.ModelSerializer):

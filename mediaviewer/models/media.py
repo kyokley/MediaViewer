@@ -27,7 +27,8 @@ class MediaManager(models.Manager):
     def from_path(self, path, name=None):
         if name is None:
             for scraper in FilenameScrapeFormat.objects.all():
-                res = scraper.nameRegex.findall(path)
+                name_regex = re.compile(scraper.nameRegex)
+                res = name_regex.findall(path)
                 name = res and res[0] or None
                 sFail = re.compile(r"\s[sS]$")
 
