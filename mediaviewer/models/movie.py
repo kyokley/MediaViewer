@@ -24,14 +24,22 @@ class MovieManager(MediaManager, ViewableManagerMixin):
         self,
         path,
         name=None,
+        tv_id=None,
+        movie_id=None,
     ):
+        if tv_id is not None:
+            raise ValueError('tv_id is not allowed for Movie objects')
+
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
             movie = mp.movie
             if not movie:
                 raise ValueError(f"No movie found for the given path {path}")
         else:
-            movie, created = super().from_path(path, name=name)
+            if movie_id is None:
+                movie, created = super().from_path(path, name=name)
+            else:
+                movie = self.get(pk=movie_id)
             Poster.objects.from_ref_obj(movie)
 
             mp = MediaPath.objects.create(_path=path, movie=movie)

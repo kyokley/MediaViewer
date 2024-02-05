@@ -10,16 +10,26 @@ class TVQuerySet(MediaQuerySet):
 
 
 class TVManager(MediaManager):
-    def from_path(self, path, name=None):
+    def from_path(self,
+                  path,
+                  name=None,
+                  tv_id=None,
+                  movie_id=None):
+        if movie_id is not None:
+            raise ValueError('movie_id is not allowed for TV objects')
+
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
             tv = mp.tv
             if not tv:
                 raise ValueError(f"No tv found for the given path {path}")
         else:
-            tv, created = super().from_path(path, name=name)
-            Poster.objects.from_ref_obj(tv)
+            if tv_id is None:
+                tv, created = super().from_path(path, name=name)
+            else:
+                tv = self.get(pk=tv_id)
 
+            Poster.objects.from_ref_obj(tv)
             mp = MediaPath.objects.create(_path=path, tv=tv)
 
         return tv
