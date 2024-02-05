@@ -29,7 +29,7 @@ class TestTv:
             json_data = response.json()
             assert tv.name == json_data["name"]
             assert tv.pk == json_data["pk"]
-            assert str(tv.media_path.path) == json_data['media_paths'][0]
+            assert str(tv.media_path.path) == json_data['media_paths'][0]['path']
             assert tv.finished == json_data['finished']
 
     def test_list(self, is_staff):
@@ -52,21 +52,24 @@ class TestTv:
                     "pk": self.tv_shows[0].pk,
                     "name": self.tv_shows[0].name,
                     "number_of_unwatched_shows": 0,
-                    'media_paths': [str(self.tv_shows[0].media_path.path)],
+                    'media_paths': [{'path': str(self.tv_shows[0].media_path.path),
+                                     'pk': self.tv_shows[0].media_path.pk}],
                     'finished': self.tv_shows[0].finished,
                 },
                 {
                     "pk": self.tv_shows[1].pk,
                     "name": self.tv_shows[1].name,
                     "number_of_unwatched_shows": 0,
-                    'media_paths': [str(self.tv_shows[1].media_path.path)],
+                    'media_paths': [{'path': str(self.tv_shows[1].media_path.path),
+                                     'pk': self.tv_shows[1].media_path.pk}],
                     'finished': self.tv_shows[1].finished,
                 },
                 {
                     "pk": self.tv_shows[2].pk,
                     "name": self.tv_shows[2].name,
                     "number_of_unwatched_shows": 0,
-                    'media_paths': [str(self.tv_shows[2].media_path.path)],
+                    'media_paths': [{'path': str(self.tv_shows[2].media_path.path),
+                                     'pk': self.tv_shows[2].media_path.pk}],
                     'finished': self.tv_shows[2].finished,
                 },
             ],
@@ -129,7 +132,7 @@ class TestTv:
 
             assert new_tv.pk == json_data['pk']
             assert new_tv.name == json_data['name']
-            assert str(new_tv.media_path.path) == json_data['media_paths'][0]
+            assert str(new_tv.media_path.path) == json_data['media_paths'][0]['path']
             assert new_tv.finished == json_data['finished']
         else:
             assert response.status_code == 403
