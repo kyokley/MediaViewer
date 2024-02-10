@@ -103,7 +103,7 @@ class TestTv:
             if include_name:
                 assert new_tv_obj.name == 'test_name'
             else:
-                assert new_tv_obj.name == '/path/to/dir'
+                assert new_tv_obj.name == 'dir'
 
             assert str(new_tv_obj.media_path.path) == '/path/to/dir'
             assert not new_tv_obj.finished

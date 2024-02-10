@@ -29,7 +29,8 @@ class TestMovies:
             json_data = response.json()
             assert movie.name == json_data["name"]
             assert movie.pk == json_data["pk"]
-            assert str(movie.media_path.path) == json_data['media_path']
+            assert dict(path=str(movie.media_path.path),
+                        pk=movie.media_path.pk) == json_data['media_path']
             assert movie.finished == json_data['finished']
 
     def test_list(self, is_staff):
@@ -50,17 +51,20 @@ class TestMovies:
             "results": [
                 {"pk": self.movies[0].pk,
                  "name": self.movies[0].name,
-                 'media_path': str(self.movies[0].media_path.path),
+                 'media_path': dict(path=str(self.movies[0].media_path.path),
+                                    pk=self.movies[0].media_path.pk),
                  'finished': self.movies[0].finished,
                  },
                 {"pk": self.movies[1].pk,
                  "name": self.movies[1].name,
-                 'media_path': str(self.movies[1].media_path.path),
+                 'media_path': dict(path=str(self.movies[1].media_path.path),
+                                    pk=self.movies[1].media_path.pk),
                  'finished': self.movies[1].finished,
                  },
                 {"pk": self.movies[2].pk,
                  "name": self.movies[2].name,
-                 'media_path': str(self.movies[2].media_path.path),
+                 'media_path': dict(path=str(self.movies[2].media_path.path),
+                                    pk=self.movies[2].media_path.pk),
                  'finished': self.movies[2].finished,
                  },
             ],
@@ -94,7 +98,7 @@ class TestMovies:
             if include_name:
                 assert new_movie.name == 'test_name'
             else:
-                assert new_movie.name == '/path/to/dir'
+                assert new_movie.name == 'dir'
 
             assert str(new_movie.media_path.path) == '/path/to/dir'
             assert not new_movie.finished
@@ -123,7 +127,8 @@ class TestMovies:
 
             assert new_movie.pk == json_data['pk']
             assert new_movie.name == json_data['name']
-            assert str(new_movie.media_path.path) == json_data['media_path']
+            assert dict(path=str(new_movie.media_path.path),
+                        pk=new_movie.media_path.pk) == json_data['media_path']
             assert new_movie.finished == json_data['finished']
         else:
             assert response.status_code == 403
