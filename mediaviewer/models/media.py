@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 from django.db import models
 
@@ -26,9 +27,10 @@ class MediaQuerySet(models.QuerySet):
 class MediaManager(models.Manager):
     def from_path(self, path, name=None):
         if name is None:
+            ref_name = Path(path).name
             for scraper in FilenameScrapeFormat.objects.all():
                 name_regex = re.compile(scraper.nameRegex)
-                res = name_regex.findall(path)
+                res = name_regex.findall(ref_name)
                 name = res and res[0] or None
                 sFail = re.compile(r"\s[sS]$")
 
@@ -41,10 +43,10 @@ class MediaManager(models.Manager):
                     or name
                 ).strip()
 
-                if name and name != path and not sFail.findall(name):
+                if name and name != ref_name and not sFail.findall(name):
                     break
             else:
-                name = path
+                name = ref_name
 
         return self.get_or_create(name=name)
 
