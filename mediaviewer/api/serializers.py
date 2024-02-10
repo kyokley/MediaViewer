@@ -165,7 +165,9 @@ class MovieSerializer(serializers.ModelSerializer):
     media_path = serializers.SerializerMethodField('get_media_path')
 
     def get_media_path(self, obj):
-        return str(obj.media_path.path)
+        mp = obj.media_path
+        return dict(pk=mp.pk,
+                    path=mp._path)
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
