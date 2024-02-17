@@ -35,6 +35,12 @@ class MessageViewSet(viewsets.ModelViewSet):
 
 
 class InferScrapersView(views.APIView):
+    def get(self, request, *args, **kwargs):
+        filename = request.GET['title']
+        tv = FilenameScrapeFormat.tv_for_filename(filename)
+        return RESTResponse(
+            {'path': str(tv.media_path.path) if tv else ''})
+
     def post(self, request, *args, **kwargs):
         try:
             MediaFile.objects.infer_all_scrapers()
