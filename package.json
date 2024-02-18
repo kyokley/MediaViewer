@@ -29,10 +29,6 @@
     "datatables.net-responsive-bs5": "^2.5.0",
     "datatables.net-scroller-bs5": "^2.2.0",
     "jquery": "^3.7.0",
-    "jquery.shorten": "^1.0.0",
-    "yarn": "^1.22.19"
-  },
-  "engines": {
-    "yarn": ">= 1.0.0"
+    "jquery.shorten": "^1.0.0"
   }
 }
