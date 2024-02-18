@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g yarn
 RUN mkdir /code/static
-COPY package.json /code/package.json
-RUN yarn install
+COPY package.json package-lock.json /code/
+RUN npm install
 
 FROM ${BASE_IMAGE} AS base
 
