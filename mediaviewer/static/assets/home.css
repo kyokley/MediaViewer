@@ -82,6 +82,10 @@ body{
     margin-bottom: 8px;
 }
 
+.table-group-divider {
+    border-top: none;
+}
+
 div .dt-scroll-body{
     border-bottom-style: none;
 }
@@ -103,6 +107,11 @@ div .dt-scroll-body{
 .table.table-plain > tfoot > tr > td{
     background-color: transparent;
 }
+
+tbody, td, tfoot, th, thead, tr {
+    border-style: hidden;
+}
+
 #file-displayName{
     text-align: center;
 }
