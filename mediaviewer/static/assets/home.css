@@ -81,8 +81,9 @@ body{
     margin: auto;
     margin-bottom: 8px;
 }
-#myTable_wrapper {
-    margin-bottom: 15px;
+
+div .dt-scroll-body{
+    border-bottom-style: none;
 }
 
 .large-img {

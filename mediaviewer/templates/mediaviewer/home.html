@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 {% load static %}
+{% if theme == 'light' %}
 <html lang="en">
+{% else %}
+<html lang="en" class="dark">
+{% endif %}
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,6 +21,12 @@
         {% endblock %}
 
         {% block css %}
+            {% if theme == 'light' %}
+                <link href="{% static "bootswatch/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            {% else %}
+                <link href="{% static "bootswatch/dist/darkly/bootstrap.min.css" %}" rel="stylesheet">
+                <link href="{% static "assets/dark.css" %}" rel="stylesheet">
+            {% endif %}
 
             <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
@@ -25,12 +35,6 @@
             <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
 
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
-            {% if theme == 'light' %}
-                <link href="{% static "bootswatch/bootstrap-light.min.css" %}" rel="stylesheet">
-            {% else %}
-                <link href="{% static "bootswatch/bootstrap-dark.min.css" %}" rel="stylesheet">
-                <link href="{% static "assets/dark.css" %}" rel="stylesheet">
-            {% endif %}
         {% endblock %}
     </head>
 
@@ -224,7 +228,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
-    <script src="{% static "datatables.net/js/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
     <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
     <script src="{% static "datatables.net-responsive/js/dataTables.responsive.min.js" %}"></script>
     <script src="{% static "datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js" %}"></script>
