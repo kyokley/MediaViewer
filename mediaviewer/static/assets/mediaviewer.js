@@ -63,8 +63,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         autoWidth: true,
         responsive: {
             details: {
-                type: 'column',
-                target: -1
+                type: 'column'
             }
         },
         columnDefs: [{
@@ -182,8 +181,7 @@ function prepareTableForRequests($){
         searching: false,
         responsive: {
             details: {
-                type: 'column',
-                target: -1
+                type: 'column'
             }
         },
         columnDefs: [{
