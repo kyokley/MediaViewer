@@ -117,8 +117,9 @@ def _ajax_movie_rows(request, qs):
         0: "name",
         1: "date_created",
     }
-    sort_column = int(request_params["order[0][column]"][0])
-    sort_dir = request_params["order[0][dir]"][0]
+    sort_column = int(request_params.get(
+        "order[0][column]", [1])[0])
+    sort_dir = request_params.get("order[0][dir]", ["desc"])[0]
     sort_expr = (
         f"-{sort_columns_map[sort_column]}"
         if sort_dir == "desc"
@@ -168,10 +169,11 @@ def _ajax_media_file_rows(request, qs):
 
     sort_columns_map = {
         0: "display_name",
-        1: "datecreated",
+        1: "date_created",
     }
-    sort_column = int(request_params["order[0][column]"][0])
-    sort_dir = request_params["order[0][dir]"][0]
+    sort_column = int(request_params.get(
+        "order[0][column]", [1])[0])
+    sort_dir = request_params.get("order[0][dir]", ["desc"])[0]
     sort_expr = (
         f"-{sort_columns_map[sort_column]}"
         if sort_dir == "desc"
@@ -210,8 +212,9 @@ def _ajax_tv_rows(request, qs):
         0: "name",
         1: "max_date_created",
     }
-    sort_column = int(request_params["order[0][column]"][0])
-    sort_dir = request_params["order[0][dir]"][0]
+    sort_column = int(request_params.get(
+        "order[0][column]", [1])[0])
+    sort_dir = request_params.get("order[0][dir]", ["desc"])[0]
     sort_expr = (
         f"-{sort_columns_map[sort_column]}"
         if sort_dir == "desc"
