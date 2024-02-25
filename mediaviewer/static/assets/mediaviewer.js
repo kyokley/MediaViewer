@@ -44,8 +44,6 @@ function sleep (time) {
 }
 
 function prepareDataTable($, sortOrder, table_data_page, filter_id) {
-    tableElement = $('#myTable');
-
     if(filter_id){
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/' + String(filter_id) + '/';
     }else{
@@ -54,7 +52,7 @@ function prepareDataTable($, sortOrder, table_data_page, filter_id) {
 
     dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path);
 
-    tableElement.dataTable(dt_config);
+    new DataTable('#myTable', dt_config);
 }
 
 function dataTableConfig($, sortOrder, table_data_page, ajax_path){
@@ -62,9 +60,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         order: sortOrder,
         autoWidth: true,
         responsive: {
-            details: {
-                type: 'column'
-            }
+            details: true
         },
         columnDefs: [{
             "targets": 'nosort',
@@ -97,6 +93,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         },
     }
 
+    var responsive_priorities = [];
     if(table_data_page == 'ajaxtvshows'){
         dt_config.buttons = [
             {
@@ -132,6 +129,29 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             },
         ];
         dt_config.dom = 'frtip<"row justify-content-center" <"col-auto" B>>';
+
+        responsive_priorities = [
+            {responsivePriority: 1, target: 0},
+            {responsivePriority: 500, target: 1},
+            {responsivePriority: 250, target: 2}
+        ];
+    } else if(table_data_page == 'ajaxtvshowssummary'){
+        responsive_priorities = [
+            {responsivePriority: 1, target: 0}
+        ];
+    } else if(table_data_page == 'ajaxmovierows'){
+        responsive_priorities = [
+            {responsivePriority: 1, target: 0},
+            {responsivePriority: 500, target: 1},
+            {responsivePriority: 250, target: 2}
+        ];
+    } else {
+        console.log("This shouldn't be possible!");
+        console.log(table_data_page);
+    }
+
+    for(var i=0; i < responsive_priorities.length; i++){
+        dt_config.columnDefs.push(responsive_priorities[i]);
     }
     return dt_config;
 }
@@ -174,21 +194,23 @@ function prepareTableForRequests($){
 
     tableElement.dataTable({
         stateSave: true,
-        autoWidth: false,
+        autoWidth: true,
         paginate: false,
         ordering: false,
         info: false,
         searching: false,
         responsive: {
-            details: {
-                type: 'column'
-            }
+            details: true
         },
-        columnDefs: [{
-                    className: 'control',
-                    orderable: false,
-                    targets: -1
-        }]
+        columnDefs: [
+            {
+                className: 'control',
+                orderable: false
+            },
+            {responsivePriority: 1, target: 0},
+            {responsivePriority: 500, target: 1},
+            {responsivePriority: 1, target: 2}
+        ]
     });
 }
 

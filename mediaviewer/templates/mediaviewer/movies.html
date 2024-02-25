@@ -14,23 +14,17 @@
 {% endblock %}
 
 {% block main %}
-    <table id="myTable" class="table table-{{ theme }} table-striped table-hover">
+    <table id="myTable" class="display table table-{{ theme }} table-striped table-hover" width="100%">
         <thead>
             <tr>
-                <th class="all">File Name</th>
-                <th class="desktop
-            {% if view == 'tvshows' %}
-                nosort
-            {% endif %}
-                    ">Timestamp</th>
-                {% if can_download %}
-                    <th class="min-tablet-p nosort">Link</th>
-                {% endif %}
-                <th class="all nosort">Viewed</th>
-                <th class="min-tablet-l nosort">Report Bad File</th>
+                <th class="text-center">File Name</th>
+                <th class="text-center">Timestamp</th>
+                <th class="text-center nosort">Link</th>
+                <th class="text-center nosort">Viewed</th>
+                <th class="text-center nosort">Report Bad File</th>
             </tr>
         </thead>
-        <tbody class="table-group-divider">
+        <tbody>
         </tbody>
     </table>
 {% endblock %}

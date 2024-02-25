@@ -35,36 +35,34 @@
 {% endblock %}
 
     {% block main %}
-        <table id="myTable" class="table table-{{ theme }} table-striped">
+        <table id="myTable" class="display table table-{{ theme }} table-striped table-hover nowrap" width=100%>
             <thead>
                 <tr>
-                    <th class="all"><center>File Name</center></th>
-                    <th class='desktop'><center>Supporters</center></th>
-                    <th class='min-tablet-p'><center>Vote!</center></th>
+                    <th class="text-center">File Name</th>
+                    <th class="text-center">Supporters</th>
+                    <th class="text-center">Vote!</th>
                     {% if user.is_staff %}
-                        <th class="desktop"><center>Added by</center></th>
-                        <th class='desktop'><center>Done</center></th>
-                        <th class='desktop'><center>Give up</center></th>
+                        <th class="text-center">Added by</th>
+                        <th class="text-center">Done</th>
+                        <th class="text-center">Give up</th>
                     {% endif %}
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in items %}
                     <tr>
-                        <td><center>{{ item.name }}</center></td>
-                        <td><center><div id='numberOfVotes-{{ item.id }}'>{{ item.numberOfVotes }}</div></center></td>
+                        <td>{{ item.name }}</td>
+                        <td class="text-center"><div id='numberOfVotes-{{ item.id }}'>{{ item.numberOfVotes }}</div></td>
                         {% if item.canVote %}
-                            <td><center><input class='btn btn-info vote-btn' id="vote-{{ item.id }}" name="{{ item.id }}" type="button" value="Vote" onclick="callAjaxVote('{{item.id}}')"/></center></td>
+                            <td class="text-center"><button class='btn btn-info vote-btn' id="vote-{{ item.id }}" name="{{ item.id }}" onclick="callAjaxVote('{{item.id}}')">Vote</button></td>
                         {% else %}
-                            <td><center>Thanks for voting!</center></td>
+                            <td class="text-center">Thanks for voting!</td>
                         {% endif %}
                         {% if user.is_staff %}
-                            <td><center>{{ item.user.username }}</center></td>
-                            <td><center><input class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" type="button" value="Done" onclick="callDoneButton('{{item.id}}')" /></center></td>
-                            <td><center><input class='btn btn-info done-btn' id="giveup-{{ item.id }}" name="{{ item.id }}" type="button" value="Give up" onclick="callGiveUpButton('{{item.id}}')" /></center></td>
+                            <td>{{ item.user.username }}</td>
+                            <td><button class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" onclick="callDoneButton('{{item.id}}')">Done</button></td>
+                            <td><button class='btn btn-info done-btn' id="giveup-{{ item.id }}" name="{{ item.id }}" onclick="callGiveUpButton('{{item.id}}')">Give Up</button></td>
                         {% endif %}
-                        <td></td>
                     </tr>
                 {% endfor %}
             </tbody>

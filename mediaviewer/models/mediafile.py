@@ -229,8 +229,8 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/tvdetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.display_name}</a>',
-            f"""<span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}""",
+            f'<a class="img-preview" href="/mediaviewer/tvdetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.display_name}</a>',
+            f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}</center>""",
         ]
 
         if can_download:
@@ -241,17 +241,17 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             else:
                 payload.append("Alfred is down")
 
-        cell = """<div class="row text-center">"""
+        cell = """<center>"""
 
         if self.comments.filter(user=user, viewed=True).exists():
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxTVCheckBox(['{self.id}'])" />"""
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxTVCheckBox(['{self.id}'])" />"""
-        cell = f'{cell}<span id="saved-{ self.id }"></span></div>'
+        cell = f'{cell}<span id="saved-{ self.id }"></span></center>'
         payload.extend(
             [
                 cell,
-                f"""<input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'mediafile')"/>""",
+                f"""<center><input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'mediafile')"/></center>""",
             ]
         )
         return payload

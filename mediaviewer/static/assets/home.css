@@ -33,29 +33,22 @@ body{
 }
 
 .tooltip-img {
-    height: auto;
     width: auto;
-    max-width: 250px;
-    max-height: 250px;
+    max-height: 450px;
     overflow: hidden;
 }
 .tooltip {
     opacity: 1 !important;
+    min-height: 450px;
+}
+.preview-tooltip {
+    max-width: 100% !important;
+    overflow: hidden;
 }
 
 .addrequestbutton{
     margin-left: 10px;
     margin-bottom: 5px;
-}
-
-.vote-btn{
-    width: 60px;
-    height: 30px;
-}
-
-.done-btn{
-    width: 60px;
-    height: 30px;
 }
 
 .jumbotron{
@@ -80,10 +73,6 @@ body{
     width: 90%;
     margin: auto;
     margin-bottom: 8px;
-}
-
-.table-group-divider {
-    border-top: none;
 }
 
 div .dt-scroll-body{

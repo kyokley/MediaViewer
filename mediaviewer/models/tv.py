@@ -99,10 +99,10 @@ class TV(Media):
         )
         payload = [
             (
-                f"""<a class="img-preview" href='/mediaviewer/tvshows/{ self.id }/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="{tooltip_img}">"""
+                f"""<a class="img-preview" href='/mediaviewer/tvshows/{ self.id }/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-custom-class="preview-tooltip" data-bs-content="{tooltip_img}">"""
                 f"""{ self.name }</a>\n"""
                 f'<span id="unwatched-show-badge-{ self.id }" class="badge text-bg-primary">{unwatched_count or ""}</span>'
             ),
-            f"""<span class="hidden_span">{self.last_created_episode_at().isoformat()}</span>{ self.last_created_episode_at().date().strftime('%b %d, %Y')}""",
+            f"""<center><span class="hidden_span">{self.last_created_episode_at().isoformat()}</span>{ self.last_created_episode_at().date().strftime('%b %d, %Y')}</center>""",
         ]
         return payload

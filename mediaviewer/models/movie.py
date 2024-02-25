@@ -93,8 +93,8 @@ class Movie(Media, ViewableObjectMixin):
         )
 
         payload = [
-            f'<a class="img-preview" href="/mediaviewer/moviedetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" {tooltip_img}>{self.name}</a>',
-            f"""<span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}""",
+            f'<a class="img-preview" href="/mediaviewer/moviedetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.name}</a>',
+            f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}</center>""",
         ]
 
         if can_download:
@@ -105,16 +105,16 @@ class Movie(Media, ViewableObjectMixin):
             else:
                 payload.append("Alfred is down")
 
-        cell = """<div class="row text-center">"""
+        cell = """<center>"""
         if self.comments.filter(user=user, viewed=True).exists():
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
-        cell = f'{cell}<span id="saved-{ self.id }"></span></div>'
+        cell = f'{cell}<span id="saved-{ self.id }"></span></center>'
         payload.extend(
             [
                 cell,
-                f"""<input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'movie')"/>""",
+                f"""<center><input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'movie')"/></center>""",
             ]
         )
         return payload
