@@ -248,7 +248,7 @@ def ajaxmovierows(request):
 @csrf_exempt
 def ajaxmoviesbygenrerows(request, genre_id):
     genre = get_object_or_404(Genre, pk=genre_id)
-    qs = Movie.objects.filter(poster__genres=genre).order_by("-id")
+    qs = Movie.objects.filter(_poster__genres=genre).order_by("-id")
     return _ajax_movie_rows(request, qs)
 
 
@@ -263,7 +263,7 @@ def _get_tv_show_rows_query(genre_id=None):
 
     if genre_id:
         genre = get_object_or_404(Genre, pk=genre_id)
-        tv_qs = tv_qs.filter(poster__genres=genre)
+        tv_qs = tv_qs.filter(_poster__genres=genre)
     return tv_qs
 
 
