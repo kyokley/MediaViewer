@@ -132,8 +132,10 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
 
         responsive_priorities = [
             {responsivePriority: 1, target: 0},
-            {responsivePriority: 500, target: 1},
-            {responsivePriority: 250, target: 2}
+            {responsivePriority: 10001, target: 1},
+            {responsivePriority: 250, target: 2},
+            {responsivePriority: 250, target: 3},
+            {responsivePriority: 10001, target: 4}
         ];
     } else if(table_data_page == 'ajaxtvshowssummary'){
         responsive_priorities = [

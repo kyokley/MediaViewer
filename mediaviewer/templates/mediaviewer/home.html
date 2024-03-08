@@ -16,9 +16,6 @@
             {% endif %}
         {% endblock %}
 
-    </head>
-
-    <body>
         {% block css %}
             <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" %}" rel="stylesheet">
@@ -29,7 +26,9 @@
             <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
+    </head>
 
+    <body>
         <nav id="top-navbar" class="navbar navbar-expand-md fixed-top bg-body-tertiary nav-show" role="navigation">
             <div class="container-fluid">
             {% block navbar%}
