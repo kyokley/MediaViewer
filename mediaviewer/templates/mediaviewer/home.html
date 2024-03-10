@@ -93,8 +93,8 @@
                             </li>
 
                             <li class="nav-item">
-                                {% if active_page == 'settings' %}
-                                    <a class="btn btn-outline-primary disabled" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                                {% if active_page == 'settings' or active_page == 'submitsettings' %}
+                                    <a class="btn btn-outline-primary" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                                 {% else %}
                                     <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                                 {% endif %}
