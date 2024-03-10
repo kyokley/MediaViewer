@@ -34,12 +34,11 @@ body{
 
 .tooltip-img {
     width: auto;
-    overflow: hidden;
+    max-height: 450px;
 }
-
 .tooltip {
     opacity: 1 !important;
-    min-height: 350px;
+    min-height: 450px;
 }
 .preview-tooltip {
     max-width: 100% !important;
@@ -162,4 +161,12 @@ tbody > tr > td > a:hover, nav > ol > li > a:hover {
     animation-name: slide-in;
     animation-duration: 0.4s;
     animation-fill-mode: both;
+}
+
+div.alert > a {
+    text-decoration: none;
+}
+
+div.alert > a:hover {
+    text-decoration: underline;
 }
