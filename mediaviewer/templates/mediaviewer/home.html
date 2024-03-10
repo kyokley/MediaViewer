@@ -22,7 +22,6 @@
             <link href="{% static "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-dt/css/dataTables.dataTables.min.css" %}" rel="stylesheet">
             <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
@@ -160,7 +159,13 @@
                                 {% if file.is_movie %}
                                         <td>
                                             {% if file.poster.image %}
-                                                <a class="img-preview" href="{% url 'mediaviewer:moviedetail' file.pk %}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
+                                                <a class="img-preview"
+                                                   href="{% url 'mediaviewer:moviedetail' file.pk %}"
+                                                   data-bs-toggle="popover"
+                                                   data-bs-trigger="hover focus"
+                                                   data-bs-placement="left"
+                                                   data-bs-custom-class="preview-tooltip"
+                                                   data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
                                             {% else %}
                                                 <a href="{% url 'mediaviewer:moviedetail' file.pk %}">
                                             {% endif %}
@@ -170,7 +175,14 @@
                                 {% else %}
                                         <td>
                                             {% if file.poster.image %}
-                                                <a class="img-preview" href="{% url 'mediaviewer:tvdetail' file.pk %}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
+                                                <a class="img-preview"
+                                                   href="{% url 'mediaviewer:tvdetail' file.pk %}"
+                                                   data-bs-toggle="popover"
+                                                   data-bs-trigger="hover focus"
+                                                   data-bs-container="body"
+                                                   data-bs-placement="top"
+                                                   data-bs-custom-class="preview-tooltip"
+                                                   data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
                                             {% else %}
                                                 <a href="{% url 'mediaviewer:tvdetail' file.pk %}">
                                             {% endif %}
