@@ -24,9 +24,9 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "datatables.net-bs5": "^2.0.0",
+    "datatables.net-bs5": "^2.0.2",
     "datatables.net-buttons-bs5": "^2.4.1",
-    "datatables.net-scroller-bs5": "^2.4.0",
+    "datatables.net-scroller-bs5": "^2.4.1",
     "jquery": "^3.7.1",
     "jquery.shorten": "^1.0.0"
   }
