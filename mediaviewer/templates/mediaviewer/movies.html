@@ -36,8 +36,8 @@
             preparePage($);
             {% if view == 'movies' %}
                 var sortOrder = [[2,'desc']];
-            {% elif view == 'tvshows' or view == 'files' %}
-                var sortOrder =  [[2,'desc']];
+            {% elif view == 'tvshows' %}
+                var sortOrder =  [[1,'desc']];
             {% elif view == 'paths' %}
                 var sortOrder =  [[1,'asc']];
             {% else %}
