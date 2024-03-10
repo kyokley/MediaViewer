@@ -34,12 +34,11 @@ body{
 
 .tooltip-img {
     width: auto;
-    max-height: 450px;
     overflow: hidden;
 }
 .tooltip {
     opacity: 1 !important;
-    min-height: 450px;
+    min-height: 350px;
 }
 .preview-tooltip {
     max-width: 100% !important;
