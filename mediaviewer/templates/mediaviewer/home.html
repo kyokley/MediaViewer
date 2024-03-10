@@ -41,7 +41,7 @@
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
                             {% if active_page == 'home' %}
-                                <a class="nav-link active" href="/mediaviewer/">Home</a>
+                                <a class="btn btn-outline-primary disabled" href="/mediaviewer/">Home</a>
                             {% else %}
                                 <a class="nav-link" href="/mediaviewer/">Home</a>
                             {% endif %}
@@ -49,7 +49,7 @@
 
                             <li class="nav-item dropdown">
                                 {% if active_page == 'movies' %}
-                                    <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                                    <a class="btn btn-outline-primary disabled dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
                                 {% else %}
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
                                 {% endif %}
@@ -68,7 +68,7 @@
 
                             <li class="nav-item dropdown">
                                 {% if active_page == 'tvshows' %}
-                                    <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+                                    <a class="btn btn-outline-primary disabled dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
                                 {% else %}
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
                                 {% endif %}
@@ -87,7 +87,7 @@
 
                             <li class="nav-item">
                                 {% if active_page == 'requests' %}
-                                    <a class="nav-link active" href="/mediaviewer/requests/">Requests</a>
+                                    <a class="btn btn-outline-primary disabled" href="/mediaviewer/requests/">Requests</a>
                                 {% else %}
                                     <a class="nav-link" href="/mediaviewer/requests/">Requests</a>
                                 {% endif %}
@@ -95,7 +95,7 @@
 
                             <li class="nav-item">
                                 {% if active_page == 'settings' %}
-                                    <a class="nav-link active" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                                    <a class="btn btn-outline-primary disabled" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                                 {% else %}
                                     <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                                 {% endif %}
