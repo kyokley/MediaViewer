@@ -114,8 +114,8 @@ def _ajax_movie_rows(request, qs):
     draw = int(request_params["draw"][0])
 
     sort_columns_map = {
-        0: "name",
-        1: "date_created",
+        1: "name",
+        3: "date_created",
     }
     sort_column = int(request_params.get(
         "order[0][column]", [1])[0])
@@ -168,8 +168,8 @@ def _ajax_media_file_rows(request, qs):
     draw = int(request_params["draw"][0])
 
     sort_columns_map = {
-        0: "display_name",
-        1: "date_created",
+        1: "display_name",
+        3: "date_created",
     }
     sort_column = int(request_params.get(
         "order[0][column]", [1])[0])

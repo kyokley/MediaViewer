@@ -17,10 +17,10 @@
     <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
         <thead>
             <tr>
-                <th class="text-center">File Name</th>
-                <th class="text-center">Timestamp</th>
-                <th class="text-center nosort">Link</th>
                 <th class="text-center nosort">Viewed</th>
+                <th class="text-center">Name</th>
+                <th class="text-center nosort">Link</th>
+                <th class="text-center">Timestamp</th>
                 <th class="text-center nosort">Report Bad File</th>
             </tr>
         </thead>
@@ -35,13 +35,9 @@
             csrf_token = '{{ csrf_token }}';
             preparePage($);
             {% if view == 'movies' %}
-                var sortOrder = [[1,'desc']];
+                var sortOrder = [[2,'desc']];
             {% elif view == 'tvshows' or view == 'files' %}
-                {% if default_sort == 'filename_sort' %}
-                    var sortOrder =  [[0,'desc']];
-                {% else %}
-                    var sortOrder =  [[1,'desc']];
-                {% endif %}
+                var sortOrder =  [[2,'desc']];
             {% elif view == 'paths' %}
                 var sortOrder =  [[1,'asc']];
             {% else %}

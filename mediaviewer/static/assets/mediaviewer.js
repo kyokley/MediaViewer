@@ -59,9 +59,9 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config = {
         order: sortOrder,
         autoWidth: true,
-        responsive: {
-            details: true
-        },
+        // responsive: {
+        //     details: false
+        // },
         columnDefs: [{
             "targets": 'nosort',
             "orderable": false
@@ -78,8 +78,9 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         loadingIndicator: true
     };
     dt_config.scrollY = 450;
+    dt_config.scrollX = true;
     dt_config.scrollCollapse = true;
-    dt_config.deferRender = true;
+    dt_config.deferRender = false;
     dt_config.pageLength = 15;
 
     dt_config.serverSide = true;
@@ -131,11 +132,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         dt_config.dom = 'frtip<"row justify-content-center" <"col-auto" B>>';
 
         responsive_priorities = [
-            {responsivePriority: 1, target: 0},
-            {responsivePriority: 10001, target: 1},
-            {responsivePriority: 250, target: 2},
-            {responsivePriority: 250, target: 3},
-            {responsivePriority: 10001, target: 4}
+            {responsivePriority: 500, target: 1},
         ];
     } else if(table_data_page == 'ajaxtvshowssummary'){
         responsive_priorities = [
@@ -143,9 +140,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         ];
     } else if(table_data_page == 'ajaxmovierows'){
         responsive_priorities = [
-            {responsivePriority: 1, target: 0},
             {responsivePriority: 500, target: 1},
-            {responsivePriority: 250, target: 2}
         ];
     } else {
         console.log("This shouldn't be possible!");
