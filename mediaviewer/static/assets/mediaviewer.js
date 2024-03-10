@@ -59,9 +59,6 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config = {
         order: sortOrder,
         autoWidth: true,
-        // responsive: {
-        //     details: false
-        // },
         columnDefs: [{
             "targets": 'nosort',
             "orderable": false
