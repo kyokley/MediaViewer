@@ -170,3 +170,8 @@ div.alert > a {
 div.alert > a:hover {
     text-decoration: underline;
 }
+
+li.nav-item > a.btn-outline-primary:hover {
+    color: var(--bs-btn-hover-border-color);
+    background-color: transparent;
+}
