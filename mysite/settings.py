@@ -285,4 +285,4 @@ PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"
 WAITER_PASSWORD_HASH = (os.environ.get("WAITER_PASSWORD_HASH") or
-    "pbkdf2_sha256$260000$x3PHIdznjFUgxGZZUbAEXr$L2S+iC0b06HbvcoixP9mC1ZAbSFx+s8dy5z2Nsa2UG4=")
+    "pbkdf2_sha256$260000$gTINkjUitLzAra3DGCJ4pK$/IzJql5fzVSV2XfINRkHpyBxIvNdjhxDyVqB3f5Lzmk=")
