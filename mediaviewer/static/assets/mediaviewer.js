@@ -155,7 +155,6 @@ function configureTooltips($){
         animated: true,
         placement: placePopover,
         html: true,
-        offset: [10, 10],
         delay: 200
     };
     $(function () {

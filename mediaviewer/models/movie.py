@@ -100,6 +100,8 @@ class Movie(Media, ViewableObjectMixin):
                 link_html = f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}', 'movie')">Open</a></center>"""
             else:
                 link_html = "Alfred is down"
+        else:
+            link_html = ''
 
         cell = """<center>"""
         if self.comments.filter(user=user, viewed=True).exists():
