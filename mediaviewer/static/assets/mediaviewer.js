@@ -76,7 +76,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     };
     dt_config.scrollY = 450;
     dt_config.scrollX = true;
-    dt_config.scrollCollapse = true;
+    dt_config.scrollCollapse = false;
     dt_config.deferRender = false;
     dt_config.pageLength = 15;
 
