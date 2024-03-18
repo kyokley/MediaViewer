@@ -159,7 +159,7 @@ function configureTooltips($){
     };
     $(function () {
         $('.img-preview').popover(options);
-        $('[data-bs-toggle="tooltip"]').tooltip();
+        $('.skip-btn').popover();
     });
 }
 
