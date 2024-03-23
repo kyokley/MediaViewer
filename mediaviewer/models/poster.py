@@ -130,13 +130,13 @@ class Poster(TimeStampModel):
     actors = models.ManyToManyField("mediaviewer.Actor", blank=True)
     writers = models.ManyToManyField("mediaviewer.Writer", blank=True)
     directors = models.ManyToManyField("mediaviewer.Director", blank=True)
-    episodename = models.CharField(blank=True, null=False, default="", max_length=100)
-    rated = models.CharField(blank=True, null=False, default="", max_length=100)
+    episodename = models.CharField(blank=True, null=False, default="", max_length=256)
+    rated = models.CharField(blank=True, null=False, default="", max_length=256)
     rating = models.CharField(blank=True, null=False, default="", max_length=32)
     tmdb = models.CharField(null=False, default="", blank=True, max_length=32)
     imdb = models.CharField(null=False, default="", blank=True, max_length=32)
     image = models.ImageField(upload_to="uploads/%Y/%m/%d/")
-    tagline = models.CharField(blank=True, null=False, default="", max_length=100)
+    tagline = models.CharField(blank=True, null=False, default="", max_length=256)
 
     objects = PosterManager()
 
