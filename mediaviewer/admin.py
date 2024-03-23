@@ -135,6 +135,9 @@ class MediaFileInline(admin.TabularInline):
     show_change_link = True
     ordering = ("season", "episode")
     extra = 0
+    raw_id_fields = ('scraper',
+                     '_poster',
+                     )
 
 
 @admin.register(MediaPath)
