@@ -53,8 +53,13 @@ class Command(BaseCommand):
                 poster.imdb = ""
                 poster.tmdb = ""
 
-            poster._populate_data()
-            poster.save()
+            try:
+                poster._populate_data()
+                poster.save()
+            except Exception as e:
+                logger.warning(f'Got error processing {poster}')
+                logger.warning(e)
+                continue
 
             self.stdout.write(f" {count}/{total} - {str(poster.ref_obj):<100}")
         self.stdout.write()
