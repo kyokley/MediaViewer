@@ -119,6 +119,8 @@ class TVAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     list_filter = ("finished",)
     inlines = [MediaPathInline]
+    raw_id_fields = ('_poster',
+                     )
 
 
 @admin.register(Movie)
@@ -131,6 +133,8 @@ class MovieAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     list_filter = ("finished",)
     inlines = [MediaPathInline]
+    raw_id_fields = ('_poster',
+                     )
 
 
 class MediaFileInline(admin.TabularInline):
