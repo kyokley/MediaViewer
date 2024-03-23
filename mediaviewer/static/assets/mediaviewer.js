@@ -246,8 +246,7 @@ function _ajaxCheckBox(update_payload, movie_or_media_file){
         contentType: "application/json",
         processData: false,
         data : JSON.stringify(update_payload),
-        success : function(json_str) {
-            json = JSON.parse(json_str);
+        success : function(json) {
             if(json.errmsg !== ''){
                 alert(json.errmsg);
             } else {
