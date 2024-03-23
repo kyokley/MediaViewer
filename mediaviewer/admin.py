@@ -115,9 +115,10 @@ class TVAdmin(admin.ModelAdmin):
         "id",
         "name",
         "finished",
+        "hide",
     )
     search_fields = ("name",)
-    list_filter = ("finished",)
+    list_filter = ("finished", "hide")
     inlines = [MediaPathInline]
     raw_id_fields = ('_poster',
                      )
@@ -128,10 +129,10 @@ class MovieAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
-        "finished",
+        "hide",
     )
     search_fields = ("name",)
-    list_filter = ("finished",)
+    list_filter = ("hide",)
     inlines = [MediaPathInline]
     raw_id_fields = ('_poster',
                      )

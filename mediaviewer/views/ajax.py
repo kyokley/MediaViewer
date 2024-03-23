@@ -238,7 +238,11 @@ def _ajax_tv_rows(request, qs):
 
 @csrf_exempt
 def ajaxmovierows(request):
-    qs = Movie.objects.order_by("-id")
+    qs = (
+        Movie.objects
+        .filter(hide=False)
+        .order_by("-id")
+    )
     return _ajax_movie_rows(request, qs)
 
 
@@ -250,7 +254,8 @@ def ajaxmoviesbygenrerows(request, genre_id):
 
 
 def _get_tv_show_rows_query(genre_id=None):
-    tv_qs = TV.objects.annotate(
+    tv_qs = TV.objects.filter(hide=False
+                              ).annotate(
         max_date_created=Subquery(
             MediaFile.objects.filter(media_path__tv=OuterRef("pk"))
             .order_by("-date_created")
@@ -280,7 +285,12 @@ def ajaxtvshowsbygenre(request, genre_id):
 def ajaxtvshows(request, tv_id):
     ref_tv = get_object_or_404(TV, pk=tv_id)
 
-    qs = MediaFile.objects.filter(media_path__tv=ref_tv).order_by("display_name")
+    qs = (
+        MediaFile.objects
+        .filter(hide=False)
+        .filter(media_path__tv=ref_tv)
+        .order_by("display_name")
+    )
 
     return _ajax_media_file_rows(request, qs)
 
