@@ -7,7 +7,7 @@ class VideoProgressManager(models.Manager):
     def destroy(self, user, hashed_filename):
         vp = self.filter(user=user).filter(hashed_filename=hashed_filename).first()
         if vp:
-            if not vp.file.next():
+            if vp.media_file and not vp.media_file.next():
                 Message.clearLastWatchedMessage(user)
 
             vp.delete()
@@ -31,6 +31,8 @@ class VideoProgress(models.Model):
     movie = models.ForeignKey(
         "mediaviewer.Movie", on_delete=models.CASCADE, null=True, blank=True
     )
+
+    objects = VideoProgressManager()
 
     class Meta:
         app_label = "mediaviewer"
