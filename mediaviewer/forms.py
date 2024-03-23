@@ -1,10 +1,11 @@
-from django import forms
-from django.template import loader
-from django.core.mail import EmailMultiAlternatives
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.tokens import default_token_generator
 import re
+
+from django import forms
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template import loader
 
 NUMBER_REGEX = re.compile(r"[0-9]")
 CHAR_REGEX = re.compile(r"[a-zA-Z]")

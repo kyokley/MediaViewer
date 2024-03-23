@@ -1,8 +1,8 @@
-import secure
 from datetime import datetime, timedelta
+
+import secure
 from django.conf import settings
 from django.contrib import auth
-
 
 secure_headers = secure.Secure()
 

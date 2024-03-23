@@ -7,10 +7,9 @@ RUN apt-get update && apt-get install -y \
         npm \
         make
 
-RUN npm install -g yarn
 RUN mkdir /code/static
-COPY package.json /code/package.json
-RUN yarn install
+COPY package.json package-lock.json /code/
+RUN npm install
 
 FROM ${BASE_IMAGE} AS base
 
@@ -60,10 +59,10 @@ COPY poetry.lock pyproject.toml /code/
 
 RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --without dev
 
-COPY --from=static-builder /code/node_modules /node/node_modules
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod
+COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
 RUN python manage.py collectstatic --no-input
 CMD uwsgi --ini /code/uwsgi/uwsi.conf
@@ -72,3 +71,4 @@ CMD uwsgi --ini /code/uwsgi/uwsi.conf
 # ********************* Begin Dev Image ******************
 FROM base AS dev
 RUN $POETRY_VENV/bin/poetry install
+COPY --from=static-builder /code/node_modules /node/node_modules

@@ -1,20 +1,18 @@
-from django.http import HttpResponseRedirect, HttpResponse
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from mediaviewer.models.request import (
-    Request,
-    RequestVote,
-)
-from mediaviewer.models.message import Message
-from mediaviewer.views.views_utils import setSiteWideContext
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
-from django.conf import settings
-from mediaviewer.utils import logAccessInfo
-
 import json
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
 from mediaviewer import interjections
+from mediaviewer.models.message import Message
+from mediaviewer.models.request import Request, RequestVote
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.views_utils import setSiteWideContext
 
 
 @login_required(login_url="/mediaviewer/login/")

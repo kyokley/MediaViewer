@@ -44,8 +44,6 @@ function sleep (time) {
 }
 
 function prepareDataTable($, sortOrder, table_data_page, filter_id) {
-    tableElement = $('#myTable');
-
     if(filter_id){
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/' + String(filter_id) + '/';
     }else{
@@ -54,19 +52,13 @@ function prepareDataTable($, sortOrder, table_data_page, filter_id) {
 
     dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path);
 
-    tableElement.dataTable(dt_config);
+    new DataTable('#myTable', dt_config);
 }
 
 function dataTableConfig($, sortOrder, table_data_page, ajax_path){
     dt_config = {
         order: sortOrder,
         autoWidth: true,
-        responsive: {
-            details: {
-                type: 'column',
-                target: -1
-            }
-        },
         columnDefs: [{
             "targets": 'nosort',
             "orderable": false
@@ -83,8 +75,9 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         loadingIndicator: true
     };
     dt_config.scrollY = 450;
-    dt_config.scrollCollapse = true;
-    dt_config.deferRender = true;
+    dt_config.scrollX = true;
+    dt_config.scrollCollapse = false;
+    dt_config.deferRender = false;
     dt_config.pageLength = 15;
 
     dt_config.serverSide = true;
@@ -98,6 +91,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
         },
     }
 
+    var responsive_priorities = [];
     if(table_data_page == 'ajaxtvshows'){
         dt_config.buttons = [
             {
@@ -133,6 +127,25 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             },
         ];
         dt_config.dom = 'frtip<"row justify-content-center" <"col-auto" B>>';
+
+        responsive_priorities = [
+            {responsivePriority: 500, target: 1},
+        ];
+    } else if(table_data_page == 'ajaxtvshowssummary'){
+        responsive_priorities = [
+            {responsivePriority: 1, target: 0}
+        ];
+    } else if(table_data_page == 'ajaxmovierows'){
+        responsive_priorities = [
+            {responsivePriority: 500, target: 1},
+        ];
+    } else {
+        console.log("This shouldn't be possible!");
+        console.log(table_data_page);
+    }
+
+    for(var i=0; i < responsive_priorities.length; i++){
+        dt_config.columnDefs.push(responsive_priorities[i]);
     }
     return dt_config;
 }
@@ -142,12 +155,11 @@ function configureTooltips($){
         animated: true,
         placement: placePopover,
         html: true,
-        offset: [10, 10],
         delay: 200
     };
     $(function () {
         $('.img-preview').popover(options);
-        $('[data-bs-toggle="tooltip"]').tooltip();
+        $('.skip-btn').popover();
     });
 }
 
@@ -175,48 +187,80 @@ function prepareTableForRequests($){
 
     tableElement.dataTable({
         stateSave: true,
-        autoWidth: false,
+        autoWidth: true,
         paginate: false,
         ordering: false,
         info: false,
         searching: false,
         responsive: {
-            details: {
-                type: 'column',
-                target: -1
-            }
+            details: true
         },
-        columnDefs: [{
-                    className: 'control',
-                    orderable: false,
-                    targets: -1
-        }]
+        columnDefs: [
+            {
+                className: 'control',
+                orderable: false
+            },
+            {responsivePriority: 1, target: 0},
+            {responsivePriority: 500, target: 1},
+            {responsivePriority: 1, target: 2}
+        ]
     });
 }
 
-function ajaxCheckBox(file_ids){
-    update_payload = {csrfmiddlewaretoken: csrf_token};
+function ajaxMovieCheckBox(file_ids){
+    update_payload = {
+        csrfmiddlewaretoken: csrf_token,
+        'movies': {}
+    };
 
     file_ids.forEach((val, idx)=>{
         var box = document.getElementsByName(val)[0];
         var checked = box.checked;
-        update_payload[val] = checked;
+        update_payload["movies"][val] = checked;
         box.setAttribute('disabled', 'disabled');
     });
 
+    _ajaxCheckBox(update_payload, 'movie');
+}
+
+function ajaxTVCheckBox(file_ids){
+    update_payload = {
+        csrfmiddlewaretoken: csrf_token,
+        "media_files": {}
+    };
+
+    file_ids.forEach((val, idx)=>{
+        var box = document.getElementsByName(val)[0];
+        var checked = box.checked;
+        update_payload["media_files"][val] = checked;
+        box.setAttribute('disabled', 'disabled');
+    });
+
+    _ajaxCheckBox(update_payload, 'media_file');
+}
+
+function _ajaxCheckBox(update_payload, movie_or_media_file){
     jQuery.ajax({
         url : "/mediaviewer/ajaxviewed/",
         type : "POST",
-        dataType: "json",
-        data : update_payload,
-        success : function(json) {
+        contentType: "application/json",
+        processData: false,
+        data : JSON.stringify(update_payload),
+        success : function(json_str) {
+            json = JSON.parse(json_str);
             if(json.errmsg !== ''){
                 alert(json.errmsg);
             } else {
                 selectors = []
 
-                for(let file_id in json.data){
-                    viewed = Boolean(json.data[file_id][0]);
+                if(movie_or_media_file === 'movie'){
+                    res_data = json.data['movies'];
+                }else{
+                    res_data = json.data['media_files'];
+                }
+
+                for(let file_id in res_data){
+                    viewed = Boolean(res_data[file_id][0]);
 
                     selectors.push('#saved-' + file_id);
 
@@ -249,15 +293,20 @@ function ajaxCheckBox(file_ids){
     });
 }
 
-function openDownloadWindow(id){
+function openDownloadWindow(id, obj_type){
+    payload = {csrfmiddlewaretoken: csrf_token}
+    if(obj_type === 'movie'){
+        payload['movie_id'] = id
+    } else {
+        payload['mf_id'] = id
+    }
+
+
     $.ajax({
     url: '/mediaviewer/ajaxdownloadbutton/',
     type: 'POST',
     dataType: 'json',
-    data: {
-        fileid: id,
-        csrfmiddlewaretoken: csrf_token
-    },
+    data: payload,
     success: function(json){
         if(json.errmsg === ""){
             var win = window.open(json.downloadLink, "_self");
@@ -368,15 +417,20 @@ function callGiveUpButton(name){
     });
 }
 
-function reportButtonClick(id){
+function reportButtonClick(id, type){
+    payload = {csrfmiddlewaretoken: csrf_token}
+
+    if(type === 'movie'){
+        payload['movie_id'] = id
+    } else if(type === 'media_file'){
+        payload['mf_id'] = id
+    }
+
     jQuery.ajax({
     url : "/mediaviewer/ajaxreport/",
     type : "POST",
     dataType: "json",
-    data : {
-        reportid : id,
-        csrfmiddlewaretoken: csrf_token
-    },
+    data : payload,
     success : function(json) {
         if(json.errmsg !== ''){
             alert(json.errmsg);

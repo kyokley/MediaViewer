@@ -1,11 +1,12 @@
+from datetime import datetime
+
 import mock
 import pytest
 import pytz
-from datetime import datetime
-
 from django.conf import settings
-from mediaviewer.tests import helpers
+
 from mediaviewer.models.loginevent import LoginEvent
+from mediaviewer.tests import helpers
 
 
 @pytest.mark.django_db

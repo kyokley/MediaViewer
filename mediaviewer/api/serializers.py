@@ -1,16 +1,8 @@
-from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
-from mediaviewer.models.error import Error
-from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.message import Message
-from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.usercomment import UserComment
-from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.videoprogress import VideoProgress
-from mediaviewer.models.donation_site import DonationSite
-
 from rest_framework import serializers
+
+from mediaviewer.models import (TV, Comment, DonationSite, DownloadToken,
+                                FilenameScrapeFormat, MediaFile, MediaPath,
+                                Message, Movie, UserSettings, VideoProgress)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -25,17 +17,15 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         fields = (
             "guid",
             "userid",
-            "fileid",
             "username",
             "path",
             "filename",
             "ismovie",
-            "datecreated",
+            "date_created",
             "tokenid",
             "isvalid",
             "displayname",
-            "pathid",
-            "pathname",
+            "tv_name",
             "videoprogresses",
             "next_id",
             "previous_id",
@@ -43,21 +33,13 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "donation_site",
             "download_link",
             "theme",
+            "tv_id",
         )
 
-    guid = serializers.CharField(required=True, max_length=32)
     userid = serializers.IntegerField(required=True, source="user.id")
-    fileid = serializers.IntegerField(required=True, source="file.id")
     username = serializers.SerializerMethodField()
-    path = serializers.CharField(required=True)
-    filename = serializers.CharField(required=True)
-    ismovie = serializers.BooleanField(required=True)
-    datecreated = serializers.DateTimeField(required=True)
     tokenid = serializers.IntegerField(required=True, source="id")
-    isvalid = serializers.BooleanField(required=True)
-    displayname = serializers.CharField(required=True)
-    pathid = serializers.SerializerMethodField()
-    pathname = serializers.SerializerMethodField()
+    tv_name = serializers.SerializerMethodField()
     videoprogresses = serializers.SerializerMethodField()
     next_id = serializers.SerializerMethodField()
     previous_id = serializers.SerializerMethodField()
@@ -65,28 +47,29 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     donation_site = serializers.SerializerMethodField()
     download_link = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
+    tv_id = serializers.SerializerMethodField()
 
     def get_username(self, obj):
         return obj.user.username
 
-    def get_pathid(self, obj):
-        return obj.file.path.id
-
-    def get_pathname(self, obj):
-        return obj.file.path.displayName()
+    def get_tv_name(self, obj):
+        tv = obj.media_file.tv if obj.media_file else None
+        return tv.name if tv else None
 
     def get_videoprogresses(self, obj):
         return [
             x.hashed_filename
-            for x in VideoProgress.objects.filter(user=obj.user).filter(file=obj.file)
+            for x in VideoProgress.objects.filter(user=obj.user).filter(
+                media_file=obj.media_file, movie=obj.movie
+            )
         ]
 
     def get_next_id(self, obj):
-        next_obj = obj.file.next()
+        next_obj = obj.media_file.next() if obj.media_file else None
         return next_obj and next_obj.id
 
     def get_previous_id(self, obj):
-        previous_obj = obj.file.previous()
+        previous_obj = obj.media_file.previous() if obj.media_file else None
         return previous_obj and previous_obj.id
 
     def get_binge_mode(self, obj):
@@ -98,37 +81,52 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return DonationSiteSerializer(donation_site).data
 
     def get_download_link(self, obj):
-        return obj.file.downloadLink(obj.user, obj.guid)
+        movie_or_media_file = obj.movie or obj.media_file
+        return movie_or_media_file.downloadLink(obj.user, obj.guid)
 
     def get_theme(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.theme
 
+    def get_tv_id(self, obj):
+        tv = obj.media_file.tv if obj.media_file else None
+        return tv and tv.id
 
-class PathSerializer(serializers.ModelSerializer):
+
+class MediaPathSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Path
+        model = MediaPath
         fields = (
             "pk",
-            "localpath",
-            "remotepath",
-            "server",
-            "skip",
-            "number_of_unwatched_shows",
-            "is_movie",
-            "finished",
-            "short_name",
+            "path",
+            "tv",
+            "movie",
+            "media_files",
         )
 
-    pk = serializers.ReadOnlyField()
-    localpath = serializers.CharField(required=True, source="localpathstr")
-    remotepath = serializers.CharField(required=True, source="remotepathstr")
-    server = serializers.CharField(required=True)
-    skip = serializers.BooleanField(required=True)
+    path = serializers.SerializerMethodField("get_path")
+    media_files = serializers.SerializerMethodField("get_media_files")
+
+    def get_path(self, obj):
+        return str(obj.path)
+
+    def get_media_files(self, obj):
+        return obj.mediafile_set.values_list("filename", flat=True)
+
+
+class TVSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TV
+        fields = (
+            "pk",
+            "name",
+            "number_of_unwatched_shows",
+            "media_paths",
+            "finished",
+        )
+
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
-    is_movie = serializers.BooleanField(required=True)
-    finished = serializers.BooleanField(required=False)
-    short_name = serializers.ReadOnlyField(source="shortName")
+    media_paths = serializers.SerializerMethodField("get_media_paths")
 
     def unwatched_shows(self, obj):
         request = self.context.get("request")
@@ -137,75 +135,58 @@ class PathSerializer(serializers.ModelSerializer):
         else:
             return 0
 
-
-class MoviePathSerializer(PathSerializer):
-    is_movie = serializers.BooleanField(default=True)
-
-
-class TvPathSerializer(PathSerializer):
-    is_movie = serializers.BooleanField(default=False)
+    def get_media_paths(self, obj):
+        return [
+            dict(pk=mp["pk"], path=mp["_path"])
+            for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path")
+        ]
 
 
-class FileSerializer(serializers.ModelSerializer):
+class MovieSerializer(serializers.ModelSerializer):
     class Meta:
-        model = File
+        model = Movie
         fields = (
             "pk",
-            "path",
-            "localpath",
-            "filename",
-            "skip",
+            "name",
+            "media_path",
             "finished",
+        )
+
+    media_path = serializers.SerializerMethodField("get_media_path")
+
+    def get_media_path(self, obj):
+        mp = obj.media_path
+        return dict(pk=mp.pk, path=mp._path)
+
+
+class MediaFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaFile
+        fields = (
+            "pk",
+            "media_path",
+            "filename",
+            "display_name",
             "size",
-            "streamable",
             "ismovie",
-            "displayname",
             "watched",
         )
 
-    pk = serializers.ReadOnlyField()
-    localpath = serializers.CharField(required=False, source="path.localpathstr")
-    filename = serializers.CharField(required=False)
-    skip = serializers.BooleanField(required=False)
-    finished = serializers.BooleanField(required=False)
+    display_name = serializers.CharField(required=False)
     size = serializers.IntegerField(required=False)
-    streamable = serializers.BooleanField(required=False)
-    ismovie = serializers.ReadOnlyField(source="path.is_movie")
-    displayname = serializers.ReadOnlyField(source="displayName")
+    ismovie = serializers.SerializerMethodField("get_ismovie")
     watched = serializers.SerializerMethodField("get_watched")
+
+    def get_ismovie(self, obj):
+        return bool(obj.movie)
 
     def get_watched(self, obj):
         request = self.context.get("request")
         if request is not None:
-            uc = obj.usercomment(request.user)
+            uc = obj.comments.filter(user=request.user).first()
             if uc and uc.viewed:
                 return True
         return False
-
-
-class ErrorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Error
-        fields = (
-            "pk",
-            "date",
-            "error",
-            "ignore",
-            "file",
-            "path",
-            "datatransmission",
-        )
-
-    pk = serializers.ReadOnlyField()
-    downloaded = serializers.DecimalField(
-        max_digits=12, decimal_places=0, required=True
-    )
-    date = serializers.DateTimeField(required=True)
-    error = serializers.CharField(required=True, source="errorstr")
-    ignore = serializers.BooleanField(required=True)
-    file = serializers.CharField(required=True)
-    path = serializers.CharField(required=True)
-    datatransmission = serializers.IntegerField(required=True)
 
 
 class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
@@ -248,39 +229,14 @@ class MessageSerializer(serializers.ModelSerializer):
     datecreated = serializers.DateTimeField(required=True)
 
 
-class PosterFileSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PosterFile
+        model = Comment
         fields = (
             "pk",
-            "image",
-            "plot",
-            "extendedplot",
-            "genre",
-            "actors",
-            "writer",
-            "director",
-            "episodename",
-        )
-        pk = serializers.ReadOnlyField()
-        image = serializers.CharField()
-        plot = serializers.CharField()
-        extendedplot = serializers.CharField()
-        genre = serializers.CharField()
-        actors = serializers.CharField()
-        writer = serializers.CharField()
-        director = serializers.CharField()
-        episodename = serializers.CharField()
-
-
-class UserCommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserComment
-        fields = (
-            "pk",
-            "comment",
+            "media_file",
+            "movie",
             "viewed",
         )
         pk = serializers.ReadOnlyField()
-        comment = serializers.CharField()
         viewed = serializers.BooleanField(required=True)

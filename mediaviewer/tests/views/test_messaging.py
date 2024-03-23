@@ -1,15 +1,10 @@
 import mock
-
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.http import HttpRequest
+from django.test import TestCase
 
 from mediaviewer.models.message import Message
-
-from mediaviewer.views.messaging import (
-    submitsitewidemessage,
-    ajaxclosemessage,
-)
+from mediaviewer.views.messaging import ajaxclosemessage, submitsitewidemessage
 
 
 class TestSubmitSiteWideMessage(TestCase):

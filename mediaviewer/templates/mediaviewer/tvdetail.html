@@ -1,0 +1,30 @@
+{% extends "moviedetail.html" %}
+<!DOCTYPE html>
+{% load static %}
+{% block jumbotron %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ mf.tv.id }}/">{{ mf.tv.name }}</a></li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block open_button %}
+    {% if can_download and waiterstatus %}
+        <div class="d-grid gap-2 col-4 mx-auto">
+            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ mf.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{mf.id}}')">Open</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block checkbox %}
+    <input class="viewed-checkbox" id="toggle-viewed" name="{{ mf.id }}" type="checkbox"
+                                                                           {% if viewed %}
+                                                                               checked
+                                                                       {% endif %}
+                                                                           onclick="
+                                                                           ajaxMovieCheckBox(['{{mf.id}}'])
+                                                                           " />
+{% endblock %}

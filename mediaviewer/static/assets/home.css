@@ -33,29 +33,21 @@ body{
 }
 
 .tooltip-img {
-    height: auto;
     width: auto;
-    max-width: 250px;
-    max-height: 250px;
-    overflow: hidden;
+    max-height: 450px;
 }
 .tooltip {
     opacity: 1 !important;
+    min-height: 450px;
+}
+.preview-tooltip {
+    max-width: 100% !important;
+    overflow: hidden;
 }
 
 .addrequestbutton{
     margin-left: 10px;
     margin-bottom: 5px;
-}
-
-.vote-btn{
-    width: 60px;
-    height: 30px;
-}
-
-.done-btn{
-    width: 60px;
-    height: 30px;
 }
 
 .jumbotron{
@@ -81,8 +73,9 @@ body{
     margin: auto;
     margin-bottom: 8px;
 }
-#myTable_wrapper {
-    margin-bottom: 15px;
+
+div .dt-scroll-body{
+    border-bottom-style: none;
 }
 
 .large-img {
@@ -102,6 +95,11 @@ body{
 .table.table-plain > tfoot > tr > td{
     background-color: transparent;
 }
+
+tbody, td, tfoot, th, thead, tr {
+    border-style: hidden;
+}
+
 #file-displayName{
     text-align: center;
 }
@@ -163,4 +161,17 @@ tbody > tr > td > a:hover, nav > ol > li > a:hover {
     animation-name: slide-in;
     animation-duration: 0.4s;
     animation-fill-mode: both;
+}
+
+div.alert > a {
+    text-decoration: none;
+}
+
+div.alert > a:hover {
+    text-decoration: underline;
+}
+
+li.nav-item > a.btn-outline-primary:hover {
+    color: var(--bs-btn-hover-border-color);
+    background-color: transparent;
 }

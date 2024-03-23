@@ -1,65 +1,43 @@
+import pytest
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
-from mediaviewer.models.usersettings import UserSettings
+
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
-from datetime import datetime
-import pytz
 
 
-class DownloadTokenViewSetTests(APITestCase):
-    def setUp(self):
-        self.test_user = User.objects.create_superuser(
-            "test_user", "test@user.com", "password"
-        )
+@pytest.mark.django_db
+@pytest.mark.parametrize("use_movie", (True, False))
+@pytest.mark.parametrize("use_regular_user", (True, False))
+class TestDownloadToken:
+    @pytest.fixture(autouse=True)
+    def setUp(self, create_user):
+        self.user = create_user(is_staff=True)
+        self.regular_user = create_user()
 
-        self.user_settings = UserSettings()
-        self.user_settings.user = self.test_user
-        self.user_settings.ip_format = "bangup"
-        self.user_settings.can_download = True
-        self.user_settings.datecreated = datetime.now(pytz.timezone("US/Central"))
-        self.user_settings.dateedited = datetime.now(pytz.timezone("US/Central"))
-        self.user_settings.save()
+    def test_detail(
+        self, client, use_movie, use_regular_user, create_movie, create_tv_media_file
+    ):
+        if use_regular_user:
+            test_user = self.regular_user
+        else:
+            test_user = self.user
+        client.force_login(test_user)
 
-        self.tvPath = Path()
-        self.tvPath.localpathstr = "/some/local/path"
-        self.tvPath.remotepathstr = "/some/local/path"
-        self.tvPath.skip = False
-        self.tvPath.is_movie = False
-        self.tvPath.server = "a.server"
-        self.tvPath.save()
+        if use_movie:
+            movie = create_movie()
+            dt = DownloadToken.objects.from_movie(test_user, movie)
+        else:
+            mf = create_tv_media_file()
+            dt = DownloadToken.objects.from_media_file(test_user, mf)
 
-        self.tvFile = File()
-        self.tvFile.filename = "some.tv.show"
-        self.tvFile.skip = False
-        self.tvFile.finished = True
-        self.tvFile.size = 100
-        self.tvFile.streamable = True
-        self.tvFile.path = self.tvPath
-        self.tvFile.hide = False
-        self.tvFile.save()
+        url = reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        response = client.get(url)
+        if not use_regular_user:
+            assert response.status_code == 200
 
-        self.download_token = DownloadToken()
-        self.download_token.guid = "some unique id"
-        self.download_token.user = self.test_user
-        self.download_token.path = "/path/to/file"
-        self.download_token.file = self.tvFile
-        self.download_token.filename = "name.of.file"
-        self.download_token.ismovie = False
-        self.download_token.displayname = "Scraped Filename"
-        self.download_token.datecreated = datetime.now(pytz.timezone("US/Central"))
-        self.download_token.dateedited = datetime.now(pytz.timezone("US/Central"))
-        self.download_token.save()
+            json_data = response.json()
+            assert dt.guid == json_data["guid"]
+            assert dt.user.username == json_data["username"]
 
-        self.client.login(username="test_user", password="password")
-
-    def test_get_download_token(self):
-        response = self.client.get(
-            reverse(
-                "mediaviewer:api:downloadtoken-detail", args=[self.download_token.guid]
-            )
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+            assert dt.ref_obj.full_name == json_data["displayname"]
+        else:
+            assert response.status_code == 403

@@ -1,0 +1,55 @@
+{% extends "home.html" %}
+<!DOCTYPE html>
+{% load static %}
+
+{% block jumbotron %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+            <li class="breadcrumb-item active">Movies</li>
+        </ol>
+        <h1>{{ title }}</h1>
+        <h3>Select from the following movies:</h3>
+    </nav>
+{% endblock %}
+
+{% block main %}
+    <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center nosort">Viewed</th>
+                <th class="text-center">Name</th>
+                <th class="text-center nosort">Link</th>
+                <th class="text-center">Timestamp</th>
+                <th class="text-center nosort">Report Bad File</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            csrf_token = '{{ csrf_token }}';
+            preparePage($);
+            {% if view == 'movies' %}
+                var sortOrder = [[3,'desc']];
+            {% elif view == 'tvshows' %}
+                var sortOrder =  [[1,'desc']];
+            {% elif view == 'paths' %}
+                var sortOrder =  [[1,'asc']];
+            {% else %}
+                var sortOrder = [[0,'desc']];
+            {% endif %}
+            prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
+
+            prepareAjaxWaiterStatus($, '{{ is_staff }}');
+            scrollSetup();
+
+            $(".truncated-text").shorten({"showChars": 1000});
+        });
+
+    </script>
+{% endblock %}

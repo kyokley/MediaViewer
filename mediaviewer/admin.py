@@ -1,52 +1,10 @@
 from django.contrib import admin
-from mediaviewer.models.genre import Genre
-from mediaviewer.models.path import Path
-from mediaviewer.models.filenamescrapeformat import FilenameScrapeFormat
-from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.file import File
-from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.models.request import Request
-from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.donation_site import DonationSite
-from mediaviewer.models.videoprogress import VideoProgress
-from mediaviewer.models.sitegreeting import SiteGreeting
+from django.db import transaction
 
-
-@admin.register(Path)
-class PathAdmin(admin.ModelAdmin):
-    fields = (
-        "remotepathstr",
-        "localpathstr",
-        "finished",
-        "defaultsearchstr",
-        "override_display_name",
-        "imdb_id",
-    )
-    list_filter = ("finished",)
-    search_fields = (
-        "localpathstr",
-        "remotepathstr",
-        "override_display_name",
-    )
-    list_display = (
-        "id",
-        "remotepathstr",
-        "finished",
-    )
-
-
-@admin.register(File)
-class FileAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "filename",
-        "hide",
-        "datecreated",
-    )
-    search_fields = (
-        "id",
-        "filename",
-    )
+from mediaviewer.models import (TV, DonationSite, DownloadToken,
+                                FilenameScrapeFormat, Genre, MediaFile,
+                                MediaPath, Movie, Poster, Request,
+                                SiteGreeting, UserSettings, VideoProgress)
 
 
 @admin.register(DownloadToken)
@@ -56,7 +14,7 @@ class DownloadTokenAdmin(admin.ModelAdmin):
         "user",
         "displayname",
         "ismovie",
-        "datecreated",
+        "date_created",
     )
     search_fields = (
         "id",
@@ -93,20 +51,11 @@ class UserSettingsAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "username",
-        "last_watched",
+        "last_watched_tv",
+        "last_watched_movie",
     )
     search_fields = ("user__username",)
     ordering = ("user__username",)
-
-
-@admin.register(PosterFile)
-class PosterFileAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "filename",
-        "pathname",
-        "poster_url",
-    )
 
 
 @admin.register(DonationSite)
@@ -148,6 +97,109 @@ class GenreAdmin(admin.ModelAdmin):
 @admin.register(SiteGreeting)
 class SiteGreetingAdmin(admin.ModelAdmin):
     ordering = ("-id",)
+
+
+class MediaPathInline(admin.TabularInline):
+    model = MediaPath
+    readonly_fields = ["tv", "movie"]
+    show_change_link = True
+    extra = 0
+
+
+@admin.register(TV)
+class TVAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "finished",
+    )
+    search_fields = ("name",)
+    list_filter = ("finished",)
+    inlines = [MediaPathInline]
+
+
+@admin.register(Movie)
+class MovieAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "finished",
+    )
+    search_fields = ("name",)
+    list_filter = ("finished",)
+    inlines = [MediaPathInline]
+
+
+class MediaFileInline(admin.TabularInline):
+    model = MediaFile
+    show_change_link = True
+    ordering = ("season", "episode")
+    extra = 0
+
+
+@admin.register(MediaPath)
+class MediaPathAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "path",
+        "tv",
+        "movie",
+        "skip",
+    )
+    search_fields = ("_path",)
+    list_filter = ("skip",)
+    inlines = [MediaFileInline]
+
+
+@admin.register(MediaFile)
+class MediaFileAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "filename",
+        "display_name",
+        "media_path",
+        "hide",
+    )
+    search_fields = ("filename",)
+    list_filter = ("hide",)
+
+
+@admin.register(Poster)
+class PosterAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "season",
+        "episode",
+        "ref_obj",
+        "imdb",
+        "tmdb",
+        "has_image",
+    )
+    search_fields = (
+        "tv__name",
+        "movie__name",
+        "media_file__filename",
+    )
+    ordering = ("-id",)
+    actions = ("repopulate_data", "clear_and_populate")
+
+    def _populate(self, queryset):
+        for poster in queryset:
+            with transaction.atomic():
+                poster._populate_data()
+                poster.save()
+
+    def repopulate_data(self, request, queryset):
+        self._populate(queryset)
+
+    repopulate_data.description = "Re-populate Data"
+
+    def clear_and_populate(self, request, queryset):
+        queryset.update(imdb="", tmdb="")
+        self._populate(queryset)
+
+    clear_and_populate.description = "Clear and Populate"
 
 
 admin.site.site_url = "/mediaviewer"

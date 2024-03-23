@@ -1,6 +1,6 @@
-from mysite.settings import *
-
 import os
+
+from mysite.settings import *
 
 USE_SILK = DEBUG = True
 

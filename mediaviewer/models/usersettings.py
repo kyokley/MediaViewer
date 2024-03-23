@@ -1,16 +1,14 @@
-from django.db import models
-from django.contrib.auth.models import (
-    User,
-    Group,
-)
-from django.contrib.auth import authenticate
-from django.db import transaction
-from django.db.utils import IntegrityError
-from django.conf import settings
-from mediaviewer.forms import FormlessPasswordReset
-from datetime import datetime
-import pytz
 import re
+from datetime import datetime
+
+import pytz
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import Group, User
+from django.db import models, transaction
+from django.db.utils import IntegrityError
+
+from mediaviewer.forms import FormlessPasswordReset
 
 LOCAL_IP = "local_ip"
 BANGUP_IP = "bangup"
@@ -60,8 +58,11 @@ class UserSettings(models.Model):
         db_column="can_login", blank=False, null=False, default=True
     )
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
-    last_watched = models.ForeignKey(
-        "mediaviewer.Path", on_delete=models.SET_NULL, null=True, blank=True
+    last_watched_tv = models.ForeignKey(
+        "mediaviewer.TV", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    last_watched_movie = models.ForeignKey(
+        "mediaviewer.Movie", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
     allow_password_logins = models.BooleanField(blank=True, null=False, default=False)

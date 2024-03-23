@@ -20,6 +20,7 @@ django-extensions = "^3.1.5"
 secure = "^0.3.0"
 pymemcache = "^3.5.1"
 django-grappelli = "^3.0.3"
+pillow = "^10.0.0"
 
 [tool.poetry.group.dev.dependencies]
 blessings = "^1.7"
@@ -35,6 +36,8 @@ django-silk = "^4.0"
 pytest-mock = "^3.6.1"
 Faker = "^10.0.0"
 black = "^24.3.0"
+isort = "^5.12.0"
+pytest-socket = "^0.6.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
@@ -43,3 +46,9 @@ build-backend = "poetry.masonry.api"
 [tool.ruff]
 select = ["E", "F"]
 ignore = ["E501"]
+
+[tool.ruff.per-file-ignores]
+"mediaviewer/models/__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+addopts = "--disable-socket --disable-warnings"

@@ -1,128 +1,88 @@
+from datetime import timedelta
+
 import mock
 import pytest
+from django.http import HttpRequest
+from django.urls import resolve, reverse
 
-from django.http import HttpRequest, Http404
-
-from mediaviewer.views.detail import (
-    ajaxdownloadbutton,
-    ajaxsuperviewed,
-    ajaxviewed,
-    filesdetail,
-    downloadlink,
-    autoplaydownloadlink,
-)
-from django.contrib.auth.models import (
-    Group,
-    AnonymousUser,
-)
-from mediaviewer.models.usersettings import (
-    UserSettings,
-    LOCAL_IP,
-    BANGUP_IP,
-)
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
-from mediaviewer.models.usercomment import UserComment
+from mediaviewer.views.detail import ajaxsuperviewed
 
 
 @pytest.mark.django_db
 class TestAjaxSuperViewed:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_filter = mocker.patch(
-            "mediaviewer.views.detail.DownloadToken.objects.filter", autospec=True
-        )
+    def setUp(self, create_tv_media_file, create_movie, create_user, client):
+        self.user = create_user()
+        self.client = client
 
-        self.mock_HttpResponse = mocker.patch(
-            "mediaviewer.views.detail.HttpResponse", autospec=True
-        )
-
-        self.mock_dumps = mocker.patch("mediaviewer.views.detail.json.dumps")
-
-        self.token = mock.MagicMock(DownloadToken)
-        self.token.isvalid = True
-
-        self.mock_filter.return_value.first.return_value = self.token
+        self.tv_mf = create_tv_media_file()
+        self.movie = create_movie()
 
         self.request = mock.MagicMock()
-        self.request.POST = {"guid": "test_guid", "viewed": "True"}
+        self.payload = {"guid": "test_guid", "viewed": "True"}
+
+        self.url = reverse("mediaviewer:ajaxsuperviewed")
 
     def test_no_token(self):
-        self.mock_filter.return_value.first.return_value = None
+        self.client.force_login(self.user)
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxsuperviewed(self.request)
+        self.payload.pop("guid")
+        resp = self.client.post(self.url, data=self.payload)
+        json_data = resp.json()
 
-        assert expected == actual
+        assert resp.status_code == 400
 
-        self.mock_dumps.assert_called_once_with(
-            {"errmsg": "Token is invalid", "guid": "test_guid", "viewed": True}
-        )
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, status=400, content_type="application/json"
-        )
-        self.mock_filter.assert_called_once_with(guid="test_guid")
-        self.mock_filter.return_value.first.assert_called_once_with()
+        assert json_data == {"errmsg": "Token is invalid", "guid": "", "viewed": True}
 
-        assert not self.token.file.markFileViewed.called
+    @pytest.mark.parametrize("use_movie", (True, False))
+    def test_token_invalid(self, use_movie):
+        self.client.force_login(self.user)
 
-    def test_token_invalid(self):
-        self.token.isvalid = False
+        if use_movie:
+            dt = DownloadToken.objects.from_movie(self.user, self.movie)
+        else:
+            dt = DownloadToken.objects.from_media_file(self.user, self.tv_mf)
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxsuperviewed(self.request)
+        dt.date_created = dt.date_created - timedelta(days=1)
+        dt.save()
 
-        assert expected == actual
+        self.payload["guid"] = dt.guid
 
-        self.mock_dumps.assert_called_once_with(
-            {"errmsg": "Token is invalid", "guid": "test_guid", "viewed": True}
-        )
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, status=400, content_type="application/json"
-        )
-        self.mock_filter.assert_called_once_with(guid="test_guid")
-        self.mock_filter.return_value.first.assert_called_once_with()
+        resp = self.client.post(self.url, data=self.payload)
 
-        assert not self.token.file.markFileViewed.called
+        assert resp.status_code == 400
 
-    def test_not_viewed(self):
-        self.request.POST = {"guid": "test_guid", "viewed": "False"}
+        json_data = resp.json()
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxsuperviewed(self.request)
+        assert json_data == {
+            "errmsg": "Token is invalid",
+            "guid": dt.guid,
+            "viewed": True,
+        }
 
-        assert expected == actual
+    @pytest.mark.parametrize("use_movie", (True, False))
+    @pytest.mark.parametrize("viewed", (True, False))
+    def test_viewed(self, use_movie, viewed):
+        self.client.force_login(self.user)
 
-        self.mock_dumps.assert_called_once_with(
-            {"errmsg": "", "guid": "test_guid", "viewed": False}
-        )
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, status=200, content_type="application/json"
-        )
-        self.mock_filter.assert_called_once_with(guid="test_guid")
-        self.mock_filter.return_value.first.assert_called_once_with()
+        if use_movie:
+            obj = self.movie
+            dt = DownloadToken.objects.from_movie(self.user, self.movie)
+        else:
+            obj = self.tv_mf
+            dt = DownloadToken.objects.from_media_file(self.user, self.tv_mf)
+        self.payload["guid"] = dt.guid
+        self.payload["viewed"] = str(viewed)
 
-        self.token.file.markFileViewed.assert_called_once_with(self.token.user, False)
+        resp = self.client.post(self.url, data=self.payload)
 
-    def test_viewed(self):
-        self.request.POST = {"guid": "test_guid", "viewed": "True"}
+        assert resp.status_code == 200
+        json_data = resp.json()
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxsuperviewed(self.request)
+        assert json_data == {"errmsg": "", "guid": dt.guid, "viewed": viewed}
 
-        assert expected == actual
-
-        self.mock_dumps.assert_called_once_with(
-            {"errmsg": "", "guid": "test_guid", "viewed": True}
-        )
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, status=200, content_type="application/json"
-        )
-        self.mock_filter.assert_called_once_with(guid="test_guid")
-        self.mock_filter.return_value.first.assert_called_once_with()
-
-        self.token.file.markFileViewed.assert_called_once_with(self.token.user, True)
+        assert obj.comments.filter(user=self.user, viewed=True).exists() == viewed
 
 
 @pytest.mark.django_db
@@ -132,8 +92,6 @@ class TestAjaxSuperViewedResponseStatusCode:
         self.mock_filter = mocker.patch(
             "mediaviewer.views.detail.DownloadToken.objects.filter", autospec=True
         )
-
-        self.mock_dumps = mocker.patch("mediaviewer.views.detail.json.dumps")
 
         self.token = mock.MagicMock(DownloadToken)
         self.token.isvalid = True
@@ -158,325 +116,122 @@ class TestAjaxSuperViewedResponseStatusCode:
 
 
 @pytest.mark.django_db
-class TestFilesDetail:
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_setSiteWideContext = mocker.patch(
-            "mediaviewer.views.detail.setSiteWideContext"
-        )
-
-        self.mock_render = mocker.patch("mediaviewer.views.detail.render")
-
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_path.tvdb_id = None
-
-        self.tv_file = File.new("tv.file", self.tv_path)
-        self.tv_file.override_filename = "test str"
-        self.tv_file.override_season = "3"
-        self.tv_file.override_episode = "5"
-
-        mv_group = Group(name="MediaViewer")
-        mv_group.save()
-
-        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
-        settings = self.user.settings()
-        settings.force_password_change = False
-
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
-
-    def test_no_comment(self):
-        expected_context = {
-            "file": self.tv_file,
-            "posterfile": self.tv_file.posterfile,
-            "comment": "",
-            "skip": self.tv_file.skip,
-            "finished": self.tv_file.finished,
-            "LOCAL_IP": LOCAL_IP,
-            "BANGUP_IP": BANGUP_IP,
-            "viewed": False,
-            "can_download": True,
-            "file_size": None,
-            "active_page": "tvshows",
-            "title": "Tv Local Path",
-            "displayName": "tv.file",
-        }
-        expected = self.mock_render.return_value
-        actual = filesdetail(self.request, self.tv_file.id)
-
-        assert expected == actual
-        self.mock_setSiteWideContext.assert_called_once_with(
-            expected_context, self.request
-        )
-        self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/filesdetail.html", expected_context
-        )
-
-    def test_comment(self):
-        usercomment = UserComment()
-        usercomment.file = self.tv_file
-        usercomment.user = self.user
-        usercomment.viewed = True
-        usercomment.comment = "test_comment"
-        usercomment.save()
-
-        expected_context = {
-            "file": self.tv_file,
-            "posterfile": self.tv_file.posterfile,
-            "comment": "test_comment",
-            "skip": self.tv_file.skip,
-            "finished": self.tv_file.finished,
-            "LOCAL_IP": LOCAL_IP,
-            "BANGUP_IP": BANGUP_IP,
-            "viewed": True,
-            "can_download": True,
-            "file_size": None,
-            "active_page": "tvshows",
-            "title": "Tv Local Path",
-            "displayName": "tv.file",
-        }
-        expected = self.mock_render.return_value
-        actual = filesdetail(self.request, self.tv_file.id)
-
-        assert expected == actual
-        self.mock_setSiteWideContext.assert_called_once_with(
-            expected_context, self.request
-        )
-        self.mock_render.assert_called_once_with(
-            self.request, "mediaviewer/filesdetail.html", expected_context
-        )
-
-
-@pytest.mark.django_db
+@pytest.mark.parametrize("use_movie", (True, False))
+@pytest.mark.parametrize("viewed", (True, False))
 class TestAjaxViewed:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_HttpResponse = mocker.patch("mediaviewer.views.detail.HttpResponse")
+    def setUp(self, create_user, create_tv_media_file, create_movie, client):
+        self.user = create_user()
+        self.client = client
 
-        self.mock_dumps = mocker.patch("mediaviewer.views.detail.json.dumps")
+        self.tv_mf = create_tv_media_file()
+        self.movie = create_movie()
 
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_path.tvdb_id = None
+        self.url = reverse("mediaviewer:ajaxviewed")
 
-        self.tv_file = File.new("tv.file", self.tv_path)
-        self.tv_file.override_filename = "test str"
-        self.tv_file.override_season = "3"
-        self.tv_file.override_episode = "5"
+    def test_user_not_authenticated(self, use_movie, viewed):
+        if use_movie:
+            payload = {"movies": {self.movie.pk: viewed}}
+        else:
+            payload = {"media_files": {self.tv_mf.pk: viewed}}
+        resp = self.client.post(self.url, payload, content_type="application/json")
 
-        mv_group = Group(name="MediaViewer")
-        mv_group.save()
+        assert resp.status_code == 400
+        json_data = resp.json()
 
-        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
-        self.user.settings().force_password_change = False
+        assert json_data == {"errmsg": "User not authenticated. Refresh and try again."}
 
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
-        self.request.POST = {
-            str(self.tv_file.id): "true",
-        }
+    def test_viewed(self, use_movie, viewed):
+        if use_movie:
+            obj = self.movie
+            payload = {"movies": {self.movie.pk: viewed}}
+        else:
+            obj = self.tv_mf
+            payload = {"media_files": {self.tv_mf.pk: viewed}}
 
-    def test_user_not_authenticated(self):
-        self.request.user = AnonymousUser()
+        self.client.force_login(self.user)
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxviewed(self.request)
+        resp = self.client.post(self.url, payload, content_type="application/json")
 
-        assert expected == actual
-        self.mock_dumps.assert_called_once_with(
-            {"errmsg": "User not authenticated. Refresh and try again."}
-        )
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
-        )
+        assert resp.status_code == 200
 
-    def test_valid(self):
-        expected_response = {
-            "errmsg": "",
-            "data": {str(self.tv_file.id): "true"},
-        }
-
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxviewed(self.request)
-
-        assert expected == actual
-        self.mock_dumps.assert_called_once_with(expected_response)
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
-        )
+        assert obj.comments.filter(user=self.user, viewed=True).exists() == viewed
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("use_movie", (True, False))
 class TestAjaxDownloadButton:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_HttpResponse = mocker.patch("mediaviewer.views.detail.HttpResponse")
+    def setUp(self, create_user, create_tv_media_file, create_movie, client):
+        self.client = client
 
-        self.mock_dumps = mocker.patch("mediaviewer.views.detail.json.dumps")
+        self.tv_mf = create_tv_media_file()
+        self.movie = create_movie()
 
-        self.mock_downloadtoken_new = mocker.patch(
-            "mediaviewer.views.detail.DownloadToken.new"
-        )
-
-        self.mock_downloadLink = mocker.patch(
-            "mediaviewer.views.detail.File.downloadLink"
-        )
-
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_path.tvdb_id = None
-
-        self.tv_file = File.new("tv.file", self.tv_path)
-        self.tv_file.override_filename = "test str"
-        self.tv_file.override_season = "3"
-        self.tv_file.override_episode = "5"
-
-        mv_group = Group(name="MediaViewer")
-        mv_group.save()
-
-        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
-        self.user.settings().force_password_change = False
+        self.user = create_user()
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
-        self.request.POST = {"fileid": self.tv_file.id}
+        self.request.POST = {"fileid": self.tv_mf.id}
 
-    def test_user_not_authenticated(self):
-        self.request.user = AnonymousUser()
+        self.url = reverse("mediaviewer:ajaxdownloadbutton")
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxdownloadbutton(self.request)
+    def test_user_not_authenticated(self, use_movie):
+        if use_movie:
+            payload = {"movie_id": self.movie.pk}
+        else:
+            payload = {"mf_id": self.tv_mf.pk}
 
-        assert expected == actual
-        self.mock_dumps.assert_called_once_with(
-            {"errmsg": "User not authenticated. Refresh and try again."}
-        )
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
-        )
+        resp = self.client.post(self.url, payload)
 
-    def test_no_file(self):
-        self.request.POST.update({"fileid": 0})
-        with pytest.raises(Http404):
-            ajaxdownloadbutton(self.request)
+        assert resp.status_code == 400
+        json_data = resp.json()
 
-    def test_valid(self):
-        expected_response = {
-            "guid": self.mock_downloadtoken_new.return_value.guid,
-            "isMovie": self.mock_downloadtoken_new.return_value.ismovie,
-            "downloadLink": self.mock_downloadLink.return_value,
-            "errmsg": "",
-        }
+        assert json_data == {"errmsg": "User not authenticated. Refresh and try again."}
 
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxdownloadbutton(self.request)
+    def test_valid(self, use_movie):
+        if use_movie:
+            payload = {"movie_id": self.movie.pk}
+        else:
+            payload = {"mf_id": self.tv_mf.pk}
 
-        assert expected == actual
-        self.mock_dumps.assert_called_once_with(expected_response)
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
-        )
+        self.client.force_login(self.user)
+        resp = self.client.post(self.url, payload)
 
+        assert resp.status_code == 200
+        json_data = resp.json()
 
-@pytest.mark.django_db
-class TestDownloadlink:
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_downloadLink = mocker.patch(
-            "mediaviewer.views.detail.File.downloadLink"
-        )
+        dt_guid = json_data["guid"]
+        dt = DownloadToken.objects.get_by_guid(dt_guid)
 
-        self.mock_downloadtoken_new = mocker.patch(
-            "mediaviewer.views.detail.DownloadToken.new"
-        )
-
-        self.mock_redirect = mocker.patch("mediaviewer.views.detail.redirect")
-
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_path.tvdb_id = None
-
-        self.tv_file = File.new("tv.file", self.tv_path)
-        self.tv_file.override_filename = "test str"
-        self.tv_file.override_season = "3"
-        self.tv_file.override_episode = "5"
-
-        mv_group = Group(name="MediaViewer")
-        mv_group.save()
-
-        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
-        self.user.settings().force_password_change = False
-
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
-
-    def test_no_file(self):
-        with pytest.raises(Http404):
-            downloadlink(self.request, 0)
-
-    def test_valid(self):
-        expected = self.mock_redirect.return_value
-        actual = downloadlink(self.request, self.tv_file.id)
-
-        assert expected == actual
-        self.mock_downloadtoken_new.assert_called_once_with(self.user, self.tv_file)
-        self.mock_downloadLink.assert_called_once_with(
-            self.user, self.mock_downloadtoken_new.return_value.guid
-        )
-        self.mock_redirect.assert_called_once_with(self.mock_downloadLink.return_value)
+        assert dt.ismovie == use_movie
+        assert dt.user == self.user
+        assert dt.isvalid
 
 
 @pytest.mark.django_db
 class TestAutoPlayDownloadLink:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.mock_autoplayDownloadLink = mocker.patch(
-            "mediaviewer.views.detail.File.autoplayDownloadLink"
+    def setUp(self, create_user, create_tv_media_file, client):
+        self.client = client
+        self.tv_mf = create_tv_media_file()
+
+        self.user = create_user()
+        self.url = reverse(
+            "mediaviewer:autoplaydownloadlink", kwargs=dict(mf_id=self.tv_mf.pk)
         )
 
-        self.mock_downloadtoken_new = mocker.patch(
-            "mediaviewer.views.detail.DownloadToken.new"
-        )
+    def test_user_is_unauthenticated(self):
+        resp = self.client.post(self.url)
 
-        self.mock_redirect = mocker.patch("mediaviewer.views.detail.redirect")
+        assert resp.status_code == 302
 
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_path.tvdb_id = None
-
-        self.tv_file = File.new("tv.file", self.tv_path)
-        self.tv_file.override_filename = "test str"
-        self.tv_file.override_season = "3"
-        self.tv_file.override_episode = "5"
-
-        mv_group = Group(name="MediaViewer")
-        mv_group.save()
-
-        self.user = UserSettings.new("test_user", "a@b.com", send_email=False)
-        self.user.settings().force_password_change = False
-
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
-
-    def test_no_file(self):
-        with pytest.raises(Http404):
-            autoplaydownloadlink(self.request, 0)
+        resolve_match = resolve(resp.url)
+        assert resolve_match.url_name == "signin"
 
     def test_valid(self):
-        expected = self.mock_redirect.return_value
-        actual = autoplaydownloadlink(self.request, self.tv_file.id)
+        self.client.force_login(self.user)
+        resp = self.client.post(self.url)
 
-        assert expected == actual
-        self.mock_downloadtoken_new.assert_called_once_with(self.user, self.tv_file)
-        self.mock_autoplayDownloadLink.assert_called_once_with(
-            self.user, self.mock_downloadtoken_new.return_value.guid
-        )
-        self.mock_redirect.assert_called_once_with(
-            self.mock_autoplayDownloadLink.return_value
-        )
+        assert resp.status_code == 302
+        assert "waiter" in resp.url

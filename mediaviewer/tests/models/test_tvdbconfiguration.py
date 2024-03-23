@@ -1,9 +1,6 @@
 import pytest
 
-from mediaviewer.models.tvdbconfiguration import (
-    getJSONData,
-    TVDBConfiguration,
-)
+from mediaviewer.models.tvdbconfiguration import TVDBConfiguration, getJSONData
 
 
 class TestGetJSONData:

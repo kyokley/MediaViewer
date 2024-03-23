@@ -1,21 +1,20 @@
 # Based on an example from http://masnun.com/2010/01/01/sending-mail-via-postfix-a-perfect-python-example.html
-import smtplib
+import os
 import re
-from email.mime.multipart import MIMEMultipart
+import smtplib
+import telnetlib  # nosec
+from binascii import hexlify
+from datetime import datetime
+from email import encoders as Encoders
 from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
-from email import encoders as Encoders
-from datetime import datetime
-from binascii import hexlify
 from functools import wraps
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-
-import os
-import telnetlib  # nosec
 
 from mediaviewer.log import log
 

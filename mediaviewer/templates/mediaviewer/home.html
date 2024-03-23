@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html lang="en" class="{{ theme }}" data-bs-theme="{{ theme }}">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -17,25 +17,17 @@
         {% endblock %}
 
         {% block css %}
-
-            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
-
+            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
+            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
-            {% if theme == 'light' %}
-                <link href="{% static "bootswatch/bootstrap-light.min.css" %}" rel="stylesheet">
-            {% else %}
-                <link href="{% static "bootswatch/bootstrap-dark.min.css" %}" rel="stylesheet">
-                <link href="{% static "assets/dark.css" %}" rel="stylesheet">
-            {% endif %}
         {% endblock %}
     </head>
 
     <body>
-        <nav id="top-navbar" class="navbar navbar-expand-md fixed-top navbar-{{ theme }} bg-{{ theme }} bg-body-tertiary nav-show" role="navigation" data-bs-theme="{{ theme }}">
+        <nav id="top-navbar" class="navbar navbar-expand-md fixed-top bg-body-tertiary nav-show" role="navigation">
             <div class="container-fluid">
             {% block navbar%}
                 <a class="navbar-brand" href="/mediaviewer/">MediaViewer <i class="bi-film"></i></a>
@@ -48,7 +40,7 @@
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
                             {% if active_page == 'home' %}
-                                <a class="nav-link active" href="/mediaviewer/">Home</a>
+                                <a class="btn btn-outline-primary" href="/mediaviewer/">Home</a>
                             {% else %}
                                 <a class="nav-link" href="/mediaviewer/">Home</a>
                             {% endif %}
@@ -56,7 +48,7 @@
 
                             <li class="nav-item dropdown">
                                 {% if active_page == 'movies' %}
-                                    <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
+                                    <a class="btn btn-outline-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
                                 {% else %}
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Movies <span class="caret"></span></a>
                                 {% endif %}
@@ -75,7 +67,7 @@
 
                             <li class="nav-item dropdown">
                                 {% if active_page == 'tvshows' %}
-                                    <a class="nav-link active dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
+                                    <a class="btn btn-outline-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
                                 {% else %}
                                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TV Shows <span class="caret"></span></a>
                                 {% endif %}
@@ -94,15 +86,15 @@
 
                             <li class="nav-item">
                                 {% if active_page == 'requests' %}
-                                    <a class="nav-link active" href="/mediaviewer/requests/">Requests</a>
+                                    <a class="btn btn-outline-primary" href="/mediaviewer/requests/">Requests</a>
                                 {% else %}
                                     <a class="nav-link" href="/mediaviewer/requests/">Requests</a>
                                 {% endif %}
                             </li>
 
                             <li class="nav-item">
-                                {% if active_page == 'settings' %}
-                                    <a class="nav-link active" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
+                                {% if active_page == 'settings' or active_page == 'submitsettings' %}
+                                    <a class="btn btn-outline-primary" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                                 {% else %}
                                     <a class="nav-link" href="/mediaviewer/settings/"><i class="bi-gear"></i></a>
                                 {% endif %}
@@ -117,7 +109,7 @@
                             </li>
                         </ul>
                         {% if loggedin %}
-                            <span class="navbar-text navbar-right">Signed in as <a href="/mediaviewer/settings/">{{ user.username }}</a></span>
+                            <span class="navbar-text navbar-right">Signed in as <a class="link-primary" href="/mediaviewer/settings/">{{ user.username }}</a></span>
                         {% endif %}
                     {% else %}
                         <nav class="nav navbar-nav">
@@ -154,7 +146,7 @@
         <div class="container py-2">
         {% block main %}
             {% if loggedin %}
-                <table id="newFileTable" class="table table-{{ theme }} table-striped">
+                <table id="newFileTable" class="table table-striped">
                     <thead>
                         <tr>
                             <th>Latest Files</th>
@@ -163,34 +155,39 @@
                     <tbody>
                         {% for file in files %}
                             <tr>
-                                {% if file.isMovie %}
-                                    {% if loggedin %}
+                                {% if file.is_movie %}
                                         <td>
-                                            {% if file.posterfile %}
-                                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                            {% if file.poster.image %}
+                                                <a class="img-preview"
+                                                   href="{% url 'mediaviewer:moviedetail' file.pk %}"
+                                                   data-bs-toggle="popover"
+                                                   data-bs-trigger="hover focus"
+                                                   data-bs-placement="left"
+                                                   data-bs-custom-class="preview-tooltip"
+                                                   data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
                                             {% else %}
-                                                <a href="/mediaviewer/files/{{ file.id }}/">
+                                                <a href="{% url 'mediaviewer:moviedetail' file.pk %}">
                                             {% endif %}
-                                                    {{ file.name }}
+                                                    {{ file.full_name }}
                                                 </a>
                                         </td>
-                                    {% else %}
-                                        <td>{{ file.name }}</td>
-                                    {% endif %}
                                 {% else %}
-                                    {% if loggedin %}
                                         <td>
-                                            {% if file.posterfile %}
-                                                <a class="img-preview" href="/mediaviewer/files/{{ file.id }}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-content="<img class='tooltip-img' src='{{MEDIA_URL}}{{file.posterfile}}' />">
+                                            {% if file.poster.image %}
+                                                <a class="img-preview"
+                                                   href="{% url 'mediaviewer:tvdetail' file.pk %}"
+                                                   data-bs-toggle="popover"
+                                                   data-bs-trigger="hover focus"
+                                                   data-bs-container="body"
+                                                   data-bs-placement="top"
+                                                   data-bs-custom-class="preview-tooltip"
+                                                   data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
                                             {% else %}
-                                                <a href="/mediaviewer/files/{{ file.id }}/">
+                                                <a href="{% url 'mediaviewer:tvdetail' file.pk %}">
                                             {% endif %}
-                                                    {{ file.name }}
+                                                    {{ file.full_name }}
                                                 </a>
                                         </td>
-                                    {% else %}
-                                        <td>{{ file.name }}</td>
-                                    {% endif %}
                                 {% endif %}
                             </tr>
                         {% endfor %}
@@ -206,7 +203,7 @@
 
 <footer>
 {% block footer %}
-    <nav id="bottom-navbar" class="navbar navbar-expand-md fixed-bottom navbar-{{ theme }} bg-{{ theme }} bg-body-tertiary nav-show" data-bs-theme="{{ theme }}">
+    <nav id="bottom-navbar" class="navbar navbar-text navbar-expand-md fixed-bottom bg-body-tertiary nav-show">
         <div class="container-fluid text-center">
             <div class="row justify-content-between">
                 <div class="col-5">
@@ -218,7 +215,7 @@
                 </div>
                 <div class="col-7">
                     {% if donation_site_name and donation_site_url %}
-                        <span class="navbar-text">If you can, please consider donating to <a href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
+                        <span class="navbar-text">If you can, please consider donating to <a class="link-primary" href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
                     {% endif %}
                 </div>
             </div>
@@ -231,17 +228,15 @@
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
     <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
-    <script src="{% static "datatables.net/js/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
     <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
-    <script src="{% static "datatables.net-responsive/js/dataTables.responsive.min.js" %}"></script>
-    <script src="{% static "datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js" %}"></script>
     <script src="{% static "datatables.net-scroller/js/dataTables.scroller.min.js" %}"></script>
     <script src="{% static "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js" %}"></script>
     <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
     <script src="{% static "datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js" %}"></script>
-    <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
-    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
     <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
     <script src="{% static "passwordless/passwordless.v1.1.0.umd.min.js" %}"></script>
     <script src="{% static "assets/mediaviewer.js" %}"></script>

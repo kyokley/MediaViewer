@@ -1,4 +1,5 @@
 import pytest
+
 from mediaviewer.models.actor import Actor
 
 

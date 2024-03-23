@@ -1,6 +1,7 @@
 # Django settings for site project.
-import os
 import logging
+import os
+
 from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
@@ -159,18 +160,17 @@ INSTALLED_APPS = (
     "widget_tweaks",
     "rest_framework",
     "mediaviewer",
-    "mediaviewer.models",
-    "mediaviewer.views",
 )
 
 AUTHENTICATION_BACKENDS = [
-    "mediaviewer.authenticators.WaiterSettingsAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
+    "mediaviewer.authenticators.WaiterSettingsAuthBackend",
 ]
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAdminUser",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
@@ -256,8 +256,7 @@ os.environ["wsgi.url_scheme"] = "https"
 # Use django_referrer_policy middleware
 REFERRER_POLICY = "same-origin"
 
-API_KEY = "keykeykey"
-OMDBAPI_KEY = None
+API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 3
@@ -285,4 +284,7 @@ PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
 
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"
-WAITER_PASSWORD_HASH = os.environ.get("WAITER_PASSWORD_HASH")
+WAITER_PASSWORD_HASH = (
+    os.environ.get("WAITER_PASSWORD_HASH")
+    or "pbkdf2_sha256$260000$gTINkjUitLzAra3DGCJ4pK$/IzJql5fzVSV2XfINRkHpyBxIvNdjhxDyVqB3f5Lzmk="
+)

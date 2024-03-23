@@ -1,7 +1,8 @@
+import mock
 import pytest
 from django.contrib.auth.models import User
+
 from mediaviewer.forms import FormlessPasswordReset
-import mock
 
 
 @pytest.mark.django_db

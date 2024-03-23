@@ -1,16 +1,12 @@
 import mock
 import pytest
-
 from django.contrib.auth.models import User
-from django.http import HttpRequest
-from mediaviewer.views.settings import (
-    submitnewuser,
-    settings,
-    submitsettings,
-)
-from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.sitegreeting import SiteGreeting
 from django.core.exceptions import ValidationError
+from django.http import HttpRequest
+
+from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.models.usersettings import UserSettings
+from mediaviewer.views.settings import settings, submitnewuser, submitsettings
 
 
 # TODO: Drop mock patch decorators
