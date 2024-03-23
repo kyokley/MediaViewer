@@ -6,6 +6,8 @@ from pathlib import Path as Pathlib
 from django.db import migrations
 from django.utils import timezone
 
+LAST_WATCHED = "last_watched"
+
 yearRegex = re.compile(r"20\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
 formatRegex = re.compile(r"\b(xvid|avi|XVID|AVI)+\b")
@@ -107,6 +109,7 @@ def forward(apps, schema_editor):
     PosterFile = apps.get_model("mediaviewer", "PosterFile")
     Comment = apps.get_model("mediaviewer", "Comment")
     UserComment = apps.get_model("mediaviewer", "UserComment")
+    Message = apps.get_model("mediaviewer", "Message")
 
     tv_path_qs = Path.objects.filter(is_movie=False)
 
@@ -223,6 +226,8 @@ def forward(apps, schema_editor):
 
         for uc in UserComment.objects.filter(file=movie_file):
             Comment.objects.create(movie=movie, user=uc.user, viewed=uc.viewed)
+
+    Message.objects.filter(message_type=LAST_WATCHED).delete()
 
 
 def clean_up_old_objects(apps, schema_editor):
