@@ -165,6 +165,7 @@ class MediaFileAdmin(admin.ModelAdmin):
     )
     search_fields = ("filename",)
     list_filter = ("hide",)
+    raw_id_fields = ('_poster',)
 
 
 @admin.register(Poster)
