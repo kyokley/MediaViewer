@@ -97,6 +97,9 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             {
                 text: 'Clear All Viewed',
                 action: function (e, dt, node, config) {
+                    var update_payload = {
+                        "media_files": {}
+                    };
                     selected_rows = $(".viewed-checkbox:checked").get();
                     file_ids = [];
 
@@ -105,14 +108,18 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
                         file_ids.push(elem.name);
                         elem.removeAttribute('checked');
                         elem.checked = false;
+                        update_payload["media_files"][elem.name] = false;
                     }
 
-                    ajaxCheckBox(file_ids);
+                    _ajaxCheckBox(update_payload, 'media_file');
                 }
             },
             {
                 text: 'Mark All Viewed',
                 action: function (e, dt, node, config) {
+                    var update_payload = {
+                        "media_files": {}
+                    };
                     selected_rows = $(".viewed-checkbox:not(:checked)").get();
                     file_ids = [];
 
@@ -121,8 +128,9 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
                         file_ids.push(elem.name);
                         elem.setAttribute('checked', 'true');
                         elem.checked = true;
+                        update_payload["media_files"][elem.name] = true;
                     }
-                    ajaxCheckBox(file_ids);
+                    _ajaxCheckBox(update_payload, 'media_file');
                 }
             },
         ];
