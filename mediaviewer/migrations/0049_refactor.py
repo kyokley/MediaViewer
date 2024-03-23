@@ -4,6 +4,7 @@ import re
 from pathlib import Path as Pathlib
 
 from django.db import migrations
+from django.utils import timezone
 
 yearRegex = re.compile(r"20\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
@@ -116,11 +117,12 @@ def forward(apps, schema_editor):
             )
             if created:
                 date_created = (
-                    path.file_set.order_by("-datecreated")
+                    path.file_set.filter(datecreated__isnull=False)
+                    .order_by("-datecreated")
                     .values_list("datecreated", flat=True)
                     .first()
                 )
-                obj.date_created = date_created
+                obj.date_created = date_created or timezone.now()
                 obj.save()
 
                 poster_file = PosterFile.objects.get(path=path)
