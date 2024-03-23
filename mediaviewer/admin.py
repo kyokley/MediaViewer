@@ -104,6 +104,9 @@ class MediaPathInline(admin.TabularInline):
     readonly_fields = ["tv", "movie"]
     show_change_link = True
     extra = 0
+    raw_id_fields = ('tv',
+                     'movie',
+                     )
 
 
 @admin.register(TV)
