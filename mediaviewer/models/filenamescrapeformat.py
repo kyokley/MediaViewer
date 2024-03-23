@@ -65,8 +65,7 @@ class FilenameScrapeFormat(models.Model):
             max_word_score = 0
 
             for tv_obj in tv_objs:
-                word_score = self._tv_name_score_for_words(
-                    tv_obj, words)
+                word_score = self._tv_name_score_for_words(tv_obj, words)
                 if word_score > max_word_score:
                     tv = tv_obj
                     max_word_score = word_score
@@ -105,8 +104,7 @@ class FilenameScrapeFormat(models.Model):
             if word.lower() in tv.name.lower():
                 count += 1
 
-        if tv.name.lower() == ' '.join([x.lower()
-                                        for x in words]):
+        if tv.name.lower() == " ".join([x.lower() for x in words]):
             count += 5
         return count
 
@@ -120,4 +118,4 @@ class FilenameScrapeFormat(models.Model):
                 paths.append(path)
 
         paths.sort(key=lambda x: len(x[1]), reverse=True)
-        return paths[0][0] if paths else ''
+        return paths[0][0] if paths else ""

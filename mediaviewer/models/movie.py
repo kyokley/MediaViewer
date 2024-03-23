@@ -28,7 +28,7 @@ class MovieManager(MediaManager, ViewableManagerMixin):
         movie_id=None,
     ):
         if tv_id is not None:
-            raise ValueError('tv_id is not allowed for Movie objects')
+            raise ValueError("tv_id is not allowed for Movie objects")
 
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
@@ -101,7 +101,7 @@ class Movie(Media, ViewableObjectMixin):
             else:
                 link_html = "Alfred is down"
         else:
-            link_html = ''
+            link_html = ""
 
         cell = """<center>"""
         if self.comments.filter(user=user, viewed=True).exists():
@@ -111,10 +111,11 @@ class Movie(Media, ViewableObjectMixin):
         viewed_html = f'{cell}<span id="saved-{ self.id }"></span></center>'
         report_html = f"""<center><input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'movie')"/></center>"""
 
-        payload = [viewed_html,
-                   name_html,
-                   link_html,
-                   timestamp_html,
-                   report_html,
-                   ]
+        payload = [
+            viewed_html,
+            name_html,
+            link_html,
+            timestamp_html,
+            report_html,
+        ]
         return payload

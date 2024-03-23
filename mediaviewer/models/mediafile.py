@@ -246,10 +246,11 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         viewed_html = f'{cell}<span id="saved-{ self.id }"></span></center>'
         report_html = f"""<center><input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'mediafile')"/></center>"""
 
-        payload = [viewed_html,
-                   name_html,
-                   link_html,
-                   timestamp_html,
-                   report_html,
-                   ]
+        payload = [
+            viewed_html,
+            name_html,
+            link_html,
+            timestamp_html,
+            report_html,
+        ]
         return payload

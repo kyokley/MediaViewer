@@ -10,13 +10,9 @@ class TVQuerySet(MediaQuerySet):
 
 
 class TVManager(MediaManager):
-    def from_path(self,
-                  path,
-                  name=None,
-                  tv_id=None,
-                  movie_id=None):
+    def from_path(self, path, name=None, tv_id=None, movie_id=None):
         if movie_id is not None:
-            raise ValueError('movie_id is not allowed for TV objects')
+            raise ValueError("movie_id is not allowed for TV objects")
 
         mp = MediaPath.objects.filter(_path=path).first()
         if mp:
@@ -98,17 +94,18 @@ class TV(Media):
             else ""
         )
         name_html = (
-                f"""<a class="img-preview" href='/mediaviewer/tvshows/{ self.id }/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" data-bs-content="{tooltip_img}">"""
-                f"""{ self.name }</a>\n"""
-                f'<span id="unwatched-show-badge-{ self.id }" class="badge text-bg-primary">{unwatched_count or ""}</span>'
-            )
+            f"""<a class="img-preview" href='/mediaviewer/tvshows/{ self.id }/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" data-bs-content="{tooltip_img}">"""
+            f"""{ self.name }</a>\n"""
+            f'<span id="unwatched-show-badge-{ self.id }" class="badge text-bg-primary">{unwatched_count or ""}</span>'
+        )
         last_created_timestamp = self.last_created_episode_at()
         if last_created_timestamp:
             timestamp_html = f"""<center><span class="hidden_span">{last_created_timestamp.isoformat()}</span>{ last_created_timestamp.date().strftime('%b %d, %Y')}</center>"""
         else:
             timestamp_html = """<center><span class="hidden_span"></span></center>"""
 
-        payload = [name_html,
-                   timestamp_html,
-                   ]
+        payload = [
+            name_html,
+            timestamp_html,
+        ]
         return payload

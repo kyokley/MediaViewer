@@ -1,16 +1,8 @@
 from rest_framework import serializers
 
-from mediaviewer.models import (TV,
-                                Comment,
-                                DonationSite,
-                                DownloadToken,
-                                FilenameScrapeFormat,
-                                MediaFile,
-                                MediaPath,
-                                Message,
-                                Movie,
-                                UserSettings,
-                                VideoProgress)
+from mediaviewer.models import (TV, Comment, DonationSite, DownloadToken,
+                                FilenameScrapeFormat, MediaFile, MediaPath,
+                                Message, Movie, UserSettings, VideoProgress)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -130,11 +122,11 @@ class TVSerializer(serializers.ModelSerializer):
             "name",
             "number_of_unwatched_shows",
             "media_paths",
-            'finished',
+            "finished",
         )
 
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
-    media_paths = serializers.SerializerMethodField('get_media_paths')
+    media_paths = serializers.SerializerMethodField("get_media_paths")
 
     def unwatched_shows(self, obj):
         request = self.context.get("request")
@@ -145,10 +137,8 @@ class TVSerializer(serializers.ModelSerializer):
 
     def get_media_paths(self, obj):
         return [
-            dict(pk=mp['pk'],
-                 path=mp['_path'])
-            for mp in
-            obj.mediapath_set.order_by('-pk').values('pk', '_path')
+            dict(pk=mp["pk"], path=mp["_path"])
+            for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path")
         ]
 
 
@@ -159,15 +149,14 @@ class MovieSerializer(serializers.ModelSerializer):
             "pk",
             "name",
             "media_path",
-            'finished',
+            "finished",
         )
 
-    media_path = serializers.SerializerMethodField('get_media_path')
+    media_path = serializers.SerializerMethodField("get_media_path")
 
     def get_media_path(self, obj):
         mp = obj.media_path
-        return dict(pk=mp.pk,
-                    path=mp._path)
+        return dict(pk=mp.pk, path=mp._path)
 
 
 class MediaFileSerializer(serializers.ModelSerializer):

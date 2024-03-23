@@ -1,11 +1,11 @@
 import pytest
 from django.urls import reverse
+
 from mediaviewer.models.tv import TV
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize('is_staff',
-                         (True, False))
+@pytest.mark.parametrize("is_staff", (True, False))
 class TestTv:
     @pytest.fixture(autouse=True)
     def setUp(self, client, create_tv, create_user):
@@ -29,8 +29,8 @@ class TestTv:
             json_data = response.json()
             assert tv.name == json_data["name"]
             assert tv.pk == json_data["pk"]
-            assert str(tv.media_path.path) == json_data['media_paths'][0]['path']
-            assert tv.finished == json_data['finished']
+            assert str(tv.media_path.path) == json_data["media_paths"][0]["path"]
+            assert tv.finished == json_data["finished"]
 
     def test_list(self, is_staff):
         if not is_staff:
@@ -52,33 +52,43 @@ class TestTv:
                     "pk": self.tv_shows[0].pk,
                     "name": self.tv_shows[0].name,
                     "number_of_unwatched_shows": 0,
-                    'media_paths': [{'path': str(self.tv_shows[0].media_path.path),
-                                     'pk': self.tv_shows[0].media_path.pk}],
-                    'finished': self.tv_shows[0].finished,
+                    "media_paths": [
+                        {
+                            "path": str(self.tv_shows[0].media_path.path),
+                            "pk": self.tv_shows[0].media_path.pk,
+                        }
+                    ],
+                    "finished": self.tv_shows[0].finished,
                 },
                 {
                     "pk": self.tv_shows[1].pk,
                     "name": self.tv_shows[1].name,
                     "number_of_unwatched_shows": 0,
-                    'media_paths': [{'path': str(self.tv_shows[1].media_path.path),
-                                     'pk': self.tv_shows[1].media_path.pk}],
-                    'finished': self.tv_shows[1].finished,
+                    "media_paths": [
+                        {
+                            "path": str(self.tv_shows[1].media_path.path),
+                            "pk": self.tv_shows[1].media_path.pk,
+                        }
+                    ],
+                    "finished": self.tv_shows[1].finished,
                 },
                 {
                     "pk": self.tv_shows[2].pk,
                     "name": self.tv_shows[2].name,
                     "number_of_unwatched_shows": 0,
-                    'media_paths': [{'path': str(self.tv_shows[2].media_path.path),
-                                     'pk': self.tv_shows[2].media_path.pk}],
-                    'finished': self.tv_shows[2].finished,
+                    "media_paths": [
+                        {
+                            "path": str(self.tv_shows[2].media_path.path),
+                            "pk": self.tv_shows[2].media_path.pk,
+                        }
+                    ],
+                    "finished": self.tv_shows[2].finished,
                 },
             ],
         }
         assert expected == json_data
 
-    @pytest.mark.parametrize(
-        'include_name',
-        (True, False))
+    @pytest.mark.parametrize("include_name", (True, False))
     def test_create_new(self, is_staff, include_name):
         if not is_staff:
             self.client.force_login(self.non_staff_user)
@@ -87,10 +97,10 @@ class TestTv:
 
         url = reverse("mediaviewer:api:tv-list")
 
-        post_data = {'media_path': '/path/to/dir'}
+        post_data = {"media_path": "/path/to/dir"}
 
         if include_name:
-            post_data['name'] = 'test_name'
+            post_data["name"] = "test_name"
 
         response = self.client.post(url, data=post_data)
 
@@ -99,13 +109,13 @@ class TestTv:
 
             assert TV.objects.count() == 4
 
-            new_tv_obj = TV.objects.get(pk=json_data['pk'])
+            new_tv_obj = TV.objects.get(pk=json_data["pk"])
             if include_name:
-                assert new_tv_obj.name == 'test_name'
+                assert new_tv_obj.name == "test_name"
             else:
-                assert new_tv_obj.name == 'dir'
+                assert new_tv_obj.name == "dir"
 
-            assert str(new_tv_obj.media_path.path) == '/path/to/dir'
+            assert str(new_tv_obj.media_path.path) == "/path/to/dir"
             assert not new_tv_obj.finished
         else:
             assert response.status_code == 403
@@ -121,8 +131,7 @@ class TestTv:
 
         url = reverse("mediaviewer:api:tv-list")
 
-        post_data = {'name': new_tv.name,
-                     'media_path': str(new_tv.media_path.path)}
+        post_data = {"name": new_tv.name, "media_path": str(new_tv.media_path.path)}
 
         response = self.client.post(url, data=post_data)
 
@@ -130,9 +139,9 @@ class TestTv:
         if is_staff:
             json_data = response.json()
 
-            assert new_tv.pk == json_data['pk']
-            assert new_tv.name == json_data['name']
-            assert str(new_tv.media_path.path) == json_data['media_paths'][0]['path']
-            assert new_tv.finished == json_data['finished']
+            assert new_tv.pk == json_data["pk"]
+            assert new_tv.name == json_data["name"]
+            assert str(new_tv.media_path.path) == json_data["media_paths"][0]["path"]
+            assert new_tv.finished == json_data["finished"]
         else:
             assert response.status_code == 403
