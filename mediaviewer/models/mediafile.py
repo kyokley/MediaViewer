@@ -32,11 +32,14 @@ class MediaFileQuerySet(models.QuerySet):
             qs = qs.filter(filename_query)
         return qs
 
+    def infer_scrapers(self):
+        for mf in self:
+            mf.infer_scraper()
+
 
 class MediaFileManager(models.Manager, ViewableManagerMixin):
     def infer_all_scrapers(self):
-        for mf in self.all():
-            mf.infer_scraper()
+        self.all().infer_scrapers()
 
 
 class MediaFile(TimeStampModel, ViewableObjectMixin):
