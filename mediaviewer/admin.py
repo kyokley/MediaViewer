@@ -175,6 +175,19 @@ class MediaFileAdmin(admin.ModelAdmin):
     list_filter = ("hide",)
     raw_id_fields = ('media_path',
                      '_poster',)
+    actions = ("infer_scrapers",
+               "hide",
+               "unhide",
+               )
+
+    def infer_scrapers(self, request, queryset):
+        queryset.infer_scrapers()
+
+    def hide(self, request, queryset):
+        queryset.update(hide=True)
+
+    def unhide(self, request, queryset):
+        queryset.update(hide=False)
 
 
 @admin.register(Poster)
