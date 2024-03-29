@@ -102,6 +102,7 @@ class MediaPathSerializer(serializers.ModelSerializer):
             "tv",
             "movie",
             "media_files",
+            "skip",
         )
 
     path = serializers.SerializerMethodField("get_path")
@@ -137,8 +138,10 @@ class TVSerializer(serializers.ModelSerializer):
 
     def get_media_paths(self, obj):
         return [
-            dict(pk=mp["pk"], path=mp["_path"])
-            for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path")
+            dict(pk=mp["pk"],
+                 path=mp["_path"],
+                 skip=mp["skip"])
+            for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path", "skip")
         ]
 
 

@@ -56,6 +56,7 @@ class TestTv:
                         {
                             "path": str(self.tv_shows[0].media_path.path),
                             "pk": self.tv_shows[0].media_path.pk,
+                            "skip": False,
                         }
                     ],
                     "finished": self.tv_shows[0].finished,
@@ -68,6 +69,7 @@ class TestTv:
                         {
                             "path": str(self.tv_shows[1].media_path.path),
                             "pk": self.tv_shows[1].media_path.pk,
+                            "skip": False,
                         }
                     ],
                     "finished": self.tv_shows[1].finished,
@@ -80,6 +82,7 @@ class TestTv:
                         {
                             "path": str(self.tv_shows[2].media_path.path),
                             "pk": self.tv_shows[2].media_path.pk,
+                            "skip": False,
                         }
                     ],
                     "finished": self.tv_shows[2].finished,

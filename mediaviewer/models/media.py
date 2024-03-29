@@ -52,7 +52,9 @@ class MediaManager(models.Manager):
 
 
 class Media(TimeStampModel):
-    name = models.CharField(null=False, blank=False, max_length=256)
+    name = models.CharField(null=False,
+                            blank=True,
+                            max_length=256)
     finished = models.BooleanField(null=False, default=False)
     hide = models.BooleanField(null=False, default=False)
 
