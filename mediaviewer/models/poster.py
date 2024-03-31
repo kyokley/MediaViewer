@@ -126,10 +126,18 @@ class PosterManager(models.Manager):
 class Poster(TimeStampModel):
     plot = models.TextField(blank=True, null=False, default="")
     extendedplot = models.TextField(blank=True, null=False, default="")
-    genres = models.ManyToManyField("mediaviewer.Genre", blank=True)
-    actors = models.ManyToManyField("mediaviewer.Actor", blank=True)
-    writers = models.ManyToManyField("mediaviewer.Writer", blank=True)
-    directors = models.ManyToManyField("mediaviewer.Director", blank=True)
+    genres = models.ManyToManyField("mediaviewer.Genre",
+                                    blank=True,
+                                    editable=False)
+    actors = models.ManyToManyField("mediaviewer.Actor",
+                                    blank=True,
+                                    editable=False)
+    writers = models.ManyToManyField("mediaviewer.Writer",
+                                     blank=True,
+                                     editable=False)
+    directors = models.ManyToManyField("mediaviewer.Director",
+                                       blank=True,
+                                       editable=False)
     episodename = models.CharField(blank=True, null=False, default="", max_length=256)
     rated = models.CharField(blank=True, null=False, default="", max_length=256)
     rating = models.CharField(blank=True, null=False, default="", max_length=32)
