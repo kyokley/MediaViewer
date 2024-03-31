@@ -6,7 +6,11 @@ from .core import TimeStampModel
 
 
 class MediaPath(TimeStampModel):
-    _path = models.CharField(null=False, blank=True, max_length=256, unique=True)
+    _path = models.CharField(null=False,
+                             blank=True,
+                             max_length=256,
+                             unique=True,
+                             db_index=True)
     skip = models.BooleanField(null=False, blank=True, default=False)
     tv = models.ForeignKey(
         "mediaviewer.TV", null=True, on_delete=models.CASCADE, blank=True

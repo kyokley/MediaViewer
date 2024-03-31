@@ -41,6 +41,9 @@ class MediaFileManager(models.Manager, ViewableManagerMixin):
     def infer_all_scrapers(self):
         self.all().infer_scrapers()
 
+    def infer_missing_scrapers(self):
+        self.filter(scraper=None).infer_scrapers()
+
 
 class MediaFile(TimeStampModel, ViewableObjectMixin):
     media_path = models.ForeignKey(
