@@ -47,7 +47,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         "mediaviewer.MediaPath", null=False, on_delete=models.CASCADE
     )
     filename = models.CharField(null=False, max_length=256)
-    display_name = models.CharField(null=False, max_length=256)
+    display_name = models.CharField(null=False, max_length=256, blank=True)
     season = models.PositiveSmallIntegerField(null=True, blank=True)
     episode = models.PositiveSmallIntegerField(null=True, blank=True)
     scraper = models.ForeignKey(
@@ -138,6 +138,10 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
         if not scrapers:
             scrapers = FilenameScrapeFormat.objects.all()
+
+        if self._poster:
+            self._poster.delete()
+
         for scraper in scrapers:
             self.scraper = scraper
             name = self.media.name
@@ -152,13 +156,23 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
                 )
 
                 self.save()
-                self.poster.delete()
 
-                display_name = self.displayName()
-                log.debug(f"Display Name: {display_name}")
                 break
         else:
             self.scraper = None
+
+        if self.scraper:
+            self.season = season
+            self.episode = episode
+            self.save()
+
+            if self.tv:
+                episode_name = self.poster.episodename
+                self.display_name = f'S{self.season:02} E{self.episode:02}: {episode_name}'
+            else:
+                self.display_name = self.movie.name
+
+        self.save()
 
     def url(self):
         if self.is_tv():
@@ -213,12 +227,13 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             return None
 
         if episode_or_season == EPISODE:
-            regex = self.scraper.episodeRegex
+            regex_str = self.scraper.episodeRegex
         elif episode_or_season == SEASON:
-            regex = self.scraper.seasonRegex
+            regex_str = self.scraper.seasonRegex
         else:
             raise Exception(f"Invalid episode_or_season. Got {episode_or_season}")
 
+        regex = re.compile(regex_str)
         res = regex.findall(self.filename)
         val = res and res[0] or None
         return val and (val.isdigit() and val.zfill(2) or None) or None

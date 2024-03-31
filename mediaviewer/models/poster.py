@@ -169,6 +169,7 @@ class Poster(TimeStampModel):
         This object will be one of a MediaFile, TV, or Movie.
         """
         if not hasattr(self, "_ref_obj"):
+            # Find ref_obj through reverse relationships
             self._ref_obj = (
                 getattr(self, "media_file", None)
                 or getattr(self, "tv", None)
@@ -181,7 +182,7 @@ class Poster(TimeStampModel):
 
     @property
     def name(self):
-        return self.ref_obj.full_name
+        return self.ref_obj.full_name if self.ref_obj else ''
 
     @admin.display(boolean=True, description="Image")
     def has_image(self):
