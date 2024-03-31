@@ -42,7 +42,7 @@ class InferScrapersView(views.APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            MediaFile.objects.infer_all_scrapers()
+            MediaFile.objects.infer_missing_scrapers()
             return RESTResponse({"success": True})
         except Exception as e:
             return RESTResponse({"success": False, "error": str(e)})
