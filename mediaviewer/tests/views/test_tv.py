@@ -121,7 +121,7 @@ class TestTvShow404:
 class TestTvShows:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file):
-        mocker.patch("mediaviewer.models.poster.Poster._populate_data")
+        mocker.patch("mediaviewer.models.poster.Poster.populate_data")
 
         self.mock_get_object_or_404 = mocker.patch(
             "mediaviewer.views.tv.get_object_or_404"

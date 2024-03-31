@@ -110,7 +110,6 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     def poster(self):
         if self._poster is None:
             self._poster = Poster.objects.from_ref_obj(self)
-            self._poster._populate_data()
         return self._poster
 
     @property
@@ -118,18 +117,18 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         return self.display_name
 
     @property
-    def full_name(self):
+    def short_name(self):
         if self.is_tv():
-            return f"{self.media.name} {self.name}".strip()
+            return self.media.name
         else:
             return self.name
 
     @property
-    def short_name(self):
+    def full_name(self):
         if self.is_tv() and self.season is not None and self.episode is not None:
-            name = f"{self.media.short_name} S{self.season} E{self.episode}"
+            name = f"{self.media.name} S{self.season} E{self.episode}"
         else:
-            name = f"{self.media.short_name}"
+            name = f"{self.media.name}"
         return name
 
     def infer_scraper(self, scrapers=None):
@@ -141,6 +140,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
         if self._poster:
             self._poster.delete()
+            self._poster = None
 
         for scraper in scrapers:
             self.scraper = scraper
@@ -155,22 +155,22 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
                     f"Name: {name} Season: {season} Episode: {episode} Fullname: {self.full_name} FSid: {scraper.id}"
                 )
 
-                self.save()
-
                 break
         else:
             self.scraper = None
 
-        if self.scraper:
+        if self.scraper and self.tv:
+
             self.season = season
             self.episode = episode
             self.save()
 
-            if self.tv:
-                episode_name = self.poster.episodename
-                self.display_name = f'S{self.season:02} E{self.episode:02}: {episode_name}'
-            else:
-                self.display_name = self.movie.name
+            self.poster.populate_data()
+
+            episode_name = self.poster.episodename
+            self.display_name = f'S{self.season:02} E{self.episode:02}: {episode_name}'
+        else:
+            self.display_name = self.media.name
 
         self.save()
 
