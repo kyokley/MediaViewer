@@ -122,6 +122,23 @@ class TVAdmin(admin.ModelAdmin):
     inlines = [MediaPathInline]
     raw_id_fields = ('_poster',
                      )
+    actions = ('hide',
+               'unhide',
+               'finished',
+               'unfinished',
+               )
+
+    def hide(self, request, queryset):
+        queryset.update(hide=True)
+
+    def unhide(self, request, queryset):
+        queryset.update(hide=False)
+
+    def finished(self, request, queryset):
+        queryset.update(finished=True)
+
+    def unfinished(self, request, queryset):
+        queryset.update(finished=False)
 
 
 @admin.register(Movie)
@@ -136,6 +153,15 @@ class MovieAdmin(admin.ModelAdmin):
     inlines = [MediaPathInline]
     raw_id_fields = ('_poster',
                      )
+    actions = ('hide',
+               'unhide',
+               )
+
+    def hide(self, request, queryset):
+        queryset.update(hide=True)
+
+    def unhide(self, request, queryset):
+        queryset.update(hide=False)
 
 
 class MediaFileInline(admin.TabularInline):
