@@ -236,6 +236,14 @@ class PosterAdmin(admin.ModelAdmin):
     ordering = ("-id",)
     actions = ("repopulate_data", "clear_and_populate")
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.select_related('tv',
+                               'movie',
+                               'media_file__media_path__tv',
+                               )
+        return qs
+
     def _populate(self, queryset):
         for poster in queryset:
             with transaction.atomic():
