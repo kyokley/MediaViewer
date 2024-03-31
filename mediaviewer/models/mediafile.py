@@ -172,7 +172,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             else:
                 self.display_name = self.movie.name
 
-            self.save()
+        self.save()
 
     def url(self):
         if self.is_tv():
