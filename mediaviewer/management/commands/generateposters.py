@@ -54,7 +54,7 @@ class Command(BaseCommand):
                 poster.tmdb = ""
 
             try:
-                poster._populate_data()
+                poster.populate_data()
                 poster.save()
             except Exception as e:
                 logger.warning(f'Got error processing {poster}')

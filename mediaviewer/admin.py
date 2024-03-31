@@ -239,7 +239,7 @@ class PosterAdmin(admin.ModelAdmin):
     def _populate(self, queryset):
         for poster in queryset:
             with transaction.atomic():
-                poster._populate_data()
+                poster.populate_data()
                 poster.save()
 
     def repopulate_data(self, request, queryset):

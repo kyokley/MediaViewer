@@ -65,7 +65,7 @@ class Media(TimeStampModel):
     def poster(self):
         if self._poster is None:
             self._poster = Poster.objects.from_ref_obj(self)
-            self._poster._populate_data()
+            self._poster.populate_data()
         return self._poster
 
     @property

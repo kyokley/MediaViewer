@@ -214,9 +214,9 @@ class Poster(TimeStampModel):
                 url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
             else:
                 if self.ref_obj.is_movie():
-                    url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.name}&api_key={settings.API_KEY}"
+                    url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.short_name}&api_key={settings.API_KEY}"
                 else:
-                    url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.name}&api_key={settings.API_KEY}"
+                    url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.short_name}&api_key={settings.API_KEY}"
             resp = getJSONData(url)
             if resp.get("results"):
                 self.tmdb = resp["results"][0]["id"]
@@ -244,7 +244,7 @@ class Poster(TimeStampModel):
                 resp["url"] = url
                 return resp
 
-    def _populate_data(self):
+    def populate_data(self):
         log.debug("Attempt to get data from IMDB")
 
         data = self._get_data_from_imdb()
