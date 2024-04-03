@@ -43,19 +43,19 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-function prepareDataTable($, sortOrder, table_data_page, filter_id) {
+function prepareDataTable($, sortOrder, table_data_page, filter_id, last_index) {
     if(filter_id){
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/' + String(filter_id) + '/';
     }else{
         var ajax_path = '/mediaviewer/ajax/' + table_data_page + '/';
     }
 
-    dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path);
+    dt_config = dataTableConfig($, sortOrder, table_data_page, ajax_path, last_index);
 
-    new DataTable('#myTable', dt_config);
+    return new DataTable('#myTable', dt_config);
 }
 
-function dataTableConfig($, sortOrder, table_data_page, ajax_path){
+function dataTableConfig($, sortOrder, table_data_page, ajax_path, last_index){
     dt_config = {
         order: sortOrder,
         autoWidth: true,
@@ -68,7 +68,10 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             configureTooltips($);
             });
         },
-        stateSave: true
+        stateSave: true,
+        initComplete: function (settings, json) {
+            data_table.scroller.toPosition(last_index);
+        }
     };
 
     dt_config.scroller = {

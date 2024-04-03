@@ -52,6 +52,7 @@ def tvshows(request, tv_id):
     context["active_page"] = "tvshows"
     context["title"] = tv.name
     context["long_plot"] = len(tv.poster.plot) > 300 if tv.poster.plot else ""
+    context["last_index"] = tv.last_watched_index(user)
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvshows.html", context)
 

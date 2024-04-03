@@ -29,10 +29,11 @@
 
 {% block javascript %}
     <script type="text/javascript">
+        var data_table;
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            prepareDataTable($, [[1,'desc']], '{{ table_data_page }}', '{{ table_data_filter_id }}');
+            data_table = prepareDataTable($, [[1,'desc']], '{{ table_data_page }}', '{{ table_data_filter_id }}', 0);
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
         });

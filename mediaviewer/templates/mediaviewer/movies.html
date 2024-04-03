@@ -31,6 +31,7 @@
 
 {% block javascript %}
     <script type="text/javascript">
+        var data_table;
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
@@ -43,7 +44,7 @@
             {% else %}
                 var sortOrder = [[0,'desc']];
             {% endif %}
-            prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
+            data_table = prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}', {{ last_index }});
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();

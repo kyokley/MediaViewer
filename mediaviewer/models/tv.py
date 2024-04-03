@@ -86,6 +86,33 @@ class TV(Media):
         ).count()
         return episodes_count - viewed_count
 
+    def last_watched_index(self, user):
+        episodes = (
+            MediaFile.objects
+            .filter(media_path__tv=self)
+            .filter(hide=False)
+            .order_by('display_name')
+        )
+        episode_count = episodes.count()
+
+        if not user:
+            return episode_count
+
+
+        last_viewed = Comment.objects.filter(
+            media_file__in=episodes,
+            user=user,
+            viewed=True
+        ).order_by('-media_file__display_name').first()
+
+        if not last_viewed:
+            return episode_count
+
+        last_index = episodes.filter(
+            display_name__lt=last_viewed.media_file.display_name
+        ).count()
+        return episode_count - last_index
+
     def ajax_row_payload(self, user):
         unwatched_count = self.number_of_unwatched_shows(user)
         poster = self.poster
