@@ -129,7 +129,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     @property
     def full_name(self):
         if self.is_tv() and self.season is not None and self.episode is not None:
-            name = f"{self.media.name} S{self.season} E{self.episode}"
+            name = f"{self.media.name} S{self.season:02} E{self.episode:02}"
             if self.poster and self.poster.episodename:
                 name = f'{name}: {self.poster.episodename}'
         else:
