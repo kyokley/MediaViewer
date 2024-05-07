@@ -256,7 +256,13 @@ class PosterAdmin(admin.ModelAdmin):
     repopulate_data.description = "Re-populate Data"
 
     def clear_and_populate(self, request, queryset):
-        queryset.update(imdb="", tmdb="")
+        queryset.update(imdb="",
+                        tmdb="",
+                        plot="",
+                        extendedplot="",
+                        episodename="",
+                        tagline="",
+                        )
         self._populate(queryset)
 
     clear_and_populate.description = "Clear and Populate"

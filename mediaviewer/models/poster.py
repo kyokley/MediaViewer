@@ -228,6 +228,7 @@ class Poster(TimeStampModel):
             resp = getJSONData(url)
             if resp.get("results"):
                 self.tmdb = resp["results"][0]["id"]
+                resp = resp['results'][0]
 
         if self.tmdb and not self.ref_obj.is_movie():
             log.debug(f"Getting data from TVDB using {self.tmdb}")
@@ -242,9 +243,9 @@ class Poster(TimeStampModel):
                 url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
                 resp = getJSONData(url)
 
-            if resp:
-                resp["url"] = url
-                return resp
+        if resp:
+            resp["url"] = url
+            return resp
 
     def populate_data(self):
         log.debug("Attempt to get data from IMDB")
@@ -254,14 +255,17 @@ class Poster(TimeStampModel):
         if not data:
             return None
 
-        self.tmdb = data["id"]
+        if not self.tmdb:
+            self.tmdb = data["id"]
 
         self._cast_and_crew()
         self._store_extended_info()
         self._store_plot(data)
         self._store_genres(data)
         self._store_rated(data)
-        self._tmdb_episode_info()
+
+        if not self.ref_obj.is_movie():
+            self._tmdb_episode_info()
 
         poster_url = (
             getattr(self, "poster_url", None)
@@ -292,6 +296,8 @@ class Poster(TimeStampModel):
 
                 image = ImageFile(io, name=poster_name)
                 self.image = image
+        else:
+            self.image.delete()
 
         self.save()
 
