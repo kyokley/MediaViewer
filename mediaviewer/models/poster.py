@@ -229,23 +229,17 @@ class Poster(TimeStampModel):
             if resp.get("results"):
                 self.tmdb = resp["results"][0]["id"]
 
-        if self.tmdb:
+        if self.tmdb and not self.ref_obj.is_movie():
             log.debug(f"Getting data from TVDB using {self.tmdb}")
 
-            if self.ref_obj.is_movie():
-                url = f"https://api.themoviedb.org/3/movie/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
-            else:
-                url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+            url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
 
             try:
                 resp = getJSONData(url)
             except Exception:
                 log.debug(f"Got bad tmdb_id={self.tmdb}. Revert to parent tmdb")
                 self.tmdb = self.ref_obj.media.poster.tmdb
-                if self.ref_obj.is_movie():
-                    url = f"https://api.themoviedb.org/3/movie/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
-                else:
-                    url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
                 resp = getJSONData(url)
 
             if resp:
