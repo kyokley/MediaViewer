@@ -1,4 +1,5 @@
 from .actor import Actor
+from .collection import Collection
 from .comment import Comment
 from .director import Director
 from .donation_site import DonationSite

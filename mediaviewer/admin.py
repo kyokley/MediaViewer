@@ -4,7 +4,8 @@ from django.db import transaction
 from mediaviewer.models import (TV, DonationSite, DownloadToken,
                                 FilenameScrapeFormat, Genre, MediaFile,
                                 MediaPath, Movie, Poster, Request,
-                                SiteGreeting, UserSettings, VideoProgress)
+                                SiteGreeting, UserSettings, VideoProgress,
+                                Collection, Media)
 
 
 @admin.register(DownloadToken)
@@ -266,6 +267,17 @@ class PosterAdmin(admin.ModelAdmin):
         self._populate(queryset)
 
     clear_and_populate.description = "Clear and Populate"
+
+
+@admin.register(Collection)
+class CollectionAdmin(admin.ModelAdmin):
+    list_display = (
+            "id",
+            "name",
+            )
+    search_fields = (
+            "name",
+            )
 
 
 admin.site.site_url = "/mediaviewer"
