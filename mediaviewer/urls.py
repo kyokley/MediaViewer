@@ -7,7 +7,7 @@ from rest_framework import routers
 
 from mediaviewer.forms import PasswordResetFormWithBCC
 from mediaviewer.views import (ajax, detail, home, messaging, movie, requests,
-                               settings, signin, signout, tv, waiterstatus)
+                               settings, signin, signout, tv, waiterstatus, collection)
 
 router = routers.DefaultRouter()
 
@@ -29,6 +29,7 @@ urlpatterns = [
         name="movies_by_genre",
     ),
     re_path(r"^moviedetail/(?P<movie_id>\d+)/$", movie.moviedetail, name="moviedetail"),
+    re_path(r"^collection/(?P<pk>\d+)/$", collection.collection, name="collection"),
     re_path(
         r"^autoplaydownloadlink/(?P<mf_id>\d+)/$",
         detail.autoplaydownloadlink,
