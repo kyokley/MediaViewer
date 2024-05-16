@@ -18,9 +18,9 @@ def collection(request, pk):
     collection = get_object_or_404(Collection, pk=pk)
     movies = Movie.objects.filter(collections=pk)
     tv_shows = TV.objects.filter(collections=pk)
-    media = [x for x in itertools.chain(movies, tv_shows)]
-    media = sorted(media, key=lambda x: x.name)
-    context["media"] = media
+    medias = [x for x in itertools.chain(movies, tv_shows)]
+    medias = sorted(medias, key=lambda x: x.name)
+    context["medias"] = medias
     context["title"] = f"Collections: {collection.name}"
     setSiteWideContext(context, request, includeMessages=True)
 

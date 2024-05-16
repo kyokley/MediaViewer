@@ -9,7 +9,7 @@
             <li class="breadcrumb-item active">Movies</li>
         </ol>
         <h1>{{ title }}</h1>
-        <h3>Select from the following movies:</h3>
+        <h3>Select from the following:</h3>
     </nav>
 {% endblock %}
 
@@ -17,38 +17,46 @@
     <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
         <thead>
             <tr>
-                <th class="text-center nosort">Viewed</th>
                 <th class="text-center">Name</th>
-                <th class="text-center nosort">Link</th>
-                <th class="text-center">Timestamp</th>
-                <th class="text-center nosort">Report Bad File</th>
             </tr>
         </thead>
         <tbody>
+            {% for media in medias %}
+            <tr>
+                <td>
+                    {% if media.poster.image %}
+                    <a class="img-preview"
+                        {% if not media.is_tv %}
+                                                                           href="{% url 'mediaviewer:moviedetail' media.pk %}"
+                                                                           {% else %}
+                                                                           href="{% url 'mediaviewer:tvdetail' media.pk %}"
+                                                                           {% endif %}
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover focus"
+                        data-bs-placement="left"
+                        data-bs-custom-class="preview-tooltip"
+                        data-bs-content="<img class='tooltip-img' src='{{ media.poster.image.url }}' />">
+                    {% else %}
+                    <a href="{{ media.url }}">
+                    {% endif %}
+                        {{ media.name }}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
-{% endblock %}
+    {% endblock %}
 
 {% block javascript %}
     <script type="text/javascript">
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
-            {% if view == 'movies' %}
-                var sortOrder = [[3,'desc']];
-            {% elif view == 'tvshows' %}
-                var sortOrder =  [[1,'desc']];
-            {% elif view == 'paths' %}
-                var sortOrder =  [[1,'asc']];
-            {% else %}
-                var sortOrder = [[0,'desc']];
-            {% endif %}
-            prepareDataTable($, sortOrder, '{{ table_data_page }}', '{{ table_data_filter_id }}');
 
             prepareAjaxWaiterStatus($, '{{ is_staff }}');
             scrollSetup();
-
-            $(".truncated-text").shorten({"showChars": 1000});
+            configureTooltips($);
         });
 
     </script>
