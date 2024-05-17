@@ -5,7 +5,7 @@ import pytest
 from django.contrib.auth.models import Group
 from faker import Faker
 
-from mediaviewer.models import TV, MediaFile, MediaPath, Movie
+from mediaviewer.models import TV, MediaFile, MediaPath, Movie, Collection
 from mediaviewer.models.usersettings import UserSettings
 
 DEFAULT_USERNAME = "test_user"
@@ -169,3 +169,14 @@ def create_user():
         return user
 
     return _create_user
+
+
+@pytest.fixture
+def create_collection():
+    def _create_collection(
+            name=None,
+            ):
+        if name is None:
+            name = f'Collection {next(_count)}'
+        return Collection.objects.create(name=name)
+    return _create_collection
