@@ -99,7 +99,7 @@ class TestSetSiteWideContext:
             "default_sort": FILENAME_SORT,
             "movie_genres": self.mock_get_movie_genres.return_value,
             "tv_genres": self.mock_get_tv_genres.return_value,
-            "collections": Collection.objects.order_by('name'),
+            "collections": list(Collection.objects.order_by('name')),
             "is_staff": "true",
             "donation_site_name": "",
             "donation_site_url": "",
@@ -126,6 +126,7 @@ class TestSetSiteWideContext:
             "movie_genres": self.mock_get_movie_genres.return_value,
             "tv_genres": self.mock_get_tv_genres.return_value,
             "theme": "dark",
+            "collections": list(Collection.objects.order_by('name')),
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         self.mock_add_message.assert_has_calls(

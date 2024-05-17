@@ -36,7 +36,7 @@ def setSiteWideContext(context, request, includeMessages=False):
         context["tv_genres"] = Genre.objects.get_tv_genres()
 
         context["theme"] = settings.theme if settings else UserSettings.DARK
-        context["collections"] = Collection.objects.all()
+        context["collections"] = list(Collection.objects.order_by('name'))
     else:
         context["loggedin"] = False
 
