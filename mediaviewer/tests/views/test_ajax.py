@@ -5,7 +5,6 @@ import pytest
 import pytz
 from django.contrib import messages
 from django.http import Http404, HttpRequest
-from django.test import TestCase
 from django.urls import reverse
 
 from mediaviewer.models.downloadtoken import DownloadToken
@@ -373,3 +372,34 @@ class TestAjaxReport:
             f"{obj.name} has been reported by {self.user.username}",
             level=messages.WARNING,
         )
+
+
+@pytest.mark.django_db
+class TestAjaxCollections:
+    @pytest.fixture(autouse=True)
+    def setUp(self,
+              client,
+              create_collection,
+              create_user,
+              create_download_token,
+              ):
+        self.client = client
+        self.user = create_user()
+        self.collection = create_collection()
+
+        self.dt = create_download_token(user=self.user)
+        self.url = reverse("mediaviewer:ajaxcollections",
+                           kwargs=dict(guid=self.dt.guid))
+
+    def test_ajax_collections(self):
+        expected = [
+                [self.collection.id, self.collection.name]
+                ]
+
+        self.client.force_login(self.user)
+
+        resp = self.client.get(self.url)
+
+        json_data = resp.json()
+
+        assert expected == json_data['collections']
