@@ -230,7 +230,10 @@ def _getDataFromIMDBByID(imdb_id, isMovie=True):
                 tmdb_id=tmdb_id, api_key=settings.API_KEY
             )
 
-        data = getJSONData(url)
+        if tmdb_id:
+            data = getJSONData(url)
+        else:
+            data = None
 
         if data:
             data["url"] = url
@@ -261,7 +264,11 @@ def _getDataFromIMDBBySearchString(searchString, isMovie=True):
 
 
 def getCastData(tmdb_id, season=None, episode=None, isMovie=True):
-    log.debug("Getting data from TVDb using %s" % (tmdb_id,))
+    log.info("Getting data from TVDb using %s" % (tmdb_id,))
+
+    if not tmdb_id:
+        log.warn("Skipping getting data: tmdb_id is null")
+        return {}
 
     if not isMovie:
         if episode and season:

@@ -55,7 +55,10 @@ def _search_TVDB_by_name(name):
 
 
 def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
-    log.debug("Getting data from TVDb using %s" % (tmdb_id,))
+    log.info("Getting data from TVDb using %s" % (tmdb_id,))
+    if not tmdb_id:
+        log.warn("Skipping getting data: tmdb_id is null.")
+        return {}
 
     urls = []
 
@@ -93,6 +96,10 @@ def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
 
 def _get_extended_info(tmdb_id, is_movie=True):
     log.debug("Getting IMDB rating for tmdb_id = %s" % tmdb_id)
+
+    if not tmdb_id:
+        log.warn("Skipping getting data: tmdb_id is null.")
+        return {}
 
     if not is_movie:
         url = "https://api.themoviedb.org/3/tv/{tmdb_id}/external_ids?api_key={api_key}".format(  # noqa
@@ -154,6 +161,20 @@ class Poster(TimeStampModel):
         else:
             return f"<Poster n:{self.short_name} s:{self.season} e:{self.episode} i:{bool(self.image)}>"
 
+    def clear(self):
+        self.imdb = ""
+        self.tmdb = ""
+        self.plot = ""
+        self.extendedplot = ""
+        self.genres.clear()
+        self.actors.clear()
+        self.writers.clear()
+        self.directors.clear()
+        self.episodename = ""
+        self.rated = ""
+        self.rating = ""
+        self.image.delete()
+
     @property
     def short_name(self):
         return self.ref_obj.short_name if self.ref_obj else ""
@@ -209,12 +230,14 @@ class Poster(TimeStampModel):
         return ", ".join([x.name for x in self.directors.all()])
 
     def _get_data_from_imdb(self):
-        if not self.tmdb:
-            self.tmdb = self.ref_obj.media.poster.tmdb
+        if self != self.ref_obj.media.poster:
+            if not self.tmdb:
+                self.tmdb = self.ref_obj.media.poster.tmdb
 
-        if not self.imdb:
-            self.imdb = self.ref_obj.media.poster.imdb
+            if not self.imdb:
+                self.imdb = self.ref_obj.media.poster.imdb
 
+        resp = None
         if not self.tmdb:
             if self.imdb:
                 log.debug(f"Getting data from IMDB using {self.imdb}")
@@ -250,12 +273,13 @@ class Poster(TimeStampModel):
     def populate_data(self):
         log.debug("Attempt to get data from IMDB")
 
+        self.clear()
         data = self._get_data_from_imdb()
 
         if not data:
             return None
 
-        if not self.tmdb:
+        if not self.tmdb and 'id' in data:
             self.tmdb = data["id"]
 
         self._cast_and_crew()
@@ -330,7 +354,11 @@ class Poster(TimeStampModel):
         self.plot = plot if plot and plot != "undefined" else ""
 
     def _store_extended_info(self):
-        extended_info = _get_extended_info(self.tmdb, is_movie=self.ref_obj.is_movie())
+        try:
+            extended_info = _get_extended_info(self.tmdb, is_movie=self.ref_obj.is_movie())
+        except Exception as e:
+            log.error(e)
+            return
 
         self._store_rating(extended_info)
         self._store_tagline(extended_info)
