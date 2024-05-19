@@ -11,7 +11,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from mediaviewer.models import TV, MediaFile, Movie
+from mediaviewer.models import TV, MediaFile, Movie, Collection
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.message import Message
@@ -90,6 +90,25 @@ def ajaxgenres(request, guid):
         data = {
             "movie_genres": [(mg.id, mg.genre) for mg in movie_genres],
             "tv_genres": [(mg.id, mg.genre) for mg in tv_genres],
+        }
+        return HttpResponse(
+            json.dumps(data), content_type="application/json", status=200
+        )
+    else:
+        return HttpResponse(None, content_type="application/json", status=405)
+
+
+@csrf_exempt
+def ajaxcollections(request, guid):
+    dt = DownloadToken.objects.get_by_guid(guid)
+    if not dt or not dt.user or not dt.isvalid:
+        return HttpResponse(None, content_type="application/json", status=412)
+
+    if request.method == "GET":
+        collections = Collection.objects.order_by('name')
+        data = {
+            "collections": [(collection.id, collection.name)
+                            for collection in collections],
         }
         return HttpResponse(
             json.dumps(data), content_type="application/json", status=200

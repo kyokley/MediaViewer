@@ -1,4 +1,4 @@
-from mediaviewer.models import Genre
+from mediaviewer.models import Genre, Collection
 from mediaviewer.models.donation_site import DonationSite
 from mediaviewer.models.message import LAST_WATCHED, REGULAR, Message
 from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
@@ -36,6 +36,7 @@ def setSiteWideContext(context, request, includeMessages=False):
         context["tv_genres"] = Genre.objects.get_tv_genres()
 
         context["theme"] = settings.theme if settings else UserSettings.DARK
+        context["collections"] = list(Collection.objects.order_by('name'))
     else:
         context["loggedin"] = False
 

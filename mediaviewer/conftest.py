@@ -5,7 +5,7 @@ import pytest
 from django.contrib.auth.models import Group
 from faker import Faker
 
-from mediaviewer.models import TV, MediaFile, MediaPath, Movie
+from mediaviewer.models import TV, MediaFile, MediaPath, Movie, Collection, DownloadToken
 from mediaviewer.models.usersettings import UserSettings
 
 DEFAULT_USERNAME = "test_user"
@@ -169,3 +169,33 @@ def create_user():
         return user
 
     return _create_user
+
+
+@pytest.fixture
+def create_collection():
+    def _create_collection(
+            name=None,
+            ):
+        if name is None:
+            name = f'Collection {next(_count)}'
+        return Collection.objects.create(name=name)
+    return _create_collection
+
+
+@pytest.fixture
+def create_download_token(create_user,
+                          create_tv_media_file):
+    def _create_download_token(
+            user=None,
+            media_file=None):
+        if user is None:
+            user = create_user()
+
+        if media_file is None:
+            media_file = create_tv_media_file()
+
+        dt = DownloadToken.objects.from_media_file(
+                user,
+                media_file)
+        return dt
+    return _create_download_token

@@ -5,10 +5,10 @@ from rest_framework.response import Response as RESTResponse
 from mediaviewer.api.serializers import (CommentSerializer,
                                          DownloadTokenSerializer,
                                          FilenameScrapeFormatSerializer,
-                                         MessageSerializer)
+                                         MessageSerializer, CollectionSerializer)
 from mediaviewer.log import log
 from mediaviewer.models import (Comment, DownloadToken, FilenameScrapeFormat,
-                                MediaFile, Message)
+                                MediaFile, Message, Collection)
 
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):
@@ -58,3 +58,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         queryset = Comment.objects.filter(user=user)
         log.debug("Returning Comment objects")
         return queryset
+
+
+class CollectionViewSet(viewsets.ModelViewSet):
+    queryset = Collection.objects.none()
+    serializer_class = CollectionSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def retrieve(self, request, pk=None):
+        obj = get_object_or_404(Collection.objects.all(), pk=pk)
+        serializer = self.serializer_class(obj)
+        return RESTResponse(serializer.data)

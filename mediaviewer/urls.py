@@ -7,7 +7,7 @@ from rest_framework import routers
 
 from mediaviewer.forms import PasswordResetFormWithBCC
 from mediaviewer.views import (ajax, detail, home, messaging, movie, requests,
-                               settings, signin, signout, tv, waiterstatus)
+                               settings, signin, signout, tv, waiterstatus, collection)
 
 router = routers.DefaultRouter()
 
@@ -29,6 +29,7 @@ urlpatterns = [
         name="movies_by_genre",
     ),
     re_path(r"^moviedetail/(?P<movie_id>\d+)/$", movie.moviedetail, name="moviedetail"),
+    re_path(r"^collection/(?P<pk>\d+)/$", collection.collection, name="collection"),
     re_path(
         r"^autoplaydownloadlink/(?P<mf_id>\d+)/$",
         detail.autoplaydownloadlink,
@@ -64,6 +65,11 @@ urlpatterns = [
     ),
     re_path(
         r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"
+    ),
+    re_path(
+        r"^ajaxcollections/(?P<guid>[0-9A-Za-z]+)/$",
+        ajax.ajaxcollections,
+        name="ajaxcollections"
     ),
     re_path(r"^ajax/ajaxmovierows/$", ajax.ajaxmovierows, name="ajaxmovierows"),
     re_path(
@@ -151,7 +157,8 @@ urlpatterns.extend(
 
 if not conf_settings.IS_SYNCING:
     from mediaviewer.api import (media_file_viewset, media_path_viewset,
-                                 movie_viewset, tv_viewset, viewset)
+                                 movie_viewset, tv_viewset, viewset,
+                                 collection_viewset)
 
     router.register(
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"
@@ -172,6 +179,7 @@ if not conf_settings.IS_SYNCING:
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
     router.register(r"comment", viewset.CommentViewSet)
+    router.register(r"collection", collection_viewset.CollectionViewSet)
 
     urlpatterns += [
         re_path(r"^api/", include((router.urls, "mediaviewer"), namespace="api")),

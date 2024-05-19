@@ -31,7 +31,7 @@ db-shell: up ## Open a shell in a mediaviewer container
 	docker-compose exec postgres /bin/bash
 
 pytest: build-dev up ## Run tests
-	docker-compose run --rm mediaviewer /venv/bin/pytest
+	docker-compose run --rm mediaviewer /venv/bin/pytest -n 4
 
 bandit: build-dev ## Run bandit tests
 	docker-compose run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests -r .
