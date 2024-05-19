@@ -6,7 +6,11 @@ from .media import Media, MediaManager, MediaQuerySet
 
 
 class TVQuerySet(MediaQuerySet):
-    pass
+    def populate_poster(self):
+        posters = Poster.objects.filter(tv__in=self)
+        for poster in posters:
+            poster.populate_data()
+            poster.save()
 
 
 class TVManager(MediaManager):

@@ -36,6 +36,12 @@ class MediaFileQuerySet(models.QuerySet):
         for mf in self:
             mf.infer_scraper()
 
+    def populate_poster(self):
+        posters = Poster.objects.filter(media_file__in=self)
+        for poster in posters:
+            poster.populate_data()
+            poster.save()
+
 
 class MediaFileManager(models.Manager, ViewableManagerMixin):
     def infer_all_scrapers(self):

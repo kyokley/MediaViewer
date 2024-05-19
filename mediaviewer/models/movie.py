@@ -16,7 +16,11 @@ punctuationRegex = re.compile(r"[^a-zA-Z0-9]+")
 
 
 class MovieQuerySet(MediaQuerySet):
-    pass
+    def populate_poster(self):
+        posters = Poster.objects.filter(movie__in=self)
+        for poster in posters:
+            poster.populate_data()
+            poster.save()
 
 
 class MovieManager(MediaManager, ViewableManagerMixin):

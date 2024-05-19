@@ -127,6 +127,7 @@ class TVAdmin(admin.ModelAdmin):
                'unhide',
                'finished',
                'unfinished',
+               'repopulate_poster_data',
                )
 
     def hide(self, request, queryset):
@@ -140,6 +141,11 @@ class TVAdmin(admin.ModelAdmin):
 
     def unfinished(self, request, queryset):
         queryset.update(finished=False)
+
+    def repopulate_poster_data(self,
+                               request,
+                               queryset):
+        queryset.populate_poster()
 
 
 @admin.register(Movie)
@@ -156,6 +162,7 @@ class MovieAdmin(admin.ModelAdmin):
                      )
     actions = ('hide',
                'unhide',
+               'repopulate_poster_data',
                )
 
     def hide(self, request, queryset):
@@ -163,6 +170,11 @@ class MovieAdmin(admin.ModelAdmin):
 
     def unhide(self, request, queryset):
         queryset.update(hide=False)
+
+    def repopulate_poster_data(self,
+                               request,
+                               queryset):
+        queryset.populate_poster()
 
 
 class MediaFileInline(admin.TabularInline):
@@ -205,6 +217,7 @@ class MediaFileAdmin(admin.ModelAdmin):
     actions = ("infer_scrapers",
                "hide",
                "unhide",
+               'repopulate_poster_data',
                )
 
     def infer_scrapers(self, request, queryset):
@@ -215,6 +228,11 @@ class MediaFileAdmin(admin.ModelAdmin):
 
     def unhide(self, request, queryset):
         queryset.update(hide=False)
+
+    def repopulate_poster_data(self,
+                               request,
+                               queryset):
+        queryset.populate_poster()
 
 
 @admin.register(Poster)
