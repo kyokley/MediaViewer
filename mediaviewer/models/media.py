@@ -57,7 +57,8 @@ class Media(TimeStampModel):
                             max_length=256)
     finished = models.BooleanField(null=False, default=False)
     hide = models.BooleanField(null=False, default=False)
-    collections = models.ManyToManyField('mediaviewer.Collection')
+    collections = models.ManyToManyField('mediaviewer.Collection',
+                                         blank=True)
 
     class Meta:
         abstract = True
