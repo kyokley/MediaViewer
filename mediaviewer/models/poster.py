@@ -150,7 +150,8 @@ class Poster(TimeStampModel):
     rating = models.CharField(blank=True, null=False, default="", max_length=32)
     tmdb = models.CharField(null=False, default="", blank=True, max_length=32)
     imdb = models.CharField(null=False, default="", blank=True, max_length=32)
-    image = models.ImageField(upload_to="uploads/%Y/%m/%d/")
+    image = models.ImageField(upload_to="uploads/%Y/%m/%d/",
+                              blank=True)
     tagline = models.CharField(blank=True, null=False, default="", max_length=256)
 
     objects = PosterManager()
