@@ -48,7 +48,9 @@ class MediaManager(models.Manager):
             else:
                 name = ref_name
 
-        return self.get_or_create(name=name)
+        obj = self.get_or_create(name=name)
+        obj.poster # Generate poster
+        return obj
 
 
 class Media(TimeStampModel):
