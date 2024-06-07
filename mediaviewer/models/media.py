@@ -48,9 +48,9 @@ class MediaManager(models.Manager):
             else:
                 name = ref_name
 
-        obj = self.get_or_create(name=name)
-        obj.poster # Generate poster
-        return obj
+        obj, _ = self.get_or_create(name=name)
+        obj._populate_poster() # Generate poster
+        return obj, _
 
 
 class Media(TimeStampModel):
@@ -68,9 +68,12 @@ class Media(TimeStampModel):
     @property
     def poster(self):
         if self._poster is None:
-            self._poster = Poster.objects.from_ref_obj(self)
-            self._poster.populate_data()
+            self._populate_poster()
         return self._poster
+
+    def _populate_poster(self):
+        self._poster = Poster.objects.from_ref_obj(self)
+        self._poster.populate_data()
 
     @property
     def media_path(self):
