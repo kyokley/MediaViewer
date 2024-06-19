@@ -248,15 +248,32 @@ class Poster(TimeStampModel):
                 log.debug(f"Getting data from IMDB using {self.imdb}")
 
                 url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
+
+                resp = getJSONData(url)
+
+                try:
+                    if self.ref_obj.is_movie():
+                        self.tmdb = resp["movie_results"][0]["id"]
+                        resp = resp['movie_results'][0]
+                    elif hasattr(self, 'tv'):
+                        self.tmdb = resp["tv_results"][0]["id"]
+                        resp = resp['tv_results'][0]
+                    else:
+                        self.tmdb = resp["tv_episode_results"][0]["id"]
+                        resp = resp['tv_episode_results'][0]
+                except Exception:
+                    self.tmdb = None
+                    resp = {}
+
             else:
                 if self.ref_obj.is_movie():
                     url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.short_name}&api_key={settings.API_KEY}"
                 else:
                     url = f"https://api.themoviedb.org/3/search/tv?query={self.ref_obj.short_name}&api_key={settings.API_KEY}"
-            resp = getJSONData(url)
-            if resp.get("results"):
-                self.tmdb = resp["results"][0]["id"]
-                resp = resp['results'][0]
+                resp = getJSONData(url)
+                if resp.get("results"):
+                    self.tmdb = resp["results"][0]["id"]
+                    resp = resp['results'][0]
 
         if self.tmdb and not self.ref_obj.is_movie():
             log.debug(f"Getting data from TVDB using {self.tmdb}")
