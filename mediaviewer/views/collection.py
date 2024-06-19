@@ -1,4 +1,5 @@
 import itertools
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 
 from mediaviewer.models import Movie, TV, Collection
@@ -7,6 +8,7 @@ from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 
 
+@login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
 def collection(request, pk):
     siteGreeting = SiteGreeting.latestSiteGreeting()
