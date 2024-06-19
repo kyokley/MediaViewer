@@ -281,6 +281,7 @@ class PosterAdmin(admin.ModelAdmin):
                         extendedplot="",
                         episodename="",
                         tagline="",
+                        release_date=None,
                         )
         self._populate(queryset)
 

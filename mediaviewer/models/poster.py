@@ -279,10 +279,12 @@ class Poster(TimeStampModel):
             resp["url"] = url
             return resp
 
-    def populate_data(self):
+    def populate_data(self, clear=False):
         log.debug("Attempt to get data from IMDB")
 
-        self.clear()
+        if clear:
+            self.clear()
+
         data = self._get_data_from_imdb()
 
         if not data:
