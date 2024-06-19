@@ -153,6 +153,8 @@ class Poster(TimeStampModel):
     image = models.ImageField(upload_to="uploads/%Y/%m/%d/",
                               blank=True)
     tagline = models.CharField(blank=True, null=False, default="", max_length=256)
+    release_date = models.DateField(blank=True,
+                                    null=True)
 
     objects = PosterManager()
 
