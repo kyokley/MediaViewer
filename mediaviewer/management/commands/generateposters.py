@@ -2,6 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 from django.db.models.functions import Coalesce
+from django.db.models import Q
 
 from mediaviewer.models import Poster
 
@@ -32,7 +33,7 @@ class Command(BaseCommand):
         force = kwargs["force"]
 
         poster_qs = (
-            Poster.objects.filter(image="")
+            Poster.objects.filter(Q(image="") | Q(release_date__isnull=True))
             .annotate(
                 obj_created=Coalesce(
                     "movie__date_created",
@@ -49,17 +50,24 @@ class Command(BaseCommand):
         for poster in poster_qs:
             count += 1
 
-            if force:
-                poster.imdb = ""
-                poster.tmdb = ""
+            if not poster.ref_obj:
+                logger.warning(f"Poster id={poster.id} is orphaned. Removing...")
+                poster.delete()
 
-            try:
-                poster.populate_data()
-                poster.save()
-            except Exception as e:
-                logger.warning(f'Got error processing {poster}')
-                logger.warning(e)
+                self.stdout.write(f" {count}/{total}")
                 continue
+            else:
+                if force:
+                    poster.imdb = ""
+                    poster.tmdb = ""
+
+                try:
+                    poster.populate_data()
+                    poster.save()
+                except Exception as e:
+                    logger.warning(f'Got error processing {poster}')
+                    logger.warning(e)
+                    continue
 
             self.stdout.write(f" {count}/{total} - {str(poster.ref_obj):<100}")
         self.stdout.write()
