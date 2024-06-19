@@ -2,6 +2,7 @@
 Re-implementation of PosterFile
 """
 from io import BytesIO
+from datetime import date
 
 import requests
 from django.conf import settings
@@ -177,6 +178,7 @@ class Poster(TimeStampModel):
         self.rated = ""
         self.rating = ""
         self.image.delete()
+        self.release_date = None
 
     @property
     def short_name(self):
@@ -235,10 +237,10 @@ class Poster(TimeStampModel):
     def _get_data_from_imdb(self):
         if self != self.ref_obj.media.poster:
             if not self.tmdb:
-                self.tmdb = self.ref_obj.media.poster.tmdb
+                self.tmdb = self.ref_obj.media.poster.tmdb if self.ref_obj else None
 
             if not self.imdb:
-                self.imdb = self.ref_obj.media.poster.imdb
+                self.imdb = self.ref_obj.media.poster.imdb if self.ref_obj else None
 
         resp = None
         if not self.tmdb:
@@ -265,9 +267,13 @@ class Poster(TimeStampModel):
                 resp = getJSONData(url)
             except Exception:
                 log.debug(f"Got bad tmdb_id={self.tmdb}. Revert to parent tmdb")
-                self.tmdb = self.ref_obj.media.poster.tmdb
-                url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
-                resp = getJSONData(url)
+                self.tmdb = self.ref_obj.media.poster.tmdb if self.ref_obj else None
+
+                if self.tmdb:
+                    url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                    resp = getJSONData(url)
+                else:
+                    resp = None
 
         if resp:
             resp["url"] = url
@@ -293,6 +299,8 @@ class Poster(TimeStampModel):
 
         if not self.ref_obj.is_movie():
             self._tmdb_episode_info()
+        else:
+            self._store_release_date(data)
 
         poster_url = (
             getattr(self, "poster_url", None)
@@ -345,6 +353,17 @@ class Poster(TimeStampModel):
             self.extendedplot = tvinfo.get("overview", "")
             self.episodename = tvinfo.get("name")
             self.tmdb = tvinfo.get("id", self.tmdb)
+
+            if hasattr(self, 'tv'):
+                if release_date_str := tvinfo.get('first_air_date'):
+                    self.release_date = date.fromisoformat(release_date_str)
+                else:
+                    self.release_date = None
+            else:
+                if release_date_str := tvinfo.get('air_date'):
+                    self.release_date = date.fromisoformat(release_date_str)
+                else:
+                    self.release_date = None
 
     def _store_plot(self, imdb_data):
         plot = (
@@ -418,3 +437,9 @@ class Poster(TimeStampModel):
                 elif job["job"] == "Director":
                     director_obj = Director.objects.create(name=job["name"])
                     self.directors.add(director_obj)
+
+    def _store_release_date(self, imdb_data):
+        if release_date_str := imdb_data.get('release_date'):
+            self.release_date = date.fromisoformat(release_date_str)
+        else:
+            self.release_date = None
