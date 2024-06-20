@@ -95,12 +95,14 @@
                     </label>
                 </div>
                 <div class="col-9">
+                    {% block checkbox %}
                     <input class="viewed-checkbox" id="toggle-viewed" name="{{ movie.id }}" type="checkbox"
                                                                                            {% if viewed %}
                                                                                                checked
                                                                                        {% endif %}
                                                                                            onclick="ajaxMovieCheckBox(['{{movie.id}}'])" />
                     <span id="saved-{{ movie.id }}"></span>
+                    {% endblock %}
                 </div>
             </div>
         </h4>
