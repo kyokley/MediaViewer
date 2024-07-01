@@ -65,7 +65,7 @@ class TV(Media):
         return mf
 
     def episodes(self):
-        base_qs = MediaFile.objects.filter(media_path__tv=self)
+        base_qs = MediaFile.objects.filter(media_path__tv=self).filter(hide=False)
         return base_qs.order_by("display_name")
 
     def last_created_episode_at(self):
