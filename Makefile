@@ -1,5 +1,7 @@
 .PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish
 
+DOCKER_COMPOSE_EXECUTABLE=$$(which docker-compose >/dev/null 2>&1 && echo 'docker-compose' || echo 'docker compose')
+
 help: ## This help
 	@grep -F "##" $(MAKEFILE_LIST) | grep -vF '@grep -F "##" $$(MAKEFILE_LIST)' | sed -r 's/(:).*##/\1/' | sort
 
@@ -13,40 +15,40 @@ build-dev: ## Build dev container
 	docker build --tag=kyokley/mediaviewer --target=dev .
 
 up: ## Bring up containers and daemonize
-	docker-compose up -d
+	${DOCKER_COMPOSE_EXECUTABLE} up -d
 
 up-no-daemon: ## Bring up all containers
-	docker-compose up
+	${DOCKER_COMPOSE_EXECUTABLE} up
 
 attach: ## Attach to a running mediaviewer container
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
 live-shell: up ## Open a shell in a mediaviewer container
-	docker-compose exec mediaviewer /bin/bash
+	${DOCKER_COMPOSE_EXECUTABLE} exec mediaviewer /bin/bash
 
 shell: ## Open a shell in a mediaviewer container
-	docker-compose run mediaviewer /bin/bash
+	${DOCKER_COMPOSE_EXECUTABLE} run mediaviewer /bin/bash
 
 db-shell: up ## Open a shell in a mediaviewer container
-	docker-compose exec postgres /bin/bash
+	${DOCKER_COMPOSE_EXECUTABLE} exec postgres /bin/bash
 
 pytest: build-dev up ## Run tests
-	docker-compose run --rm mediaviewer /venv/bin/pytest -n 4
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/pytest -n 4
 
 bandit: build-dev ## Run bandit tests
-	docker-compose run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests -r .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests,./.venv -r .
 
 check-migrations: build-dev ## Check for missing migrations
-	docker-compose run --rm mediaviewer /venv/bin/python manage.py makemigrations --check
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/python manage.py makemigrations --check
 
 tests: check-migrations pytest bandit ## Run all tests
 
 stop-all-but-db: ## Bring all containers down except postgres
-	docker-compose down
-	docker-compose up -d postgres
+	${DOCKER_COMPOSE_EXECUTABLE} down
+	${DOCKER_COMPOSE_EXECUTABLE} up -d postgres
 
 down: ## Bring all containers down
-	docker-compose down
+	${DOCKER_COMPOSE_EXECUTABLE} down
 
 static: ## Install static files
 	yarn install
@@ -57,5 +59,5 @@ push: build ## Push image to docker hub
 publish: push ## Alias for push
 
 autoformat:
-	docker-compose run --rm --no-deps mediaviewer /venv/bin/black .
-	docker-compose run --rm --no-deps mediaviewer /venv/bin/isort .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/black .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/isort .

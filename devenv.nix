@@ -29,7 +29,7 @@
   # languages.nix.enable = true;
   languages.python = {
     enable = true;
-    version = "3.11";
+    version = "3.12";
     poetry = {
       enable = true;
       install.enable = true;

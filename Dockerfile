@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=python:3.10-slim
+ARG BASE_IMAGE=python:3.12-slim
 
 FROM ${BASE_IMAGE} AS static-builder
 WORKDIR /code
@@ -13,8 +13,8 @@ RUN npm install
 
 FROM ${BASE_IMAGE} AS base
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 RUN pip install -U pip
 
@@ -23,7 +23,7 @@ RUN python3 -m venv $POETRY_VENV
 
 ENV VIRTUAL_ENV=/venv
 RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV PATH="$VIRTUAL_ENV/bin:$PATH:$POETRY_VENV/bin"
 
 # Add virtualenv to bash prompt
 RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
