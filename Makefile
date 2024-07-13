@@ -36,7 +36,7 @@ pytest: build-dev up ## Run tests
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/pytest -n 4
 
 bandit: build-dev ## Run bandit tests
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests -x ./.venv -r .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests,./.venv -r .
 
 check-migrations: build-dev ## Check for missing migrations
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/python manage.py makemigrations --check
