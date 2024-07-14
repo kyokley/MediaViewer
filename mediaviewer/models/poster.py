@@ -235,14 +235,8 @@ class Poster(TimeStampModel):
         return ", ".join([x.name for x in self.directors.all()])
 
     def _get_data_from_imdb(self):
-        if self != self.ref_obj.media.poster:
-            if not self.tmdb:
-                self.tmdb = self.ref_obj.media.poster.tmdb if self.ref_obj else None
-
-            if not self.imdb:
-                self.imdb = self.ref_obj.media.poster.imdb if self.ref_obj else None
-
         resp = None
+
         if not self.tmdb:
             if self.imdb:
                 log.debug(f"Getting data from IMDB using {self.imdb}")
@@ -265,7 +259,7 @@ class Poster(TimeStampModel):
                     self.tmdb = None
                     resp = {}
 
-            else:
+            if not self.tmdb:
                 if self.ref_obj.is_movie():
                     url = f"https://api.themoviedb.org/3/search/movie?query={self.ref_obj.short_name}&api_key={settings.API_KEY}"
                 else:
@@ -275,26 +269,39 @@ class Poster(TimeStampModel):
                     self.tmdb = resp["results"][0]["id"]
                     resp = resp['results'][0]
 
-        if self.tmdb and not self.ref_obj.is_movie():
-            log.debug(f"Getting data from TVDB using {self.tmdb}")
+        if self.tmdb:
+            if not self.ref_obj.is_movie():
+                log.debug(f"Getting TV data from TVDB using {self.tmdb}")
 
-            url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
 
-            try:
-                resp = getJSONData(url)
-            except Exception:
-                log.debug(f"Got bad tmdb_id={self.tmdb}. Revert to parent tmdb")
-                self.tmdb = self.ref_obj.media.poster.tmdb if self.ref_obj else None
-
-                if self.tmdb:
-                    url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                try:
                     resp = getJSONData(url)
-                else:
+                except Exception:
+                    log.debug(f"Got bad tmdb_id={self.tmdb}. Revert to parent tmdb")
+                    self.tmdb = self.ref_obj.media.poster.tmdb if self.ref_obj else None
+
+                    if self.tmdb:
+                        url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+                        resp = getJSONData(url)
+                    else:
+                        resp = None
+            else:
+                log.debug(f"Getting Movie data from TVDB using {self.tmdb}")
+
+                url = f"https://api.themoviedb.org/3/movie/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
+
+                try:
+                    resp = getJSONData(url)
+                except Exception:
+                    log.debug(f"Got bad tmdb_id={self.tmdb}. Reverting to null")
+                    self.tmdb = None
                     resp = None
 
         if resp:
             resp["url"] = url
-            return resp
+
+        return resp
 
     def populate_data(self, clear=False):
         log.debug("Attempt to get data from IMDB")
