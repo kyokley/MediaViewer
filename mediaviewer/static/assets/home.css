@@ -175,3 +175,41 @@ li.nav-item > a.btn-outline-primary:hover {
     color: var(--bs-btn-hover-border-color);
     background-color: transparent;
 }
+
+[data-bs-theme="dark"] .carousel .carousel-control-prev-icon,
+[data-bs-theme="dark"] .carousel .carousel-control-next-icon,
+[data-bs-theme="dark"].carousel .carousel-control-prev-icon,
+[data-bs-theme="dark"].carousel .carousel-control-next-icon
+[data-bs-theme="light"] .carousel .carousel-control-prev-icon,
+[data-bs-theme="light"] .carousel .carousel-control-next-icon,
+[data-bs-theme="light"].carousel .carousel-control-prev-icon,
+[data-bs-theme="light"].carousel .carousel-control-next-icon
+{
+  filter: none;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  height: 100px;
+  width: 100px;
+  outline: black;
+  background-size: 100%, 100%;
+  border-radius: 50%;
+  border: 1px solid black;
+  background-image: none;
+  border-color: var(--bs-info);
+  background-color: var(--bs-info-bg-subtle);
+}
+
+.carousel-control-next-icon:after
+{
+  content: '>';
+  font-size: 55px;
+  color: var(--bs-info);
+}
+
+.carousel-control-prev-icon:after {
+  content: '<';
+  font-size: 55px;
+  color: var(--bs-info);
+}

@@ -164,54 +164,48 @@
         <div class="container py-2">
         {% block main %}
             {% if loggedin %}
-                <table id="newFileTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Latest Files</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div class="row">
+                <div class="col-1"></div>
+                <div class="col-10">
+                <div id="carouselExample" class="carousel carousel-dark slide">
+                    <div class="carousel-indicators">
                         {% for file in files %}
-                            <tr>
-                                {% if file.is_movie %}
-                                        <td>
-                                            {% if file.poster.image %}
-                                                <a class="img-preview"
-                                                   href="{% url 'mediaviewer:moviedetail' file.pk %}"
-                                                   data-bs-toggle="popover"
-                                                   data-bs-trigger="hover focus"
-                                                   data-bs-placement="left"
-                                                   data-bs-custom-class="preview-tooltip"
-                                                   data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
-                                            {% else %}
-                                                <a href="{% url 'mediaviewer:moviedetail' file.pk %}">
-                                            {% endif %}
-                                                    {{ file.full_name }}
-                                                </a>
-                                        </td>
-                                {% else %}
-                                        <td>
-                                            {% if file.poster.image %}
-                                                <a class="img-preview"
-                                                   href="{% url 'mediaviewer:tvdetail' file.pk %}"
-                                                   data-bs-toggle="popover"
-                                                   data-bs-trigger="hover focus"
-                                                   data-bs-container="body"
-                                                   data-bs-placement="top"
-                                                   data-bs-custom-class="preview-tooltip"
-                                                   data-bs-content="<img class='tooltip-img' src='{{ file.poster.image.url }}' />">
-                                            {% else %}
-                                                <a href="{% url 'mediaviewer:tvdetail' file.pk %}">
-                                            {% endif %}
-                                                    {{ file.full_name }}
-                                                </a>
-                                        </td>
-                                {% endif %}
-                            </tr>
+                        <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
                         {% endfor %}
-                    </tbody>
-                </table>
-
+                    </div>
+                    <div class="carousel-inner">
+                        {% for file in files %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <a
+                                {% if file.is_movie %}
+                                href="{% url 'mediaviewer:moviedetail' file.pk %}"
+                                {% else %}
+                                href="{% url 'mediaviewer:tvdetail' file.pk %}"
+                                {% endif %}
+                                >
+                                <img src="{{ file.poster.image.url }}" class="d-block w-100">
+                            </a>
+                                <div class="carousel-caption d-block text-info-emphasis">
+                                    <h5>{{ file.short_name }}</h5>
+                                    {% if file.is_tv %}
+                                    <p>{{ file.poster.episodename }}</p>
+                                    {% endif %}
+                                </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-control-prev btn-outline-info" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next btn-info" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+                </div>
+                <div class="col-1"></div>
+            </div>
             {% endif %}
         {% endblock %}
         </div>
