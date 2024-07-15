@@ -176,40 +176,27 @@ li.nav-item > a.btn-outline-primary:hover {
     background-color: transparent;
 }
 
-[data-bs-theme="dark"] .carousel .carousel-control-prev-icon,
-[data-bs-theme="dark"] .carousel .carousel-control-next-icon,
-[data-bs-theme="dark"].carousel .carousel-control-prev-icon,
-[data-bs-theme="dark"].carousel .carousel-control-next-icon
-[data-bs-theme="light"] .carousel .carousel-control-prev-icon,
-[data-bs-theme="light"] .carousel .carousel-control-next-icon,
-[data-bs-theme="light"].carousel .carousel-control-prev-icon,
-[data-bs-theme="light"].carousel .carousel-control-next-icon
-{
-  filter: none;
+#recent-carousel .carousel-item img {
+    object-fit: cover;
+    object-position: center;
+    height: 50vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
 }
 
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-  height: 100px;
-  width: 100px;
-  outline: black;
-  background-size: 100%, 100%;
-  border-radius: 50%;
-  border: 1px solid black;
-  background-image: none;
-  border-color: var(--bs-info);
-  background-color: var(--bs-info-bg-subtle);
-}
-
-.carousel-control-next-icon:after
-{
-  content: '>';
-  font-size: 55px;
-  color: var(--bs-info);
-}
-
-.carousel-control-prev-icon:after {
-  content: '<';
-  font-size: 55px;
-  color: var(--bs-info);
+#recent-carousel .carousel-item:before {
+    content: "";
+    background-image:
+        linear-gradient(
+            to bottom,
+            transparent, rgba(0,0,0,.85)
+            );
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
 }

@@ -165,12 +165,12 @@
         {% block main %}
             {% if loggedin %}
             <div class="row">
-                <div class="col-1"></div>
-                <div class="col-10">
-                <div id="carouselExample" class="carousel carousel-dark slide">
+                <p>Latest media:</p>
+            </div>
+                <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-indicators">
                         {% for file in files %}
-                        <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
+                        <button type="button" data-bs-target="#recent-carousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
                         {% endfor %}
                     </div>
                     <div class="carousel-inner">
@@ -181,31 +181,29 @@
                                 href="{% url 'mediaviewer:moviedetail' file.pk %}"
                                 {% else %}
                                 href="{% url 'mediaviewer:tvdetail' file.pk %}"
-                                {% endif %}
-                                >
-                                <img src="{{ file.poster.image.url }}" class="d-block w-100">
-                            </a>
-                                <div class="carousel-caption d-block text-info-emphasis">
-                                    <h5>{{ file.short_name }}</h5>
-                                    {% if file.is_tv %}
+                                {% endif %}>
+                                <img src="{{ file.poster.image.url }}" class="d-block">
+                            <div class="carousel-caption d-block text-primary-emphasis">
+                                {% if file.is_tv %}
+                                <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
                                     <p>{{ file.poster.episodename }}</p>
-                                    {% endif %}
-                                </div>
+                                {% else %}
+                                    <h5>{{ file.short_name }}</h5>
+                                {% endif %}
+                            </div>
+                            </a>
                         </div>
                         {% endfor %}
                     </div>
-                    <button class="carousel-control-prev btn-outline-info" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#recent-carousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
                     </button>
-                    <button class="carousel-control-next btn-info" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#recent-carousel" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
                 </div>
-                </div>
-                <div class="col-1"></div>
-            </div>
             {% endif %}
         {% endblock %}
         </div>
