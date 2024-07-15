@@ -1,9 +1,13 @@
+import random
 from django.shortcuts import render
 
 from mediaviewer.models import MediaFile
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
+
+
+rand = random.SystemRandom()
 
 
 @logAccessInfo
@@ -15,6 +19,7 @@ def home(request):
     )
     context["active_page"] = "home"
     files = list(MediaFile.objects.most_recent_media())
+    rand.shuffle(files)
     context["files"] = files
     context["title"] = "Home"
     setSiteWideContext(context, request, includeMessages=True)

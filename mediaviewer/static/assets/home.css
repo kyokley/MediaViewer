@@ -176,6 +176,18 @@ li.nav-item > a.btn-outline-primary:hover {
     background-color: transparent;
 }
 
+[data-bs-theme="dark"] .carousel .carousel-control-prev-icon,
+[data-bs-theme="dark"] .carousel .carousel-control-next-icon,
+[data-bs-theme="dark"].carousel .carousel-control-prev-icon,
+[data-bs-theme="dark"].carousel .carousel-control-next-icon,
+[data-bs-theme="light"] .carousel .carousel-control-prev-icon,
+[data-bs-theme="light"] .carousel .carousel-control-next-icon,
+[data-bs-theme="light"].carousel .carousel-control-prev-icon,
+[data-bs-theme="light"].carousel .carousel-control-next-icon
+{
+  filter: none;
+}
+
 #recent-carousel .carousel-item img {
     object-fit: cover;
     object-position: center;
@@ -199,4 +211,8 @@ li.nav-item > a.btn-outline-primary:hover {
     top: 0;
     width: 100vw;
     height: 100vh;
+}
+
+.carousel-indicators .active {
+    background-color: var(--bs-primary) !important;
 }

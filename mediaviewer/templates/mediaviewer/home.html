@@ -165,12 +165,12 @@
         {% block main %}
             {% if loggedin %}
             <div class="row">
-                <p>Latest media:</p>
+                <p class="fs-4">Latest media:</p>
             </div>
                 <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-indicators">
                         {% for file in files %}
-                        <button type="button" data-bs-target="#recent-carousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
+                        <button type="button" data-bs-target="#recent-carousel" data-bs-slide-to="{{ forloop.counter0 }}" class="primary-indicator {% if forloop.first %}active{% endif %}" aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
                         {% endfor %}
                     </div>
                     <div class="carousel-inner">
@@ -183,7 +183,7 @@
                                 href="{% url 'mediaviewer:tvdetail' file.pk %}"
                                 {% endif %}>
                                 <img src="{{ file.poster.image.url }}" class="d-block">
-                            <div class="carousel-caption d-block text-primary-emphasis">
+                            <div class="carousel-caption d-block text-light-emphasis">
                                 {% if file.is_tv %}
                                 <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
                                     <p>{{ file.poster.episodename }}</p>
