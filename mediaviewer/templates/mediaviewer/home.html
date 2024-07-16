@@ -167,6 +167,8 @@
             <div class="row">
                 <p class="fs-4">Latest media:</p>
             </div>
+            <!-- Uncomment below to test carousel -->
+            <!-- <div id="recent-carousel" class="carousel slide" data-bs-ride="true"> -->
                 <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-indicators">
                         {% for file in files %}
@@ -183,7 +185,7 @@
                                 href="{% url 'mediaviewer:tvdetail' file.pk %}"
                                 {% endif %}>
                                 <img src="{{ file.poster.image.url }}" class="d-block">
-                            <div class="carousel-caption d-block text-light-emphasis">
+                                <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
                                 {% if file.is_tv %}
                                 <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
                                     <p>{{ file.poster.episodename }}</p>

@@ -213,15 +213,15 @@ li.nav-item > a.btn-outline-primary:hover {
     height: 100vh;
     visibility: hidden;
   opacity: 0;
-  transition: all .75s ease-out;
+  transition: all .6s ease-out;
 }
 
 #recent-carousel:hover .carousel-item:before {
   visibility: visible;
   opacity: 1;
-  transition: all .75s ease-in;
+  transition: all .6s ease-in;
 }
 
 .carousel-indicators .active {
-    background-color: var(--bs-primary) !important;
+    background-color: var(--bs-light) !important;
 }
