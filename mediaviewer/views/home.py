@@ -18,9 +18,9 @@ def home(request):
         siteGreeting and siteGreeting.greeting or "Check out the new downloads!"
     )
     context["active_page"] = "home"
-    files = list(MediaFile.objects.most_recent_media())
-    rand.shuffle(files)
-    context["files"] = files
+    carousel_files = list(MediaFile.objects.most_recent_media())
+    rand.shuffle(carousel_files)
+    context["carousel_files"] = carousel_files
     context["title"] = "Home"
     setSiteWideContext(context, request, includeMessages=True)
 
