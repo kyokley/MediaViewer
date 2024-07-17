@@ -10,6 +10,7 @@ from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.views.ajax import get_tv_show_rows_query
 
 
+NUMBER_OF_CAROUSEL_FILES = 20
 rand = random.SystemRandom()
 
 
@@ -24,7 +25,7 @@ def tvshowsummary(request):
 
     carousel_files = list(get_tv_show_rows_query()
                           .exclude(_poster__image="")
-                          [:15])
+                          [:NUMBER_OF_CAROUSEL_FILES])
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
 
@@ -41,6 +42,13 @@ def tvshows_by_genre(request, genre_id):
     context["title"] = "TV Shows: {}".format(ref_genre.genre)
     context["table_data_page"] = "ajaxtvshowsbygenre"
     context["table_data_filter_id"] = genre_id
+
+    carousel_files = list(get_tv_show_rows_query(genre_id=genre_id)
+                          .exclude(_poster__image="")
+                          [:NUMBER_OF_CAROUSEL_FILES])
+    rand.shuffle(carousel_files)
+    context["carousel_files"] = carousel_files
+
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 

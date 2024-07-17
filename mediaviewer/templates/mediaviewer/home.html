@@ -172,11 +172,13 @@
                         <!-- Uncomment below to test carousel -->
                         <!-- <div id="recent-carousel" class="carousel slide" data-bs-ride="true"> -->
                         <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
+                            {% if carousel_files|length <= 10 %}
                             <div class="carousel-indicators">
                                 {% for file in carousel_files %}
-                                <button type="button" data-bs-target="#recent-carousel" data-bs-slide-to="{{ forloop.counter0 }}" class="primary-indicator {% if forloop.first %}active{% endif %}" aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
+                                    <button type="button" data-bs-target="#recent-carousel" data-bs-slide-to="{{ forloop.counter0 }}" class="primary-indicator {% if forloop.first %}active{% endif %}" aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
                                 {% endfor %}
                             </div>
+                            {% endif %}
                             <div class="carousel-inner">
                                 {% for file in carousel_files %}
                                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
