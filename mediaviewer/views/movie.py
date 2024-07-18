@@ -9,6 +9,7 @@ from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 
 
+NUMBER_OF_CAROUSEL_FILES = 10
 rand = random.SystemRandom()
 
 
@@ -32,7 +33,7 @@ def movies(request):
             Movie.objects
             .exclude(_poster__image="")
             .filter(hide=False)
-            .order_by('-_poster__release_date')[:10]
+            .order_by('-_poster__release_date')[:NUMBER_OF_CAROUSEL_FILES]
             )
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
@@ -64,7 +65,7 @@ def movies_by_genre(request, genre_id):
             .exclude(_poster__image="")
             .filter(hide=False)
             .filter(_poster__genres=genre)
-            .order_by('-_poster__release_date')[:10]
+            .order_by('-_poster__release_date')[:NUMBER_OF_CAROUSEL_FILES]
             )
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
