@@ -175,3 +175,53 @@ li.nav-item > a.btn-outline-primary:hover {
     color: var(--bs-btn-hover-border-color);
     background-color: transparent;
 }
+
+[data-bs-theme="dark"] .carousel .carousel-control-prev-icon,
+[data-bs-theme="dark"] .carousel .carousel-control-next-icon,
+[data-bs-theme="dark"].carousel .carousel-control-prev-icon,
+[data-bs-theme="dark"].carousel .carousel-control-next-icon,
+[data-bs-theme="light"] .carousel .carousel-control-prev-icon,
+[data-bs-theme="light"] .carousel .carousel-control-next-icon,
+[data-bs-theme="light"].carousel .carousel-control-prev-icon,
+[data-bs-theme="light"].carousel .carousel-control-next-icon
+{
+  filter: none;
+}
+
+#recent-carousel .carousel-item img {
+    object-fit: cover;
+    object-position: center;
+    height: 50vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+#recent-carousel .carousel-item:before {
+    content: "";
+    background-image:
+        linear-gradient(
+            to bottom,
+            transparent, rgba(0,0,0,.85)
+            );
+    display: block;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    visibility: hidden;
+  opacity: 0;
+  transition: all .6s ease-out;
+}
+
+#recent-carousel:hover .carousel-item:before {
+  visibility: visible;
+  opacity: 1;
+  transition: all .6s ease-in;
+}
+
+.carousel-indicators .active {
+    background-color: var(--bs-light) !important;
+}

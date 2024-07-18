@@ -49,6 +49,10 @@
 {% endblock %}
 
 {% block main %}
+    {% block carousel %}
+    {{ block.super }}
+    {% endblock %}
+
     <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
         <thead>
             <tr>
