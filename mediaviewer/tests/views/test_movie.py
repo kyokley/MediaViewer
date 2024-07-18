@@ -10,7 +10,7 @@ from mediaviewer.views.movie import movies, movies_by_genre
 @pytest.mark.django_db
 class TestMovies:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file, create_movie):
+    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file):
         self.mock_setSiteWideContext = mocker.patch(
             "mediaviewer.views.movie.setSiteWideContext"
         )
@@ -18,8 +18,7 @@ class TestMovies:
         self.mock_render = mocker.patch("mediaviewer.views.movie.render")
 
         self.tv_file = create_tv_media_file()
-        self.movie = create_movie()
-        self.movie_file = create_movie_media_file(movie=self.movie)
+        self.movie_file = create_movie_media_file()
 
         self.user = create_user()
 
@@ -36,7 +35,6 @@ class TestMovies:
             "active_page": "movies",
             "title": "Movies",
             "table_data_page": "ajaxmovierows",
-            "carousel_files": [self.movie],
         }
         expected = self.mock_render.return_value
         actual = movies(self.request)
@@ -71,7 +69,7 @@ class TestMovieByGenre404:
 @pytest.mark.django_db
 class TestMoviesByGenre:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file, create_movie):
+    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file):
         self.mock_get_object_or_404 = mocker.patch(
             "mediaviewer.views.movie.get_object_or_404"
         )
@@ -82,14 +80,14 @@ class TestMoviesByGenre:
 
         self.mock_render = mocker.patch("mediaviewer.views.movie.render")
 
-        self.genre = Genre.objects.create(genre="test_genre")
+        self.genre = mock.MagicMock(Genre)
+        self.genre.id = 123
+        self.genre.genre = "test_genre"
 
         self.mock_get_object_or_404.return_value = self.genre
 
         self.tv_file = create_tv_media_file()
-
-        self.movie = create_movie()
-        self.movie_file = create_movie_media_file(movie=self.movie)
+        self.movie_file = create_movie_media_file()
 
         self.user = create_user()
 
@@ -107,9 +105,7 @@ class TestMoviesByGenre:
             "title": "Movies: test_genre",
             "table_data_page": "ajaxmoviesbygenrerows",
             "table_data_filter_id": self.genre.id,
-            "carousel_files": [],
         }
-
         expected = self.mock_render.return_value
         actual = movies_by_genre(self.request, self.genre.id)
 

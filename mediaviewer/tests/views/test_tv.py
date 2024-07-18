@@ -29,7 +29,6 @@ class TestTvShowSummary:
             "title": "TV Shows",
             "table_data_page": "ajaxtvshowssummary",
             "table_data_filter_id": "",
-            "carousel_files": [],
         }
 
         expected = self.mock_render.return_value
@@ -72,7 +71,9 @@ class TestTvShowsByGenre:
 
         self.mock_render = mocker.patch("mediaviewer.views.tv.render")
 
-        self.genre = Genre.objects.create(genre="test_genre")
+        self.genre = mock.MagicMock(Genre)
+        self.genre.id = 123
+        self.genre.genre = "test_genre"
 
         self.mock_get_object_or_404.return_value = self.genre
 
@@ -87,7 +88,6 @@ class TestTvShowsByGenre:
             "title": "TV Shows: test_genre",
             "table_data_page": "ajaxtvshowsbygenre",
             "table_data_filter_id": self.genre.id,
-            "carousel_files": [],
         }
 
         expected = self.mock_render.return_value

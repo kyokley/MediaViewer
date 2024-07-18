@@ -35,8 +35,8 @@ class TestHome:
         expected_context = {
             "greeting": "test_greeting",
             "active_page": "home",
+            "files": [self.tv_file],
             "title": "Home",
-            "carousel_files": [self.tv_file],
         }
 
         expected = self.mock_render.return_value
@@ -55,7 +55,7 @@ class TestHome:
         expected_context = {
             "greeting": "Check out the new downloads!",
             "active_page": "home",
-            "carousel_files": [self.tv_file],
+            "files": [self.tv_file],
             "title": "Home",
         }
 
