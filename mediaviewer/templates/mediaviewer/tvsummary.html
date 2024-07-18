@@ -24,7 +24,7 @@
                 {% for file in carousel_files %}
                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                     <a href="{% url 'mediaviewer:tvshows' file.pk %}">
-                        <img src="{{ file.poster.image.url }}" class="d-block">
+                        <img src="{{ file.poster.image.url }}" class="d-block carousel-movie-item">
                         <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
                             <h5>{{ file.short_name }}</h5>
                         </div>

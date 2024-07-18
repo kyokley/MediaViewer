@@ -191,12 +191,15 @@ li.nav-item > a.btn-outline-primary:hover {
 #recent-carousel .carousel-item img {
     object-fit: cover;
     object-position: center;
-    height: 50vh;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: auto;
+}
+
+.carousel-movie-item {
+    height: 50vh;
 }
 
 #recent-carousel .carousel-item:before {
