@@ -272,7 +272,7 @@ def ajaxmoviesbygenrerows(request, genre_id):
     return _ajax_movie_rows(request, qs)
 
 
-def get_tv_show_rows_query(genre_id=None):
+def _get_tv_show_rows_query(genre_id=None):
     tv_qs = TV.objects.filter(hide=False
                               ).annotate(
         max_date_created=Subquery(
@@ -291,13 +291,13 @@ def get_tv_show_rows_query(genre_id=None):
 
 @csrf_exempt
 def ajaxtvshowssummary(request):
-    paths_qs = get_tv_show_rows_query()
+    paths_qs = _get_tv_show_rows_query()
     return _ajax_tv_rows(request, paths_qs)
 
 
 @csrf_exempt
 def ajaxtvshowsbygenre(request, genre_id):
-    paths_qs = get_tv_show_rows_query(genre_id)
+    paths_qs = _get_tv_show_rows_query(genre_id)
     return _ajax_tv_rows(request, paths_qs)
 
 

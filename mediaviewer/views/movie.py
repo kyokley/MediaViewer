@@ -1,5 +1,3 @@
-import random
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
@@ -7,10 +5,6 @@ from mediaviewer.models import Comment, Genre, Movie
 from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
-
-
-NUMBER_OF_CAROUSEL_FILES = 10
-rand = random.SystemRandom()
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -29,14 +23,6 @@ def movies(request):
     }
     context["active_page"] = "movies"
     context["title"] = "Movies"
-    carousel_files = list(
-            Movie.objects
-            .exclude(_poster__image="")
-            .filter(hide=False)
-            .order_by('-_poster__release_date')[:NUMBER_OF_CAROUSEL_FILES]
-            )
-    rand.shuffle(carousel_files)
-    context["carousel_files"] = carousel_files
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/movies.html", context)
 
@@ -59,16 +45,6 @@ def movies_by_genre(request, genre_id):
     }
     context["active_page"] = "movies"
     context["title"] = "Movies: {}".format(genre.genre)
-
-    carousel_files = list(
-            Movie.objects
-            .exclude(_poster__image="")
-            .filter(hide=False)
-            .filter(_poster__genres=genre)
-            .order_by('-_poster__release_date')[:NUMBER_OF_CAROUSEL_FILES]
-            )
-    rand.shuffle(carousel_files)
-    context["carousel_files"] = carousel_files
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/movies.html", context)
 
