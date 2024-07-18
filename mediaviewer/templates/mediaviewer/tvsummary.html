@@ -2,18 +2,49 @@
 <!DOCTYPE html>
 {% load static %}
 {% block jumbotron %}
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item active">TV Shows</li>
-            </ol>
-        </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+        <li class="breadcrumb-item active">TV Shows</li>
+    </ol>
+</nav>
 
-        <h1 class="display-5 fw-bold">{{ title }}</h1>
-        <h3>Select from the following TV Shows:</h3>
+<h1 class="display-5 fw-bold">{{ title }}</h1>
+<h3>Select from the following TV Shows:</h3>
 {% endblock %}
 
 {% block main %}
+    <div class="container py-2">
+    {% block carousel %}
+        {% if carousel_files %}
+        <!-- Uncomment below to test carousel -->
+        <!-- <div id="recent-carousel" class="carousel slide" data-bs-ride="true"> -->
+        <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for file in carousel_files %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <a href="{% url 'mediaviewer:tvshows' file.pk %}">
+                        <img src="{{ file.poster.image.url }}" class="d-block carousel-movie-item">
+                        <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
+                            <h5>{{ file.short_name }}</h5>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#recent-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#recent-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+        {% endif %}
+    {% endblock %}
+    </div>
+
     <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
         <thead>
             <tr>

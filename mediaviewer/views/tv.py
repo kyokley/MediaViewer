@@ -1,3 +1,5 @@
+import random
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
@@ -5,6 +7,11 @@ from mediaviewer.models import TV, Comment, Genre, MediaFile
 from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 from mediaviewer.utils import humansize, logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
+from mediaviewer.views.ajax import get_tv_show_rows_query
+
+
+NUMBER_OF_CAROUSEL_FILES = 20
+rand = random.SystemRandom()
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -15,6 +22,13 @@ def tvshowsummary(request):
     context["title"] = "TV Shows"
     context["table_data_page"] = "ajaxtvshowssummary"
     context["table_data_filter_id"] = ""
+
+    carousel_files = list(get_tv_show_rows_query()
+                          .exclude(_poster__image="")
+                          [:NUMBER_OF_CAROUSEL_FILES])
+    rand.shuffle(carousel_files)
+    context["carousel_files"] = carousel_files
+
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
@@ -28,6 +42,13 @@ def tvshows_by_genre(request, genre_id):
     context["title"] = "TV Shows: {}".format(ref_genre.genre)
     context["table_data_page"] = "ajaxtvshowsbygenre"
     context["table_data_filter_id"] = genre_id
+
+    carousel_files = list(get_tv_show_rows_query(genre_id=genre_id)
+                          .exclude(_poster__image="")
+                          [:NUMBER_OF_CAROUSEL_FILES])
+    rand.shuffle(carousel_files)
+    context["carousel_files"] = carousel_files
+
     setSiteWideContext(context, request, includeMessages=True)
     return render(request, "mediaviewer/tvsummary.html", context)
 
