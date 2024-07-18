@@ -16,27 +16,23 @@ class TimeStampModel(models.Model):
 
 class ViewableManagerMixin:
     def most_recent_media(self, limit=10):
-        from mediaviewer.models import MediaFile, Movie
-
-        recent_movies = (
-            Movie.objects
-            .filter(hide=False)
-            .select_related('_poster')
-            .order_by("-date_created")[:limit]
-        )
-        recent_tv = (
-            MediaFile.objects
-            .filter(hide=False)
-            .filter(media_path__tv__hide=False)
-            .select_related('_poster')
-            .order_by("-date_created")[:limit]
-        )
-        recent_files = sorted(
-            [file for file in itertools.chain(recent_movies, recent_tv)],
-            key=lambda x: x.date_created,
-            reverse=True,
-        )
-        return recent_files[:limit]
+        from mediaviewer.models import Poster, TV, MediaFile
+        mfs = MediaFile.objects.filter(media_path__tv=models.OuterRef('pk')).exclude(_poster__image="").order_by('-_poster__release_date', '-season', '-episode').values('pk')[:1]
+        tvs = (
+                TV.objects
+                .filter(hide=False)
+                .annotate(most_recent_show=models.Subquery(mfs))
+                .values('most_recent_show')
+                )
+        qs = (
+                Poster.objects
+                .exclude(image="")
+                .filter(models.Q(movie__hide=False) | models.Q(media_file__pk__in=tvs))
+                .filter(release_date__isnull=False)
+                .select_related('movie', 'media_file')
+                .order_by('-release_date')[:limit]
+                )
+        return (x.ref_obj for x in qs)
 
 
 class ViewableObjectMixin:
