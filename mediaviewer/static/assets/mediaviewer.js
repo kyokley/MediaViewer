@@ -68,7 +68,10 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
             configureTooltips($);
             });
         },
-        stateSave: true
+        stateSave: true,
+        createdRow: function (row, data, index) {
+            $(row).addClass('base-row');
+        }
     };
 
     dt_config.scroller = {
@@ -285,12 +288,12 @@ function _ajaxCheckBox(update_payload, movie_or_media_file){
                 }
 
                 savedFields = $(selector_str);
-                savedFields.html("Saved");
+                savedFields.parent().parent().parent().addClass("row-highlight");
 
                 savedFields.attr('style', '');
-                savedFields.fadeOut(2000, function() {
-                    savedFields.html("");
+                savedFields.fadeOut(500, function() {
                     savedFields.attr('style', 'display: none;');
+                    savedFields.parent().parent().parent().removeClass("row-highlight");
                 });
             }
         },

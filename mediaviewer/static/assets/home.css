@@ -228,3 +228,11 @@ li.nav-item > a.btn-outline-primary:hover {
 .carousel-indicators .active {
     background-color: var(--bs-light) !important;
 }
+
+.row-highlight {
+    background-color: var(--bs-primary) !important;
+    transition: all .4s ease-in-out;
+}
+.base-row {
+    transition: all .4s ease-in-out;
+}
