@@ -193,8 +193,6 @@
                                         {% if file.is_tv and file.season and file.episode %}
                                             <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
                                             <p>{{ file.poster.episodename }}</p>
-                                        {% else %}
-                                            <h5>{{ file.short_name }}</h5>
                                         {% endif %}
                                     </div>
                                     </a>
