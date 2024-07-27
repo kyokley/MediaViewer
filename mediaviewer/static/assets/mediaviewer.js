@@ -292,7 +292,7 @@ function _ajaxCheckBox(update_payload, movie_or_media_file, is_detail_page){
                 var fadeOutLength;
                 if(is_detail_page){
                     fadeOutLength = 2000;
-                    savedFields.html("<p>Saved</p>");
+                    savedFields.html("&nbsp;Saved");
                 } else {
                     fadeOutLength = 500;
                     savedFields.parent().parent().parent().addClass("row-highlight");
