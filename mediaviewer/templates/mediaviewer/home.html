@@ -188,16 +188,14 @@
                                         {% else %}
                                         href="{% url 'mediaviewer:tvdetail' file.pk %}"
                                         {% endif %}>
-                                        <img src="{{ file.poster.image.url }}" class="d-block {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}">
-                                        <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
-                                        {% if file.is_tv and file.season and file.episode %}
-                                            <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
-                                            <p>{{ file.poster.episodename }}</p>
-                                        {% else %}
-                                            <h5>{{ file.short_name }}</h5>
-                                        {% endif %}
-                                    </div>
+                                        <img src="{{ file.poster.image.url }}" class="d-block {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
                                     </a>
+                                    <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
+                                    {% if file.is_tv and file.season and file.episode %}
+                                        <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
+                                        <p>{{ file.poster.episodename }}</p>
+                                    {% endif %}
+                                    </div>
                                 </div>
                                 {% endfor %}
                             </div>

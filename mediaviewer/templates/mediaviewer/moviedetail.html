@@ -100,7 +100,7 @@
                                                                                            {% if viewed %}
                                                                                                checked
                                                                                        {% endif %}
-                                                                                           onclick="ajaxMovieCheckBox(['{{movie.id}}'])" />
+                                                                                           onclick="ajaxMovieCheckBox(['{{movie.id}}'], true)" />
                     <span id="saved-{{ movie.id }}"></span>
                     {% endblock %}
                 </div>

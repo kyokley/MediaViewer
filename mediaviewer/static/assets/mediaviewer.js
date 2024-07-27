@@ -114,7 +114,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
                         update_payload["media_files"][elem.name] = false;
                     }
 
-                    _ajaxCheckBox(update_payload, 'media_file');
+                    _ajaxCheckBox(update_payload, 'media_file', false);
                 }
             },
             {
@@ -133,7 +133,7 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path){
                         elem.checked = true;
                         update_payload["media_files"][elem.name] = true;
                     }
-                    _ajaxCheckBox(update_payload, 'media_file');
+                    _ajaxCheckBox(update_payload, 'media_file', false);
                 }
             },
         ];
@@ -218,7 +218,7 @@ function prepareTableForRequests($){
     });
 }
 
-function ajaxMovieCheckBox(file_ids){
+function ajaxMovieCheckBox(file_ids, is_detail_page){
     update_payload = {
         csrfmiddlewaretoken: csrf_token,
         'movies': {}
@@ -231,10 +231,10 @@ function ajaxMovieCheckBox(file_ids){
         box.setAttribute('disabled', 'disabled');
     });
 
-    _ajaxCheckBox(update_payload, 'movie');
+    _ajaxCheckBox(update_payload, 'movie', is_detail_page);
 }
 
-function ajaxTVCheckBox(file_ids){
+function ajaxTVCheckBox(file_ids, is_detail_page){
     update_payload = {
         csrfmiddlewaretoken: csrf_token,
         "media_files": {}
@@ -247,10 +247,10 @@ function ajaxTVCheckBox(file_ids){
         box.setAttribute('disabled', 'disabled');
     });
 
-    _ajaxCheckBox(update_payload, 'media_file');
+    _ajaxCheckBox(update_payload, 'media_file', is_detail_page);
 }
 
-function _ajaxCheckBox(update_payload, movie_or_media_file){
+function _ajaxCheckBox(update_payload, movie_or_media_file, is_detail_page){
     jQuery.ajax({
         url : "/mediaviewer/ajaxviewed/",
         type : "POST",
@@ -288,12 +288,25 @@ function _ajaxCheckBox(update_payload, movie_or_media_file){
                 }
 
                 savedFields = $(selector_str);
-                savedFields.parent().parent().parent().addClass("row-highlight");
+
+                var fadeOutLength;
+                if(is_detail_page){
+                    fadeOutLength = 2000;
+                    savedFields.html("&nbsp;Saved");
+                } else {
+                    fadeOutLength = 500;
+                    savedFields.parent().parent().parent().addClass("row-highlight");
+                }
 
                 savedFields.attr('style', '');
-                savedFields.fadeOut(500, function() {
+
+                savedFields.fadeOut(fadeOutLength, function() {
                     savedFields.attr('style', 'display: none;');
-                    savedFields.parent().parent().parent().removeClass("row-highlight");
+                    if(is_detail_page){
+                        savedFields.html("");
+                    } else {
+                        savedFields.parent().parent().parent().removeClass("row-highlight");
+                    }
                 });
             }
         },
