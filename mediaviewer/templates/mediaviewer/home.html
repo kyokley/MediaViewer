@@ -184,9 +184,11 @@
                                 <div class="carousel-item {% if forloop.first %}active{% endif %}">
                                     <a
                                         {% if file.is_movie %}
-                                        href="{% url 'mediaviewer:moviedetail' file.pk %}"
+                                            href="{% url 'mediaviewer:moviedetail' file.pk %}"
+                                        {% elif file.season or file.episode %}
+                                            href="{% url 'mediaviewer:tvdetail' file.pk %}"
                                         {% else %}
-                                        href="{% url 'mediaviewer:tvdetail' file.pk %}"
+                                            href="{% url 'mediaviewer:tvshows' file.pk %}"
                                         {% endif %}>
                                         <img src="{{ file.poster.image.url }}" class="d-block {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
                                     </a>
