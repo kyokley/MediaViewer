@@ -21,7 +21,7 @@ SEASON = "season"
 
 class MediaFileQuerySet(models.QuerySet):
     def delete(self, *args, **kwargs):
-        Poster.objects.filter(pk__in=self.values("poster")).delete()
+        Poster.objects.filter(pk__in=self.values("_poster")).delete()
         return super().delete(*args, **kwargs)
 
     def search(self, search_str):
