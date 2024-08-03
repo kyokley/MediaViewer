@@ -1,5 +1,3 @@
-import itertools
-
 from django.conf import settings as conf_settings
 from django.db import models
 
