@@ -68,7 +68,7 @@ RUN python manage.py collectstatic --no-input
 CMD uwsgi --ini /code/uwsgi/uwsgi.conf
 
 
-# ********************* Begin Dev Image ******************
+# ********************* Begin Dev Image *******************
 FROM base AS dev
 RUN $POETRY_VENV/bin/poetry install
 COPY --from=static-builder /code/node_modules /node/node_modules
