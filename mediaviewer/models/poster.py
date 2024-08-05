@@ -256,7 +256,7 @@ class Poster(TimeStampModel):
                         self.tmdb = resp["tv_episode_results"][0]["id"]
                         resp = resp['tv_episode_results'][0]
                 except Exception:
-                    self.tmdb = None
+                    self.tmdb = ""
                     resp = {}
 
             if not self.tmdb:
@@ -295,7 +295,7 @@ class Poster(TimeStampModel):
                     resp = getJSONData(url)
                 except Exception:
                     log.debug(f"Got bad tmdb_id={self.tmdb}. Reverting to null")
-                    self.tmdb = None
+                    self.tmdb = ""
                     resp = None
 
         if resp:
