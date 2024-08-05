@@ -378,7 +378,7 @@ class Poster(TimeStampModel):
             )
             self.extendedplot = tvinfo.get("overview", "")
             self.episodename = tvinfo.get("name")
-            self.tmdb = tvinfo.get("id", self.tmdb)
+            self.tmdb = tvinfo.get("id", self.tmdb) or ""
 
             if hasattr(self, 'tv'):
                 if release_date_str := tvinfo.get('first_air_date'):
