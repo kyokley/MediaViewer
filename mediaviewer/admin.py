@@ -218,10 +218,14 @@ class MediaFileAdmin(admin.ModelAdmin):
                "hide",
                "unhide",
                'repopulate_poster_data',
+               'refresh_display_name',
                )
 
     def infer_scrapers(self, request, queryset):
         queryset.infer_scrapers()
+
+    def refresh_display_name(self, request, queryset):
+        queryset.refresh_display_name()
 
     def hide(self, request, queryset):
         queryset.update(hide=True)

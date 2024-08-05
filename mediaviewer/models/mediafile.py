@@ -36,6 +36,10 @@ class MediaFileQuerySet(models.QuerySet):
         for mf in self:
             mf.infer_scraper()
 
+    def refresh_display_name(self):
+        for mf in self:
+            mf.refresh_display_name()
+
     def populate_poster(self):
         posters = Poster.objects.filter(media_file__in=self)
         for poster in posters:
@@ -141,6 +145,12 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         else:
             name = f"{self.media.name}"
         return name
+
+    def refresh_display_name(self):
+        if self.poster:
+            episode_name = self.poster.episodename
+            self.display_name = f'S{self.season:02} E{self.episode:02}: {episode_name}'
+            self.save()
 
     def infer_scraper(self, scrapers=None):
         if self.movie:
