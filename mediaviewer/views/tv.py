@@ -2,6 +2,7 @@ import random
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 
 from mediaviewer.models import TV, Comment, Genre, MediaFile
 from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
@@ -87,6 +88,17 @@ def tvdetail(request, mf_id):
         user=user, media_file=mf, defaults={"viewed": False}
     )
 
+    previous_mf = mf.previous()
+    next_mf = mf.next()
+
+    previous_link = reverse('mediaviewer:tvdetail',
+                            kwargs=dict(mf_id=previous_mf.pk)
+                            ) if previous_mf else None
+
+    next_link = reverse('mediaviewer:tvdetail',
+                            kwargs=dict(mf_id=next_mf.pk)
+                            ) if next_mf else None
+
     settings = user.settings()
     context = {
         "mf": mf,
@@ -99,6 +111,8 @@ def tvdetail(request, mf_id):
         "can_download": settings and settings.can_download or False,
         "file_size": mf.size and humansize(mf.size),
         "obj_type": "media_file",
+        "previous_link": previous_link,
+        "next_link": next_link,
     }
     context["active_page"] = "tvshows"
     context["title"] = mf.full_name

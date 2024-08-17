@@ -29,3 +29,16 @@
                                                                            " />
     <span id="saved-{{ mf.id }}"></span>
 {% endblock %}
+
+{% block episode_nav %}
+    {% if previous_link %}
+    <div class="col-auto">
+        <a class='btn btn-info' name='previous-btn' id='previous-btn' href="{{ previous_link }}"><i class="bi-arrow-left-circle-fill"></i> Previous Episode</a>
+    </div>
+    {% endif %}
+    {% if next_link %}
+    <div class="col-auto">
+        <a class='btn btn-info' name='next-btn' id='next-btn' href="{{ next_link }}"><i class="bi-arrow-right-circle-fill"></i> Next Episode</a>
+    </div>
+    {% endif %}
+{% endblock %}
