@@ -20,7 +20,7 @@ class MediaQuerySet(models.QuerySet):
         return qs
 
     def delete(self, *args, **kwargs):
-        Poster.objects.filter(pk__in=self.values("poster")).delete()
+        Poster.objects.filter(pk__in=self.values("_poster")).delete()
         return super().delete(*args, **kwargs)
 
 
