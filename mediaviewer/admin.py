@@ -5,7 +5,7 @@ from mediaviewer.models import (TV, DonationSite, DownloadToken,
                                 FilenameScrapeFormat, Genre, MediaFile,
                                 MediaPath, Movie, Poster, Request,
                                 SiteGreeting, UserSettings, VideoProgress,
-                                Collection, Media)
+                                Collection)
 
 
 @admin.register(DownloadToken)
@@ -267,10 +267,10 @@ class PosterAdmin(admin.ModelAdmin):
                                )
         return qs
 
-    def _populate(self, queryset):
+    def _populate(self, queryset, clear=False):
         for poster in queryset:
             with transaction.atomic():
-                poster.populate_data()
+                poster.populate_data(clear=clear)
                 poster.save()
 
     def repopulate_data(self, request, queryset):
@@ -287,7 +287,7 @@ class PosterAdmin(admin.ModelAdmin):
                         tagline="",
                         release_date=None,
                         )
-        self._populate(queryset)
+        self._populate(queryset, clear=True)
 
     clear_and_populate.description = "Clear and Populate"
 
