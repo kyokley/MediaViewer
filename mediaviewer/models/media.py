@@ -96,6 +96,9 @@ class Media(TimeStampModel):
             self.poster.delete()
         return super().delete(*args, **kwargs)
 
+    def is_media_file(self):
+        return False
+
     @property
     def full_name(self):
         return self.name

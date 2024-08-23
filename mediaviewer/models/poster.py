@@ -238,26 +238,30 @@ class Poster(TimeStampModel):
         resp = None
 
         if not self.tmdb:
-            if self.imdb:
-                log.debug(f"Getting data from IMDB using {self.imdb}")
+            if self.ref_obj.is_tv() and self.ref_obj.is_media_file():
+                self.tmdb = self.ref_obj.tv.poster.tmdb
 
-                url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
+            if not self.tmdb:
+                if self.imdb:
+                    log.debug(f"Getting data from IMDB using {self.imdb}")
 
-                resp = getJSONData(url)
+                    url = f"https://api.themoviedb.org/3/find/{self.imdb}?api_key={settings.API_KEY}&external_source=imdb_id"
 
-                try:
-                    if self.ref_obj.is_movie():
-                        self.tmdb = resp["movie_results"][0]["id"]
-                        resp = resp['movie_results'][0]
-                    elif hasattr(self, 'tv'):
-                        self.tmdb = resp["tv_results"][0]["id"]
-                        resp = resp['tv_results'][0]
-                    else:
-                        self.tmdb = resp["tv_episode_results"][0]["id"]
-                        resp = resp['tv_episode_results'][0]
-                except Exception:
-                    self.tmdb = ""
-                    resp = {}
+                    resp = getJSONData(url)
+
+                    try:
+                        if self.ref_obj.is_movie():
+                            self.tmdb = resp["movie_results"][0]["id"]
+                            resp = resp['movie_results'][0]
+                        elif hasattr(self, 'tv'):
+                            self.tmdb = resp["tv_results"][0]["id"]
+                            resp = resp['tv_results'][0]
+                        else:
+                            self.tmdb = resp["tv_episode_results"][0]["id"]
+                            resp = resp['tv_episode_results'][0]
+                    except Exception:
+                        self.tmdb = ""
+                        resp = {}
 
             if not self.tmdb:
                 if self.ref_obj.is_movie():
