@@ -119,6 +119,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     def is_movie(self):
         return not self.is_tv()
 
+    def is_media_file(self):
+        return True
+
     @property
     def poster(self):
         if self._poster is None:
