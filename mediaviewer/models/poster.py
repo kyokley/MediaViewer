@@ -395,6 +395,10 @@ class Poster(TimeStampModel):
                 else:
                     self.release_date = None
 
+        if self.ref_obj.is_media_file():
+            self.ref_obj.populate_display_name()
+            self.ref_obj.save()
+
     def _store_plot(self, imdb_data):
         plot = (
             imdb_data.get("Plot")

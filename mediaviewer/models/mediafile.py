@@ -191,12 +191,15 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
             self.poster.populate_data()
 
-            episode_name = self.poster.episodename
-            self.display_name = f'S{self.season:02} E{self.episode:02}: {episode_name}'
-        else:
-            self.display_name = self.media.name
+        self.populate_display_name()
 
         self.save()
+
+    def populate_display_name(self):
+        if self.scraper and self.tv:
+            self.display_name = f'S{self.season:02} E{self.episode:02}: {self.poster.episodename}'
+        else:
+            self.display_name = self.media.name
 
     def url(self):
         if self.is_tv():
