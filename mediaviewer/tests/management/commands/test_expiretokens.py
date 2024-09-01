@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from django.core.management import call_command
-from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models import DownloadToken
 
 
 @pytest.mark.parametrize(

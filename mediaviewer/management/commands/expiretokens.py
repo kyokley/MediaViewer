@@ -3,34 +3,43 @@ import argparse
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
-from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models import VideoProgress, DownloadToken
 
 from django.conf import settings as conf_settings
 from django.utils import timezone
 from django.db import transaction
 
 
-class Command(BaseCommand):
+class ExpireCommand(BaseCommand):
     help = 'Remove expired tokens'
+
+    FILTER_FIELD = {DownloadToken: 'date_created',
+                    VideoProgress: 'date_edited'}
 
     def add_arguments(self, parser):
         parser.add_argument('--dry-run',
                             action=argparse.BooleanOptionalAction)
 
-    def handle(self, *args, **kwargs):
-        dry_run = kwargs['dry_run']
+    def _handle(self,
+                expiry_length,
+                klass,
+                *args,
+                **kwargs):
+        dry_run = kwargs.get('dry_run', False) or False
 
         expiry_time = (
-            timezone.now() - timedelta(hours=conf_settings.TOKEN_HOLDING_PERIOD)
+            timezone.now() - timedelta(hours=expiry_length)
         )
 
         with transaction.atomic():
-            # Remove old tokens
-            tokens_deleted, _ = (
-                DownloadToken.objects.filter(date_created__lt=expiry_time).delete()
-            )
+            qs = klass.objects.filter(**{
+                f'{self.FILTER_FIELD[klass]}__lt': expiry_time,
+                })
 
-            self.stdout.write(f'Removed {tokens_deleted} tokens.')
+            # Remove old tokens
+            tokens_deleted, _ = qs.delete()
+
+            self.stdout.write(f'Removed {tokens_deleted} {klass.__name__} records.')
 
             if dry_run:
                 self.stdout.write(
@@ -39,3 +48,11 @@ class Command(BaseCommand):
                     )
                 )
                 transaction.set_rollback(True)
+
+
+class Command(ExpireCommand):
+    def handle(self, *args, **kwargs):
+        self._handle(conf_settings.TOKEN_HOLDING_PERIOD,
+                     DownloadToken,
+                     *args,
+                     **kwargs)

@@ -75,10 +75,12 @@ class VideoProgressAdmin(admin.ModelAdmin):
         "user",
         "file_filename",
         "offset",
+        "date_edited",
     )
 
     def file_filename(self, obj):
-        return f"{obj.file.filename}"
+        movie_or_mf = obj.movie or obj.media_file
+        return movie_or_mf.full_name if movie_or_mf else None
 
     file_filename.short_description = "File"
 
