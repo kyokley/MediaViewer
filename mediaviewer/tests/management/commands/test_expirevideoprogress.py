@@ -42,7 +42,6 @@ class TestExpireTokens:
                                           media_file=self.mf,
                                           movie=self.movie,
                                           offset=100,
-
                                           )
 
         call_command(self.command_name)
