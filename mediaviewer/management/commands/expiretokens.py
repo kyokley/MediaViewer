@@ -32,12 +32,12 @@ class ExpireCommand(BaseCommand):
         )
 
         with transaction.atomic():
+            qs = klass.objects.filter(**{
+                f'{self.FILTER_FIELD[klass]}__lt': expiry_time,
+                })
+
             # Remove old tokens
-            tokens_deleted, _ = (
-                    klass.objects.filter(**{
-                        f'{self.FILTER_FIELD[klass]}__lt': expiry_time,
-                        }).delete()
-                    )
+            tokens_deleted, _ = qs.delete()
 
             self.stdout.write(f'Removed {tokens_deleted} {klass.__name__} records.')
 
