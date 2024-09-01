@@ -71,6 +71,14 @@ class Movie(Media, ViewableObjectMixin):
 
     objects = MovieManager.from_queryset(MovieQuerySet)()
 
+    @property
+    def display_name(self):
+        return self.name
+
+    @property
+    def full_name(self):
+        return self.name
+
     def is_tv(self):
         return False
 
