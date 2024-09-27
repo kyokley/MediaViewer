@@ -35,6 +35,9 @@
       install.enable = true;
       activate.enable = true;
     };
+    uv = {
+      enable = true;
+    };
   };
 
   # https://devenv.sh/pre-commit-hooks/

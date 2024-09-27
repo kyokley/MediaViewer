@@ -65,7 +65,7 @@ FROM base AS prod
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
 RUN python manage.py collectstatic --no-input
-CMD uwsgi --ini /code/uwsgi/uwsgi.conf
+CMD gunicorn mysite.wsgi
 
 
 # ********************* Begin Dev Image ******************
