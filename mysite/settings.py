@@ -257,7 +257,7 @@ REFERRER_POLICY = "same-origin"
 API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
-REQUEST_TIMEOUT = 3
+REQUEST_TIMEOUT = 20
 
 # Run the python debugging smtp server with the following
 # python -m smtpd -n -c DebuggingServer localhost:1025
