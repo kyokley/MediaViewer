@@ -195,7 +195,8 @@ li.nav-item > a.btn-outline-primary:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: auto;
+    margin-left: 25px;
+    margin-right: 25px;
 }
 
 .carousel-movie-item {

@@ -22,6 +22,8 @@
             <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
             <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
             <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "slick-carousel/slick/slick.css" %}" rel="stylesheet">
+            <link href="{% static "slick-carousel/slick/slick-theme.css" %}" rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
     </head>
@@ -172,43 +174,26 @@
                         <!-- Uncomment below to test carousel -->
                         <!-- <div id="recent-carousel" class="carousel slide" data-bs-ride="true"> -->
                         <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
-                            {% if carousel_files|length <= 10 %}
-                            <div class="carousel-indicators">
-                                {% for file in carousel_files %}
-                                    <button type="button" data-bs-target="#recent-carousel" data-bs-slide-to="{{ forloop.counter0 }}" class="primary-indicator {% if forloop.first %}active{% endif %}" aria-current="true" aria-label="Slide {{ forloop.counter0 }}"></button>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            <div class="carousel-inner">
-                                {% for file in carousel_files %}
-                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                    <a
-                                        {% if file.is_movie %}
-                                            href="{% url 'mediaviewer:moviedetail' file.pk %}"
-                                        {% elif file.season or file.episode %}
-                                            href="{% url 'mediaviewer:tvdetail' file.pk %}"
-                                        {% else %}
-                                            href="{% url 'mediaviewer:tvshows' file.pk %}"
-                                        {% endif %}>
-                                        <img src="{{ file.poster.image.url }}" class="d-block {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
-                                    </a>
-                                    <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
-                                    {% if file.is_tv and file.season and file.episode %}
-                                        <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
-                                        <p>{{ file.poster.episodename }}</p>
-                                    {% endif %}
-                                    </div>
+                            {% for file in carousel_files %}
+                            <div class="carousel-item">
+                                <a
+                                    {% if file.is_movie %}
+                                        href="{% url 'mediaviewer:moviedetail' file.pk %}"
+                                    {% elif file.season or file.episode %}
+                                        href="{% url 'mediaviewer:tvdetail' file.pk %}"
+                                    {% else %}
+                                        href="{% url 'mediaviewer:tvshows' file.pk %}"
+                                    {% endif %}>
+                                    <img src="{{ file.poster.image.url }}" class="d-block {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
+                                </a>
+                                <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
+                                {% if file.is_tv and file.season and file.episode %}
+                                    <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
+                                    <p>{{ file.poster.episodename }}</p>
+                                {% endif %}
                                 </div>
-                                {% endfor %}
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#recent-carousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#recent-carousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
+                            {% endfor %}
                         </div>
                     {% endif %}
                 {% endblock %}
@@ -257,6 +242,8 @@
     <script src="{% static "datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js" %}"></script>
     <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
     <script src="{% static "passwordless/passwordless.v1.1.0.umd.min.js" %}"></script>
+    <script src="{% static "slick-carousel/slick/slick.js" %}"></script>
+    <script src="{% static "jquery-migrate/dist/jquery-migrate.min.js" %}"></script>
     <script src="{% static "assets/mediaviewer.js" %}"></script>
 {% endblock %}
 
