@@ -173,7 +173,7 @@
                     {% if carousel_files %}
                         <!-- Uncomment below to test carousel -->
                         <!-- <div id="recent-carousel" class="carousel slide" data-bs-ride="true"> -->
-                        <div id="recent-carousel" class="carousel slide" data-bs-ride="carousel">
+                        <div id="recent-carousel" class="carousel slide">
                             {% for file in carousel_files %}
                             <div class="carousel-item">
                                 <a
@@ -184,7 +184,7 @@
                                     {% else %}
                                         href="{% url 'mediaviewer:tvshows' file.pk %}"
                                     {% endif %}>
-                                    <img src="{{ file.poster.image.url }}" class="d-block {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
+                                    <img src="{{ file.poster.image.url }}" class="d-block align-middle {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
                                 </a>
                                 <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
                                 {% if file.is_tv and file.season and file.episode %}

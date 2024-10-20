@@ -31,7 +31,7 @@ function preparePage($) {
         centerMode: true,
         variableWidth: true,
         adaptiveHeight: false,
-        autoplay: true,
+        autoplay: false,
         autoplaySpeed: 2000
     });
 }
