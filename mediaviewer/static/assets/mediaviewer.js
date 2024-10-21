@@ -31,9 +31,16 @@ function preparePage($) {
         centerMode: true,
         variableWidth: true,
         adaptiveHeight: false,
-        autoplay: false,
+        autoplay: true,
         autoplaySpeed: 2000
     });
+
+    /*
+    $( ".carousel-img" ).each(function( index ) {
+        $( this ).css('margin-top',
+            ($('.carousel').height()-$(this).height())/2+'px' );
+    });
+    */
 }
 
 function setHomeFormSubmit($) {

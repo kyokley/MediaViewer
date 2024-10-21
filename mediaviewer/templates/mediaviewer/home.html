@@ -176,7 +176,7 @@
                         <div id="recent-carousel" class="carousel slide">
                             {% for file in carousel_files %}
                             <div class="carousel-item">
-                                <a
+                                <a class="carousel-link {% if theme == 'dark' %}text-light-emphasis{% endif %}"
                                     {% if file.is_movie %}
                                         href="{% url 'mediaviewer:moviedetail' file.pk %}"
                                     {% elif file.season or file.episode %}
@@ -184,13 +184,13 @@
                                     {% else %}
                                         href="{% url 'mediaviewer:tvshows' file.pk %}"
                                     {% endif %}>
-                                    <img src="{{ file.poster.image.url }}" class="d-block align-middle {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
-                                </a>
+                                    <img src="{{ file.poster.image.url }}" class="carousel-img d-block align-middle {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
                                 <div class="carousel-caption d-block {% if theme == 'dark' %}text-light-emphasis{% endif %}">
                                 {% if file.is_tv and file.season and file.episode %}
                                     <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
                                     <p>{{ file.poster.episodename }}</p>
                                 {% endif %}
+                                </a>
                                 </div>
                             </div>
                             {% endfor %}

@@ -188,15 +188,20 @@ li.nav-item > a.btn-outline-primary:hover {
   filter: none;
 }
 
-#recent-carousel .carousel-item img {
+#recent-carousel {
     object-fit: cover;
     object-position: center;
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.carousel-item {
     margin-left: 25px;
     margin-right: 25px;
+    justify-content: center;
+    align-items: center;
 }
 
 .carousel-movie-item {
@@ -215,3 +220,16 @@ li.nav-item > a.btn-outline-primary:hover {
 .base-row {
     transition: all .4s ease-in-out;
 }
+
+a.carousel-link {
+    text-decoration: none;
+}
+
+/*
+.carousel-link {
+    height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+*/
