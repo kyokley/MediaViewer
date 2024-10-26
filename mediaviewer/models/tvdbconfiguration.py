@@ -31,7 +31,7 @@ def getJSONData(url):
                 time.sleep(1)
 
         return data
-    except Exception as e:
+    except Exception:
         raise
 
 
