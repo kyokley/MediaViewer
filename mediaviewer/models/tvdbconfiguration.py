@@ -12,7 +12,11 @@ def getJSONData(url):
         url = url.replace(" ", "+")
         log.info("Getting json from %s" % (url,))
         resp = requests.get(url, timeout=settings.REQUEST_TIMEOUT)
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except Exception:
+            time.sleep(1)
+            raise
         data = resp.json()
         log.debug("Got %s" % (data,))
 
@@ -20,15 +24,14 @@ def getJSONData(url):
             remaining = int(resp.headers["X-RateLimit-Remaining"])
             limit = int(resp.headers.get("X-RateLimit-Limit", "40"))
 
-            if remaining < 0.1 * limit:
+            if remaining < 0.3 * limit:
                 log.warning(
                     "90%% of the rate limit has been used. Sleeping for 1 second"
                 )
                 time.sleep(1)
 
         return data
-    except Exception as e:
-        log.error(str(e), exc_info=True)
+    except Exception:
         raise
 
 
@@ -61,7 +64,7 @@ class TVDBConfiguration:
             self.still_size = ""
             self.connected = False
             self.genres = {}
-            log.error(str(e), exc_info=True)
+            log.warning(str(e), exc_info=True)
             log.debug("Failed to set tvdb values")
 
     def _getTVDBConfiguration(self):

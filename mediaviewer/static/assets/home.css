@@ -188,22 +188,15 @@ li.nav-item > a.btn-outline-primary:hover {
   filter: none;
 }
 
-#recent-carousel .carousel-item img {
-    object-fit: cover;
-    object-position: center;
-    overflow: hidden;
-    display: flex;
+.carousel-item {
+    margin-left: 25px;
+    margin-right: 25px;
     justify-content: center;
     align-items: center;
-    margin: auto;
 }
 
 .carousel-movie-item {
     height: 50vh;
-}
-
-.carousel-indicators .active {
-    background-color: var(--bs-light) !important;
 }
 
 .row-highlight {
@@ -213,4 +206,18 @@ li.nav-item > a.btn-outline-primary:hover {
 
 .base-row {
     transition: all .4s ease-in-out;
+}
+
+a.carousel-link {
+    text-decoration: none;
+    color: var(--bs-text-white) !important;
+}
+
+.slick-track
+{
+    position: relative;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
 }

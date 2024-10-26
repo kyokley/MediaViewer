@@ -28,6 +28,8 @@
     "datatables.net-buttons-bs5": "^2.4.1",
     "datatables.net-scroller-bs5": "^2.4.1",
     "jquery": "^3.7.1",
-    "jquery.shorten": "^1.0.0"
+    "jquery-migrate": "^3.5.2",
+    "jquery.shorten": "^1.0.0",
+    "slick-carousel": "^1.8.1"
   }
 }

@@ -25,6 +25,16 @@ function bindAlertMessage($) {
 
 function preparePage($) {
     bindAlertMessage($);
+    $('.carousel').slick({
+        infinite: true,
+        speed: 600,
+        centerMode: true,
+        variableWidth: true,
+        adaptiveHeight: false,
+        autoplay: true,
+        autoplaySpeed: 2000,
+        arrows: true
+    });
 }
 
 function setHomeFormSubmit($) {

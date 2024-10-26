@@ -22,7 +22,7 @@ class TestGetJSONData:
 
     def test_not_rate_limited(self):
         self.mock_get.return_value.headers = {
-            "X-RateLimit-Remaining": "10",
+            "X-RateLimit-Remaining": "12",
             "X-RateLimit-Limit": "40",
         }
 
