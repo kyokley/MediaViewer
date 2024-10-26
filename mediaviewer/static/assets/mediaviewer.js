@@ -33,7 +33,10 @@ function preparePage($) {
         adaptiveHeight: false,
         autoplay: true,
         autoplaySpeed: 2000,
-        arrows: true
+        pauseOnFocus: false,
+        swipeToSlide: true,
+        arrows: true,
+        waitForAnimate: false
     });
 }
 
