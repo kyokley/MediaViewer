@@ -33,6 +33,8 @@ function preparePage($) {
         adaptiveHeight: false,
         autoplay: true,
         autoplaySpeed: 2000,
+        pauseOnFocus: false,
+        swipeToSlide: true,
         arrows: true,
         waitForAnimate: false
     });
