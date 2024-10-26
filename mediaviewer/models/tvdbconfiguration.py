@@ -32,7 +32,6 @@ def getJSONData(url):
 
         return data
     except Exception as e:
-        # log.warning(str(e), exc_info=True)
         raise
 
 

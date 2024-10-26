@@ -35,13 +35,6 @@ function preparePage($) {
         autoplaySpeed: 2000,
         arrows: true
     });
-
-    /*
-    $( ".carousel-img" ).each(function( index ) {
-        $( this ).css('margin-top',
-            ($('.carousel').height()-$(this).height())/2+'px' );
-    });
-    */
 }
 
 function setHomeFormSubmit($) {
