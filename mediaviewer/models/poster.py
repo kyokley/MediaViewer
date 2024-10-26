@@ -287,7 +287,10 @@ class Poster(TimeStampModel):
 
                     if self.tmdb:
                         url = f"https://api.themoviedb.org/3/tv/{self.tmdb}?language=en-US&api_key={settings.API_KEY}"
-                        resp = getJSONData(url)
+                        try:
+                            resp = getJSONData(url)
+                        except Exception:
+                            resp = None
                     else:
                         resp = None
             else:
@@ -413,7 +416,8 @@ class Poster(TimeStampModel):
         try:
             extended_info = _get_extended_info(self.tmdb, is_movie=self.ref_obj.is_movie())
         except Exception as e:
-            log.error(e)
+            log.warning("Extended info not found")
+            log.warning(e)
             return
 
         self._store_rating(extended_info)
