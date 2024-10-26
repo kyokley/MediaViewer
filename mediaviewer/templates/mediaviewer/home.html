@@ -184,7 +184,7 @@
                                     {% else %}
                                         href="{% url 'mediaviewer:tvshows' file.pk %}"
                                     {% endif %}>
-                                    <img src="{{ file.poster.image.url }}" class="carousel-img {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
+                                <img src="{{ file.poster.image.url }}" class="carousel-img {% if file.is_movie or not file.season or not file.episode %}carousel-movie-item{% endif %}" />
                                 <div class="carousel-caption {% if theme == 'dark' %}text-light-emphasis{% endif %}">
                                 {% if file.is_tv and file.season and file.episode %}
                                     <h5>{{ file.short_name }} S{{ file.season | stringformat:"02d" }}E{{ file.episode | stringformat:"02d" }}:</h5>
