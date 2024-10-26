@@ -32,7 +32,8 @@ function preparePage($) {
         variableWidth: true,
         adaptiveHeight: false,
         autoplay: true,
-        autoplaySpeed: 2000
+        autoplaySpeed: 2000,
+        arrows: true
     });
 
     /*
