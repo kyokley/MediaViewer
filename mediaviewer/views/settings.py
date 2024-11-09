@@ -7,8 +7,7 @@ from django.utils.timezone import utc
 
 from mediaviewer.log import log
 from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.models.usersettings import (FILENAME_SORT,
-                                             UserSettings)
+from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 
@@ -25,7 +24,6 @@ def settings(request):
     context["active_page"] = "settings"
     user = request.user
     settings = user.settings()
-    context["ip_format"] = settings.ip_format
     context["title"] = "Settings"
     context["binge_mode"] = settings.binge_mode
     context["jump_to_last"] = settings.jump_to_last_watched
