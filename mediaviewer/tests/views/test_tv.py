@@ -4,7 +4,6 @@ from django.http import Http404, HttpRequest
 
 from mediaviewer.models import TV
 from mediaviewer.models.genre import Genre
-from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 from mediaviewer.views.tv import tvshows, tvshows_by_genre, tvshowsummary
 
 
@@ -147,8 +146,6 @@ class TestTvShows:
         expected_context = {
             "tv": self.tv_file.tv,
             "view": "tvshows",
-            "LOCAL_IP": LOCAL_IP,
-            "BANGUP_IP": BANGUP_IP,
             "can_download": True,
             "jump_to_last": True,
             "active_page": "tvshows",

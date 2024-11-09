@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from mediaviewer.models import TV, Comment, Genre, MediaFile
-from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 from mediaviewer.utils import humansize, logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.views.ajax import get_tv_show_rows_query
@@ -64,8 +63,6 @@ def tvshows(request, tv_id):
     context = {
         "tv": tv,
         "view": "tvshows",
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
         "table_data_page": "ajaxtvshows",
@@ -105,8 +102,6 @@ def tvdetail(request, mf_id):
         "display_name": mf.tv.name,
         "episode_name": mf.display_name,
         "poster": mf.poster,
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
         "file_size": mf.size and humansize(mf.size),
