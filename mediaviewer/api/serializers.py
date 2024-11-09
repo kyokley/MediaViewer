@@ -82,7 +82,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
 
     def get_download_link(self, obj):
         movie_or_media_file = obj.movie or obj.media_file
-        return movie_or_media_file.downloadLink(obj.user, obj.guid)
+        return movie_or_media_file.downloadLink(obj.guid)
 
     def get_theme(self, obj):
         user_settings = UserSettings.getSettings(obj.user)

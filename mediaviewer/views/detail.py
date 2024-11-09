@@ -124,7 +124,7 @@ def ajaxdownloadbutton(request):
         else:
             dt = DownloadToken.objects.from_movie(user, obj)
 
-        downloadlink = obj.downloadLink(user, dt.guid)
+        downloadlink = obj.downloadLink(dt.guid)
         response = {
             "guid": dt.guid,
             "isMovie": dt.ismovie,
@@ -145,5 +145,5 @@ def autoplaydownloadlink(request, mf_id):
     mf = get_object_or_404(MediaFile, pk=mf_id)
     dt = DownloadToken.objects.from_media_file(user, mf)
 
-    downloadlink = mf.autoplayDownloadLink(user, dt.guid)
+    downloadlink = mf.autoplayDownloadLink(dt.guid)
     return redirect(downloadlink)
