@@ -151,8 +151,6 @@ class TestSettings:
 
     def test_user_has_email(self):
         expected_context = {
-            "LOCAL_IP": "test_local_ip",
-            "BANGUP_IP": "test_bangup_ip",
             "greeting": "test_greeting",
             "active_page": "settings",
             "title": "Settings",
@@ -181,8 +179,6 @@ class TestSettings:
         self.user.email = None
 
         expected_context = {
-            "LOCAL_IP": "test_local_ip",
-            "BANGUP_IP": "test_bangup_ip",
             "greeting": "test_greeting",
             "active_page": "settings",
             "title": "Settings",
