@@ -122,14 +122,6 @@ class TestNewUserView:
 class TestSettings:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.LOCAL_IP_patcher = mocker.patch(
-            "mediaviewer.views.settings.LOCAL_IP", "test_local_ip"
-        )
-
-        self.BANGUP_IP_patcher = mocker.patch(
-            "mediaviewer.views.settings.BANGUP_IP", "test_bangup_ip"
-        )
-
         self.mock_latestSiteGreeting = mocker.patch(
             "mediaviewer.views.settings.SiteGreeting.latestSiteGreeting"
         )

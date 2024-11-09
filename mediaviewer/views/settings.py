@@ -7,8 +7,8 @@ from django.utils.timezone import utc
 
 from mediaviewer.log import log
 from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.models.usersettings import (BANGUP_IP, FILENAME_SORT,
-                                             LOCAL_IP, UserSettings)
+from mediaviewer.models.usersettings import (FILENAME_SORT,
+                                             UserSettings)
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 
@@ -18,8 +18,6 @@ from mediaviewer.views.views_utils import setSiteWideContext
 def settings(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context = {
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "greeting": (
             siteGreeting and siteGreeting.greeting or "Check out the new downloads!"
         ),

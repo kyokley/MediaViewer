@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
 from mediaviewer.models import Comment, Genre, Movie
-from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 
@@ -21,8 +20,6 @@ def movies(request):
     settings = user.settings()
     context = {
         "view": "movies",
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
         "table_data_page": "ajaxmovierows",
@@ -50,8 +47,6 @@ def movies_by_genre(request, genre_id):
     settings = user.settings()
     context = {
         "view": "movies",
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "can_download": settings and settings.can_download or False,
         "jump_to_last": (settings and settings.jump_to_last_watched or False),
         "table_data_page": "ajaxmoviesbygenrerows",
@@ -88,8 +83,6 @@ def moviedetail(request, movie_id):
         "movie": movie,
         "display_name": movie.name,
         "poster": movie.poster,
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
         "obj_type": "movie",

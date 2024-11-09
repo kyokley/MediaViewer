@@ -10,8 +10,6 @@ from django.db.utils import IntegrityError
 
 from mediaviewer.forms import FormlessPasswordReset
 
-LOCAL_IP = "local_ip"
-BANGUP_IP = "bangup"
 
 TIMESTAMP_SORT = "timestamp_sort"
 FILENAME_SORT = "filename_sort"
@@ -39,7 +37,6 @@ class UserSettings(models.Model):
 
     datecreated = models.DateTimeField(db_column="datecreated", blank=True)
     dateedited = models.DateTimeField(db_column="dateedited", blank=True)
-    ip_format = models.TextField(db_column="ip_format", blank=False, null=False)
     user = models.OneToOneField(
         "auth.User",
         on_delete=models.CASCADE,
@@ -77,7 +74,7 @@ class UserSettings(models.Model):
         verbose_name_plural = "User Settings"
 
     def __str__(self):
-        return f"id: {self.id} u: {self.user.username} ip: {self.ip_format}"
+        return f"id: {self.id} u: {self.user.username}"
 
     @property
     def username(self):
@@ -92,7 +89,6 @@ class UserSettings(models.Model):
     def create_user_setting(
         cls,
         user,
-        ip_format=BANGUP_IP,
         default_sort=FILENAME_SORT,
         can_login=False,
         can_download=True,
@@ -103,7 +99,6 @@ class UserSettings(models.Model):
         newSettings.datecreated = datetime.now(pytz.timezone(settings.TIME_ZONE))
         newSettings.dateedited = newSettings.datecreated
         newSettings.user = user
-        newSettings.ip_format = ip_format
         newSettings.default_sort = default_sort
         newSettings.can_download = can_download
         newSettings.can_login = can_login
@@ -120,7 +115,6 @@ class UserSettings(models.Model):
         email,
         is_staff=False,
         is_superuser=False,
-        ip_format=BANGUP_IP,
         default_sort=FILENAME_SORT,
         can_download=True,
         send_email=True,
@@ -152,7 +146,6 @@ class UserSettings(models.Model):
 
         cls.create_user_setting(
             newUser,
-            ip_format=ip_format,
             default_sort=default_sort,
             can_login=True,
             can_download=can_download,

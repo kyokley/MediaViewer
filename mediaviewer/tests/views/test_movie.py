@@ -3,7 +3,6 @@ import pytest
 from django.http import Http404, HttpRequest
 
 from mediaviewer.models.genre import Genre
-from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
 from mediaviewer.views.movie import movies, movies_by_genre
 
 
@@ -29,8 +28,6 @@ class TestMovies:
     def test_valid(self):
         expected_context = {
             "view": "movies",
-            "LOCAL_IP": LOCAL_IP,
-            "BANGUP_IP": BANGUP_IP,
             "can_download": True,
             "jump_to_last": True,
             "active_page": "movies",
@@ -99,8 +96,6 @@ class TestMoviesByGenre:
     def test_valid(self):
         expected_context = {
             "view": "movies",
-            "LOCAL_IP": LOCAL_IP,
-            "BANGUP_IP": BANGUP_IP,
             "can_download": True,
             "jump_to_last": True,
             "active_page": "movies",

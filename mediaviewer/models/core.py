@@ -1,8 +1,6 @@
 from django.conf import settings as conf_settings
 from django.db import models
 
-from mediaviewer.models.usersettings import BANGUP_IP, LOCAL_IP
-
 
 class TimeStampModel(models.Model):
     date_created = models.DateTimeField(blank=True, auto_now_add=True)
@@ -68,26 +66,19 @@ class ViewableObjectMixin:
                 Message.clearLastWatchedMessage(user)
         return comment, was_created
 
-    def downloadLink(self, user, guid):
-        settings = user.settings()
-        if not settings or settings.ip_format == LOCAL_IP:
-            if self.is_movie():
-                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.LOCAL_WAITER_IP_FORMAT_MOVIES}{guid}/"
-            else:
-                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.LOCAL_WAITER_IP_FORMAT_TVSHOWS}{guid}/"
-        elif settings and settings.ip_format == BANGUP_IP:
-            if self.is_movie():
-                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.BANGUP_WAITER_IP_FORMAT_MOVIES}{guid}/"
-            else:
-                waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.BANGUP_WAITER_IP_FORMAT_TVSHOWS}{guid}/"
+    def downloadLink(self, guid):
+        if self.is_movie():
+            waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_MOVIES}{guid}/"
+        else:
+            waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_TVSHOWS}{guid}/"
 
         return waiter_server
 
-    def autoplayDownloadLink(self, user, guid):
+    def autoplayDownloadLink(self, guid):
         if self.is_movie():
             return None
         else:
-            return f"{self.downloadLink(user, guid)}autoplay"
+            return f"{self.downloadLink(guid)}autoplay"
 
     def url(self):
         raise NotImplementedError("Method must be implemented by child classes")
