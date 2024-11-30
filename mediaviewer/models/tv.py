@@ -1,8 +1,10 @@
 from django.db import models
+from django.conf import settings
 
 from mediaviewer.models import Comment, MediaFile, MediaPath, Poster
 
 from .media import Media, MediaManager, MediaQuerySet
+from .tvdbconfiguration import getJSONData
 
 
 class TVQuerySet(MediaQuerySet):
@@ -43,11 +45,21 @@ class TV(Media):
         blank=True,
         related_name="tv",
     )
+    recommendations = models.ManyToManyField('self')
 
     objects = TVManager.from_queryset(TVQuerySet)()
 
     class Meta:
         verbose_name_plural = "TV"
+
+    def populate_recommendations(self):
+        if self.poster.tmdb:
+            url = f"https://api.themoviedb.org/3/tv/{self.poster.tmdb}/recommendations?api_key={settings.API_KEY}"
+            data = getJSONData(url)
+            ids = [x['id'] for x in data['results'] if not x['adult']]
+            recommended_tvs = self.__class__.objects.filter(_poster__tmdb__in=ids)
+            self.recommendations.add(*recommended_tvs)
+        return self.recommendations
 
     def add_path(self, path):
         return MediaPath.objects.create(tv=self, _path=path)

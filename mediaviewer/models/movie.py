@@ -2,12 +2,14 @@ import re
 
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
 
 from mediaviewer.models import MediaPath
 
 from .core import ViewableManagerMixin, ViewableObjectMixin
 from .media import Media, MediaManager, MediaQuerySet
 from .poster import Poster
+from .tvdbconfiguration import getJSONData
 
 yearRegex = re.compile(r"(19|20)\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")
@@ -68,8 +70,18 @@ class Movie(Media, ViewableObjectMixin):
         blank=True,
         related_name="movie",
     )
+    recommendations = models.ManyToManyField('self')
 
     objects = MovieManager.from_queryset(MovieQuerySet)()
+
+    def populate_recommendations(self):
+        if self.poster.tmdb:
+            url = f"https://api.themoviedb.org/3/movie/{self.poster.tmdb}/recommendations?api_key={settings.API_KEY}"
+            data = getJSONData(url)
+            ids = [x['id'] for x in data['results'] if not x['adult']]
+            recommended_movies = self.__class__.objects.filter(_poster__tmdb__in=ids)
+            self.recommendations.add(*recommended_movies)
+        return self.recommendations
 
     @property
     def display_name(self):
