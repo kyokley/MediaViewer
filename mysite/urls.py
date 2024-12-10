@@ -15,7 +15,7 @@ urlpatterns = [
     # re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     re_path("grappelli/", include("grappelli.urls")),  # grappelli URLS
     # Uncomment the next line to enable the admin:
-    re_path(r"^admin/", admin.site.urls),
+    re_path(r"^mediaviewer/admin/", admin.site.urls),
     re_path(
         r"^mediaviewer/",
         include(("mediaviewer.urls", "mediaviewer"), namespace="mediaviewer"),
