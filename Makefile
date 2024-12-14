@@ -9,9 +9,11 @@ list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
 build: ## Build prod-like container
+	python ci/main.py build
 	docker build --tag=kyokley/mediaviewer --target=prod .
 
 build-dev: ## Build dev container
+	python ci/main.py build-dev
 	docker build --tag=kyokley/mediaviewer --target=dev .
 
 up: ## Bring up containers and daemonize
@@ -43,6 +45,12 @@ check-migrations: build-dev ## Check for missing migrations
 
 tests: check-migrations pytest bandit ## Run all tests
 
+ci:
+	python ci/main.py test
+
+publish:
+	python ci/main.py publish
+
 stop-all-but-db: ## Bring all containers down except postgres
 	${DOCKER_COMPOSE_EXECUTABLE} down
 	${DOCKER_COMPOSE_EXECUTABLE} up -d postgres
@@ -52,11 +60,6 @@ down: ## Bring all containers down
 
 static: ## Install static files
 	yarn install
-
-push: build ## Push image to docker hub
-	docker push kyokley/mediaviewer
-
-publish: push ## Alias for push
 
 autoformat:
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/black .

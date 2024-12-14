@@ -8,14 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    - name: Check migrations
-      run: make check-migrations
+    - name: Install Dagger
+      run: pip install -r dagger-requirements.txt
 
-    - name: Run pytest
-      run: make pytest
-
-    - name: Run bandit
-      run: make bandit
+    - name: Run Dagger pipeline
+      run: python ci/main.py test
