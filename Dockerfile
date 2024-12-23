@@ -16,6 +16,10 @@ FROM ${BASE_IMAGE} AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+RUN groupadd -r user && \
+        useradd -r -g user user && \
+        chown -R user:user /app
+
 RUN pip install -U pip
 
 ENV POETRY_VENV=/poetry_venv
@@ -62,6 +66,7 @@ RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --wit
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod
+USER user
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
 RUN python manage.py collectstatic --no-input
@@ -69,6 +74,9 @@ CMD gunicorn mysite.wsgi
 
 
 # ********************* Begin Dev Image ******************
-FROM base AS dev
+FROM base AS dev-root
 RUN $POETRY_VENV/bin/poetry install
 COPY --from=static-builder /code/node_modules /node/node_modules
+
+FROM dev-root AS dev
+USER user
