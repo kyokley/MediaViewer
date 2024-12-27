@@ -16,9 +16,12 @@ FROM ${BASE_IMAGE} AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+WORKDIR /code/logs
+RUN touch /code/logs/mediaviewerLog
+
 RUN groupadd -r user && \
         useradd -r -g user user && \
-        chown -R user:user /app
+        chown -R user:user /code
 
 RUN pip install -U pip
 
