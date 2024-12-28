@@ -12,6 +12,7 @@ COPY package.json package-lock.json /code/
 RUN npm install
 
 FROM ${BASE_IMAGE} AS base
+ARG UID=1001
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -19,8 +20,8 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /code/logs
 RUN touch /code/logs/mediaviewerLog
 
-RUN groupadd -r user && \
-        useradd -r -g user user && \
+RUN groupadd -g ${UID} -r user && \
+        useradd -r -u ${UID} -g user user && \
         chown -R user:user /code
 
 RUN pip install -U pip

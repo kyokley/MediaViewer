@@ -1,5 +1,11 @@
 .PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish
 
+UID := 1001
+GID := 1001
+
+export UID
+export GID
+
 DOCKER_COMPOSE_EXECUTABLE=$$(which docker-compose >/dev/null 2>&1 && echo 'docker-compose' || echo 'docker compose')
 
 help: ## This help
@@ -9,10 +15,10 @@ list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
 build: ## Build prod-like container
-	docker build --tag=kyokley/mediaviewer --target=prod .
+	docker build --build-arg UID=${UID} --tag=kyokley/mediaviewer --target=prod .
 
 build-dev: ## Build dev container
-	docker build --tag=kyokley/mediaviewer --target=dev .
+	docker build --build-arg UID=${UID} --tag=kyokley/mediaviewer --target=dev .
 
 up: ## Bring up containers and daemonize
 	${DOCKER_COMPOSE_EXECUTABLE} up -d
