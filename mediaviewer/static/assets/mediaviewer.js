@@ -33,7 +33,8 @@ function preparePage($) {
         adaptiveHeight: false,
         autoplay: true,
         autoplaySpeed: 2000,
-        // pauseOnFocus: false,
+        pauseOnFocus: true,
+        pauseOnHover: false,
         swipeToSlide: true,
         arrows: true,
         waitForAnimate: false
