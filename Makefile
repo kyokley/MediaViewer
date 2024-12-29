@@ -1,10 +1,8 @@
 .PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish
 
-UID := 1001
-GID := 1001
+UID := 1000
 
 export UID
-export GID
 
 DOCKER_COMPOSE_EXECUTABLE=$$(which docker-compose >/dev/null 2>&1 && echo 'docker-compose' || echo 'docker compose')
 

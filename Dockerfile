@@ -12,7 +12,7 @@ COPY package.json package-lock.json /code/
 RUN npm install
 
 FROM ${BASE_IMAGE} AS base
-ARG UID=1001
+ARG UID=1000
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
