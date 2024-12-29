@@ -19,6 +19,8 @@ services:
         environment:
             - DJANGO_SETTINGS_MODULE=mysite.docker_settings
             - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
+            - MV_WEB_ROOT=/www
+            - MV_LOG_DIR=/code/logs
         command:
             sh -c "/venv/bin/python manage.py collectstatic --no-input &&
                    /venv/bin/python manage.py migrate &&
