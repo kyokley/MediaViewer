@@ -17,12 +17,13 @@ ARG UID=1001
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+WORKDIR /www
 WORKDIR /code/logs
-RUN touch /code/logs/mediaviewerLog
 
 RUN groupadd -g ${UID} -r user && \
         useradd -r -u ${UID} -g user user && \
-        chown -R user:user /code
+        chown -R user:user /code /www && \
+        chmod 777 -R /www
 
 RUN pip install -U pip
 
@@ -73,7 +74,8 @@ FROM base AS prod
 USER user
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
-RUN python manage.py collectstatic --no-input
+RUN chown user:user -R /code && \
+        python manage.py collectstatic --no-input
 CMD gunicorn mysite.wsgi
 
 
