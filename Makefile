@@ -14,25 +14,25 @@ help: ## This help
 list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
-build: ## Build prod-like container
+build: touch-history ## Build prod-like container
 	docker build --build-arg UID=${UID} --tag=kyokley/mediaviewer --target=prod .
 
-build-dev: ## Build dev container
+build-dev: touch-history ## Build dev container
 	docker build --build-arg UID=${UID} --tag=kyokley/mediaviewer --target=dev .
 
-up: ## Bring up containers and daemonize
+up: touch-history ## Bring up containers and daemonize
 	${DOCKER_COMPOSE_EXECUTABLE} up -d
 
-up-no-daemon: ## Bring up all containers
+up-no-daemon: touch-history ## Bring up all containers
 	${DOCKER_COMPOSE_EXECUTABLE} up
 
-attach: ## Attach to a running mediaviewer container
+attach: touch-history ## Attach to a running mediaviewer container
 	docker attach $$(docker ps -qf name=mediaviewer_mediaviewer)
 
 live-shell: up ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} exec mediaviewer /bin/bash
 
-shell: ## Open a shell in a mediaviewer container
+shell: touch-history ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} run mediaviewer /bin/bash
 
 db-shell: up ## Open a shell in a mediaviewer container
@@ -67,3 +67,8 @@ publish: push ## Alias for push
 autoformat:
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/black .
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/isort .
+
+touch-history:
+	@touch .mv.history
+	@mkdir -p logs
+	@chmod 777 -R logs
