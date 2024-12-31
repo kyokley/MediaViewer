@@ -36,7 +36,6 @@ services:
           - mediaviewer-backend
         volumes:
           - .:/code
-          - ./logs:/logs
 
 # Persistent Volumes
 volumes:

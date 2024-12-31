@@ -68,5 +68,3 @@ autoformat:
 
 touch-history:
 	@touch .mv.history
-	@mkdir -p logs
-	@chmod 777 -R logs
