@@ -20,7 +20,7 @@ services:
             - DJANGO_SETTINGS_MODULE=mysite.docker_settings
             - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
             - MV_WEB_ROOT=/www
-            - MV_LOG_DIR=/code/logs
+            - MV_LOG_DIR=/logs
         command:
             sh -c "/venv/bin/python manage.py collectstatic --no-input &&
                    /venv/bin/python manage.py migrate &&
@@ -36,7 +36,7 @@ services:
           - mediaviewer-backend
         volumes:
           - .:/code
-          - ./logs:/code/logs
+          - ./logs:/logs
 
 # Persistent Volumes
 volumes:
