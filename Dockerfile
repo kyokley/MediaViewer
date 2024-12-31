@@ -21,7 +21,7 @@ WORKDIR /www
 WORKDIR /logs
 
 RUN groupadd -g ${UID} -r user && \
-        useradd -r -u ${UID} -g user user && \
+        useradd --create-home --system --uid ${UID} --gid user user && \
         chown -R user:user /logs /www && \
         chmod 777 -R /www
 
@@ -33,23 +33,6 @@ RUN python3 -m venv $POETRY_VENV
 ENV VIRTUAL_ENV=/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH:$POETRY_VENV/bin"
-
-# Add virtualenv to bash prompt
-RUN echo 'if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT:-}" ] ; then \n\
-              _OLD_VIRTUAL_PS1="${PS1:-}" \n\
-              if [ "x(venv) " != x ] ; then \n\
-                PS1="(venv) ${PS1:-}" \n\
-              else \n\
-              if [ "`basename \"$VIRTUAL_ENV\"`" = "__" ] ; then \n\
-                  # special case for Aspen magic directories \n\
-                  # see http://www.zetadev.com/software/aspen/ \n\
-                  PS1="[`basename \`dirname \"$VIRTUAL_ENV\"\``] $PS1" \n\
-              else \n\
-                  PS1="(`basename \"$VIRTUAL_ENV\"`)$PS1" \n\
-              fi \n\
-              fi \n\
-              export PS1 \n\
-          fi' >> ~/.bashrc
 
 # Install required packages and remove the apt packages cache when done.
 RUN apt-get update && apt-get install -y \

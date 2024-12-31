@@ -36,6 +36,7 @@ services:
           - mediaviewer-backend
         volumes:
           - .:/code
+          - ./.mv.history:/home/user/.bash_history
 
 # Persistent Volumes
 volumes:
