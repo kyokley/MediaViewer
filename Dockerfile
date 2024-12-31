@@ -18,11 +18,11 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /www
-WORKDIR /code/logs
+WORKDIR /logs
 
 RUN groupadd -g ${UID} -r user && \
         useradd -r -u ${UID} -g user user && \
-        chown -R user:user /code /www && \
+        chown -R user:user /logs /www && \
         chmod 777 -R /www
 
 RUN pip install -U pip
