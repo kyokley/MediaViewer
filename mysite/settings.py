@@ -2,6 +2,8 @@
 import logging
 import os
 
+from pathlib import Path
+
 from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
@@ -88,9 +90,10 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
+WEB_ROOT = Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = "/var/www/mv/media/"
+MEDIA_ROOT = WEB_ROOT / "mv" / "media"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -101,7 +104,7 @@ MEDIA_ROOT = "/var/www/mv/media/"
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = "/var/www/mv/static/"
+STATIC_ROOT = WEB_ROOT / "mv" / "static"
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -209,9 +212,9 @@ LOGGING = {
     },
 }
 
-SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-LOG_DIR = os.path.join(SYSTEM_BASE_PATH, "logs")
-LOG_FILE_NAME = os.path.join(LOG_DIR, "mediaviewerLog")
+SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+LOG_DIR = Path(os.getenv("MV_LOG_DIR")) if os.getenv("MV_LOG_DIR") else SYSTEM_BASE_PATH / "logs"
+LOG_FILE_NAME = LOG_DIR / "mediaviewerLog"
 LOG_LEVEL = logging.DEBUG
 
 TEMPLATES = [
