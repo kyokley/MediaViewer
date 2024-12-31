@@ -61,7 +61,7 @@ RUN python manage.py collectstatic --no-input && \
         chown user:user -R /code
 
 USER user
-CMD gunicorn mysite.wsgi
+CMD ["gunicorn", "mysite.wsgi"]
 
 
 # ********************* Begin Dev Image ******************
