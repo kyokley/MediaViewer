@@ -56,8 +56,10 @@ RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --wit
 FROM base AS prod
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
-RUN chown user:user -R /code && \
-        python manage.py collectstatic --no-input
+
+RUN python manage.py collectstatic --no-input && \
+        chown user:user -R /code
+
 USER user
 CMD gunicorn mysite.wsgi
 
