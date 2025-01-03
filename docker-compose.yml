@@ -22,9 +22,9 @@ services:
             - MV_WEB_ROOT=/www
             - MV_LOG_DIR=/logs
         command:
-            sh -c "/venv/bin/python manage.py collectstatic --no-input &&
-                   /venv/bin/python manage.py migrate &&
-                   /venv/bin/python manage.py runserver 0.0.0.0:8000"
+            sh -c "python manage.py collectstatic --no-input &&
+                   python manage.py migrate &&
+                   python manage.py runserver 0.0.0.0:8000"
         hostname: mediaviewer
         depends_on:
             - "postgres"

@@ -33,17 +33,20 @@ live-shell: up ## Open a shell in a mediaviewer container
 shell: touch-history ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} run mediaviewer /bin/bash
 
-db-shell: up ## Open a shell in a mediaviewer container
+db-shell: db-up ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} exec postgres /bin/bash
 
-pytest: build-dev up ## Run tests
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/pytest -n 4
+db-up:
+	${DOCKER_COMPOSE_EXECUTABLE} up -d postgres
+
+pytest: build-dev db-up ## Run tests
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer pytest -n 4
 
 bandit: build-dev ## Run bandit tests
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests,./.venv -r .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer bandit -x ./mediaviewer/tests,./.venv -r .
 
 check-migrations: build-dev ## Check for missing migrations
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/python manage.py makemigrations --check
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer python manage.py makemigrations --check
 
 tests: check-migrations pytest bandit ## Run all tests
 
@@ -63,8 +66,8 @@ push: build ## Push image to docker hub
 publish: push ## Alias for push
 
 autoformat:
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/black .
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/isort .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer black .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer isort .
 
 touch-history:
 	@touch .mv.history

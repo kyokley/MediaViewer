@@ -25,14 +25,11 @@ RUN groupadd -g ${UID} -r user && \
         chown -R user:user /logs /www && \
         chmod 777 -R /www
 
-RUN pip install -U pip
+RUN pip install -U pip uv
 
-ENV POETRY_VENV=/poetry_venv
-RUN python3 -m venv $POETRY_VENV
-
-ENV VIRTUAL_ENV=/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH:$POETRY_VENV/bin"
+ENV VIRTUAL_ENV=/venv/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN uv venv ${VIRTUAL_ENV}
 
 # Install required packages and remove the apt packages cache when done.
 RUN apt-get update && apt-get install -y \
@@ -46,22 +43,21 @@ RUN apt-get update && apt-get install -y \
 
 COPY ./pdbrc.py /root/.pdbrc.py
 
-WORKDIR /code
-COPY poetry.lock pyproject.toml /code/
+WORKDIR /venv
+COPY pyproject.toml /venv/
 
-RUN /bin/bash -c '$POETRY_VENV/bin/pip install poetry uv && \
-        ${POETRY_VENV}/bin/uv pip install --no-deps -r <(POETRY_WARNINGS_EXPORT=false ${POETRY_VENV}/bin/poetry export --without-hashes --without dev -f requirements.txt) && \
-        $POETRY_VENV/bin/poetry install --without dev'
+RUN /bin/bash -c 'source ${VIRTUAL_ENV}/bin/activate && uv sync --no-dev'
 
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod
 ARG MV_LOG_DIR=/logs
+
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
 
-RUN python manage.py collectstatic --no-input && \
-        chown user:user -R /code
+WORKDIR /code
+RUN python manage.py collectstatic --no-input
 
 USER user
 CMD ["gunicorn", "mysite.wsgi"]
@@ -69,7 +65,11 @@ CMD ["gunicorn", "mysite.wsgi"]
 
 # ********************* Begin Dev Image ******************
 FROM base AS dev-root
-RUN $POETRY_VENV/bin/poetry install
+WORKDIR /venv
+RUN /bin/bash -c 'source ${VIRTUAL_ENV}/bin/activate && uv sync'
+
+WORKDIR /code
+
 COPY --from=static-builder /code/node_modules /node/node_modules
 
 FROM dev-root AS dev

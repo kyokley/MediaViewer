@@ -30,11 +30,6 @@
   languages.python = {
     enable = true;
     version = "3.12";
-    poetry = {
-      enable = true;
-      install.enable = true;
-      activate.enable = true;
-    };
     uv = {
       enable = true;
     };
