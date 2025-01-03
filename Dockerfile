@@ -29,7 +29,7 @@ RUN pip install -U pip uv
 
 ENV VIRTUAL_ENV=/venv/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN uv venv ${VIRTUAL_ENV}
+RUN uv venv --seed ${VIRTUAL_ENV}
 
 # Install required packages and remove the apt packages cache when done.
 RUN apt-get update && apt-get install -y \
@@ -46,7 +46,7 @@ COPY ./pdbrc.py /root/.pdbrc.py
 WORKDIR /venv
 COPY uv.lock pyproject.toml /venv/
 
-RUN /bin/bash -c 'source ${VIRTUAL_ENV}/bin/activate && uv sync --no-dev'
+RUN uv sync --no-dev --project ${VIRTUAL_ENV}
 
 
 # ********************* Begin Prod Image ******************
@@ -66,7 +66,7 @@ CMD ["gunicorn", "mysite.wsgi"]
 # ********************* Begin Dev Image ******************
 FROM base AS dev-root
 WORKDIR /venv
-RUN /bin/bash -c 'source ${VIRTUAL_ENV}/bin/activate && uv sync'
+RUN uv sync --project ${VIRTUAL_ENV}
 
 WORKDIR /code
 
