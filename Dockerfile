@@ -1,17 +1,20 @@
 ARG BASE_IMAGE=python:3.12-slim
 
-FROM ${BASE_IMAGE} AS static-builder
+FROM ${BASE_IMAGE} AS base-image
+RUN apt-get update
+
+FROM base-image AS static-builder
+WORKDIR /code/static
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
         npm \
         make
 
-RUN mkdir /code/static
 COPY package.json package-lock.json /code/
 RUN npm install
 
-FROM ${BASE_IMAGE} AS base
+FROM base-image AS base
 ARG UID=1000
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -32,7 +35,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv venv --seed ${VIRTUAL_ENV}
 
 # Install required packages and remove the apt packages cache when done.
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
         gnupg \
         g++ \
         git \
@@ -43,7 +46,6 @@ RUN apt-get update && apt-get install -y \
 
 COPY ./pdbrc.py /root/.pdbrc.py
 
-WORKDIR /venv
 COPY uv.lock pyproject.toml /venv/
 
 RUN uv sync --no-dev --project ${VIRTUAL_ENV}
