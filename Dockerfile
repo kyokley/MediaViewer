@@ -44,7 +44,7 @@ RUN apt-get update && apt-get install -y \
 COPY ./pdbrc.py /root/.pdbrc.py
 
 WORKDIR /venv
-COPY pyproject.toml /venv/
+COPY uv.lock pyproject.toml /venv/
 
 RUN /bin/bash -c 'source ${VIRTUAL_ENV}/bin/activate && uv sync --no-dev'
 
