@@ -49,7 +49,9 @@ COPY ./pdbrc.py /root/.pdbrc.py
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
 
-RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --without dev
+RUN /bin/bash -c '$POETRY_VENV/bin/pip install poetry uv && \
+        ${POETRY_VENV}/bin/uv pip install --no-deps -r <(POETRY_WARNINGS_EXPORT=false ${POETRY_VENV}/bin/poetry export --without-hashes --without dev -f requirements.txt) && \
+        $POETRY_VENV/bin/poetry install --without dev'
 
 
 # ********************* Begin Prod Image ******************
