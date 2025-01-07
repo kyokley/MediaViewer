@@ -145,6 +145,9 @@
             {% block jumbotron %}
                 <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
                 <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
+                {% if not loggedin %}
+                    <a class="btn btn-primary" href="/mediaviewer/login/">Log In</a>
+                {% endif %}
             {% endblock %}
         </div>
 
