@@ -58,7 +58,7 @@ ARG MV_LOG_DIR=/logs
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
 
-RUN python manage.py collectstatic --no-input && \
+RUN SKIP_LOADING_TVDB_CONFIG=1 python manage.py collectstatic --no-input && \
         chown user:user -R /code
 
 USER user
