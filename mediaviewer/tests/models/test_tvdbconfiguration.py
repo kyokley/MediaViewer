@@ -1,5 +1,7 @@
 import pytest
 
+from django.test import override_settings
+
 from mediaviewer.models.tvdbconfiguration import TVDBConfiguration, getJSONData
 
 
@@ -65,6 +67,7 @@ class TestTVDBConfigurationInit:
 
         self.mock_getTVDBConfiguration.return_value = self.fake_config_data
 
+    @override_settings(SKIP_LOADING_TVDB_CONFIG=False)
     def test_valid(self):
         test_obj = TVDBConfiguration()
 
@@ -74,24 +77,16 @@ class TestTVDBConfigurationInit:
         assert test_obj.connected
         assert test_obj.genres == self.mock_getTVDBGenres.return_value
 
+    @override_settings(SKIP_LOADING_TVDB_CONFIG=False)
     def test_got_bad_config_data(self):
         self.mock_getTVDBConfiguration.return_value = None
 
-        test_obj = TVDBConfiguration()
+        with pytest.raises(Exception):
+            TVDBConfiguration()
 
-        assert test_obj.url == ""
-        assert test_obj.poster_size == ""
-        assert test_obj.still_size == ""
-        assert not test_obj.connected
-        assert test_obj.genres == {}
-
+    @override_settings(SKIP_LOADING_TVDB_CONFIG=False)
     def test_got_bad_genre_data(self):
         self.mock_getTVDBGenres.return_value = None
 
-        test_obj = TVDBConfiguration()
-
-        assert test_obj.url == ""
-        assert test_obj.poster_size == ""
-        assert test_obj.still_size == ""
-        assert not test_obj.connected
-        assert test_obj.genres == {}
+        with pytest.raises(Exception):
+            TVDBConfiguration()
