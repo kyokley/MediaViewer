@@ -15,7 +15,7 @@ list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
 build: touch-history ## Build prod-like container
-	docker build
+	docker build \
 		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
 		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
 		--build-arg UID=${UID} \
