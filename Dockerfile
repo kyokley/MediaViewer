@@ -49,7 +49,7 @@ COPY ./pdbrc.py /root/.pdbrc.py
 WORKDIR /code
 COPY poetry.lock pyproject.toml /code/
 
-RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --without dev
+RUN $POETRY_VENV/bin/pip install poetry && $POETRY_VENV/bin/poetry install --no-root --without dev
 
 
 # ********************* Begin Prod Image ******************
@@ -67,7 +67,7 @@ CMD ["gunicorn", "mysite.wsgi"]
 
 # ********************* Begin Dev Image ******************
 FROM base AS dev-root
-RUN $POETRY_VENV/bin/poetry install
+RUN $POETRY_VENV/bin/poetry install --no-root
 COPY --from=static-builder /code/node_modules /node/node_modules
 
 FROM dev-root AS dev

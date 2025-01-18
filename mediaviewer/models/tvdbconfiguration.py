@@ -44,8 +44,8 @@ class TVDBConfiguration:
         return cls._instance
 
     def __init__(self):
-        log.debug("Getting tvdb config")
-        try:
+        if not settings.SKIP_LOADING_TVDB_CONFIG:
+            log.debug("Getting tvdb config")
             data = self._getTVDBConfiguration()
             self.url = data["images"]["secure_base_url"]
             self.poster_size = "w500"
@@ -58,14 +58,13 @@ class TVDBConfiguration:
 
             self.genres = genres
             log.debug("tvdb values set successfully")
-        except Exception as e:
+        else:
+            log.debug("Skip loading TVDB config")
             self.url = ""
             self.poster_size = ""
             self.still_size = ""
             self.connected = False
             self.genres = {}
-            log.warning(str(e), exc_info=True)
-            log.debug("Failed to set tvdb values")
 
     def _getTVDBConfiguration(self):
         url = "https://api.themoviedb.org/3/configuration?api_key={}".format(
