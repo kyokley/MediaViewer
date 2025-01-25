@@ -10,16 +10,16 @@
   ];
 
   # https://devenv.sh/scripts/
-  scripts.hello.exec = "echo hello from $GREET";
+  # scripts.hello.exec = "echo hello from $GREET";
 
   enterShell = ''
-    hello
+    # hello
   '';
 
   # https://devenv.sh/tests/
   enterTest = ''
-    echo "Running tests"
-    git --version | grep "2.42.0"
+    # echo "Running tests"
+    # git --version | grep "2.42.0"
   '';
 
   # https://devenv.sh/services/
