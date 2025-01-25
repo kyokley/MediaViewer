@@ -40,32 +40,35 @@ class TVDBConfiguration:
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(TVDBConfiguration, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
     def __init__(self):
-        log.debug("Getting tvdb config")
-        try:
-            data = self._getTVDBConfiguration()
-            self.url = data["images"]["secure_base_url"]
-            self.poster_size = "w500"
-            self.still_size = data["images"]["still_sizes"][-1]
-            self.connected = True
+        if not settings.SKIP_LOADING_TVDB_CONFIG:
+            log.debug("Getting tvdb config")
+            try:
+                data = self._getTVDBConfiguration()
+                self.url = data["images"]["secure_base_url"]
+                self.poster_size = "w500"
+                self.still_size = data["images"]["still_sizes"][-1]
+                self.connected = True
 
-            genres = self._getTVDBGenres()
-            if not genres:
-                raise Exception("No genres returned")
+                genres = self._getTVDBGenres()
+                if not genres:
+                    raise Exception("No genres returned")
 
-            self.genres = genres
-            log.debug("tvdb values set successfully")
-        except Exception as e:
+                self.genres = genres
+                log.debug("tvdb values set successfully")
+            except Exception:
+                log.error("Failed to load TVDB config")
+                raise
+        else:
+            log.debug("Skip loading TVDB config")
             self.url = ""
             self.poster_size = ""
             self.still_size = ""
             self.connected = False
             self.genres = {}
-            log.warning(str(e), exc_info=True)
-            log.debug("Failed to set tvdb values")
 
     def _getTVDBConfiguration(self):
         url = "https://api.themoviedb.org/3/configuration?api_key={}".format(

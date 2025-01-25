@@ -21,6 +21,7 @@ services:
             - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
             - MV_WEB_ROOT=/www
             - MV_LOG_DIR=/logs
+            - SKIP_LOADING_TVDB_CONFIG=1
         command:
             sh -c "python manage.py collectstatic --no-input &&
                    python manage.py migrate &&

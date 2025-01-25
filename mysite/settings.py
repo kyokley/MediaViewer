@@ -297,3 +297,5 @@ WAITER_PASSWORD_HASH = (
     os.environ.get("WAITER_PASSWORD_HASH")
     or "pbkdf2_sha256$260000$gTINkjUitLzAra3DGCJ4pK$/IzJql5fzVSV2XfINRkHpyBxIvNdjhxDyVqB3f5Lzmk="
 )
+
+SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1

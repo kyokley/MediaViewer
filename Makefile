@@ -1,6 +1,8 @@
 .PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish
 
 UID := 1000
+NO_CACHE ?= 0
+USE_HOST_NET ?= 0
 
 export UID
 
@@ -13,10 +15,20 @@ list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
 build: touch-history ## Build prod-like container
-	docker build --build-arg UID=${UID} --tag=kyokley/mediaviewer --target=prod .
+	docker build \
+		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
+		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
+		--build-arg UID=${UID} \
+		--tag=kyokley/mediaviewer \
+		--target=prod .
 
 build-dev: touch-history ## Build dev container
-	docker build --build-arg UID=${UID} --tag=kyokley/mediaviewer --target=dev .
+	docker build \
+		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
+		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
+		--build-arg UID=${UID} \
+		--tag=kyokley/mediaviewer \
+		--target=dev .
 
 up: touch-history ## Bring up containers and daemonize
 	${DOCKER_COMPOSE_EXECUTABLE} up -d
