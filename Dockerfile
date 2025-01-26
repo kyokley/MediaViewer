@@ -3,12 +3,8 @@ ARG BASE_IMAGE=python:3.12-slim
 FROM ${BASE_IMAGE} AS base-image
 RUN apt-get update
 
-FROM base-image AS static-builder
+FROM node:alpine3.20 AS static-builder
 WORKDIR /code/static
-
-RUN apt-get install -y \
-        npm \
-        make
 
 COPY package.json package-lock.json /code/
 RUN npm install
@@ -29,7 +25,8 @@ RUN groupadd -g ${UID} -r user && \
 
 RUN pip install -U pip uv
 
-ENV VIRTUAL_ENV=/venv/.venv
+ENV UV_PROJECT_DIR=/mv
+ENV VIRTUAL_ENV=${UV_PROJECT_DIR}/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv venv --seed ${VIRTUAL_ENV}
 
@@ -45,7 +42,7 @@ RUN apt-get install -y \
 
 COPY ./pdbrc.py /root/.pdbrc.py
 
-COPY uv.lock pyproject.toml /venv/
+COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}
 
 RUN uv sync --no-dev --project ${VIRTUAL_ENV}
 
