@@ -40,8 +40,6 @@ RUN apt-get install -y \
         libpq-dev \
         make
 
-COPY ./pdbrc.py /root/.pdbrc.py
-
 COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}
 
 RUN uv sync --no-dev --project ${VIRTUAL_ENV}
@@ -69,7 +67,9 @@ RUN uv sync --project ${VIRTUAL_ENV}
 
 WORKDIR /code
 
+COPY ./pdbrc.py /root/.pdbrc.py
 COPY --from=static-builder /code/node_modules /node/node_modules
 
 FROM dev-root AS dev
+COPY ./pdbrc.py /home/user/.pdbrc.py
 USER user
