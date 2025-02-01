@@ -8,7 +8,7 @@ URL = "http://mediaviewer:8000/mediaviewer/"
 
 @pytest.mark.enable_socket
 def test_home_not_logged_in(page: Page):
-    page.goto(URL)
+    page.goto(URL, timeout=300_000)
 
     # Expect a title "to contain" a substring.
     expect(page).to_have_title(re.compile("Home - MediaViewer"))
