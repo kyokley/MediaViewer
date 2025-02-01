@@ -6,6 +6,7 @@ from playwright.sync_api import Page, expect
 URL = "http://mediaviewer:8000/mediaviewer/"
 
 
+@pytest.mark.enable_socket
 def test_home_not_logged_in(page: Page):
     page.goto(URL)
 

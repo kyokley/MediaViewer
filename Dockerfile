@@ -74,7 +74,7 @@ COPY ./pdbrc.py /home/user/.pdbrc.py
 USER user
 
 # ********************* Begin Playwright Image ******************
-FROM mcr.microsoft.com/playwright/python:v1.37.0-jammy AS playwright
+FROM mcr.microsoft.com/playwright/python:v1.49.1-jammy AS playwright
 RUN apt-get update && apt-get install -y \
         python3-venv \
         python3-dev \
@@ -92,6 +92,7 @@ ENV VIRTUAL_ENV=${UV_PROJECT_DIR}/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}/
+RUN uv sync --project "${VIRTUAL_ENV}"
+
 COPY . /code
 WORKDIR /code
-RUN uv sync --project "${VIRTUAL_ENV}"

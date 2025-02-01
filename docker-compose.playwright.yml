@@ -4,6 +4,7 @@ services:
     hostname: playwright
     environment:
       - DJANGO_SETTINGS_MODULE=mysite.docker_settings
+      - SKIP_LOADING_TVDB_CONFIG=1
     build:
       context: .
       target: playwright
