@@ -85,9 +85,13 @@ RUN apt-get update && apt-get install -y \
         ncurses-dev \
         libpq-dev
 
+RUN pip install --upgrade --no-cache-dir pip uv
 
-ENV VIRTUAL_ENV=/venv
+ENV UV_PROJECT_DIR=/mv
+ENV VIRTUAL_ENV=${UV_PROJECT_DIR}/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN python3 -m venv $VIRTUAL_ENV
 
-RUN $VIRTUAL_ENV/bin/pip install playwright
+COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}/
+COPY . /code
+WORKDIR /code
+RUN uv sync --project "${VIRTUAL_ENV}"

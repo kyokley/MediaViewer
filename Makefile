@@ -29,8 +29,13 @@ build-dev: touch-history ## Build dev container
 		--tag=kyokley/mediaviewer \
 		--target=dev .
 
-build-playwright: build-dev
-	${DOCKER_COMPOSE_EXECUTABLE} -f docker-compose.yml -f docker-compose.playwright.yml build playwright
+build-playwright: touch-history ## Build playwright container
+	docker build \
+		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
+		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
+		--build-arg UID=${UID} \
+		--tag=kyokley/playwright \
+		--target=playwright .
 
 
 up: touch-history ## Bring up containers and daemonize
@@ -69,7 +74,7 @@ bandit: build-dev ## Run bandit tests
 check-migrations: build-dev ## Check for missing migrations
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer python manage.py makemigrations --check
 
-tests: check-migrations pytest bandit ## Run all tests
+tests: check-migrations pytest bandit test-e2e ## Run all tests
 
 stop-all-but-db: ## Bring all containers down except postgres
 	${DOCKER_COMPOSE_EXECUTABLE} down
