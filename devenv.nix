@@ -39,10 +39,11 @@
   pre-commit.hooks = {
     check-added-large-files.enable = true;
     detect-private-keys.enable = true;
+    ripsecrets.enable = true;
     ruff.enable = true;
     ruff-format.enable = true;
-    ripsecrets.enable = true;
     trim-trailing-whitespace.enable = true;
+    yamlfmt.enable = true;
   };
 
   # https://devenv.sh/processes/
