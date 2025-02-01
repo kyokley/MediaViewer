@@ -2,25 +2,25 @@
 
 {
   # https://devenv.sh/basics/
-  env.GREET = "MV";
+  # env.GREET = "MV";
 
   # https://devenv.sh/packages/
-  packages = [
-    pkgs.git
-  ];
+  # packages = [
+  #   pkgs.git
+  # ];
 
   # https://devenv.sh/scripts/
   # scripts.hello.exec = "echo hello from $GREET";
 
-  enterShell = ''
-    # hello
-  '';
+  # enterShell = ''
+  #   # hello
+  # '';
 
   # https://devenv.sh/tests/
-  enterTest = ''
-    # echo "Running tests"
-    # git --version | grep "2.42.0"
-  '';
+  # enterTest = ''
+  #   # echo "Running tests"
+  #   # git --version | grep "2.42.0"
+  # '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
