@@ -27,11 +27,10 @@ def movies(request):
     context["active_page"] = "movies"
     context["title"] = "Movies"
     carousel_files = list(
-            Movie.objects
-            .exclude(_poster__image="")
-            .filter(hide=False)
-            .order_by('-_poster__release_date')[:NUMBER_OF_CAROUSEL_FILES]
-            )
+        Movie.objects.exclude(_poster__image="")
+        .filter(hide=False)
+        .order_by("-_poster__release_date")[:NUMBER_OF_CAROUSEL_FILES]
+    )
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
     setSiteWideContext(context, request, includeMessages=True)
@@ -56,12 +55,11 @@ def movies_by_genre(request, genre_id):
     context["title"] = "Movies: {}".format(genre.genre)
 
     carousel_files = list(
-            Movie.objects
-            .exclude(_poster__image="")
-            .filter(hide=False)
-            .filter(_poster__genres=genre)
-            .order_by('-_poster__release_date')[:NUMBER_OF_CAROUSEL_FILES]
-            )
+        Movie.objects.exclude(_poster__image="")
+        .filter(hide=False)
+        .filter(_poster__genres=genre)
+        .order_by("-_poster__release_date")[:NUMBER_OF_CAROUSEL_FILES]
+    )
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
     setSiteWideContext(context, request, includeMessages=True)

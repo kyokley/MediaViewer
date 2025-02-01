@@ -23,9 +23,9 @@ def tvshowsummary(request):
     context["table_data_page"] = "ajaxtvshowssummary"
     context["table_data_filter_id"] = ""
 
-    carousel_files = list(get_tv_show_rows_query()
-                          .exclude(_poster__image="")
-                          [:NUMBER_OF_CAROUSEL_FILES])
+    carousel_files = list(
+        get_tv_show_rows_query().exclude(_poster__image="")[:NUMBER_OF_CAROUSEL_FILES]
+    )
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
 
@@ -43,9 +43,11 @@ def tvshows_by_genre(request, genre_id):
     context["table_data_page"] = "ajaxtvshowsbygenre"
     context["table_data_filter_id"] = genre_id
 
-    carousel_files = list(get_tv_show_rows_query(genre_id=genre_id)
-                          .exclude(_poster__image="")
-                          [:NUMBER_OF_CAROUSEL_FILES])
+    carousel_files = list(
+        get_tv_show_rows_query(genre_id=genre_id).exclude(_poster__image="")[
+            :NUMBER_OF_CAROUSEL_FILES
+        ]
+    )
     rand.shuffle(carousel_files)
     context["carousel_files"] = carousel_files
 
@@ -88,13 +90,17 @@ def tvdetail(request, mf_id):
     previous_mf = mf.previous()
     next_mf = mf.next()
 
-    previous_link = reverse('mediaviewer:tvdetail',
-                            kwargs=dict(mf_id=previous_mf.pk)
-                            ) if previous_mf else None
+    previous_link = (
+        reverse("mediaviewer:tvdetail", kwargs=dict(mf_id=previous_mf.pk))
+        if previous_mf
+        else None
+    )
 
-    next_link = reverse('mediaviewer:tvdetail',
-                            kwargs=dict(mf_id=next_mf.pk)
-                            ) if next_mf else None
+    next_link = (
+        reverse("mediaviewer:tvdetail", kwargs=dict(mf_id=next_mf.pk))
+        if next_mf
+        else None
+    )
 
     settings = user.settings()
     context = {

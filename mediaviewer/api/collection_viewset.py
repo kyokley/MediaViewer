@@ -1,5 +1,4 @@
-from rest_framework import serializers, viewsets
-from rest_framework.response import Response
+from rest_framework import viewsets
 
 from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.api.serializers import CollectionSerializer

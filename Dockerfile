@@ -23,24 +23,23 @@ RUN groupadd -g ${UID} -r user && \
         chown -R user:user /logs /www && \
         chmod 777 -R /www
 
-RUN pip install -U pip uv
+RUN pip install --upgrade --no-cache-dir pip uv
 
 ENV UV_PROJECT_DIR=/mv
 ENV VIRTUAL_ENV=${UV_PROJECT_DIR}/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN uv venv --seed ${VIRTUAL_ENV}
 
-# Install required packages and remove the apt packages cache when done.
-RUN apt-get install -y \
+RUN apt-get install -y --no-install-recommends \
         gnupg \
         g++ \
         git \
         apt-transport-https \
         ncurses-dev \
         libpq-dev \
-        make
+        make && \
+        uv venv --seed ${VIRTUAL_ENV}
 
-COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}
+COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}/
 
 RUN uv sync --no-dev --project ${VIRTUAL_ENV}
 
@@ -63,7 +62,7 @@ CMD ["gunicorn", "mysite.wsgi"]
 # ********************* Begin Dev Image ******************
 FROM base AS dev-root
 WORKDIR /venv
-RUN uv sync --project ${VIRTUAL_ENV}
+RUN uv sync --project "${VIRTUAL_ENV}"
 
 WORKDIR /code
 

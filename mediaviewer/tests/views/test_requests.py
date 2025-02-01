@@ -5,8 +5,13 @@ from django.test import TestCase
 
 from mediaviewer.models.request import Request
 from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.views.requests import (addrequests, ajaxdone, ajaxgiveup,
-                                        ajaxvote, requests)
+from mediaviewer.views.requests import (
+    addrequests,
+    ajaxdone,
+    ajaxgiveup,
+    ajaxvote,
+    requests,
+)
 
 
 class TestRequests(TestCase):

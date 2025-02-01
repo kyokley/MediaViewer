@@ -20,7 +20,9 @@ class TestAjaxVideoProgress:
     def setUp(self, mocker):
         mocker.patch("mediaviewer.views.ajax.REWIND_THRESHOLD", 10)
 
-        self.mock_downloadTokenClass = mocker.patch("mediaviewer.views.ajax.DownloadToken")
+        self.mock_downloadTokenClass = mocker.patch(
+            "mediaviewer.views.ajax.DownloadToken"
+        )
 
         self.mock_jsonClass = mocker.patch("mediaviewer.views.ajax.json")
         self.fake_json_data = "json_data"
@@ -34,7 +36,9 @@ class TestAjaxVideoProgress:
         self.mock_vpClass.objects.filter.return_value.first.return_value = self.vp
         self.mock_vpClass.objects.update_or_create.return_value = (self.vp, False)
 
-        self.mock_httpResponseClass = mocker.patch("mediaviewer.views.ajax.HttpResponse")
+        self.mock_httpResponseClass = mocker.patch(
+            "mediaviewer.views.ajax.HttpResponse"
+        )
         self.fake_httpresponse = "fake_httpresponse"
         self.mock_httpResponseClass.return_value = self.fake_httpresponse
 
@@ -377,24 +381,24 @@ class TestAjaxReport:
 @pytest.mark.django_db
 class TestAjaxCollections:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              client,
-              create_collection,
-              create_user,
-              create_download_token,
-              ):
+    def setUp(
+        self,
+        client,
+        create_collection,
+        create_user,
+        create_download_token,
+    ):
         self.client = client
         self.user = create_user()
         self.collection = create_collection()
 
         self.dt = create_download_token(user=self.user)
-        self.url = reverse("mediaviewer:ajaxcollections",
-                           kwargs=dict(guid=self.dt.guid))
+        self.url = reverse(
+            "mediaviewer:ajaxcollections", kwargs=dict(guid=self.dt.guid)
+        )
 
     def test_ajax_collections(self):
-        expected = [
-                [self.collection.id, self.collection.name]
-                ]
+        expected = [[self.collection.id, self.collection.name]]
 
         self.client.force_login(self.user)
 
@@ -402,4 +406,4 @@ class TestAjaxCollections:
 
         json_data = resp.json()
 
-        assert expected == json_data['collections']
+        assert expected == json_data["collections"]

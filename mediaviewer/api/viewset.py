@@ -2,13 +2,22 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views, viewsets
 from rest_framework.response import Response as RESTResponse
 
-from mediaviewer.api.serializers import (CommentSerializer,
-                                         DownloadTokenSerializer,
-                                         FilenameScrapeFormatSerializer,
-                                         MessageSerializer, CollectionSerializer)
+from mediaviewer.api.serializers import (
+    CommentSerializer,
+    DownloadTokenSerializer,
+    FilenameScrapeFormatSerializer,
+    MessageSerializer,
+    CollectionSerializer,
+)
 from mediaviewer.log import log
-from mediaviewer.models import (Comment, DownloadToken, FilenameScrapeFormat,
-                                MediaFile, Message, Collection)
+from mediaviewer.models import (
+    Comment,
+    DownloadToken,
+    FilenameScrapeFormat,
+    MediaFile,
+    Message,
+    Collection,
+)
 
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):

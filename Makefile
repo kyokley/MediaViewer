@@ -1,4 +1,4 @@
-.PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish
+.PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish all clean test
 
 UID := 1000
 NO_CACHE ?= 0
@@ -19,8 +19,7 @@ build: touch-history ## Build prod-like container
 		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
 		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
 		--build-arg UID=${UID} \
-		--tag=kyokley/mediaviewer \
-		--target=prod .
+		--tag=kyokley/mediaviewer --target=prod .
 
 build-dev: touch-history ## Build dev container
 	docker build \

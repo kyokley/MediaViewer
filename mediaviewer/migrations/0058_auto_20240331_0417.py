@@ -4,30 +4,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0057_alter_mediafile_display_name'),
+        ("mediaviewer", "0057_alter_mediafile_display_name"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='poster',
-            name='actors',
-            field=models.ManyToManyField(blank=True, editable=False, to='mediaviewer.Actor'),
+            model_name="poster",
+            name="actors",
+            field=models.ManyToManyField(
+                blank=True, editable=False, to="mediaviewer.Actor"
+            ),
         ),
         migrations.AlterField(
-            model_name='poster',
-            name='directors',
-            field=models.ManyToManyField(blank=True, editable=False, to='mediaviewer.Director'),
+            model_name="poster",
+            name="directors",
+            field=models.ManyToManyField(
+                blank=True, editable=False, to="mediaviewer.Director"
+            ),
         ),
         migrations.AlterField(
-            model_name='poster',
-            name='genres',
-            field=models.ManyToManyField(blank=True, editable=False, to='mediaviewer.Genre'),
+            model_name="poster",
+            name="genres",
+            field=models.ManyToManyField(
+                blank=True, editable=False, to="mediaviewer.Genre"
+            ),
         ),
         migrations.AlterField(
-            model_name='poster',
-            name='writers',
-            field=models.ManyToManyField(blank=True, editable=False, to='mediaviewer.Writer'),
+            model_name="poster",
+            name="writers",
+            field=models.ManyToManyField(
+                blank=True, editable=False, to="mediaviewer.Writer"
+            ),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0062_alter_poster_image'),
+        ("mediaviewer", "0062_alter_poster_image"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='poster',
-            name='release_date',
+            model_name="poster",
+            name="release_date",
             field=models.DateField(blank=True, null=True),
         ),
     ]

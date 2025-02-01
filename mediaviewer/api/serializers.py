@@ -1,8 +1,19 @@
 from rest_framework import serializers
 
-from mediaviewer.models import (TV, Comment, DonationSite, DownloadToken,
-                                FilenameScrapeFormat, MediaFile, MediaPath,
-                                Message, Movie, UserSettings, VideoProgress, Collection)
+from mediaviewer.models import (
+    TV,
+    Comment,
+    DonationSite,
+    DownloadToken,
+    FilenameScrapeFormat,
+    MediaFile,
+    MediaPath,
+    Message,
+    Movie,
+    UserSettings,
+    VideoProgress,
+    Collection,
+)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -138,9 +149,7 @@ class TVSerializer(serializers.ModelSerializer):
 
     def get_media_paths(self, obj):
         return [
-            dict(pk=mp["pk"],
-                 path=mp["_path"],
-                 skip=mp["skip"])
+            dict(pk=mp["pk"], path=mp["_path"], skip=mp["skip"])
             for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path", "skip")
         ]
 
@@ -249,7 +258,7 @@ class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = (
-                "pk",
-                "name",
-                )
+            "pk",
+            "name",
+        )
         pk = serializers.ReadOnlyField()

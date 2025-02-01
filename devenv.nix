@@ -37,13 +37,19 @@
 
   # https://devenv.sh/pre-commit-hooks/
   pre-commit.hooks = {
+    hadolint.enable = false;
+    check-merge-conflicts.enable = true;
     check-added-large-files.enable = true;
+    check-toml.enable = true;
+    check-yaml.enable = true;
+    checkmake.enable = true;
     detect-private-keys.enable = true;
     ripsecrets.enable = true;
     ruff.enable = true;
     ruff-format.enable = true;
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
+    yamllint.enable = false;
   };
 
   # https://devenv.sh/processes/

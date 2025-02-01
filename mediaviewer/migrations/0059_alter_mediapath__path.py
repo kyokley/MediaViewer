@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0058_auto_20240331_0417'),
+        ("mediaviewer", "0058_auto_20240331_0417"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mediapath',
-            name='_path',
-            field=models.CharField(blank=True, db_index=True, max_length=256, unique=True),
+            model_name="mediapath",
+            name="_path",
+            field=models.CharField(
+                blank=True, db_index=True, max_length=256, unique=True
+            ),
         ),
     ]

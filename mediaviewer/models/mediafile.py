@@ -144,7 +144,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         if self.is_tv() and self.season is not None and self.episode is not None:
             name = f"{self.media.name} S{self.season:02} E{self.episode:02}"
             if self.poster and self.poster.episodename:
-                name = f'{name}: {self.poster.episodename}'
+                name = f"{name}: {self.poster.episodename}"
         else:
             name = f"{self.media.name}"
         return name
@@ -152,7 +152,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     def refresh_display_name(self):
         if self.poster:
             episode_name = self.poster.episodename
-            self.display_name = f'S{self.season:02} E{self.episode:02}: {episode_name}'
+            self.display_name = f"S{self.season:02} E{self.episode:02}: {episode_name}"
             self.save()
 
     def infer_scraper(self, scrapers=None):
@@ -184,7 +184,6 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             self.scraper = None
 
         if self.scraper and self.tv:
-
             self.season = season
             self.episode = episode
             self.save()
@@ -197,7 +196,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
     def populate_display_name(self):
         if self.scraper and self.tv:
-            self.display_name = f'S{self.season:02} E{self.episode:02}: {self.poster.episodename}'
+            self.display_name = (
+                f"S{self.season:02} E{self.episode:02}: {self.poster.episodename}"
+            )
         else:
             self.display_name = self.media.name
 

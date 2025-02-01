@@ -3,8 +3,7 @@ import pytest
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
 
-from mediaviewer.models.usersettings import (UserSettings,
-                                             case_insensitive_authenticate)
+from mediaviewer.models.usersettings import UserSettings, case_insensitive_authenticate
 from mediaviewer.tests import helpers
 
 

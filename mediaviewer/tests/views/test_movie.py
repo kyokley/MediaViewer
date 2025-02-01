@@ -9,7 +9,14 @@ from mediaviewer.views.movie import movies, movies_by_genre
 @pytest.mark.django_db
 class TestMovies:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file, create_movie):
+    def setUp(
+        self,
+        mocker,
+        create_user,
+        create_tv_media_file,
+        create_movie_media_file,
+        create_movie,
+    ):
         self.mock_setSiteWideContext = mocker.patch(
             "mediaviewer.views.movie.setSiteWideContext"
         )
@@ -68,7 +75,14 @@ class TestMovieByGenre404:
 @pytest.mark.django_db
 class TestMoviesByGenre:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker, create_user, create_tv_media_file, create_movie_media_file, create_movie):
+    def setUp(
+        self,
+        mocker,
+        create_user,
+        create_tv_media_file,
+        create_movie_media_file,
+        create_movie,
+    ):
         self.mock_get_object_or_404 = mocker.patch(
             "mediaviewer.views.movie.get_object_or_404"
         )

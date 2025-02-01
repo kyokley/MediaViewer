@@ -5,13 +5,14 @@ from django.urls import reverse
 @pytest.mark.django_db
 class TestCollection:
     @pytest.fixture(autouse=True)
-    def setUp(self,
-              client,
-              create_tv,
-              create_movie,
-              create_collection,
-              create_user,
-              ):
+    def setUp(
+        self,
+        client,
+        create_tv,
+        create_movie,
+        create_collection,
+        create_user,
+    ):
         self.user = create_user()
 
         self.client = client

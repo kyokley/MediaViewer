@@ -22,8 +22,8 @@ def collection(request, pk):
     )
     context["active_page"] = "collections"
     collection = get_object_or_404(Collection, pk=pk)
-    movies = Movie.objects.filter(collections=pk).select_related('_poster')
-    tv_shows = TV.objects.filter(collections=pk).select_related('_poster')
+    movies = Movie.objects.filter(collections=pk).select_related("_poster")
+    tv_shows = TV.objects.filter(collections=pk).select_related("_poster")
     medias = [x for x in itertools.chain(movies, tv_shows)]
     medias = sorted(medias, key=lambda x: x.name)
     context["medias"] = medias
