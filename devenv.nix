@@ -36,7 +36,14 @@
   };
 
   # https://devenv.sh/pre-commit-hooks/
-  # pre-commit.hooks.shellcheck.enable = true;
+  pre-commit.hooks = {
+    check-added-large-files.enable = true;
+    detect-private-keys.enable = true;
+    ruff.enable = true;
+    ruff-format.enable = true;
+    ripsecrets.enable = true;
+    trim-trailing-whitespace.enable = true;
+  };
 
   # https://devenv.sh/processes/
   # processes.ping.exec = "ping example.com";
