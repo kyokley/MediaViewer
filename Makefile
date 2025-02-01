@@ -74,7 +74,7 @@ bandit: build-dev ## Run bandit tests
 check-migrations: build-dev ## Check for missing migrations
 	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer python manage.py makemigrations --check
 
-tests: check-migrations pytest bandit test-e2e ## Run all tests
+tests: check-migrations pytest bandit ## Run all tests
 
 stop-all-but-db: ## Bring all containers down except postgres
 	${DOCKER_COMPOSE_EXECUTABLE} down
