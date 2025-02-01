@@ -59,7 +59,7 @@ db-shell: db-up ## Open a shell in a mediaviewer container
 e2e-shell: build-playwright
 	${DOCKER_COMPOSE_EXECUTABLE} -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash
 
-test-e2e: build-playwright
+test-e2e: build-playwright up
 	${DOCKER_COMPOSE_EXECUTABLE} -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash -c 'for i in $$(seq 20 -1 1); do echo -ne "Waiting for MediaViewer to start up... ($$i secs) \\r"; sleep 1; done && pytest mediaviewer/tests/e2e'
 
 db-up:
