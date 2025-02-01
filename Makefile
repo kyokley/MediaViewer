@@ -1,4 +1,4 @@
-.PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish
+.PHONY: build build-dev up up-no-daemon tests attach shell help list static push publish all clean test
 
 UID := 1000
 NO_CACHE ?= 0
@@ -6,7 +6,7 @@ USE_HOST_NET ?= 0
 
 export UID
 
-DOCKER_COMPOSE_EXECUTABLE=$$(which docker-compose >/dev/null 2>&1 && echo 'docker-compose' || echo 'docker compose')
+DOCKER_COMPOSE_EXECUTABLE=$$(command -v docker-compose >/dev/null 2>&1 && echo 'docker-compose' || echo 'docker compose')
 
 help: ## This help
 	@grep -F "##" $(MAKEFILE_LIST) | grep -vF '@grep -F "##" $$(MAKEFILE_LIST)' | sed -r 's/(:).*##/\1/' | sort
@@ -19,8 +19,7 @@ build: touch-history ## Build prod-like container
 		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
 		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
 		--build-arg UID=${UID} \
-		--tag=kyokley/mediaviewer \
-		--target=prod .
+		--tag=kyokley/mediaviewer --target=prod .
 
 build-dev: touch-history ## Build dev container
 	docker build \
@@ -45,17 +44,20 @@ live-shell: up ## Open a shell in a mediaviewer container
 shell: touch-history ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} run mediaviewer /bin/bash
 
-db-shell: up ## Open a shell in a mediaviewer container
+db-shell: db-up ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} exec postgres /bin/bash
 
-pytest: build-dev up ## Run tests
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/pytest -n 4
+db-up:
+	${DOCKER_COMPOSE_EXECUTABLE} up -d postgres
+
+pytest: build-dev db-up ## Run tests
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer pytest -n 4
 
 bandit: build-dev ## Run bandit tests
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/bandit -x ./mediaviewer/tests,./.venv -r .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer bandit -x ./mediaviewer/tests,./.venv -r .
 
 check-migrations: build-dev ## Check for missing migrations
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /venv/bin/python manage.py makemigrations --check
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer python manage.py makemigrations --check
 
 tests: check-migrations pytest bandit ## Run all tests
 
@@ -75,8 +77,8 @@ push: build ## Push image to docker hub
 publish: push ## Alias for push
 
 autoformat:
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/black .
-	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer /venv/bin/isort .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer black .
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm --no-deps mediaviewer isort .
 
 touch-history:
 	@touch .mv.history

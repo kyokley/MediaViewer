@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0055_auto_20240323_1010'),
+        ("mediaviewer", "0055_auto_20240323_1010"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='movie',
-            name='name',
+            model_name="movie",
+            name="name",
             field=models.CharField(blank=True, max_length=256),
         ),
         migrations.AlterField(
-            model_name='tv',
-            name='name',
+            model_name="tv",
+            name="name",
             field=models.CharField(blank=True, max_length=256),
         ),
     ]

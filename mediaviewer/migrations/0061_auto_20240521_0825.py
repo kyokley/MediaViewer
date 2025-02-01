@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0060_auto_20240512_1633'),
+        ("mediaviewer", "0060_auto_20240512_1633"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='movie',
-            name='collections',
-            field=models.ManyToManyField(blank=True, to='mediaviewer.Collection'),
+            model_name="movie",
+            name="collections",
+            field=models.ManyToManyField(blank=True, to="mediaviewer.Collection"),
         ),
         migrations.AlterField(
-            model_name='tv',
-            name='collections',
-            field=models.ManyToManyField(blank=True, to='mediaviewer.Collection'),
+            model_name="tv",
+            name="collections",
+            field=models.ManyToManyField(blank=True, to="mediaviewer.Collection"),
         ),
     ]

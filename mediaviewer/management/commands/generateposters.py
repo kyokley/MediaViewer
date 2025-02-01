@@ -65,7 +65,7 @@ class Command(BaseCommand):
                     poster.populate_data()
                     poster.save()
                 except Exception as e:
-                    logger.warning(f'Got error processing {poster}')
+                    logger.warning(f"Got error processing {poster}")
                     logger.warning(e)
                     continue
 

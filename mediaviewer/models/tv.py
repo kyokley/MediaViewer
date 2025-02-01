@@ -82,8 +82,7 @@ class TV(Media):
         if not user:
             return 0
 
-        episodes = MediaFile.objects.filter(
-            media_path__tv=self).filter(hide=False)
+        episodes = MediaFile.objects.filter(media_path__tv=self).filter(hide=False)
         episodes_count = episodes.count()
         viewed_count = Comment.objects.filter(
             media_file__in=episodes, user=user, viewed=True

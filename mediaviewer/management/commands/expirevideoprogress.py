@@ -6,7 +6,6 @@ from mediaviewer.models import VideoProgress
 
 class Command(ExpireCommand):
     def handle(self, *args, **kwargs):
-        self._handle(conf_settings.VIDEO_PROGRESS_HOLDING_PERIOD,
-                     VideoProgress,
-                     *args,
-                     **kwargs)
+        self._handle(
+            conf_settings.VIDEO_PROGRESS_HOLDING_PERIOD, VideoProgress, *args, **kwargs
+        )

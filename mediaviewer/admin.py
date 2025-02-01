@@ -1,11 +1,22 @@
 from django.contrib import admin
 from django.db import transaction
 
-from mediaviewer.models import (TV, DonationSite, DownloadToken,
-                                FilenameScrapeFormat, Genre, MediaFile,
-                                MediaPath, Movie, Poster, Request,
-                                SiteGreeting, UserSettings, VideoProgress,
-                                Collection)
+from mediaviewer.models import (
+    TV,
+    DonationSite,
+    DownloadToken,
+    FilenameScrapeFormat,
+    Genre,
+    MediaFile,
+    MediaPath,
+    Movie,
+    Poster,
+    Request,
+    SiteGreeting,
+    UserSettings,
+    VideoProgress,
+    Collection,
+)
 
 
 @admin.register(DownloadToken)
@@ -107,9 +118,10 @@ class MediaPathInline(admin.TabularInline):
     readonly_fields = ["tv", "movie"]
     show_change_link = True
     extra = 0
-    raw_id_fields = ('tv',
-                     'movie',
-                     )
+    raw_id_fields = (
+        "tv",
+        "movie",
+    )
 
 
 @admin.register(TV)
@@ -123,14 +135,14 @@ class TVAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     list_filter = ("finished", "hide")
     inlines = [MediaPathInline]
-    raw_id_fields = ('_poster',
-                     )
-    actions = ('hide',
-               'unhide',
-               'finished',
-               'unfinished',
-               'repopulate_poster_data',
-               )
+    raw_id_fields = ("_poster",)
+    actions = (
+        "hide",
+        "unhide",
+        "finished",
+        "unfinished",
+        "repopulate_poster_data",
+    )
 
     def hide(self, request, queryset):
         queryset.update(hide=True)
@@ -144,9 +156,7 @@ class TVAdmin(admin.ModelAdmin):
     def unfinished(self, request, queryset):
         queryset.update(finished=False)
 
-    def repopulate_poster_data(self,
-                               request,
-                               queryset):
+    def repopulate_poster_data(self, request, queryset):
         queryset.populate_poster()
 
 
@@ -160,12 +170,12 @@ class MovieAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     list_filter = ("hide",)
     inlines = [MediaPathInline]
-    raw_id_fields = ('_poster',
-                     )
-    actions = ('hide',
-               'unhide',
-               'repopulate_poster_data',
-               )
+    raw_id_fields = ("_poster",)
+    actions = (
+        "hide",
+        "unhide",
+        "repopulate_poster_data",
+    )
 
     def hide(self, request, queryset):
         queryset.update(hide=True)
@@ -173,9 +183,7 @@ class MovieAdmin(admin.ModelAdmin):
     def unhide(self, request, queryset):
         queryset.update(hide=False)
 
-    def repopulate_poster_data(self,
-                               request,
-                               queryset):
+    def repopulate_poster_data(self, request, queryset):
         queryset.populate_poster()
 
 
@@ -184,9 +192,10 @@ class MediaFileInline(admin.TabularInline):
     show_change_link = True
     ordering = ("season", "episode")
     extra = 0
-    raw_id_fields = ('scraper',
-                     '_poster',
-                     )
+    raw_id_fields = (
+        "scraper",
+        "_poster",
+    )
 
 
 @admin.register(MediaPath)
@@ -214,14 +223,17 @@ class MediaFileAdmin(admin.ModelAdmin):
     )
     search_fields = ("filename",)
     list_filter = ("hide",)
-    raw_id_fields = ('media_path',
-                     '_poster',)
-    actions = ("infer_scrapers",
-               "hide",
-               "unhide",
-               'repopulate_poster_data',
-               'refresh_display_name',
-               )
+    raw_id_fields = (
+        "media_path",
+        "_poster",
+    )
+    actions = (
+        "infer_scrapers",
+        "hide",
+        "unhide",
+        "repopulate_poster_data",
+        "refresh_display_name",
+    )
 
     def infer_scrapers(self, request, queryset):
         queryset.infer_scrapers()
@@ -235,9 +247,7 @@ class MediaFileAdmin(admin.ModelAdmin):
     def unhide(self, request, queryset):
         queryset.update(hide=False)
 
-    def repopulate_poster_data(self,
-                               request,
-                               queryset):
+    def repopulate_poster_data(self, request, queryset):
         queryset.populate_poster()
 
 
@@ -263,10 +273,11 @@ class PosterAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.select_related('tv',
-                               'movie',
-                               'media_file__media_path__tv',
-                               )
+        qs = qs.select_related(
+            "tv",
+            "movie",
+            "media_file__media_path__tv",
+        )
         return qs
 
     def _populate(self, queryset, clear=False):
@@ -281,14 +292,15 @@ class PosterAdmin(admin.ModelAdmin):
     repopulate_data.description = "Re-populate Data"
 
     def clear_and_populate(self, request, queryset):
-        queryset.update(imdb="",
-                        tmdb="",
-                        plot="",
-                        extendedplot="",
-                        episodename="",
-                        tagline="",
-                        release_date=None,
-                        )
+        queryset.update(
+            imdb="",
+            tmdb="",
+            plot="",
+            extendedplot="",
+            episodename="",
+            tagline="",
+            release_date=None,
+        )
         self._populate(queryset, clear=True)
 
     clear_and_populate.description = "Clear and Populate"
@@ -297,12 +309,10 @@ class PosterAdmin(admin.ModelAdmin):
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display = (
-            "id",
-            "name",
-            )
-    search_fields = (
-            "name",
-            )
+        "id",
+        "name",
+    )
+    search_fields = ("name",)
 
 
 admin.site.site_url = "/mediaviewer"

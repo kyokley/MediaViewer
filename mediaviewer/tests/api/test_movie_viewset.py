@@ -9,7 +9,7 @@ from mediaviewer.models import Movie
 class TestMovies:
     @pytest.fixture(autouse=True)
     def setUp(self, client, create_movie, create_user, mocker):
-        mocker.patch('mediaviewer.models.media.Media._populate_poster')
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
 
         self.client = client
         self.user = create_user(is_staff=True)

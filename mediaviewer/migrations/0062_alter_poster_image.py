@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('mediaviewer', '0061_auto_20240521_0825'),
+        ("mediaviewer", "0061_auto_20240521_0825"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='poster',
-            name='image',
-            field=models.ImageField(blank=True, upload_to='uploads/%Y/%m/%d/'),
+            model_name="poster",
+            name="image",
+            field=models.ImageField(blank=True, upload_to="uploads/%Y/%m/%d/"),
         ),
     ]

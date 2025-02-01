@@ -10,25 +10,21 @@ class TestDelete:
         self.tv = create_tv()
         self.movie = create_movie()
 
-    @pytest.mark.parametrize(
-            'use_tv',
-            (True, False))
+    @pytest.mark.parametrize("use_tv", (True, False))
     def test_delete_obj(self, use_tv):
         if use_tv:
             self.media = self.tv
         else:
             self.media = self.movie
 
-        poster = Poster.objects.from_ref_obj(self.media)
+        Poster.objects.from_ref_obj(self.media)
 
         self.media.delete()
 
         with pytest.raises(self.media.DoesNotExist):
             self.media.refresh_from_db()
 
-    @pytest.mark.parametrize(
-            'use_tv',
-            (True, False))
+    @pytest.mark.parametrize("use_tv", (True, False))
     def test_delete_qs(self, use_tv):
         if use_tv:
             media = self.tv
@@ -37,7 +33,7 @@ class TestDelete:
             media = self.movie
             media_class = Movie
 
-        poster = Poster.objects.from_ref_obj(media)
+        Poster.objects.from_ref_obj(media)
 
         media_class.objects.delete()
 

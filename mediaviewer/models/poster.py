@@ -1,6 +1,7 @@
 """
 Re-implementation of PosterFile
 """
+
 from io import BytesIO
 from datetime import date
 
@@ -134,28 +135,20 @@ class PosterManager(models.Manager):
 class Poster(TimeStampModel):
     plot = models.TextField(blank=True, null=False, default="")
     extendedplot = models.TextField(blank=True, null=False, default="")
-    genres = models.ManyToManyField("mediaviewer.Genre",
-                                    blank=True,
-                                    editable=False)
-    actors = models.ManyToManyField("mediaviewer.Actor",
-                                    blank=True,
-                                    editable=False)
-    writers = models.ManyToManyField("mediaviewer.Writer",
-                                     blank=True,
-                                     editable=False)
-    directors = models.ManyToManyField("mediaviewer.Director",
-                                       blank=True,
-                                       editable=False)
+    genres = models.ManyToManyField("mediaviewer.Genre", blank=True, editable=False)
+    actors = models.ManyToManyField("mediaviewer.Actor", blank=True, editable=False)
+    writers = models.ManyToManyField("mediaviewer.Writer", blank=True, editable=False)
+    directors = models.ManyToManyField(
+        "mediaviewer.Director", blank=True, editable=False
+    )
     episodename = models.CharField(blank=True, null=False, default="", max_length=256)
     rated = models.CharField(blank=True, null=False, default="", max_length=256)
     rating = models.CharField(blank=True, null=False, default="", max_length=32)
     tmdb = models.CharField(null=False, default="", blank=True, max_length=32)
     imdb = models.CharField(null=False, default="", blank=True, max_length=32)
-    image = models.ImageField(upload_to="uploads/%Y/%m/%d/",
-                              blank=True)
+    image = models.ImageField(upload_to="uploads/%Y/%m/%d/", blank=True)
     tagline = models.CharField(blank=True, null=False, default="", max_length=256)
-    release_date = models.DateField(blank=True,
-                                    null=True)
+    release_date = models.DateField(blank=True, null=True)
 
     objects = PosterManager()
 
@@ -216,7 +209,7 @@ class Poster(TimeStampModel):
 
     @property
     def name(self):
-        return self.ref_obj.full_name if self.ref_obj else ''
+        return self.ref_obj.full_name if self.ref_obj else ""
 
     @admin.display(boolean=True, description="Image")
     def has_image(self):
@@ -252,13 +245,13 @@ class Poster(TimeStampModel):
                     try:
                         if self.ref_obj.is_movie():
                             self.tmdb = resp["movie_results"][0]["id"]
-                            resp = resp['movie_results'][0]
-                        elif hasattr(self, 'tv'):
+                            resp = resp["movie_results"][0]
+                        elif hasattr(self, "tv"):
                             self.tmdb = resp["tv_results"][0]["id"]
-                            resp = resp['tv_results'][0]
+                            resp = resp["tv_results"][0]
                         else:
                             self.tmdb = resp["tv_episode_results"][0]["id"]
-                            resp = resp['tv_episode_results'][0]
+                            resp = resp["tv_episode_results"][0]
                     except Exception:
                         self.tmdb = ""
                         resp = {}
@@ -271,7 +264,7 @@ class Poster(TimeStampModel):
                 resp = getJSONData(url)
                 if resp.get("results"):
                     self.tmdb = resp["results"][0]["id"]
-                    resp = resp['results'][0]
+                    resp = resp["results"][0]
 
         if self.tmdb:
             if not self.ref_obj.is_movie():
@@ -321,7 +314,7 @@ class Poster(TimeStampModel):
         if not data:
             return None
 
-        if not self.tmdb and 'id' in data:
+        if not self.tmdb and "id" in data:
             self.tmdb = data["id"]
 
         self._cast_and_crew()
@@ -387,13 +380,13 @@ class Poster(TimeStampModel):
             self.episodename = tvinfo.get("name")
             self.tmdb = tvinfo.get("id", self.tmdb) or ""
 
-            if hasattr(self, 'tv'):
-                if release_date_str := tvinfo.get('first_air_date'):
+            if hasattr(self, "tv"):
+                if release_date_str := tvinfo.get("first_air_date"):
                     self.release_date = date.fromisoformat(release_date_str)
                 else:
                     self.release_date = None
             else:
-                if release_date_str := tvinfo.get('air_date'):
+                if release_date_str := tvinfo.get("air_date"):
                     self.release_date = date.fromisoformat(release_date_str)
                 else:
                     self.release_date = None
@@ -414,7 +407,9 @@ class Poster(TimeStampModel):
 
     def _store_extended_info(self):
         try:
-            extended_info = _get_extended_info(self.tmdb, is_movie=self.ref_obj.is_movie())
+            extended_info = _get_extended_info(
+                self.tmdb, is_movie=self.ref_obj.is_movie()
+            )
         except Exception as e:
             log.warning("Extended info not found")
             log.warning(e)
@@ -477,7 +472,7 @@ class Poster(TimeStampModel):
                     self.directors.add(director_obj)
 
     def _store_release_date(self, imdb_data):
-        if release_date_str := imdb_data.get('release_date'):
+        if release_date_str := imdb_data.get("release_date"):
             self.release_date = date.fromisoformat(release_date_str)
         else:
             self.release_date = None

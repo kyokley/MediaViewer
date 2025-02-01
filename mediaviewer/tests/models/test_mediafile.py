@@ -5,9 +5,7 @@ from mediaviewer.models import MediaFile, Poster
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("use_tv", (True, False))
-def test_delete(create_movie_media_file,
-                create_tv_media_file,
-                use_tv):
+def test_delete(create_movie_media_file, create_tv_media_file, use_tv):
     if use_tv:
         mf = create_tv_media_file()
     else:

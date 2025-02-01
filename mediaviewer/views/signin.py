@@ -5,12 +5,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
-from django.contrib.auth.views import \
-    PasswordResetConfirmView as DjangoPasswordResetConfirmView
-from django.contrib.auth.views import \
-    PasswordResetDoneView as DjangoPasswordResetDoneView
-from django.contrib.auth.views import \
-    PasswordResetView as DjangoPasswordResetView
+from django.contrib.auth.views import (
+    PasswordResetConfirmView as DjangoPasswordResetConfirmView,
+)
+from django.contrib.auth.views import (
+    PasswordResetDoneView as DjangoPasswordResetDoneView,
+)
+from django.contrib.auth.views import PasswordResetView as DjangoPasswordResetView
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -20,8 +21,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from mediaviewer.models.loginevent import LoginEvent
 from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.models.usersettings import (ImproperLogin,
-                                             case_insensitive_authenticate)
+from mediaviewer.models.usersettings import ImproperLogin, case_insensitive_authenticate
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 

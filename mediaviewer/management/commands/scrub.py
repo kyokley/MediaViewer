@@ -21,6 +21,6 @@ class Command(BaseCommand):
             user.save()
 
         site = Site.objects.get()
-        site.name = 'localhost:8000'
-        site.domain = 'localhost:8000'
+        site.name = "localhost:8000"
+        site.domain = "localhost:8000"
         site.save()

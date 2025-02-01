@@ -90,7 +90,9 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-WEB_ROOT = Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
+WEB_ROOT = (
+    Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
+)
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = WEB_ROOT / "mv" / "media"
@@ -213,7 +215,11 @@ LOGGING = {
 }
 
 SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-LOG_DIR = Path(os.getenv("MV_LOG_DIR")) if os.getenv("MV_LOG_DIR") else SYSTEM_BASE_PATH / "logs"
+LOG_DIR = (
+    Path(os.getenv("MV_LOG_DIR"))
+    if os.getenv("MV_LOG_DIR")
+    else SYSTEM_BASE_PATH / "logs"
+)
 LOG_FILE_NAME = LOG_DIR / "mediaviewerLog"
 LOG_LEVEL = logging.DEBUG
 
@@ -284,8 +290,8 @@ MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
-TOKEN_HOLDING_PERIOD = 168 # In hours
-VIDEO_PROGRESS_HOLDING_PERIOD = 2160 # In hours
+TOKEN_HOLDING_PERIOD = 168  # In hours
+VIDEO_PROGRESS_HOLDING_PERIOD = 2160  # In hours
 
 # PassKey Settings
 PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")

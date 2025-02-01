@@ -49,18 +49,15 @@ class MediaManager(models.Manager):
                 name = ref_name
 
         obj, _ = self.get_or_create(name=name)
-        obj._populate_poster() # Generate poster
+        obj._populate_poster()  # Generate poster
         return obj, _
 
 
 class Media(TimeStampModel):
-    name = models.CharField(null=False,
-                            blank=True,
-                            max_length=256)
+    name = models.CharField(null=False, blank=True, max_length=256)
     finished = models.BooleanField(null=False, default=False)
     hide = models.BooleanField(null=False, default=False)
-    collections = models.ManyToManyField('mediaviewer.Collection',
-                                         blank=True)
+    collections = models.ManyToManyField("mediaviewer.Collection", blank=True)
 
     class Meta:
         abstract = True

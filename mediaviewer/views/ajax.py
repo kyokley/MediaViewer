@@ -105,10 +105,11 @@ def ajaxcollections(request, guid):
         return HttpResponse(None, content_type="application/json", status=412)
 
     if request.method == "GET":
-        collections = Collection.objects.order_by('name')
+        collections = Collection.objects.order_by("name")
         data = {
-            "collections": [(collection.id, collection.name)
-                            for collection in collections],
+            "collections": [
+                (collection.id, collection.name) for collection in collections
+            ],
         }
         return HttpResponse(
             json.dumps(data), content_type="application/json", status=200
@@ -257,11 +258,7 @@ def _ajax_tv_rows(request, qs):
 
 @csrf_exempt
 def ajaxmovierows(request):
-    qs = (
-        Movie.objects
-        .filter(hide=False)
-        .order_by("-id")
-    )
+    qs = Movie.objects.filter(hide=False).order_by("-id")
     return _ajax_movie_rows(request, qs)
 
 
@@ -273,15 +270,18 @@ def ajaxmoviesbygenrerows(request, genre_id):
 
 
 def get_tv_show_rows_query(genre_id=None):
-    tv_qs = TV.objects.filter(hide=False
-                              ).annotate(
-        max_date_created=Subquery(
-            MediaFile.objects.filter(hide=False)
-            .filter(media_path__tv=OuterRef("pk"))
-            .order_by("-date_created")
-            .values("date_created")[:1]
+    tv_qs = (
+        TV.objects.filter(hide=False)
+        .annotate(
+            max_date_created=Subquery(
+                MediaFile.objects.filter(hide=False)
+                .filter(media_path__tv=OuterRef("pk"))
+                .order_by("-date_created")
+                .values("date_created")[:1]
+            )
         )
-    ).order_by("-max_date_created")
+        .order_by("-max_date_created")
+    )
 
     if genre_id:
         genre = get_object_or_404(Genre, pk=genre_id)
@@ -306,8 +306,7 @@ def ajaxtvshows(request, tv_id):
     ref_tv = get_object_or_404(TV, pk=tv_id)
 
     qs = (
-        MediaFile.objects
-        .filter(hide=False)
+        MediaFile.objects.filter(hide=False)
         .filter(media_path__tv=ref_tv)
         .order_by("display_name")
     )
