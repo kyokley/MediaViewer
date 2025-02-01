@@ -95,4 +95,5 @@ COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}/
 RUN uv sync --project "${VIRTUAL_ENV}"
 
 COPY . /code
+WORKDIR /logs
 WORKDIR /code
