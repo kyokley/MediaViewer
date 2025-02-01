@@ -4,10 +4,21 @@ secret.txt
 *.log
 *.ini
 *.pyc
-*.lock
 node_modules
 static/*
 components/*
 .coverage
 cover
 .python-version
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+logs
+.mv.history

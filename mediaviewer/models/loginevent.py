@@ -1,6 +1,7 @@
-from django.conf import settings
-import pytz
 from datetime import datetime
+
+import pytz
+from django.conf import settings
 from django.db import models
 
 

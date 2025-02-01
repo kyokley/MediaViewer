@@ -1,0 +1,44 @@
+{% extends "moviedetail.html" %}
+<!DOCTYPE html>
+{% load static %}
+{% block jumbotron %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                <li class="breadcrumb-item active"><a href="/mediaviewer/tvshows/{{ mf.tv.id }}/">{{ mf.tv.name }}</a></li>
+        </ol>
+    </nav>
+{% endblock %}
+
+{% block open_button %}
+    {% if can_download and waiterstatus %}
+        <div class="d-grid gap-2 col-4 mx-auto">
+            <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ mf.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{mf.id}}')">Open</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block checkbox %}
+    <input class="viewed-checkbox" id="toggle-viewed" name="{{ mf.id }}" type="checkbox"
+                                                                           {% if viewed %}
+                                                                               checked
+                                                                       {% endif %}
+                                                                           onclick="
+                                                                           ajaxTVCheckBox(['{{mf.id}}'], true)
+                                                                           " />
+    <span id="saved-{{ mf.id }}"></span>
+{% endblock %}
+
+{% block episode_nav %}
+    {% if previous_link %}
+    <div class="col-auto">
+        <a class='btn btn-info' name='previous-btn' id='previous-btn' href="{{ previous_link }}"><i class="bi-arrow-left-circle-fill"></i> Previous Episode</a>
+    </div>
+    {% endif %}
+    {% if next_link %}
+    <div class="col-auto">
+        <a class='btn btn-info' name='next-btn' id='next-btn' href="{{ next_link }}"><i class="bi-arrow-right-circle-fill"></i> Next Episode</a>
+    </div>
+    {% endif %}
+{% endblock %}

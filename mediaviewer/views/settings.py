@@ -1,18 +1,15 @@
-from django.contrib.auth.decorators import login_required
-from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.models.usersettings import (
-    UserSettings,
-    LOCAL_IP,
-    BANGUP_IP,
-    FILENAME_SORT,
-)
-from mediaviewer.views.views_utils import setSiteWideContext
-from django.shortcuts import render
 from datetime import datetime as dateObj
-from django.utils.timezone import utc
-from mediaviewer.utils import logAccessInfo
-from mediaviewer.log import log
+
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.shortcuts import render
+from django.utils.timezone import utc
+
+from mediaviewer.log import log
+from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
+from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.views_utils import setSiteWideContext
 
 
 @login_required(login_url="/mediaviewer/login/")
@@ -20,8 +17,6 @@ from django.core.exceptions import ValidationError
 def settings(request):
     siteGreeting = SiteGreeting.latestSiteGreeting()
     context = {
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
         "greeting": (
             siteGreeting and siteGreeting.greeting or "Check out the new downloads!"
         ),
@@ -29,7 +24,6 @@ def settings(request):
     context["active_page"] = "settings"
     user = request.user
     settings = user.settings()
-    context["ip_format"] = settings.ip_format
     context["title"] = "Settings"
     context["binge_mode"] = settings.binge_mode
     context["jump_to_last"] = settings.jump_to_last_watched

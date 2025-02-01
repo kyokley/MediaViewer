@@ -1,9 +1,10 @@
-from django.contrib.auth.models import User
-from django.shortcuts import render
-from mediaviewer.views.views_utils import setSiteWideContext
 from django.contrib.auth import logout
+from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_out
+from django.shortcuts import render
+
 from mediaviewer.utils import logAccessInfo
+from mediaviewer.views.views_utils import setSiteWideContext
 
 
 @logAccessInfo

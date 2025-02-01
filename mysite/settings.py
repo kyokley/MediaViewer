@@ -1,6 +1,9 @@
 # Django settings for site project.
-import os
 import logging
+import os
+
+from pathlib import Path
+
 from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
@@ -87,9 +90,12 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
+WEB_ROOT = (
+    Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
+)
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = "/var/www/mv/media/"
+MEDIA_ROOT = WEB_ROOT / "mv" / "media"
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -100,7 +106,7 @@ MEDIA_ROOT = "/var/www/mv/media/"
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = "/var/www/mv/static/"
+STATIC_ROOT = WEB_ROOT / "mv" / "static"
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -111,8 +117,6 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "/venv/lib/python3.10/site-packages/django/contrib/admin",
-    "/venv/lib/python3.10/site-packages/rest_framework",
 )
 
 # List of finder classes that know how to find static files in
@@ -159,18 +163,17 @@ INSTALLED_APPS = (
     "widget_tweaks",
     "rest_framework",
     "mediaviewer",
-    "mediaviewer.models",
-    "mediaviewer.views",
 )
 
 AUTHENTICATION_BACKENDS = [
-    "mediaviewer.authenticators.WaiterSettingsAuthBackend",
     "django.contrib.auth.backends.ModelBackend",
+    "mediaviewer.authenticators.WaiterSettingsAuthBackend",
 ]
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAdminUser",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ),
@@ -192,7 +195,10 @@ LOGGING = {
             "level": "ERROR",
             "filters": ["require_debug_false"],
             "class": "django.utils.log.AdminEmailHandler",
-        }
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+        },
     },
     "loggers": {
         "django.request": {
@@ -200,12 +206,21 @@ LOGGING = {
             "level": "ERROR",
             "propagate": True,
         },
+        "": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 
-SYSTEM_BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-LOG_DIR = os.path.join(SYSTEM_BASE_PATH, "logs")
-LOG_FILE_NAME = os.path.join(LOG_DIR, "mediaviewerLog")
+SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+LOG_DIR = (
+    Path(os.getenv("MV_LOG_DIR"))
+    if os.getenv("MV_LOG_DIR")
+    else SYSTEM_BASE_PATH / "logs"
+)
+LOG_FILE_NAME = LOG_DIR / "mediaviewerLog"
 LOG_LEVEL = logging.DEBUG
 
 TEMPLATES = [
@@ -235,10 +250,8 @@ TEMPLATES = [
 GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
 WAITER_HEAD = "http://"
-LOCAL_WAITER_IP_FORMAT_MOVIES = BANGUP_WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
-LOCAL_WAITER_IP_FORMAT_TVSHOWS = (
-    BANGUP_WAITER_IP_FORMAT_TVSHOWS
-) = "127.0.0.1/waiter/file/"
+WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
+WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1/waiter/file/"
 
 WAITER_STATUS_URL = "http://127.0.0.1/waiter/status"
 
@@ -256,11 +269,10 @@ os.environ["wsgi.url_scheme"] = "https"
 # Use django_referrer_policy middleware
 REFERRER_POLICY = "same-origin"
 
-API_KEY = "keykeykey"
-OMDBAPI_KEY = None
+API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
-REQUEST_TIMEOUT = 3
+REQUEST_TIMEOUT = 20
 
 # Run the python debugging smtp server with the following
 # python -m smtpd -n -c DebuggingServer localhost:1025
@@ -278,6 +290,8 @@ MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
 TOKEN_VALIDITY_LENGTH = 3  # In hours
+TOKEN_HOLDING_PERIOD = 168  # In hours
+VIDEO_PROGRESS_HOLDING_PERIOD = 2160  # In hours
 
 # PassKey Settings
 PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")
@@ -285,4 +299,9 @@ PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
 
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"
-WAITER_PASSWORD_HASH = os.environ.get("WAITER_PASSWORD_HASH")
+WAITER_PASSWORD_HASH = (
+    os.environ.get("WAITER_PASSWORD_HASH")
+    or "pbkdf2_sha256$260000$gTINkjUitLzAra3DGCJ4pK$/IzJql5fzVSV2XfINRkHpyBxIvNdjhxDyVqB3f5Lzmk="
+)
+
+SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1

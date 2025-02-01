@@ -1,11 +1,9 @@
 import logging
+
 import requests
-
-from django.core.management.base import BaseCommand
-
 from django.conf import settings as conf_settings
 from django.contrib.auth.models import User
-
+from django.core.management.base import BaseCommand
 
 logger = logging.getLogger(__file__)
 

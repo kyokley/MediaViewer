@@ -1,13 +1,8 @@
-from mediaviewer.models.waiterstatus import WaiterStatus
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
-from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
-from mediaviewer.models.message import (
-    Message,
-    REGULAR,
-    LAST_WATCHED,
-)
+from mediaviewer.models import Genre, Collection
 from mediaviewer.models.donation_site import DonationSite
+from mediaviewer.models.message import LAST_WATCHED, REGULAR, Message
+from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
+from mediaviewer.models.waiterstatus import WaiterStatus
 
 
 def setSiteWideContext(context, request, includeMessages=False):
@@ -37,10 +32,11 @@ def setSiteWideContext(context, request, includeMessages=False):
                     extra_tags=str(message.id) + " last_watched",
                 )
 
-        context["movie_genres"] = File.get_movie_genres()
-        context["tv_genres"] = Path.get_tv_genres()
+        context["movie_genres"] = Genre.objects.get_movie_genres()
+        context["tv_genres"] = Genre.objects.get_tv_genres()
 
         context["theme"] = settings.theme if settings else UserSettings.DARK
+        context["collections"] = list(Collection.objects.order_by("name"))
     else:
         context["loggedin"] = False
 

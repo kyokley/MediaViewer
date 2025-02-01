@@ -1,13 +1,12 @@
 import pytest
-
 from django.conf import settings
 
 from mediaviewer.utils import (
+    checkSMTPServer,
     getSomewhatUniqueID,
     humansize,
-    sendMail,
-    checkSMTPServer,
     query_param_to_bool,
+    sendMail,
 )
 
 SOMEWHAT_UNIQUE_TEST_ATTEMPTS = 100

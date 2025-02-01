@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 
-URL = 'http://mediaviewer:8000/mediaviewer/'
+URL = "http://mediaviewer:8000/mediaviewer/"
 
 
 def test_home_not_logged_in(page: Page):

@@ -1,16 +1,12 @@
 import mock
 import pytest
-
 from django.contrib.auth.models import User
-from django.http import HttpRequest
-from mediaviewer.views.settings import (
-    submitnewuser,
-    settings,
-    submitsettings,
-)
-from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.sitegreeting import SiteGreeting
 from django.core.exceptions import ValidationError
+from django.http import HttpRequest
+
+from mediaviewer.models.sitegreeting import SiteGreeting
+from mediaviewer.models.usersettings import UserSettings
+from mediaviewer.views.settings import settings, submitnewuser, submitsettings
 
 
 # TODO: Drop mock patch decorators
@@ -126,14 +122,6 @@ class TestNewUserView:
 class TestSettings:
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
-        self.LOCAL_IP_patcher = mocker.patch(
-            "mediaviewer.views.settings.LOCAL_IP", "test_local_ip"
-        )
-
-        self.BANGUP_IP_patcher = mocker.patch(
-            "mediaviewer.views.settings.BANGUP_IP", "test_bangup_ip"
-        )
-
         self.mock_latestSiteGreeting = mocker.patch(
             "mediaviewer.views.settings.SiteGreeting.latestSiteGreeting"
         )
@@ -163,12 +151,9 @@ class TestSettings:
 
     def test_user_has_email(self):
         expected_context = {
-            "LOCAL_IP": "test_local_ip",
-            "BANGUP_IP": "test_bangup_ip",
             "greeting": "test_greeting",
             "active_page": "settings",
             "title": "Settings",
-            "ip_format": self.settings.ip_format,
             "binge_mode": self.settings.binge_mode,
             "jump_to_last": self.settings.jump_to_last_watched,
             "email": self.user.email,
@@ -193,12 +178,9 @@ class TestSettings:
         self.user.email = None
 
         expected_context = {
-            "LOCAL_IP": "test_local_ip",
-            "BANGUP_IP": "test_bangup_ip",
             "greeting": "test_greeting",
             "active_page": "settings",
             "title": "Settings",
-            "ip_format": self.settings.ip_format,
             "binge_mode": self.settings.binge_mode,
             "jump_to_last": self.settings.jump_to_last_watched,
             "email": self.user.email,

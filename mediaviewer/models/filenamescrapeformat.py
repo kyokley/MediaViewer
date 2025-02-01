@@ -1,4 +1,5 @@
 import re
+
 from django.db import models
 
 
@@ -43,9 +44,9 @@ class FilenameScrapeFormat(models.Model):
         return obj
 
     def valid_for_filename(self, filename):
-        from mediaviewer.models.path import Path
+        from mediaviewer.models import TV
 
-        path = None
+        tv = None
 
         if self.subPeriods:
             filename = filename.replace(".", " ")
@@ -56,11 +57,20 @@ class FilenameScrapeFormat(models.Model):
         if not name:
             return None
         else:
-            for p in Path.objects.filter(is_movie=False).order_by("-id"):
-                if name.lower() in p.displayName().lower():
-                    path = p
-                    break
-            else:
+            query = models.Q()
+            words = name.split()
+            for word in words:
+                query = query | models.Q(name__icontains=word)
+            tv_objs = TV.objects.filter(query).order_by("-pk")
+            max_word_score = 0
+
+            for tv_obj in tv_objs:
+                word_score = self._tv_name_score_for_words(tv_obj, words)
+                if word_score > max_word_score:
+                    tv = tv_obj
+                    max_word_score = word_score
+
+            if not tv:
                 return None
 
         season = re.findall(self.seasonRegex, filename)
@@ -85,10 +95,21 @@ class FilenameScrapeFormat(models.Model):
         if int(season) == 2 and int(episode) == 64:
             return None
 
-        return (path, name, season, episode)
+        return (tv, name, season, episode)
+
+    @staticmethod
+    def _tv_name_score_for_words(tv, words):
+        count = 0
+        for word in words:
+            if word.lower() in tv.name.lower():
+                count += 1
+
+        if tv.name.lower() == " ".join([x.lower() for x in words]):
+            count += 5
+        return count
 
     @classmethod
-    def path_for_filename(cls, filename):
+    def tv_for_filename(cls, filename):
         paths = []
 
         for scraper in FilenameScrapeFormat.objects.all():
@@ -97,4 +118,4 @@ class FilenameScrapeFormat(models.Model):
                 paths.append(path)
 
         paths.sort(key=lambda x: len(x[1]), reverse=True)
-        return paths[0][0] if paths else None
+        return paths[0][0] if paths else ""

@@ -1,12 +1,9 @@
 import mock
 import pytest
-
-from django.http import HttpRequest
 from django.db.utils import IntegrityError
-from mediaviewer.models.usersettings import (
-    UserSettings,
-    case_insensitive_authenticate,
-)
+from django.http import HttpRequest
+
+from mediaviewer.models.usersettings import UserSettings, case_insensitive_authenticate
 
 
 @pytest.mark.django_db

@@ -1,0 +1,85 @@
+{% extends "home.html" %}
+<!DOCTYPE html>
+{% load static %}
+
+{% block jumbotron %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+            <li class="breadcrumb-item active">Movies</li>
+        </ol>
+        <h1>{{ title }}</h1>
+        <h3>Select from the following:</h3>
+    </nav>
+{% endblock %}
+
+{% block main %}
+    {% block carousel %}
+    {{ block.super }}
+    {% endblock %}
+
+    <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
+        <thead>
+            <tr>
+                <th class="text-center">Name</th>
+                <th class="text-center">Release Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for media in medias %}
+            <tr>
+                <td>
+                    {% if media.poster.image %}
+                    <a class="img-preview"
+                        {% if not media.is_tv %}
+                        href="{% url 'mediaviewer:moviedetail' media.pk %}"
+                        {% else %}
+                        href="{% url 'mediaviewer:tvshows' media.pk %}"
+                        {% endif %}
+                        data-bs-toggle="popover"
+                        data-bs-trigger="hover focus"
+                        data-bs-placement="left"
+                        data-bs-custom-class="preview-tooltip"
+                        data-bs-content="<img class='tooltip-img' src='{{ media.poster.image.url }}' />">
+                    {% else %}
+                    <a href="{{ media.url }}">
+                    {% endif %}
+                        {{ media.name }}
+                    </a>
+                </td>
+                <td>
+                    <div class="hidden_span">{{ media.poster.release_date.isoformat }}</div> {{ media.poster.release_date }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        $(document).ready(function(){
+            csrf_token = '{{ csrf_token }}';
+            preparePage($);
+
+            prepareAjaxWaiterStatus($, '{{ is_staff }}');
+            scrollSetup();
+            configureTooltips($);
+
+            tableElement = $('#myTable');
+
+            tableElement.dataTable({
+                stateSave: true,
+                autoWidth: true,
+                paginate: false,
+                order: [[1, 'desc']],
+                ordering: true,
+                info: false,
+                searching: false,
+                pageLength: 15,
+                scrollY: 450
+            });
+        });
+
+    </script>
+{% endblock %}

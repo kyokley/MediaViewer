@@ -1,8 +1,8 @@
-from mysite.settings import *
-
 import os
 
-USE_SILK = DEBUG = True
+from mysite.settings import *  # noqa
+
+USE_SILK = DEBUG = os.environ.get("MEDIAVIEWER_DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "mediaviewer"]
 
@@ -35,8 +35,8 @@ STATICFILES_DIRS += ("/node/node_modules",)
 
 WAITER_STATUS_URL = "http://mediawaiter:5000/waiter/status"
 WAITER_HEAD = "http://"
-BANGUP_WAITER_IP_FORMAT_MOVIES = "127.0.0.1:5000/waiter/dir/"
-BANGUP_WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1:5000/waiter/file/"
+WAITER_IP_FORMAT_MOVIES = "127.0.0.1:5000/waiter/dir/"
+WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1:5000/waiter/file/"
 
 BYPASS_SMTPD_CHECK = True
 

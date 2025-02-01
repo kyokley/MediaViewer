@@ -1,19 +1,15 @@
-from django.db import models
-from django.contrib.auth.models import (
-    User,
-    Group,
-)
-from django.contrib.auth import authenticate
-from django.db import transaction
-from django.db.utils import IntegrityError
-from django.conf import settings
-from mediaviewer.forms import FormlessPasswordReset
-from datetime import datetime
-import pytz
 import re
+from datetime import datetime
 
-LOCAL_IP = "local_ip"
-BANGUP_IP = "bangup"
+import pytz
+from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import Group, User
+from django.db import models, transaction
+from django.db.utils import IntegrityError
+
+from mediaviewer.forms import FormlessPasswordReset
+
 
 TIMESTAMP_SORT = "timestamp_sort"
 FILENAME_SORT = "filename_sort"
@@ -41,7 +37,6 @@ class UserSettings(models.Model):
 
     datecreated = models.DateTimeField(db_column="datecreated", blank=True)
     dateedited = models.DateTimeField(db_column="dateedited", blank=True)
-    ip_format = models.TextField(db_column="ip_format", blank=False, null=False)
     user = models.OneToOneField(
         "auth.User",
         on_delete=models.CASCADE,
@@ -60,8 +55,11 @@ class UserSettings(models.Model):
         db_column="can_login", blank=False, null=False, default=True
     )
     binge_mode = models.BooleanField(blank=False, null=False, default=True)
-    last_watched = models.ForeignKey(
-        "mediaviewer.Path", on_delete=models.SET_NULL, null=True, blank=True
+    last_watched_tv = models.ForeignKey(
+        "mediaviewer.TV", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    last_watched_movie = models.ForeignKey(
+        "mediaviewer.Movie", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
     allow_password_logins = models.BooleanField(blank=True, null=False, default=False)
@@ -76,7 +74,7 @@ class UserSettings(models.Model):
         verbose_name_plural = "User Settings"
 
     def __str__(self):
-        return f"id: {self.id} u: {self.user.username} ip: {self.ip_format}"
+        return f"id: {self.id} u: {self.user.username}"
 
     @property
     def username(self):
@@ -91,7 +89,6 @@ class UserSettings(models.Model):
     def create_user_setting(
         cls,
         user,
-        ip_format=BANGUP_IP,
         default_sort=FILENAME_SORT,
         can_login=False,
         can_download=True,
@@ -102,7 +99,6 @@ class UserSettings(models.Model):
         newSettings.datecreated = datetime.now(pytz.timezone(settings.TIME_ZONE))
         newSettings.dateedited = newSettings.datecreated
         newSettings.user = user
-        newSettings.ip_format = ip_format
         newSettings.default_sort = default_sort
         newSettings.can_download = can_download
         newSettings.can_login = can_login
@@ -119,7 +115,6 @@ class UserSettings(models.Model):
         email,
         is_staff=False,
         is_superuser=False,
-        ip_format=BANGUP_IP,
         default_sort=FILENAME_SORT,
         can_download=True,
         send_email=True,
@@ -151,7 +146,6 @@ class UserSettings(models.Model):
 
         cls.create_user_setting(
             newUser,
-            ip_format=ip_format,
             default_sort=default_sort,
             can_login=True,
             can_download=can_download,

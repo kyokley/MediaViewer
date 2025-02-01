@@ -1,62 +1,21 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-from mediaviewer.models.file import File
-from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.views.views_utils import setSiteWideContext
-from mediaviewer.models.usersettings import (
-    LOCAL_IP,
-    BANGUP_IP,
-)
-from mediaviewer.models.message import Message
-from mediaviewer.models.usercomment import UserComment
-from mediaviewer.utils import logAccessInfo, humansize
-from django.shortcuts import render, get_object_or_404, redirect
 import json
+from itertools import chain
 
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
 
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def filesdetail(request, file_id):
-    user = request.user
-    file = File.objects.get(pk=file_id)
-    skip = file.skip
-    finished = file.finished
-    usercomment = file.usercomment(user)
-    if usercomment:
-        viewed = usercomment.viewed
-        comment = usercomment.comment or ""
-        setattr(file, "usercomment", usercomment)
-    else:
-        viewed = False
-        comment = ""
-
-    posterfile = file.posterfile
-
-    settings = user.settings()
-    context = {
-        "file": file,
-        "displayName": file.displayName(),
-        "posterfile": posterfile,
-        "comment": comment,
-        "skip": skip,
-        "finished": finished,
-        "LOCAL_IP": LOCAL_IP,
-        "BANGUP_IP": BANGUP_IP,
-        "viewed": viewed,
-        "can_download": settings and settings.can_download or False,
-        "file_size": file.size and humansize(file.size),
-    }
-    context["active_page"] = "movies" if file.isMovie() else "tvshows"
-    context["title"] = (
-        file.isMovie() and file.rawSearchString() or file.path.displayName()
-    )
-    setSiteWideContext(context, request)
-    return render(request, "mediaviewer/filesdetail.html", context)
+from mediaviewer.models import Comment, MediaFile, Movie
+from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.models.message import Message
+from mediaviewer.utils import logAccessInfo
 
 
 @csrf_exempt
 @logAccessInfo
+@transaction.atomic
 def ajaxviewed(request):
     errmsg = None
     user = request.user
@@ -66,78 +25,106 @@ def ajaxviewed(request):
 
     if errmsg:
         response["errmsg"] = errmsg
-        return HttpResponse(json.dumps(response), content_type="application/javascript")
+        return JsonResponse(response, status=400)
 
-    data = dict(request.POST)
-    data.pop("csrfmiddlewaretoken", None)
+    data = dict(json.loads(request.body))
 
-    updated = []
+    media_files = data.get("media_files", {})
+    movies = data.get("movies", {})
+
     updated_comments = []
     created_comments = []
 
-    qs = File.objects.filter(pk__in=data.keys())
-    uc_qs = UserComment.objects.filter(user=user).filter(file__in=qs)
-    uc_lookup = {uc.file: uc for uc in uc_qs}
+    mf_qs = MediaFile.objects.filter(pk__in=media_files.keys())
+    movie_qs = Movie.objects.filter(pk__in=movies.keys())
 
-    for file in qs:
-        checked = data[str(file.pk)]
-        viewed = checked[0].lower() == "true" and True or False
-        comment, was_created = file.markFileViewed(
-            user, viewed, save=False, uc_lookup=uc_lookup
+    mf_comment_qs = Comment.objects.filter(user=user).filter(media_file__in=mf_qs)
+    movie_comment_qs = Comment.objects.filter(user=user).filter(movie__in=movie_qs)
+
+    comment_lookup = {comment.media_file: comment for comment in mf_comment_qs}
+    comment_lookup.update({comment.movie: comment for comment in movie_comment_qs})
+
+    for obj in chain(mf_qs, movie_qs):
+        if isinstance(obj, MediaFile):
+            checked = media_files[str(obj.pk)]
+        else:
+            checked = movies[str(obj.pk)]
+
+        comment, was_created = obj.mark_viewed(
+            user, checked, save=False, comment_lookup=comment_lookup
         )
+
         if was_created:
             created_comments.append(comment)
         else:
             updated_comments.append(comment)
 
-        updated.append(str(file.pk))
-
     if created_comments:
-        UserComment.objects.bulk_create(created_comments)
+        Comment.objects.bulk_create(created_comments)
 
     if updated_comments:
-        UserComment.objects.bulk_update(updated_comments, ["viewed", "dateedited"])
+        Comment.objects.bulk_update(updated_comments, ["viewed"])
 
     if created_comments or updated_comments:
         Message.clearLastWatchedMessage(user)
 
     response["data"] = data
 
-    return HttpResponse(json.dumps(response), content_type="application/javascript")
+    return JsonResponse(response)
 
 
 @csrf_exempt
 def ajaxsuperviewed(request):
     errmsg = ""
-    guid = request.POST["guid"]
+    guid = request.POST.get("guid", "")
     viewed = request.POST["viewed"] == "True" and True or False
 
-    token = DownloadToken.objects.filter(guid=guid).first()
-    if token and token.isvalid:
-        token.file.markFileViewed(token.user, viewed)
+    if guid:
+        token = DownloadToken.objects.filter(guid=guid).first()
+        if token and token.isvalid:
+            obj = token.media_file or token.movie
+            obj.mark_viewed(token.user, viewed)
+        else:
+            errmsg = "Token is invalid"
     else:
         errmsg = "Token is invalid"
 
     response = {"errmsg": errmsg, "guid": guid, "viewed": viewed}
-    response = json.dumps(response)
-    return HttpResponse(
-        response, status=200 if not errmsg else 400, content_type="application/json"
+    return JsonResponse(
+        response,
+        status=200 if not errmsg else 400,
     )
 
 
 @logAccessInfo
 def ajaxdownloadbutton(request):
     response = {"errmsg": ""}
-    fileid = int(request.POST["fileid"])
-    file = get_object_or_404(File, pk=fileid)
+    mf_id = request.POST.get("mf_id")
+    movie_id = request.POST.get("movie_id")
+
+    # Need to raise error
+    if mf_id is None and movie_id is None:
+        return HttpResponse("Neither mf_id nor movie_id were provided", status=404)
+    elif mf_id is not None and movie_id is not None:
+        return HttpResponse(
+            "Only mf_id or movie_id can be provided. Got both.", status=400
+        )
+
+    if mf_id is not None:
+        obj = get_object_or_404(MediaFile, pk=mf_id)
+    else:
+        obj = get_object_or_404(Movie, pk=movie_id)
     user = request.user
 
     if not user.is_authenticated:
         response = {"errmsg": "User not authenticated. Refresh and try again."}
-    elif file and user:
-        dt = DownloadToken.new(user, file)
+    elif obj and user:
+        if isinstance(obj, MediaFile):
+            dt = DownloadToken.objects.from_media_file(user, obj)
+        else:
+            dt = DownloadToken.objects.from_movie(user, obj)
 
-        downloadlink = file.downloadLink(user, dt.guid)
+        downloadlink = obj.downloadLink(dt.guid)
         response = {
             "guid": dt.guid,
             "isMovie": dt.ismovie,
@@ -147,26 +134,16 @@ def ajaxdownloadbutton(request):
     else:
         response = {"errmsg": "An error has occurred"}
 
-    return HttpResponse(json.dumps(response), content_type="application/javascript")
+    status = 200 if response["errmsg"] == "" else 400
+    return JsonResponse(response, status=status)
 
 
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
-def downloadlink(request, fileid):
+def autoplaydownloadlink(request, mf_id):
     user = request.user
-    file = get_object_or_404(File, pk=fileid)
-    dt = DownloadToken.new(user, file)
+    mf = get_object_or_404(MediaFile, pk=mf_id)
+    dt = DownloadToken.objects.from_media_file(user, mf)
 
-    downloadlink = file.downloadLink(user, dt.guid)
-    return redirect(downloadlink)
-
-
-@login_required(login_url="/mediaviewer/login/")
-@logAccessInfo
-def autoplaydownloadlink(request, fileid):
-    user = request.user
-    file = get_object_or_404(File, pk=fileid)
-    dt = DownloadToken.new(user, file)
-
-    downloadlink = file.autoplayDownloadLink(user, dt.guid)
+    downloadlink = mf.autoplayDownloadLink(dt.guid)
     return redirect(downloadlink)

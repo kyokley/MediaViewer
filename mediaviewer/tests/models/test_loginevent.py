@@ -1,8 +1,8 @@
+from datetime import datetime
+
 import mock
 import pytest
 import pytz
-from datetime import datetime
-
 from django.conf import settings
 from mediaviewer.models.loginevent import LoginEvent
 

@@ -1,8 +1,9 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.utils import timezone
 from datetime import datetime as dateObj
+
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
 from django.utils.timezone import utc
 
 REGULAR = "regular"
@@ -74,11 +75,10 @@ class Message(models.Model):
             cls.createNewMessage(user, body, level=level)
 
     @classmethod
-    def createLastWatchedMessage(cls, user, file, level=messages.WARNING):
-        if file.isTVShow():
-            body = CONTINUE_MESSAGE.format(file.path.url())
-        else:
-            body = CONTINUE_MESSAGE.format(file.url())
+    def createLastWatchedMessage(
+        cls, user, movie_or_media_file, level=messages.WARNING
+    ):
+        body = CONTINUE_MESSAGE.format(movie_or_media_file.last_watched_url())
 
         old_messages = (
             cls.objects.filter(touser=user)

@@ -1,23 +1,17 @@
 import mock
 import pytest
-
 from django.http import HttpRequest
 
-from mediaviewer.models.file import File
-from mediaviewer.models.path import Path
 from mediaviewer.models.sitegreeting import SiteGreeting
-from mediaviewer.views.home import (
-    home,
-    ajaxrunscraper,
-)
+from mediaviewer.views.home import home
 
 
 @pytest.mark.django_db
 class TestHome:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_user, mocker):
+    def setUp(self, mocker, create_user, create_tv_media_file):
         self.mock_most_recent_files = mocker.patch(
-            "mediaviewer.views.home.File.most_recent_files"
+            "mediaviewer.views.home.MediaFile.objects.most_recent_media"
         )
 
         self.mock_setSiteWideContext = mocker.patch(
@@ -28,10 +22,7 @@ class TestHome:
 
         self.user = create_user()
 
-        self.tv_path = Path.objects.create(
-            localpathstr="tv.local.path", remotepathstr="tv.remote.path", is_movie=False
-        )
-        self.tv_file = File.objects.create(filename="tv.file", path=self.tv_path)
+        self.tv_file = create_tv_media_file(filename="tv.file")
 
         self.mock_most_recent_files.return_value = [self.tv_file]
 
@@ -44,8 +35,8 @@ class TestHome:
         expected_context = {
             "greeting": "test_greeting",
             "active_page": "home",
-            "files": [self.tv_file],
             "title": "Home",
+            "carousel_files": [self.tv_file],
         }
 
         expected = self.mock_render.return_value
@@ -64,7 +55,7 @@ class TestHome:
         expected_context = {
             "greeting": "Check out the new downloads!",
             "active_page": "home",
-            "files": [self.tv_file],
+            "carousel_files": [self.tv_file],
             "title": "Home",
         }
 
@@ -78,50 +69,4 @@ class TestHome:
         )
         self.mock_render.assert_called_once_with(
             self.request, "mediaviewer/home.html", expected_context
-        )
-
-
-@pytest.mark.django_db
-class TestAjaxRunScraper:
-    @pytest.fixture(autouse=True)
-    def setUp(self, create_user, mocker):
-        self.mock_inferAllScrapers = mocker.patch(
-            "mediaviewer.views.home.File.inferAllScrapers"
-        )
-
-        self.mock_dumps = mocker.patch("mediaviewer.views.home.json.dumps")
-
-        self.mock_HttpResponse = mocker.patch("mediaviewer.views.home.HttpResponse")
-
-        self.user = create_user()
-
-        self.request = mock.MagicMock(HttpRequest)
-        self.request.user = self.user
-
-    def test_not_staff(self):
-        expected_response = {"errmsg": ""}
-
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxrunscraper(self.request)
-
-        assert expected == actual
-        assert not self.mock_inferAllScrapers.called
-        self.mock_dumps.assert_called_once_with(expected_response)
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
-        )
-
-    def test_staff(self):
-        self.user.is_staff = True
-
-        expected_response = {"errmsg": ""}
-
-        expected = self.mock_HttpResponse.return_value
-        actual = ajaxrunscraper(self.request)
-
-        assert expected == actual
-        self.mock_inferAllScrapers.assert_called_once_with()
-        self.mock_dumps.assert_called_once_with(expected_response)
-        self.mock_HttpResponse.assert_called_once_with(
-            self.mock_dumps.return_value, content_type="application/javascript"
         )

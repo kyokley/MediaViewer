@@ -1,21 +1,20 @@
-import pytest
-
-from mediaviewer.views.views_utils import (
-    setSiteWideContext,
-    getLastWaiterStatus,
-)
-from mediaviewer.models.usersettings import FILENAME_SORT
-from mediaviewer.models.message import Message
-from django.contrib.auth.models import User
-
 import mock
+import pytest
+from django.contrib.auth.models import User
 from mock import call
+
+from mediaviewer.models import Collection
+from mediaviewer.models.message import Message
+from mediaviewer.models.usersettings import FILENAME_SORT
+from mediaviewer.views.views_utils import getLastWaiterStatus, setSiteWideContext
 
 
 @pytest.mark.django_db
 class TestSetSiteWideContext:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, mocker, create_collection):
+        create_collection()
+
         self.mock_add_message = mocker.patch(
             "mediaviewer.views.views_utils.Message.add_message"
         )
@@ -29,11 +28,11 @@ class TestSetSiteWideContext:
         )
 
         self.mock_get_movie_genres = mocker.patch(
-            "mediaviewer.views.views_utils.File.get_movie_genres"
+            "mediaviewer.views.views_utils.Genre.objects.get_movie_genres"
         )
 
         self.mock_get_tv_genres = mocker.patch(
-            "mediaviewer.views.views_utils.Path.get_tv_genres"
+            "mediaviewer.views.views_utils.Genre.objects.get_tv_genres"
         )
 
         self.first_message = mock.MagicMock(Message)
@@ -93,15 +92,16 @@ class TestSetSiteWideContext:
         setSiteWideContext(context, self.request, includeMessages=False)
 
         expected = {
+            "theme": "dark",
             "loggedin": True,
-            "is_staff": "true",
-            "default_sort": FILENAME_SORT,
-            "donation_site_name": "",
-            "donation_site_url": "",
             "user": self.user,
+            "default_sort": FILENAME_SORT,
             "movie_genres": self.mock_get_movie_genres.return_value,
             "tv_genres": self.mock_get_tv_genres.return_value,
-            "theme": "dark",
+            "collections": list(Collection.objects.order_by("name")),
+            "is_staff": "true",
+            "donation_site_name": "",
+            "donation_site_url": "",
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         assert not self.mock_getMessagesForUser.called
@@ -125,6 +125,7 @@ class TestSetSiteWideContext:
             "movie_genres": self.mock_get_movie_genres.return_value,
             "tv_genres": self.mock_get_tv_genres.return_value,
             "theme": "dark",
+            "collections": list(Collection.objects.order_by("name")),
         }
         self.mock_getLastWaiterStatus.assert_called_once_with(expected)
         self.mock_add_message.assert_has_calls(

@@ -1,45 +1,41 @@
-version: '3.6'
-
 services:
-    postgres:
-        hostname: postgres
-        image: postgres:14-alpine
-        environment:
-          - POSTGRES_PASSWORD=postgres
-          - POSTGRES_HOST_AUTH_METHOD=trust
-        ports:
-            - "5432:5432"
-        volumes:
-          - mediaviewer-data:/var/lib/postgresql/data
-        networks:
-          - mediaviewer-backend
-
-    mediaviewer:
-        image: kyokley/mediaviewer
-        build:
-          context: .
-        environment:
-            - DJANGO_SETTINGS_MODULE=mysite.docker_settings
-            - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
-        command:
-            sh -c "/venv/bin/python manage.py collectstatic --no-input &&
-                   /venv/bin/python manage.py migrate &&
-                   /venv/bin/python manage.py runserver 0.0.0.0:8000"
-        hostname: mediaviewer
-        depends_on:
-            - "postgres"
-        ports:
-            - "8000:8000"
-        tty: true
-        stdin_open: true
-        networks:
-          - mediaviewer-backend
-        volumes:
-          - .:/code
-
+  postgres:
+    hostname: postgres
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - mediaviewer-data:/var/lib/postgresql/data
+    networks:
+      - mediaviewer-backend
+  mediaviewer:
+    image: kyokley/mediaviewer
+    build:
+      context: .
+    environment:
+      - DJANGO_SETTINGS_MODULE=mysite.docker_settings
+      - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
+      - MV_WEB_ROOT=/www
+      - MV_LOG_DIR=/logs
+      - SKIP_LOADING_TVDB_CONFIG=1
+    command: sh -c "python manage.py collectstatic --no-input && \ python manage.py migrate && \ python manage.py runserver 0.0.0.0:8000"
+    hostname: mediaviewer
+    depends_on:
+      - "postgres"
+    ports:
+      - "8000:8000"
+    tty: true
+    stdin_open: true
+    networks:
+      - mediaviewer-backend
+    volumes:
+      - .:/code
+      - ./.mv.history:/home/user/.bash_history
 # Persistent Volumes
 volumes:
   mediaviewer-data:
-
 networks:
-    mediaviewer-backend:
+  mediaviewer-backend:

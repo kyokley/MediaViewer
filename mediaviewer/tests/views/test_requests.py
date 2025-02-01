@@ -1,16 +1,15 @@
 import mock
-
-from django.test import TestCase
 from django.contrib.auth.models import User
 from django.http import HttpRequest
+from django.test import TestCase
 
-from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.models.request import Request
+from mediaviewer.models.usersettings import UserSettings
 from mediaviewer.views.requests import (
     addrequests,
-    ajaxvote,
     ajaxdone,
     ajaxgiveup,
+    ajaxvote,
     requests,
 )
 

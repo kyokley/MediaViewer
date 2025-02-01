@@ -1,12 +1,9 @@
-import pytest
-
 from datetime import timedelta
 
+import pytest
 from django.contrib.auth.models import User
-from mediaviewer.models.request import (
-    Request,
-    RequestVote,
-)
+
+from mediaviewer.models.request import Request, RequestVote
 
 
 @pytest.mark.django_db

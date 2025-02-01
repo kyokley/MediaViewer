@@ -1,13 +1,22 @@
+import shutil
+from pathlib import Path
+
 import pytest
+from django.contrib.auth.models import Group
 from faker import Faker
 
-from django.contrib.auth.models import Group
+from mediaviewer.models import (
+    TV,
+    MediaFile,
+    MediaPath,
+    Movie,
+    Collection,
+    DownloadToken,
+)
 from mediaviewer.models.usersettings import UserSettings
-from mediaviewer.models.path import Path
-from mediaviewer.models.file import File
-from mediaviewer.models.posterfile import PosterFile
-from mediaviewer.utils import getSomewhatUniqueID
 
+DEFAULT_USERNAME = "test_user"
+DEFAULT_EMAIL = "asdf@example.com"
 
 DEFAULT_USERNAME = "test_user"
 DEFAULT_EMAIL = "a@b.com"
@@ -25,112 +34,142 @@ def _counter_gen():
 _count = _counter_gen()
 
 
-@pytest.fixture()
-def create_path():
-    def _create_path(
-        localpathstr=None,
-        remotepathstr=None,
-        skip=False,
-        is_movie=False,
+@pytest.fixture(autouse=True)
+def mock_requests(mocker):
+    mock = mocker.patch("mediaviewer.models.tvdbconfiguration.requests.get")
+    mock.side_effect = Exception("Failing external requests on purpose")
+
+
+@pytest.fixture
+def temp_dir(tmp_path):
+    base_dir = Path(tmp_path)
+
+    def _temp_dir():
+        dir = base_dir / str(next(_count))
+        return dir
+
+    yield _temp_dir
+    if base_dir.exists():
+        shutil.rmtree(base_dir)
+
+
+@pytest.fixture
+def create_media_path(temp_dir):
+    def _create_media_path(path=None, tv=None, movie=None):
+        if tv is None and movie is None:
+            raise ValueError("Either tv or movie must be provided")
+
+        if not path:
+            path = temp_dir()
+
+        mp = MediaPath.objects.create(_path=path, tv=tv, movie=movie)
+        return mp
+
+    return _create_media_path
+
+
+@pytest.fixture
+def create_movie(create_media_path):
+    def _create_movie(
+        name=None,
+        finished=False,
+        poster=None,
+        hide=False,
     ):
-        if localpathstr is None:
-            localpathstr = f"/path/to/localpath_{next(_count)}"
+        if name is None:
+            name = f"Movie {next(_count)}"
 
-        if remotepathstr is None:
-            remotepathstr = f"/path/to/remotepath_{next(_count)}"
-
-        return Path.objects.create(
-            localpathstr=localpathstr,
-            remotepathstr=remotepathstr,
-            skip=skip,
-            is_movie=is_movie,
+        movie = Movie.objects.create(
+            name=name,
+            finished=finished,
+            _poster=poster,
+            hide=hide,
         )
 
-    return _create_path
+        create_media_path(movie=movie)
+
+        return movie
+
+    return _create_movie
 
 
-@pytest.fixture()
-def create_file(create_path):
-    def _create_file(
-        path=None, filename=None, skip=False, finished=True, size=100, streamable=True
+@pytest.fixture
+def create_tv(create_media_path):
+    def _create_tv(
+        name=None,
+        finished=False,
+        poster=None,
+        hide=False,
     ):
-        if path is None:
-            path = create_path()
+        if name is None:
+            name = f"TV {next(_count)}"
+
+        tv = TV.objects.create(
+            name=name,
+            finished=finished,
+            _poster=poster,
+            hide=hide,
+        )
+
+        create_media_path(tv=tv)
+        return tv
+
+    return _create_tv
+
+
+@pytest.fixture
+def create_tv_media_file(create_tv):
+    def _create_tv_media_file(tv=None, filename=None, display_name=None):
+        if tv is None:
+            tv = create_tv()
 
         if filename is None:
-            filename = f"test_filename{next(_count)}"
+            filename = f"foo{next(_count)}.mp4"
 
-        return File.objects.create(
-            path=path,
-            filename=filename,
-            skip=skip,
-            finished=finished,
-            size=size,
-            streamable=streamable,
+        if display_name is None:
+            display_name = filename
+
+        return tv.add_episode(filename, display_name)
+
+    return _create_tv_media_file
+
+
+@pytest.fixture
+def create_movie_media_file(create_movie):
+    def _create_movie_media_file(movie=None, filename=None, display_name=None):
+        if movie is None:
+            movie = create_movie()
+
+        if filename is None:
+            filename = f"foo{next(_count)}.mp4"
+
+        if display_name is None:
+            display_name = filename
+
+        return MediaFile.objects.create(
+            media_path=movie.media_path, filename=filename, display_name=display_name
         )
 
-    return _create_file
+    return _create_movie_media_file
 
 
-@pytest.fixture()
-def create_poster_file():
-    def _create_poster_file(
-        file=None, path=None, genres=None, plot=None, extendedplot=None
-    ):
-        if file is None and path is None or (file and path):
-            raise Exception("Either file or path must be defined but not both")
-
-        if genres is None:
-            genres = []
-
-        if plot is None:
-            plot = fake.sentence()
-
-        if extendedplot is None:
-            extendedplot = fake.paragraph()
-
-        poster_file = PosterFile.objects.create(
-            file=file,
-            path=path,
-            plot=plot,
-            extendedplot=extendedplot,
-        )
-
-        for genre in genres:
-            poster_file.genres.add(genre)
-
-        return poster_file
-
-    return _create_poster_file
-
-@pytest.fixture()
+@pytest.fixture
 def create_user():
     def _create_user(
-        username=DEFAULT_USERNAME,
-        email=DEFAULT_EMAIL,
+        username=None,
+        email=None,
         group_name="MediaViewer",
         send_email=False,
         force_password_change=False,
         is_staff=False,
-        random=False,
     ):
-        mv_group = Group.objects.filter(name=group_name).first()
+        mv_group, _ = Group.objects.get_or_create(name=group_name)
 
-        if not mv_group:
-            mv_group = Group(name=group_name)
-            mv_group.save()
+        if not username:
+            username = f"{DEFAULT_USERNAME}{next(_count)}"
 
-        if random:
-            if username != DEFAULT_USERNAME or email != DEFAULT_EMAIL:
-                raise ValueError(
-                    "Username and email are not expected to be populated"
-                    " when used with random kwarg"
-                )
-
-            username = getSomewhatUniqueID()
-            email = "{}@{}.com".format(
-                str(getSomewhatUniqueID()), str(getSomewhatUniqueID())
-            )
+        if not email:
+            email = f"asdf{next(_count)}@example.com"
 
         user = UserSettings.new(
             username, email, send_email=send_email, group=mv_group, is_staff=is_staff
@@ -138,4 +177,32 @@ def create_user():
         settings = user.settings()
         settings.force_password_change = force_password_change
         return user
+
     return _create_user
+
+
+@pytest.fixture
+def create_collection():
+    def _create_collection(
+        name=None,
+    ):
+        if name is None:
+            name = f"Collection {next(_count)}"
+        return Collection.objects.create(name=name)
+
+    return _create_collection
+
+
+@pytest.fixture
+def create_download_token(create_user, create_tv_media_file):
+    def _create_download_token(user=None, media_file=None):
+        if user is None:
+            user = create_user()
+
+        if media_file is None:
+            media_file = create_tv_media_file()
+
+        dt = DownloadToken.objects.from_media_file(user, media_file)
+        return dt
+
+    return _create_download_token

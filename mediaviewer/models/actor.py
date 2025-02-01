@@ -1,4 +1,5 @@
 from django.db import models
+
 from mediaviewer.models.person import Person
 
 
@@ -11,7 +12,7 @@ class Actor(Person):
 
     @classmethod
     def new(cls, name, order=None):
-        new_obj = super(Actor, cls).new(name)
+        new_obj = super().new(name)
         new_obj.order = order
         new_obj.save()
         return new_obj

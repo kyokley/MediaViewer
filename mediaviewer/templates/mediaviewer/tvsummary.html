@@ -1,43 +1,35 @@
-{% extends "files.html" %}
+{% extends "movies.html" %}
 <!DOCTYPE html>
 {% load static %}
-{% include title %}
-
-{% include css %}
-
-{% include navbar %}
-
 {% block jumbotron %}
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-                <li class="breadcrumb-item active">TV Shows</li>
-            </ol>
-        </nav>
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+        <li class="breadcrumb-item active">TV Shows</li>
+    </ol>
+</nav>
 
-        <h1 class="display-5 fw-bold">{{ title }}</h1>
-        <h3>Select from the following TV Shows:</h3>
+<h1 class="display-5 fw-bold">{{ title }}</h1>
+<h3>Select from the following TV Shows:</h3>
 {% endblock %}
 
-{% include messages %}
-
 {% block main %}
-    <table id="myTable" class="table table-{{ theme }} table-striped table-hover">
+    {% block carousel %}
+    {{ block.super }}
+    {% endblock %}
+
+    <table id="myTable" class="table table-striped table-hover nowrap" width="100%">
         <thead>
             <tr>
-                <th class="all">TV Shows</th>
-                <th class='min-tablet-p'>Last Show</th>
+                <th class="text-center">TV Shows</th>
+                <th class="text-center">Last Show</th>
             </tr>
         </thead>
-        <tbody class="table-group-divider">
+        <tbody>
         </tbody>
     </table>
 
 {% endblock %}
-
-{% include footer %}
-
-{% include javascript_include %}
 
 {% block javascript %}
     <script type="text/javascript">

@@ -1,14 +1,67 @@
-from django.db import models
 from datetime import timedelta
-from datetime import datetime
-import pytz
-from mediaviewer.utils import getSomewhatUniqueID
+
 from django.conf import settings as conf_settings
+from django.db import models
+from django.utils import timezone
+
 from mediaviewer.models.message import Message
+from mediaviewer.utils import getSomewhatUniqueID
 
 
 def _createId():
     return getSomewhatUniqueID(numBytes=16)
+
+
+class DownloadTokenManager(models.Manager):
+    def get_by_guid(self, guid):
+        return self.filter(guid=guid).first()
+
+    def from_media_file(
+        self,
+        user,
+        media_file,
+    ):
+        dt = self.create(
+            user=user,
+            filename=media_file.filename,
+            path=media_file.media_path.path,
+            displayname=media_file.full_name,
+            media_file=media_file,
+        )
+        return self._post_token_create(dt, user)
+
+    def from_movie(
+        self,
+        user,
+        movie,
+    ):
+        dt = self.create(
+            user=user,
+            filename=movie.name,
+            path=movie.mediapath_set.first().path,
+            displayname=movie.full_name,
+            movie=movie,
+        )
+        return self._post_token_create(dt, user)
+
+    def _post_token_create(self, dt, user):
+        number_of_stored_tokens = self.count()
+        if (
+            number_of_stored_tokens
+            > conf_settings.MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
+        ):
+            old_token = self.order_by("id").first()
+            if old_token:
+                old_token.delete()
+
+        Message.createLastWatchedMessage(user, dt.movie or dt.media_file)
+        settings = user.settings()
+        if dt.movie:
+            settings.last_watched_movie = dt.movie
+        if dt.media_file:
+            settings.last_watched_tv = dt.media_file.tv
+        settings.save()
+        return dt
 
 
 class DownloadToken(models.Model):
@@ -22,16 +75,22 @@ class DownloadToken(models.Model):
     )
     path = models.TextField(db_column="path")
     filename = models.TextField(db_column="filename")
-    ismovie = models.BooleanField(db_column="ismovie")
-    datecreated = models.DateTimeField(db_column="datecreated", blank=True)
+    date_created = models.DateTimeField(blank=True, auto_now_add=True, null=True)
     displayname = models.TextField(db_column="display_name")
-    file = models.ForeignKey(
-        "mediaviewer.File",
+    media_file = models.ForeignKey(
+        "mediaviewer.MediaFile",
         on_delete=models.CASCADE,
-        null=False,
-        db_column="fileid",
+        null=True,
         blank=True,
     )
+    movie = models.ForeignKey(
+        "mediaviewer.Movie",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
+    objects = DownloadTokenManager()
 
     class Meta:
         app_label = "mediaviewer"
@@ -42,53 +101,21 @@ class DownloadToken(models.Model):
             self.id,
             self.filename,
             self.path,
-            self.datecreated,
+            self.date_created,
         )
 
     @property
     def isvalid(self):
         # Tokens are only valid for a certain amount of time
-        refDate = self.datecreated + timedelta(
+        refDate = self.date_created + timedelta(
             hours=conf_settings.TOKEN_VALIDITY_LENGTH
         )
-        return refDate > datetime.now(pytz.timezone(conf_settings.TIME_ZONE))
+        return refDate > timezone.now()
 
-    @classmethod
-    def new(
-        cls,
-        user,
-        file,
-        datecreated=None,
-    ):
-        dt = cls()
-        dt.user = user
-        dt.filename = file.filename
-        dt.path = file.path.localpathstr
-        dt.ismovie = file.isMovie()
+    @property
+    def ismovie(self):
+        return bool(self.movie)
 
-        if not datecreated:
-            datecreated = datetime.now(pytz.timezone(conf_settings.TIME_ZONE))
-        dt.datecreated = datecreated
-
-        dt.displayname = file.display_name_with_path()
-        dt.file = file
-        dt.save()
-
-        number_of_stored_tokens = cls.objects.count()
-        if (
-            number_of_stored_tokens
-            > conf_settings.MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS
-        ):  # noqa
-            old_token = cls.objects.order_by("id").first()
-            if old_token:
-                old_token.delete()
-
-        Message.createLastWatchedMessage(user, file)
-        settings = user.settings()
-        settings.last_watched = file.path
-        settings.save()
-        return dt
-
-    @classmethod
-    def getByGUID(cls, guid):
-        return cls.objects.filter(guid=guid).first()
+    @property
+    def ref_obj(self):
+        return self.media_file or self.movie

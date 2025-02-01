@@ -1,8 +1,10 @@
-import time
 import os
-from mediaviewer.log import log
-from django.conf import settings
+import time
+
 import requests
+from django.conf import settings
+
+from mediaviewer.log import log
 
 
 def getJSONData(url):
@@ -10,7 +12,11 @@ def getJSONData(url):
         url = url.replace(" ", "+")
         log.info("Getting json from %s" % (url,))
         resp = requests.get(url, timeout=settings.REQUEST_TIMEOUT)
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except Exception:
+            time.sleep(1)
+            raise
         data = resp.json()
         log.debug("Got %s" % (data,))
 
@@ -18,15 +24,15 @@ def getJSONData(url):
             remaining = int(resp.headers["X-RateLimit-Remaining"])
             limit = int(resp.headers.get("X-RateLimit-Limit", "40"))
 
-            if remaining < 0.1 * limit:
+            if remaining < 0.3 * limit:
                 log.warning(
                     "90%% of the rate limit has been used. Sleeping for 1 second"
                 )
                 time.sleep(1)
 
         return data
-    except Exception as e:
-        log.error(str(e), exc_info=True)
+    except Exception:
+        raise
 
 
 class TVDBConfiguration:
@@ -34,32 +40,35 @@ class TVDBConfiguration:
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
-            cls._instance = super(TVDBConfiguration, cls).__new__(cls, *args, **kwargs)
+            cls._instance = super().__new__(cls, *args, **kwargs)
         return cls._instance
 
     def __init__(self):
-        log.debug("Getting tvdb config")
-        try:
-            data = self._getTVDBConfiguration()
-            self.url = data["images"]["secure_base_url"]
-            self.poster_size = "w500"
-            self.still_size = data["images"]["still_sizes"][-1]
-            self.connected = True
+        if not settings.SKIP_LOADING_TVDB_CONFIG:
+            log.debug("Getting tvdb config")
+            try:
+                data = self._getTVDBConfiguration()
+                self.url = data["images"]["secure_base_url"]
+                self.poster_size = "w500"
+                self.still_size = data["images"]["still_sizes"][-1]
+                self.connected = True
 
-            genres = self._getTVDBGenres()
-            if not genres:
-                raise Exception("No genres returned")
+                genres = self._getTVDBGenres()
+                if not genres:
+                    raise Exception("No genres returned")
 
-            self.genres = genres
-            log.debug("tvdb values set successfully")
-        except Exception as e:
+                self.genres = genres
+                log.debug("tvdb values set successfully")
+            except Exception:
+                log.error("Failed to load TVDB config")
+                raise
+        else:
+            log.debug("Skip loading TVDB config")
             self.url = ""
             self.poster_size = ""
             self.still_size = ""
             self.connected = False
             self.genres = {}
-            log.error(str(e), exc_info=True)
-            log.debug("Failed to set tvdb values")
 
     def _getTVDBConfiguration(self):
         url = "https://api.themoviedb.org/3/configuration?api_key={}".format(
@@ -105,17 +114,42 @@ def searchTVDBByName(name):
 
 
 def getTVDBEpisodeInfo(tvdb_id, season, episode):
+    if not tvdbConfig.connected:
+        log.debug(
+            f"Could not get episode specific information. tvdbConfig.connected={tvdbConfig.connected}"
+        )
+        return {}
+
     log.debug(
         f"Getting tvdb episode info for {tvdb_id}, "
         f"season: {season}, episode: {episode}"
     )
-    if not tvdbConfig.connected:
-        return {}
 
-    url = "https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={api_key}".format(  # noqa
-        tvdb_id=tvdb_id, season=season, episode=episode, api_key=settings.API_KEY
-    )
-    return getJSONData(url)
+    urls = []
+
+    if episode and season:
+        urls.append(
+            f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={settings.API_KEY}"
+        )
+
+    if season:
+        urls.append(
+            f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}?api_key={settings.API_KEY}"
+        )
+
+    urls.append(f"https://api.themoviedb.org/3/tv/{tvdb_id}?api_key={settings.API_KEY}")
+
+    resp = {}
+    for url in urls:
+        try:
+            resp = getJSONData(url)
+        except Exception as e:
+            log.debug(e)
+            continue
+
+        if resp:
+            break
+    return resp
 
 
 def saveImageToDisk(path, imgName):
@@ -198,11 +232,16 @@ def _getDataFromIMDBByID(imdb_id, isMovie=True):
                 )
         else:
             tmdb_id = resp.get("movie_results")[0]["id"]
-            url = "https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={api_key}".format(  # noqa
-                tmdb_id=tmdb_id, api_key=settings.API_KEY
+            url = (
+                "https://api.themoviedb.org/3/movie/{tmdb_id}?api_key={api_key}".format(  # noqa
+                    tmdb_id=tmdb_id, api_key=settings.API_KEY
+                )
             )
 
-        data = getJSONData(url)
+        if tmdb_id:
+            data = getJSONData(url)
+        else:
+            data = None
 
         if data:
             data["url"] = url
@@ -233,7 +272,11 @@ def _getDataFromIMDBBySearchString(searchString, isMovie=True):
 
 
 def getCastData(tmdb_id, season=None, episode=None, isMovie=True):
-    log.debug("Getting data from TVDb using %s" % (tmdb_id,))
+    log.info("Getting data from TVDb using %s" % (tmdb_id,))
+
+    if not tmdb_id:
+        log.warn("Skipping getting data: tmdb_id is null")
+        return {}
 
     if not isMovie:
         if episode and season:

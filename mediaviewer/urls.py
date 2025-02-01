@@ -1,50 +1,49 @@
-from django.views.decorators.csrf import csrf_exempt
-from django.conf.urls import include
-from django.urls import re_path
-from rest_framework import routers
-from django.shortcuts import redirect
 from django.conf import settings as conf_settings
-from django.urls import reverse_lazy
-from mediaviewer.forms import PasswordResetFormWithBCC
+from django.conf.urls import include
+from django.shortcuts import redirect
+from django.urls import re_path, reverse_lazy
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import routers
 
+from mediaviewer.forms import PasswordResetFormWithBCC
 from mediaviewer.views import (
-    home,
-    files,
+    ajax,
     detail,
+    home,
+    messaging,
+    movie,
+    requests,
+    settings,
     signin,
     signout,
-    settings,
-    messaging,
-    requests,
+    tv,
     waiterstatus,
-    ajax,
+    collection,
 )
 
 router = routers.DefaultRouter()
 
 urlpatterns = [
     re_path(r"^$", home.home, name="home"),
-    re_path(r"^files/(?P<file_id>\d+)/$", detail.filesdetail, name="filesdetail"),
+    re_path(r"^tvdetail/(?P<mf_id>\d+)/$", tv.tvdetail, name="tvdetail"),
     re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
-    re_path(r"^tvshows/display/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
-    re_path(r"^tvshows/(?P<pathid>\d+)/$", files.tvshows, name="tvshows"),
-    re_path(r"^tvshows/summary/$", files.tvshowsummary, name="tvshowsummary"),
+    re_path(r"^tvshows/(?P<tv_id>\d+)/$", tv.tvshows, name="tvshows"),
+    re_path(r"^tvshows/summary/$", tv.tvshowsummary, name="tvshowsummary"),
     re_path(
         r"^tvshows/genre/(?P<genre_id>\d+)/$",
-        files.tvshows_by_genre,
+        tv.tvshows_by_genre,
         name="tvshows_by_genre",
     ),
-    re_path(r"^movies/$", files.movies, name="movies"),
+    re_path(r"^movies/$", movie.movies, name="movies"),
     re_path(
         r"^movies/genre/(?P<genre_id>\d+)/$",
-        files.movies_by_genre,
+        movie.movies_by_genre,
         name="movies_by_genre",
     ),
+    re_path(r"^moviedetail/(?P<movie_id>\d+)/$", movie.moviedetail, name="moviedetail"),
+    re_path(r"^collection/(?P<pk>\d+)/$", collection.collection, name="collection"),
     re_path(
-        r"^downloadlink/(?P<fileid>\d+)/$", detail.downloadlink, name="downloadlink"
-    ),
-    re_path(
-        r"^autoplaydownloadlink/(?P<fileid>\d+)/$",
+        r"^autoplaydownloadlink/(?P<mf_id>\d+)/$",
         detail.autoplaydownloadlink,
         name="autoplaydownloadlink",
     ),
@@ -70,8 +69,7 @@ urlpatterns = [
         r"^ajaxwaiterstatus/", waiterstatus.ajaxwaiterstatus, name="ajaxwaiterstatus"
     ),
     re_path(r"^ajaxclosemessage/", messaging.ajaxclosemessage, name="ajaxclosemessage"),
-    re_path(r"^ajaxreport/", files.ajaxreport, name="ajaxreport"),
-    re_path(r"^ajaxrunscraper/", home.ajaxrunscraper, name="ajaxrunscraper"),
+    re_path(r"^ajaxreport/", ajax.ajaxreport, name="ajaxreport"),
     re_path(
         r"^ajaxvideoprogress/(?P<guid>[0-9A-Za-z]+)/(?P<hashed_filename>.+)/$",
         ajax.ajaxvideoprogress,
@@ -79,6 +77,11 @@ urlpatterns = [
     ),
     re_path(
         r"^ajaxgenres/(?P<guid>[0-9A-Za-z]+)/$", ajax.ajaxgenres, name="ajaxgenres"
+    ),
+    re_path(
+        r"^ajaxcollections/(?P<guid>[0-9A-Za-z]+)/$",
+        ajax.ajaxcollections,
+        name="ajaxcollections",
     ),
     re_path(r"^ajax/ajaxmovierows/$", ajax.ajaxmovierows, name="ajaxmovierows"),
     re_path(
@@ -97,7 +100,7 @@ urlpatterns = [
         name="ajaxtvshowsbygenre",
     ),
     re_path(
-        r"^ajax/ajaxtvshows/(?P<path_id>[0-9]+)/$",
+        r"^ajax/ajaxtvshows/(?P<tv_id>[0-9]+)/$",
         ajax.ajaxtvshows,
         name="ajaxtvshows",
     ),
@@ -165,29 +168,35 @@ urlpatterns.extend(
 )
 
 if not conf_settings.IS_SYNCING:
-    from mediaviewer.api import viewset, path_viewset, file_viewset
+    from mediaviewer.api import (
+        media_file_viewset,
+        media_path_viewset,
+        movie_viewset,
+        tv_viewset,
+        viewset,
+        collection_viewset,
+    )
 
     router.register(
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"
     )
+    router.register(r"movie", movie_viewset.MovieViewSet, basename="movie")
+    router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
     router.register(
-        r"unstreamablefile",
-        file_viewset.UnstreamableFileViewSet,
-        basename="unstreamablefile",
+        r"tvmediapath", media_path_viewset.TVMediaPathViewSet, basename="tvmediapath"
     )
-    router.register(r"movie", file_viewset.MovieFileViewSet, basename="movie")
-    router.register(r"tv", file_viewset.TvFileViewSet, basename="tv")
-    router.register(r"tvpath", path_viewset.TvPathViewSet, basename="tvpath")
-    router.register(r"moviepath", path_viewset.MoviePathViewSet, basename="moviepath")
     router.register(
-        r"distinct-tv", path_viewset.DistinctTvPathViewSet, basename="distinct-tv"
+        r"moviemediapath",
+        media_path_viewset.MovieMediaPathViewSet,
+        basename="moviemediapath",
     )
-    router.register(r"error", viewset.ErrorViewSet)
+    router.register(
+        r"mediafile", media_file_viewset.MediaFileViewSet, basename="mediafile"
+    )
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
-    router.register(r"posterfilebypath", viewset.PosterViewSetByPath)
-    router.register(r"posterfilebyfile", viewset.PosterViewSetByFile)
-    router.register(r"usercomment", viewset.UserCommentViewSet)
+    router.register(r"comment", viewset.CommentViewSet)
+    router.register(r"collection", collection_viewset.CollectionViewSet)
 
     urlpatterns += [
         re_path(r"^api/", include((router.urls, "mediaviewer"), namespace="api")),
