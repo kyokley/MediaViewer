@@ -14,12 +14,16 @@ help: ## This help
 list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
-build: touch-history ## Build prod-like container
+_build: touch-history ## Build prod-like container
 	docker build \
 		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
 		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
 		--build-arg UID=${UID} \
-		--tag=kyokley/mediaviewer --target=prod .
+		--tag=kyokley/mediaviewer \
+		--target=prod \
+		.
+
+build: _build
 
 build-dev: touch-history ## Build dev container
 	docker build \
@@ -27,7 +31,8 @@ build-dev: touch-history ## Build dev container
 		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
 		--build-arg UID=${UID} \
 		--tag=kyokley/mediaviewer \
-		--target=dev .
+		--target=dev \
+		.
 
 up: touch-history ## Bring up containers and daemonize
 	${DOCKER_COMPOSE_EXECUTABLE} up -d
@@ -42,7 +47,7 @@ live-shell: up ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} exec mediaviewer /bin/bash
 
 shell: touch-history ## Open a shell in a mediaviewer container
-	${DOCKER_COMPOSE_EXECUTABLE} run mediaviewer /bin/bash
+	${DOCKER_COMPOSE_EXECUTABLE} run --rm mediaviewer /bin/bash
 
 db-shell: db-up ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} exec postgres /bin/bash
