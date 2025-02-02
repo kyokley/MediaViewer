@@ -14,7 +14,7 @@ help: ## This help
 list: ## List all targets
 	@make -qp | awk -F':' '/^[a-zA-Z0-9][^$$#\/\t=]*:([^=]|$$)/ {split($$1,A,/ /);for(i in A)print A[i]}'
 
-_build: touch-history ## Build prod-like container
+_build: touch-history
 	docker build \
 		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
 		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
@@ -23,7 +23,7 @@ _build: touch-history ## Build prod-like container
 		--target=prod \
 		.
 
-build: _build
+build: _build ## Build prod-like container
 
 build-dev: touch-history ## Build dev container
 	docker build \
