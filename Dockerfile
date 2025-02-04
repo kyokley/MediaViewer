@@ -20,7 +20,7 @@ WORKDIR /www
 WORKDIR /logs
 
 RUN groupadd -g ${UID} -r user && \
-        useradd --create-home --system --uid ${UID} --gid user user && \
+        useradd --create-home --uid ${UID} --gid user user && \
         chown -R user:user /logs /www && \
         chmod 777 -R /www && \
         apt-get update && \
@@ -57,7 +57,6 @@ CMD ["gunicorn", "mysite.wsgi"]
 
 # ********************* Begin Dev Image ******************
 FROM base AS dev-root
-WORKDIR /venv
 RUN uv sync --project "${VIRTUAL_ENV}"
 
 WORKDIR /code
