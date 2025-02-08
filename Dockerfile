@@ -67,3 +67,28 @@ COPY --from=static-builder /code/node_modules /node/node_modules
 FROM dev-root AS dev
 COPY ./pdbrc.py /home/user/.pdbrc.py
 USER user
+
+# ********************* Begin Playwright Image ******************
+FROM mcr.microsoft.com/playwright/python:v1.49.1-jammy AS playwright
+RUN apt-get update && apt-get install -y \
+        python3-venv \
+        python3-dev \
+        gnupg \
+        g++ \
+        git \
+        apt-transport-https \
+        ncurses-dev \
+        libpq-dev
+
+RUN pip install --upgrade --no-cache-dir pip uv
+
+ENV UV_PROJECT_DIR=/mv
+ENV VIRTUAL_ENV=${UV_PROJECT_DIR}/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}/
+RUN uv sync --project "${VIRTUAL_ENV}"
+
+COPY . /code
+WORKDIR /logs
+WORKDIR /code
