@@ -54,8 +54,10 @@
     bandit = {
       enable = true;
       name = "bandit-security-checks";
-      entry = "${pkgs.uv}/bin/uvx bandit -c pyproject.toml";
+      entry = "${pkgs.uv}/bin/uvx bandit -c ${config.devenv.root}/pyproject.toml";
       files = "\\.py$";
+      stages = ["pre-commit"];
+      pass_filenames = true;
     };
   };
 

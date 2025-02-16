@@ -16,7 +16,7 @@ ignore = ["E501"]
 addopts = "--disable-socket --disable-warnings"
 
 [tool.bandit]
-exclude_dirs = ["./mediaviewer/tests", "./.venv"]
+exclude_dirs = ["mediaviewer/tests", ".venv"]
 
 [project]
 authors = [
