@@ -50,6 +50,13 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
+
+    bandit = {
+      enable = true;
+      name = "Bandit Security Checks";
+      entry = "uvx bandit -c pyproject.toml";
+      files = "\\.py$";
+    };
   };
 
   # https://devenv.sh/processes/

@@ -15,6 +15,9 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 addopts = "--disable-socket --disable-warnings"
 
+[tool.bandit]
+exclude_dirs = ["./mediaviewer/tests", "./.venv"]
+
 [project]
 authors = [
     {name = "Kevin Yokley", email = "kyokley2@gmail.com"},
