@@ -53,7 +53,7 @@
 
     bandit = {
       enable = true;
-      name = "Bandit Security Checks";
+      name = "bandit-security-checks";
       entry = "uvx bandit -c pyproject.toml";
       files = "\\.py$";
     };
