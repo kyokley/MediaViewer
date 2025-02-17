@@ -65,6 +65,8 @@
 
   # https://devenv.sh/processes/
   # processes.ping.exec = "ping example.com";
+  processes.postgres.exec = "docker compose up postgres";
+  processes.mediaviewer.exec = "docker compose up mediaviewer";
 
   # See full reference at https://devenv.sh/reference/options/
 }
