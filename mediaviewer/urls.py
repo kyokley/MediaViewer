@@ -8,6 +8,7 @@ from rest_framework import routers
 from mediaviewer.forms import PasswordResetFormWithBCC
 from mediaviewer.views import (
     ajax,
+    collection,
     detail,
     home,
     messaging,
@@ -18,7 +19,6 @@ from mediaviewer.views import (
     signout,
     tv,
     waiterstatus,
-    collection,
 )
 
 router = routers.DefaultRouter()
@@ -169,12 +169,12 @@ urlpatterns.extend(
 
 if not conf_settings.IS_SYNCING:
     from mediaviewer.api import (
+        collection_viewset,
         media_file_viewset,
         media_path_viewset,
         movie_viewset,
         tv_viewset,
         viewset,
-        collection_viewset,
     )
 
     router.register(

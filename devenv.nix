@@ -17,10 +17,9 @@
   # '';
 
   # https://devenv.sh/tests/
-  # enterTest = ''
-  #   # echo "Running tests"
-  #   # git --version | grep "2.42.0"
-  # '';
+  enterTest = ''
+    ${pkgs.gnumake}/bin/make tests
+  '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
@@ -45,7 +44,10 @@
     checkmake.enable = true;
     detect-private-keys.enable = true;
     ripsecrets.enable = true;
-    ruff.enable = true;
+    ruff = {
+      enable = true;
+      args = ["--select" "I"];
+    };
     ruff-format.enable = true;
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;

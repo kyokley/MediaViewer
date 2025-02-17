@@ -1,5 +1,4 @@
 import pytest
-
 from django.test import override_settings
 
 from mediaviewer.models.tvdbconfiguration import TVDBConfiguration, getJSONData
