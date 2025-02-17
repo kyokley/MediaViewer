@@ -1,6 +1,6 @@
 import pytest
 
-from mediaviewer.models import Poster, TV, Movie
+from mediaviewer.models import TV, Movie, Poster
 
 
 @pytest.mark.django_db

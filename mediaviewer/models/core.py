@@ -12,7 +12,7 @@ class TimeStampModel(models.Model):
 
 class ViewableManagerMixin:
     def most_recent_media(self, limit=10):
-        from mediaviewer.models import Poster, TV, MediaFile
+        from mediaviewer.models import TV, MediaFile, Poster
 
         mfs = (
             MediaFile.objects.filter(media_path__tv=models.OuterRef("pk"))

@@ -10,7 +10,6 @@ from django.db.utils import IntegrityError
 
 from mediaviewer.forms import FormlessPasswordReset
 
-
 TIMESTAMP_SORT = "timestamp_sort"
 FILENAME_SORT = "filename_sort"
 

@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from mediaviewer.models import (
     TV,
+    Collection,
     Comment,
     DonationSite,
     DownloadToken,
@@ -12,7 +13,6 @@ from mediaviewer.models import (
     Movie,
     UserSettings,
     VideoProgress,
-    Collection,
 )
 
 
