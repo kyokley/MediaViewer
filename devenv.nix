@@ -17,10 +17,9 @@
   # '';
 
   # https://devenv.sh/tests/
-  # enterTest = ''
-  #   # echo "Running tests"
-  #   # git --version | grep "2.42.0"
-  # '';
+  enterTest = ''
+    ${pkgs.gnumake}/bin/make tests
+  '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
