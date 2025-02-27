@@ -10,16 +10,16 @@
   # ];
 
   # https://devenv.sh/scripts/
-  # scripts.hello.exec = "echo hello from $GREET";
+  scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
 
   # enterShell = ''
   #   # hello
   # '';
 
   # https://devenv.sh/tests/
-  enterTest = ''
-    ${pkgs.gnumake}/bin/make tests
-  '';
+  # enterTest = ''
+  #   ${pkgs.gnumake}/bin/make tests
+  # '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
