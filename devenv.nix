@@ -35,7 +35,7 @@
   };
 
   # https://devenv.sh/pre-commit-hooks/
-  pre-commit.hooks = {
+  git-hooks.hooks = {
     hadolint.enable = false;
     check-merge-conflicts.enable = true;
     check-added-large-files.enable = true;
@@ -49,6 +49,11 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
+  };
+
+  tasks."mv:format" = {
+    exec = "pre-commit run -a";
+    before = [ "devenv:enterShell" ];
   };
 
   # https://devenv.sh/processes/
