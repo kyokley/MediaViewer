@@ -52,8 +52,12 @@
   };
 
   tasks."mv:format" = {
-    exec = "${pkgs.pre-commit}/bin/pre-commit run -av --show-diff-on-failure";
-    after = [ "devenv:git-hooks:install" ];
+    exec = ''
+      pwd
+      ls -la
+      ${config.git-hooks.installationScript}
+      ${pkgs.pre-commit}/bin/pre-commit run -av --show-diff-on-failure
+    '';
   };
 
   # https://devenv.sh/processes/
