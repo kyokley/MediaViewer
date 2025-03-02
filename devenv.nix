@@ -52,8 +52,8 @@
   };
 
   tasks."mv:format" = {
-    exec = "pre-commit run -a";
-    before = [ "devenv:enterShell" ];
+    exec = "${pkgs.pre-commit}/bin/pre-commit run -av --show-diff-on-failure";
+    after = [ "devenv:git-hooks:install" ];
   };
 
   # https://devenv.sh/processes/
