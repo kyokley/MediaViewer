@@ -53,8 +53,6 @@
 
   tasks."mv:format" = {
     exec = ''
-      pwd
-      ls -la
       ${config.git-hooks.installationScript}
       ${pkgs.pre-commit}/bin/pre-commit run -av --show-diff-on-failure
     '';
