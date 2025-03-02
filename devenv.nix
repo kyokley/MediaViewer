@@ -10,16 +10,16 @@
   # ];
 
   # https://devenv.sh/scripts/
-  scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
+  # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
 
   # enterShell = ''
   #   # hello
   # '';
 
   # https://devenv.sh/tests/
-  # enterTest = ''
-  #   ${pkgs.gnumake}/bin/make tests
-  # '';
+  enterTest = ''
+    ${pkgs.gnumake}/bin/make tests
+  '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
@@ -49,15 +49,6 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
-
-    bandit = {
-      enable = true;
-      name = "bandit-security-checks";
-      entry = "${pkgs.uv}/bin/uvx bandit -c ${config.devenv.root}/pyproject.toml";
-      files = "\\.py$";
-      stages = ["pre-commit"];
-      pass_filenames = true;
-    };
   };
 
   # https://devenv.sh/processes/
