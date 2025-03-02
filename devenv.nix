@@ -10,17 +10,16 @@
   # ];
 
   # https://devenv.sh/scripts/
-  # scripts.hello.exec = "echo hello from $GREET";
+  # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
 
   # enterShell = ''
   #   # hello
   # '';
 
   # https://devenv.sh/tests/
-  # enterTest = ''
-  #   # echo "Running tests"
-  #   # git --version | grep "2.42.0"
-  # '';
+  enterTest = ''
+    ${pkgs.gnumake}/bin/make tests
+  '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
@@ -36,7 +35,7 @@
   };
 
   # https://devenv.sh/pre-commit-hooks/
-  pre-commit.hooks = {
+  git-hooks.hooks = {
     hadolint.enable = false;
     check-merge-conflicts.enable = true;
     check-added-large-files.enable = true;
@@ -59,6 +58,13 @@
       stages = ["pre-commit"];
       pass_filenames = true;
     };
+  };
+
+  tasks."mv:format" = {
+    exec = ''
+      ${config.git-hooks.installationScript}
+      ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
+    '';
   };
 
   # https://devenv.sh/processes/
