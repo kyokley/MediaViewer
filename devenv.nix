@@ -54,7 +54,17 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
-    prettier.enable = true;
+    prettier = {
+      enable = true;
+      files = "\\.js$";
+    };
+    djlint = {
+      enable = true;
+      files = "\\.html$";
+      stages = ["pre-commit"];
+      pass_filenames = true;
+      entry = "${pkgs.djlint}/bin/djlint --reformat";
+    };
 
     bandit = {
       enable = true;
