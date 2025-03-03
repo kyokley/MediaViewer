@@ -26,16 +26,17 @@ function bindAlertMessage($) {
 function preparePage($) {
     bindAlertMessage($);
     $('.carousel').slick({
-        infinite: true,
-        speed: 600,
-        centerMode: true,
-        variableWidth: true,
         adaptiveHeight: false,
+        arrows: true,
         autoplay: true,
         autoplaySpeed: 2000,
+        centerMode: true,
+        infinite: true,
         pauseOnFocus: false,
+        pauseOnHover: false,
+        speed: 600,
         swipeToSlide: true,
-        arrows: true,
+        variableWidth: true,
         waitForAnimate: false
     });
 }
