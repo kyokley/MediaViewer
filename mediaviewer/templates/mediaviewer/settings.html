@@ -1,19 +1,23 @@
 {% extends "home.html" %}
 <!DOCTYPE html>
 {% load static %}
-
 {% block jumbotron %}
     <div class="jumbotron">
         <h1>Settings</h1>
     </div>
 {% endblock %}
-
 {% block main %}
-    <div class="modal" id="missingEmailModal" tabindex="-1" role="dialog" aria-labelledby="missingEmailModalLabel">
+    <div class="modal"
+         id="missingEmailModal"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="missingEmailModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                     <h4 class="modal-title" id="missingEmailModalLabel">Missing Email Address</h4>
                 </div>
                 <div class="modal-body">
@@ -25,7 +29,6 @@
             </div>
         </div>
     </div>
-
     <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
         {% csrf_token %}
         <div class="row">
@@ -37,13 +40,13 @@
                 <ul class="inputs-list">
                     <ul>
                         <label>
-                            <input type="radio" checked name="binge_mode" value=true id="binge_mode_yes"/>
+                            <input type="radio" checked name="binge_mode" value=true id="binge_mode_yes" />
                             <span>Yes</span>
                         </label>
                     </ul>
                     <ul>
                         <label>
-                            <input type="radio" name="binge_mode" value=false id="binge_mode_no"/>
+                            <input type="radio" name="binge_mode" value=false id="binge_mode_no" />
                             <span>No</span>
                         </label>
                     </ul>
@@ -56,57 +59,72 @@
                 <ul class="inputs-list">
                     <ul>
                         <label>
-                            <input type="radio" checked name="theme" value="{{ light_theme_option }}" id="light_theme_option"/>
+                            <input type="radio"
+                                   checked
+                                   name="theme"
+                                   value="{{ light_theme_option }}"
+                                   id="light_theme_option" />
                             <span>Light <i class="bi-sun"></i></span>
                         </label>
                     </ul>
                     <ul>
                         <label>
-                            <input type="radio" name="theme" value="{{ dark_theme_option }}" id="dark_theme_option"/>
+                            <input type="radio"
+                                   name="theme"
+                                   value="{{ dark_theme_option }}"
+                                   id="dark_theme_option" />
                             <span>Dark <i class="bi-moon-stars"></i></span>
                         </label>
                     </ul>
                 </ul>
             </div>
         </ul>
-    {% if user.is_staff %}
-        <div class="well well-sm">
-            <h2>Sitewide Message</h2>
-            <label>Message:</label>
-            <textarea class="form-control site-message" rows="5" id="sitemessage" class="sitemessage" name="sitemessage"></textarea>
-            <div class="input">
-                <ul class="inputs-list">
-                    <ul>
-                        <label>
-                            <input type="radio"  checked name="level" value="Info"/>
-                            Info
-                        </label>
+        {% if user.is_staff %}
+            <div class="well well-sm">
+                <h2>Sitewide Message</h2>
+                <label>Message:</label>
+                <textarea class="form-control site-message"
+                          rows="5"
+                          id="sitemessage"
+                          class="sitemessage"
+                          name="sitemessage"></textarea>
+                <div class="input">
+                    <ul class="inputs-list">
+                        <ul>
+                            <label>
+                                <input type="radio"  checked name="level" value="Info" />
+                                Info
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="level" value="Success" />
+                                Success
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="level" value="Warning" />
+                                Warning
+                            </label>
+                        </ul>
+                        <ul>
+                            <label>
+                                <input type="radio" name="level" value="Error" />
+                                Error
+                            </label>
+                        </ul>
                     </ul>
-                    <ul>
-                        <label>
-                            <input type="radio" name="level" value="Success"/>
-                            Success
-                        </label>
-                    </ul>
-                    <ul>
-                        <label>
-                            <input type="radio" name="level" value="Warning"/>
-                            Warning
-                        </label>
-                    </ul>
-                    <ul>
-                        <label>
-                            <input type="radio" name="level" value="Error"/>
-                            Error
-                        </label>
-                    </ul>
-                </ul>
+                </div>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
         <ul>
             <div class="sitemessageinput">
-                <input type='submit' value='Save Settings &raquo;' id='submit_site_message' name='submit_site_message' class="btn btn-info primary"/>
+                <input type='submit'
+                       value='Save Settings &raquo;'
+                       id='submit_site_message'
+                       name='submit_site_message'
+                       class="btn btn-info primary" />
             </div>
         </ul>
     </form>
@@ -114,26 +132,32 @@
         <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
             {% csrf_token %}
             <div class="container py-5">
-                    <h1>New User</h1>
-                    <ul>
-                        <label>Email Address:</label>
-                        <div class="input">
-                            <input class="form-control email-field" type="text" name="new_user_email" placeholder="Email" id="new_user_email_field"/>
-                        </div>
-                    </ul>
-                    <ul>
-                        <div class="sitemessageinput">
-                            <input type='submit' value='Add User' id='submit_new_user' name='submit_new_user' class="btn btn-info primary"/>
-                        </div>
-                    </ul>
+                <h1>New User</h1>
+                <ul>
+                    <label>Email Address:</label>
+                    <div class="input">
+                        <input class="form-control email-field"
+                               type="text"
+                               name="new_user_email"
+                               placeholder="Email"
+                               id="new_user_email_field" />
+                    </div>
+                </ul>
+                <ul>
+                    <div class="sitemessageinput">
+                        <input type='submit'
+                               value='Add User'
+                               id='submit_new_user'
+                               name='submit_new_user'
+                               class="btn btn-info primary" />
+                    </div>
+                </ul>
             </div>
         </form>
     {% endif %}
 {% endblock %}
-
 {% block javascript %}
     <script type="text/javascript">
-
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);

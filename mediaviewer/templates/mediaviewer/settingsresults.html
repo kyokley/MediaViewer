@@ -3,9 +3,7 @@
 {% load static %}
 {% include title %}
 {% include css %}
-
 {% include navbar %}
-
 <div class="container">
     {% block jumbotron %}
         <div class="jumbotron">
@@ -18,18 +16,13 @@
             {% endif %}
             <h4>{{ errMsg }}</h4>
             <a href="/mediaviewer/settings/">Return to Settings</a>
-            <p/>
+            <p />
             <a href="/mediaviewer/">Go Home</a>
         </div>
     {% endblock %}
-</div> <!-- /container -->
-
+</div>
+<!-- /container -->
 {% include messages %}
-
-{% block main %}
-{% endblock %}
-
+{% block main %}{% endblock %}
 {% include footer %}
-
 {% include javascript %}
-

@@ -57,6 +57,9 @@
     prettier = {
       enable = true;
       files = "\\.js$";
+      excludes = [
+        "mediaviewer/static/passwordless/passwordless.v1.1.0.umd.min.js"
+      ];
     };
     djlint = {
       enable = true;
