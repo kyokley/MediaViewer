@@ -1,6 +1,10 @@
-{ pkgs, lib, config, inputs, ... }:
-
 {
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}: {
   # https://devenv.sh/basics/
   # env.GREET = "MV";
 
@@ -36,6 +40,7 @@
 
   # https://devenv.sh/pre-commit-hooks/
   git-hooks.hooks = {
+    alejandra.enable = true;
     hadolint.enable = false;
     check-merge-conflicts.enable = true;
     check-added-large-files.enable = true;
@@ -49,6 +54,7 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
+    prettier.enable = true;
 
     bandit = {
       enable = true;
