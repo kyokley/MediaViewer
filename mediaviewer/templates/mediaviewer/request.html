@@ -2,22 +2,21 @@
 <!DOCTYPE html>
 {% load static %}
 {% include title %}
-
 {% include css %}
-
 {% include navbar %}
-
 {% block jumbotron %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+            <li class="breadcrumb-item">
+                <a href="/mediaviewer/">Home</a>
+            </li>
             <li class="breadcrumb-item active">Requests</li>
         </ol>
     </nav>
-        <h1>Requests</h1>
-        <h3>
-            Welcome to the requests page. Feel free to make submissions or to support submissions from others and I will do my best to fulfill them! Votes are limited to one per request per user per day.
-        </h3>
+    <h1>Requests</h1>
+    <h3>
+        Welcome to the requests page. Feel free to make submissions or to support submissions from others and I will do my best to fulfill them! Votes are limited to one per request per user per day.
+    </h3>
     <form action="{% url 'mediaviewer:addrequests' %}" method="post">
         {% csrf_token %}
         <div class="container text-center">
@@ -28,52 +27,70 @@
                         <input type="text" name="newrequest" id="request-textbox" value="">
                     </span>
                 </span>
-                <input class='col-4 btn btn-info addrequestbutton' name="addrequestbutton" type="submit" value="Add" />
+                <input class='col-4 btn btn-info addrequestbutton'
+                       name="addrequestbutton"
+                       type="submit"
+                       value="Add" />
             </div>
         </div>
     </form>
 {% endblock %}
-
-    {% block main %}
-        <table id="myTable" class="display table table-{{ theme }} table-striped table-hover nowrap" width=100%>
-            <thead>
+{% block main %}
+    <table id="myTable"
+           class="display table table-{{ theme }} table-striped table-hover nowrap"
+           width="100">
+        <thead>
+            <tr>
+                <th class="text-center">File Name</th>
+                <th class="text-center">Supporters</th>
+                <th class="text-center">Vote!</th>
+                {% if user.is_staff %}
+                    <th class="text-center">Added by</th>
+                    <th class="text-center">Done</th>
+                    <th class="text-center">Give up</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
                 <tr>
-                    <th class="text-center">File Name</th>
-                    <th class="text-center">Supporters</th>
-                    <th class="text-center">Vote!</th>
+                    <td>{{ item.name }}</td>
+                    <td class="text-center">
+                        <div id='numberOfVotes-{{ item.id }}'>{{ item.numberOfVotes }}</div>
+                    </td>
+                    {% if item.canVote %}
+                        <td class="text-center">
+                            <button class='btn btn-info vote-btn'
+                                    id="vote-{{ item.id }}"
+                                    name="{{ item.id }}"
+                                    onclick="callAjaxVote('{{ item.id }}')">Vote</button>
+                        </td>
+                    {% else %}
+                        <td class="text-center">Thanks for voting!</td>
+                    {% endif %}
                     {% if user.is_staff %}
-                        <th class="text-center">Added by</th>
-                        <th class="text-center">Done</th>
-                        <th class="text-center">Give up</th>
+                        <td>{{ item.user.username }}</td>
+                        <td>
+                            <button class='btn btn-info done-btn'
+                                    id="done-{{ item.id }}"
+                                    name="{{ item.id }}"
+                                    onclick="callDoneButton('{{ item.id }}')">Done</button>
+                        </td>
+                        <td>
+                            <button class='btn btn-info done-btn'
+                                    id="giveup-{{ item.id }}"
+                                    name="{{ item.id }}"
+                                    onclick="callGiveUpButton('{{ item.id }}')">Give Up</button>
+                        </td>
                     {% endif %}
                 </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                    <tr>
-                        <td>{{ item.name }}</td>
-                        <td class="text-center"><div id='numberOfVotes-{{ item.id }}'>{{ item.numberOfVotes }}</div></td>
-                        {% if item.canVote %}
-                            <td class="text-center"><button class='btn btn-info vote-btn' id="vote-{{ item.id }}" name="{{ item.id }}" onclick="callAjaxVote('{{item.id}}')">Vote</button></td>
-                        {% else %}
-                            <td class="text-center">Thanks for voting!</td>
-                        {% endif %}
-                        {% if user.is_staff %}
-                            <td>{{ item.user.username }}</td>
-                            <td><button class='btn btn-info done-btn' id="done-{{ item.id }}" name="{{ item.id }}" onclick="callDoneButton('{{item.id}}')">Done</button></td>
-                            <td><button class='btn btn-info done-btn' id="giveup-{{ item.id }}" name="{{ item.id }}" onclick="callGiveUpButton('{{item.id}}')">Give Up</button></td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
-
 {% include footer %}
-
 {% include javascript_include %}
-
 {% block javascript %}
     <script type="text/javascript">
         $(document).ready(function(){

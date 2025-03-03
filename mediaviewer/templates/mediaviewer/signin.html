@@ -2,16 +2,13 @@
 <!DOCTYPE html>
 {% load static %}
 {% include title %}
-
 {% include css %}
-
 {% include navbar %}
-
 {% block jumbotron %}
     <div class="jumbotron">
         {% if not loggedin %}
-                <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
-                <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
+            <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
+            <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
         {% else %}
             <h1 class="display-5 fw-bold">Logged In!</h1>
             <h3 class="col-md-8 fs-4">You have logged in successfully</h3>
@@ -19,9 +16,7 @@
         {% endif %}
     </div>
 {% endblock %}
-
 {% include messages %}
-
 {% block main %}
     {% if not loggedin %}
         {{ error_message }}
@@ -29,21 +24,27 @@
             {% csrf_token %}
             <div class="row justify-content-center">
                 <h2 class="col-6 form-signin-heading">Please sign in</h2>
-                <input type="text" id="username-textbox" class="col-6 form-control" placeholder="Email / Username" required style="display:none;">
+                <input type="text"
+                       id="username-textbox"
+                       class="col-6 form-control"
+                       placeholder="Email / Username"
+                       required
+                       style="display:none">
                 <input type="hidden" name="username" value="" id="username" />
             </div>
-
             <div class="row justify-content-center">
-                <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn" onclick="verify_passkey()">Sign In</button>
+                <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
+                        onclick="verify_passkey()">Sign In</button>
             </div>
-
             <div class="row justify-content-center">
                 <input type="hidden" name="next" value="{{ next }}" id="next" />
-                <a id="help-link" class="col-auto" href="javascript:void(0);" onclick="display_help();">Need help logging in?</a>
+                <a id="help-link"
+                   class="col-auto"
+                   href="javascript:void(0);"
+                   onclick="display_help();">Need help logging in?</a>
             </div>
         </form>
     {% endif %}
-
     {% block help_section %}
         <div id="help-text" class="container" style="display:none;">
             <div class="row">
@@ -57,25 +58,26 @@
                 <div class="col-md-8">
                     <p>In order to create a new passkey, do the following:</p>
                     <ol>
-                        <li>Click the Sign In button.
-                        On the following dialog, click cancel. This will cause the email prompt to display.</li>
+                        <li>
+                            Click the Sign In button.
+                            On the following dialog, click cancel. This will cause the email prompt to display.
+                        </li>
                         <li>Click the link in the email to go to the Passkey Registration page.</li>
-                        <li>Click the Register Passkey button. Select the device you would like to store the passkey on (I recommend using your phone). Complete the rest of the prompts.</li>
-                        <li>Return to the login page and click the Sign In button. Select the device containing the passkey to complete logging in.</li>
+                        <li>
+                            Click the Register Passkey button. Select the device you would like to store the passkey on (I recommend using your phone). Complete the rest of the prompts.
+                        </li>
+                        <li>
+                            Return to the login page and click the Sign In button. Select the device containing the passkey to complete logging in.
+                        </li>
                     </ol>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-2"></div>
-                <div class="col-md-8">
-                    NOTE: This process can be repeated to register passkeys on multiple devices.
-                </div>
+                <div class="col-md-8">NOTE: This process can be repeated to register passkeys on multiple devices.</div>
             </div>
         </div>
     {% endblock %}
 {% endblock %}
-
-
 {% include footer %}
-
 {% include javascript %}

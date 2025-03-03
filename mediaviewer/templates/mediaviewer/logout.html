@@ -2,11 +2,8 @@
 <!DOCTYPE html>
 {% load static %}
 {% include title %}
-
 {% include css %}
-
 {% include navbar %}
-
 <div class="container">
     {% block jumbotron %}
         <div class="jumbotron">
@@ -15,11 +12,8 @@
             <a href="/mediaviewer/">Go Home</a>
         </div>
     {% endblock %}
-
-    {% block main %}
-    {% endblock %}
-</div> <!-- /container -->
-
+    {% block main %}{% endblock %}
+</div>
+<!-- /container -->
 {% include footer %}
-
 {% include javascript %}
