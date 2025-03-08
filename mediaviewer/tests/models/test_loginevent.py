@@ -4,15 +4,13 @@ import mock
 import pytest
 import pytz
 from django.conf import settings
-
 from mediaviewer.models.loginevent import LoginEvent
-from mediaviewer.tests import helpers
 
 
 @pytest.mark.django_db
 class TestNew:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, create_user, mocker):
         self.ref_time = datetime.now(pytz.timezone(settings.TIME_ZONE))
         self.mock_objects = mocker.patch(
             "mediaviewer.models.loginevent.LoginEvent.objects"
@@ -27,7 +25,7 @@ class TestNew:
         self.mock_datetime = mocker.patch("mediaviewer.models.loginevent.datetime")
         self.mock_datetime.now.return_value = self.ref_time
 
-        self.user = helpers.create_user()
+        self.user = create_user()
 
     def test_less_stored_events(self):
         self.mock_objects.count.return_value = 1
