@@ -7,11 +7,11 @@ from faker import Faker
 
 from mediaviewer.models import (
     TV,
+    Collection,
+    DownloadToken,
     MediaFile,
     MediaPath,
     Movie,
-    Collection,
-    DownloadToken,
 )
 from mediaviewer.models.usersettings import UserSettings
 

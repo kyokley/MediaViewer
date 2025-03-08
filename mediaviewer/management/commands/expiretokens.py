@@ -1,13 +1,12 @@
 import argparse
-
 from datetime import timedelta
 
-from django.core.management.base import BaseCommand
-from mediaviewer.models import VideoProgress, DownloadToken
-
 from django.conf import settings as conf_settings
-from django.utils import timezone
+from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
+
+from mediaviewer.models import DownloadToken, VideoProgress
 
 
 class ExpireCommand(BaseCommand):

@@ -3,6 +3,7 @@ from django.db import transaction
 
 from mediaviewer.models import (
     TV,
+    Collection,
     DonationSite,
     DownloadToken,
     FilenameScrapeFormat,
@@ -15,7 +16,6 @@ from mediaviewer.models import (
     SiteGreeting,
     UserSettings,
     VideoProgress,
-    Collection,
 )
 
 
