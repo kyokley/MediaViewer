@@ -58,6 +58,11 @@ class Media(TimeStampModel):
     finished = models.BooleanField(null=False, default=False)
     hide = models.BooleanField(null=False, default=False)
     collections = models.ManyToManyField("mediaviewer.Collection", blank=True)
+    rating = models.CharField(
+        null=False,
+        blank=True,
+        default="",
+    )
 
     class Meta:
         abstract = True
