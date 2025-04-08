@@ -32,5 +32,4 @@ class WaiterStatus(models.Model):
 
     @classmethod
     def getLastStatus(cls):
-        obj = WaiterStatus.objects.order_by("-id")
-        return obj and obj[0] or None
+        return WaiterStatus.objects.order_by("-id").first()
