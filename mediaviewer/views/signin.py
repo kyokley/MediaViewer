@@ -286,11 +286,7 @@ def legacy_signin(request):
                         credentials={"username": username, "password": password},
                         request=request,
                     )
-                    raise ImproperLogin(
-                        "You should have received an email with a link "
-                        "to set up your password the first time. "
-                        "Please follow the instructions in the email."
-                    )
+                    raise ImproperLogin("You could not be logged in at this time")
                 else:
                     if user.is_active:
                         login_user(
