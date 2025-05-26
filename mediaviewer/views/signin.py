@@ -142,11 +142,11 @@ def bypass_passkey(request, uidb64):
             return HttpResponseRedirect(request.GET["next"])
         else:
             if request.method == "GET":
-                return render(request, "mediaviewer/signin.html", context)
+                return render(request, "mediaviewer/home.html", context)
             else:
                 return HttpResponseRedirect(reverse("mediaviewer:signin"))
 
-    return render(request, "mediaviewer/signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 @csrf_exempt
@@ -231,11 +231,11 @@ def verify_token(request):
             return HttpResponseRedirect(next)
         else:
             if request.method == "GET":
-                return render(request, "mediaviewer/signin.html", context)
+                return render(request, "mediaviewer/home.html", context)
             else:
                 return HttpResponseRedirect(reverse("mediaviewer:signin"))
 
-    return render(request, "mediaviewer/signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 @logAccessInfo
@@ -250,7 +250,7 @@ def signin(request):
     if "next" in request.GET:
         context["next"] = request.GET["next"]
 
-    return render(request, "mediaviewer/signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 @csrf_exempt
@@ -333,11 +333,11 @@ def legacy_signin(request):
             return HttpResponseRedirect(request.POST["next"])
         else:
             if request.method == "GET":
-                return render(request, "mediaviewer/legacy-signin.html", context)
+                return render(request, "mediaviewer/home.html", context)
             else:
-                return HttpResponseRedirect(reverse("mediaviewer:legacy-signin"))
+                return HttpResponseRedirect(reverse("mediaviewer:home"))
 
-    return render(request, "mediaviewer/legacy-signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 class ContextMixin:

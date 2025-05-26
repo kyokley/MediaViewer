@@ -225,28 +225,40 @@
                     {% endblock %}
                 {% else %}
                     {{ error_message }}
-                    <form class="form-signin" role="form" method='post'>
+                    <form action="{% url 'mediaviewer:legacy-signin' %}"
+                          class="form-signin"
+                          role="form"
+                          method='post'>
                         {% csrf_token %}
                         <div class="row justify-content-center">
-                            <h2 class="col-6 form-signin-heading">Please sign in</h2>
+                            <h2 class="col-5 form-signin-heading">Please sign in</h2>
+                        </div>
+                        <div class="row justify-content-center">
                             <input type="text"
+                                   name="username"
                                    id="username-textbox"
-                                   class="col-6 form-control"
+                                   class="col-5"
                                    placeholder="Email / Username"
-                                   required
-                                   style="display:none">
-                            <input type="hidden" name="username" value="" id="username" />
+                                   required>
+                        </div>
+                        <div class="row justify-content-center">
+                            <input type="password"
+                                   name="password"
+                                   id="password-textbox"
+                                   class="col-5"
+                                   placeholder="Password"
+                                   required>
                         </div>
                         <div class="row justify-content-center">
                             <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
-                                    onclick="verify_passkey()">Sign In</button>
+                                    type="submit">Sign In</button>
                         </div>
                         <div class="row justify-content-center">
-                            <input type="hidden" name="next" value="{{ next }}" id="next" />
-                            <a id="help-link"
-                               class="col-auto"
-                               href="javascript:void(0);"
-                               onclick="display_help();">Need help logging in?</a>
+                            <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
+                                    onclick="verify_passkey()">Sign In With Passkey</button>
+                        </div>
+                        <div class="row justify-content-center">
+                            <a class="col-auto" href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
                         </div>
                     </form>
                 {% endif %}
