@@ -238,16 +238,14 @@
                                            name="username"
                                            id="username-textbox"
                                            class="col-5"
-                                           placeholder="Email / Username"
-                                           required>
+                                           placeholder="Email / Username">
                                 </div>
                                 <div class="row justify-content-center">
                                     <input type="password"
                                            name="password"
                                            id="password-textbox"
                                            class="col-5"
-                                           placeholder="Password"
-                                           required>
+                                           placeholder="Password">
                                 </div>
                                 <div class="row justify-content-center">
                                     <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
@@ -258,17 +256,17 @@
                                 </div>
                             </div>
                         </div>
-                        <br>
-                        <div class="card col-auto">
-                            <div class="card-header">Sign in with passkey</div>
-                            <div class="card-body">
-                                <div class="row justify-content-center">
-                                    <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
-                                            onclick="verify_passkey()">Use Passkey</button>
-                                </div>
+                    </form>
+                    <br>
+                    <div class="card col-auto">
+                        <div class="card-header">Sign in with passkey</div>
+                        <div class="card-body">
+                            <div class="row justify-content-center">
+                                <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
+                                        onclick="verify_passkey()">Use Passkey</button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 {% endif %}
             {% endblock %}
         </div>
