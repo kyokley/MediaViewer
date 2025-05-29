@@ -4,6 +4,7 @@ from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 from django.contrib.auth.views import (
     PasswordResetConfirmView as DjangoPasswordResetConfirmView,
@@ -80,22 +81,14 @@ def change_password(request, uidb64):
     if not default_token_generator.check_token(ref_user, reset_token):
         raise ImproperLogin("Invalid Token")
 
-    payload = {
-        "userId": ref_user.username,
-        "username": ref_user.username,
-        "aliasHashing": False,
-    }
+    # Need to actually POST password
+    post_data = None
 
-    resp = requests.post(
-        f"{conf_settings.PASSKEY_API_URL}/register/token",
-        json=payload,
-        headers={
-            "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
-        },
-        timeout=conf_settings.REQUEST_TIMEOUT,
-    )
-    resp.raise_for_status()
-    return JsonResponse(resp.json())
+    validate_password(post_data, user=ref_user)
+    ref_user.set_password(post_data)
+    context = {}
+    setSiteWideContext(context, request)
+    return render(request, "mediaviewer/passkey_complete.html", context)
 
 
 def create_token_complete(request):
