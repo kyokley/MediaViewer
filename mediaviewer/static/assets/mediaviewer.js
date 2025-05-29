@@ -558,34 +558,42 @@ async function change_password() {
     "change-password",
   );
 
-  fadeOutLength = 2000;
-
   var password_textbox = document.getElementById("password-textbox");
   var confirm_password_textbox = document.getElementById(
     "confirm-password-textbox",
   );
-  var error_div = $(document.getElementById("error-div"));
 
   if (password_textbox.value != confirm_password_textbox.value) {
-    error_div.html("Passwords do not match");
-    error_div.attr("style", "");
-    error_div.fadeOut(fadeOutLength, function () {
-      error_div.attr("style", "display: none;");
-      error_div.html("");
-    });
+    flash_password_error("Passwords do not match");
   } else {
     options["body"] = JSON.stringify({ password: password_textbox.value });
     const fetch_resp = await fetch(change_password_path, options);
     fetch_json = await fetch_resp.json();
 
     debugger;
-    if (fetch_json && fetch_json["success"]) {
-      window.location.href = "/mediaviewer/create-token-complete/";
+    if (fetch_json) {
+      if (fetch_json["success"]) {
+        window.location.href = "/mediaviewer/create-token-complete/";
+      } else {
+        flash_password_error(fetch_json["error"]);
+      }
     } else {
       window.location.href = "/mediaviewer/create-token-failed/";
     }
     return;
   }
+}
+
+function flash_password_error(message) {
+  fadeOutLength = 2000;
+  var error_div = $(document.getElementById("error-div"));
+
+  error_div.html(message);
+  error_div.attr("style", "");
+  error_div.fadeOut(fadeOutLength, function () {
+    error_div.attr("style", "display: none;");
+    error_div.html("");
+  });
 }
 
 function display_help() {

@@ -93,8 +93,10 @@ def change_password(request, uidb64):
         context = {}
         setSiteWideContext(context, request)
         resp = {"success": True}
+    except ValidationError as e:
+        resp = {"success": False, "error": e.messages[0]}
     except Exception:
-        resp = {"success": False}
+        resp = {"success": False, "error": "Something went wrong"}
     return JsonResponse(resp)
 
 
