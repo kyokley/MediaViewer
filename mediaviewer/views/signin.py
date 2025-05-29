@@ -73,6 +73,31 @@ def create_token(request, uidb64):
     return JsonResponse(resp.json())
 
 
+@csrf_exempt
+def change_password(request, uidb64):
+    reset_token = request.session.get(INTERNAL_RESET_SESSION_TOKEN)
+    ref_user = get_user(uidb64)
+    if not default_token_generator.check_token(ref_user, reset_token):
+        raise ImproperLogin("Invalid Token")
+
+    payload = {
+        "userId": ref_user.username,
+        "username": ref_user.username,
+        "aliasHashing": False,
+    }
+
+    resp = requests.post(
+        f"{conf_settings.PASSKEY_API_URL}/register/token",
+        json=payload,
+        headers={
+            "ApiSecret": conf_settings.PASSKEY_API_PRIVATE_KEY,
+        },
+        timeout=conf_settings.REQUEST_TIMEOUT,
+    )
+    resp.raise_for_status()
+    return JsonResponse(resp.json())
+
+
 def create_token_complete(request):
     context = {}
     setSiteWideContext(context, request)

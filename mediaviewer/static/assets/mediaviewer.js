@@ -543,6 +543,54 @@ async function verify_passkey() {
   window.location.href = "/mediaviewer/user/reset/";
 }
 
+async function change_password() {
+  let options = {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json;charset=utf-8",
+      csrfmiddlewaretoken: csrf_token,
+    },
+  };
+
+  change_password_path = document.location.pathname.replace(
+    "user/reset",
+    "change-password",
+  );
+
+  fadeOutLength = 2000;
+
+  var password_textbox = document.getElementById("password-textbox");
+  var confirm_password_textbox = document.getElementById(
+    "confirm-password-textbox",
+  );
+  var error_div = $(document.getElementById("error-div"));
+
+  if (password_textbox.value != confirm_password_textbox.value) {
+    error_div.html("Passwords do not match");
+    error_div.attr("style", "");
+    error_div.fadeOut(fadeOutLength, function () {
+      error_div.attr("style", "display: none;");
+      error_div.html("");
+    });
+  } else {
+    const fetch_resp = await fetch(change_password_path, options);
+    fetch_json = await fetch_resp.json();
+
+    debugger;
+    if (fetch_json) {
+      var register_token = fetch_json["token"];
+      const { token, error } = await passkey_client.register(register_token);
+      if (token) {
+        window.location.href = "/mediaviewer/create-token-complete/";
+      } else {
+        window.location.href = "/mediaviewer/create-token-failed/";
+      }
+      return;
+    }
+  }
+}
+
 function display_help() {
   var help_text = document.getElementById("help-text");
   var help_link = document.getElementById("help-link");
