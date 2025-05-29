@@ -1,4 +1,5 @@
 import requests
+import json
 from django.conf import settings as conf_settings
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
@@ -76,19 +77,25 @@ def create_token(request, uidb64):
 
 @csrf_exempt
 def change_password(request, uidb64):
-    reset_token = request.session.get(INTERNAL_RESET_SESSION_TOKEN)
-    ref_user = get_user(uidb64)
-    if not default_token_generator.check_token(ref_user, reset_token):
-        raise ImproperLogin("Invalid Token")
+    try:
+        reset_token = request.session.get(INTERNAL_RESET_SESSION_TOKEN)
+        ref_user = get_user(uidb64)
+        if not default_token_generator.check_token(ref_user, reset_token):
+            raise ImproperLogin("Invalid Token")
 
-    # Need to actually POST password
-    post_data = None
+        # Need to actually POST password
+        post_data = json.loads(request.body)
+        new_password = post_data["password"]
 
-    validate_password(post_data, user=ref_user)
-    ref_user.set_password(post_data)
-    context = {}
-    setSiteWideContext(context, request)
-    return render(request, "mediaviewer/passkey_complete.html", context)
+        validate_password(new_password, user=ref_user)
+        ref_user.set_password(new_password)
+        ref_user.save()
+        context = {}
+        setSiteWideContext(context, request)
+        resp = {"success": True}
+    except Exception:
+        resp = {"success": False}
+    return JsonResponse(resp)
 
 
 def create_token_complete(request):

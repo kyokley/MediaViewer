@@ -574,20 +574,17 @@ async function change_password() {
       error_div.html("");
     });
   } else {
+    options["body"] = JSON.stringify({ password: password_textbox.value });
     const fetch_resp = await fetch(change_password_path, options);
     fetch_json = await fetch_resp.json();
 
     debugger;
-    if (fetch_json) {
-      var register_token = fetch_json["token"];
-      const { token, error } = await passkey_client.register(register_token);
-      if (token) {
-        window.location.href = "/mediaviewer/create-token-complete/";
-      } else {
-        window.location.href = "/mediaviewer/create-token-failed/";
-      }
-      return;
+    if (fetch_json && fetch_json["success"]) {
+      window.location.href = "/mediaviewer/create-token-complete/";
+    } else {
+      window.location.href = "/mediaviewer/create-token-failed/";
     }
+    return;
   }
 }
 
