@@ -45,6 +45,9 @@ def get_user(uidb64):
 
 
 def create_token_failed(request):
+    import pdb
+
+    pdb.set_trace()  # ############################## Breakpoint ##############################
     context = {}
     setSiteWideContext(context, request)
     return render(request, "mediaviewer/passkey_create_failed.html", context)
@@ -101,6 +104,9 @@ def change_password(request, uidb64):
 
 
 def create_token_complete(request):
+    import pdb
+
+    pdb.set_trace()  # ############################## Breakpoint ##############################
     context = {}
     setSiteWideContext(context, request)
     return render(request, "mediaviewer/passkey_complete.html", context)
@@ -178,6 +184,9 @@ def bypass_passkey(request, uidb64):
 
 @csrf_exempt
 def verify_token(request):
+    import pdb
+
+    pdb.set_trace()  # ############################## Breakpoint ##############################
     token = request.GET["token"]
     next = request.GET.get("next") or request.POST.get("next")
 

@@ -224,7 +224,6 @@
                         {% endif %}
                     {% endblock %}
                 {% else %}
-                    {{ error_message }}
                     <form action="{% url 'mediaviewer:legacy-signin' %}"
                           class="form-signin"
                           role="form"
@@ -233,6 +232,7 @@
                         <div class="card col-auto">
                             <div class="card-header">Sign in with password</div>
                             <div class="card-body">
+                                <div class="row justify-content-center text-danger" id="error-div">{{ error_message }}</div>
                                 <div class="row justify-content-center">
                                     <input type="text"
                                            name="username"

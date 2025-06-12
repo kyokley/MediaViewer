@@ -488,30 +488,23 @@ async function register_passkey() {
       csrfmiddlewaretoken: csrf_token,
     },
   };
-  try {
-    create_token_path = document.location.pathname.replace(
-      "user/reset",
-      "create-token",
-    );
-    create_token_path = create_token_path.replace(
-      "user/create",
-      "create-token",
-    );
-    const fetch_resp = await fetch(create_token_path, options);
-    fetch_json = await fetch_resp.json();
-    if (fetch_json) {
-      var register_token = fetch_json["token"];
-      const { token, error } = await passkey_client.register(register_token);
-      if (token) {
-        window.location.href = "/mediaviewer/create-token-complete/";
-      } else {
-        window.location.href = "/mediaviewer/create-token-failed/";
-      }
-      return;
+
+  create_token_path = document.location.pathname.replace(
+    "user/reset",
+    "create-token",
+  );
+  create_token_path = create_token_path.replace("user/create", "create-token");
+  const fetch_resp = await fetch(create_token_path, options);
+  fetch_json = await fetch_resp.json();
+  if (fetch_json) {
+    var register_token = fetch_json["token"];
+    const { token, error } = await passkey_client.register(register_token);
+    if (token) {
+      window.location.href = "/mediaviewer/create-token-complete/";
+    } else {
+      window.location.href = "/mediaviewer/create-token-failed/";
     }
-  } catch (err) {
-    console.log(err);
-    window.location.href = "/mediaviewer/create-token-failed/";
+    return;
   }
 }
 
@@ -585,7 +578,7 @@ async function change_password() {
 }
 
 function flash_password_error(message) {
-  fadeOutLength = 2000;
+  fadeOutLength = 5000;
   var error_div = $(document.getElementById("error-div"));
 
   error_div.html(message);
