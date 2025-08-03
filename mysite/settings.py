@@ -1,7 +1,6 @@
 # Django settings for site project.
 import logging
 import os
-
 from pathlib import Path
 
 from django.contrib.messages import constants as message_constants

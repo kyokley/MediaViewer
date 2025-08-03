@@ -1,13 +1,13 @@
 import itertools
 import random
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
 
-from mediaviewer.models import Movie, TV, Collection
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render
+
+from mediaviewer.models import TV, Collection, Movie
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
-
 
 rand = random.SystemRandom()
 

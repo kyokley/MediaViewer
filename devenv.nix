@@ -49,7 +49,10 @@
     checkmake.enable = true;
     detect-private-keys.enable = true;
     ripsecrets.enable = true;
-    ruff.enable = true;
+    ruff = {
+      enable = true;
+      args = ["--select" "I"];
+    };
     ruff-format.enable = true;
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
@@ -88,6 +91,8 @@
 
   # https://devenv.sh/processes/
   # processes.ping.exec = "ping example.com";
+  processes.postgres.exec = "docker compose up postgres";
+  processes.mediaviewer.exec = "docker compose up mediaviewer";
 
   # See full reference at https://devenv.sh/reference/options/
 }

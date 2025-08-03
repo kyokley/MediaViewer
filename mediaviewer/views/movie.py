@@ -7,7 +7,6 @@ from mediaviewer.models import Comment, Genre, Movie
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
 
-
 NUMBER_OF_CAROUSEL_FILES = 10
 rand = random.SystemRandom()
 
