@@ -22,9 +22,9 @@ class TestGetSomewhatUniqueID:
 
             vals.add(int_val)
 
-        assert (
-            len(vals) == SOMEWHAT_UNIQUE_TEST_ATTEMPTS
-        ), f"Expected to get {SOMEWHAT_UNIQUE_TEST_ATTEMPTS} vals. Only received {len(vals)}"
+        assert len(vals) == SOMEWHAT_UNIQUE_TEST_ATTEMPTS, (
+            f"Expected to get {SOMEWHAT_UNIQUE_TEST_ATTEMPTS} vals. Only received {len(vals)}"
+        )
 
 
 class TestHumanSize:
