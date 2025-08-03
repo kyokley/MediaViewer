@@ -10,7 +10,7 @@
   # ];
 
   # https://devenv.sh/scripts/
-  # scripts.hello.exec = "echo hello from $GREET";
+  # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
 
   # enterShell = ''
   #   # hello
@@ -35,7 +35,7 @@
   };
 
   # https://devenv.sh/pre-commit-hooks/
-  pre-commit.hooks = {
+  git-hooks.hooks = {
     hadolint.enable = false;
     check-merge-conflicts.enable = true;
     check-added-large-files.enable = true;
@@ -52,15 +52,11 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
+  };
 
-    bandit = {
-      enable = true;
-      name = "bandit-security-checks";
-      entry = "${pkgs.uv}/bin/uvx bandit -c ${config.devenv.root}/pyproject.toml";
-      files = "\\.py$";
-      stages = ["pre-commit"];
-      pass_filenames = true;
-    };
+  tasks."mv:format" = {
+    exec = "${pkgs.pre-commit}/bin/pre-commit run -av --show-diff-on-failure";
+    after = [ "devenv:git-hooks:install" ];
   };
 
   # https://devenv.sh/processes/
