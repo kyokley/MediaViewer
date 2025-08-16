@@ -6,6 +6,7 @@ from django.db import migrations
 def enable_password_logins(apps, schema_editor):
     UserSettings = apps.get_model("mediaviewer", "UserSettings")
     UserSettings.objects.all().update(allow_password_logins=True)
+    UserSettings.objects.filter(user__is_staff=True).update(allow_password_logins=False)
 
 
 class Migration(migrations.Migration):

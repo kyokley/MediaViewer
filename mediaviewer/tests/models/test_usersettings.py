@@ -120,3 +120,18 @@ class TestCaseInsensitiveAuthenticate:
         )
 
         assert expected == actual
+
+    def test_valid_user_with_disallow_password_logins(self):
+        test_username = self.name
+        test_password = self.password
+
+        settings = self.new_user.settings()
+        settings.allow_password_logins = False
+        settings.save()
+
+        expected = None
+        actual = case_insensitive_authenticate(
+            self.request, test_username, test_password
+        )
+
+        assert expected == actual
