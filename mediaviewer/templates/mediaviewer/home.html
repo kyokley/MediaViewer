@@ -7,7 +7,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="">
         <meta name="author" content="">
-        <link rel="shortcut icon" type="image/png" href="{% static "assets/favicon.ico" %}" />
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static "assets/favicon.ico" %}" />
         {% block title %}
             {% if title == '' or title == None %}
                 <title>MediaViewer</title>
@@ -16,13 +18,19 @@
             {% endif %}
         {% endblock %}
         {% block css %}
-            <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}"
+                  rel="stylesheet">
             <link href="{% static "slick-carousel/slick/slick.css" %}" rel="stylesheet">
-            <link href="{% static "slick-carousel/slick/slick-theme.css" %}" rel="stylesheet">
+            <link href="{% static "slick-carousel/slick/slick-theme.css" %}"
+                  rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
     </head>
@@ -232,7 +240,6 @@
                         <div class="card col-auto">
                             <div class="card-header">Sign in with password</div>
                             <div class="card-body">
-                                <div class="row justify-content-center text-danger" id="error-div">{{ error_message }}</div>
                                 <div class="row justify-content-center">
                                     <input type="text"
                                            name="username"
@@ -253,6 +260,7 @@
                                     <div class="row justify-content-center">
                                         <a class="col-auto" href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
                                     </div>
+                                    <div class="row justify-content-center text-danger" id="error-div">{{ error_message }}</div>
                                 </div>
                             </div>
                         </div>
