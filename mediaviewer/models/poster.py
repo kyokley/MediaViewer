@@ -2,8 +2,8 @@
 Re-implementation of PosterFile
 """
 
-from io import BytesIO
 from datetime import date
+from io import BytesIO
 
 import requests
 from django.conf import settings

@@ -29,26 +29,30 @@
                 <tr>
                     <td>
                         {% if media.poster.image %}
-                            <a class="img-preview" {% if not media.is_tv %} href="{% url 'mediaviewer:moviedetail' media.pk %}" {% else %} href="{% url 'mediaviewer:tvshows' media.pk %}" {% endif %} data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="left" data-bs-custom-class="preview-tooltip" data-bs-content="
-                                <img class='tooltip-img' src='{{ media.poster.image.url }}' />
-                                ">
-                            {% else %}
-                                <a href="{{ media.url }}">
-                                {% endif %}
-                                {{ media.name }}
-                            </a>
-                        </td>
-                        <td>
-                            <div class="hidden_span">{{ media.poster.release_date.isoformat }}</div>
-                            {{ media.poster.release_date }}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endblock %}
-    {% block javascript %}
-        <script type="text/javascript">
+                            <a class="img-preview"
+                               {% if not media.is_tv %} href="{% url 'mediaviewer:moviedetail' media.pk %}" {% else %} href="{% url 'mediaviewer:tvshows' media.pk %}" {% endif %}
+                               data-bs-toggle="popover"
+                               data-bs-trigger="hover focus"
+                               data-bs-placement="left"
+                               data-bs-custom-class="preview-tooltip"
+                               data-bs-content=" <img class='tooltip-img' src='{{ media.poster.image.url }}' /> ">
+                        {% else %}
+                            <a href="{{ media.url }}">
+                            {% endif %}
+                            {{ media.name }}
+                        </a>
+                    </td>
+                    <td>
+                        <div class="hidden_span">{{ media.poster.release_date.isoformat }}</div>
+                        {{ media.poster.release_date }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block javascript %}
+    <script type="text/javascript">
         $(document).ready(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
@@ -72,5 +76,5 @@
             });
         });
 
-        </script>
-    {% endblock %}
+    </script>
+{% endblock %}

@@ -1,11 +1,12 @@
-import requests
 import json
+
+import requests
 from django.conf import settings as conf_settings
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
 from django.contrib.auth.views import (
     PasswordResetConfirmView as DjangoPasswordResetConfirmView,

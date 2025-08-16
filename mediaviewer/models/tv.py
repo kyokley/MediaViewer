@@ -93,18 +93,18 @@ class TV(Media):
         unwatched_count = self.number_of_unwatched_shows(user)
         poster = self.poster
         tooltip_img = (
-            f"<img class='tooltip-img' src='{ poster.image.url }' />"
+            f"<img class='tooltip-img' src='{poster.image.url}' />"
             if poster and poster.image
             else ""
         )
         name_html = (
-            f"""<a class="img-preview" href='/mediaviewer/tvshows/{ self.id }/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" data-bs-content="{tooltip_img}">"""
-            f"""{ self.name }</a>\n"""
-            f'<span id="unwatched-show-badge-{ self.id }" class="badge text-bg-primary">{unwatched_count or ""}</span>'
+            f"""<a class="img-preview" href='/mediaviewer/tvshows/{self.id}/' data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" data-bs-content="{tooltip_img}">"""
+            f"""{self.name}</a>\n"""
+            f'<span id="unwatched-show-badge-{self.id}" class="badge text-bg-primary">{unwatched_count or ""}</span>'
         )
         last_created_timestamp = self.last_created_episode_at()
         if last_created_timestamp:
-            timestamp_html = f"""<center><span class="hidden_span">{last_created_timestamp.isoformat()}</span>{ last_created_timestamp.date().strftime('%b %d, %Y')}</center>"""
+            timestamp_html = f"""<center><span class="hidden_span">{last_created_timestamp.isoformat()}</span>{last_created_timestamp.date().strftime("%b %d, %Y")}</center>"""
         else:
             timestamp_html = """<center><span class="hidden_span"></span></center>"""
 

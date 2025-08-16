@@ -121,8 +121,7 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
         return {}
 
     log.debug(
-        f"Getting tvdb episode info for {tvdb_id}, "
-        f"season: {season}, episode: {episode}"
+        f"Getting tvdb episode info for {tvdb_id}, season: {season}, episode: {episode}"
     )
 
     urls = []
