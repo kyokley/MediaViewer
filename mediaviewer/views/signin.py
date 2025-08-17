@@ -169,10 +169,7 @@ def bypass_passkey(request, uidb64):
         if "next" in request.GET and request.GET["next"]:
             return HttpResponseRedirect(request.GET["next"])
         else:
-            if request.method == "GET":
-                return render(request, "mediaviewer/home.html", context)
-            else:
-                return HttpResponseRedirect(reverse("mediaviewer:signin"))
+            return HttpResponseRedirect(reverse("mediaviewer:home"))
 
     return render(request, "mediaviewer/home.html", context)
 
@@ -258,10 +255,7 @@ def verify_token(request):
         elif next:
             return HttpResponseRedirect(next)
         else:
-            if request.method == "GET":
-                return render(request, "mediaviewer/home.html", context)
-            else:
-                return HttpResponseRedirect(reverse("mediaviewer:signin"))
+            return HttpResponseRedirect(reverse("mediaviewer:home"))
 
     return render(request, "mediaviewer/home.html", context)
 
@@ -356,10 +350,7 @@ def legacy_signin(request):
         elif "next" in request.POST and request.POST["next"]:
             return HttpResponseRedirect(request.POST["next"])
         else:
-            if request.method == "GET":
-                return render(request, "mediaviewer/home.html", context)
-            else:
-                return HttpResponseRedirect(reverse("mediaviewer:home"))
+            return HttpResponseRedirect(reverse("mediaviewer:home"))
 
     return render(request, "mediaviewer/home.html", context)
 
