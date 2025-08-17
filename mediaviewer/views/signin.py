@@ -1,7 +1,10 @@
+import json
+
 import requests
 from django.conf import settings as conf_settings
 from django.contrib.auth import login as login_user
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import INTERNAL_RESET_SESSION_TOKEN
@@ -73,6 +76,31 @@ def create_token(request, uidb64):
     return JsonResponse(resp.json())
 
 
+@csrf_exempt
+def change_password(request, uidb64):
+    try:
+        reset_token = request.session.get(INTERNAL_RESET_SESSION_TOKEN)
+        ref_user = get_user(uidb64)
+        if not default_token_generator.check_token(ref_user, reset_token):
+            raise ImproperLogin("Invalid Token")
+
+        # Need to actually POST password
+        post_data = json.loads(request.body)
+        new_password = post_data["password"]
+
+        validate_password(new_password, user=ref_user)
+        ref_user.set_password(new_password)
+        ref_user.save()
+        context = {}
+        setSiteWideContext(context, request)
+        resp = {"success": True}
+    except ValidationError as e:
+        resp = {"success": False, "error": e.messages[0]}
+    except Exception:
+        resp = {"success": False, "error": "Something went wrong"}
+    return JsonResponse(resp)
+
+
 def create_token_complete(request):
     context = {}
     setSiteWideContext(context, request)
@@ -142,11 +170,11 @@ def bypass_passkey(request, uidb64):
             return HttpResponseRedirect(request.GET["next"])
         else:
             if request.method == "GET":
-                return render(request, "mediaviewer/signin.html", context)
+                return render(request, "mediaviewer/home.html", context)
             else:
                 return HttpResponseRedirect(reverse("mediaviewer:signin"))
 
-    return render(request, "mediaviewer/signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 @csrf_exempt
@@ -231,11 +259,11 @@ def verify_token(request):
             return HttpResponseRedirect(next)
         else:
             if request.method == "GET":
-                return render(request, "mediaviewer/signin.html", context)
+                return render(request, "mediaviewer/home.html", context)
             else:
                 return HttpResponseRedirect(reverse("mediaviewer:signin"))
 
-    return render(request, "mediaviewer/signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 @logAccessInfo
@@ -250,7 +278,7 @@ def signin(request):
     if "next" in request.GET:
         context["next"] = request.GET["next"]
 
-    return render(request, "mediaviewer/signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 @csrf_exempt
@@ -286,11 +314,7 @@ def legacy_signin(request):
                         credentials={"username": username, "password": password},
                         request=request,
                     )
-                    raise ImproperLogin(
-                        "You should have received an email with a link "
-                        "to set up your password the first time. "
-                        "Please follow the instructions in the email."
-                    )
+                    raise ImproperLogin("You could not be logged in at this time")
                 else:
                     if user.is_active:
                         login_user(
@@ -333,11 +357,11 @@ def legacy_signin(request):
             return HttpResponseRedirect(request.POST["next"])
         else:
             if request.method == "GET":
-                return render(request, "mediaviewer/legacy-signin.html", context)
+                return render(request, "mediaviewer/home.html", context)
             else:
-                return HttpResponseRedirect(reverse("mediaviewer:legacy-signin"))
+                return HttpResponseRedirect(reverse("mediaviewer:home"))
 
-    return render(request, "mediaviewer/legacy-signin.html", context)
+    return render(request, "mediaviewer/home.html", context)
 
 
 class ContextMixin:

@@ -11,7 +11,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from mediaviewer.models import TV, MediaFile, Movie, Collection
+from mediaviewer.models import TV, Collection, MediaFile, Movie
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.message import Message

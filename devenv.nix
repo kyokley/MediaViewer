@@ -1,6 +1,10 @@
-{ pkgs, lib, config, inputs, ... }:
-
 {
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}: {
   # https://devenv.sh/basics/
   # env.GREET = "MV";
 
@@ -10,17 +14,16 @@
   # ];
 
   # https://devenv.sh/scripts/
-  # scripts.hello.exec = "echo hello from $GREET";
+  # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
 
   # enterShell = ''
   #   # hello
   # '';
 
   # https://devenv.sh/tests/
-  # enterTest = ''
-  #   # echo "Running tests"
-  #   # git --version | grep "2.42.0"
-  # '';
+  enterTest = ''
+    ${pkgs.gnumake}/bin/make tests
+  '';
 
   # https://devenv.sh/services/
   # services.postgres.enable = true;
@@ -36,7 +39,8 @@
   };
 
   # https://devenv.sh/pre-commit-hooks/
-  pre-commit.hooks = {
+  git-hooks.hooks = {
+    alejandra.enable = true;
     hadolint.enable = false;
     check-merge-conflicts.enable = true;
     check-added-large-files.enable = true;
@@ -50,6 +54,36 @@
     trim-trailing-whitespace.enable = true;
     yamlfmt.enable = true;
     yamllint.enable = false;
+    prettier = {
+      enable = true;
+      files = "\\.js$";
+      excludes = [
+        "mediaviewer/static/passwordless/passwordless.v1.1.0.umd.min.js"
+      ];
+    };
+    djlint = {
+      enable = true;
+      files = "\\.html$";
+      stages = ["pre-commit"];
+      pass_filenames = true;
+      entry = "${pkgs.djlint}/bin/djlint --reformat";
+    };
+
+    bandit = {
+      enable = true;
+      name = "bandit-security-checks";
+      entry = "${pkgs.uv}/bin/uvx bandit -c ${config.devenv.root}/pyproject.toml";
+      files = "\\.py$";
+      stages = ["pre-commit"];
+      pass_filenames = true;
+    };
+  };
+
+  tasks."mv:format" = {
+    exec = ''
+      ${config.git-hooks.installationScript}
+      ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
+    '';
   };
 
   # https://devenv.sh/processes/

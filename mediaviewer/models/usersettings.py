@@ -10,7 +10,6 @@ from django.db.utils import IntegrityError
 
 from mediaviewer.forms import FormlessPasswordReset
 
-
 TIMESTAMP_SORT = "timestamp_sort"
 FILENAME_SORT = "filename_sort"
 
@@ -177,10 +176,14 @@ def case_insensitive_authenticate(request, username, password):
     """Attempt password-based user login"""
     try:
         user = User.objects.get(username__iexact=username)
-        settings = user.settings()
-        if not settings.allow_password_logins:
-            return None
     except User.DoesNotExist:
+        try:
+            user = User.objects.get(email__iexact=username)
+        except User.DoesNotExist:
+            return None
+
+    settings = user.settings()
+    if not settings.allow_password_logins:
         return None
 
     return authenticate(request=request, username=user.username, password=password)

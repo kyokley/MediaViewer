@@ -4,46 +4,43 @@
 {% block jumbotron %}
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
+            <li class="breadcrumb-item">
+                <a href="/mediaviewer/">Home</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/mediaviewer/movies/">Movies</a>
+            </li>
             <li class="breadcrumb-item active">{{ display_name }}</li>
         </ol>
     </nav>
 {% endblock %}
-
 {% block main %}
     {% if error_message %}
-        <p><strong>{{ error_message }}</strong></p>
+        <p>
+            <strong>{{ error_message }}</strong>
+        </p>
     {% endif %}
     <div class="row text-center">
-        <h2>
-            {{ display_name }}
-        </h2>
+        <h2>{{ display_name }}</h2>
     </div>
     <div class="row">
         <div class="col">
             {% if poster.image %}
-                <img src="{{ poster.image.url }}" class="large-img mx-auto d-block"/>
+                <img src="{{ poster.image.url }}" class="large-img mx-auto d-block" />
             {% else %}
-                <h4>
-                    No Image
-                </h4>
+                <h4>No Image</h4>
             {% endif %}
         </div>
     </div>
     <div class="row text-center justify-content-center">
         <div class="col-10">
-            <h2>
-                {{ episode_name }}
-            </h2>
+            <h2>{{ episode_name }}</h2>
         </div>
     </div>
     <div class="row text-center justify-content-center">
         <div class="col-10">
             <h2>
-                {% if poster.tagline %}
-                    {{ poster.tagline }}
-                {% endif %}
+                {% if poster.tagline %}{{ poster.tagline }}{% endif %}
             </h2>
         </div>
     </div>
@@ -51,7 +48,12 @@
         {% block open_button %}
             {% if can_download and waiterstatus %}
                 <div class="d-grid gap-2 col-4 mx-auto">
-                    <a class='btn btn-info btn-lg btn-block' name='download-btn' id={{ movie.id }} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{{movie.id}}', 'movie')">Open</a>
+                    <a class='btn btn-info btn-lg btn-block'
+                       name='download-btn'
+                       id="{{ movie.id }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       onclick="openDownloadWindow('{{ movie.id }}', 'movie')">Open</a>
                 </div>
             {% endif %}
         {% endblock %}
@@ -90,29 +92,26 @@
                     <div class="col-9">{{ poster.rating | floatformat }}/10</div>
                 {% endif %}
                 <div class="col-3">
-                    <label for="toggle-viewed">
-                        Viewed:
-                    </label>
+                    <label for="toggle-viewed">Viewed:</label>
                 </div>
                 <div class="col-9">
                     {% block checkbox %}
-                    <input class="viewed-checkbox" id="toggle-viewed" name="{{ movie.id }}" type="checkbox"
-                                                                                           {% if viewed %}
-                                                                                               checked
-                                                                                       {% endif %}
-                                                                                           onclick="ajaxMovieCheckBox(['{{movie.id}}'], true)" />
-                    <span id="saved-{{ movie.id }}"></span>
+                        <input class="viewed-checkbox"
+                               id="toggle-viewed"
+                               name="{{ movie.id }}"
+                               type="checkbox"
+                               {% if viewed %}checked{% endif %}
+                               onclick="ajaxMovieCheckBox(['{{ movie.id }}'], true)" />
+                        <span id="saved-{{ movie.id }}"></span>
                     {% endblock %}
                 </div>
             </div>
         </h4>
     </div>
     <div class="row justify-content-center">
-        {% block episode_nav %}
-        {% endblock %}
+        {% block episode_nav %}{% endblock %}
     </div>
 {% endblock %}
-
 {% block javascript %}
     <script type="text/javascript">
         $(document).ready(function(){

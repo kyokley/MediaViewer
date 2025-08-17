@@ -1,35 +1,30 @@
 ARG BASE_IMAGE=python:3.12-slim
 
-FROM ${BASE_IMAGE} AS base-image
-RUN apt-get update
-
 FROM node:alpine3.20 AS static-builder
 WORKDIR /code/static
 
 COPY package.json package-lock.json /code/
 RUN npm install
 
-FROM base-image AS base
+FROM ${BASE_IMAGE} AS base
 ARG UID=1000
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /www
-WORKDIR /logs
-
-RUN groupadd -g ${UID} -r user && \
-        useradd --create-home --system --uid ${UID} --gid user user && \
-        chown -R user:user /logs /www && \
-        chmod 777 -R /www
-
-RUN pip install --upgrade --no-cache-dir pip uv
-
 ENV UV_PROJECT_DIR=/mv
 ENV VIRTUAL_ENV=${UV_PROJECT_DIR}/.venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN apt-get install -y --no-install-recommends \
+WORKDIR /www
+WORKDIR /logs
+
+RUN groupadd -g ${UID} -r user && \
+        useradd --create-home --uid ${UID} --gid user user && \
+        chown -R user:user /logs /www && \
+        chmod 777 -R /www && \
+        apt-get update && \
+        apt-get install -y --no-install-recommends \
         gnupg \
         g++ \
         git \
@@ -37,6 +32,7 @@ RUN apt-get install -y --no-install-recommends \
         ncurses-dev \
         libpq-dev \
         make && \
+        pip install --upgrade --no-cache-dir pip uv && \
         uv venv --seed ${VIRTUAL_ENV}
 
 COPY uv.lock pyproject.toml ${UV_PROJECT_DIR}/
@@ -61,7 +57,6 @@ CMD ["gunicorn", "mysite.wsgi"]
 
 # ********************* Begin Dev Image ******************
 FROM base AS dev-root
-WORKDIR /venv
 RUN uv sync --project "${VIRTUAL_ENV}"
 
 WORKDIR /code

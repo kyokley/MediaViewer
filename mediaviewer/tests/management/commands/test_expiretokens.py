@@ -1,9 +1,9 @@
-import pytest
 from datetime import timedelta
 
+import pytest
+from django.core.management import call_command
 from django.utils import timezone
 
-from django.core.management import call_command
 from mediaviewer.models import DownloadToken
 
 

@@ -99,13 +99,13 @@ class Movie(Media, ViewableObjectMixin):
     def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster
         tooltip_img = (
-            f"""data-bs-content="<img class='tooltip-img' src='{ poster.image.url }' />\""""
+            f"""data-bs-content="<img class='tooltip-img' src='{poster.image.url}' />\""""
             if poster and poster.image
             else ""
         )
 
         name_html = f'<a class="img-preview" href="/mediaviewer/moviedetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.name}</a>'
-        timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime('%b %d, %Y')}</center>"""
+        timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime("%b %d, %Y")}</center>"""
 
         if can_download:
             if waiterstatus:
@@ -117,11 +117,11 @@ class Movie(Media, ViewableObjectMixin):
 
         cell = """<center>"""
         if self.comments.filter(user=user, viewed=True).exists():
-            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" checked onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
+            cell = f"""{cell}<input class="viewed-checkbox" name="{self.id}" type="checkbox" checked onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
         else:
-            cell = f"""{cell}<input class="viewed-checkbox" name="{ self.id }" type="checkbox" onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
-        viewed_html = f'{cell}<span id="saved-{ self.id }"></span></center>'
-        report_html = f"""<center><input class='report' name='report-{ self.id }' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'movie')"/></center>"""
+            cell = f"""{cell}<input class="viewed-checkbox" name="{self.id}" type="checkbox" onclick="ajaxMovieCheckBox(['{self.id}'])" />"""
+        viewed_html = f'{cell}<span id="saved-{self.id}"></span></center>'
+        report_html = f"""<center><input class='report' name='report-{self.id}' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'movie')"/></center>"""
 
         payload = [
             viewed_html,

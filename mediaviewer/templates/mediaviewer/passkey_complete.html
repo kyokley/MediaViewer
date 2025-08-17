@@ -1,12 +1,9 @@
-{% extends "signin.html" %}
+{% extends "home.html" %}
 <!DOCTYPE html>
 {% load static %}
 {% include title %}
-
 {% include css %}
-
 {% include navbar %}
-
 {% block jumbotron %}
     <div class="jumbotron">
         <h1>Passkey Registered Successfully!</h1>
@@ -15,19 +12,17 @@
         <p></p>
     </div>
 {% endblock %}
-
 {% include messages %}
-
 {% block main %}
     Passkey was registered successfully. Future logins from this device will use the stored passkey!
     <p>You may go ahead and log in now.</p>
-    <p><a href="{% url 'mediaviewer:signin' %}">Log in</a></p>
-    <p><a id="help-link" href="javascript:void(0);" onclick="display_help();">Need help logging in?</a></p>
-    {% block help_section %}
-        {{ block.super }}
-    {% endblock %}
+    <p>
+        <a href="{% url 'mediaviewer:signin' %}">Log in</a>
+    </p>
+    <p>
+        <a id="help-link" href="javascript:void(0);" onclick="display_help();">Need help logging in?</a>
+    </p>
+    {% block help_section %}{{ block.super }}{% endblock %}
 {% endblock %}
-
 {% include footer %}
-
 {% include javascript %}
