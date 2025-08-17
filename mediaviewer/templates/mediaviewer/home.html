@@ -7,7 +7,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="">
         <meta name="author" content="">
-        <link rel="shortcut icon" type="image/png" href="{% static "assets/favicon.ico" %}" />
+        <link rel="shortcut icon"
+              type="image/png"
+              href="{% static "assets/favicon.ico" %}" />
         {% block title %}
             {% if title == '' or title == None %}
                 <title>MediaViewer</title>
@@ -16,13 +18,19 @@
             {% endif %}
         {% endblock %}
         {% block css %}
-            <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}" rel="stylesheet">
-            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}" rel="stylesheet">
-            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+            <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "bootstrap-icons/font/bootstrap-icons.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "datatables.net-bs5/css/dataTables.bootstrap5.min.css" %}"
+                  rel="stylesheet">
+            <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}"
+                  rel="stylesheet">
             <link href="{% static "slick-carousel/slick/slick.css" %}" rel="stylesheet">
-            <link href="{% static "slick-carousel/slick/slick-theme.css" %}" rel="stylesheet">
+            <link href="{% static "slick-carousel/slick/slick-theme.css" %}"
+                  rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
         {% endblock %}
     </head>
@@ -224,88 +232,105 @@
                         {% endif %}
                     {% endblock %}
                 {% else %}
-                    {{ error_message }}
-                    <form class="form-signin" role="form" method='post'>
+                    <form action="{% url 'mediaviewer:legacy-signin' %}"
+                          class="form-signin"
+                          role="form"
+                          method='post'>
                         {% csrf_token %}
-                        <div class="row justify-content-center">
-                            <h2 class="col-6 form-signin-heading">Please sign in</h2>
-                            <input type="text"
-                                   id="username-textbox"
-                                   class="col-6 form-control"
-                                   placeholder="Email / Username"
-                                   required
-                                   style="display:none">
-                            <input type="hidden" name="username" value="" id="username" />
-                        </div>
-                        <div class="row justify-content-center">
-                            <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
-                                    onclick="verify_passkey()">Sign In</button>
-                        </div>
-                        <div class="row justify-content-center">
-                            <input type="hidden" name="next" value="{{ next }}" id="next" />
-                            <a id="help-link"
-                               class="col-auto"
-                               href="javascript:void(0);"
-                               onclick="display_help();">Need help logging in?</a>
+                        <div class="card col-auto">
+                            <div class="card-header">Sign in with password</div>
+                            <div class="card-body">
+                                <div class="row justify-content-center">
+                                    <input type="text"
+                                           name="username"
+                                           id="username-textbox"
+                                           class="col-5"
+                                           placeholder="Email / Username">
+                                </div>
+                                <div class="row justify-content-center">
+                                    <input type="password"
+                                           name="password"
+                                           id="password-textbox"
+                                           class="col-5"
+                                           placeholder="Password">
+                                </div>
+                                <div class="row justify-content-center">
+                                    <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
+                                            type="submit">Sign In</button>
+                                    <div class="row justify-content-center">
+                                        <a class="col-auto" href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
+                                    </div>
+                                    <div class="row justify-content-center text-danger" id="error-div">{{ error_message }}</div>
+                                </div>
+                            </div>
                         </div>
                     </form>
+                    <br>
+                    <div class="card col-auto">
+                        <div class="card-header">Sign in with passkey</div>
+                        <div class="card-body">
+                            <div class="row justify-content-center">
+                                <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
+                                        onclick="verify_passkey()">Use Passkey</button>
+                            </div>
+                        </div>
+                    </div>
                 {% endif %}
             {% endblock %}
         </div>
-    </div>
-</body>
-<footer>
-    {% block footer %}
-        <nav id="bottom-navbar"
-             class="navbar navbar-text navbar-expand-md fixed-bottom bg-body-tertiary nav-show">
-            <div class="container-fluid text-center">
-                <div class="row justify-content-between">
-                    <div class="col-5">
-                        {% if waiterstatus %}
-                            <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-success">Connected</span></span>
-                        {% else %}
-                            <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-danger">Disconnected</span></span>
-                        {% endif %}
-                    </div>
-                    <div class="col-7">
-                        {% if donation_site_name and donation_site_url %}
-                            <span class="navbar-text">If you can, please consider donating to <a class="link-primary" href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
-                        {% endif %}
+        {% block footer %}
+            <nav id="bottom-navbar"
+                 class="navbar navbar-text navbar-expand-md fixed-bottom bg-body-tertiary nav-show">
+                <div class="container-fluid text-center">
+                    <div class="row justify-content-between">
+                        <div class="col-5">
+                            {% if waiterstatus %}
+                                <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-success">Connected</span></span>
+                            {% else %}
+                                <span class="navbar-text">Alfred status is <span id="waiter-status" class="badge text-bg-danger">Disconnected</span></span>
+                            {% endif %}
+                        </div>
+                        <div class="col-7">
+                            {% if donation_site_name and donation_site_url %}
+                                <span class="navbar-text">If you can, please consider donating to <a class="link-primary" href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </nav>
-    {% endblock %}
-</footer>
-{% block javascript_include %}
-    <!-- Bootstrap core JavaScript
+            </nav>
+        {% endblock %}
+    </body>
+    <footer>
+        {% block javascript_include %}
+            <!-- Bootstrap core JavaScript
     ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
-    <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
-    <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
-    <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
-    <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
-    <script src="{% static "datatables.net-scroller/js/dataTables.scroller.min.js" %}"></script>
-    <script src="{% static "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js" %}"></script>
-    <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
-    <script src="{% static "datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js" %}"></script>
-    <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
-    <script src="{% static "passwordless/passwordless.v1.1.0.umd.min.js" %}"></script>
-    <script src="{% static "slick-carousel/slick/slick.js" %}"></script>
-    <script src="{% static "jquery-migrate/dist/jquery-migrate.min.js" %}"></script>
-    <script src="{% static "assets/mediaviewer.js" %}"></script>
-{% endblock %}
-{% block javascript %}
-    <script type="text/javascript">
-        $(document).ready(function(){
-            csrf_token = '{{ csrf_token }}';
-            preparePage($);
-            setHomeFormSubmit($);
-            prepareAjaxWaiterStatus($, '{{ is_staff }}');
-            scrollSetup();
-            configureTooltips($);
-        });
-    </script>
-{% endblock %}
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
+            <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
+            <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+            <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
+            <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
+            <script src="{% static "datatables.net-scroller/js/dataTables.scroller.min.js" %}"></script>
+            <script src="{% static "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js" %}"></script>
+            <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
+            <script src="{% static "datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js" %}"></script>
+            <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
+            <script src="{% static "passwordless/passwordless.v1.1.0.umd.min.js" %}"></script>
+            <script src="{% static "slick-carousel/slick/slick.js" %}"></script>
+            <script src="{% static "jquery-migrate/dist/jquery-migrate.min.js" %}"></script>
+            <script src="{% static "assets/mediaviewer.js" %}"></script>
+        {% endblock %}
+        {% block javascript %}
+            <script type="text/javascript">
+                $(document).ready(function(){
+                    csrf_token = '{{ csrf_token }}';
+                    preparePage($);
+                    setHomeFormSubmit($);
+                    prepareAjaxWaiterStatus($, '{{ is_staff }}');
+                    scrollSetup();
+                    configureTooltips($);
+                });
+            </script>
+        {% endblock %}
+    </footer>
 </html>

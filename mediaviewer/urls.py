@@ -8,6 +8,7 @@ from rest_framework import routers
 from mediaviewer.forms import PasswordResetFormWithBCC
 from mediaviewer.views import (
     ajax,
+    collection,
     detail,
     home,
     messaging,
@@ -18,7 +19,6 @@ from mediaviewer.views import (
     signout,
     tv,
     waiterstatus,
-    collection,
 )
 
 router = routers.DefaultRouter()
@@ -143,6 +143,11 @@ urlpatterns.extend(
         re_path(r"^login/", signin.signin, name="signin"),
         re_path(r"^legacy-login/", signin.legacy_signin, name="legacy-signin"),
         re_path(
+            rf"^change-password/(?P<uidb64>[0-9A-Za-z]+)-{signin.PasswordResetConfirmView.reset_url_token}/$",
+            signin.change_password,
+            name="change-password",
+        ),
+        re_path(
             rf"^bypass-passkey/(?P<uidb64>[0-9A-Za-z]+)-{signin.PasswordResetConfirmView.reset_url_token}/$",
             signin.bypass_passkey,
             name="bypass-passkey",
@@ -169,12 +174,12 @@ urlpatterns.extend(
 
 if not conf_settings.IS_SYNCING:
     from mediaviewer.api import (
+        collection_viewset,
         media_file_viewset,
         media_path_viewset,
         movie_viewset,
         tv_viewset,
         viewset,
-        collection_viewset,
     )
 
     router.register(

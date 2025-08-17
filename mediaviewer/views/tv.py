@@ -6,9 +6,8 @@ from django.urls import reverse
 
 from mediaviewer.models import TV, Comment, Genre, MediaFile
 from mediaviewer.utils import humansize, logAccessInfo
-from mediaviewer.views.views_utils import setSiteWideContext
 from mediaviewer.views.ajax import get_tv_show_rows_query
-
+from mediaviewer.views.views_utils import setSiteWideContext
 
 NUMBER_OF_CAROUSEL_FILES = 20
 rand = random.SystemRandom()
