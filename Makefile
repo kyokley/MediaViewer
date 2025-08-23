@@ -34,6 +34,15 @@ build-dev: touch-history ## Build dev container
 		--target=dev \
 		.
 
+build-playwright: touch-history ## Build playwright container
+	docker build \
+		$$(test ${USE_HOST_NET} -ne 0 && echo "--network=host" || echo "") \
+		$$(test ${NO_CACHE} -ne 0 && echo "--no-cache" || echo "") \
+		--build-arg UID=${UID} \
+		--tag=kyokley/playwright \
+		--target=playwright .
+
+
 up: touch-history ## Bring up containers and daemonize
 	${DOCKER_COMPOSE_EXECUTABLE} up -d
 
@@ -51,6 +60,12 @@ shell: touch-history ## Open a shell in a mediaviewer container
 
 db-shell: db-up ## Open a shell in a mediaviewer container
 	${DOCKER_COMPOSE_EXECUTABLE} exec postgres /bin/bash
+
+e2e-shell: build-playwright
+	${DOCKER_COMPOSE_EXECUTABLE} -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash
+
+test-e2e: build-playwright
+	${DOCKER_COMPOSE_EXECUTABLE} -f docker-compose.yml -f docker-compose.playwright.yml run playwright /bin/bash -c 'for i in $$(seq 10 -1 1); do echo -ne "Waiting for MediaViewer to start up... ($$i secs) \\r"; sleep 1; done && pytest --browser firefox mediaviewer/tests/e2e'
 
 db-up:
 	${DOCKER_COMPOSE_EXECUTABLE} up -d postgres

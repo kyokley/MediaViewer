@@ -2,8 +2,8 @@ name: Test
 "on":
   pull_request:
 jobs:
-  test:
-    name: Run test suite
+  check-migrations:
+    name: Check migrations status
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -14,6 +14,14 @@ jobs:
         run: make pytest
       - name: Run bandit
         run: make bandit
+  run-e2e-tests:
+    name: Run E2E tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run E2E tests
+        run: make test-e2e
   format-checks:
     name: Run devenv format checks
     runs-on: ubuntu-latest

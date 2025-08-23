@@ -18,6 +18,9 @@ from mediaviewer.models.usersettings import UserSettings
 DEFAULT_USERNAME = "test_user"
 DEFAULT_EMAIL = "asdf@example.com"
 
+DEFAULT_USERNAME = "test_user"
+DEFAULT_EMAIL = "a@b.com"
+
 fake = Faker()
 
 

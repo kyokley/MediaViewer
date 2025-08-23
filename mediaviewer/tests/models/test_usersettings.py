@@ -4,14 +4,13 @@ from django.db.utils import IntegrityError
 from django.http import HttpRequest
 
 from mediaviewer.models.usersettings import UserSettings, case_insensitive_authenticate
-from mediaviewer.tests import helpers
 
 
 @pytest.mark.django_db
 @mock.patch("mediaviewer.forms.PasswordResetForm")
 class TestNewUser:
     @pytest.fixture(autouse=True)
-    def setUp(self):
+    def setUp(self, create_user):
         self.name = " New User "
         self.expected_name = "new user"
         self.email = " test@user.com "
@@ -20,7 +19,7 @@ class TestNewUser:
         self.expected_existing_user = "existing user"
         self.existing_email = "existing@user.com"
 
-        helpers.create_user(username=self.existing_user, email=self.existing_email)
+        create_user(username=self.existing_user, email=self.existing_email)
 
     def test_new(self, mock_form):
         new_user = UserSettings.new(self.name, self.email, send_email=False)
@@ -52,14 +51,14 @@ class TestNewUser:
 @pytest.mark.django_db
 class TestCaseInsensitiveAuthenticate:
     @pytest.fixture(autouse=True)
-    def setUp(self):
+    def setUp(self, create_user):
         self.name = "New User"
         self.email = "test@user.com"
         self.password = "password"
 
         self.request = HttpRequest()
 
-        self.new_user = helpers.create_user(username=self.name, email=self.email)
+        self.new_user = create_user(username=self.name, email=self.email)
         self.new_user.set_password(self.password)
         self.new_user.save()
 

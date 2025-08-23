@@ -2,7 +2,6 @@
 import os
 import re
 import smtplib
-import telnetlib  # nosec
 from binascii import hexlify
 from datetime import datetime
 from email import encoders as Encoders
@@ -144,14 +143,6 @@ def send_test_mail(to_addr):
         subject,
         text,
     )
-
-
-def checkSMTPServer():
-    if not settings.BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(  # nosec
-            host=settings.EMAIL_HOST, port=settings.EMAIL_PORT
-        )
-        smtp_server.close()
 
 
 def query_param_to_bool(param):

@@ -1,9 +1,7 @@
 import pytest
 from django.conf import settings
 
-from mediaviewer.tests import helpers
 from mediaviewer.utils import (
-    checkSMTPServer,
     getSomewhatUniqueID,
     humansize,
     query_param_to_bool,
@@ -75,13 +73,13 @@ class TestHumanSize:
 @pytest.mark.django_db
 class TestSendMail:
     @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
+    def setUp(self, create_user, mocker):
         self.mock_SMTP = mocker.patch("mediaviewer.utils.smtplib.SMTP")
 
         self.mock_MIMEMultipart = mocker.patch("mediaviewer.utils.MIMEMultipart")
 
-        self.staff_user = helpers.create_user(is_staff=True)
-        self.normal_user = helpers.create_user(username="normal_user", email="b@c.com")
+        self.staff_user = create_user(is_staff=True)
+        self.normal_user = create_user(username="normal_user", email="b@c.com")
 
         self.to_addr = "test@example.com"
 
@@ -114,37 +112,6 @@ class BaseSMTPServerTestCase:
 
         self.mock_settings.EMAIL_HOST = "test_host"
         self.mock_settings.EMAIL_PORT = "test_port"
-
-
-class TestCheckSMTPServer(BaseSMTPServerTestCase):
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.create_mocks(mocker)
-
-        self.mock_settings.BYPASS_SMTPD_CHECK = False
-
-    def test_smtpd_check(self):
-        expected = None
-        actual = checkSMTPServer()
-
-        assert expected == actual
-        self.mock_Telnet.assert_called_once_with(host="test_host", port="test_port")
-        self.mock_Telnet.return_value.close.assert_called_once_with()
-
-
-class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.create_mocks(mocker)
-
-        self.mock_settings.BYPASS_SMTPD_CHECK = True
-
-    def test_bypass_smtpd_check(self):
-        expected = None
-        actual = checkSMTPServer()
-
-        assert expected == actual
-        assert not self.mock_Telnet.called
 
 
 class TestQueryParamToBool:
