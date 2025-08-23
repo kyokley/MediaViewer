@@ -3,6 +3,9 @@ import os
 import re
 import smtplib
 import telnetlib  # nosec
+import secrets
+import string
+
 from binascii import hexlify
 from datetime import datetime
 from email import encoders as Encoders
@@ -20,6 +23,13 @@ from mediaviewer.log import log
 
 SUFFIXES = ("B", "KB", "MB", "GB", "TB", "PB")
 COMMASPACE = ", "
+RANDOM_PASSWORD_LENGTH = 20
+
+
+def make_random_password():
+    alphabet = string.ascii_letters + string.digits
+    password = "".join(secrets.choice(alphabet) for i in range(RANDOM_PASSWORD_LENGTH))
+    return password
 
 
 def getSomewhatUniqueID(numBytes=4):

@@ -73,6 +73,9 @@ stop-all-but-db: ## Bring all containers down except postgres
 down: ## Bring all containers down
 	${DOCKER_COMPOSE_EXECUTABLE} down --remove-orphans
 
+clear: ## Bring down containers and clear all volumes
+	${DOCKER_COMPOSE_EXECUTABLE} down --remove-orphans -v
+
 static: ## Install static files
 	yarn install
 

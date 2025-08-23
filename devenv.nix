@@ -9,9 +9,9 @@
   # env.GREET = "MV";
 
   # https://devenv.sh/packages/
-  # packages = [
-  #   pkgs.git
-  # ];
+  packages = [
+    pkgs.postgresql
+  ];
 
   # https://devenv.sh/scripts/
   # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
