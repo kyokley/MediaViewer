@@ -2,7 +2,7 @@ import os
 
 from mysite.settings import *  # noqa
 
-USE_SILK = DEBUG = os.environ.get("MEDIAVIEWER_DEBUG", "true").lower() == "true"
+USE_SILK = DEBUG = os.environ.get("MEDIAVIEWER_DEBUG", "false").lower() == "true"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "mediaviewer"]
 

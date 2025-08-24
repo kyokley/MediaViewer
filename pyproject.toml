@@ -54,7 +54,6 @@ dev = [
     "bpython<1.0,>=0.24",
     "pdbpp<1.0.0,>=0.9.3",
     "coverage<5.0,>=4.5",
-    "django-silk<6.0,>=5.0",
     "pytest-mock<4.0.0,>=3.6.1",
     "Faker<11.0.0,>=10.0.0",
     "black<25.0.0,>=24.3.0",
@@ -63,4 +62,5 @@ dev = [
     "pytest-random<1.0,>=0.2",
     "pytest-xdist<4.0.0,>=3.6.1",
     "django-debug-toolbar>=6.0.0",
+    "django-silk>=5.4.1",
 ]

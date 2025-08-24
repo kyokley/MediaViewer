@@ -522,7 +522,7 @@ dev = [
     { name = "bpython", specifier = ">=0.24,<1.0" },
     { name = "coverage", specifier = ">=4.5,<5.0" },
     { name = "django-debug-toolbar", specifier = ">=6.0.0" },
-    { name = "django-silk", specifier = ">=5.0,<6.0" },
+    { name = "django-silk", specifier = ">=5.4.1" },
     { name = "faker", specifier = ">=10.0.0,<11.0.0" },
     { name = "isort", specifier = ">=5.12.0,<6.0.0" },
     { name = "mock", specifier = ">=2.0,<3.0" },
