@@ -16,9 +16,11 @@
   # https://devenv.sh/scripts/
   # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
 
-  # enterShell = ''
-  #   # hello
-  # '';
+  enterShell = ''
+    echo
+    ${pkgs.figlet}/bin/figlet -f slant MediaViewer | ${pkgs.lolcat}/bin/lolcat
+    echo
+  '';
 
   # https://devenv.sh/tests/
   enterTest = ''
