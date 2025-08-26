@@ -10,7 +10,6 @@ urlpatterns = [
     # Examples:
     # re_path(r'^$', 'site.views.home', name='home'),
     # re_path(r'^site/', include('site.foo.urls')),
-    # (r'^cache/', include('django_memcached.urls')),
     # Uncomment the admin/doc line below to enable admin documentation:
     # re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     re_path("grappelli/", include("grappelli.urls")),  # grappelli URLS

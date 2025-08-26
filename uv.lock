@@ -468,7 +468,6 @@ dependencies = [
     { name = "gunicorn" },
     { name = "pillow" },
     { name = "psycopg2" },
-    { name = "pymemcache" },
     { name = "python-dateutil" },
     { name = "pytz" },
     { name = "requests" },
@@ -507,7 +506,6 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=23.0.0,<24.0.0" },
     { name = "pillow", specifier = ">=10.3.0,<11.0.0" },
     { name = "psycopg2", specifier = ">=2.9.9,<3.0.0" },
-    { name = "pymemcache", specifier = ">=3.5.1,<4.0.0" },
     { name = "python-dateutil", specifier = ">=2.7,<3.0" },
     { name = "pytz", specifier = ">=2018.9,<2019.0" },
     { name = "requests", specifier = ">=2.32,<3.0" },
@@ -528,7 +526,7 @@ dev = [
     { name = "mock", specifier = ">=2.0,<3.0" },
     { name = "pdbpp", specifier = ">=0.9.3,<1.0.0" },
     { name = "pytest-cov", specifier = ">=2.6,<3.0" },
-    { name = "pytest-django", specifier = ">=3.4,<4.0" },
+    { name = "pytest-django", specifier = ">=4.11.1" },
     { name = "pytest-mock", specifier = ">=3.6.1,<4.0.0" },
     { name = "pytest-random", specifier = ">=0.2,<1.0" },
     { name = "pytest-socket", specifier = ">=0.6.0,<1.0.0" },
@@ -669,18 +667,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pymemcache"
-version = "3.5.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a7/c5/b76baaa08caae918c8a29c347810d2bd3fee3810b6f9fe8784dbb0f4240d/pymemcache-3.5.2.tar.gz", hash = "sha256:8923ab59840f0d5338f1c52dba229fa835545b91c3c2f691c118e678d0fb974e", size = 65351 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/9b/a3/58af0a398c490092e8039edcda815c172309f8037b75519b7b8138fa0322/pymemcache-3.5.2-py2.py3-none-any.whl", hash = "sha256:3fca0215845d7b2ecd5f4c627fcf4ce2345a703a897b7e116380115b5a197be2", size = 56964 },
-]
-
-[[package]]
 name = "pyreadline3"
 version = "3.5.4"
 source = { registry = "https://pypi.org/simple" }
@@ -729,14 +715,14 @@ wheels = [
 
 [[package]]
 name = "pytest-django"
-version = "3.10.0"
+version = "4.11.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/22/04/fda3dded8b1497c75a64a32a5d6e7cb40ca0e2cc73d92ae809769b4eb4ed/pytest-django-3.10.0.tar.gz", hash = "sha256:4de6dbd077ed8606616958f77655fed0d5e3ee45159475671c7fa67596c6dba6", size = 73732 }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/fb/55d580352db26eb3d59ad50c64321ddfe228d3d8ac107db05387a2fadf3a/pytest_django-4.11.1.tar.gz", hash = "sha256:a949141a1ee103cb0e7a20f1451d355f83f5e4a5d07bdd4dcfdd1fd0ff227991", size = 86202 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/5d/c43af4d29cd0380cfac100c86f9496f6a2fc2c5864ca40ce64575a634e65/pytest_django-3.10.0-py2.py3-none-any.whl", hash = "sha256:c33e3d3da14d8409b125d825d4e74da17bb252191bf6fc3da6856e27a8b73ea4", size = 19603 },
+    { url = "https://files.pythonhosted.org/packages/be/ac/bd0608d229ec808e51a21044f3f2f27b9a37e7a0ebaca7247882e67876af/pytest_django-4.11.1-py3-none-any.whl", hash = "sha256:1b63773f648aa3d8541000c26929c1ea63934be1cfa674c76436966d73fe6a10", size = 25281 },
 ]
 
 [[package]]
