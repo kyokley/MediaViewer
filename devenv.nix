@@ -14,7 +14,28 @@
   ];
 
   # https://devenv.sh/scripts/
-  # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
+  scripts = {
+    runtests.exec = "${pkgs.gnumake}/bin/make tests";
+    touch-history.exec = "touch .mv.history";
+    build.exec = ''
+      docker build \
+        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
+        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
+        --build-arg UID=''${UID:=1000} \
+        --tag=kyokley/mediaviewer \
+        --target=prod \
+        .
+    '';
+    build-dev.exec = ''
+      docker build \
+        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
+        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
+        --build-arg UID=''${UID:=1000} \
+        --tag=kyokley/mediaviewer \
+        --target=dev \
+        .
+    '';
+  };
 
   enterShell = ''
     echo
