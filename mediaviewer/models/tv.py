@@ -70,11 +70,12 @@ class TV(Media):
 
     def last_created_episode_at(self):
         if not hasattr(self, "_last_created_episode_at"):
-            self._last_created_episode_at = (
+            result = list(
                 self.episodes()
                 .order_by("-date_created")
-                .values_list("date_created", flat=True)[0]
+                .values_list("date_created", flat=True)
             )
+            self._last_created_episode_at = result[0] if result else None
         return self._last_created_episode_at
 
     def number_of_unwatched_shows(self, user):

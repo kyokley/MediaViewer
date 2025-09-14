@@ -35,6 +35,12 @@
         --target=dev \
         .
     '';
+    pytest.exec = ''
+      ${pkgs.docker}/bin/docker compose run --rm mediaviewer pytest -n 4
+    '';
+    shell.exec = ''
+      ${pkgs.docker}/bin/docker compose run --rm mediaviewer bash
+    '';
   };
 
   enterShell = ''
