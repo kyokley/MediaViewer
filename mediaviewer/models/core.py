@@ -29,7 +29,7 @@ class ViewableManagerMixin:
             Poster.objects.exclude(image="")
             .filter(models.Q(movie__hide=False) | models.Q(media_file__pk__in=tvs))
             .filter(release_date__isnull=False)
-            .select_related("movie", "media_file")
+            .select_related("movie", "media_file", "tv")
             .order_by("-release_date")[:limit]
         )
         return (x.ref_obj for x in qs)

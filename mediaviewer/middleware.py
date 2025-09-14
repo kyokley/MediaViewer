@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import secure
 from django.conf import settings
 from django.contrib import auth
+from mediaviewer.log import log
 
 secure_headers = secure.Secure()
 
@@ -21,16 +22,16 @@ class AutoLogout:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated:
-            try:
+        try:
+            if request.user.is_authenticated:
                 if datetime.now() - datetime.fromisoformat(
                     request.session["last_touch"]
                 ) > timedelta(minutes=settings.AUTO_LOGOUT_DELAY):
                     auth.logout(request)
                     del request.session["last_touch"]
                     return
-            except KeyError:
-                pass
+        except Exception as e:
+            log.error(str(e))
 
         request.session["last_touch"] = datetime.now().isoformat()
         return self.get_response(request)

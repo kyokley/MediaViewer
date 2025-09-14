@@ -70,20 +70,23 @@ class TV(Media):
 
     def last_created_episode_at(self):
         if not hasattr(self, "_last_created_episode_at"):
-            if episodes := self.episodes().order_by("-date_created"):
-                self._last_created_episode_at = episodes.values_list(
-                    "date_created", flat=True
-                )[0]
-            else:
-                self._last_created_episode_at = None
+            self._last_created_episode_at = (
+                self.episodes()
+                .order_by("-date_created")
+                .values_list("date_created", flat=True)[0]
+            )
         return self._last_created_episode_at
 
     def number_of_unwatched_shows(self, user):
         if not user:
             return 0
 
-        episodes = MediaFile.objects.filter(media_path__tv=self).filter(hide=False)
-        episodes_count = episodes.count()
+        episodes = list(
+            MediaFile.objects.filter(media_path__tv=self)
+            .filter(hide=False)
+            .values_list("id", flat=True)
+        )
+        episodes_count = len(episodes)
         viewed_count = Comment.objects.filter(
             media_file__in=episodes, user=user, viewed=True
         ).count()
