@@ -41,6 +41,12 @@
     shell.exec = ''
       ${pkgs.docker}/bin/docker compose run --rm mediaviewer bash
     '';
+    down.exec = ''
+      ${pkgs.docker}/bin/docker compose down --remove-orphans
+    '';
+    clear.exec = ''
+      ${pkgs.docker}/bin/docker compose down --remove-orphans -v
+    '';
   };
 
   enterShell = ''
