@@ -94,7 +94,11 @@ class TV(Media):
         return episodes_count - viewed_count
 
     def ajax_row_payload(self, user):
-        unwatched_count = self.number_of_unwatched_shows(user)
+        unwatched_count = (
+            self._number_unwatched
+            if hasattr(self, "_number_unwatched")
+            else self.number_of_unwatched_shows(user)
+        )
         poster = self.poster
         tooltip_img = (
             f"<img class='tooltip-img' src='{poster.image.url}' />"

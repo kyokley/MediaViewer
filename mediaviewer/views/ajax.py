@@ -6,12 +6,12 @@ import pytz
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Count, F
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
-from mediaviewer.models import TV, Collection, MediaFile, Movie
+from mediaviewer.models import TV, Collection, MediaFile, Movie, Comment
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.models.genre import Genre
 from mediaviewer.models.message import Message
@@ -238,8 +238,42 @@ def _ajax_tv_rows(request, qs):
         else f"{sort_columns_map[sort_column]}"
     )
 
+    episodes_qs = (
+        MediaFile.objects.filter(media_path__tv=OuterRef("pk"))
+        .filter(hide=False)
+        .order_by("-date_created")
+        .values("date_created")[:1]
+    )
+    episodes_watched_qs = (
+        Comment.objects.filter(user=request.user, viewed=True, media_file__hide=False)
+        .values("media_file__media_path__tv")
+        .annotate(count=Count("pk"))
+        .values("media_file__media_path__tv", "count")
+        .filter(media_file__media_path__tv=OuterRef("pk"))
+        .values("count")[:1]
+    )
+
+    total_qs = (
+        TV.objects.filter(mediapath__mediafile__hide=False)
+        .values("pk")
+        .annotate(count=Count("mediapath__mediafile"))
+        .values("count")
+        .filter(pk=OuterRef("pk"))[:1]
+    )
+
     initial_qs = qs
-    qs = initial_qs.order_by(sort_expr).search(search_str)
+    qs = (
+        initial_qs.order_by(sort_expr)
+        .search(search_str)
+        .select_related("_poster")
+        .annotate(
+            _last_created_episode_at=Subquery(episodes_qs),
+            number_watched=Subquery(episodes_watched_qs),
+            total=Subquery(total_qs),
+        )
+        .annotate(_number_unwatched=F("total") - F("number_watched"))
+    )
+
     tvs = qs[offset : offset + length]
 
     tv_data = [tv.ajax_row_payload(request.user) for tv in tvs]
