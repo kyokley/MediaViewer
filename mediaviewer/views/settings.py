@@ -3,7 +3,7 @@ from datetime import datetime as dateObj
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import render
-from django.utils.timezone import utc
+from datetime import timezone
 
 from mediaviewer.log import log
 from mediaviewer.models.sitegreeting import SiteGreeting
@@ -87,7 +87,7 @@ def submitsettings(request):
     context["default_sort"] = settings.default_sort
 
     if changed:
-        settings.dateedited = dateObj.now(utc)
+        settings.dateedited = dateObj.now(timezone.utc)
 
     settings.save()
     user.save()

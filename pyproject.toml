@@ -24,21 +24,19 @@ authors = [
 ]
 requires-python = "<4.0,>=3.12"
 dependencies = [
-    "django<5.0.0,>=4.2.17",
     "psycopg2<3.0.0,>=2.9.9",
     "python-dateutil<3.0,>=2.7",
     "djangorestframework<4.0,>=3.9",
     "pytz<2019.0,>=2018.9",
     "requests<3.0,>=2.32",
     "django-widget-tweaks<2.0,>=1.4",
-    "django-bower<6.0,>=5.2",
     "django-referrer-policy<2.0,>=1.0",
     "django-extensions<4.0.0,>=3.1.5",
     "secure<1.0.0,>=0.3.0",
-    "pymemcache<4.0.0,>=3.5.1",
     "django-grappelli<4.0.0,>=3.0.3",
     "pillow<11.0.0,>=10.3.0",
     "gunicorn<24.0.0,>=23.0.0",
+    "django>=5.2.5",
 ]
 name = "mediaviewer"
 version = "0.1.0"
@@ -49,14 +47,11 @@ package-mode = false
 dev = [
     "blessings<2.0,>=1.7",
     "mock<3.0,>=2.0",
-    "django-debug-toolbar<4.0,>=3.2",
     "bandit<2.0,>=1.5",
-    "pytest-django<4.0,>=3.4",
     "pytest-cov<3.0,>=2.6",
     "bpython<1.0,>=0.24",
     "pdbpp<1.0.0,>=0.9.3",
     "coverage<5.0,>=4.5",
-    "django-silk<6.0,>=5.0",
     "pytest-mock<4.0.0,>=3.6.1",
     "Faker<11.0.0,>=10.0.0",
     "black<25.0.0,>=24.3.0",
@@ -64,4 +59,7 @@ dev = [
     "pytest-socket<1.0.0,>=0.6.0",
     "pytest-random<1.0,>=0.2",
     "pytest-xdist<4.0.0,>=3.6.1",
+    "django-debug-toolbar>=6.0.0",
+    "django-silk>=5.4.1",
+    "pytest-django>=4.11.1",
 ]

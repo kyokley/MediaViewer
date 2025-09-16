@@ -9,6 +9,7 @@ from django.db import models, transaction
 from django.db.utils import IntegrityError
 
 from mediaviewer.forms import FormlessPasswordReset
+from mediaviewer.utils import make_random_password
 
 TIMESTAMP_SORT = "timestamp_sort"
 FILENAME_SORT = "filename_sort"
@@ -140,7 +141,7 @@ class UserSettings(models.Model):
         newUser.is_superuser = is_superuser
         # Password reset emails are only sent for user that have passwords
         # Create a random password for the time being
-        newUser.set_password(User.objects.make_random_password())
+        newUser.set_password(make_random_password())
         newUser.save()
 
         cls.create_user_setting(

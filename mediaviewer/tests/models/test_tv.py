@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import pytest
-from django.utils.timezone import utc
+from datetime import timezone
 
 
 @pytest.mark.django_db
@@ -36,7 +36,7 @@ class TestLastCreatedEpisodeAt:
 
         self.mfs = [create_tv_media_file(tv=self.tv) for i in range(3)]
 
-        dt = datetime(2018, 11, 1, 0, 0, 0, 0, utc)
+        dt = datetime(2018, 11, 1, 0, 0, 0, 0, timezone.utc)
         for idx, mf in enumerate(self.mfs):
             mf.date_created = dt + timedelta(days=idx)
             mf.save()

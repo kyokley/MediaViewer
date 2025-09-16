@@ -9,16 +9,51 @@
   # env.GREET = "MV";
 
   # https://devenv.sh/packages/
-  # packages = [
-  #   pkgs.git
-  # ];
+  packages = [
+    pkgs.postgresql
+  ];
 
   # https://devenv.sh/scripts/
-  # scripts.runtests.exec = "${pkgs.gnumake}/bin/make tests";
+  scripts = {
+    runtests.exec = "${pkgs.gnumake}/bin/make tests";
+    touch-history.exec = "touch .mv.history";
+    build.exec = ''
+      docker build \
+        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
+        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
+        --build-arg UID=''${UID:=1000} \
+        --tag=kyokley/mediaviewer \
+        --target=prod \
+        .
+    '';
+    build-dev.exec = ''
+      docker build \
+        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
+        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
+        --build-arg UID=''${UID:=1000} \
+        --tag=kyokley/mediaviewer \
+        --target=dev \
+        .
+    '';
+    pytest.exec = ''
+      ${pkgs.docker}/bin/docker compose run --rm mediaviewer pytest -n 4
+    '';
+    shell.exec = ''
+      ${pkgs.docker}/bin/docker compose run --rm mediaviewer bash
+    '';
+    down.exec = ''
+      ${pkgs.docker}/bin/docker compose down --remove-orphans
+    '';
+    clear.exec = ''
+      ${pkgs.docker}/bin/docker compose down --remove-orphans -v
+    '';
+  };
 
-  # enterShell = ''
-  #   # hello
-  # '';
+  enterShell = ''
+    echo
+    ${pkgs.figlet}/bin/figlet -f slant MediaViewer | ${pkgs.lolcat}/bin/lolcat
+    echo
+  '';
 
   # https://devenv.sh/tests/
   enterTest = ''

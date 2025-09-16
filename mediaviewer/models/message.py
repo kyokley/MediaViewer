@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
-from django.utils.timezone import utc
+from datetime import timezone as dt_timezone
 
 REGULAR = "regular"
 LAST_WATCHED = "last_watched"
@@ -62,7 +62,7 @@ class Message(models.Model):
         newMessage = Message()
         newMessage.touser = user
         newMessage.body = body
-        newMessage.datecreated = dateObj.utcnow().replace(tzinfo=utc)
+        newMessage.datecreated = dateObj.utcnow().replace(tzinfo=dt_timezone.utc)
         newMessage.level = level
         newMessage.sent = False
         newMessage.message_type = message_type
