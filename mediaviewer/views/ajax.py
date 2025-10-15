@@ -6,7 +6,8 @@ import pytz
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db.models import OuterRef, Subquery, Count, F
+from django.db.models import OuterRef, Subquery, Count, F, Value
+from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -268,7 +269,7 @@ def _ajax_tv_rows(request, qs):
         .select_related("_poster")
         .annotate(
             _last_created_episode_at=Subquery(episodes_qs),
-            number_watched=Subquery(episodes_watched_qs),
+            number_watched=Coalesce(Subquery(episodes_watched_qs), Value(0)),
             total=Subquery(total_qs),
         )
         .annotate(_number_unwatched=F("total") - F("number_watched"))
