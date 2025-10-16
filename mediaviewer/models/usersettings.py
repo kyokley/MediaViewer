@@ -62,7 +62,7 @@ class UserSettings(models.Model):
         "mediaviewer.Movie", on_delete=models.SET_NULL, null=True, blank=True
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
-    allow_password_logins = models.BooleanField(blank=True, null=False, default=False)
+    allow_password_logins = models.BooleanField(blank=True, null=False, default=True)
 
     theme = models.CharField(
         max_length=32, blank=False, null=False, default=DARK, choices=THEME_CHOICES
