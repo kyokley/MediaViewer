@@ -30,7 +30,6 @@ dependencies = [
     "pytz<2019.0,>=2018.9",
     "requests<3.0,>=2.32",
     "django-widget-tweaks<2.0,>=1.4",
-    "django-referrer-policy<2.0,>=1.0",
     "django-extensions<4.0.0,>=3.1.5",
     "secure<1.0.0,>=0.3.0",
     "django-grappelli<4.0.0,>=3.0.3",
