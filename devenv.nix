@@ -15,6 +15,10 @@
 
   # https://devenv.sh/scripts/
   scripts = {
+    help.exec = ''
+      echo Scripts
+      devenv info | awk /scripts/ RS="\n\n" ORS="\n\n" | tail -n "+2" | sort | awk '{$3=""; print $0}'
+    '';
     runtests.exec = "${pkgs.gnumake}/bin/make tests";
     touch-history.exec = "touch .mv.history";
     build.exec = ''
