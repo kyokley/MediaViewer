@@ -24,19 +24,18 @@ authors = [
 ]
 requires-python = "<4.0,>=3.12"
 dependencies = [
-    "psycopg2<3.0.0,>=2.9.9",
     "python-dateutil<3.0,>=2.7",
     "djangorestframework<4.0,>=3.9",
     "pytz<2019.0,>=2018.9",
     "requests<3.0,>=2.32",
     "django-widget-tweaks<2.0,>=1.4",
-    "django-referrer-policy<2.0,>=1.0",
     "django-extensions<4.0.0,>=3.1.5",
     "secure<1.0.0,>=0.3.0",
     "django-grappelli<4.0.0,>=3.0.3",
     "pillow<11.0.0,>=10.3.0",
     "gunicorn<24.0.0,>=23.0.0",
     "django>=5.2.5",
+    "psycopg2-binary>=2.9.11",
 ]
 name = "mediaviewer"
 version = "0.1.0"
