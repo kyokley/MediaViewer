@@ -505,6 +505,7 @@ dependencies = [
     { name = "pytz" },
     { name = "requests" },
     { name = "secure" },
+    { name = "setuptools" },
 ]
 
 [package.dev-dependencies]
@@ -542,6 +543,7 @@ requires-dist = [
     { name = "pytz", specifier = ">=2018.9,<2019.0" },
     { name = "requests", specifier = ">=2.32,<3.0" },
     { name = "secure", specifier = ">=0.3.0,<1.0.0" },
+    { name = "setuptools" },
 ]
 
 [package.metadata.requires-dev]
