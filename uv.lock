@@ -505,7 +505,6 @@ dependencies = [
     { name = "pytz" },
     { name = "requests" },
     { name = "secure" },
-    { name = "setuptools" },
 ]
 
 [package.dev-dependencies]
@@ -514,7 +513,6 @@ dev = [
     { name = "black" },
     { name = "blessings" },
     { name = "bpython" },
-    { name = "coverage" },
     { name = "django-debug-toolbar" },
     { name = "django-silk" },
     { name = "faker" },
@@ -543,7 +541,6 @@ requires-dist = [
     { name = "pytz", specifier = ">=2018.9,<2019.0" },
     { name = "requests", specifier = ">=2.32,<3.0" },
     { name = "secure", specifier = ">=0.3.0,<1.0.0" },
-    { name = "setuptools" },
 ]
 
 [package.metadata.requires-dev]
@@ -552,7 +549,6 @@ dev = [
     { name = "black", specifier = ">=24.3.0,<25.0.0" },
     { name = "blessings", specifier = ">=1.7,<2.0" },
     { name = "bpython", specifier = ">=0.24,<1.0" },
-    { name = "coverage", specifier = ">=4.5,<5.0" },
     { name = "django-debug-toolbar", specifier = ">=6.0.0" },
     { name = "django-silk", specifier = ">=5.4.1" },
     { name = "faker", specifier = ">=10.0.0,<11.0.0" },

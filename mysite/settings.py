@@ -231,12 +231,6 @@ LOGGING = {
 }
 
 SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-LOG_DIR = (
-    Path(os.getenv("MV_LOG_DIR"))
-    if os.getenv("MV_LOG_DIR")
-    else SYSTEM_BASE_PATH / "logs"
-)
-LOG_FILE_NAME = LOG_DIR / "mediaviewerLog"
 LOG_LEVEL = logging.DEBUG
 
 TEMPLATES = [

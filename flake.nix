@@ -65,10 +65,14 @@
           pythonSet.mkVirtualEnv
           (thisProjectAsNixPkg.pname + "-env")
           workspace.deps.default; # Uses deps from pyproject.toml [project.dependencies]
+        devPythonEnv =
+          pythonSet.mkVirtualEnv
+          (thisProjectAsNixPkg.pname + "-env")
+          workspace.deps.all;
       in {
         # Development Shell
         devShells.default = pkgs.mkShell {
-          packages = [appPythonEnv pkgs.ruff pkgs.uv];
+          packages = [devPythonEnv];
           shellHook = ''# Your custom shell hooks */ '';
         };
 
@@ -79,14 +83,14 @@
           src = ./.; # Source of your main script
 
           nativeBuildInputs = [pkgs.makeWrapper];
-          buildInputs = [appPythonEnv]; # Runtime Python environment
+          buildInputs = [devPythonEnv]; # Runtime Python environment
 
           installPhase = ''
             mkdir -p $out/bin $out/lib
             cp -r ./. $out/lib/mediaviewer
             cp manage.py $out/bin/${thisProjectAsNixPkg.pname}-script
             chmod +x $out/bin/${thisProjectAsNixPkg.pname}-script
-            makeWrapper ${appPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
+            makeWrapper ${devPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
               --add-flags $out/bin/${thisProjectAsNixPkg.pname}-script
           '';
         };
