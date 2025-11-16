@@ -3,7 +3,6 @@ from django.conf import settings
 
 from mediaviewer.tests import helpers
 from mediaviewer.utils import (
-    checkSMTPServer,
     getSomewhatUniqueID,
     humansize,
     query_param_to_bool,
@@ -104,47 +103,6 @@ class TestSendMail:
             self.mock_MIMEMultipart.return_value.as_string.return_value,
         )
         self.mock_SMTP.return_value.close.assert_called_once_with()
-
-
-class BaseSMTPServerTestCase:
-    def create_mocks(self, mocker):
-        self.mock_Telnet = mocker.patch("mediaviewer.utils.telnetlib.Telnet")
-
-        self.mock_settings = mocker.patch("mediaviewer.utils.settings")
-
-        self.mock_settings.EMAIL_HOST = "test_host"
-        self.mock_settings.EMAIL_PORT = "test_port"
-
-
-class TestCheckSMTPServer(BaseSMTPServerTestCase):
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.create_mocks(mocker)
-
-        self.mock_settings.BYPASS_SMTPD_CHECK = False
-
-    def test_smtpd_check(self):
-        expected = None
-        actual = checkSMTPServer()
-
-        assert expected == actual
-        self.mock_Telnet.assert_called_once_with(host="test_host", port="test_port")
-        self.mock_Telnet.return_value.close.assert_called_once_with()
-
-
-class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
-    @pytest.fixture(autouse=True)
-    def setUp(self, mocker):
-        self.create_mocks(mocker)
-
-        self.mock_settings.BYPASS_SMTPD_CHECK = True
-
-    def test_bypass_smtpd_check(self):
-        expected = None
-        actual = checkSMTPServer()
-
-        assert expected == actual
-        assert not self.mock_Telnet.called
 
 
 class TestQueryParamToBool:
