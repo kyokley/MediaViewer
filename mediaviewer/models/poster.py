@@ -11,7 +11,7 @@ from django.contrib import admin
 from django.core.files.images import ImageFile
 from django.db import models
 
-from mediaviewer.log import log
+import logging
 
 from .actor import Actor
 from .core import TimeStampModel
@@ -19,6 +19,8 @@ from .director import Director
 from .genre import Genre
 from .tvdbconfiguration import getJSONData, getTVDBEpisodeInfo, tvdbConfig
 from .writer import Writer
+
+log = logging.getLogger(__name__)
 
 SENTINEL = object()
 

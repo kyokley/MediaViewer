@@ -19,7 +19,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
-from mediaviewer.log import log
+import logging
+
+log = logging.getLogger(__name__)
 
 SUFFIXES = ("B", "KB", "MB", "GB", "TB", "PB")
 COMMASPACE = ", "
