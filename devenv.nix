@@ -6,7 +6,13 @@
   ...
 }: {
   # https://devenv.sh/basics/
-  # env.GREET = "MV";
+  env = {
+    DJANGO_SETTINGS_MODULE = "mysite.docker_settings";
+    WAITER_PASSWORD_HASH = "";
+    MV_WEB_ROOT = "/www";
+    SKIP_LOADING_TVDB_CONFIG = 1;
+    MV_HOST = "localhost";
+  };
 
   # https://devenv.sh/packages/
   packages = [
@@ -51,6 +57,14 @@
     clear.exec = ''
       ${pkgs.docker}/bin/docker compose down --remove-orphans -v
     '';
+
+    init.exec = ''
+      rm -r $DEVENV_STATE/postgres
+      devenv up -d postgres
+      sleep 3
+      nix run . -- migrate
+      devenv down
+    '';
   };
 
   enterShell = ''
@@ -65,7 +79,14 @@
   '';
 
   # https://devenv.sh/services/
-  # services.postgres.enable = true;
+  services.postgres = {
+    enable = true;
+    initialDatabases = [{name = "postgres";}];
+    initialScript = ''
+      CREATE ROLE postgres SUPERUSER;
+    '';
+    listen_addresses = "localhost";
+  };
 
   # https://devenv.sh/languages/
   # languages.nix.enable = true;
@@ -126,7 +147,13 @@
   };
 
   # https://devenv.sh/processes/
-  # processes.ping.exec = "ping example.com";
+  processes = {
+    # ping.exec = "ping example.com";
+    server = {
+      exec = "nix run . -- runserver";
+      # cwd = "./public";
+    };
+  };
 
   # See full reference at https://devenv.sh/reference/options/
 }

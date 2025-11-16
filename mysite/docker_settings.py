@@ -13,11 +13,11 @@ DATABASES = {
     # Testing settings!!!
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "postgres",
-        "PORT": "",  # Set to empty string for default.
+        "NAME": os.environ.get("MV_NAME", "postgres"),
+        "USER": os.environ.get("MV_USER", "postgres"),
+        "PASSWORD": os.environ.get("MV_PASSWORD", "postgres"),
+        "HOST": os.environ.get("MV_HOST", "postgres"),
+        "PORT": os.environ.get("MV_PORT", ""),  # Set to empty string for default.
     },
 }
 
