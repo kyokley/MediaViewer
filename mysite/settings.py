@@ -1,5 +1,4 @@
 # Django settings for site project.
-import logging
 import os
 from pathlib import Path
 
@@ -224,14 +223,13 @@ LOGGING = {
         },
         "": {
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": False,
         },
     },
 }
 
 SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-LOG_LEVEL = logging.DEBUG
 
 TEMPLATES = [
     {
