@@ -189,12 +189,6 @@ wheels = [
 ]
 
 [[package]]
-name = "coverage"
-version = "4.5.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/85/d5/818d0e603685c4a613d56f065a721013e942088047ff1027a632948bdae6/coverage-4.5.4.tar.gz", hash = "sha256:e07d9f1a23e9e93ab5c62902833bf3e4b1f65502927379148b6622686223125c", size = 385185, upload-time = "2019-07-29T15:30:15.433Z" }
-
-[[package]]
 name = "curtsies"
 version = "0.4.3"
 source = { registry = "https://pypi.org/simple" }
@@ -519,7 +513,6 @@ dev = [
     { name = "isort" },
     { name = "mock" },
     { name = "pdbpp" },
-    { name = "pytest-cov" },
     { name = "pytest-django" },
     { name = "pytest-mock" },
     { name = "pytest-random" },
@@ -555,7 +548,6 @@ dev = [
     { name = "isort", specifier = ">=5.12.0,<6.0.0" },
     { name = "mock", specifier = ">=2.0,<3.0" },
     { name = "pdbpp", specifier = ">=0.9.3,<1.0.0" },
-    { name = "pytest-cov", specifier = ">=2.6,<3.0" },
     { name = "pytest-django", specifier = ">=4.11.1" },
     { name = "pytest-mock", specifier = ">=3.6.1,<4.0.0" },
     { name = "pytest-random", specifier = ">=0.2,<1.0" },
@@ -758,19 +750,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/07/56/f013048ac4bc4c1d9be45afd4ab209ea62822fb1598f40687e6bf45dcea4/pytest-9.0.1.tar.gz", hash = "sha256:3e9c069ea73583e255c3b21cf46b8d3c56f6e3a1a8f6da94ccb0fcf57b9d73c8", size = 1564125, upload-time = "2025-11-12T13:05:09.333Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0b/8b/6300fb80f858cda1c51ffa17075df5d846757081d11ab4aa35cef9e6258b/pytest-9.0.1-py3-none-any.whl", hash = "sha256:67be0030d194df2dfa7b556f2e56fb3c3315bd5c8822c6951162b92b32ce7dad", size = 373668, upload-time = "2025-11-12T13:05:07.379Z" },
-]
-
-[[package]]
-name = "pytest-cov"
-version = "2.10.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "coverage" },
-    { name = "pytest" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/8f/d9/05d0d003613cf4cf86ce4505c93c149abd330d2519d1a031c1515e7924ec/pytest-cov-2.10.1.tar.gz", hash = "sha256:47bd0ce14056fdd79f93e1713f88fad7bdcc583dcd7783da86ef2f085a0bb88e", size = 56822, upload-time = "2020-08-14T17:21:20.758Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/18/401594af67eda194a8b9167208621761927c937db7d60292608342bbac0a/pytest_cov-2.10.1-py2.py3-none-any.whl", hash = "sha256:45ec2d5182f89a81fc3eb29e3d1ed3113b9e9a873bcddb2a71faaab066110191", size = 19499, upload-time = "2020-08-14T17:21:19.132Z" },
 ]
 
 [[package]]

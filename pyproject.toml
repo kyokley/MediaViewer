@@ -47,7 +47,6 @@ dev = [
     "blessings<2.0,>=1.7",
     "mock<3.0,>=2.0",
     "bandit<2.0,>=1.5",
-    "pytest-cov<3.0,>=2.6",
     "bpython<1.0,>=0.24",
     "pdbpp<1.0.0,>=0.9.3",
     "pytest-mock<4.0.0,>=3.6.1",
