@@ -12,6 +12,10 @@
     MV_WEB_ROOT = "/www";
     SKIP_LOADING_TVDB_CONFIG = 1;
     MV_HOST = "localhost";
+    MV_NAME = "mv";
+    MV_USER = "yokley";
+    MV_STATIC_DIR = "static";
+    MV_DEBUG = "true";
   };
 
   # https://devenv.sh/packages/
@@ -46,7 +50,9 @@
         .
     '';
     pytest.exec = ''
-      ${pkgs.docker}/bin/docker compose run --rm mediaviewer pytest -n 4
+      # ${pkgs.docker}/bin/docker compose run --rm mediaviewer pytest -n 4
+      # devenv up -d postgres
+      uv run pytest -n 4
     '';
     shell.exec = ''
       ${pkgs.docker}/bin/docker compose run --rm mediaviewer bash
@@ -60,10 +66,13 @@
 
     init.exec = ''
       rm -r $DEVENV_STATE/postgres
+      migrate
+    '';
+    migrate.exec = ''
       devenv up -d postgres
       sleep 3
-      nix run . -- migrate
-      devenv down
+      uv run python manage.py migrate
+      devenv processes down
     '';
   };
 
@@ -75,17 +84,23 @@
 
   # https://devenv.sh/tests/
   enterTest = ''
-    ${pkgs.gnumake}/bin/make tests
+    pytest
   '';
 
   # https://devenv.sh/services/
   services.postgres = {
     enable = true;
-    initialDatabases = [{name = "postgres";}];
-    initialScript = ''
-      CREATE ROLE postgres SUPERUSER;
-    '';
+    initialDatabases = [{name = "mv";}];
     listen_addresses = "localhost";
+  };
+
+  # https://devenv.sh/processes/
+  processes = {
+    # ping.exec = "ping example.com";
+    server = {
+      exec = "uv run python manage.py runserver";
+      # cwd = "./public";
+    };
   };
 
   # https://devenv.sh/languages/
@@ -144,15 +159,6 @@
       ${config.git-hooks.installationScript}
       ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
     '';
-  };
-
-  # https://devenv.sh/processes/
-  processes = {
-    # ping.exec = "ping example.com";
-    server = {
-      exec = "nix run . -- runserver";
-      # cwd = "./public";
-    };
   };
 
   # See full reference at https://devenv.sh/reference/options/

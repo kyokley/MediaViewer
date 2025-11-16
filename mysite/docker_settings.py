@@ -1,8 +1,9 @@
 import os
 
+from pathlib import Path
 from mysite.settings import *  # noqa
 
-USE_SILK = DEBUG = os.environ.get("MEDIAVIEWER_DEBUG", "false").lower() == "true"
+USE_SILK = DEBUG = os.environ.get("MV_DEBUG", "false").lower() == "true"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "mediaviewer"]
 
@@ -31,7 +32,9 @@ if DEBUG:
 
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
-STATICFILES_DIRS += ("/node/node_modules",)
+static_file_path = Path(os.environ.get("MV_STATIC_DIR", "/node/node_modules"))
+static_file_path.mkdir(exist_ok=True)
+STATICFILES_DIRS += (static_file_path,)
 
 WAITER_STATUS_URL = "http://mediawaiter:5000/waiter/status"
 WAITER_HEAD = "http://"

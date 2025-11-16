@@ -86,14 +86,14 @@
           src = ./.; # Source of your main script
 
           nativeBuildInputs = [pkgs.makeWrapper];
-          buildInputs = [devPythonEnv]; # Runtime Python environment
+          buildInputs = [appPythonEnv]; # Runtime Python environment
 
           installPhase = ''
             mkdir -p $out/bin $out/lib
             cp -r ./. $out/lib/mediaviewer
             cp manage.py $out/bin/${thisProjectAsNixPkg.pname}-script
             chmod +x $out/bin/${thisProjectAsNixPkg.pname}-script
-            makeWrapper ${devPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
+            makeWrapper ${appPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
               --add-flags $out/bin/${thisProjectAsNixPkg.pname}-script
           '';
         };
