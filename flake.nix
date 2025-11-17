@@ -105,6 +105,27 @@
           program = "${self.packages.${system}.default}/bin/${thisProjectAsNixPkg.pname}";
         };
         apps.${thisProjectAsNixPkg.pname} = self.apps.${system}.default;
+
+        checks = pkgs.testers.runNixOSTest {
+          name = "pytestTests";
+          nodes = {
+            postgres = {
+              services.postgresql.enable = true;
+            };
+            server = {
+              self,
+              pkgs,
+              ...
+            }: {
+              environment.variables = {
+                MV_HOST = "postgres";
+              };
+            };
+          };
+          testScript = ''
+            server.succeed("uv run pytest")
+          '';
+        };
       }
     );
 }
