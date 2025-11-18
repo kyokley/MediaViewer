@@ -33,7 +33,7 @@ if DEBUG:
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
 static_file_path = Path(os.environ.get("MV_STATIC_DIR", "/node/node_modules"))
-static_file_path.mkdir(exist_ok=True)
+# static_file_path.mkdir(exist_ok=True)
 STATICFILES_DIRS += (static_file_path,)
 
 WAITER_STATUS_URL = "http://mediawaiter:5000/waiter/status"

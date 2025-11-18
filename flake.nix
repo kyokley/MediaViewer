@@ -106,24 +106,51 @@
         };
         apps.${thisProjectAsNixPkg.pname} = self.apps.${system}.default;
 
-        checks = pkgs.testers.runNixOSTest {
+        checks.${system} = pkgs.testers.runNixOSTest {
           name = "pytestTests";
           nodes = {
             postgres = {
-              services.postgresql.enable = true;
+              networking.firewall.enable = false;
+              services.postgresql = {
+                enable = true;
+                authentication = pkgs.lib.mkOverride 10 ''
+                  #type database  DBuser  auth-method
+                  local all       all     trust
+                  host  all       all     0.0.0.0/0  trust
+                  host  all       all     ::/0  trust
+                '';
+                enableTCPIP = true;
+                ensureUsers = [
+                  {
+                    name = "user";
+                  }
+                ];
+                initialScript = pkgs.writeText "backend-initScript" ''
+                  CREATE ROLE dbuser WITH LOGIN PASSWORD 'dbuser' CREATEDB;
+                '';
+              };
             };
             server = {
-              self,
-              pkgs,
-              ...
-            }: {
-              environment.variables = {
-                MV_HOST = "postgres";
+              environment = {
+                variables = {
+                  MV_HOST = "postgres";
+                  MV_NAME = "db";
+                  MV_USER = "dbuser";
+                  MV_STATIC_DIR = "static";
+                  SKIP_LOADING_TVDB_CONFIG = 1;
+                  PATH = "${devPythonEnv}/bin:$PATH";
+                  DJANGO_SETTINGS_MODULE = "mysite.docker_settings";
+                };
+                systemPackages = [
+                  self.packages.${system}.default
+                  pkgs.postgresql
+                ];
               };
             };
           };
           testScript = ''
-            server.succeed("uv run pytest")
+            postgres.wait_for_open_port(5432)
+            server.succeed("cd ${self.packages.${system}.default}/lib/mediaviewer && pytest")
           '';
         };
       }
