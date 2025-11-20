@@ -91,13 +91,27 @@
           installPhase = ''
             mkdir -p $out/bin $out/lib
             cp -r ./. $out/lib/mediaviewer
-            cp manage.py $out/bin/${thisProjectAsNixPkg.pname}-script
-            chmod +x $out/bin/${thisProjectAsNixPkg.pname}-script
-            makeWrapper ${appPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
-              --add-flags $out/bin/${thisProjectAsNixPkg.pname}-script
+            makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/${thisProjectAsNixPkg.pname} \
+              --add-flags mysite.wsgi
           '';
         };
-        packages.${thisProjectAsNixPkg.pname} = self.packages.${system}.default;
+
+        packages.mv-image = pkgs.dockerTools.buildImage {
+          name = "kyokley/mediaviewer";
+          tag = "latest";
+          copyToRoot = pkgs.buildEnv {
+            name = "image-root";
+            paths = [self.packages.${system}.default];
+            pathsToLink = ["/bin"];
+          };
+          # runAsRoot = ''
+          #   #!${pkgs.runtimeShell}
+          #   ${pkgs.dockerTools.shadowSetup}
+          # '';
+          config = {
+            Entrypoint = ["/bin/mediaviewer"];
+          };
+        };
 
         # App for `nix run`
         apps.default = {
@@ -143,7 +157,6 @@
                 };
                 systemPackages = [
                   self.packages.${system}.default
-                  pkgs.postgresql
                 ];
               };
             };

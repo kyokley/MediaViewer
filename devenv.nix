@@ -84,7 +84,7 @@
 
   # https://devenv.sh/tests/
   enterTest = ''
-    pytest
+    uv run pytest
   '';
 
   # https://devenv.sh/services/
@@ -154,11 +154,7 @@
     };
   };
 
-  tasks."mv:format" = {
-    exec = ''
-      ${config.git-hooks.installationScript}
-      ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
-    '';
+  tasks = {
   };
 
   # See full reference at https://devenv.sh/reference/options/
