@@ -92,6 +92,7 @@
             mkdir -p $out/bin $out/lib
             cp -r ./. $out/lib/mediaviewer
             makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/${thisProjectAsNixPkg.pname} \
+              --add-flags "--config=$out/lib/mediaviewer/gunicorn.conf.py" \
               --add-flags mysite.wsgi
           '';
         };

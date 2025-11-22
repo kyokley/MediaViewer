@@ -4,18 +4,16 @@
   config,
   inputs,
   ...
-}: let
-  MV_NAME = "mv";
-  MV_HOST = "localhost";
-  MV_USER = "dbuser";
-in {
+}: {
   # https://devenv.sh/basics/
   env = {
+    MV_NAME = "mv";
+    MV_HOST = "localhost";
+    MV_USER = "dbuser";
     DJANGO_SETTINGS_MODULE = "mysite.docker_settings";
     WAITER_PASSWORD_HASH = "";
     MV_WEB_ROOT = "/www";
     SKIP_LOADING_TVDB_CONFIG = 1;
-    inherit MV_HOST MV_NAME MV_USER;
     MV_STATIC_DIR = "static";
     MV_DEBUG = "true";
   };
@@ -46,13 +44,12 @@ in {
 
     _wait_for_db.exec = ''
       devenv up -d postgres
-      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${MV_USER}:${MV_USER}@${MV_HOST}:5432/${MV_NAME}?sslmode=disable'
+      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${config.env.MV_USER}:${config.env.MV_USER}@${config.env.MV_HOST}:5432/${config.env.MV_NAME}?sslmode=disable'
     '';
 
     migrate.exec = ''
       _wait_for_db
       uv run python manage.py migrate
-      down
     '';
 
     up.exec = ''
@@ -64,12 +61,13 @@ in {
     docker-up.exec = ''
       build
       _wait_for_db
+      migrate
       docker run --rm \
                  -it \
                  --net host \
-                 -e MV_NAME=${MV_NAME} \
-                 -e MV_HOST=${MV_HOST} \
-                 -e MV_USER=${MV_USER} \
+                 -e MV_NAME=${config.env.MV_NAME} \
+                 -e MV_HOST=${config.env.MV_HOST} \
+                 -e MV_USER=${config.env.MV_USER} \
                  -e SKIP_LOADING_TVDB_CONFIG=1 \
                  -e DJANGO_SETTINGS_MODULE="mysite.docker_settings" \
                  kyokley/mediaviewer
@@ -79,7 +77,8 @@ in {
       devenv processes down
     '';
 
-    tests.exec = ''
+    pytest.exec = ''
+      set -e
       _wait_for_db
       uv run pytest $(test $# -eq 0 && echo "-n 4" || echo $@)
       down
@@ -113,20 +112,16 @@ in {
   # https://devenv.sh/services/
   services.postgres = {
     enable = true;
+    listen_addresses = "localhost";
+    initialScript = ''
+      CREATE ROLE ${config.env.MV_USER} WITH LOGIN PASSWORD '${config.env.MV_USER}' SUPERUSER;
+    '';
     initialDatabases = [
       {
-        name = MV_NAME;
-        user = MV_USER;
+        name = config.env.MV_NAME;
+        user = config.env.MV_USER;
       }
     ];
-    initialScript = ''
-      CREATE ROLE ${MV_USER} WITH LOGIN PASSWORD '${MV_USER}' CREATEDB;
-    '';
-    listen_addresses = "localhost";
-  };
-
-  # https://devenv.sh/processes/
-  processes = {
   };
 
   # https://devenv.sh/languages/
@@ -177,9 +172,6 @@ in {
       stages = ["pre-commit"];
       pass_filenames = true;
     };
-  };
-
-  tasks = {
   };
 
   # See full reference at https://devenv.sh/reference/options/

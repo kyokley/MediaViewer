@@ -6,14 +6,11 @@ from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), ".."),
-)
+BASE_DIR = Path(__file__).parent.parent
 
 # Generate a secret key
 # Borrowed from https://gist.github.com/ndarville/3452907
-SECRET_FILE = os.path.join(BASE_DIR, "secret.txt")
+SECRET_FILE = BASE_DIR / "secret.txt"
 try:
     with open(SECRET_FILE, "r") as secret_file:
         SECRET_KEY = secret_file.read().strip()
