@@ -15,7 +15,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": os.environ.get("MV_NAME", "postgres"),
-        "USER": os.environ.get("MV_USER", os.environ["USER"]),
+        "USER": os.environ.get("MV_USER", os.environ.get("USER")),
         "PASSWORD": os.environ.get("MV_PASSWORD", "postgres"),
         "HOST": os.environ.get("MV_HOST", "postgres"),
         "PORT": os.environ.get("MV_PORT", ""),  # Set to empty string for default.

@@ -4,16 +4,18 @@
   config,
   inputs,
   ...
-}: {
+}: let
+  MV_NAME = "mv";
+  MV_HOST = "localhost";
+  MV_USER = "yokley";
+in {
   # https://devenv.sh/basics/
   env = {
     DJANGO_SETTINGS_MODULE = "mysite.docker_settings";
     WAITER_PASSWORD_HASH = "";
     MV_WEB_ROOT = "/www";
     SKIP_LOADING_TVDB_CONFIG = 1;
-    MV_HOST = "localhost";
-    MV_NAME = "mv";
-    MV_USER = "yokley";
+    inherit MV_HOST MV_NAME MV_USER;
     MV_STATIC_DIR = "static";
     MV_DEBUG = "true";
   };
@@ -29,50 +31,68 @@
       echo Scripts
       devenv info | awk /scripts/ RS="\n\n" ORS="\n\n" | tail -n "+2" | sort | awk '{$3=""; print $0}'
     '';
-    runtests.exec = "${pkgs.gnumake}/bin/make tests";
-    touch-history.exec = "touch .mv.history";
     build.exec = ''
-      docker build \
-        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
-        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
-        --build-arg UID=''${UID:=1000} \
-        --tag=kyokley/mediaviewer \
-        --target=prod \
-        .
-    '';
-    build-dev.exec = ''
-      docker build \
-        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
-        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
-        --build-arg UID=''${UID:=1000} \
-        --tag=kyokley/mediaviewer \
-        --target=dev \
-        .
-    '';
-    pytest.exec = ''
-      # ${pkgs.docker}/bin/docker compose run --rm mediaviewer pytest -n 4
-      # devenv up -d postgres
-      uv run pytest -n 4
-    '';
-    shell.exec = ''
-      ${pkgs.docker}/bin/docker compose run --rm mediaviewer bash
-    '';
-    down.exec = ''
-      ${pkgs.docker}/bin/docker compose down --remove-orphans
+      nix build '.#mv-image'
+      docker load < result
     '';
     clear.exec = ''
-      ${pkgs.docker}/bin/docker compose down --remove-orphans -v
+      rm -rf $DEVENV_STATE/postgres
     '';
 
     init.exec = ''
-      rm -r $DEVENV_STATE/postgres
+      clear
       migrate
     '';
-    migrate.exec = ''
+
+    _wait_for_db.exec = ''
       devenv up -d postgres
-      sleep 3
+      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${MV_USER}@${MV_HOST}:5432/${MV_NAME}?sslmode=disable'
+    '';
+
+    migrate.exec = ''
+      _wait_for_db
       uv run python manage.py migrate
+      down
+    '';
+
+    up.exec = ''
+      _wait_for_db
+      uv run python manage.py collectstatic --no-input
+      uv run python manage.py runserver 0.0.0.0:8000
+    '';
+
+    docker-up.exec = ''
+      build
+      _wait_for_db
+      docker run --rm \
+                 -it \
+                 --net host \
+                 -e MV_NAME=${MV_NAME} \
+                 -e MV_HOST=${MV_HOST} \
+                 -e MV_USER=${MV_USER} \
+                 -e SKIP_LOADING_TVDB_CONFIG=1 \
+                 -e DJANGO_SETTINGS_MODULE="mysite.docker_settings" \
+                 kyokley/mediaviewer
+    '';
+
+    down.exec = ''
       devenv processes down
+    '';
+
+    tests.exec = ''
+      _wait_for_db
+      uv run pytest $(test $# -eq 0 && echo "-n 4" || echo $@)
+      down
+    '';
+
+    check-migrations.exec = ''
+      _wait_for_db
+      uv run python manage.py makemigrations --check
+      down
+    '';
+
+    bandit.exec = ''
+      uv run bandit -x ./mediaviewer/tests,./.venv,./.devenv* $(test $# -eq 0 && echo "-r ." || echo $@)
     '';
   };
 
@@ -84,27 +104,23 @@
 
   # https://devenv.sh/tests/
   enterTest = ''
-    uv run pytest
+    check-migrations
+    tests
+    bandit
   '';
 
   # https://devenv.sh/services/
   services.postgres = {
     enable = true;
-    initialDatabases = [{name = "mv";}];
+    initialDatabases = [{name = MV_NAME;}];
     listen_addresses = "localhost";
   };
 
   # https://devenv.sh/processes/
   processes = {
-    # ping.exec = "ping example.com";
-    server = {
-      exec = "uv run python manage.py runserver";
-      # cwd = "./public";
-    };
   };
 
   # https://devenv.sh/languages/
-  # languages.nix.enable = true;
   languages.python = {
     enable = true;
     version = "3.13";

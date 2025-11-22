@@ -13,8 +13,6 @@ services:
       - mediaviewer-backend
   mediaviewer:
     image: kyokley/mediaviewer
-    build:
-      context: .
     environment:
       - DJANGO_SETTINGS_MODULE=mysite.docker_settings
       - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
