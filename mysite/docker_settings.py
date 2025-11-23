@@ -32,9 +32,19 @@ if DEBUG:
 
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
-static_file_path = Path(os.environ.get("MV_STATIC_DIR", "/node/node_modules"))
+MEDIA_ROOT = (
+    Path(os.environ["MV_MEDIA_ROOT"])
+    if os.environ.get("MV_MEDIA_ROOT")
+    else Path(__file__).parent.parent / "media"
+)
+
+STATIC_ROOT = (
+    Path(os.environ["MV_STATIC_DIR"])
+    if os.environ.get("MV_STATIC_DIR")
+    else Path(__file__).parent.parent / "static"
+)
 # static_file_path.mkdir(exist_ok=True)
-STATICFILES_DIRS += (static_file_path,)
+
 
 WAITER_STATUS_URL = "http://mediawaiter:5000/waiter/status"
 WAITER_HEAD = "http://"
@@ -50,4 +60,3 @@ os.environ["wsgi.url_scheme"] = "http"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = "/code/mediaviewer/static/media/"

@@ -105,7 +105,7 @@
   enterTest = ''
     set -e
     check-migrations
-    tests
+    pytest
     bandit
   '';
 

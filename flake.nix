@@ -86,13 +86,33 @@
           src = ./.; # Source of your main script
 
           nativeBuildInputs = [pkgs.makeWrapper];
-          buildInputs = [appPythonEnv]; # Runtime Python environment
+          buildInputs = [appPythonEnv devPythonEnv]; # Runtime Python environment
+
+          buildPhase = ''
+            export PATH=${devPythonEnv}/bin:$PATH
+            export SKIP_LOADING_TVDB_CONFIG=1
+            export MV_STATIC_DIR=$(pwd)/static
+            export MV_WEB_ROOT=$(pwd)/media
+            export DJANGO_SETTINGS_MODULE="mysite.docker_settings"
+
+            echo "Copying project to writable build/ directory..."
+            mkdir $MV_STATIC_DIR
+            pwd
+            ls
+
+            echo "Running collectstatic..."
+            python manage.py collectstatic --noinput
+            ls $MV_STATIC_DIR
+          '';
 
           installPhase = ''
             mkdir -p $out/bin $out/lib
-            cp -r ./. $out/lib/mediaviewer
+
+            cp ./gunicorn.conf.py $out/lib/
+            cp -r ./static $out/lib/static
+
             makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/${thisProjectAsNixPkg.pname} \
-              --add-flags "--config=$out/lib/mediaviewer/gunicorn.conf.py" \
+              --add-flags "--config=$out/lib/gunicorn.conf.py" \
               --add-flags mysite.wsgi
           '';
         };
@@ -103,7 +123,7 @@
           copyToRoot = pkgs.buildEnv {
             name = "image-root";
             paths = [self.packages.${system}.default];
-            pathsToLink = ["/bin"];
+            pathsToLink = ["/bin" "/lib"];
           };
           config = {
             Entrypoint = ["/bin/mediaviewer"];
