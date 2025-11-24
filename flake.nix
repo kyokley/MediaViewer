@@ -117,12 +117,41 @@
           '';
         };
 
+        packages.dev = pkgs.stdenv.mkDerivation {
+          pname = thisProjectAsNixPkg.pname;
+          version = thisProjectAsNixPkg.version;
+          src = ./.; # Source of your main script
+
+          nativeBuildInputs = [pkgs.makeWrapper];
+          buildInputs = [devPythonEnv]; # Runtime Python environment
+
+          installPhase = ''
+            mkdir -p $out/bin $out/lib
+
+            makeWrapper ${devPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
+              --add-flags "manage.py"
+          '';
+        };
+
         packages.mv-image = pkgs.dockerTools.buildImage {
           name = "kyokley/mediaviewer";
           tag = "latest";
           copyToRoot = pkgs.buildEnv {
             name = "image-root";
             paths = [self.packages.${system}.default];
+            pathsToLink = ["/bin" "/lib"];
+          };
+          config = {
+            Entrypoint = ["/bin/mediaviewer"];
+          };
+        };
+
+        packages.dev-image = pkgs.dockerTools.buildImage {
+          name = "kyokley/mediaviewer";
+          tag = "latest";
+          copyToRoot = pkgs.buildEnv {
+            name = "image-root";
+            paths = [self.packages.${system}.dev];
             pathsToLink = ["/bin" "/lib"];
           };
           config = {
