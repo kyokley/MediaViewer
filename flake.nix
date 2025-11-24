@@ -142,7 +142,7 @@
             pathsToLink = ["/bin" "/lib"];
           };
           config = {
-            Entrypoint = ["/bin/mediaviewer"];
+            Cmd = ["/bin/mediaviewer"];
           };
         };
 
@@ -155,7 +155,7 @@
             pathsToLink = ["/bin" "/lib"];
           };
           config = {
-            Entrypoint = ["/bin/mediaviewer"];
+            Cmd = ["/bin/mediaviewer"];
           };
         };
 
