@@ -63,3 +63,6 @@ dev = [
     "django-silk>=5.4.1",
     "pytest-django>=4.11.1",
 ]
+
+[project.scripts]
+manage = "manage:main"

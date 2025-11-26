@@ -128,8 +128,11 @@
           installPhase = ''
             mkdir -p $out/bin $out/lib
 
-            makeWrapper ${devPythonEnv}/bin/python $out/bin/${thisProjectAsNixPkg.pname} \
-              --add-flags "manage.py"
+            cp -r . $out/lib
+
+            makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname} \
+              --add-flags "runserver" \
+              --set PYTHONPATH $out/lib
           '';
         };
 
