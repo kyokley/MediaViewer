@@ -93,7 +93,7 @@
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/static
             export MV_WEB_ROOT=$(pwd)/media
-            export DJANGO_SETTINGS_MODULE="mysite.docker_settings"
+            export DJANGO_SETTINGS_MODULE="mysite.settings"
 
             echo "Copying project to writable build/ directory..."
             mkdir $MV_STATIC_DIR
@@ -123,14 +123,14 @@
           src = ./.; # Source of your main script
 
           nativeBuildInputs = [pkgs.makeWrapper];
-          buildInputs = [devPythonEnv]; # Runtime Python environment
+          buildInputs = [devPythonEnv pkgs.nodejs_24]; # Runtime Python environment
 
           buildPhase = ''
             export PATH=${devPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/static
             export MV_WEB_ROOT=$(pwd)/media
-            export DJANGO_SETTINGS_MODULE="mysite.docker_settings"
+            export DJANGO_SETTINGS_MODULE="mysite.settings"
 
             echo "Copying project to writable build/ directory..."
             mkdir $MV_STATIC_DIR
@@ -140,6 +140,8 @@
             echo "Running collectstatic..."
             python manage.py collectstatic --noinput
             ls $MV_STATIC_DIR
+
+            npm install --loglevel=verbose
           '';
 
           installPhase = ''
@@ -147,6 +149,7 @@
 
             cp -r . $out/lib
             cp -r ./static $out/lib/static
+            cp -r ./node_modules/* $out/lib/static/
 
             makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-runserver \
               --add-flags "runserver" \

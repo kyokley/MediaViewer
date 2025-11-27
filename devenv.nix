@@ -10,12 +10,13 @@
     MV_NAME = "mv";
     MV_HOST = "localhost";
     MV_USER = "dbuser";
-    DJANGO_SETTINGS_MODULE = "mysite.docker_settings";
+    DJANGO_SETTINGS_MODULE = "mysite.settings";
     WAITER_PASSWORD_HASH = "";
     MV_WEB_ROOT = "/www";
     SKIP_LOADING_TVDB_CONFIG = 1;
     MV_STATIC_DIR = "static";
     MV_DEBUG = "true";
+    MV_ALLOWED_HOSTS = "127.0.0.1:8000,localhost:8000,127.0.0.1,localhost";
   };
 
   # https://devenv.sh/packages/
@@ -38,6 +39,7 @@
     '';
 
     init.exec = ''
+      down
       clear
       migrate
     '';
@@ -69,7 +71,7 @@
                  -e MV_HOST=${config.env.MV_HOST} \
                  -e MV_USER=${config.env.MV_USER} \
                  -e SKIP_LOADING_TVDB_CONFIG=1 \
-                 -e DJANGO_SETTINGS_MODULE="mysite.docker_settings" \
+                 -e DJANGO_SETTINGS_MODULE="mysite.settings" \
                  kyokley/mediaviewer
     '';
 

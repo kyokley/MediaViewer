@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).parent.parent
 
 # Generate a secret key
 # Borrowed from https://gist.github.com/ndarville/3452907
-SECRET_FILE = BASE_DIR / "secret.txt"
+SECRET_FILE = os.environ.get("MV_SECRET_FILE", BASE_DIR / "secret.txt")
 try:
     with open(SECRET_FILE, "r") as secret_file:
         SECRET_KEY = secret_file.read().strip()
@@ -36,31 +36,23 @@ except IOError:
             f"to generate your secret key!"
         )
 
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 LOG_ACCESS_TIMINGS = False
 IS_SYNCING = False
-USE_SILK = False
 
 ADMINS = (("AdminName", "admin@email.com"),)
-
 MANAGERS = ADMINS
 
 DATABASES = {
     # Testing settings!!!
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "dbname",
-        "USER": "db_user",
-        "PASSWORD": "db_password",
-        "HOST": "",
-        "PORT": "",
+        "NAME": os.environ.get("MV_NAME", "postgres"),
+        "USER": os.environ.get("MV_USER", os.environ.get("USER")),
+        "PASSWORD": os.environ.get("MV_PASSWORD", "postgres"),
+        "HOST": os.environ.get("MV_HOST", "postgres"),
+        "PORT": os.environ.get("MV_PORT", ""),  # Set to empty string for default.
     },
 }
-
-# Hosts/domain names that are valid for this site; required if DEBUG is False
-# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -88,20 +80,28 @@ USE_TZ = True
 WEB_ROOT = (
     Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
 )
-# Absolute filesystem path to the directory that will hold user-uploaded files.
+
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = WEB_ROOT / "mv" / "media"
+MEDIA_ROOT = (
+    Path(os.environ["MV_MEDIA_ROOT"])
+    if os.environ.get("MV_MEDIA_ROOT")
+    else Path(__file__).parent.parent / "media"
+)
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-# MEDIA_URL = '/static/media/'
+MEDIA_URL = "/media/"
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = WEB_ROOT / "mv" / "static"
+STATIC_ROOT = (
+    Path(os.environ["MV_STATIC_DIR"])
+    if os.environ.get("MV_STATIC_DIR")
+    else Path(__file__).parent.parent / "static"
+)
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -254,16 +254,31 @@ TEMPLATES = [
 
 GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
-WAITER_HEAD = "http://"
-WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
-WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1/waiter/file/"
+# WAITER_HEAD = "http://"
+# WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
+# WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1/waiter/file/"
+# WAITER_STATUS_URL = "http://127.0.0.1/waiter/status"
 
-WAITER_STATUS_URL = "http://127.0.0.1/waiter/status"
+WAITER_STATUS_URL = os.environ.get(
+    "MV_WAITER_STATUS_URL", "http://mediawaiter:5000/waiter/status"
+)
+WAITER_HEAD = os.environ.get("MV_WAITER_HEAD", "http://")
+WAITER_IP_FORMAT_MOVIES = os.environ.get(
+    "MV_WAITER_IP_FORMAT_MOVIES", "127.0.0.1:5000/waiter/dir/"
+)
+WAITER_IP_FORMAT_TVSHOWS = os.environ.get(
+    "MV_WAITER_IP_FORMAT_TVSHOWS", "127.0.0.1:5000/waiter/file/"
+)
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-os.environ["HTTPS"] = "on"
-os.environ["wsgi.url_scheme"] = "https"
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# os.environ["HTTPS"] = "on"
+# os.environ["wsgi.url_scheme"] = "https"
+
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+os.environ["HTTPS"] = "off"
+os.environ["wsgi.url_scheme"] = "http"
 
 # For SecurityMiddleware in django 3.0
 SECURE_REFERRER_POLICY = "same-origin"
@@ -305,3 +320,26 @@ WAITER_PASSWORD_HASH = (
 )
 
 SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1
+
+USE_SILK = DEBUG = os.environ.get("MV_DEBUG", "false").lower() == "true"
+
+TEMPLATE_DEBUG = DEBUG
+ALLOWED_HOSTS = os.environ.get("MV_ALLOWED_HOSTS", "").split(",") or [
+    "localhost",
+    "127.0.0.1",
+    "mediaviewer",
+]
+
+if DEBUG:
+    INSTALLED_APPS += (
+        "silk",
+        "debug_toolbar",
+    )
+
+    MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
+
+    MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+print(f"{STATIC_ROOT=}")
