@@ -150,12 +150,8 @@
 
             makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-runserver \
               --add-flags "runserver" \
-              --set PYTHONPATH $out/lib
-
-            makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-collectstatic \
-              --add-flags "collectstatic" \
-              --add-flags "--noinput" \
-              --set PYTHONPATH $out/lib
+              --set PYTHONPATH $out/lib \
+              --set MV_STATIC_DIR $out/lib/static
           '';
         };
 
