@@ -125,10 +125,28 @@
           nativeBuildInputs = [pkgs.makeWrapper];
           buildInputs = [devPythonEnv]; # Runtime Python environment
 
+          buildPhase = ''
+            export PATH=${devPythonEnv}/bin:$PATH
+            export SKIP_LOADING_TVDB_CONFIG=1
+            export MV_STATIC_DIR=$(pwd)/static
+            export MV_WEB_ROOT=$(pwd)/media
+            export DJANGO_SETTINGS_MODULE="mysite.docker_settings"
+
+            echo "Copying project to writable build/ directory..."
+            mkdir $MV_STATIC_DIR
+            pwd
+            ls
+
+            echo "Running collectstatic..."
+            python manage.py collectstatic --noinput
+            ls $MV_STATIC_DIR
+          '';
+
           installPhase = ''
             mkdir -p $out/bin $out/lib
 
             cp -r . $out/lib
+            cp -r ./static $out/lib/static
 
             makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-runserver \
               --add-flags "runserver" \
