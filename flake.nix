@@ -130,8 +130,13 @@
 
             cp -r . $out/lib
 
-            makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname} \
+            makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-runserver \
               --add-flags "runserver" \
+              --set PYTHONPATH $out/lib
+
+            makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-collectstatic \
+              --add-flags "collectstatic" \
+              --add-flags "--noinput" \
               --set PYTHONPATH $out/lib
           '';
         };
