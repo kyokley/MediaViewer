@@ -135,6 +135,13 @@
               --set PYTHONPATH $out/lib/mediaviewer \
               --set MV_STATIC_DIR $out/lib/static \
               --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
+
+            makeWrapper ${devPythonEnv}/bin/manage $out/bin/runserver \
+              --add-flags runserver \
+              --add-flags 127.0.0.1:8000 \
+              --set PYTHONPATH $out/lib/mediaviewer \
+              --set MV_STATIC_DIR $out/lib/static \
+              --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
           '';
         };
 
@@ -167,9 +174,12 @@
         # App for `nix run`
         apps.default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/${thisProjectAsNixPkg.pname}";
+          program = "${self.packages.${system}.default}/bin/mv-gunicorn";
         };
-        apps.${thisProjectAsNixPkg.pname} = self.apps.${system}.default;
+        apps.dev = {
+          type = "app";
+          program = "${self.packages.${system}.dev}/bin/runserver";
+        };
       }
     );
 }

@@ -58,8 +58,7 @@
 
     up.exec = ''
       _wait_for_db
-      uv run python manage.py collectstatic --no-input
-      uv run python manage.py runserver 0.0.0.0:8000
+      uv run python manage.py runserver 127.0.0.1:8000
     '';
 
     docker-up.exec = ''
