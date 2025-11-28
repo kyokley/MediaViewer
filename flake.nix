@@ -95,7 +95,7 @@
             export PATH=${appPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/static
-            export DJANGO_SETTINGS_MODULE="site.settings"
+            export DJANGO_SETTINGS_MODULE="config.settings"
 
             echo "Copying project to writable build/ directory..."
             mkdir $MV_STATIC_DIR
@@ -132,14 +132,9 @@
             export MV_STATIC_DIR=$(pwd)/temp_static
             export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
             export MV_WAITER_DOMAIN=localhost
-            export DJANGO_SETTINGS_MODULE=site.settings
             export PYTHONPATH=$(pwd)
+            export DJANGO_SETTINGS_MODULE=config.settings
 
-            echo $PYTHONPATH
-            ls $PYTHONPATH
-
-            echo $PYTHONPATH/site
-            ls $PYTHONPATH/site
             ${devPythonEnv}/bin/manage collectstatic --noinput
           '';
 

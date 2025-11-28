@@ -15,7 +15,7 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 addopts = "--disable-socket --disable-warnings"
 env = [
-    "DJANGO_SETTINGS_MODULE=site.settings",
+    "DJANGO_SETTINGS_MODULE=config.settings",
 ]
 
 [tool.bandit]
