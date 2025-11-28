@@ -139,10 +139,10 @@ MIDDLEWARE = (
 # Auto logout delay in minutes
 AUTO_LOGOUT_DELAY = 2880
 
-ROOT_URLCONF = "mysite.urls"
+ROOT_URLCONF = "site.urls"
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = "mysite.wsgi.application"
+WSGI_APPLICATION = "site.wsgi.application"
 
 INSTALLED_APPS = (
     "django.contrib.auth",

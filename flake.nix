@@ -95,7 +95,7 @@
             export PATH=${appPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/static
-            export DJANGO_SETTINGS_MODULE="mysite.settings"
+            export DJANGO_SETTINGS_MODULE="site.settings"
 
             echo "Copying project to writable build/ directory..."
             mkdir $MV_STATIC_DIR
@@ -115,7 +115,7 @@
 
             makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/${thisProjectAsNixPkg.pname} \
               --add-flags "--config=$out/lib/gunicorn.conf.py" \
-              --add-flags mysite.wsgi
+              --add-flags site.wsgi
           '';
         };
 
@@ -133,7 +133,7 @@
             export MV_STATIC_DIR=$(pwd)/temp_static
             export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
             export MV_WAITER_DOMAIN=localhost
-            export DJANGO_SETTINGS_MODULE="mysite.settings"
+            export DJANGO_SETTINGS_MODULE="site.settings"
 
             echo "Copying project to writable build/ directory..."
             mkdir $MV_STATIC_DIR

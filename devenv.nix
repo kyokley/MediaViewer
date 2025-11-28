@@ -10,7 +10,7 @@
     MV_NAME = "mv";
     MV_HOST = "localhost";
     MV_USER = "dbuser";
-    DJANGO_SETTINGS_MODULE = "mysite.settings";
+    DJANGO_SETTINGS_MODULE = "site.settings";
     WAITER_PASSWORD_HASH = "";
     SKIP_LOADING_TVDB_CONFIG = 1;
     MV_STATIC_DIR = "static";
@@ -73,7 +73,7 @@
                  -e MV_HOST=${config.env.MV_HOST} \
                  -e MV_USER=${config.env.MV_USER} \
                  -e SKIP_LOADING_TVDB_CONFIG=1 \
-                 -e DJANGO_SETTINGS_MODULE="mysite.settings" \
+                 -e DJANGO_SETTINGS_MODULE="site.settings" \
                  kyokley/mediaviewer
     '';
 
