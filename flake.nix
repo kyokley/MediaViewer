@@ -75,6 +75,17 @@
 
         # Node/NPM stuff
         nodeDependencies = (pkgs.callPackage ./default.nix {}).nodeDependencies;
+
+        packageBuildPhase = ''
+          export SKIP_LOADING_TVDB_CONFIG=1
+          export MV_STATIC_DIR=$(pwd)/temp_static
+          export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
+          export MV_WAITER_DOMAIN=localhost
+          export PYTHONPATH=$(pwd)
+          export DJANGO_SETTINGS_MODULE=config.settings
+
+          ${devPythonEnv}/bin/manage collectstatic --noinput
+        '';
       in {
         # Development Shell
         devShells.default = pkgs.mkShell {
@@ -91,29 +102,14 @@
           nativeBuildInputs = [pkgs.makeWrapper];
           buildInputs = [appPythonEnv]; # Runtime Python environment
 
-          buildPhase = ''
-            export PATH=${appPythonEnv}/bin:$PATH
-            export SKIP_LOADING_TVDB_CONFIG=1
-            export MV_STATIC_DIR=$(pwd)/static
-            export DJANGO_SETTINGS_MODULE="config.settings"
-
-            echo "Copying project to writable build/ directory..."
-            mkdir $MV_STATIC_DIR
-            pwd
-            ls
-
-            echo "Running collectstatic..."
-            python manage.py collectstatic --noinput
-            ls $MV_STATIC_DIR
-          '';
-
+          buildPhase = packageBuildPhase;
           installPhase = ''
             mkdir -p $out/bin $out/lib
 
             cp ./gunicorn.conf.py $out/lib/
             cp -r ./static $out/lib/static
 
-            makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/${thisProjectAsNixPkg.pname} \
+            makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/mv-gunicorn \
               --add-flags "--config=$out/lib/gunicorn.conf.py" \
               --add-flags config.wsgi
           '';
@@ -127,16 +123,7 @@
           nativeBuildInputs = [pkgs.makeWrapper];
           buildInputs = [devPythonEnv]; # Runtime Python environment
 
-          buildPhase = ''
-            export SKIP_LOADING_TVDB_CONFIG=1
-            export MV_STATIC_DIR=$(pwd)/temp_static
-            export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
-            export MV_WAITER_DOMAIN=localhost
-            export PYTHONPATH=$(pwd)
-            export DJANGO_SETTINGS_MODULE=config.settings
-
-            ${devPythonEnv}/bin/manage collectstatic --noinput
-          '';
+          buildPhase = packageBuildPhase;
 
           installPhase = ''
             mkdir -p $out/bin $out/lib
@@ -144,8 +131,7 @@
             mv ./temp_static $out/lib/static
             cp -r . $out/lib/mediaviewer
 
-            makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-runserver \
-              --add-flags "runserver" \
+            makeWrapper ${devPythonEnv}/bin/manage $out/bin/manage \
               --set PYTHONPATH $out/lib/mediaviewer \
               --set MV_STATIC_DIR $out/lib/static \
               --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
