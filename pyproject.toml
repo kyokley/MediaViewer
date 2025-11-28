@@ -13,7 +13,7 @@ ignore = ["E501"]
 "config/settings.py" = ["F405"]
 
 [tool.pytest.ini_options]
-addopts = "--disable-socket --disable-warnings"
+addopts = "--disable-socket --disable-warnings --ignore=result"
 env = [
     "DJANGO_SETTINGS_MODULE=config.settings",
 ]

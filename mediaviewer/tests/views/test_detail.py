@@ -212,7 +212,9 @@ class TestAjaxDownloadButton:
 @pytest.mark.django_db
 class TestAutoPlayDownloadLink:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_user, create_tv_media_file, client):
+    def setUp(self, create_user, create_tv_media_file, client, settings):
+        settings.WAITER_IP_FORMAT_TVSHOWS = "example.com/tv/"
+
         self.client = client
         self.tv_mf = create_tv_media_file()
 
@@ -234,4 +236,4 @@ class TestAutoPlayDownloadLink:
         resp = self.client.post(self.url)
 
         assert resp.status_code == 302
-        assert "waiter" in resp.url
+        assert "example.com" in resp.url
