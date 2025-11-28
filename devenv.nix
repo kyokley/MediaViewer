@@ -16,7 +16,8 @@
     MV_STATIC_DIR = "static";
     MV_NPM_STATIC_DIR = "node_modules";
     MV_DEBUG = "true";
-    MV_ALLOWED_HOSTS = "127.0.0.1:8000,localhost:8000,127.0.0.1,localhost";
+    MV_ALLOWED_HOSTS = "127.0.0.1,localhost";
+    MV_WAITER_DOMAIN = "localhost:5000";
   };
 
   # https://devenv.sh/packages/

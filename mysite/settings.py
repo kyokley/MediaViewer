@@ -258,10 +258,9 @@ TEMPLATES = [
 GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
 # WAITER_DOMAIN should be like "http://127.0.0.1:5000"
+_waiter_domain = os.environ["MV_WAITER_DOMAIN"]
 WAITER_DOMAIN = (
-    os.environ["MV_WAITER_DOMAIN"]
-    if not os.environ["MV_WAITER_DOMAIN"].endswith("/")
-    else os.environ["MV_WAITER_DOMAIN"][:-1]
+    _waiter_domain if not _waiter_domain.endswith("/") else _waiter_domain[:-1]
 )
 WAITER_STATUS_URL = f"{WAITER_DOMAIN}/waiter/status"
 WAITER_IP_FORMAT_MOVIES = f"{WAITER_DOMAIN}/waiter/dir/"
@@ -338,7 +337,3 @@ if DEBUG:
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-print(f"{STATIC_ROOT=}")
-print(f"{NPM_STATIC_ROOT=}")
-print(f"{DEBUG=}")
