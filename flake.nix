@@ -128,21 +128,19 @@
           buildInputs = [devPythonEnv]; # Runtime Python environment
 
           buildPhase = ''
-            export PATH=${devPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/temp_static
             export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
             export MV_WAITER_DOMAIN=localhost
-            export DJANGO_SETTINGS_MODULE="site.settings"
+            export DJANGO_SETTINGS_MODULE=site.settings
+            export PYTHONPATH=$(pwd)
 
-            echo "Copying project to writable build/ directory..."
-            mkdir $MV_STATIC_DIR
-            pwd
-            ls
+            echo $PYTHONPATH
+            ls $PYTHONPATH
 
-            echo "Running collectstatic..."
-            python manage.py collectstatic --noinput
-            ls $MV_STATIC_DIR
+            echo $PYTHONPATH/site
+            ls $PYTHONPATH/site
+            ${devPythonEnv}/bin/manage collectstatic --noinput
           '';
 
           installPhase = ''
