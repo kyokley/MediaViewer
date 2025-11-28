@@ -103,6 +103,12 @@ STATIC_ROOT = (
     else Path(__file__).parent.parent / "static"
 )
 
+NPM_STATIC_ROOT = (
+    Path(os.environ["MV_NPM_STATIC_DIR"])
+    if os.environ.get("MV_NPM_STATIC_DIR")
+    else Path(__file__).parent.parent / "node_modules"
+)
+
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = "/static/"
@@ -112,6 +118,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    NPM_STATIC_ROOT,
 )
 
 # List of finder classes that know how to find static files in
@@ -343,3 +350,5 @@ if DEBUG:
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 print(f"{STATIC_ROOT=}")
+print(f"{NPM_STATIC_ROOT=}")
+print(f"{DEBUG=}")

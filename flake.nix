@@ -72,6 +72,9 @@
           pythonSet.mkVirtualEnv
           (thisProjectAsNixPkg.pname + "-env")
           workspace.deps.all;
+
+        # Node/NPM stuff
+        nodeDependencies = (pkgs.callPackage ./default.nix {}).nodeDependencies;
       in {
         # Development Shell
         devShells.default = pkgs.mkShell {
@@ -86,10 +89,10 @@
           src = ./.; # Source of your main script
 
           nativeBuildInputs = [pkgs.makeWrapper];
-          buildInputs = [appPythonEnv devPythonEnv]; # Runtime Python environment
+          buildInputs = [appPythonEnv]; # Runtime Python environment
 
           buildPhase = ''
-            export PATH=${devPythonEnv}/bin:$PATH
+            export PATH=${appPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/static
             export MV_WEB_ROOT=$(pwd)/media
@@ -123,12 +126,13 @@
           src = ./.; # Source of your main script
 
           nativeBuildInputs = [pkgs.makeWrapper];
-          buildInputs = [devPythonEnv pkgs.nodejs_24]; # Runtime Python environment
+          buildInputs = [devPythonEnv]; # Runtime Python environment
 
           buildPhase = ''
             export PATH=${devPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
-            export MV_STATIC_DIR=$(pwd)/static
+            export MV_STATIC_DIR=$(pwd)/temp_static
+            export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
             export MV_WEB_ROOT=$(pwd)/media
             export DJANGO_SETTINGS_MODULE="mysite.settings"
 
@@ -140,21 +144,19 @@
             echo "Running collectstatic..."
             python manage.py collectstatic --noinput
             ls $MV_STATIC_DIR
-
-            npm install --loglevel=verbose
           '';
 
           installPhase = ''
             mkdir -p $out/bin $out/lib
 
-            cp -r . $out/lib
-            cp -r ./static $out/lib/static
-            cp -r ./node_modules/* $out/lib/static/
+            mv ./temp_static $out/lib/static
+            cp -r . $out/lib/mediaviewer
 
             makeWrapper ${devPythonEnv}/bin/manage $out/bin/${thisProjectAsNixPkg.pname}-runserver \
               --add-flags "runserver" \
-              --set PYTHONPATH $out/lib \
-              --set MV_STATIC_DIR $out/lib/static
+              --set PYTHONPATH $out/lib/mediaviewer \
+              --set MV_STATIC_DIR $out/lib/static \
+              --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
           '';
         };
 

@@ -15,6 +15,7 @@
     MV_WEB_ROOT = "/www";
     SKIP_LOADING_TVDB_CONFIG = 1;
     MV_STATIC_DIR = "static";
+    MV_NPM_STATIC_DIR = "node_modules";
     MV_DEBUG = "true";
     MV_ALLOWED_HOSTS = "127.0.0.1:8000,localhost:8000,127.0.0.1,localhost";
   };
@@ -22,6 +23,7 @@
   # https://devenv.sh/packages/
   packages = [
     pkgs.postgresql
+    pkgs.node2nix
   ];
 
   # https://devenv.sh/scripts/
