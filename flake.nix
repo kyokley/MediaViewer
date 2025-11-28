@@ -115,7 +115,7 @@
 
             makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/${thisProjectAsNixPkg.pname} \
               --add-flags "--config=$out/lib/gunicorn.conf.py" \
-              --add-flags site.wsgi
+              --add-flags config.wsgi
           '';
         };
 

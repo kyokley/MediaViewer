@@ -51,7 +51,7 @@ RUN SKIP_LOADING_TVDB_CONFIG=1 python manage.py collectstatic --no-input && \
         chown user:user -R /code
 
 USER user
-CMD ["gunicorn", "site.wsgi"]
+CMD ["gunicorn", "config.wsgi"]
 
 
 # ********************* Begin Dev Image ******************
