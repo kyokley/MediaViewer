@@ -95,7 +95,6 @@
             export PATH=${appPythonEnv}/bin:$PATH
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/static
-            export MV_WEB_ROOT=$(pwd)/media
             export DJANGO_SETTINGS_MODULE="mysite.settings"
 
             echo "Copying project to writable build/ directory..."
@@ -133,7 +132,6 @@
             export SKIP_LOADING_TVDB_CONFIG=1
             export MV_STATIC_DIR=$(pwd)/temp_static
             export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
-            export MV_WEB_ROOT=$(pwd)/media
             export DJANGO_SETTINGS_MODULE="mysite.settings"
 
             echo "Copying project to writable build/ directory..."

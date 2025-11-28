@@ -77,10 +77,6 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-WEB_ROOT = (
-    Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
-)
-
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = (
     Path(os.environ["MV_MEDIA_ROOT"])

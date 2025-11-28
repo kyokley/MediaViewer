@@ -12,7 +12,6 @@
     MV_USER = "dbuser";
     DJANGO_SETTINGS_MODULE = "mysite.settings";
     WAITER_PASSWORD_HASH = "";
-    MV_WEB_ROOT = "/www";
     SKIP_LOADING_TVDB_CONFIG = 1;
     MV_STATIC_DIR = "static";
     MV_NPM_STATIC_DIR = "node_modules";

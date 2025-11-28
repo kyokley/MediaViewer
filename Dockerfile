@@ -42,7 +42,6 @@ RUN uv sync --no-dev --project ${VIRTUAL_ENV}
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod
-ARG MV_LOG_DIR=/logs
 
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
