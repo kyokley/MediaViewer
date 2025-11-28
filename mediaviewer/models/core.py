@@ -72,9 +72,9 @@ class ViewableObjectMixin:
 
     def downloadLink(self, guid):
         if self.is_movie():
-            waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_MOVIES}{guid}/"
+            waiter_server = f"{conf_settings.WAITER_IP_FORMAT_MOVIES}{guid}/"
         else:
-            waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_TVSHOWS}{guid}/"
+            waiter_server = f"{conf_settings.WAITER_IP_FORMAT_TVSHOWS}{guid}/"
 
         return waiter_server
 

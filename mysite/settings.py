@@ -257,21 +257,15 @@ TEMPLATES = [
 
 GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
-# WAITER_HEAD = "http://"
-# WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
-# WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1/waiter/file/"
-# WAITER_STATUS_URL = "http://127.0.0.1/waiter/status"
-
-WAITER_STATUS_URL = os.environ.get(
-    "MV_WAITER_STATUS_URL", "http://mediawaiter:5000/waiter/status"
+# WAITER_DOMAIN should be like "http://127.0.0.1:5000"
+WAITER_DOMAIN = (
+    os.environ["MV_WAITER_DOMAIN"]
+    if not os.environ["MV_WAITER_DOMAIN"].endswith("/")
+    else os.environ["MV_WAITER_DOMAIN"][:-1]
 )
-WAITER_HEAD = os.environ.get("MV_WAITER_HEAD", "http://")
-WAITER_IP_FORMAT_MOVIES = os.environ.get(
-    "MV_WAITER_IP_FORMAT_MOVIES", "127.0.0.1:5000/waiter/dir/"
-)
-WAITER_IP_FORMAT_TVSHOWS = os.environ.get(
-    "MV_WAITER_IP_FORMAT_TVSHOWS", "127.0.0.1:5000/waiter/file/"
-)
+WAITER_STATUS_URL = f"{WAITER_DOMAIN}/waiter/status"
+WAITER_IP_FORMAT_MOVIES = f"{WAITER_DOMAIN}/waiter/dir/"
+WAITER_IP_FORMAT_TVSHOWS = f"{WAITER_DOMAIN}/waiter/file/"
 
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
