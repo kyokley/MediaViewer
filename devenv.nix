@@ -71,7 +71,7 @@
                  -e MV_NAME=${config.env.MV_NAME} \
                  -e MV_HOST=${config.env.MV_HOST} \
                  -e MV_USER=${config.env.MV_USER} \
-                 -e SKIP_LOADING_TVDB_CONFIG=1 \
+                 -e MV_SKIP_LOADING_TVDB_CONFIG=1 \
                  -e DJANGO_SETTINGS_MODULE="config.settings" \
                  kyokley/mediaviewer
     '';
