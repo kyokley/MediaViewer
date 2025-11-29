@@ -11,8 +11,8 @@
     MV_HOST = "localhost";
     MV_USER = "dbuser";
     DJANGO_SETTINGS_MODULE = "config.settings";
-    WAITER_PASSWORD_HASH = "";
-    SKIP_LOADING_TVDB_CONFIG = 1;
+    MV_WAITER_PASSWORD_HASH = "";
+    MV_SKIP_LOADING_TVDB_CONFIG = 1;
     MV_STATIC_DIR = "static";
     MV_NPM_STATIC_DIR = "node_modules";
     MV_DEBUG = "true";

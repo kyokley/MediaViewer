@@ -229,13 +229,13 @@ LOGGING = {
     },
 }
 
-SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+SYSTEM_BASE_PATH = Path(__file__).parent.parent
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(SYSTEM_BASE_PATH, "mediaviewer/templates/mediaviewer"),
+            SYSTEM_BASE_PATH / "mediaviewer/templates/mediaviewer",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -281,7 +281,7 @@ SECURE_REFERRER_POLICY = "same-origin"
 SECURE_HSTS_SECONDS = 300
 SECURE_BROWSER_XSS_FILTER = True
 
-API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
+API_KEY = os.environ.get("MV_TVDB_API_KEY", "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 20
@@ -305,17 +305,17 @@ TOKEN_HOLDING_PERIOD = 168  # In hours
 VIDEO_PROGRESS_HOLDING_PERIOD = 2160  # In hours
 
 # PassKey Settings
-PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")
-PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
+PASSKEY_API_URL = os.environ.get("MV_PASSKEY_API_URL")
+PASSKEY_API_PRIVATE_KEY = os.environ.get("MV_PASSKEY_API_PRIVATE_KEY")
 
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"
 WAITER_PASSWORD_HASH = (
-    os.environ.get("WAITER_PASSWORD_HASH")
+    os.environ.get("MV_WAITER_PASSWORD_HASH")
     or "pbkdf2_sha256$260000$gTINkjUitLzAra3DGCJ4pK$/IzJql5fzVSV2XfINRkHpyBxIvNdjhxDyVqB3f5Lzmk="
 )
 
-SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1
+SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("MV_SKIP_LOADING_TVDB_CONFIG", 0)) == 1
 
 USE_SILK = DEBUG = os.environ.get("MV_DEBUG", "false").lower() == "true"
 
