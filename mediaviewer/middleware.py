@@ -3,7 +3,10 @@ from datetime import datetime, timedelta
 import secure
 from django.conf import settings
 from django.contrib import auth
-from mediaviewer.log import log
+
+import logging
+
+log = logging.getLogger(__name__)
 
 secure_headers = secure.Secure()
 

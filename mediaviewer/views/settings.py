@@ -5,11 +5,14 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import render
 from datetime import timezone
 
-from mediaviewer.log import log
+import logging
+
 from mediaviewer.models.sitegreeting import SiteGreeting
 from mediaviewer.models.usersettings import FILENAME_SORT, UserSettings
 from mediaviewer.utils import logAccessInfo
 from mediaviewer.views.views_utils import setSiteWideContext
+
+log = logging.getLogger(__name__)
 
 
 @login_required(login_url="/mediaviewer/login/")

@@ -1,5 +1,4 @@
 # Django settings for site project.
-import logging
 import os
 from pathlib import Path
 
@@ -7,14 +6,11 @@ from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {message_constants.ERROR: "danger"}
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), ".."),
-)
+BASE_DIR = Path(__file__).parent.parent
 
 # Generate a secret key
 # Borrowed from https://gist.github.com/ndarville/3452907
-SECRET_FILE = os.path.join(BASE_DIR, "secret.txt")
+SECRET_FILE = os.environ.get("MV_SECRET_FILE", BASE_DIR / "secret.txt")
 try:
     with open(SECRET_FILE, "r") as secret_file:
         SECRET_KEY = secret_file.read().strip()
@@ -40,31 +36,23 @@ except IOError:
             f"to generate your secret key!"
         )
 
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 LOG_ACCESS_TIMINGS = False
 IS_SYNCING = False
-USE_SILK = False
 
 ADMINS = (("AdminName", "admin@email.com"),)
-
 MANAGERS = ADMINS
 
 DATABASES = {
     # Testing settings!!!
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "dbname",
-        "USER": "db_user",
-        "PASSWORD": "db_password",
-        "HOST": "",
-        "PORT": "",
+        "NAME": os.environ.get("MV_NAME", "postgres"),
+        "USER": os.environ.get("MV_USER", os.environ.get("USER")),
+        "PASSWORD": os.environ.get("MV_PASSWORD", "postgres"),
+        "HOST": os.environ.get("MV_HOST", "postgres"),
+        "PORT": os.environ.get("MV_PORT", ""),  # Set to empty string for default.
     },
 }
-
-# Hosts/domain names that are valid for this site; required if DEBUG is False
-# See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -89,23 +77,33 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-WEB_ROOT = (
-    Path(os.getenv("MV_WEB_ROOT")) if os.getenv("MV_WEB_ROOT") else Path("/var/www")
-)
-# Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = WEB_ROOT / "mv" / "media"
+MEDIA_ROOT = (
+    Path(os.environ["MV_MEDIA_ROOT"])
+    if os.environ.get("MV_MEDIA_ROOT")
+    else Path(__file__).parent.parent / "media"
+)
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
-# MEDIA_URL = '/static/media/'
+MEDIA_URL = "/media/"
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = WEB_ROOT / "mv" / "static"
+STATIC_ROOT = (
+    Path(os.environ["MV_STATIC_DIR"])
+    if os.environ.get("MV_STATIC_DIR")
+    else Path(__file__).parent.parent / "static"
+)
+
+NPM_STATIC_ROOT = (
+    Path(os.environ["MV_NPM_STATIC_DIR"])
+    if os.environ.get("MV_NPM_STATIC_DIR")
+    else Path(__file__).parent.parent / "node_modules"
+)
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -116,6 +114,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    NPM_STATIC_ROOT,
 )
 
 # List of finder classes that know how to find static files in
@@ -140,10 +139,10 @@ MIDDLEWARE = (
 # Auto logout delay in minutes
 AUTO_LOGOUT_DELAY = 2880
 
-ROOT_URLCONF = "mysite.urls"
+ROOT_URLCONF = "config.urls"
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = "mysite.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 INSTALLED_APPS = (
     "django.contrib.auth",
@@ -224,26 +223,19 @@ LOGGING = {
         },
         "": {
             "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
+            "level": "DEBUG",
+            "propagate": True,
         },
     },
 }
 
-SYSTEM_BASE_PATH = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-LOG_DIR = (
-    Path(os.getenv("MV_LOG_DIR"))
-    if os.getenv("MV_LOG_DIR")
-    else SYSTEM_BASE_PATH / "logs"
-)
-LOG_FILE_NAME = LOG_DIR / "mediaviewerLog"
-LOG_LEVEL = logging.DEBUG
+SYSTEM_BASE_PATH = Path(__file__).parent.parent
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            os.path.join(SYSTEM_BASE_PATH, "mediaviewer/templates/mediaviewer"),
+            SYSTEM_BASE_PATH / "mediaviewer/templates/mediaviewer",
         ],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -265,23 +257,31 @@ TEMPLATES = [
 
 GRAPPELLI_ADMIN_TITLE = "MediaViewer Admin"
 
-WAITER_HEAD = "http://"
-WAITER_IP_FORMAT_MOVIES = "127.0.0.1/waiter/dir/"
-WAITER_IP_FORMAT_TVSHOWS = "127.0.0.1/waiter/file/"
+# WAITER_DOMAIN should be like "http://127.0.0.1:5000"
+_waiter_domain = os.environ["MV_WAITER_DOMAIN"]
+WAITER_DOMAIN = (
+    _waiter_domain if not _waiter_domain.endswith("/") else _waiter_domain[:-1]
+)
+WAITER_STATUS_URL = f"{WAITER_DOMAIN}/waiter/status"
+WAITER_IP_FORMAT_MOVIES = f"{WAITER_DOMAIN}/waiter/dir/"
+WAITER_IP_FORMAT_TVSHOWS = f"{WAITER_DOMAIN}/waiter/file/"
 
-WAITER_STATUS_URL = "http://127.0.0.1/waiter/status"
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# os.environ["HTTPS"] = "on"
+# os.environ["wsgi.url_scheme"] = "https"
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-os.environ["HTTPS"] = "on"
-os.environ["wsgi.url_scheme"] = "https"
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+os.environ["HTTPS"] = "off"
+os.environ["wsgi.url_scheme"] = "http"
 
 # For SecurityMiddleware in django 3.0
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_HSTS_SECONDS = 300
 SECURE_BROWSER_XSS_FILTER = True
 
-API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
+API_KEY = os.environ.get("MV_TVDB_API_KEY", "keykeykey")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 20
@@ -294,7 +294,6 @@ EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""  # nosec
 EMAIL_USE_TLS = False
 EMAIL_FROM_ADDR = DEFAULT_FROM_EMAIL = "testing@example.com"
-BYPASS_SMTPD_CHECK = False
 
 MINIMUM_PASSWORD_LENGTH = 6
 
@@ -306,14 +305,35 @@ TOKEN_HOLDING_PERIOD = 168  # In hours
 VIDEO_PROGRESS_HOLDING_PERIOD = 2160  # In hours
 
 # PassKey Settings
-PASSKEY_API_URL = os.environ.get("PASSKEY_API_URL")
-PASSKEY_API_PRIVATE_KEY = os.environ.get("PASSKEY_API_PRIVATE_KEY")
+PASSKEY_API_URL = os.environ.get("MV_PASSKEY_API_URL")
+PASSKEY_API_PRIVATE_KEY = os.environ.get("MV_PASSKEY_API_PRIVATE_KEY")
 
 # MediaWaiter Settings
 WAITER_LOGIN = "waiter"
 WAITER_PASSWORD_HASH = (
-    os.environ.get("WAITER_PASSWORD_HASH")
+    os.environ.get("MV_WAITER_PASSWORD_HASH")
     or "pbkdf2_sha256$260000$gTINkjUitLzAra3DGCJ4pK$/IzJql5fzVSV2XfINRkHpyBxIvNdjhxDyVqB3f5Lzmk="
 )
 
-SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1
+SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("MV_SKIP_LOADING_TVDB_CONFIG", 0)) == 1
+
+USE_SILK = DEBUG = os.environ.get("MV_DEBUG", "false").lower() == "true"
+
+TEMPLATE_DEBUG = DEBUG
+ALLOWED_HOSTS = os.environ.get("MV_ALLOWED_HOSTS", "").split(",") or [
+    "localhost",
+    "127.0.0.1",
+    "mediaviewer",
+]
+
+if DEBUG:
+    INSTALLED_APPS += (
+        "silk",
+        "debug_toolbar",
+    )
+
+    MIDDLEWARE = ("silk.middleware.SilkyMiddleware",) + MIDDLEWARE
+
+    MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
+
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

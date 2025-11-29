@@ -22,3 +22,6 @@ devenv.local.nix
 
 logs
 .mv.history
+
+result
+.nixos-test-history

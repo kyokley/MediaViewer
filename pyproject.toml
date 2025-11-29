@@ -10,10 +10,13 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "mediaviewer/models/__init__.py" = ["F401"]
-"mysite/docker_settings.py" = ["F405"]
+"config/settings.py" = ["F405"]
 
 [tool.pytest.ini_options]
-addopts = "--disable-socket --disable-warnings"
+addopts = "--disable-socket --disable-warnings --ignore=result"
+env = [
+    "DJANGO_SETTINGS_MODULE=config.settings",
+]
 
 [tool.bandit]
 exclude_dirs = ["mediaviewer/tests", ".venv"]
@@ -47,10 +50,8 @@ dev = [
     "blessings<2.0,>=1.7",
     "mock<3.0,>=2.0",
     "bandit<2.0,>=1.5",
-    "pytest-cov<3.0,>=2.6",
     "bpython<1.0,>=0.24",
     "pdbpp<1.0.0,>=0.9.3",
-    "coverage<5.0,>=4.5",
     "pytest-mock<4.0.0,>=3.6.1",
     "Faker<11.0.0,>=10.0.0",
     "black<25.0.0,>=24.3.0",
@@ -62,3 +63,6 @@ dev = [
     "django-silk>=5.4.1",
     "pytest-django>=4.11.1",
 ]
+
+[project.scripts]
+manage = "manage:main"

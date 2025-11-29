@@ -2,7 +2,6 @@
 import os
 import re
 import smtplib
-import telnetlib  # nosec
 import secrets
 import string
 
@@ -19,7 +18,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
-from mediaviewer.log import log
+import logging
+
+log = logging.getLogger(__name__)
 
 SUFFIXES = ("B", "KB", "MB", "GB", "TB", "PB")
 COMMASPACE = ", "
@@ -154,14 +155,6 @@ def send_test_mail(to_addr):
         subject,
         text,
     )
-
-
-def checkSMTPServer():
-    if not settings.BYPASS_SMTPD_CHECK:
-        smtp_server = telnetlib.Telnet(  # nosec
-            host=settings.EMAIL_HOST, port=settings.EMAIL_PORT
-        )
-        smtp_server.close()
 
 
 def query_param_to_bool(param):

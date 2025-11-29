@@ -3,12 +3,15 @@ import re
 from django.db import models
 from django.urls import reverse
 
-from mediaviewer.log import log
+import logging
+
 from mediaviewer.utils import get_search_query
 
 from .core import TimeStampModel, ViewableManagerMixin, ViewableObjectMixin
 from .filenamescrapeformat import FilenameScrapeFormat
 from .poster import Poster
+
+log = logging.getLogger(__name__)
 
 yearRegex = re.compile(r"20\d{2}\D?.*$")
 dvdRegex = re.compile(r"[A-Z]{2,}.*$")

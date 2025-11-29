@@ -13,13 +13,9 @@ services:
       - mediaviewer-backend
   mediaviewer:
     image: kyokley/mediaviewer
-    build:
-      context: .
     environment:
-      - DJANGO_SETTINGS_MODULE=mysite.docker_settings
+      - DJANGO_SETTINGS_MODULE=config.settings
       - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
-      - MV_WEB_ROOT=/www
-      - MV_LOG_DIR=/logs
       - SKIP_LOADING_TVDB_CONFIG=1
     command: sh -c "python manage.py collectstatic --no-input && \ python manage.py migrate && \ python manage.py runserver 0.0.0.0:8000"
     hostname: mediaviewer

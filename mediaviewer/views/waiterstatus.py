@@ -6,8 +6,11 @@ import requests
 from django.conf import settings
 from django.http import HttpResponse
 
-from mediaviewer.log import log
+import logging
+
 from mediaviewer.models.waiterstatus import WaiterStatus
+
+log = logging.getLogger(__name__)
 
 
 def ajaxwaiterstatus(request):

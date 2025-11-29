@@ -4,7 +4,9 @@ import time
 import requests
 from django.conf import settings
 
-from mediaviewer.log import log
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def getJSONData(url):

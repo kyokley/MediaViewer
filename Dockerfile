@@ -42,7 +42,6 @@ RUN uv sync --no-dev --project ${VIRTUAL_ENV}
 
 # ********************* Begin Prod Image ******************
 FROM base AS prod
-ARG MV_LOG_DIR=/logs
 
 COPY --from=static-builder /code/node_modules /node/node_modules
 COPY . /code
@@ -52,7 +51,7 @@ RUN SKIP_LOADING_TVDB_CONFIG=1 python manage.py collectstatic --no-input && \
         chown user:user -R /code
 
 USER user
-CMD ["gunicorn", "mysite.wsgi"]
+CMD ["gunicorn", "config.wsgi"]
 
 
 # ********************* Begin Dev Image ******************

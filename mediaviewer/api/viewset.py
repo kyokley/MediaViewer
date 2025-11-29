@@ -9,7 +9,8 @@ from mediaviewer.api.serializers import (
     FilenameScrapeFormatSerializer,
     MessageSerializer,
 )
-from mediaviewer.log import log
+import logging
+
 from mediaviewer.models import (
     Collection,
     Comment,
@@ -18,6 +19,8 @@ from mediaviewer.models import (
     MediaFile,
     Message,
 )
+
+log = logging.getLogger(__name__)
 
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):

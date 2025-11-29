@@ -6,11 +6,24 @@
   ...
 }: {
   # https://devenv.sh/basics/
-  # env.GREET = "MV";
+  env = {
+    MV_NAME = "mv";
+    MV_HOST = "localhost";
+    MV_USER = "dbuser";
+    DJANGO_SETTINGS_MODULE = "config.settings";
+    MV_WAITER_PASSWORD_HASH = "";
+    MV_SKIP_LOADING_TVDB_CONFIG = 1;
+    MV_STATIC_DIR = "static";
+    MV_NPM_STATIC_DIR = "node_modules";
+    MV_DEBUG = "true";
+    MV_ALLOWED_HOSTS = "127.0.0.1,localhost";
+    MV_WAITER_DOMAIN = "localhost:5000";
+  };
 
   # https://devenv.sh/packages/
   packages = [
     pkgs.postgresql
+    pkgs.node2nix
   ];
 
   # https://devenv.sh/scripts/
@@ -19,37 +32,69 @@
       echo Scripts
       devenv info | awk /scripts/ RS="\n\n" ORS="\n\n" | tail -n "+2" | sort | awk '{$3=""; print $0}'
     '';
-    runtests.exec = "${pkgs.gnumake}/bin/make tests";
-    touch-history.exec = "touch .mv.history";
     build.exec = ''
-      docker build \
-        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
-        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
-        --build-arg UID=''${UID:=1000} \
-        --tag=kyokley/mediaviewer \
-        --target=prod \
-        .
-    '';
-    build-dev.exec = ''
-      docker build \
-        $(test ''${USE_HOST_NET:=0} -ne 0 && echo "--network=host" || echo "") \
-        $(test ''${NO_CACHE:=0} -ne 0 && echo "--no-cache" || echo "") \
-        --build-arg UID=''${UID:=1000} \
-        --tag=kyokley/mediaviewer \
-        --target=dev \
-        .
-    '';
-    pytest.exec = ''
-      ${pkgs.docker}/bin/docker compose run --rm mediaviewer pytest -n 4
-    '';
-    shell.exec = ''
-      ${pkgs.docker}/bin/docker compose run --rm mediaviewer bash
-    '';
-    down.exec = ''
-      ${pkgs.docker}/bin/docker compose down --remove-orphans
+      nix build '.#mv-image'
+      docker load < result
     '';
     clear.exec = ''
-      ${pkgs.docker}/bin/docker compose down --remove-orphans -v
+      rm -rf $DEVENV_STATE/postgres
+    '';
+
+    init.exec = ''
+      down
+      clear
+      migrate
+    '';
+
+    _wait_for_db.exec = ''
+      devenv up -d postgres
+      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${config.env.MV_USER}:${config.env.MV_USER}@${config.env.MV_HOST}:5432/${config.env.MV_NAME}?sslmode=disable'
+    '';
+
+    migrate.exec = ''
+      _wait_for_db
+      uv run python manage.py migrate
+    '';
+
+    up.exec = ''
+      _wait_for_db
+      uv run python manage.py runserver 127.0.0.1:8000
+    '';
+
+    docker-up.exec = ''
+      build
+      _wait_for_db
+      migrate
+      docker run --rm \
+                 -it \
+                 --net host \
+                 -e MV_NAME=${config.env.MV_NAME} \
+                 -e MV_HOST=${config.env.MV_HOST} \
+                 -e MV_USER=${config.env.MV_USER} \
+                 -e MV_SKIP_LOADING_TVDB_CONFIG=1 \
+                 -e DJANGO_SETTINGS_MODULE="config.settings" \
+                 kyokley/mediaviewer
+    '';
+
+    down.exec = ''
+      devenv processes down
+    '';
+
+    pytest.exec = ''
+      set -e
+      _wait_for_db
+      uv run pytest $(test $# -eq 0 && echo "-n 4" || echo $@)
+      down
+    '';
+
+    check-migrations.exec = ''
+      _wait_for_db
+      uv run python manage.py makemigrations --check
+      down
+    '';
+
+    bandit.exec = ''
+      uv run bandit -x ./mediaviewer/tests,./.venv,./.devenv* $(test $# -eq 0 && echo "-r ." || echo $@)
     '';
   };
 
@@ -61,17 +106,31 @@
 
   # https://devenv.sh/tests/
   enterTest = ''
-    ${pkgs.gnumake}/bin/make tests
+    set -e
+    check-migrations
+    pytest
+    bandit
   '';
 
   # https://devenv.sh/services/
-  # services.postgres.enable = true;
+  services.postgres = {
+    enable = true;
+    listen_addresses = "localhost";
+    initialScript = ''
+      CREATE ROLE ${config.env.MV_USER} WITH LOGIN PASSWORD '${config.env.MV_USER}' SUPERUSER;
+    '';
+    initialDatabases = [
+      {
+        name = config.env.MV_NAME;
+        user = config.env.MV_USER;
+      }
+    ];
+  };
 
   # https://devenv.sh/languages/
-  # languages.nix.enable = true;
   languages.python = {
     enable = true;
-    version = "3.12";
+    version = "3.13";
     uv = {
       enable = true;
     };
@@ -117,16 +176,6 @@
       pass_filenames = true;
     };
   };
-
-  tasks."mv:format" = {
-    exec = ''
-      ${config.git-hooks.installationScript}
-      ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
-    '';
-  };
-
-  # https://devenv.sh/processes/
-  # processes.ping.exec = "ping example.com";
 
   # See full reference at https://devenv.sh/reference/options/
 }

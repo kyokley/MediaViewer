@@ -2,13 +2,13 @@
 import os
 import sys
 
-if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
+from django.core.management import execute_from_command_line
 
-    from django.core.management import execute_from_command_line
 
-    if "runserver" in sys.argv:
-        from mediaviewer.utils import checkSMTPServer
-
-        checkSMTPServer()
+def main():
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
     execute_from_command_line(sys.argv)
+
+
+if __name__ == "__main__":
+    main()
