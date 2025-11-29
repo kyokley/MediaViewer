@@ -133,6 +133,7 @@
 
             makeWrapper ${devPythonEnv}/bin/manage $out/bin/manage \
               --set PYTHONPATH $out/lib/mediaviewer \
+              --set MV_DEBUG true \
               --set MV_STATIC_DIR $out/lib/static \
               --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
 
