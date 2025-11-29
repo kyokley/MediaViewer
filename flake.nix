@@ -181,6 +181,10 @@
           type = "app";
           program = "${self.packages.${system}.dev}/bin/runserver";
         };
+        apps.manage = {
+          type = "app";
+          program = "${self.packages.${system}.dev}/bin/manage";
+        };
       }
     );
 }
