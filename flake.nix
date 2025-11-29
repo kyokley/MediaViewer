@@ -77,7 +77,7 @@
         nodeDependencies = (pkgs.callPackage ./default.nix {}).nodeDependencies;
 
         packageBuildPhase = ''
-          export SKIP_LOADING_TVDB_CONFIG=1
+          export MV_SKIP_LOADING_TVDB_CONFIG=1
           export MV_STATIC_DIR=$(pwd)/temp_static
           export MV_NPM_STATIC_DIR=${nodeDependencies}/lib/node_modules
           export MV_WAITER_DOMAIN=localhost
