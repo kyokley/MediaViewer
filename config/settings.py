@@ -224,12 +224,7 @@ LOGGING = {
         "": {
             "handlers": ["console"],
             "level": "DEBUG",
-            "propagate": False,
-        },
-        "django.core": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
+            "propagate": True,
         },
     },
 }
@@ -341,4 +336,4 @@ if DEBUG:
 
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
