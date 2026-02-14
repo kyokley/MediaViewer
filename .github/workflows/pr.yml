@@ -24,6 +24,7 @@ jobs:
         continue-on-error: true
         run: |
           docker run --rm \
+            --user $(id -u):$(id -g) \
             -v ${{ github.workspace }}:/workspace \
             kyokley/mediaviewer-devenv:latest \
             tasks run mv:format
