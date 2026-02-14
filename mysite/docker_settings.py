@@ -15,7 +15,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "postgres",
         "USER": "postgres",
-        "PASSWORD": "postgres",
+        "PASSWORD": "postgres",  # nosec B105
         "HOST": "postgres",
         "PORT": "",  # Set to empty string for default.
     },
