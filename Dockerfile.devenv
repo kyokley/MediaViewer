@@ -1,0 +1,38 @@
+# Dockerfile for pre-built devenv environment
+# Used by GitHub Actions to speed up format checks by avoiding
+# repeated Nix and devenv installation on every PR
+
+FROM nixos/nix:latest
+
+# Enable experimental features for better performance
+RUN echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
+
+# Install devenv
+RUN nix profile install nixpkgs#devenv
+
+# Set up working directory
+WORKDIR /workspace
+
+# Copy devenv configuration files
+COPY devenv.nix devenv.yaml ./
+
+# Copy pyproject.toml for bandit configuration
+COPY pyproject.toml ./
+
+# Build the devenv shell to cache all dependencies
+# This pre-installs all formatting tools, git hooks, and other dependencies
+RUN devenv shell --impure -- echo "Devenv shell built successfully"
+
+# Install git-hooks so they're ready to run
+RUN devenv shell --impure -- sh -c '
+  if [ -n "$DEVENV_ROOT" ]; then
+    cd "$DEVENV_ROOT"
+  fi
+  devenv info | grep "git-hooks" || true
+'
+
+# Set the entrypoint to devenv
+ENTRYPOINT ["devenv"]
+
+# Default command runs the format checks
+CMD ["tasks", "run", "mv:format"]
