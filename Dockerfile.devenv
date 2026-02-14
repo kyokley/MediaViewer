@@ -24,12 +24,7 @@ COPY pyproject.toml ./
 RUN devenv shell --impure -- echo "Devenv shell built successfully"
 
 # Install git-hooks so they're ready to run
-RUN devenv shell --impure -- sh -c '
-  if [ -n "$DEVENV_ROOT" ]; then
-    cd "$DEVENV_ROOT"
-  fi
-  devenv info | grep "git-hooks" || true
-'
+RUN devenv shell --impure -- sh -c 'devenv info | grep "git-hooks" || true'
 
 # Set the entrypoint to devenv
 ENTRYPOINT ["devenv"]
