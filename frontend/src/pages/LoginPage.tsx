@@ -7,7 +7,7 @@ import ErrorAlert from '../components/ErrorAlert'
 export default function LoginPage() {
   const navigate = useNavigate()
   const login = useAuthStore((state) => state.login)
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -19,7 +19,7 @@ export default function LoginPage() {
 
     try {
       const response = await apiClient.post('/auth/login/', {
-        email,
+        username,
         password,
       })
 
@@ -47,21 +47,21 @@ export default function LoginPage() {
 
           {error && <ErrorAlert message={error} />}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-                placeholder="your@email.com"
-              />
-            </div>
+           <form onSubmit={handleSubmit} className="space-y-4">
+             <div>
+               <label htmlFor="username" className="block text-sm font-medium text-gray-300">
+                 Username
+               </label>
+               <input
+                 type="text"
+                 id="username"
+                 value={username}
+                 onChange={(e) => setUsername(e.target.value)}
+                 required
+                 className="mt-1 w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                 placeholder="username"
+               />
+             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300">
