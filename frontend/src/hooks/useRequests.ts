@@ -13,7 +13,7 @@ export function useRequests(limit: number = 20, offset: number = 0) {
       try {
         setLoading(true);
         setError(null);
-        const response = await apiClient.get("/mediaviewer/api/v2/requests/", {
+        const response = await apiClient.get("/requests/", {
           params: { limit, offset },
         });
         setRequests(response.data.data || []);
@@ -33,7 +33,7 @@ export function useRequests(limit: number = 20, offset: number = 0) {
 
   const createRequest = async (name: string): Promise<Request | null> => {
     try {
-      const response = await apiClient.post("/mediaviewer/api/v2/requests/", {
+      const response = await apiClient.post("/requests/", {
         name,
       });
       return response.data;
@@ -48,7 +48,7 @@ export function useRequests(limit: number = 20, offset: number = 0) {
   const deleteRequest = async (requestId: number): Promise<boolean> => {
     try {
       await apiClient.delete(
-        `/mediaviewer/api/v2/requests/${requestId}/`
+        `/requests/${requestId}/`
       );
       setRequests(requests.filter((r) => r.id !== requestId));
       return true;
@@ -63,7 +63,7 @@ export function useRequests(limit: number = 20, offset: number = 0) {
   const voteForRequest = async (requestId: number): Promise<Request | null> => {
     try {
       const response = await apiClient.post(
-        `/mediaviewer/api/v2/requests/${requestId}/vote/`
+        `/requests/${requestId}/vote/`
       );
       // Update the request in the list with new vote count
       setRequests(
@@ -83,7 +83,7 @@ export function useRequests(limit: number = 20, offset: number = 0) {
   const markRequestDone = async (requestId: number): Promise<Request | null> => {
     try {
       const response = await apiClient.post(
-        `/mediaviewer/api/v2/requests/${requestId}/done/`
+        `/requests/${requestId}/done/`
       );
       // Update the request in the list
       setRequests(

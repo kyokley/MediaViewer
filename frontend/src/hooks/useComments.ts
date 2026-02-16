@@ -13,7 +13,7 @@ export function useComments(limit: number = 20, offset: number = 0) {
       try {
         setLoading(true);
         setError(null);
-        const response = await apiClient.get("/mediaviewer/api/v2/comments/", {
+        const response = await apiClient.get("/comments/", {
           params: { limit, offset },
         });
         setComments(response.data.data || []);
@@ -33,7 +33,7 @@ export function useComments(limit: number = 20, offset: number = 0) {
 
   const createComment = async (data: Record<string, unknown>): Promise<Comment | null> => {
     try {
-      const response = await apiClient.post("/mediaviewer/api/v2/comments/", data);
+      const response = await apiClient.post("/comments/", data);
       // Add new comment to the beginning of the list
       setComments([response.data, ...comments]);
       setTotal(total + 1);
@@ -52,7 +52,7 @@ export function useComments(limit: number = 20, offset: number = 0) {
   ): Promise<Comment | null> => {
     try {
       const response = await apiClient.put(
-        `/mediaviewer/api/v2/comments/${commentId}/`,
+        `/comments/${commentId}/`,
         data
       );
       // Update comment in the list
@@ -70,7 +70,7 @@ export function useComments(limit: number = 20, offset: number = 0) {
 
   const deleteComment = async (commentId: number): Promise<boolean> => {
     try {
-      await apiClient.delete(`/mediaviewer/api/v2/comments/${commentId}/`);
+      await apiClient.delete(`/comments/${commentId}/`);
       setComments(comments.filter((c) => c.id !== commentId));
       setTotal(total - 1);
       return true;
