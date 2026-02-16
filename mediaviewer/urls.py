@@ -1,7 +1,7 @@
 from django.conf import settings as conf_settings
 from django.conf.urls import include
 from django.shortcuts import redirect
-from django.urls import re_path, reverse_lazy
+from django.urls import re_path, reverse_lazy, path
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import routers
 
@@ -23,7 +23,13 @@ from mediaviewer.views import (
 
 router = routers.DefaultRouter()
 
+# API v2 routes (new React SPA API)
 urlpatterns = [
+    path("api/v2/", include("mediaviewer.api.v2.urls")),
+]
+
+# Legacy routes (kept for backward compatibility)
+urlpatterns += [
     re_path(r"^$", home.home, name="home"),
     re_path(r"^tvdetail/(?P<mf_id>\d+)/$", tv.tvdetail, name="tvdetail"),
     re_path(r"^tvshows/$", lambda x: redirect("/mediaviewer/tvshows/summary/")),
