@@ -43,28 +43,38 @@ export interface UserSettings {
 // Media types
 export interface Genre {
   id: number;
-  genre: string;
+  name: string;
   datecreated: string;
   dateedited: string;
 }
 
 export interface Movie {
   id: number;
+  title: string;
   name: string;
   date_created: string;
   dateedited: string;
+  poster_image?: string;
   poster_image_url?: string;
+  description?: string;
+  release_date?: string;
   genres: Genre[];
 }
 
-export interface TV {
+export interface TVShow {
   id: number;
+  title: string;
   name: string;
   date_created: string;
   dateedited: string;
+  poster_image?: string;
   poster_image_url?: string;
+  description?: string;
+  first_air_date?: string;
   genres: Genre[];
 }
+
+export interface TV extends TVShow {}
 
 // Collection types
 export interface Collection {

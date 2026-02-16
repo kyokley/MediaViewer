@@ -62,6 +62,7 @@ api.interceptors.response.use(
   }
 )
 
+export { api as apiClient }
 export default api
 
 // Authentication API functions

@@ -1,0 +1,48 @@
+import { useState, useEffect } from 'react'
+import { TVShow, ApiResponse } from '../types/api'
+import { apiClient } from '../utils/api'
+
+export function useTV(page = 1, limit = 20, search = '') {
+  const [shows, setShows] = useState<TVShow[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [total, setTotal] = useState(0)
+
+  useEffect(() => {
+    const fetchShows = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const offset = (page - 1) * limit
+        const params: any = {
+          limit,
+          offset,
+        }
+
+        if (search) {
+          params.search = search
+        }
+
+        const response = await apiClient.get<ApiResponse<TVShow[]>>(
+          '/tv/',
+          { params }
+        )
+
+        setShows(response.data.data)
+        setTotal(response.data.pagination?.total || 0)
+      } catch (err: any) {
+        setError(
+          err.response?.data?.error?.message ||
+            'Failed to fetch TV shows'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchShows()
+  }, [page, limit, search])
+
+  return { shows, isLoading, error, total }
+}
