@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './utils/authStore'
+import { PaginationProvider } from './context/PaginationContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
@@ -36,7 +37,9 @@ function App() {
           path="/movies"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <MoviesPage />
+              <PaginationProvider>
+                <MoviesPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
@@ -52,7 +55,9 @@ function App() {
           path="/tv"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <TVPage />
+              <PaginationProvider>
+                <TVPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
@@ -68,7 +73,9 @@ function App() {
           path="/collections"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <CollectionsPage />
+              <PaginationProvider>
+                <CollectionsPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
@@ -84,7 +91,9 @@ function App() {
           path="/search"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <SearchPage />
+              <PaginationProvider>
+                <SearchPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
@@ -92,7 +101,9 @@ function App() {
           path="/requests"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <RequestsPage />
+              <PaginationProvider>
+                <RequestsPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
@@ -100,7 +111,9 @@ function App() {
           path="/comments"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <CommentsPage />
+              <PaginationProvider>
+                <CommentsPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
@@ -108,7 +121,9 @@ function App() {
           path="/video-progress"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <VideoProgressPage />
+              <PaginationProvider>
+                <VideoProgressPage />
+              </PaginationProvider>
             </ProtectedRoute>
           }
         />
