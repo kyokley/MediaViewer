@@ -1,20 +1,27 @@
 import { useState } from "react";
 import { useComments } from "../hooks/useComments";
+import { usePagination } from "../context/PaginationContext";
 import ErrorAlert from "../components/ErrorAlert";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { PaginationControls } from "../components/PaginationControls";
 
 export function CommentsPage() {
-  const [currentPage, setCurrentPage] = useState(0);
+  const { currentPage, setCurrentPage, total, setTotal } = usePagination();
   const [submitting, setSubmitting] = useState(false);
   const limit = 20;
   const {
     comments,
-    total,
+    total: hookTotal,
     loading,
     error,
     updateComment,
     deleteComment,
   } = useComments(limit, currentPage * limit);
+
+  // Sync total from hook to context
+  if (hookTotal !== total) {
+    setTotal(hookTotal);
+  }
 
   const handleUpdateComment = async (commentId: number) => {
     setSubmitting(true);
@@ -109,27 +116,12 @@ export function CommentsPage() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Page {currentPage + 1} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPreviousClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+        onNextClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+      />
     </div>
   );
 }

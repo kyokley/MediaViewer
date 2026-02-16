@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "../utils/api";
 import { VideoProgress } from "../types/api";
+import { usePagination } from "../context/PaginationContext";
 import ErrorAlert from "../components/ErrorAlert";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { PaginationControls } from "../components/PaginationControls";
 
 export function VideoProgressPage() {
+  const { currentPage, setCurrentPage, total, setTotal } = usePagination();
   const [videoProgress, setVideoProgress] = useState<VideoProgress[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
   const limit = 20;
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function VideoProgressPage() {
     };
 
     fetchProgress();
-  }, [currentPage, limit]);
+  }, [currentPage, limit, setTotal]);
 
   const handleDeleteProgress = async (hashedFilename: string) => {
     if (window.confirm("Are you sure you want to delete this progress?")) {
@@ -137,27 +138,12 @@ export function VideoProgressPage() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-            disabled={currentPage === 0}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Page {currentPage + 1} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={currentPage >= totalPages - 1}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPreviousClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+        onNextClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+      />
     </div>
   );
 }
