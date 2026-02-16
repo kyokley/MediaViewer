@@ -23,11 +23,15 @@
   # https://devenv.sh/packages/
   packages = [
     pkgs.postgresql
-    pkgs.node2nix
+    pkgs.nodejs_25
   ];
 
   # https://devenv.sh/scripts/
   scripts = {
+    frontend-run.exec = ''
+      cd frontend && npm run dev
+    '';
+
     help.exec = ''
       echo Scripts
       devenv info | awk /scripts/ RS="\n\n" ORS="\n\n" | tail -n "+2" | sort | awk '{$3=""; print $0}'
