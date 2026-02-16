@@ -18,9 +18,9 @@ export function VideoProgressPage() {
       try {
         setLoading(true);
         setError(null);
-        const response = await apiClient.get("/mediaviewer/api/v2/video-progress/", {
-          params: { limit, offset: currentPage * limit },
-        });
+         const response = await apiClient.get("/video-progress/", {
+           params: { limit, offset: currentPage * limit },
+         });
         setVideoProgress(response.data.data || []);
         setTotal(response.data.pagination?.total || 0);
       } catch (err) {
@@ -39,9 +39,9 @@ export function VideoProgressPage() {
   const handleDeleteProgress = async (hashedFilename: string) => {
     if (window.confirm("Are you sure you want to delete this progress?")) {
       try {
-        await apiClient.delete(
-          `/mediaviewer/api/v2/video-progress/${hashedFilename}/`
-        );
+         await apiClient.delete(
+           `/video-progress/${hashedFilename}/`
+         );
         setVideoProgress(
           videoProgress.filter((v) => v.hashed_filename !== hashedFilename)
         );
