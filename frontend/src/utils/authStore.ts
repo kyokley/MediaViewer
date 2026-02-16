@@ -7,7 +7,9 @@ export interface AuthStore {
   isAuthenticated: boolean
   isLoading: boolean
   error: string | null
-  login: (username: string, password: string) => Promise<void>
+  accessToken: string | null
+  refreshToken: string | null
+  login: (accessToken: string, refreshToken: string, user?: User) => void
   logout: () => Promise<void>
   setUser: (user: User | null) => void
   clearError: () => void
@@ -18,28 +20,20 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  accessToken: localStorage.getItem('access_token'),
+  refreshToken: localStorage.getItem('refresh_token'),
 
-  login: async (username: string, password: string) => {
-    set({ isLoading: true, error: null })
-    try {
-      const response = await authAPI.login({ username, password })
-      const { access, refresh, user } = response.data
+  login: (accessToken: string, refreshToken: string, user?: User) => {
+    localStorage.setItem('access_token', accessToken)
+    localStorage.setItem('refresh_token', refreshToken)
 
-      localStorage.setItem('access_token', access)
-      localStorage.setItem('refresh_token', refresh)
-
-      set({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      })
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Login failed',
-        isLoading: false,
-      })
-      throw error
-    }
+    set({
+      accessToken,
+      refreshToken,
+      user: user || null,
+      isAuthenticated: true,
+      isLoading: false,
+    })
   },
 
   logout: async () => {
@@ -55,6 +49,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
         user: null,
         isAuthenticated: false,
         isLoading: false,
+        accessToken: null,
+        refreshToken: null,
       })
     }
   },

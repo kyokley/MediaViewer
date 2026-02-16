@@ -62,6 +62,7 @@ api.interceptors.response.use(
   }
 )
 
+export { api as apiClient }
 export default api
 
 // Authentication API functions
@@ -140,7 +141,7 @@ export const collectionAPI = {
 
 // Request API functions
 export const requestAPI = {
-  getRequests: (limit = 50, offset = 0) =>
+  getRequests: (limit = 20, offset = 0) =>
     api.get('/api/v2/requests/', { params: { limit, offset } }),
 
   getRequest: (id: number) =>
@@ -154,6 +155,12 @@ export const requestAPI = {
 
   deleteRequest: (id: number) =>
     api.delete(`/api/v2/requests/${id}/`),
+
+  voteRequest: (id: number) =>
+    api.post(`/api/v2/requests/${id}/vote/`),
+
+  markRequestDone: (id: number) =>
+    api.post(`/api/v2/requests/${id}/done/`),
 }
 
 // Video progress API functions

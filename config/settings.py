@@ -106,16 +106,25 @@ NPM_STATIC_ROOT = (
     else Path(__file__).parent.parent / "node_modules"
 )
 
+REACT_BUILD_DIR = (
+    Path(os.environ["MV_REACT_BUILD_DIR"])
+    if os.environ.get("MV_REACT_BUILD_DIR")
+    else Path(__file__).parent.parent / "frontend" / "dist"
+)
+
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = "/static/"
 
 # Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    NPM_STATIC_ROOT,
+STATICFILES_DIRS = tuple(
+    filter(
+        None,
+        [
+            NPM_STATIC_ROOT,
+            REACT_BUILD_DIR / "assets" if REACT_BUILD_DIR.exists() else None,
+        ],
+    )
 )
 
 # List of finder classes that know how to find static files in

@@ -17,6 +17,7 @@ from mediaviewer.views import (
     settings,
     signin,
     signout,
+    spa,
     tv,
     waiterstatus,
 )
@@ -215,3 +216,9 @@ if not conf_settings.IS_SYNCING:
             r"^api/inferscrapers/", csrf_exempt(viewset.InferScrapersView.as_view())
         ),
     ]
+
+# Catch-all route for React SPA (must be last)
+# Serves index.html for all non-matching routes to enable client-side routing
+urlpatterns += [
+    re_path(r".*", spa.serve_spa, name="spa"),
+]

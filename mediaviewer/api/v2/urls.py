@@ -41,6 +41,16 @@ urlpatterns = [
         additional_views.request_detail,
         name="request_detail",
     ),
+    path(
+        "requests/<int:request_id>/vote/",
+        additional_views.vote_request,
+        name="vote_request",
+    ),
+    path(
+        "requests/<int:request_id>/done/",
+        additional_views.mark_request_done,
+        name="mark_request_done",
+    ),
     # Video progress endpoints
     path(
         "video-progress/",

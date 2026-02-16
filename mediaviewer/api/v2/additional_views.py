@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from mediaviewer.models.request import Request
+from mediaviewer.models.request import Request, RequestVote
 from mediaviewer.models.videoprogress import VideoProgress
 from mediaviewer.models.comment import Comment
 from mediaviewer.models.movie import Movie
@@ -554,6 +554,129 @@ def search(request):
                 "error": {
                     "code": "SEARCH_ERROR",
                     "message": "Search failed",
+                    "details": str(e),
+                }
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+# ============================================================================
+# VOTE ENDPOINTS
+# ============================================================================
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def vote_request(request, request_id):
+    """
+    POST /api/v2/requests/{id}/vote/ - Vote for a media request
+    User can vote once per day for a request
+    """
+    try:
+        req_obj = Request.objects.get(pk=request_id)
+    except Request.DoesNotExist:
+        return Response(
+            {
+                "error": {
+                    "code": "REQUEST_NOT_FOUND",
+                    "message": f"Request with id {request_id} not found",
+                }
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        # Check if user can vote (once per day)
+        if not req_obj.canVote(request.user):
+            return Response(
+                {
+                    "error": {
+                        "code": "VOTE_COOLDOWN",
+                        "message": "You can only vote for this request once per day",
+                    }
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        # Create vote
+        RequestVote.new(req_obj, request.user)
+
+        # Return updated request with new vote count
+        serializer = RequestSerializer(req_obj)
+        return Response(
+            {
+                "message": "Vote recorded successfully",
+                "data": serializer.data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        return Response(
+            {
+                "error": {
+                    "code": "VOTE_ERROR",
+                    "message": "Failed to record vote",
+                    "details": str(e),
+                }
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def mark_request_done(request, request_id):
+    """
+    POST /api/v2/requests/{id}/done/ - Mark a request as done
+    Only the request creator can mark it as done
+    """
+    try:
+        req_obj = Request.objects.get(pk=request_id)
+    except Request.DoesNotExist:
+        return Response(
+            {
+                "error": {
+                    "code": "REQUEST_NOT_FOUND",
+                    "message": f"Request with id {request_id} not found",
+                }
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        # Check if user is the request creator
+        if req_obj.user != request.user:
+            return Response(
+                {
+                    "error": {
+                        "code": "PERMISSION_DENIED",
+                        "message": "Only the request creator can mark it as done",
+                    }
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Mark as done
+        req_obj.done = True
+        req_obj.save()
+
+        serializer = RequestSerializer(req_obj)
+        return Response(
+            {
+                "message": "Request marked as done",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        return Response(
+            {
+                "error": {
+                    "code": "UPDATE_ERROR",
+                    "message": "Failed to mark request as done",
                     "details": str(e),
                 }
             },
