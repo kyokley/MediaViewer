@@ -11,6 +11,8 @@ import CollectionsPage from './pages/CollectionsPage'
 import UserProfilePage from './pages/UserProfilePage'
 import SearchPage from './pages/SearchPage'
 import { RequestsPage } from './pages/RequestsPage'
+import { CommentsPage } from './pages/CommentsPage'
+import { VideoProgressPage } from './pages/VideoProgressPage'
 
 function App() {
   const isAuthenticated = useAuthStore((state) => !!state.accessToken)
@@ -91,6 +93,22 @@ function App() {
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               <RequestsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/comments"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <CommentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/video-progress"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <VideoProgressPage />
             </ProtectedRoute>
           }
         />
