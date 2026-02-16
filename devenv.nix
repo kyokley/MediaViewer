@@ -32,10 +32,65 @@
       echo Scripts
       devenv info | awk /scripts/ RS="\n\n" ORS="\n\n" | tail -n "+2" | sort | awk '{$3=""; print $0}'
     '';
+
+    list.exec = ''
+      devenv info | awk /scripts/ RS="\n\n" ORS="\n\n" | tail -n "+2" | sort
+    '';
+
+    _touch-history.exec = ''
+      touch .mv.history
+    '';
+
+    _wait_for_db.exec = ''
+      devenv up -d postgres
+      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${config.env.MV_USER}:${config.env.MV_USER}@${config.env.MV_HOST}:5432/${config.env.MV_NAME}?sslmode=disable'
+    '';
+
     build.exec = ''
+      _touch-history
       nix build '.#mv-image'
       docker load < result
     '';
+
+    build-dev.exec = ''
+      _touch-history
+      docker build \
+        --build-arg UID=1000 \
+        --tag=kyokley/mediaviewer \
+        --target=dev \
+        .
+    '';
+
+    up.exec = ''
+      _wait_for_db
+      uv run python manage.py runserver 127.0.0.1:8000
+    '';
+
+    down.exec = ''
+      devenv processes down
+    '';
+
+    db-up.exec = ''
+      devenv up -d postgres
+    '';
+
+    db-shell.exec = ''
+      db-up
+      docker exec -it postgres /bin/bash
+    '';
+
+    shell.exec = ''
+      docker run --rm -it kyokley/mediaviewer /bin/bash
+    '';
+
+    live-shell.exec = ''
+      docker exec -it mediaviewer /bin/bash
+    '';
+
+    attach.exec = ''
+      docker attach $(docker ps -qf name=mediaviewer_mediaviewer)
+    '';
+
     clear.exec = ''
       rm -rf $DEVENV_STATE/postgres
     '';
@@ -46,19 +101,9 @@
       migrate
     '';
 
-    _wait_for_db.exec = ''
-      devenv up -d postgres
-      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${config.env.MV_USER}:${config.env.MV_USER}@${config.env.MV_HOST}:5432/${config.env.MV_NAME}?sslmode=disable'
-    '';
-
     migrate.exec = ''
       _wait_for_db
       uv run python manage.py migrate
-    '';
-
-    up.exec = ''
-      _wait_for_db
-      uv run python manage.py runserver 127.0.0.1:8000
     '';
 
     docker-up.exec = ''
@@ -76,10 +121,6 @@
                  kyokley/mediaviewer
     '';
 
-    down.exec = ''
-      devenv processes down
-    '';
-
     pytest.exec = ''
       set -e
       _wait_for_db
@@ -95,6 +136,29 @@
 
     bandit.exec = ''
       uv run bandit -x ./mediaviewer/tests,./.venv,./.devenv* $(test $# -eq 0 && echo "-r ." || echo $@)
+    '';
+
+    stop-all-but-db.exec = ''
+      devenv processes down
+      db-up
+    '';
+
+    static.exec = ''
+      yarn install
+    '';
+
+    push.exec = ''
+      build
+      docker push kyokley/mediaviewer
+    '';
+
+    publish.exec = ''
+      push
+    '';
+
+    autoformat.exec = ''
+      uv run black .
+      uv run isort .
     '';
   };
 
