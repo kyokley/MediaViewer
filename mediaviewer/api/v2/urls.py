@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from . import auth_views, users_views, media_views, collections_views
+from . import auth_views, users_views, media_views, collections_views, additional_views
 
 app_name = "api_v2"
 
@@ -34,4 +34,31 @@ urlpatterns = [
         collections_views.collection_items,
         name="collection_items",
     ),
+    # Request endpoints
+    path("requests/", additional_views.list_requests, name="list_requests"),
+    path(
+        "requests/<int:request_id>/",
+        additional_views.request_detail,
+        name="request_detail",
+    ),
+    # Video progress endpoints
+    path(
+        "video-progress/",
+        additional_views.list_video_progress,
+        name="list_video_progress",
+    ),
+    path(
+        "video-progress/<str:hashed_filename>/",
+        additional_views.delete_video_progress,
+        name="delete_video_progress",
+    ),
+    # Comment endpoints
+    path("comments/", additional_views.list_comments, name="list_comments"),
+    path(
+        "comments/<int:comment_id>/",
+        additional_views.comment_detail,
+        name="comment_detail",
+    ),
+    # Search endpoint
+    path("search/", additional_views.search, name="search"),
 ]

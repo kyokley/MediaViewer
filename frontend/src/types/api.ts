@@ -1,0 +1,127 @@
+// API Response types
+export interface ApiResponse<T = unknown> {
+  data: T;
+  pagination?: {
+    total: number;
+    limit: number;
+    offset: number;
+  };
+}
+
+export interface ApiError {
+  error: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+}
+
+// User types
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_staff: boolean;
+  avatar_url?: string;
+}
+
+export interface UserSettings {
+  id: number;
+  dark_theme: boolean;
+  items_per_page: number;
+  autoplay_next: boolean;
+  default_quality: string;
+  subtitle_language: string;
+  volume_level: number;
+  email_notifications: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Media types
+export interface Genre {
+  id: number;
+  genre: string;
+  datecreated: string;
+  dateedited: string;
+}
+
+export interface Movie {
+  id: number;
+  name: string;
+  date_created: string;
+  dateedited: string;
+  poster_image_url?: string;
+  genres: Genre[];
+}
+
+export interface TV {
+  id: number;
+  name: string;
+  date_created: string;
+  dateedited: string;
+  poster_image_url?: string;
+  genres: Genre[];
+}
+
+// Collection types
+export interface Collection {
+  id: number;
+  name: string;
+  item_count: number;
+}
+
+// Request types
+export interface MediaRequest {
+  id: number;
+  name: string;
+  done: boolean;
+  user_username: string;
+  vote_count: number;
+  datecreated: string;
+  dateedited: string;
+}
+
+// Video progress types
+export interface VideoProgress {
+  id: number;
+  hashed_filename: string;
+  offset: number;
+  date_edited: string;
+  movie_name?: string;
+  media_file_name?: string;
+}
+
+// Comment types
+export interface Comment {
+  id: number;
+  user_username: string;
+  movie_name?: string;
+  media_file_name?: string;
+  viewed: boolean;
+  date_created: string;
+  date_modified: string;
+}
+
+// Auth types
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access: string;
+  refresh: string;
+  user: User;
+}
+
+export interface RefreshTokenRequest {
+  refresh: string;
+}
+
+export interface RefreshTokenResponse {
+  access: string;
+  refresh?: string;
+}
