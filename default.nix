@@ -15,8 +15,23 @@
       then pkgs.cctools or pkgs.darwin.cctools
       else null;
   };
-in
-  import ./node-packages.nix {
+
+  nodePackages = import ./node-packages.nix {
     inherit (pkgs) fetchurl nix-gitignore stdenv lib fetchgit;
     inherit nodeEnv;
-  }
+  };
+in {
+  inherit (nodePackages) sources args tarball package shell;
+
+  # Fix broken symlink issue by removing the bin directory
+  nodeDependencies = nodePackages.nodeDependencies.overrideAttrs (oldAttrs: {
+    preFixup =
+      (oldAttrs.preFixup or "")
+      + ''
+        # Remove broken symlink to .bin if it exists
+        if [ -L "$out/bin" ] && [ ! -e "$out/bin" ]; then
+          rm "$out/bin"
+        fi
+      '';
+  });
+}

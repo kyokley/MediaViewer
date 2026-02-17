@@ -4,24 +4,7 @@
   config,
   inputs,
   ...
-}: let
-  set-env = ''
-    : ''${USE_HOST_NET:=0}
-    if [ $USE_HOST_NET -eq 1 ]
-    then
-      HOST_NET_COMPOSE_ARGS="-f docker-compose.host-net.yml"
-      MV_HOST="127.0.0.1"
-    else
-      HOST_NET_COMPOSE_ARGS=""
-      MV_HOST="postgres"
-    fi
-
-    : ''${DEV_COMPOSE_ARGS:="-f docker-compose.yml -f docker-compose.dev.yml $HOST_NET_COMPOSE_ARGS"}
-    : ''${PROD_COMPOSE_ARGS:="-f docker-compose.yml -f docker-compose.prod.yml $HOST_NET_COMPOSE_ARGS"}
-    export DEV_COMPOSE_ARGS PROD_COMPOSE_ARGS HOST_NET_COMPOSE_ARGS MV_HOST
-  '';
-  POSTGRES_VERSION = "postgresql_17";
-in {
+}: {
   # https://devenv.sh/basics/
   env = {
     MV_NAME = lib.mkDefault "mv";
@@ -78,32 +61,29 @@ in {
 
     up.exec = ''
       set -x
-      ${set-env}
-      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} up $@
+      ${pkgs.docker}/bin/docker compose up $@
     '';
 
     down.exec = ''
       set -x
-      ${set-env}
-      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} down $@
+      ${pkgs.docker}/bin/docker compose down $@
     '';
 
     logs.exec = ''
-      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} logs $@
+      ${pkgs.docker}/bin/docker compose logs $@
     '';
 
     shell.exec = ''
       build-dev
-      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} run $@ bash
+      ${pkgs.docker}/bin/docker compose run $@ bash
     '';
 
     attach.exec = ''
-      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} attach $@
+      ${pkgs.docker}/bin/docker compose attach $@
     '';
 
     clear.exec = ''
-      ${set-env}
-      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} down --remove-orphans -v
+      ${pkgs.docker}/bin/docker compose down --remove-orphans -v
     '';
 
     init.exec = ''

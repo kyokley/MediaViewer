@@ -8,12 +8,804 @@
   lib,
   globalBuildInputs ? [],
 }: let
-  sources = {};
+  sources = {
+    "@esbuild/aix-ppc64-0.21.5" = {
+      name = "_at_esbuild_slash_aix-ppc64";
+      packageName = "@esbuild/aix-ppc64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.21.5.tgz";
+        sha512 = "1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==";
+      };
+    };
+    "@esbuild/android-arm-0.21.5" = {
+      name = "_at_esbuild_slash_android-arm";
+      packageName = "@esbuild/android-arm";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/android-arm/-/android-arm-0.21.5.tgz";
+        sha512 = "vCPvzSjpPHEi1siZdlvAlsPxXl7WbOVUBBAowWug4rJHb68Ox8KualB+1ocNvT5fjv6wpkX6o/iEpbDrf68zcg==";
+      };
+    };
+    "@esbuild/android-arm64-0.21.5" = {
+      name = "_at_esbuild_slash_android-arm64";
+      packageName = "@esbuild/android-arm64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/android-arm64/-/android-arm64-0.21.5.tgz";
+        sha512 = "c0uX9VAUBQ7dTDCjq+wdyGLowMdtR/GoC2U5IYk/7D1H1JYC0qseD7+11iMP2mRLN9RcCMRcjC4YMclCzGwS/A==";
+      };
+    };
+    "@esbuild/android-x64-0.21.5" = {
+      name = "_at_esbuild_slash_android-x64";
+      packageName = "@esbuild/android-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/android-x64/-/android-x64-0.21.5.tgz";
+        sha512 = "D7aPRUUNHRBwHxzxRvp856rjUHRFW1SdQATKXH2hqA0kAZb1hKmi02OpYRacl0TxIGz/ZmXWlbZgjwWYaCakTA==";
+      };
+    };
+    "@esbuild/darwin-arm64-0.21.5" = {
+      name = "_at_esbuild_slash_darwin-arm64";
+      packageName = "@esbuild/darwin-arm64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.21.5.tgz";
+        sha512 = "DwqXqZyuk5AiWWf3UfLiRDJ5EDd49zg6O9wclZ7kUMv2WRFr4HKjXp/5t8JZ11QbQfUS6/cRCKGwYhtNAY88kQ==";
+      };
+    };
+    "@esbuild/darwin-x64-0.21.5" = {
+      name = "_at_esbuild_slash_darwin-x64";
+      packageName = "@esbuild/darwin-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/darwin-x64/-/darwin-x64-0.21.5.tgz";
+        sha512 = "se/JjF8NlmKVG4kNIuyWMV/22ZaerB+qaSi5MdrXtd6R08kvs2qCN4C09miupktDitvh8jRFflwGFBQcxZRjbw==";
+      };
+    };
+    "@esbuild/freebsd-arm64-0.21.5" = {
+      name = "_at_esbuild_slash_freebsd-arm64";
+      packageName = "@esbuild/freebsd-arm64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/freebsd-arm64/-/freebsd-arm64-0.21.5.tgz";
+        sha512 = "5JcRxxRDUJLX8JXp/wcBCy3pENnCgBR9bN6JsY4OmhfUtIHe3ZW0mawA7+RDAcMLrMIZaf03NlQiX9DGyB8h4g==";
+      };
+    };
+    "@esbuild/freebsd-x64-0.21.5" = {
+      name = "_at_esbuild_slash_freebsd-x64";
+      packageName = "@esbuild/freebsd-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/freebsd-x64/-/freebsd-x64-0.21.5.tgz";
+        sha512 = "J95kNBj1zkbMXtHVH29bBriQygMXqoVQOQYA+ISs0/2l3T9/kj42ow2mpqerRBxDJnmkUDCaQT/dfNXWX/ZZCQ==";
+      };
+    };
+    "@esbuild/linux-arm-0.21.5" = {
+      name = "_at_esbuild_slash_linux-arm";
+      packageName = "@esbuild/linux-arm";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-arm/-/linux-arm-0.21.5.tgz";
+        sha512 = "bPb5AHZtbeNGjCKVZ9UGqGwo8EUu4cLq68E95A53KlxAPRmUyYv2D6F0uUI65XisGOL1hBP5mTronbgo+0bFcA==";
+      };
+    };
+    "@esbuild/linux-arm64-0.21.5" = {
+      name = "_at_esbuild_slash_linux-arm64";
+      packageName = "@esbuild/linux-arm64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-arm64/-/linux-arm64-0.21.5.tgz";
+        sha512 = "ibKvmyYzKsBeX8d8I7MH/TMfWDXBF3db4qM6sy+7re0YXya+K1cem3on9XgdT2EQGMu4hQyZhan7TeQ8XkGp4Q==";
+      };
+    };
+    "@esbuild/linux-ia32-0.21.5" = {
+      name = "_at_esbuild_slash_linux-ia32";
+      packageName = "@esbuild/linux-ia32";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-ia32/-/linux-ia32-0.21.5.tgz";
+        sha512 = "YvjXDqLRqPDl2dvRODYmmhz4rPeVKYvppfGYKSNGdyZkA01046pLWyRKKI3ax8fbJoK5QbxblURkwK/MWY18Tg==";
+      };
+    };
+    "@esbuild/linux-loong64-0.21.5" = {
+      name = "_at_esbuild_slash_linux-loong64";
+      packageName = "@esbuild/linux-loong64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-loong64/-/linux-loong64-0.21.5.tgz";
+        sha512 = "uHf1BmMG8qEvzdrzAqg2SIG/02+4/DHB6a9Kbya0XDvwDEKCoC8ZRWI5JJvNdUjtciBGFQ5PuBlpEOXQj+JQSg==";
+      };
+    };
+    "@esbuild/linux-mips64el-0.21.5" = {
+      name = "_at_esbuild_slash_linux-mips64el";
+      packageName = "@esbuild/linux-mips64el";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-mips64el/-/linux-mips64el-0.21.5.tgz";
+        sha512 = "IajOmO+KJK23bj52dFSNCMsz1QP1DqM6cwLUv3W1QwyxkyIWecfafnI555fvSGqEKwjMXVLokcV5ygHW5b3Jbg==";
+      };
+    };
+    "@esbuild/linux-ppc64-0.21.5" = {
+      name = "_at_esbuild_slash_linux-ppc64";
+      packageName = "@esbuild/linux-ppc64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-ppc64/-/linux-ppc64-0.21.5.tgz";
+        sha512 = "1hHV/Z4OEfMwpLO8rp7CvlhBDnjsC3CttJXIhBi+5Aj5r+MBvy4egg7wCbe//hSsT+RvDAG7s81tAvpL2XAE4w==";
+      };
+    };
+    "@esbuild/linux-riscv64-0.21.5" = {
+      name = "_at_esbuild_slash_linux-riscv64";
+      packageName = "@esbuild/linux-riscv64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-riscv64/-/linux-riscv64-0.21.5.tgz";
+        sha512 = "2HdXDMd9GMgTGrPWnJzP2ALSokE/0O5HhTUvWIbD3YdjME8JwvSCnNGBnTThKGEB91OZhzrJ4qIIxk/SBmyDDA==";
+      };
+    };
+    "@esbuild/linux-s390x-0.21.5" = {
+      name = "_at_esbuild_slash_linux-s390x";
+      packageName = "@esbuild/linux-s390x";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-s390x/-/linux-s390x-0.21.5.tgz";
+        sha512 = "zus5sxzqBJD3eXxwvjN1yQkRepANgxE9lgOW2qLnmr8ikMTphkjgXu1HR01K4FJg8h1kEEDAqDcZQtbrRnB41A==";
+      };
+    };
+    "@esbuild/linux-x64-0.21.5" = {
+      name = "_at_esbuild_slash_linux-x64";
+      packageName = "@esbuild/linux-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.21.5.tgz";
+        sha512 = "1rYdTpyv03iycF1+BhzrzQJCdOuAOtaqHTWJZCWvijKD2N5Xu0TtVC8/+1faWqcP9iBCWOmjmhoH94dH82BxPQ==";
+      };
+    };
+    "@esbuild/netbsd-x64-0.21.5" = {
+      name = "_at_esbuild_slash_netbsd-x64";
+      packageName = "@esbuild/netbsd-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/netbsd-x64/-/netbsd-x64-0.21.5.tgz";
+        sha512 = "Woi2MXzXjMULccIwMnLciyZH4nCIMpWQAs049KEeMvOcNADVxo0UBIQPfSmxB3CWKedngg7sWZdLvLczpe0tLg==";
+      };
+    };
+    "@esbuild/openbsd-x64-0.21.5" = {
+      name = "_at_esbuild_slash_openbsd-x64";
+      packageName = "@esbuild/openbsd-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/openbsd-x64/-/openbsd-x64-0.21.5.tgz";
+        sha512 = "HLNNw99xsvx12lFBUwoT8EVCsSvRNDVxNpjZ7bPn947b8gJPzeHWyNVhFsaerc0n3TsbOINvRP2byTZ5LKezow==";
+      };
+    };
+    "@esbuild/sunos-x64-0.21.5" = {
+      name = "_at_esbuild_slash_sunos-x64";
+      packageName = "@esbuild/sunos-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/sunos-x64/-/sunos-x64-0.21.5.tgz";
+        sha512 = "6+gjmFpfy0BHU5Tpptkuh8+uw3mnrvgs+dSPQXQOv3ekbordwnzTVEb4qnIvQcYXq6gzkyTnoZ9dZG+D4garKg==";
+      };
+    };
+    "@esbuild/win32-arm64-0.21.5" = {
+      name = "_at_esbuild_slash_win32-arm64";
+      packageName = "@esbuild/win32-arm64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/win32-arm64/-/win32-arm64-0.21.5.tgz";
+        sha512 = "Z0gOTd75VvXqyq7nsl93zwahcTROgqvuAcYDUr+vOv8uHhNSKROyU961kgtCD1e95IqPKSQKH7tBTslnS3tA8A==";
+      };
+    };
+    "@esbuild/win32-ia32-0.21.5" = {
+      name = "_at_esbuild_slash_win32-ia32";
+      packageName = "@esbuild/win32-ia32";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/win32-ia32/-/win32-ia32-0.21.5.tgz";
+        sha512 = "SWXFF1CL2RVNMaVs+BBClwtfZSvDgtL//G/smwAc5oVK/UPu2Gu9tIaRgFmYFFKrmg3SyAjSrElf0TiJ1v8fYA==";
+      };
+    };
+    "@esbuild/win32-x64-0.21.5" = {
+      name = "_at_esbuild_slash_win32-x64";
+      packageName = "@esbuild/win32-x64";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.21.5.tgz";
+        sha512 = "tQd/1efJuzPC6rCFwEvLtci/xNFcTZknmXs98FYDfGE4wP9ClFV98nyKrzJKVPMhdDnjzLhdUyMX4PsQAPjwIw==";
+      };
+    };
+    "@popperjs/core-2.11.8" = {
+      name = "_at_popperjs_slash_core";
+      packageName = "@popperjs/core";
+      version = "2.11.8";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz";
+        sha512 = "P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==";
+      };
+    };
+    "@rollup/rollup-android-arm-eabi-4.57.1" = {
+      name = "_at_rollup_slash_rollup-android-arm-eabi";
+      packageName = "@rollup/rollup-android-arm-eabi";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.57.1.tgz";
+        sha512 = "A6ehUVSiSaaliTxai040ZpZ2zTevHYbvu/lDoeAteHI8QnaosIzm4qwtezfRg1jOYaUmnzLX1AOD6Z+UJjtifg==";
+      };
+    };
+    "@rollup/rollup-android-arm64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-android-arm64";
+      packageName = "@rollup/rollup-android-arm64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-android-arm64/-/rollup-android-arm64-4.57.1.tgz";
+        sha512 = "dQaAddCY9YgkFHZcFNS/606Exo8vcLHwArFZ7vxXq4rigo2bb494/xKMMwRRQW6ug7Js6yXmBZhSBRuBvCCQ3w==";
+      };
+    };
+    "@rollup/rollup-darwin-arm64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-darwin-arm64";
+      packageName = "@rollup/rollup-darwin-arm64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-darwin-arm64/-/rollup-darwin-arm64-4.57.1.tgz";
+        sha512 = "crNPrwJOrRxagUYeMn/DZwqN88SDmwaJ8Cvi/TN1HnWBU7GwknckyosC2gd0IqYRsHDEnXf328o9/HC6OkPgOg==";
+      };
+    };
+    "@rollup/rollup-darwin-x64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-darwin-x64";
+      packageName = "@rollup/rollup-darwin-x64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-darwin-x64/-/rollup-darwin-x64-4.57.1.tgz";
+        sha512 = "Ji8g8ChVbKrhFtig5QBV7iMaJrGtpHelkB3lsaKzadFBe58gmjfGXAOfI5FV0lYMH8wiqsxKQ1C9B0YTRXVy4w==";
+      };
+    };
+    "@rollup/rollup-freebsd-arm64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-freebsd-arm64";
+      packageName = "@rollup/rollup-freebsd-arm64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-freebsd-arm64/-/rollup-freebsd-arm64-4.57.1.tgz";
+        sha512 = "R+/WwhsjmwodAcz65guCGFRkMb4gKWTcIeLy60JJQbXrJ97BOXHxnkPFrP+YwFlaS0m+uWJTstrUA9o+UchFug==";
+      };
+    };
+    "@rollup/rollup-freebsd-x64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-freebsd-x64";
+      packageName = "@rollup/rollup-freebsd-x64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-freebsd-x64/-/rollup-freebsd-x64-4.57.1.tgz";
+        sha512 = "IEQTCHeiTOnAUC3IDQdzRAGj3jOAYNr9kBguI7MQAAZK3caezRrg0GxAb6Hchg4lxdZEI5Oq3iov/w/hnFWY9Q==";
+      };
+    };
+    "@rollup/rollup-linux-arm-gnueabihf-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-arm-gnueabihf";
+      packageName = "@rollup/rollup-linux-arm-gnueabihf";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-arm-gnueabihf/-/rollup-linux-arm-gnueabihf-4.57.1.tgz";
+        sha512 = "F8sWbhZ7tyuEfsmOxwc2giKDQzN3+kuBLPwwZGyVkLlKGdV1nvnNwYD0fKQ8+XS6hp9nY7B+ZeK01EBUE7aHaw==";
+      };
+    };
+    "@rollup/rollup-linux-arm-musleabihf-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-arm-musleabihf";
+      packageName = "@rollup/rollup-linux-arm-musleabihf";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-arm-musleabihf/-/rollup-linux-arm-musleabihf-4.57.1.tgz";
+        sha512 = "rGfNUfn0GIeXtBP1wL5MnzSj98+PZe/AXaGBCRmT0ts80lU5CATYGxXukeTX39XBKsxzFpEeK+Mrp9faXOlmrw==";
+      };
+    };
+    "@rollup/rollup-linux-arm64-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-arm64-gnu";
+      packageName = "@rollup/rollup-linux-arm64-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-arm64-gnu/-/rollup-linux-arm64-gnu-4.57.1.tgz";
+        sha512 = "MMtej3YHWeg/0klK2Qodf3yrNzz6CGjo2UntLvk2RSPlhzgLvYEB3frRvbEF2wRKh1Z2fDIg9KRPe1fawv7C+g==";
+      };
+    };
+    "@rollup/rollup-linux-arm64-musl-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-arm64-musl";
+      packageName = "@rollup/rollup-linux-arm64-musl";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-arm64-musl/-/rollup-linux-arm64-musl-4.57.1.tgz";
+        sha512 = "1a/qhaaOXhqXGpMFMET9VqwZakkljWHLmZOX48R0I/YLbhdxr1m4gtG1Hq7++VhVUmf+L3sTAf9op4JlhQ5u1Q==";
+      };
+    };
+    "@rollup/rollup-linux-loong64-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-loong64-gnu";
+      packageName = "@rollup/rollup-linux-loong64-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-loong64-gnu/-/rollup-linux-loong64-gnu-4.57.1.tgz";
+        sha512 = "QWO6RQTZ/cqYtJMtxhkRkidoNGXc7ERPbZN7dVW5SdURuLeVU7lwKMpo18XdcmpWYd0qsP1bwKPf7DNSUinhvA==";
+      };
+    };
+    "@rollup/rollup-linux-loong64-musl-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-loong64-musl";
+      packageName = "@rollup/rollup-linux-loong64-musl";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-loong64-musl/-/rollup-linux-loong64-musl-4.57.1.tgz";
+        sha512 = "xpObYIf+8gprgWaPP32xiN5RVTi/s5FCR+XMXSKmhfoJjrpRAjCuuqQXyxUa/eJTdAE6eJ+KDKaoEqjZQxh3Gw==";
+      };
+    };
+    "@rollup/rollup-linux-ppc64-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-ppc64-gnu";
+      packageName = "@rollup/rollup-linux-ppc64-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-ppc64-gnu/-/rollup-linux-ppc64-gnu-4.57.1.tgz";
+        sha512 = "4BrCgrpZo4hvzMDKRqEaW1zeecScDCR+2nZ86ATLhAoJ5FQ+lbHVD3ttKe74/c7tNT9c6F2viwB3ufwp01Oh2w==";
+      };
+    };
+    "@rollup/rollup-linux-ppc64-musl-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-ppc64-musl";
+      packageName = "@rollup/rollup-linux-ppc64-musl";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-ppc64-musl/-/rollup-linux-ppc64-musl-4.57.1.tgz";
+        sha512 = "NOlUuzesGauESAyEYFSe3QTUguL+lvrN1HtwEEsU2rOwdUDeTMJdO5dUYl/2hKf9jWydJrO9OL/XSSf65R5+Xw==";
+      };
+    };
+    "@rollup/rollup-linux-riscv64-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-riscv64-gnu";
+      packageName = "@rollup/rollup-linux-riscv64-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-riscv64-gnu/-/rollup-linux-riscv64-gnu-4.57.1.tgz";
+        sha512 = "ptA88htVp0AwUUqhVghwDIKlvJMD/fmL/wrQj99PRHFRAG6Z5nbWoWG4o81Nt9FT+IuqUQi+L31ZKAFeJ5Is+A==";
+      };
+    };
+    "@rollup/rollup-linux-riscv64-musl-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-riscv64-musl";
+      packageName = "@rollup/rollup-linux-riscv64-musl";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-riscv64-musl/-/rollup-linux-riscv64-musl-4.57.1.tgz";
+        sha512 = "S51t7aMMTNdmAMPpBg7OOsTdn4tySRQvklmL3RpDRyknk87+Sp3xaumlatU+ppQ+5raY7sSTcC2beGgvhENfuw==";
+      };
+    };
+    "@rollup/rollup-linux-s390x-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-s390x-gnu";
+      packageName = "@rollup/rollup-linux-s390x-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-s390x-gnu/-/rollup-linux-s390x-gnu-4.57.1.tgz";
+        sha512 = "Bl00OFnVFkL82FHbEqy3k5CUCKH6OEJL54KCyx2oqsmZnFTR8IoNqBF+mjQVcRCT5sB6yOvK8A37LNm/kPJiZg==";
+      };
+    };
+    "@rollup/rollup-linux-x64-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-x64-gnu";
+      packageName = "@rollup/rollup-linux-x64-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.57.1.tgz";
+        sha512 = "ABca4ceT4N+Tv/GtotnWAeXZUZuM/9AQyCyKYyKnpk4yoA7QIAuBt6Hkgpw8kActYlew2mvckXkvx0FfoInnLg==";
+      };
+    };
+    "@rollup/rollup-linux-x64-musl-4.57.1" = {
+      name = "_at_rollup_slash_rollup-linux-x64-musl";
+      packageName = "@rollup/rollup-linux-x64-musl";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.57.1.tgz";
+        sha512 = "HFps0JeGtuOR2convgRRkHCekD7j+gdAuXM+/i6kGzQtFhlCtQkpwtNzkNj6QhCDp7DRJ7+qC/1Vg2jt5iSOFw==";
+      };
+    };
+    "@rollup/rollup-openbsd-x64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-openbsd-x64";
+      packageName = "@rollup/rollup-openbsd-x64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-openbsd-x64/-/rollup-openbsd-x64-4.57.1.tgz";
+        sha512 = "H+hXEv9gdVQuDTgnqD+SQffoWoc0Of59AStSzTEj/feWTBAnSfSD3+Dql1ZruJQxmykT/JVY0dE8Ka7z0DH1hw==";
+      };
+    };
+    "@rollup/rollup-openharmony-arm64-4.57.1" = {
+      name = "_at_rollup_slash_rollup-openharmony-arm64";
+      packageName = "@rollup/rollup-openharmony-arm64";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-openharmony-arm64/-/rollup-openharmony-arm64-4.57.1.tgz";
+        sha512 = "4wYoDpNg6o/oPximyc/NG+mYUejZrCU2q+2w6YZqrAs2UcNUChIZXjtafAiiZSUc7On8v5NyNj34Kzj/Ltk6dQ==";
+      };
+    };
+    "@rollup/rollup-win32-arm64-msvc-4.57.1" = {
+      name = "_at_rollup_slash_rollup-win32-arm64-msvc";
+      packageName = "@rollup/rollup-win32-arm64-msvc";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-win32-arm64-msvc/-/rollup-win32-arm64-msvc-4.57.1.tgz";
+        sha512 = "O54mtsV/6LW3P8qdTcamQmuC990HDfR71lo44oZMZlXU4tzLrbvTii87Ni9opq60ds0YzuAlEr/GNwuNluZyMQ==";
+      };
+    };
+    "@rollup/rollup-win32-ia32-msvc-4.57.1" = {
+      name = "_at_rollup_slash_rollup-win32-ia32-msvc";
+      packageName = "@rollup/rollup-win32-ia32-msvc";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-win32-ia32-msvc/-/rollup-win32-ia32-msvc-4.57.1.tgz";
+        sha512 = "P3dLS+IerxCT/7D2q2FYcRdWRl22dNbrbBEtxdWhXrfIMPP9lQhb5h4Du04mdl5Woq05jVCDPCMF7Ub0NAjIew==";
+      };
+    };
+    "@rollup/rollup-win32-x64-gnu-4.57.1" = {
+      name = "_at_rollup_slash_rollup-win32-x64-gnu";
+      packageName = "@rollup/rollup-win32-x64-gnu";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.57.1.tgz";
+        sha512 = "VMBH2eOOaKGtIJYleXsi2B8CPVADrh+TyNxJ4mWPnKfLB/DBUmzW+5m1xUrcwWoMfSLagIRpjUFeW5CO5hyciQ==";
+      };
+    };
+    "@rollup/rollup-win32-x64-msvc-4.57.1" = {
+      name = "_at_rollup_slash_rollup-win32-x64-msvc";
+      packageName = "@rollup/rollup-win32-x64-msvc";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.57.1.tgz";
+        sha512 = "mxRFDdHIWRxg3UfIIAwCm6NzvxG0jDX/wBN6KsQFTvKFqqg9vTrWUE68qEjHt19A5wwx5X5aUi2zuZT7YR0jrA==";
+      };
+    };
+    "@types/estree-1.0.8" = {
+      name = "_at_types_slash_estree";
+      packageName = "@types/estree";
+      version = "1.0.8";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/@types/estree/-/estree-1.0.8.tgz";
+        sha512 = "dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==";
+      };
+    };
+    "bootstrap-5.3.8" = {
+      name = "bootstrap";
+      packageName = "bootstrap";
+      version = "5.3.8";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/bootstrap/-/bootstrap-5.3.8.tgz";
+        sha512 = "HP1SZDqaLDPwsNiqRqi5NcP0SSXciX2s9E+RyqJIIqGo+vJeN5AJVM98CXmW/Wux0nQ5L7jeWUdplCEf0Ee+tg==";
+      };
+    };
+    "bootstrap-icons-1.13.1" = {
+      name = "bootstrap-icons";
+      packageName = "bootstrap-icons";
+      version = "1.13.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/bootstrap-icons/-/bootstrap-icons-1.13.1.tgz";
+        sha512 = "ijombt4v6bv5CLeXvRWKy7CuM3TRTuPEuGaGKvTV5cz65rQSY8RQ2JcHt6b90cBBAC7s8fsf2EkQDldzCoXUjw==";
+      };
+    };
+    "cac-6.7.14" = {
+      name = "cac";
+      packageName = "cac";
+      version = "6.7.14";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/cac/-/cac-6.7.14.tgz";
+        sha512 = "b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ==";
+      };
+    };
+    "datatables.net-1.13.11" = {
+      name = "datatables.net";
+      packageName = "datatables.net";
+      version = "1.13.11";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net/-/datatables.net-1.13.11.tgz";
+        sha512 = "AE6RkMXziRaqzPcu/pl3SJXeRa6fmXQG/fVjuRESujvkzqDCYEeKTTpPMuVJSGYJpPi32WGSphVNNY1G4nSN/g==";
+      };
+    };
+    "datatables.net-2.3.7" = {
+      name = "datatables.net";
+      packageName = "datatables.net";
+      version = "2.3.7";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net/-/datatables.net-2.3.7.tgz";
+        sha512 = "AvsjG/Nkp6OxeyBKYZauemuzQCPogE1kOtKwG4sYjvdqGCSLiGaJagQwXv4YxG+ts5vaJr6qKGG9ec3g6vTo3w==";
+      };
+    };
+    "datatables.net-bs5-1.13.11" = {
+      name = "datatables.net-bs5";
+      packageName = "datatables.net-bs5";
+      version = "1.13.11";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net-bs5/-/datatables.net-bs5-1.13.11.tgz";
+        sha512 = "NQO15TjXo4xvZ0jReC4Uf86ezbQzPQPdaN2YncrCPhzQ6fx+2WD7DUq4ur0HbAcYHo94/M+MtD5Ch29To7Rj3Q==";
+      };
+    };
+    "datatables.net-bs5-2.3.7" = {
+      name = "datatables.net-bs5";
+      packageName = "datatables.net-bs5";
+      version = "2.3.7";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net-bs5/-/datatables.net-bs5-2.3.7.tgz";
+        sha512 = "RiCEMpMXDBeMDwjSrMpmcXDU6mibRMuOn7Wk7k3SlOfLEY3FQHO7S2m+K7teXYeaNlCLyjJMU+6BUUwlBCpLFw==";
+      };
+    };
+    "datatables.net-buttons-2.4.3" = {
+      name = "datatables.net-buttons";
+      packageName = "datatables.net-buttons";
+      version = "2.4.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net-buttons/-/datatables.net-buttons-2.4.3.tgz";
+        sha512 = "xoHD6I2kxnU/CEp97Ar0lSnAL1siucQ/5Q/otGWWfWE2VN0o4n5C2h2Ot/ZCS8kxbEHBGd873Bc2xPdJH87yOw==";
+      };
+    };
+    "datatables.net-buttons-bs5-2.4.3" = {
+      name = "datatables.net-buttons-bs5";
+      packageName = "datatables.net-buttons-bs5";
+      version = "2.4.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net-buttons-bs5/-/datatables.net-buttons-bs5-2.4.3.tgz";
+        sha512 = "osgIyqTTXRWOF+vh19GM0ixB4kqmtQTiYmcO3v2Ca+bwUpfasI+ylEyMrHqqiON77zA+FmPTuUVHUZTJIIJWUg==";
+      };
+    };
+    "datatables.net-scroller-2.4.3" = {
+      name = "datatables.net-scroller";
+      packageName = "datatables.net-scroller";
+      version = "2.4.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net-scroller/-/datatables.net-scroller-2.4.3.tgz";
+        sha512 = "ce6Qa7ObGQmLJYvm6eMglf54L+01/Omn3N1pw7SiQjGYv8AKRRp1ex+U0NWmx3QaWp0iEeTnBaM4G6ay4juYZg==";
+      };
+    };
+    "datatables.net-scroller-bs5-2.4.3" = {
+      name = "datatables.net-scroller-bs5";
+      packageName = "datatables.net-scroller-bs5";
+      version = "2.4.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/datatables.net-scroller-bs5/-/datatables.net-scroller-bs5-2.4.3.tgz";
+        sha512 = "Dcg0dlp6XHw7MvnohbygY3fc2KxBGVPFveAlo2oXXKUTzXbiO3hWBvwnk5wKK9Bz5QP47XqqiImtui5ZprOcSg==";
+      };
+    };
+    "debug-4.4.3" = {
+      name = "debug";
+      packageName = "debug";
+      version = "4.4.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz";
+        sha512 = "RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==";
+      };
+    };
+    "es-module-lexer-1.7.0" = {
+      name = "es-module-lexer";
+      packageName = "es-module-lexer";
+      version = "1.7.0";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/es-module-lexer/-/es-module-lexer-1.7.0.tgz";
+        sha512 = "jEQoCwk8hyb2AZziIOLhDqpm5+2ww5uIE6lkO/6jcOCusfk6LhMHpXXfBLXTZ7Ydyt0j4VoUQv6uGNYbdW+kBA==";
+      };
+    };
+    "esbuild-0.21.5" = {
+      name = "esbuild";
+      packageName = "esbuild";
+      version = "0.21.5";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/esbuild/-/esbuild-0.21.5.tgz";
+        sha512 = "mg3OPMV4hXywwpoDxu3Qda5xCKQi+vCTZq8S9J/EpkhB2HzKXq4SNFZE3+NK93JYxc8VMSep+lOUSC/RVKaBqw==";
+      };
+    };
+    "fsevents-2.3.3" = {
+      name = "fsevents";
+      packageName = "fsevents";
+      version = "2.3.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz";
+        sha512 = "5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==";
+      };
+    };
+    "jquery-3.7.1" = {
+      name = "jquery";
+      packageName = "jquery";
+      version = "3.7.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/jquery/-/jquery-3.7.1.tgz";
+        sha512 = "m4avr8yL8kmFN8psrbFFFmB/If14iN5o9nw/NgnnM+kybDJpRsAynV2BsfpTYrTRysYUdADVD7CkUUizgkpLfg==";
+      };
+    };
+    "jquery-migrate-3.6.0" = {
+      name = "jquery-migrate";
+      packageName = "jquery-migrate";
+      version = "3.6.0";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/jquery-migrate/-/jquery-migrate-3.6.0.tgz";
+        sha512 = "2k3GMQXXEellCOkj8tczgCd/Y0KMm7LErz4rE6CkHIZV1JTUDlgs7XFN+GpwGKXDQtw/HsjtJuE+CS8IfEOnPg==";
+      };
+    };
+    "jquery.shorten-1.0.0" = {
+      name = "jquery.shorten";
+      packageName = "jquery.shorten";
+      version = "1.0.0";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/jquery.shorten/-/jquery.shorten-1.0.0.tgz";
+        sha512 = "49rJlpcyVI/Y2eQRwSexyz6l+fwTKfurO0XttXK4XnG9eQxIuE2Fb4rwNqnsnzStJ8M7ynlhH31fWE9P70B9rg==";
+      };
+    };
+    "ms-2.1.3" = {
+      name = "ms";
+      packageName = "ms";
+      version = "2.1.3";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz";
+        sha512 = "6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==";
+      };
+    };
+    "nanoid-3.3.11" = {
+      name = "nanoid";
+      packageName = "nanoid";
+      version = "3.3.11";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz";
+        sha512 = "N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==";
+      };
+    };
+    "pathe-1.1.2" = {
+      name = "pathe";
+      packageName = "pathe";
+      version = "1.1.2";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/pathe/-/pathe-1.1.2.tgz";
+        sha512 = "whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==";
+      };
+    };
+    "picocolors-1.1.1" = {
+      name = "picocolors";
+      packageName = "picocolors";
+      version = "1.1.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz";
+        sha512 = "xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==";
+      };
+    };
+    "postcss-8.5.6" = {
+      name = "postcss";
+      packageName = "postcss";
+      version = "8.5.6";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/postcss/-/postcss-8.5.6.tgz";
+        sha512 = "3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==";
+      };
+    };
+    "rollup-4.57.1" = {
+      name = "rollup";
+      packageName = "rollup";
+      version = "4.57.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/rollup/-/rollup-4.57.1.tgz";
+        sha512 = "oQL6lgK3e2QZeQ7gcgIkS2YZPg5slw37hYufJ3edKlfQSGGm8ICoxswK15ntSzF/a8+h7ekRy7k7oWc3BQ7y8A==";
+      };
+    };
+    "slick-carousel-1.8.1" = {
+      name = "slick-carousel";
+      packageName = "slick-carousel";
+      version = "1.8.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/slick-carousel/-/slick-carousel-1.8.1.tgz";
+        sha512 = "XB9Ftrf2EEKfzoQXt3Nitrt/IPbT+f1fgqBdoxO3W/+JYvtEOW6EgxnWfr9GH6nmULv7Y2tPmEX3koxThVmebA==";
+      };
+    };
+    "source-map-js-1.2.1" = {
+      name = "source-map-js";
+      packageName = "source-map-js";
+      version = "1.2.1";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/source-map-js/-/source-map-js-1.2.1.tgz";
+        sha512 = "UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==";
+      };
+    };
+    "vite-5.4.21" = {
+      name = "vite";
+      packageName = "vite";
+      version = "5.4.21";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/vite/-/vite-5.4.21.tgz";
+        sha512 = "o5a9xKjbtuhY6Bi5S3+HvbRERmouabWbyUcpXXUA1u+GNUKoROi9byOJ8M0nHbHYHkYICiMlqxkg1KkYmm25Sw==";
+      };
+    };
+    "vite-node-2.1.9" = {
+      name = "vite-node";
+      packageName = "vite-node";
+      version = "2.1.9";
+      src = fetchurl {
+        url = "https://registry.npmjs.org/vite-node/-/vite-node-2.1.9.tgz";
+        sha512 = "AM9aQ/IPrW/6ENLQg3AGY4K1N2TGZdR5e4gu/MmmR2xR3Ll1+dib+nook92g4TV3PXVyeyxdWwtaCAiUL0hMxA==";
+      };
+    };
+  };
   args = {
     name = "mediaviewer";
     packageName = "mediaviewer";
     version = "1.0.0";
     src = ./.;
+    dependencies = [
+      sources."@esbuild/aix-ppc64-0.21.5"
+      sources."@esbuild/android-arm-0.21.5"
+      sources."@esbuild/android-arm64-0.21.5"
+      sources."@esbuild/android-x64-0.21.5"
+      sources."@esbuild/darwin-arm64-0.21.5"
+      sources."@esbuild/darwin-x64-0.21.5"
+      sources."@esbuild/freebsd-arm64-0.21.5"
+      sources."@esbuild/freebsd-x64-0.21.5"
+      sources."@esbuild/linux-arm-0.21.5"
+      sources."@esbuild/linux-arm64-0.21.5"
+      sources."@esbuild/linux-ia32-0.21.5"
+      sources."@esbuild/linux-loong64-0.21.5"
+      sources."@esbuild/linux-mips64el-0.21.5"
+      sources."@esbuild/linux-ppc64-0.21.5"
+      sources."@esbuild/linux-riscv64-0.21.5"
+      sources."@esbuild/linux-s390x-0.21.5"
+      sources."@esbuild/linux-x64-0.21.5"
+      sources."@esbuild/netbsd-x64-0.21.5"
+      sources."@esbuild/openbsd-x64-0.21.5"
+      sources."@esbuild/sunos-x64-0.21.5"
+      sources."@esbuild/win32-arm64-0.21.5"
+      sources."@esbuild/win32-ia32-0.21.5"
+      sources."@esbuild/win32-x64-0.21.5"
+      sources."@popperjs/core-2.11.8"
+      sources."@rollup/rollup-android-arm-eabi-4.57.1"
+      sources."@rollup/rollup-android-arm64-4.57.1"
+      sources."@rollup/rollup-darwin-arm64-4.57.1"
+      sources."@rollup/rollup-darwin-x64-4.57.1"
+      sources."@rollup/rollup-freebsd-arm64-4.57.1"
+      sources."@rollup/rollup-freebsd-x64-4.57.1"
+      sources."@rollup/rollup-linux-arm-gnueabihf-4.57.1"
+      sources."@rollup/rollup-linux-arm-musleabihf-4.57.1"
+      sources."@rollup/rollup-linux-arm64-gnu-4.57.1"
+      sources."@rollup/rollup-linux-arm64-musl-4.57.1"
+      sources."@rollup/rollup-linux-loong64-gnu-4.57.1"
+      sources."@rollup/rollup-linux-loong64-musl-4.57.1"
+      sources."@rollup/rollup-linux-ppc64-gnu-4.57.1"
+      sources."@rollup/rollup-linux-ppc64-musl-4.57.1"
+      sources."@rollup/rollup-linux-riscv64-gnu-4.57.1"
+      sources."@rollup/rollup-linux-riscv64-musl-4.57.1"
+      sources."@rollup/rollup-linux-s390x-gnu-4.57.1"
+      sources."@rollup/rollup-linux-x64-gnu-4.57.1"
+      sources."@rollup/rollup-linux-x64-musl-4.57.1"
+      sources."@rollup/rollup-openbsd-x64-4.57.1"
+      sources."@rollup/rollup-openharmony-arm64-4.57.1"
+      sources."@rollup/rollup-win32-arm64-msvc-4.57.1"
+      sources."@rollup/rollup-win32-ia32-msvc-4.57.1"
+      sources."@rollup/rollup-win32-x64-gnu-4.57.1"
+      sources."@rollup/rollup-win32-x64-msvc-4.57.1"
+      sources."@types/estree-1.0.8"
+      sources."bootstrap-5.3.8"
+      sources."bootstrap-icons-1.13.1"
+      sources."cac-6.7.14"
+      sources."datatables.net-2.3.7"
+      sources."datatables.net-bs5-2.3.7"
+      (sources."datatables.net-buttons-2.4.3"
+        // {
+          dependencies = [
+            sources."datatables.net-1.13.11"
+          ];
+        })
+      (sources."datatables.net-buttons-bs5-2.4.3"
+        // {
+          dependencies = [
+            sources."datatables.net-1.13.11"
+            sources."datatables.net-bs5-1.13.11"
+          ];
+        })
+      sources."datatables.net-scroller-2.4.3"
+      sources."datatables.net-scroller-bs5-2.4.3"
+      sources."debug-4.4.3"
+      sources."es-module-lexer-1.7.0"
+      sources."esbuild-0.21.5"
+      sources."fsevents-2.3.3"
+      sources."jquery-3.7.1"
+      sources."jquery-migrate-3.6.0"
+      sources."jquery.shorten-1.0.0"
+      sources."ms-2.1.3"
+      sources."nanoid-3.3.11"
+      sources."pathe-1.1.2"
+      sources."picocolors-1.1.1"
+      sources."postcss-8.5.6"
+      sources."rollup-4.57.1"
+      sources."slick-carousel-1.8.1"
+      sources."source-map-js-1.2.1"
+      sources."vite-5.4.21"
+      sources."vite-node-2.1.9"
+    ];
     buildInputs = globalBuildInputs;
     meta = {
       description = "Track media files";

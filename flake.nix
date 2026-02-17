@@ -117,7 +117,7 @@
               mkdir -p $out/bin $out/lib
 
               cp ./gunicorn.conf.py $out/lib/
-              cp -r ./static $out/lib/static
+              cp -r ./temp_static $out/lib/static
 
               makeWrapper ${appPythonEnv}/bin/gunicorn $out/bin/mv-gunicorn \
                 --add-flags "--config=$out/lib/gunicorn.conf.py" \
@@ -143,7 +143,7 @@
             src = ./.; # Source of your main script
 
             nativeBuildInputs = [pkgs.makeWrapper];
-            buildInputs = [devPythonEnv]; # Runtime Python environment
+            buildInputs = [devPythonEnv pkgs.nodejs]; # Runtime Python environment
 
             buildPhase = packageBuildPhase;
 
@@ -152,6 +152,7 @@
 
               mv ./temp_static $out/lib/static
               cp -r . $out/lib/mediaviewer
+              cp -r ${nodeDependencies}/lib/node_modules $out/lib/node_modules
 
               makeWrapper ${devPythonEnv}/bin/manage $out/bin/manage \
                 --set PYTHONPATH $out/lib/mediaviewer \
@@ -165,6 +166,14 @@
                 --set PYTHONPATH $out/lib/mediaviewer \
                 --set MV_STATIC_DIR $out/lib/static \
                 --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
+
+              makeWrapper ${pkgs.nodejs}/bin/npm $out/bin/vite-node-run-dev \
+                --add-flags run \
+                --add-flags dev
+            '';
+
+            postInstall = ''
+              substituteInPlace $out/lib/node_modules/.bin/vite --replace '#!/usr/bin/env node' '#!${pkgs.nodejs}/bin/node'
             '';
           };
 
