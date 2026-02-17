@@ -4,12 +4,29 @@
   config,
   inputs,
   ...
-}: {
+}: let
+  set-env = ''
+    : ''${USE_HOST_NET:=0}
+    if [ $USE_HOST_NET -eq 1 ]
+    then
+      HOST_NET_COMPOSE_ARGS="-f docker-compose.host-net.yml"
+      MV_HOST="127.0.0.1"
+    else
+      HOST_NET_COMPOSE_ARGS=""
+      MV_HOST="postgres"
+    fi
+
+    : ''${DEV_COMPOSE_ARGS:="-f docker-compose.yml -f docker-compose.dev.yml $HOST_NET_COMPOSE_ARGS"}
+    : ''${PROD_COMPOSE_ARGS:="-f docker-compose.yml -f docker-compose.prod.yml $HOST_NET_COMPOSE_ARGS"}
+    export DEV_COMPOSE_ARGS PROD_COMPOSE_ARGS HOST_NET_COMPOSE_ARGS MV_HOST
+  '';
+  POSTGRES_VERSION = "postgresql_17";
+in {
   # https://devenv.sh/basics/
   env = {
-    MV_NAME = "mv";
-    MV_HOST = "localhost";
-    MV_USER = "dbuser";
+    MV_NAME = lib.mkDefault "mv";
+    MV_HOST = lib.mkDefault "localhost";
+    MV_USER = lib.mkDefault "dbuser";
     DJANGO_SETTINGS_MODULE = "config.settings";
     MV_WAITER_PASSWORD_HASH = "";
     MV_SKIP_LOADING_TVDB_CONFIG = 1;
@@ -45,58 +62,48 @@
       touch .mv.history
     '';
 
-    _wait_for_db.exec = ''
-      devenv up -d postgres
-      ${pkgs.wait4x}/bin/wait4x postgresql 'postgres://${config.env.MV_USER}:${config.env.MV_USER}@${config.env.MV_HOST}:5432/${config.env.MV_NAME}?sslmode=disable'
-    '';
-
     build.exec = ''
+      set -x
       _touch-history
       nix build '.#mv-image'
       docker load < result
     '';
 
     build-dev.exec = ''
+      set -x
       _touch-history
-      docker build \
-        --build-arg UID=1000 \
-        --tag=kyokley/mediaviewer \
-        --target=dev \
-        .
+      nix build '.#dev-image'
+      docker load < result
     '';
 
     up.exec = ''
-      _wait_for_db
-      uv run python manage.py runserver 127.0.0.1:8000
+      set -x
+      ${set-env}
+      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} up $@
     '';
 
     down.exec = ''
-      devenv processes down
+      set -x
+      ${set-env}
+      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} down $@
     '';
 
-    db-up.exec = ''
-      devenv up -d postgres
-    '';
-
-    db-shell.exec = ''
-      db-up
-      docker exec -it postgres /bin/bash
+    logs.exec = ''
+      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} logs $@
     '';
 
     shell.exec = ''
-      docker run --rm -it kyokley/mediaviewer /bin/bash
-    '';
-
-    live-shell.exec = ''
-      docker exec -it mediaviewer /bin/bash
+      build-dev
+      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} run $@ bash
     '';
 
     attach.exec = ''
-      docker attach $(docker ps -qf name=mediaviewer_mediaviewer)
+      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} attach $@
     '';
 
     clear.exec = ''
-      rm -rf $DEVENV_STATE/postgres
+      ${set-env}
+      ${pkgs.docker}/bin/docker compose ''${DEV_COMPOSE_ARGS} down --remove-orphans -v
     '';
 
     init.exec = ''
@@ -106,34 +113,17 @@
     '';
 
     migrate.exec = ''
-      _wait_for_db
       uv run python manage.py migrate
-    '';
-
-    docker-up.exec = ''
-      build
-      _wait_for_db
-      migrate
-      docker run --rm \
-                 -it \
-                 --net host \
-                 -e MV_NAME=${config.env.MV_NAME} \
-                 -e MV_HOST=${config.env.MV_HOST} \
-                 -e MV_USER=${config.env.MV_USER} \
-                 -e MV_SKIP_LOADING_TVDB_CONFIG=1 \
-                 -e DJANGO_SETTINGS_MODULE="config.settings" \
-                 kyokley/mediaviewer
     '';
 
     pytest.exec = ''
       set -e
-      _wait_for_db
       uv run pytest $(test $# -eq 0 && echo "-n 4" || echo $@)
       down
     '';
 
     check-migrations.exec = ''
-      _wait_for_db
+      set -x
       uv run python manage.py makemigrations --check
       down
     '';

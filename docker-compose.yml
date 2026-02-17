@@ -1,3 +1,18 @@
+x-mediaviewer: &default-mediaviewer
+  image: kyokley/mediaviewer
+  environment:
+    - DJANGO_SETTINGS_MODULE=config.settings
+    - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
+    - SKIP_LOADING_TVDB_CONFIG=1
+  depends_on:
+    - "postgres"
+  tty: true
+  stdin_open: true
+  networks:
+    - mediaviewer-backend
+  volumes:
+    - .:/code
+    - ./.mv.history:/home/user/.bash_history
 services:
   postgres:
     hostname: postgres
@@ -11,25 +26,19 @@ services:
       - mediaviewer-data:/var/lib/postgresql/data
     networks:
       - mediaviewer-backend
-  mediaviewer:
-    image: kyokley/mediaviewer
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings
-      - WAITER_PASSWORD_HASH=${WAITER_PASSWORD_HASH}
-      - SKIP_LOADING_TVDB_CONFIG=1
-    command: sh -c "python manage.py collectstatic --no-input && \ python manage.py migrate && \ python manage.py runserver 0.0.0.0:8000"
-    hostname: mediaviewer
+  mediaviewer-migrate:
+    !!merge <<: *default-mediaviewer
     depends_on:
       - "postgres"
+    command: /bin/manage migrate
+  mediaviewer:
+    !!merge <<: *default-mediaviewer
+    depends_on:
+      - "postgres"
+      - "mediaviewer-migrate"
+    hostname: mediaviewer
     ports:
       - "8000:8000"
-    tty: true
-    stdin_open: true
-    networks:
-      - mediaviewer-backend
-    volumes:
-      - .:/code
-      - ./.mv.history:/home/user/.bash_history
 # Persistent Volumes
 volumes:
   mediaviewer-data:
