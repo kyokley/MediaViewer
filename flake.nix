@@ -94,7 +94,7 @@
           export PYTHONPATH=$(pwd)
           export DJANGO_SETTINGS_MODULE=config.settings
 
-          ${devPythonEnv}/bin/manage collectstatic --noinput
+          ${appPythonEnv}/bin/manage collectstatic --noinput
         '';
       in {
         # Development Shell
