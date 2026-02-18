@@ -2,7 +2,7 @@ x-mediaviewer: &default-mediaviewer
   image: kyokley/mediaviewer
   environment:
     - MV_NAME
-    - MV_HOST
+    - MV_HOST=postgres
     - MV_USER
     - DJANGO_SETTINGS_MODULE
     - MV_WAITER_PASSWORD_HASH
@@ -10,8 +10,9 @@ x-mediaviewer: &default-mediaviewer
     - MV_STATIC_DIR
     - MV_NPM_STATIC_DIR
     - MV_DEBUG
-    - MV_ALLOWED_HOSTS
+    - MV_ALLOWED_HOSTS=mediaviewer
     - MV_WAITER_DOMAIN
+    - MV_API_URL=http://mediaviewer:8000
   depends_on:
     - "postgres"
   tty: true
@@ -29,7 +30,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - mediaviewer-data:/var/lib/postgresql/data
     networks:
@@ -41,6 +42,7 @@ services:
     command: /bin/manage migrate
   mediaviewer:
     !!merge <<: *default-mediaviewer
+    working_dir: /code
     depends_on:
       - "postgres"
       - "mediaviewer-migrate"
@@ -50,7 +52,7 @@ services:
   mediaviewer-frontend:
     !!merge <<: *default-mediaviewer
     working_dir: /code/frontend
-    command: /bin/vite-node-run-dev
+    command: /bin/vite-dev --host 0.0.0.0
     ports:
       - "127.0.0.1:3000:3000"
 # Persistent Volumes

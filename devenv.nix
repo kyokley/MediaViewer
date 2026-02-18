@@ -18,6 +18,7 @@
     MV_DEBUG = "true";
     MV_ALLOWED_HOSTS = "127.0.0.1,localhost";
     MV_WAITER_DOMAIN = "localhost:5000";
+    MV_API_URL = "http://localhost:8000/";
   };
 
   # https://devenv.sh/packages/

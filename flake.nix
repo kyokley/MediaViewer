@@ -40,6 +40,7 @@
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = import nixpkgs {inherit system;};
+        inherit (pkgs) lib;
         python = pkgs.python312; # Your desired Python version
 
         # 1. Load Project Workspace (parses pyproject.toml, uv.lock)
@@ -167,13 +168,8 @@
                 --set MV_STATIC_DIR $out/lib/static \
                 --set MV_NPM_STATIC_DIR ${nodeDependencies}/lib/node_modules
 
-              makeWrapper ${pkgs.nodejs}/bin/npm $out/bin/vite-node-run-dev \
-                --add-flags run \
-                --add-flags dev
-            '';
-
-            postInstall = ''
-              substituteInPlace $out/lib/node_modules/.bin/vite --replace '#!/usr/bin/env node' '#!${pkgs.nodejs}/bin/node'
+              makeWrapper ${pkgs.nodejs}/bin/node $out/bin/vite-dev \
+                --add-flags ${nodeDependencies}/lib/node_modules/vite/bin/vite.js
             '';
           };
 
@@ -195,11 +191,11 @@
             tag = "latest";
             copyToRoot = pkgs.buildEnv {
               name = "image-root";
-              paths = [self.packages.${system}.dev pkgs.bashInteractive];
+              paths = [self.packages.${system}.dev];
               pathsToLink = ["/bin" "/lib"];
             };
             config = {
-              Cmd = ["/bin/manage" "runserver" "127.0.0.1:8000"];
+              Cmd = ["/bin/manage" "runserver" "0.0.0.0:8000"];
             };
           };
         };
@@ -210,13 +206,17 @@
             type = "app";
             program = "${self.packages.${system}.default}/bin/mv-gunicorn";
           };
-          dev = {
+          runserver = {
             type = "app";
             program = "${self.packages.${system}.dev}/bin/runserver";
           };
           manage = {
             type = "app";
             program = "${self.packages.${system}.dev}/bin/manage";
+          };
+          vite = {
+            type = "app";
+            program = "${self.packages.${system}.dev}/bin/vite-dev";
           };
         };
       }

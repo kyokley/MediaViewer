@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/mediaviewer': {
-        target: 'http://localhost:8000',
+        target: process.env.MV_API_URL || 'http://localhost:8000',
         changeOrigin: true,
       },
     },
