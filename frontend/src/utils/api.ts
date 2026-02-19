@@ -33,12 +33,12 @@ api.interceptors.response.use(
           throw new Error('No refresh token available')
         }
 
-         const response = await axios.post<RefreshTokenResponse>(
+         const response = await axios.post<{ data: RefreshTokenResponse }>(
            '/mediaviewer/api/v2/auth/refresh/',
            { refresh: refreshToken } as RefreshTokenRequest
          )
 
-        const { access, refresh } = response.data
+        const { access, refresh } = response.data.data
         localStorage.setItem('access_token', access)
         if (refresh) {
           localStorage.setItem('refresh_token', refresh)

@@ -27,9 +27,11 @@ def login(request):
         refresh = RefreshToken.for_user(user)
 
         response_data = {
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "user": UserSerializer(user).data,
+            "data": {
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": UserSerializer(user).data,
+            }
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -80,8 +82,10 @@ def refresh_token(request):
             new_access = refresh.access_token
 
             response_data = {
-                "access": str(new_access),
-                "refresh": str(refresh),
+                "data": {
+                    "access": str(new_access),
+                    "refresh": str(refresh),
+                }
             }
 
             return Response(response_data, status=status.HTTP_200_OK)

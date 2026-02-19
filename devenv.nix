@@ -27,10 +27,20 @@
     pkgs.nodejs_25
   ];
 
+  processes = {
+    db.exec = "up postgres";
+    frontend.exec = "frontend-run";
+    backend.exec = "run";
+  };
+
   # https://devenv.sh/scripts/
   scripts = {
     frontend-run.exec = ''
-      cd frontend && npm run dev
+      cd frontend && nix run ..'#vite'
+    '';
+
+    run.exec = ''
+      nix run .#runserver
     '';
 
     help.exec = ''
@@ -152,19 +162,19 @@
   '';
 
   # https://devenv.sh/services/
-  services.postgres = {
-    enable = true;
-    listen_addresses = "localhost";
-    initialScript = ''
-      CREATE ROLE ${config.env.MV_USER} WITH LOGIN PASSWORD '${config.env.MV_USER}' SUPERUSER;
-    '';
-    initialDatabases = [
-      {
-        name = config.env.MV_NAME;
-        user = config.env.MV_USER;
-      }
-    ];
-  };
+  # services.postgres = {
+  #   enable = true;
+  #   listen_addresses = "localhost";
+  #   initialScript = ''
+  #     CREATE ROLE ${config.env.MV_USER} WITH LOGIN PASSWORD '${config.env.MV_USER}' SUPERUSER;
+  #   '';
+  #   initialDatabases = [
+  #     {
+  #       name = config.env.MV_NAME;
+  #       user = config.env.MV_USER;
+  #     }
+  #   ];
+  # };
 
   # https://devenv.sh/languages/
   languages.python = {

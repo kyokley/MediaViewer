@@ -24,8 +24,8 @@ export default function LoginPage() {
       })
 
       const { data } = response.data
-      const { access, refresh } = data
-      login(access, refresh)
+      const { access, refresh, user } = data
+      login(access, refresh, user)
       navigate('/')
     } catch (err: any) {
       setError(
