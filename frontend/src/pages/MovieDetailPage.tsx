@@ -4,6 +4,7 @@ import Layout from '../components/Layout'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorAlert from '../components/ErrorAlert'
 import VideoPlayer from '../components/VideoPlayer'
+import AddToCollectionModal from '../components/AddToCollectionModal'
 import { apiClient } from '../utils/api'
 import { Movie } from '../types/api'
 
@@ -14,6 +15,7 @@ export default function MovieDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showPlayer, setShowPlayer] = useState(false)
+  const [showAddToCollection, setShowAddToCollection] = useState(false)
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -129,7 +131,10 @@ export default function MovieDetailPage() {
               >
                 Watch Now
               </button>
-              <button className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition">
+              <button
+                onClick={() => setShowAddToCollection(true)}
+                className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition"
+              >
                 Add to Collection
               </button>
             </div>
@@ -168,6 +173,14 @@ export default function MovieDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Add to Collection Modal */}
+      <AddToCollectionModal
+        isOpen={showAddToCollection}
+        mediaId={parseInt(id!)}
+        mediaType="movie"
+        onClose={() => setShowAddToCollection(false)}
+      />
     </Layout>
   )
 }
