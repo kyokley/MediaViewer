@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorAlert from '../components/ErrorAlert'
+import VideoPlayer from '../components/VideoPlayer'
 import { apiClient } from '../utils/api'
 import { Movie } from '../types/api'
 
@@ -12,6 +13,7 @@ export default function MovieDetailPage() {
   const [movie, setMovie] = useState<Movie | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showPlayer, setShowPlayer] = useState(false)
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -121,7 +123,10 @@ export default function MovieDetailPage() {
 
             {/* Action Buttons */}
             <div className="flex gap-4">
-              <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
+              <button
+                onClick={() => setShowPlayer(true)}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+              >
                 Watch Now
               </button>
               <button className="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition">
@@ -139,6 +144,30 @@ export default function MovieDetailPage() {
           ← Back to Movies
         </button>
       </div>
+
+      {/* Video Player Modal */}
+      {showPlayer && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-white text-lg font-semibold">
+                Now Playing: {movie?.title || movie?.name}
+              </h2>
+              <button
+                onClick={() => setShowPlayer(false)}
+                className="text-gray-400 hover:text-white text-2xl transition"
+              >
+                ✕
+              </button>
+            </div>
+            <VideoPlayer
+              mediaId={parseInt(id!)}
+              mediaType="movie"
+              title={movie?.title || movie?.name || 'Movie'}
+            />
+          </div>
+        </div>
+      )}
     </Layout>
   )
 }
