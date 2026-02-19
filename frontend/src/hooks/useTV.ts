@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react'
 import { TVShow, ApiResponse } from '../types/api'
 import { apiClient } from '../utils/api'
 
-export function useTV(page = 1, limit = 20, search = '') {
+export function useTV(
+  page = 1,
+  limit = 20,
+  search = '',
+  genreId?: number
+) {
   const [shows, setShows] = useState<TVShow[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,6 +29,10 @@ export function useTV(page = 1, limit = 20, search = '') {
           params.search = search
         }
 
+        if (genreId) {
+          params.genre = genreId
+        }
+
         const response = await apiClient.get<ApiResponse<TVShow[]>>(
           '/tv/',
           { params }
@@ -42,7 +51,7 @@ export function useTV(page = 1, limit = 20, search = '') {
     }
 
     fetchShows()
-  }, [page, limit, search])
+  }, [page, limit, search, genreId])
 
   return { shows, isLoading, error, total }
 }
