@@ -9,9 +9,11 @@ from mediaviewer.models.genre import Genre
 class GenreSerializer(serializers.ModelSerializer):
     """Serialize Genre model"""
 
+    name = serializers.CharField(source="genre")
+
     class Meta:
         model = Genre
-        fields = ["id", "genre", "datecreated", "dateedited"]
+        fields = ["id", "name", "datecreated", "dateedited"]
         read_only_fields = ["id", "datecreated", "dateedited"]
 
 
@@ -20,6 +22,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     poster_image_url = serializers.SerializerMethodField()
     genres = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Movie
@@ -27,12 +30,12 @@ class MovieSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "date_created",
-            "dateedited",
+            "date_edited",
             "poster_image_url",
             "genres",
             "description",
         ]
-        read_only_fields = ["id", "date_created", "dateedited"]
+        read_only_fields = ["id", "date_created", "date_edited"]
 
     def get_poster_image_url(self, obj):
         """Get poster image URL"""
@@ -56,12 +59,11 @@ class MovieSerializer(serializers.ModelSerializer):
             pass
         return []
 
-    @property
-    def description(self):
+    def get_description(self, obj):
         """Get description from poster"""
         try:
-            if hasattr(self, "_poster") and self._poster:
-                return self._poster.description
+            if obj._poster:
+                return obj._poster.plot or obj._poster.extendedplot
         except AttributeError:
             pass
         return None
@@ -72,6 +74,7 @@ class TVSerializer(serializers.ModelSerializer):
 
     poster_image_url = serializers.SerializerMethodField()
     genres = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = TV
@@ -79,12 +82,12 @@ class TVSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "date_created",
-            "dateedited",
+            "date_edited",
             "poster_image_url",
             "genres",
             "description",
         ]
-        read_only_fields = ["id", "date_created", "dateedited"]
+        read_only_fields = ["id", "date_created", "date_edited"]
 
     def get_poster_image_url(self, obj):
         """Get poster image URL"""
@@ -108,12 +111,11 @@ class TVSerializer(serializers.ModelSerializer):
             pass
         return []
 
-    @property
-    def description(self):
+    def get_description(self, obj):
         """Get description from poster"""
         try:
-            if hasattr(self, "_poster") and self._poster:
-                return self._poster.description
+            if obj._poster:
+                return obj._poster.plot or obj._poster.extendedplot
         except AttributeError:
             pass
         return None

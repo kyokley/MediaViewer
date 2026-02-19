@@ -24,7 +24,7 @@
   # https://devenv.sh/packages/
   packages = [
     pkgs.postgresql
-    pkgs.nodejs_25
+    pkgs.nodejs
   ];
 
   processes = {
@@ -36,11 +36,13 @@
   # https://devenv.sh/scripts/
   scripts = {
     frontend-run.exec = ''
-      cd frontend && nix run ..'#vite'
+      # cd frontend && nix run -v ..'#vite'
+      cd frontend && node node_modules/vite/bin/vite.js
     '';
 
     run.exec = ''
-      nix run .#runserver
+      # nix run -v .#runserver 2>&1
+      uv run python manage.py runserver 127.0.0.1:8000
     '';
 
     help.exec = ''
@@ -95,6 +97,11 @@
 
     clear.exec = ''
       ${pkgs.docker}/bin/docker compose down --remove-orphans -v
+    '';
+
+    seed-data.exec = ''
+      up -d postgres
+      uv run python manage.py seed_data
     '';
 
     init.exec = ''
