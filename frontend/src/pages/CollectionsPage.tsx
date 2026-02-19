@@ -5,10 +5,14 @@ import ErrorAlert from '../components/ErrorAlert'
 import { useCollections } from '../hooks/useCollections'
 
 export default function CollectionsPage() {
-  const { collections, isLoading, error, createCollection } = useCollections()
+  const { collections, isLoading, error, createCollection, deleteCollection } =
+    useCollections()
   const [newCollectionName, setNewCollectionName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null)
 
   const handleCreateCollection = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,6 +28,20 @@ export default function CollectionsPage() {
       setCreateError(err)
     } finally {
       setIsCreating(false)
+    }
+  }
+
+  const handleDeleteCollection = async (id: number) => {
+    setDeletingId(id)
+    setDeleteError(null)
+
+    try {
+      await deleteCollection(id)
+      setConfirmDelete(null)
+    } catch (err: any) {
+      setDeleteError(err)
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -78,14 +96,46 @@ export default function CollectionsPage() {
                 <p className="text-gray-400 mb-4">
                   {collection.item_count} items
                 </p>
-                <div className="flex gap-2">
-                  <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
-                    View
-                  </button>
-                  <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm font-medium">
-                    Delete
-                  </button>
-                </div>
+
+                {deleteError && confirmDelete === collection.id && (
+                  <ErrorAlert message={deleteError} />
+                )}
+
+                {confirmDelete === collection.id ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-300 mb-3">
+                      Are you sure you want to delete this collection?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleDeleteCollection(collection.id)}
+                        disabled={deletingId === collection.id}
+                        className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white rounded-lg transition text-sm font-medium"
+                      >
+                        {deletingId === collection.id ? 'Deleting...' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        disabled={deletingId === collection.id}
+                        className="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-600 text-white rounded-lg transition text-sm font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
+                      View
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(collection.id)}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
