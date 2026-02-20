@@ -7,9 +7,9 @@
 }: {
   # https://devenv.sh/basics/
   env = {
-    MV_NAME = lib.mkDefault "mv";
+    MV_NAME = lib.mkDefault "postgres";
     MV_HOST = lib.mkDefault "localhost";
-    MV_USER = lib.mkDefault "dbuser";
+    MV_USER = lib.mkDefault "postgres";
     DJANGO_SETTINGS_MODULE = "config.settings";
     MV_WAITER_PASSWORD_HASH = "";
     MV_SKIP_LOADING_TVDB_CONFIG = 1;
@@ -19,6 +19,8 @@
     MV_ALLOWED_HOSTS = "127.0.0.1,localhost";
     MV_WAITER_DOMAIN = "localhost:5000";
     MV_API_URL = "http://localhost:8000/";
+    VITE_HOST = "localhost";
+    VITE_PORT = 3000;
   };
 
   # https://devenv.sh/packages/

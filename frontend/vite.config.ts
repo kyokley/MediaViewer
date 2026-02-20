@@ -6,7 +6,8 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
+    port: process.env.VITE_PORT || 3000,
+    host: process.env.VITE_HOST || 'localhost',
     proxy: {
       '/mediaviewer': {
         target: process.env.MV_API_URL || 'http://localhost:8000',
