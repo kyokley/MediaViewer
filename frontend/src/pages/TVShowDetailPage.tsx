@@ -7,7 +7,7 @@ import VideoPlayer from '../components/VideoPlayer'
 import AddToCollectionModal from '../components/AddToCollectionModal'
 import { EpisodeList } from '../components/EpisodeList'
 import { apiClient } from '../utils/api'
-import { TVShow } from '../types/api'
+import { TVShow, Episode } from '../types/api'
 import { useEpisodes } from '../hooks/useTV'
 
 export default function TVShowDetailPage() {
@@ -18,6 +18,8 @@ export default function TVShowDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [showPlayer, setShowPlayer] = useState(false)
   const [showAddToCollection, setShowAddToCollection] = useState(false)
+  const [selectedEpisodeId, setSelectedEpisodeId] = useState<number | null>(null)
+  const [selectedEpisodeTitle, setSelectedEpisodeTitle] = useState<string>('')
 
   // Fetch episodes using the useEpisodes hook
   const {
@@ -52,6 +54,14 @@ export default function TVShowDetailPage() {
 
     fetchShow()
   }, [id])
+
+  const handlePlayEpisode = (episode: Episode) => {
+    setSelectedEpisodeId(episode.id)
+    setSelectedEpisodeTitle(
+      `${show?.name} - S${episode.season.toString().padStart(2, '0')} E${episode.episode.toString().padStart(2, '0')}: ${episode.episode_name || 'Episode'}`
+    )
+    setShowPlayer(true)
+  }
 
   if (isLoading) {
     return (
@@ -135,10 +145,18 @@ export default function TVShowDetailPage() {
             {/* Action Buttons */}
             <div className="flex gap-4">
               <button
-                onClick={() => setShowPlayer(true)}
+                onClick={() => {
+                  // Play first episode if available
+                  if (seasons.length > 0 && seasons[0].episodes.length > 0) {
+                    handlePlayEpisode(seasons[0].episodes[0])
+                  } else {
+                    setShowPlayer(true)
+                  }
+                }}
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                disabled={episodesLoading}
               >
-                Watch Now
+                {episodesLoading ? 'Loading...' : 'Watch Now'}
               </button>
               <button
                 onClick={() => setShowAddToCollection(true)}
@@ -156,10 +174,7 @@ export default function TVShowDetailPage() {
           isLoading={episodesLoading}
           error={episodesError}
           showName={show.name}
-          onPlayEpisode={(episode) => {
-            // TODO: Implement play specific episode
-            console.log('Play episode:', episode)
-          }}
+          onPlayEpisode={handlePlayEpisode}
         />
 
         {/* Back Button */}
@@ -172,24 +187,28 @@ export default function TVShowDetailPage() {
       </div>
 
       {/* Video Player Modal */}
-      {showPlayer && (
+      {showPlayer && selectedEpisodeId && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="w-full max-w-4xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-white text-lg font-semibold">
-                Now Playing: {show?.title || show?.name}
+                Now Playing: {selectedEpisodeTitle}
               </h2>
               <button
-                onClick={() => setShowPlayer(false)}
+                onClick={() => {
+                  setShowPlayer(false)
+                  setSelectedEpisodeId(null)
+                  setSelectedEpisodeTitle('')
+                }}
                 className="text-gray-400 hover:text-white text-2xl transition"
               >
                 ✕
               </button>
             </div>
             <VideoPlayer
-              mediaId={parseInt(id!)}
+              mediaId={selectedEpisodeId}
               mediaType="tv"
-              title={show?.title || show?.name || 'TV Show'}
+              title={selectedEpisodeTitle}
             />
           </div>
         </div>

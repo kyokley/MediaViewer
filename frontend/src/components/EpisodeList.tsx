@@ -44,6 +44,11 @@ export function EpisodeList({
     setSelectedEpisode(null)
   }
 
+  const handlePlayEpisode = (episode: Episode) => {
+    setSelectedEpisode(null) // Close the modal
+    onPlayEpisode?.(episode) // Trigger the play handler
+  }
+
   if (isLoading) {
     return <div className="episode-list-loading">Loading episodes...</div>
   }
@@ -116,7 +121,7 @@ export function EpisodeList({
         episode={selectedEpisode}
         showName={showName}
         onClose={handleCloseModal}
-        onPlayEpisode={onPlayEpisode}
+        onPlayEpisode={handlePlayEpisode}
       />
     </>
   )
