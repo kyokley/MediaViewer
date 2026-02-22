@@ -1,0 +1,157 @@
+.episode-list {
+  margin-top: 2rem;
+}
+
+.episode-list h2 {
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.episode-list-loading,
+.episode-list-error,
+.episode-list-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.episode-list-error {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.season-container {
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+.season-header {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  background-color: var(--bg-secondary);
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.season-header:hover {
+  background-color: var(--bg-hover);
+}
+
+.season-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.episode-count {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.season-toggle {
+  transition: transform 0.2s;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.season-toggle.expanded {
+  transform: rotate(180deg);
+}
+
+.episodes-container {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.episode-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.episode-card:hover {
+  background-color: var(--bg-hover);
+  transform: translateX(4px);
+}
+
+.episode-card.watched {
+  opacity: 0.6;
+}
+
+.episode-number {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  min-width: 3rem;
+  text-align: center;
+  padding: 0.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: 4px;
+}
+
+.episode-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.episode-name {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.episode-date {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.episode-watched-badge {
+  color: #10b981;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .season-header {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  .episode-card {
+    padding: 0.75rem;
+  }
+
+  .episode-number {
+    min-width: 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .episode-name {
+    font-size: 0.875rem;
+  }
+}

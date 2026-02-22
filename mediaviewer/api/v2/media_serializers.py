@@ -4,6 +4,7 @@ from rest_framework import serializers
 from mediaviewer.models.movie import Movie
 from mediaviewer.models.tv import TV
 from mediaviewer.models.genre import Genre
+from mediaviewer.models.mediafile import MediaFile
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -119,3 +120,39 @@ class TVSerializer(serializers.ModelSerializer):
         except AttributeError:
             pass
         return None
+
+
+class EpisodeSerializer(serializers.ModelSerializer):
+    """Serialize MediaFile (episode) model"""
+
+    episode_name = serializers.SerializerMethodField()
+    watched = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MediaFile
+        fields = [
+            "id",
+            "season",
+            "episode",
+            "display_name",
+            "episode_name",
+            "date_created",
+            "watched",
+        ]
+        read_only_fields = ["id", "date_created"]
+
+    def get_episode_name(self, obj):
+        """Get episode name from poster"""
+        try:
+            if obj._poster and obj._poster.episodename:
+                return obj._poster.episodename
+        except AttributeError:
+            pass
+        return None
+
+    def get_watched(self, obj):
+        """Check if episode has been watched by current user"""
+        request = self.context.get("request")
+        if request and request.user:
+            return obj.comments.filter(user=request.user, viewed=True).exists()
+        return False

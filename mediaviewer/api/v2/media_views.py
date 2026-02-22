@@ -9,7 +9,12 @@ from rest_framework.response import Response
 from mediaviewer.models.movie import Movie
 from mediaviewer.models.tv import TV
 from mediaviewer.models.genre import Genre
-from .media_serializers import MovieSerializer, TVSerializer, GenreSerializer
+from .media_serializers import (
+    MovieSerializer,
+    TVSerializer,
+    GenreSerializer,
+    EpisodeSerializer,
+)
 
 
 @api_view(["GET"])
@@ -296,6 +301,76 @@ def list_genres(request):
                 "error": {
                     "code": "FETCH_ERROR",
                     "message": "Failed to fetch genres",
+                    "details": str(e),
+                }
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def list_episodes(request, tv_id):
+    """
+    GET /api/v2/tv/{tv_id}/episodes/ - List all episodes for a TV show
+    """
+    try:
+        # Check if TV show exists
+        tv_show = TV.objects.get(pk=tv_id)
+
+        # Get episodes using the TV model's episodes() method
+        episodes = tv_show.episodes()
+
+        # Serialize episodes
+        serializer = EpisodeSerializer(
+            episodes, many=True, context={"request": request}
+        )
+
+        # Group episodes by season
+        episodes_by_season = {}
+        for episode_data in serializer.data:
+            season_num = episode_data.get("season")
+            if season_num is not None:
+                if season_num not in episodes_by_season:
+                    episodes_by_season[season_num] = []
+                episodes_by_season[season_num].append(episode_data)
+
+        # Convert to sorted list of seasons
+        seasons = [
+            {
+                "season_number": season_num,
+                "episodes": sorted(
+                    episodes_by_season[season_num], key=lambda x: x.get("episode", 0)
+                ),
+            }
+            for season_num in sorted(episodes_by_season.keys())
+        ]
+
+        return Response(
+            {
+                "data": seasons,
+                "total_episodes": len(serializer.data),
+                "total_seasons": len(seasons),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except TV.DoesNotExist:
+        return Response(
+            {
+                "error": {
+                    "code": "TV_NOT_FOUND",
+                    "message": f"TV show with id {tv_id} not found",
+                }
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    except Exception as e:
+        return Response(
+            {
+                "error": {
+                    "code": "FETCH_ERROR",
+                    "message": "Failed to fetch episodes",
                     "details": str(e),
                 }
             },

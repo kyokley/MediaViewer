@@ -76,6 +76,28 @@ export interface TVShow {
 
 export interface TV extends TVShow {}
 
+// Episode types
+export interface Episode {
+  id: number;
+  season: number;
+  episode: number;
+  display_name: string;
+  episode_name?: string;
+  date_created: string;
+  watched: boolean;
+}
+
+export interface Season {
+  season_number: number;
+  episodes: Episode[];
+}
+
+export interface EpisodesResponse {
+  data: Season[];
+  total_episodes: number;
+  total_seasons: number;
+}
+
 // Collection types
 export interface Collection {
   id: number;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TVShow, ApiResponse } from '../types/api'
+import { TVShow, ApiResponse, EpisodesResponse } from '../types/api'
 import { apiClient } from '../utils/api'
 
 export function useTV(
@@ -56,4 +56,42 @@ export function useTV(
   }, [page, limit, search, genreId, sortBy])
 
   return { shows, isLoading, error, total }
+}
+
+export function useEpisodes(tvId: number) {
+  const [seasons, setSeasons] = useState<EpisodesResponse['data']>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [totalEpisodes, setTotalEpisodes] = useState(0)
+  const [totalSeasons, setTotalSeasons] = useState(0)
+
+  useEffect(() => {
+    const fetchEpisodes = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const response = await apiClient.get<EpisodesResponse>(
+          `/tv/${tvId}/episodes/`
+        )
+
+        setSeasons(response.data.data)
+        setTotalEpisodes(response.data.total_episodes)
+        setTotalSeasons(response.data.total_seasons)
+      } catch (err: any) {
+        setError(
+          err.response?.data?.error?.message ||
+            'Failed to fetch episodes'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (tvId) {
+      fetchEpisodes()
+    }
+  }, [tvId])
+
+  return { seasons, isLoading, error, totalEpisodes, totalSeasons }
 }

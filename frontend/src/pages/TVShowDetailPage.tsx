@@ -5,8 +5,10 @@ import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorAlert from '../components/ErrorAlert'
 import VideoPlayer from '../components/VideoPlayer'
 import AddToCollectionModal from '../components/AddToCollectionModal'
+import { EpisodeList } from '../components/EpisodeList'
 import { apiClient } from '../utils/api'
 import { TVShow } from '../types/api'
+import { useEpisodes } from '../hooks/useTV'
 
 export default function TVShowDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -16,6 +18,13 @@ export default function TVShowDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [showPlayer, setShowPlayer] = useState(false)
   const [showAddToCollection, setShowAddToCollection] = useState(false)
+
+  // Fetch episodes using the useEpisodes hook
+  const {
+    seasons,
+    isLoading: episodesLoading,
+    error: episodesError,
+  } = useEpisodes(parseInt(id || '0'))
 
   useEffect(() => {
     const fetchShow = async () => {
@@ -30,7 +39,7 @@ export default function TVShowDetailPage() {
 
       try {
         const response = await apiClient.get(`/tv/${id}/`)
-        setShow(response.data.data)
+        setShow(response.data)
       } catch (err: any) {
         setError(
           err.response?.data?.error?.message ||
@@ -141,10 +150,17 @@ export default function TVShowDetailPage() {
           </div>
         </div>
 
+        {/* Episodes Section */}
+        <EpisodeList
+          seasons={seasons}
+          isLoading={episodesLoading}
+          error={episodesError}
+        />
+
         {/* Back Button */}
         <button
           onClick={() => navigate('/tv')}
-          className="text-blue-400 hover:text-blue-300 transition"
+          className="text-blue-400 hover:text-blue-300 transition mt-8"
         >
           ← Back to TV Shows
         </button>
