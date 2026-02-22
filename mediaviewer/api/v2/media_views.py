@@ -19,6 +19,7 @@ def list_movies(request):
     GET /api/v2/movies/ - List all movies
     Query parameters:
     - search: Search by movie name
+    - sort_by: Sort order - 'date_added' (default), 'name', 'release_date'
     - limit: Number of results (default: 50)
     - offset: Pagination offset (default: 0)
     """
@@ -29,6 +30,18 @@ def list_movies(request):
         search_query = request.query_params.get("search", "").strip()
         if search_query:
             movies = movies.filter(name__icontains=search_query)
+
+        # Handle sorting
+        sort_by = request.query_params.get("sort_by", "date_added").strip().lower()
+        if sort_by == "date_added":
+            movies = movies.order_by("-date_created")
+        elif sort_by == "name":
+            movies = movies.order_by("name")
+        elif sort_by == "release_date":
+            movies = movies.order_by("-release_date")
+        else:
+            # Default to most recently added
+            movies = movies.order_by("-date_created")
 
         # Handle pagination
         limit = min(int(request.query_params.get("limit", 50)), 500)
@@ -105,6 +118,7 @@ def list_tv(request):
     GET /api/v2/tv/ - List all TV shows
     Query parameters:
     - search: Search by TV name
+    - sort_by: Sort order - 'date_added' (default), 'name', 'first_air_date'
     - limit: Number of results (default: 50)
     - offset: Pagination offset (default: 0)
     """
@@ -115,6 +129,18 @@ def list_tv(request):
         search_query = request.query_params.get("search", "").strip()
         if search_query:
             tv_shows = tv_shows.filter(name__icontains=search_query)
+
+        # Handle sorting
+        sort_by = request.query_params.get("sort_by", "date_added").strip().lower()
+        if sort_by == "date_added":
+            tv_shows = tv_shows.order_by("-date_created")
+        elif sort_by == "name":
+            tv_shows = tv_shows.order_by("name")
+        elif sort_by == "first_air_date":
+            tv_shows = tv_shows.order_by("-first_air_date")
+        else:
+            # Default to most recently added
+            tv_shows = tv_shows.order_by("-date_created")
 
         # Handle pagination
         limit = min(int(request.query_params.get("limit", 50)), 500)

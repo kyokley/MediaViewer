@@ -11,10 +11,17 @@ export default function MovieCard({ movie }: MovieCardProps) {
   return (
     <div
       onClick={() => navigate(`/movies/${movie.id}`)}
-      className="bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition transform hover:scale-105 cursor-pointer"
+      className="rounded-lg overflow-hidden transition transform hover:scale-105 cursor-pointer"
+      style={{
+        backgroundColor: 'var(--bg-secondary)',
+        boxShadow: 'var(--shadow-md)',
+      }}
     >
       {/* Poster Image */}
-      <div className="relative h-48 bg-gray-700 overflow-hidden">
+      <div
+        className="relative h-48 overflow-hidden"
+        style={{ backgroundColor: 'var(--bg-tertiary)' }}
+      >
         {movie.poster_image_url ? (
           <img
             src={movie.poster_image_url}
@@ -22,7 +29,10 @@ export default function MovieCard({ movie }: MovieCardProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-500">
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
             No poster
           </div>
         )}
@@ -30,8 +40,10 @@ export default function MovieCard({ movie }: MovieCardProps) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-white truncate">{movie.title || movie.name}</h3>
-        <p className="text-sm text-gray-400 mt-1">
+        <h3 className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+          {movie.title || movie.name}
+        </h3>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
           {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
         </p>
 
@@ -41,7 +53,11 @@ export default function MovieCard({ movie }: MovieCardProps) {
             {movie.genres.slice(0, 2).map((genre) => (
               <span
                 key={genre.id}
-                className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded"
+                className="text-xs px-2 py-1 rounded"
+                style={{
+                  backgroundColor: 'var(--bg-tertiary)',
+                  color: 'var(--text-secondary)',
+                }}
               >
                 {genre.name}
               </span>
@@ -51,7 +67,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
 
         {/* Description Preview */}
         {movie.description && (
-          <p className="text-xs text-gray-400 mt-3 line-clamp-2">
+          <p className="text-xs mt-3 line-clamp-2" style={{ color: 'var(--text-tertiary)' }}>
             {movie.description}
           </p>
         )}

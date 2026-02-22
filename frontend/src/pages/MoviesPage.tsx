@@ -10,13 +10,15 @@ export default function MoviesPage() {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [selectedGenre, setSelectedGenre] = useState<number | undefined>()
+  const [sortBy, setSortBy] = useState('date_added')
 
   const limit = 20
   const { movies, isLoading, error, total } = useMovies(
     page,
     limit,
     debouncedSearch,
-    selectedGenre
+    selectedGenre,
+    sortBy
   )
   const { genres } = useGenres()
   const totalPages = Math.ceil(total / limit)
@@ -37,34 +39,66 @@ export default function MoviesPage() {
     setPage(1) // Reset to first page on filter change
   }
 
+  // Handle sort change
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+    setPage(1) // Reset to first page on sort change
+  }
+
   return (
     <Layout>
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-white mb-6">Movies</h1>
+          <h1 className="text-4xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+            Movies
+          </h1>
 
-          {/* Search Bar */}
-          <input
-            type="text"
-            placeholder="Search movies..."
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition"
-          />
+          {/* Search Bar and Sort Dropdown */}
+          <div className="flex gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search movies..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="flex-1 px-4 py-3 rounded-lg border focus:ring-2 outline-none transition"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                borderColor: 'var(--border-primary)',
+              }}
+            />
+
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+              className="px-4 py-3 rounded-lg border focus:ring-2 outline-none transition cursor-pointer"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                borderColor: 'var(--border-primary)',
+              }}
+            >
+              <option value="date_added">Recently Added</option>
+              <option value="name">Name (A-Z)</option>
+              <option value="release_date">Release Date</option>
+            </select>
+          </div>
 
           {/* Genre Filter */}
           {genres.length > 0 && (
             <div className="mt-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-gray-400 text-sm">Filter by Genre:</span>
+                <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Filter by Genre:
+                </span>
                 <button
                   onClick={() => handleGenreChange(undefined)}
-                  className={`px-3 py-1 rounded-full text-sm transition ${
-                    selectedGenre === undefined
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className="px-3 py-1 rounded-full text-sm transition"
+                  style={{
+                    backgroundColor: selectedGenre === undefined ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                    color: selectedGenre === undefined ? '#ffffff' : 'var(--text-secondary)',
+                  }}
                 >
                   All
                 </button>
@@ -72,11 +106,11 @@ export default function MoviesPage() {
                   <button
                     key={genre.id}
                     onClick={() => handleGenreChange(genre.id)}
-                    className={`px-3 py-1 rounded-full text-sm transition ${
-                      selectedGenre === genre.id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
+                    className="px-3 py-1 rounded-full text-sm transition"
+                    style={{
+                      backgroundColor: selectedGenre === genre.id ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                      color: selectedGenre === genre.id ? '#ffffff' : 'var(--text-secondary)',
+                    }}
                   >
                     {genre.name}
                   </button>
@@ -93,7 +127,7 @@ export default function MoviesPage() {
         {isLoading ? (
           <LoadingSpinner />
         ) : movies.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12" style={{ color: 'var(--text-secondary)' }}>
             {debouncedSearch ? 'No movies found matching your search.' : 'No movies available.'}
           </div>
         ) : (
@@ -109,19 +143,27 @@ export default function MoviesPage() {
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                }}
               >
                 Previous
               </button>
 
-              <span className="text-gray-400">
+              <span style={{ color: 'var(--text-secondary)' }}>
                 Page {page} of {totalPages}
               </span>
 
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="px-4 py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                }}
               >
                 Next
               </button>

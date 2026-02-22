@@ -15,15 +15,19 @@ export default function HomePage() {
       <div className="space-y-12">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Welcome to MediaViewer</h1>
-          <p className="text-gray-400">
+          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            Welcome to MediaViewer
+          </h1>
+          <p style={{ color: 'var(--text-secondary)' }}>
             Discover and manage your favorite movies and TV shows
           </p>
         </div>
 
         {/* Featured Movies */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-6">Featured Movies</h2>
+          <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+            Featured Movies
+          </h2>
 
           {moviesError && <ErrorAlert message={moviesError} />}
 
@@ -40,7 +44,9 @@ export default function HomePage() {
 
         {/* Featured TV Shows */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-6">Featured TV Shows</h2>
+          <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+            Featured TV Shows
+          </h2>
 
           {showsError && <ErrorAlert message={showsError} />}
 

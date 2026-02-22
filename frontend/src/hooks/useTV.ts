@@ -6,7 +6,8 @@ export function useTV(
   page = 1,
   limit = 20,
   search = '',
-  genreId?: number
+  genreId?: number,
+  sortBy = 'date_added'
 ) {
   const [shows, setShows] = useState<TVShow[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -23,6 +24,7 @@ export function useTV(
         const params: any = {
           limit,
           offset,
+          sort_by: sortBy,
         }
 
         if (search) {
@@ -51,7 +53,7 @@ export function useTV(
     }
 
     fetchShows()
-  }, [page, limit, search, genreId])
+  }, [page, limit, search, genreId, sortBy])
 
   return { shows, isLoading, error, total }
 }

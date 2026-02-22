@@ -6,7 +6,8 @@ export function useMovies(
   page = 1,
   limit = 20,
   search = '',
-  genreId?: number
+  genreId?: number,
+  sortBy = 'date_added'
 ) {
   const [movies, setMovies] = useState<Movie[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -23,6 +24,7 @@ export function useMovies(
         const params: any = {
           limit,
           offset,
+          sort_by: sortBy,
         }
 
         if (search) {
@@ -51,7 +53,7 @@ export function useMovies(
     }
 
     fetchMovies()
-  }, [page, limit, search, genreId])
+  }, [page, limit, search, genreId, sortBy])
 
   return { movies, isLoading, error, total }
 }

@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import LoadingSpinner from '../components/LoadingSpinner'
 import ErrorAlert from '../components/ErrorAlert'
 import { useCollections } from '../hooks/useCollections'
 
 export default function CollectionsPage() {
+  const navigate = useNavigate()
   const { collections, isLoading, error, createCollection, deleteCollection } =
     useCollections()
   const [newCollectionName, setNewCollectionName] = useState('')
@@ -125,7 +127,10 @@ export default function CollectionsPage() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
+                    <button
+                      onClick={() => navigate(`/collections/${collection.id}`)}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium"
+                    >
                       View
                     </button>
                     <button

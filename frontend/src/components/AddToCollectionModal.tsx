@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useCollections } from '../hooks/useCollections'
+import { apiClient } from '../utils/api'
 import LoadingSpinner from './LoadingSpinner'
 import ErrorAlert from './ErrorAlert'
 
@@ -31,17 +32,12 @@ export default function AddToCollectionModal({
 
     try {
       // Add media to collection
-      // Endpoint: POST /collections/{collectionId}/items/
-      // Body: { media_id: _mediaId, media_type: _mediaType }
-      // For now, just show a success message
+      await apiClient.post(
+        `/collections/${selectedCollectionId}/items/`,
+        { media_id: _mediaId, media_type: _mediaType }
+      )
 
-      // Placeholder: In production, this would call:
-      // await apiClient.post(
-      //   `/collections/${selectedCollectionId}/items/`,
-      //   { media_id: _mediaId, media_type: _mediaType }
-      // )
-
-      // Show success for demo
+      // Show success
       setSuccess(true)
       setTimeout(() => {
         onClose()
