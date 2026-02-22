@@ -102,19 +102,22 @@ export default function MoviesPage() {
                 >
                   All
                 </button>
-                {genres.slice(0, 10).map((genre) => (
-                  <button
-                    key={genre.id}
-                    onClick={() => handleGenreChange(genre.id)}
-                    className="px-3 py-1 rounded-full text-sm transition"
-                    style={{
-                      backgroundColor: selectedGenre === genre.id ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                      color: selectedGenre === genre.id ? '#ffffff' : 'var(--text-secondary)',
-                    }}
-                  >
-                    {genre.name}
-                  </button>
-                ))}
+                {genres
+                  .slice(0, 10)
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((genre) => (
+                    <button
+                      key={genre.id}
+                      onClick={() => handleGenreChange(genre.id)}
+                      className="px-3 py-1 rounded-full text-sm transition"
+                      style={{
+                        backgroundColor: selectedGenre === genre.id ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                        color: selectedGenre === genre.id ? '#ffffff' : 'var(--text-secondary)',
+                      }}
+                    >
+                      {genre.name}
+                    </button>
+                  ))}
               </div>
             </div>
           )}
