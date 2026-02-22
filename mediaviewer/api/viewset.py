@@ -24,6 +24,7 @@ log = logging.getLogger(__name__)
 
 
 class DownloadTokenViewSet(viewsets.ModelViewSet):
+    queryset = DownloadToken.objects.all()
     serializer_class = DownloadTokenSerializer
 
     def retrieve(self, request, pk=None):
