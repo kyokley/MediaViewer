@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from mediaviewer.models.movie import Movie
 from mediaviewer.models.tv import TV
 from mediaviewer.models.genre import Genre
+from mediaviewer.models.mediafile import MediaFile
+from mediaviewer.models.downloadtoken import DownloadToken
 from .media_serializers import (
     MovieSerializer,
     TVSerializer,
@@ -92,13 +94,12 @@ def list_movies(request):
 @permission_classes([IsAuthenticated])
 def movie_detail(request, movie_id):
     """
-    GET /api/v2/movies/{id}/ - Get movie details
+    GET /api/v2/movies/{movie_id}/ - Get details for a specific movie
     """
     try:
         movie = Movie.objects.get(pk=movie_id)
         serializer = MovieSerializer(movie, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
     except Movie.DoesNotExist:
         return Response(
             {
@@ -115,6 +116,62 @@ def movie_detail(request, movie_id):
                 "error": {
                     "code": "FETCH_ERROR",
                     "message": "Failed to fetch movie",
+                    "details": str(e),
+                }
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_episode_stream(request, episode_id):
+    """
+    GET /api/v2/episodes/{episode_id}/stream/ - Get streaming URL for an episode
+    Returns:
+    {
+        "stream_url": "http://waiter.domain/waiter/file/{guid}/",
+        "episode_id": 123,
+        "episode_name": "S01 E01: Episode Title"
+    }
+    """
+    try:
+        # Get the episode (MediaFile)
+        episode = MediaFile.objects.get(pk=episode_id)
+
+        # Create a download token for this episode
+        user = request.user
+        dt = DownloadToken.objects.from_media_file(user, episode)
+
+        # Get the streaming URL using the download link
+        stream_url = episode.downloadLink(dt.guid)
+
+        return Response(
+            {
+                "stream_url": stream_url,
+                "episode_id": episode.id,
+                "episode_name": episode.display_name,
+                "guid": dt.guid,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except MediaFile.DoesNotExist:
+        return Response(
+            {
+                "error": {
+                    "code": "EPISODE_NOT_FOUND",
+                    "message": f"Episode with id {episode_id} not found",
+                }
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    except Exception as e:
+        return Response(
+            {
+                "error": {
+                    "code": "STREAM_ERROR",
+                    "message": "Failed to get stream URL",
                     "details": str(e),
                 }
             },

@@ -22,6 +22,11 @@ urlpatterns = [
     path("tv/", media_views.list_tv, name="list_tv"),
     path("tv/<int:tv_id>/", media_views.tv_detail, name="tv_detail"),
     path("tv/<int:tv_id>/episodes/", media_views.list_episodes, name="list_episodes"),
+    path(
+        "episodes/<int:episode_id>/stream/",
+        media_views.get_episode_stream,
+        name="get_episode_stream",
+    ),
     path("genres/", media_views.list_genres, name="list_genres"),
     # Collection endpoints
     path("collections/", collections_views.list_collections, name="list_collections"),

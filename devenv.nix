@@ -11,7 +11,7 @@
     MV_HOST = lib.mkDefault "localhost";
     MV_USER = lib.mkDefault "postgres";
     DJANGO_SETTINGS_MODULE = "config.settings";
-    MV_WAITER_PASSWORD_HASH = "";
+    MV_WAITER_PASSWORD_HASH = "pbkdf2_sha256$1000000$XDwFF1GvD8vJ58jcl0gL5M$AqO5OO8DQ/9dqdcL8Y2tNoqfj2YsGQFFdzZ/xo9frlg=";
     MV_SKIP_LOADING_TVDB_CONFIG = 1;
     MV_STATIC_DIR = "static";
     MV_NPM_STATIC_DIR = "node_modules";

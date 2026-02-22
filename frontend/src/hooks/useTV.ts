@@ -95,3 +95,84 @@ export function useEpisodes(tvId: number) {
 
   return { seasons, isLoading, error, totalEpisodes, totalSeasons }
 }
+
+interface MediaWaiterMetadata {
+  video_file: string
+  subtitle_files: string[]
+  title: string
+  filename: string
+  hashPath: string
+  next_link: string | null
+  previous_link: string | null
+  files: Array<{
+    path: string
+    hashedWaiterPath: string
+    subtitleFiles: Array<{ waiter_path: string }>
+  }>
+}
+
+export function useEpisodeStream(episodeId: number | null) {
+  const [streamUrl, setStreamUrl] = useState<string | null>(null)
+  const [metadata, setMetadata] = useState<MediaWaiterMetadata | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!episodeId) {
+      setStreamUrl(null)
+      setMetadata(null)
+      return
+    }
+
+    const fetchStreamUrl = async () => {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        // Step 1: Get the stream URL with GUID from MediaViewer API
+        const response = await apiClient.get<{
+          stream_url: string
+          episode_id: number
+          episode_name: string
+          guid: string
+        }>(`/episodes/${episodeId}/stream/`)
+
+        // Ensure the URL has http:// prefix
+        let baseUrl = response.data.stream_url
+        if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+          baseUrl = `http://${baseUrl}`
+        }
+
+        // Step 2: Fetch JSON metadata from MediaWaiter autoplay endpoint
+        // The stream_url is like: http://localhost:5000/waiter/file/{guid}/
+        // We need to append 'autoplay/json' to get the video player metadata
+        const jsonUrl = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}autoplay/json`
+
+        const metadataResponse = await fetch(jsonUrl)
+        if (!metadataResponse.ok) {
+          throw new Error('Failed to fetch video metadata from MediaWaiter')
+        }
+
+        const metadataJson: MediaWaiterMetadata = await metadataResponse.json()
+
+        // Extract the direct video URL from metadata
+        const directVideoUrl = metadataJson.video_file
+
+        setStreamUrl(directVideoUrl)
+        setMetadata(metadataJson)
+      } catch (err: any) {
+        setError(
+          err.response?.data?.error?.message ||
+          err.message ||
+            'Failed to fetch stream URL'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchStreamUrl()
+  }, [episodeId])
+
+  return { streamUrl, metadata, isLoading, error }
+}
