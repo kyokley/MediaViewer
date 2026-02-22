@@ -1,17 +1,28 @@
 import { useState } from 'react'
 import { Season, Episode } from '../types/api'
+import { EpisodeCard } from './EpisodeCard'
+import { EpisodeDetailModal } from './EpisodeDetailModal'
 import './EpisodeList.css'
 
 interface EpisodeListProps {
   seasons: Season[]
   isLoading: boolean
   error: string | null
+  showName?: string
+  onPlayEpisode?: (episode: Episode) => void
 }
 
-export function EpisodeList({ seasons, isLoading, error }: EpisodeListProps) {
+export function EpisodeList({
+  seasons,
+  isLoading,
+  error,
+  showName = 'TV Show',
+  onPlayEpisode,
+}: EpisodeListProps) {
   const [expandedSeasons, setExpandedSeasons] = useState<Set<number>>(
     new Set([1]) // First season expanded by default
   )
+  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null)
 
   const toggleSeason = (seasonNumber: number) => {
     setExpandedSeasons((prev) => {
@@ -23,6 +34,14 @@ export function EpisodeList({ seasons, isLoading, error }: EpisodeListProps) {
       }
       return newSet
     })
+  }
+
+  const handleEpisodeClick = (episode: Episode) => {
+    setSelectedEpisode(episode)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedEpisode(null)
   }
 
   if (isLoading) {
@@ -37,59 +56,68 @@ export function EpisodeList({ seasons, isLoading, error }: EpisodeListProps) {
     return <div className="episode-list-empty">No episodes found</div>
   }
 
-  return (
-    <div className="episode-list">
-      <h2>Episodes</h2>
-      {seasons.map((season) => (
-        <div key={season.season_number} className="season-container">
-          <button
-            className="season-header"
-            onClick={() => toggleSeason(season.season_number)}
-          >
-            <span className="season-title">
-              Season {season.season_number}
-              <span className="episode-count">
-                {' '}
-                ({season.episodes.length} episode
-                {season.episodes.length !== 1 ? 's' : ''})
-              </span>
-            </span>
-            <span
-              className={`season-toggle ${
-                expandedSeasons.has(season.season_number) ? 'expanded' : ''
-              }`}
-            >
-              ▼
-            </span>
-          </button>
+  // Calculate total episode count
+  const totalEpisodes = seasons.reduce(
+    (sum, season) => sum + season.episodes.length,
+    0
+  )
 
-          {expandedSeasons.has(season.season_number) && (
-            <div className="episodes-container">
-              {season.episodes.map((episode: Episode) => (
-                <div
-                  key={episode.id}
-                  className={`episode-card ${episode.watched ? 'watched' : ''}`}
-                >
-                  <div className="episode-number">
-                    E{episode.episode.toString().padStart(2, '0')}
-                  </div>
-                  <div className="episode-info">
-                    <div className="episode-name">
-                      {episode.episode_name || episode.display_name}
-                    </div>
-                    <div className="episode-date">
-                      {new Date(episode.date_created).toLocaleDateString()}
-                    </div>
-                  </div>
-                  {episode.watched && (
-                    <div className="episode-watched-badge">✓</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+  return (
+    <>
+      <div className="episode-list">
+        <div className="episode-list-header">
+          <h2>Episodes</h2>
+          <span className="episode-count-badge">
+            {totalEpisodes} episode{totalEpisodes !== 1 ? 's' : ''} across{' '}
+            {seasons.length} season{seasons.length !== 1 ? 's' : ''}
+          </span>
         </div>
-      ))}
-    </div>
+
+        {seasons.map((season) => (
+          <div key={season.season_number} className="season-container">
+            <button
+              className="season-header"
+              onClick={() => toggleSeason(season.season_number)}
+            >
+              <span className="season-title">
+                Season {season.season_number}
+                <span className="episode-count">
+                  {' '}
+                  ({season.episodes.length} episode
+                  {season.episodes.length !== 1 ? 's' : ''})
+                </span>
+              </span>
+              <span
+                className={`season-toggle ${
+                  expandedSeasons.has(season.season_number) ? 'expanded' : ''
+                }`}
+              >
+                ▼
+              </span>
+            </button>
+
+            {expandedSeasons.has(season.season_number) && (
+              <div className="episodes-container">
+                {season.episodes.map((episode: Episode) => (
+                  <EpisodeCard
+                    key={episode.id}
+                    episode={episode}
+                    onEpisodeClick={handleEpisodeClick}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Episode Detail Modal */}
+      <EpisodeDetailModal
+        episode={selectedEpisode}
+        showName={showName}
+        onClose={handleCloseModal}
+        onPlayEpisode={onPlayEpisode}
+      />
+    </>
   )
 }

@@ -85,6 +85,11 @@ export interface Episode {
   episode_name?: string;
   date_created: string;
   watched: boolean;
+  plot?: string;
+  overview?: string;
+  air_date?: string;
+  thumbnail_url?: string;
+  file_size?: number;
 }
 
 export interface Season {

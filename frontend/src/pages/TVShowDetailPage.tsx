@@ -155,6 +155,11 @@ export default function TVShowDetailPage() {
           seasons={seasons}
           isLoading={episodesLoading}
           error={episodesError}
+          showName={show.name}
+          onPlayEpisode={(episode) => {
+            // TODO: Implement play specific episode
+            console.log('Play episode:', episode)
+          }}
         />
 
         {/* Back Button */}

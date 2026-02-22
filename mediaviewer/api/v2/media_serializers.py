@@ -127,6 +127,11 @@ class EpisodeSerializer(serializers.ModelSerializer):
 
     episode_name = serializers.SerializerMethodField()
     watched = serializers.SerializerMethodField()
+    plot = serializers.SerializerMethodField()
+    overview = serializers.SerializerMethodField()
+    air_date = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+    file_size = serializers.IntegerField(source="size", read_only=True)
 
     class Meta:
         model = MediaFile
@@ -138,6 +143,11 @@ class EpisodeSerializer(serializers.ModelSerializer):
             "episode_name",
             "date_created",
             "watched",
+            "plot",
+            "overview",
+            "air_date",
+            "thumbnail_url",
+            "file_size",
         ]
         read_only_fields = ["id", "date_created"]
 
@@ -156,3 +166,42 @@ class EpisodeSerializer(serializers.ModelSerializer):
         if request and request.user:
             return obj.comments.filter(user=request.user, viewed=True).exists()
         return False
+
+    def get_plot(self, obj):
+        """Get episode plot/summary"""
+        try:
+            if obj._poster:
+                return obj._poster.plot or obj._poster.extendedplot
+        except AttributeError:
+            pass
+        return None
+
+    def get_overview(self, obj):
+        """Get episode extended plot/overview"""
+        try:
+            if obj._poster and obj._poster.extendedplot:
+                return obj._poster.extendedplot
+        except AttributeError:
+            pass
+        return None
+
+    def get_air_date(self, obj):
+        """Get episode air date"""
+        try:
+            if obj._poster and obj._poster.release_date:
+                return obj._poster.release_date.isoformat()
+        except AttributeError:
+            pass
+        return None
+
+    def get_thumbnail_url(self, obj):
+        """Get episode thumbnail URL"""
+        try:
+            if obj._poster and obj._poster.image:
+                request = self.context.get("request")
+                if request:
+                    return request.build_absolute_uri(obj._poster.image.url)
+                return obj._poster.image.url
+        except AttributeError:
+            pass
+        return None
