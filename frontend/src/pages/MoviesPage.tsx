@@ -68,7 +68,7 @@ export default function MoviesPage() {
                 >
                   All
                 </button>
-                {genres.map((genre) => (
+                {genres.slice(0, 10).map((genre) => (
                   <button
                     key={genre.id}
                     onClick={() => handleGenreChange(genre.id)}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRequests } from "../hooks/useRequests";
 import { usePagination } from "../context/PaginationContext";
+import Layout from "../components/Layout";
 import ErrorAlert from "../components/ErrorAlert";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { PaginationControls } from "../components/PaginationControls";
@@ -59,12 +60,13 @@ export function RequestsPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="space-y-6">
+    <Layout>
+      <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-4xl font-bold text-white mb-6">
           Media Requests
         </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="text-gray-400">
           Request new media to be added to the library. Vote for requests you want!
         </p>
       </div>
@@ -82,10 +84,10 @@ export function RequestsPage() {
       ) : (
         <form
           onSubmit={handleCreateRequest}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4"
+          className="bg-gray-800 rounded-lg shadow p-6 space-y-4"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-300">
               Request Name
             </label>
             <input
@@ -93,7 +95,7 @@ export function RequestsPage() {
               value={newRequestName}
               onChange={(e) => setNewRequestName(e.target.value)}
               placeholder="e.g., 'Avatar 3' or 'The Last of Us Season 2'"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition placeholder-gray-400"
               disabled={submitting}
             />
           </div>
@@ -111,7 +113,7 @@ export function RequestsPage() {
                 setShowForm(false);
                 setNewRequestName("");
               }}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600"
             >
               Cancel
             </button>
@@ -123,15 +125,15 @@ export function RequestsPage() {
       {loading ? (
         <LoadingSpinner />
       ) : requests.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
-          <p className="text-gray-600 dark:text-gray-400">No requests yet.</p>
+        <div className="text-center py-12 bg-gray-800 rounded-lg">
+          <p className="text-gray-400">No requests yet.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {requests.map((request) => (
             <div
               key={request.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4"
+              className="bg-gray-800 rounded-lg shadow p-6 space-y-4"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -139,32 +141,32 @@ export function RequestsPage() {
                     className={`text-lg font-semibold ${
                       request.done
                         ? "line-through text-gray-400"
-                        : "text-gray-900 dark:text-white"
+                        : "text-white"
                     }`}
                   >
                     {request.name}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-sm text-gray-400 mt-1">
                     Requested by <span className="font-medium">{request.user_username}</span> on{" "}
                     {new Date(request.datecreated).toLocaleDateString()}
                   </p>
                 </div>
                 {request.done && (
-                  <span className="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 dark:bg-green-900 dark:text-green-200 rounded-full">
+                  <span className="px-3 py-1 text-sm font-medium text-green-200 bg-green-900 rounded-full">
                     Done
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4 pt-4 border-t border-gray-700">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleVote(request.id)}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-400 hover:bg-blue-900/30 rounded"
                   >
                     👍 Vote
                   </button>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-sm font-medium text-gray-300">
                     {request.vote_count} {request.vote_count === 1 ? "vote" : "votes"}
                   </span>
                 </div>
@@ -172,7 +174,7 @@ export function RequestsPage() {
                 {!request.done && (
                   <button
                     onClick={() => handleMarkDone(request.id)}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-green-400 hover:bg-green-900/30 rounded"
                   >
                     ✓ Mark Done
                   </button>
@@ -180,7 +182,7 @@ export function RequestsPage() {
 
                 <button
                   onClick={() => handleDelete(request.id)}
-                  className="ml-auto inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+                  className="ml-auto inline-flex items-center px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-900/30 rounded"
                 >
                   🗑 Delete
                 </button>
@@ -198,5 +200,6 @@ export function RequestsPage() {
         onNextClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
       />
     </div>
+    </Layout>
   );
 }

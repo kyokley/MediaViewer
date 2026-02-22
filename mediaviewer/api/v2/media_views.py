@@ -1,5 +1,6 @@
 """Media views for API v2"""
 
+from django.db import models
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -191,25 +192,51 @@ def list_genres(request):
     Query parameters:
     - media_type: Filter by 'movie' or 'tv'
     - limit: Number of results (default: 50)
+    - sort_by: Sort order - 'popularity' (default) or 'name'
     """
     try:
-        genres = Genre.objects.all()
-
-        # Handle media type filter
+        # Handle media type filter and sorting
         media_type = request.query_params.get("media_type", "").strip().lower()
-        if media_type == "movie":
-            # Only genres with movies
-            genres = genres.filter(poster__movie__isnull=False).distinct()
-        elif media_type == "tv":
-            # Only genres with TV shows
-            genres = genres.filter(poster__tv__isnull=False).distinct()
+        sort_by = request.query_params.get("sort_by", "popularity").strip().lower()
 
         # Handle pagination
         limit = min(int(request.query_params.get("limit", 50)), 500)
         offset = int(request.query_params.get("offset", 0))
 
+        if sort_by == "popularity":
+            # Sort by popularity (count of associated movies/TV shows)
+            if media_type == "movie":
+                # Get genres with movie count, sorted by popularity
+                genres = (
+                    Genre.objects.filter(poster__movie__isnull=False)
+                    .annotate(usage_count=models.Count("poster__movie", distinct=True))
+                    .order_by("-usage_count", "genre")
+                    .distinct()
+                )
+            elif media_type == "tv":
+                # Get genres with TV show count, sorted by popularity
+                genres = (
+                    Genre.objects.filter(poster__tv__isnull=False)
+                    .annotate(usage_count=models.Count("poster__tv", distinct=True))
+                    .order_by("-usage_count", "genre")
+                    .distinct()
+                )
+            else:
+                # Get all genres with combined count
+                genres = Genre.objects.annotate(
+                    usage_count=models.Count("poster", distinct=True)
+                ).order_by("-usage_count", "genre")
+        else:
+            # Sort alphabetically by name
+            genres = Genre.objects.all()
+            if media_type == "movie":
+                genres = genres.filter(poster__movie__isnull=False).distinct()
+            elif media_type == "tv":
+                genres = genres.filter(poster__tv__isnull=False).distinct()
+            genres = genres.order_by("genre")
+
         total_count = genres.count()
-        genres = genres.order_by("genre")[offset : offset + limit]
+        genres = genres[offset : offset + limit]
 
         serializer = GenreSerializer(genres, many=True)
 

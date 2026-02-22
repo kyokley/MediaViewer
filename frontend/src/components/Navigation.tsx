@@ -53,24 +53,6 @@ export default function Navigation() {
              >
                Requests
              </Link>
-             <Link
-               to="/comments"
-               className="text-gray-300 hover:text-white transition"
-             >
-               Comments
-             </Link>
-             <Link
-               to="/video-progress"
-               className="text-gray-300 hover:text-white transition"
-             >
-               Progress
-             </Link>
-             <Link
-               to="/search"
-               className="text-gray-300 hover:text-white transition"
-             >
-               Search
-             </Link>
            </div>
 
           {/* User Menu */}
