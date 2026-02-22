@@ -59,9 +59,13 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     download_link = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
     tv_id = serializers.SerializerMethodField()
+    isvalid = serializers.SerializerMethodField()
 
     def get_username(self, obj):
         return obj.user.username
+
+    def get_isvalid(self, obj):
+        return obj.isvalid
 
     def get_tv_name(self, obj):
         tv = obj.media_file.tv if obj.media_file else None
