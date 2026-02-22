@@ -19,6 +19,7 @@ def list_movies(request):
     GET /api/v2/movies/ - List all movies
     Query parameters:
     - search: Search by movie name
+    - genre: Filter by genre ID
     - sort_by: Sort order - 'date_added' (default), 'name', 'release_date'
     - limit: Number of results (default: 50)
     - offset: Pagination offset (default: 0)
@@ -30,6 +31,11 @@ def list_movies(request):
         search_query = request.query_params.get("search", "").strip()
         if search_query:
             movies = movies.filter(name__icontains=search_query)
+
+        # Handle genre filter
+        genre_id = request.query_params.get("genre", "").strip()
+        if genre_id:
+            movies = movies.filter(_poster__genres__id=genre_id)
 
         # Handle sorting
         sort_by = request.query_params.get("sort_by", "date_added").strip().lower()
@@ -118,6 +124,7 @@ def list_tv(request):
     GET /api/v2/tv/ - List all TV shows
     Query parameters:
     - search: Search by TV name
+    - genre: Filter by genre ID
     - sort_by: Sort order - 'date_added' (default), 'name', 'first_air_date'
     - limit: Number of results (default: 50)
     - offset: Pagination offset (default: 0)
@@ -129,6 +136,11 @@ def list_tv(request):
         search_query = request.query_params.get("search", "").strip()
         if search_query:
             tv_shows = tv_shows.filter(name__icontains=search_query)
+
+        # Handle genre filter
+        genre_id = request.query_params.get("genre", "").strip()
+        if genre_id:
+            tv_shows = tv_shows.filter(_poster__genres__id=genre_id)
 
         # Handle sorting
         sort_by = request.query_params.get("sort_by", "date_added").strip().lower()
