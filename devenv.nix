@@ -113,6 +113,13 @@
     '';
 
     migrate.exec = ''
+      up -d postgres
+      echo "Waiting for PostgreSQL to be ready..."
+      for i in {1..30}; do
+        ${pkgs.postgresql}/bin/pg_isready -h localhost -p 5432 -U postgres && break
+        echo "Waiting for PostgreSQL... ($i/30)"
+        sleep 1
+      done
       uv run python manage.py migrate
     '';
 
@@ -130,11 +137,6 @@
 
     bandit.exec = ''
       uv run bandit -x ./mediaviewer/tests,./.venv,./.devenv* $(test $# -eq 0 && echo "-r ." || echo $@)
-    '';
-
-    stop-all-but-db.exec = ''
-      devenv processes down
-      db-up
     '';
 
     static.exec = ''
