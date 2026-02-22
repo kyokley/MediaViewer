@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import serializers
 
 from mediaviewer.models import (
@@ -14,6 +16,8 @@ from mediaviewer.models import (
     UserSettings,
     VideoProgress,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -65,7 +69,11 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return obj.user.username
 
     def get_isvalid(self, obj):
-        return obj.isvalid
+        try:
+            return obj.isvalid
+        except Exception as e:
+            logger.error(f"Error getting isvalid for token {obj.guid}: {e}")
+            return False
 
     def get_tv_name(self, obj):
         tv = obj.media_file.tv if obj.media_file else None
