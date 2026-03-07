@@ -17,7 +17,7 @@
     MV_NPM_STATIC_DIR = "node_modules";
     MV_DEBUG = "true";
     MV_ALLOWED_HOSTS = "127.0.0.1,localhost";
-    MV_WAITER_DOMAIN = "localhost:5000";
+    MV_WAITER_DOMAIN = "http://localhost:5000";
     MV_API_URL = "http://localhost:8000/";
     VITE_HOST = "localhost";
     VITE_PORT = 3000;
