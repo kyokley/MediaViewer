@@ -8,7 +8,7 @@
   # https://devenv.sh/basics/
   env = {
     MV_NAME = lib.mkDefault "postgres";
-    MV_HOST = lib.mkDefault "localhost";
+    MV_HOST = lib.mkDefault "127.0.0.1";
     MV_USER = lib.mkDefault "postgres";
     DJANGO_SETTINGS_MODULE = "config.settings";
     MV_WAITER_PASSWORD_HASH = "pbkdf2_sha256$1000000$XDwFF1GvD8vJ58jcl0gL5M$AqO5OO8DQ/9dqdcL8Y2tNoqfj2YsGQFFdzZ/xo9frlg=";
@@ -17,9 +17,9 @@
     MV_NPM_STATIC_DIR = "node_modules";
     MV_DEBUG = "true";
     MV_ALLOWED_HOSTS = "127.0.0.1,localhost";
-    MV_WAITER_DOMAIN = "http://localhost:5000";
-    MV_API_URL = "http://localhost:8000/";
-    VITE_HOST = "localhost";
+    MV_WAITER_DOMAIN = "http://127.0.0.1:5000";
+    MV_API_URL = "http://127.0.0.1:8000/";
+    VITE_HOST = "127.0.0.1";
     VITE_PORT = 3000;
   };
 
@@ -116,7 +116,7 @@
       up -d postgres
       echo "Waiting for PostgreSQL to be ready..."
       for i in {1..30}; do
-        ${pkgs.postgresql}/bin/pg_isready -h localhost -p 5432 -U postgres && break
+        ${pkgs.postgresql}/bin/pg_isready -h 127.0.0.1 -p 5432 -U postgres && break
         echo "Waiting for PostgreSQL... ($i/30)"
         sleep 1
       done
