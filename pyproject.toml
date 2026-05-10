@@ -34,7 +34,7 @@ dependencies = [
     "django-grappelli<4.0.0,>=3.0.3",
     "pillow>=10.3.0,<13.0.0",
     "gunicorn<24.0.0,>=23.0.0",
-    "django>=5.2.5",
+    "django>=5.2.14",
     "psycopg2-binary>=2.9.11",
 ]
 name = "mediaviewer"
