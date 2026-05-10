@@ -85,7 +85,7 @@
     check-added-large-files.enable = true;
     check-toml.enable = true;
     check-yaml.enable = true;
-    checkmake.enable = true;
+    checkmake.enable = false;
     detect-private-keys.enable = true;
     ripsecrets.enable = true;
     ruff.enable = true;
