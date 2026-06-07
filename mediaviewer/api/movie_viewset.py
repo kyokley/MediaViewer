@@ -1,13 +1,13 @@
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
-from mediaviewer.api.permissions import IsStaffOrReadOnly
+from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
 from mediaviewer.api.serializers import MovieSerializer
 from mediaviewer.models import Movie
 
 
 class MovieViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsStaffOrReadOnly,)
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = Movie.objects.order_by("id")
     serializer_class = MovieSerializer
 

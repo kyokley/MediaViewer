@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.contrib.auth import login
 from rest_framework import permissions
 
 
@@ -12,12 +13,19 @@ class IsStaffOrReadOnly(permissions.BasePermission):
         return False
 
 
-class CheckAPIKey(permissions.BasePermission):
+class IsStaffReadOnlyOrCheckAPIKey(IsStaffOrReadOnly):
     def has_permission(self, request, view):
         if api_key := request.META.get("HTTP_API_KEY"):
-            return (
-                User.objects.filter(active=True)
-                .filter(apikey__key__iexact=api_key.strip())
-                .exists()
-            )
-        return False
+            if user := (
+                User.objects.filter(apikey__key__iexact=api_key.strip())
+                .distinct()
+                .get()
+            ):
+                if user.is_active:
+                    login(
+                        request,
+                        user,
+                        backend="django.contrib.auth.backends.ModelBackend",
+                    )
+                    return True
+        return super().has_permission(request, view)
