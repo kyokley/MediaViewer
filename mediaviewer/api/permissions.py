@@ -15,7 +15,9 @@ class IsStaffOrReadOnly(permissions.BasePermission):
 
 class IsStaffReadOnlyOrCheckAPIKey(IsStaffOrReadOnly):
     def has_permission(self, request, view):
-        if api_key := request.META.get("HTTP_API_KEY"):
+        if request.method in permissions.SAFE_METHODS and (
+            api_key := request.META.get("HTTP_API_KEY")
+        ):
             if user := (
                 User.objects.filter(apikey__key__iexact=api_key.strip())
                 .distinct()
