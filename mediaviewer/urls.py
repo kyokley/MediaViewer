@@ -187,6 +187,8 @@ if not conf_settings.IS_SYNCING:
     )
     router.register(r"movie", movie_viewset.MovieViewSet, basename="movie")
     router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
+    router.register(r"tv-imdb", tv_viewset.TVByIMDBViewSet, basename="tv-imdb")
+    router.register(r"tv-genre", tv_viewset.TVByGenreViewSet, basename="tv-genre")
     router.register(
         r"tvmediapath", media_path_viewset.TVMediaPathViewSet, basename="tvmediapath"
     )
@@ -199,6 +201,7 @@ if not conf_settings.IS_SYNCING:
         r"mediafile", media_file_viewset.MediaFileViewSet, basename="mediafile"
     )
     router.register(r"message", viewset.MessageViewSet)
+    router.register(r"genre", viewset.GenreViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
     router.register(r"comment", viewset.CommentViewSet)
     router.register(r"collection", collection_viewset.CollectionViewSet)

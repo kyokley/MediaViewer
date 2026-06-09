@@ -13,7 +13,14 @@ from mediaviewer.models import (
     Movie,
     UserSettings,
     VideoProgress,
+    Genre,
 )
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ("genre",)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -135,10 +142,12 @@ class TVSerializer(serializers.ModelSerializer):
             "number_of_unwatched_shows",
             "media_paths",
             "finished",
+            "genres",
         )
 
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
     media_paths = serializers.SerializerMethodField("get_media_paths")
+    genres = serializers.SerializerMethodField("get_genres")
 
     def unwatched_shows(self, obj):
         request = self.context.get("request")
@@ -152,6 +161,9 @@ class TVSerializer(serializers.ModelSerializer):
             dict(pk=mp["pk"], path=mp["_path"], skip=mp["skip"])
             for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path", "skip")
         ]
+
+    def get_genres(self, obj):
+        return [g.genre for g in obj._poster.genres.all()]
 
 
 class MovieSerializer(serializers.ModelSerializer):

@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views, viewsets
 from rest_framework.response import Response as RESTResponse
+from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
 
 from mediaviewer.api.serializers import (
     CollectionSerializer,
@@ -8,6 +9,7 @@ from mediaviewer.api.serializers import (
     DownloadTokenSerializer,
     FilenameScrapeFormatSerializer,
     MessageSerializer,
+    GenreSerializer,
 )
 from mediaviewer.log import log
 from mediaviewer.models import (
@@ -17,6 +19,7 @@ from mediaviewer.models import (
     FilenameScrapeFormat,
     MediaFile,
     Message,
+    Genre,
 )
 
 
@@ -78,3 +81,9 @@ class CollectionViewSet(viewsets.ModelViewSet):
         obj = get_object_or_404(Collection.objects.all(), pk=pk)
         serializer = self.serializer_class(obj)
         return RESTResponse(serializer.data)
+
+
+class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
