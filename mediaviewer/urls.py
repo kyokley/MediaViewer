@@ -205,6 +205,11 @@ if not conf_settings.IS_SYNCING:
         media_file_viewset.MediaFileAutoplayViewSet,
         basename="mcp-autoplay",
     )
+    router.register(
+        r"mcp-mediafile",
+        media_file_viewset.MCPMediaFileViewSet,
+        basename="mcp-mediafile",
+    )
     router.register(r"message", viewset.MessageViewSet)
     router.register(r"genre", viewset.GenreViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)

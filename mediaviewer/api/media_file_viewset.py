@@ -29,7 +29,7 @@ class MediaFileAutoplayViewSet(viewsets.ViewSet):
 
 class MCPMediaFileViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
-    queryset = MediaFile.objects.all()
+    queryset = MediaFile.objects.filter(hide=False)
     serializer_class = MediaFileSerializer
 
     def list(self, request):
@@ -37,6 +37,6 @@ class MCPMediaFileViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError("'imdb_id' is a required argument")
 
         tv_id = request.query_params["tv_id"]
-        mfs = MediaFile.objects.filter(tv=tv_id)
+        mfs = self.queryset.filter(tv=tv_id)
         serializer = self.serializer_class(mfs, many=True)
         return Response(serializer.data)
