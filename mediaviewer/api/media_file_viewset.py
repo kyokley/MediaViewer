@@ -34,7 +34,7 @@ class MCPMediaFileViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         if "tv_id" not in request.query_params:
-            raise serializers.ValidationError("'imdb_id' is a required argument")
+            raise serializers.ValidationError("'tv_id' is a required argument")
 
         tv_id = request.query_params["tv_id"]
         mfs = self.queryset.filter(tv=tv_id)

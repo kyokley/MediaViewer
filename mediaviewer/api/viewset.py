@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views, viewsets
 from rest_framework.response import Response as RESTResponse
+from rest_framework import serializers
 from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
 
 from mediaviewer.api.serializers import (
@@ -10,6 +11,7 @@ from mediaviewer.api.serializers import (
     FilenameScrapeFormatSerializer,
     MessageSerializer,
     GenreSerializer,
+    PosterSerializer,
 )
 from mediaviewer.log import log
 from mediaviewer.models import (
@@ -20,6 +22,7 @@ from mediaviewer.models import (
     MediaFile,
     Message,
     Genre,
+    Poster,
 )
 
 
@@ -87,3 +90,18 @@ class GenreViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
+
+class PosterByNameViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+    queryset = Poster.objects.all()
+    serializer_class = PosterSerializer
+
+    def list(self, request):
+        if "name" not in request.query_params:
+            raise serializers.ValidationError("'name' is a required argument")
+
+        name = request.query_params["name"]
+        posters = self.queryset.filter(name__iexact=name)
+        serializer = self.serializer_class(posters, many=True)
+        return RESTResponse(serializer.data)

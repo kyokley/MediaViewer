@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from mediaviewer.models import (
+    Poster,
     TV,
     Collection,
     Comment,
@@ -274,3 +275,18 @@ class CollectionSerializer(serializers.ModelSerializer):
             "name",
         )
         pk = serializers.ReadOnlyField()
+
+
+class PosterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Poster
+        fields = (
+            "pk",
+            "tv",
+            "movie",
+            "mediafile",
+            "genres",
+        )
+        tv = TVSerializer(read_only=True)
+        movie = MovieSerializer(read_only=True)
+        mediafile = MediaFileSerializer(read_only=True)
