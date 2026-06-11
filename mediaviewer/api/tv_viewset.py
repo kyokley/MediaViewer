@@ -53,7 +53,7 @@ class TVByIMDBViewSet(viewsets.ReadOnlyModelViewSet):
         if "imdb_id" not in request.query_params:
             raise serializers.ValidationError("'imdb_id' is a required argument")
         imdb_id = request.query_params["imdb_id"]
-        tvs = self.queryset.filter(imdb_id=imdb_id).filter(hide=False)
+        tvs = self.queryset.filter(_poster__imdb=imdb_id).filter(hide=False)
         serializer = self.serializer_class(tvs, many=True)
         return Response(serializer.data)
 

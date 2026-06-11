@@ -164,6 +164,8 @@ class TVSerializer(serializers.ModelSerializer):
         ]
 
     def get_genres(self, obj):
+        if obj._poster is None:
+            return []
         return [g.genre for g in obj._poster.genres.all()]
 
 
