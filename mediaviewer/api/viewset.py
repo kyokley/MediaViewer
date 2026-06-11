@@ -11,7 +11,7 @@ from mediaviewer.api.serializers import (
     FilenameScrapeFormatSerializer,
     MessageSerializer,
     GenreSerializer,
-    PosterSerializer,
+    MCPPosterSerializer,
 )
 from mediaviewer.log import log
 from mediaviewer.models import (
@@ -95,7 +95,7 @@ class GenreViewSet(viewsets.ReadOnlyModelViewSet):
 class PosterViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = Poster.objects.all()
-    serializer_class = PosterSerializer
+    serializer_class = MCPPosterSerializer
 
     def list(self, request):
         fields = {

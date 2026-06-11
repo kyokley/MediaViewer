@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from mediaviewer.models import MediaFile
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
-from mediaviewer.api.serializers import MediaFileSerializer
+from mediaviewer.api.serializers import MediaFileSerializer, MCPMediaFileSerializer
 
 
 class MediaFileViewSet(viewsets.ModelViewSet):
@@ -30,7 +30,7 @@ class MediaFileAutoplayViewSet(viewsets.ViewSet):
 class MCPMediaFileViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = MediaFile.objects.filter(hide=False)
-    serializer_class = MediaFileSerializer
+    serializer_class = MCPMediaFileSerializer
 
     def list(self, request):
         if "tv_id" not in request.query_params:

@@ -2,7 +2,7 @@ from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
 from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
-from mediaviewer.api.serializers import TVSerializer
+from mediaviewer.api.serializers import TVSerializer, MCPTVSerializer
 from mediaviewer.models import TV, Genre
 
 
@@ -47,7 +47,7 @@ class TVViewSet(viewsets.ModelViewSet):
 class TVByIMDBViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = TV.objects.filter(hide=False)
-    serializer_class = TVSerializer
+    serializer_class = MCPTVSerializer
 
     def list(self, request):
         if "imdb_id" not in request.query_params:
@@ -61,7 +61,7 @@ class TVByIMDBViewSet(viewsets.ReadOnlyModelViewSet):
 class TVByGenreViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = TV.objects.filter(hide=False)
-    serializer_class = TVSerializer
+    serializer_class = MCPTVSerializer
 
     def list(self, request):
         if "genre" not in request.query_params:

@@ -169,6 +169,16 @@ class TVSerializer(serializers.ModelSerializer):
         return [g.genre for g in obj._poster.genres.all()]
 
 
+class MCPTVSerializer(TVSerializer):
+    class Meta:
+        model = TV
+        fields = (
+            "pk",
+            "name",
+            "genres",
+        )
+
+
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
@@ -214,6 +224,15 @@ class MediaFileSerializer(serializers.ModelSerializer):
             if uc and uc.viewed:
                 return True
         return False
+
+
+class MCPMediaFileSerializer(MediaFileSerializer):
+    class Meta:
+        model = MediaFile
+        fields = (
+            "pk",
+            "display_name",
+        )
 
 
 class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
@@ -286,7 +305,7 @@ class PosterSerializer(serializers.ModelSerializer):
             "pk",
             "tv",
             "movie",
-            # "mediafile",
+            "media_file",
             "genres",
             "actors",
             "writers",
@@ -300,3 +319,26 @@ class PosterSerializer(serializers.ModelSerializer):
         tv = TVSerializer(read_only=True)
         movie = MovieSerializer(read_only=True)
         mediafile = MediaFileSerializer(read_only=True)
+
+
+class MCPPosterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Poster
+        fields = (
+            "pk",
+            "tv",
+            "movie",
+            "media_file",
+            "genres",
+            "actors",
+            "writers",
+            "directors",
+            "episodename",
+            "tmdb",
+            "imdb",
+            "plot",
+            "extendedplot",
+        )
+        tv = MCPTVSerializer(read_only=True)
+        movie = MovieSerializer(read_only=True)
+        media_file = MCPMediaFileSerializer(read_only=True)
