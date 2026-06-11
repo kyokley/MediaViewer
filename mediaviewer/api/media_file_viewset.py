@@ -37,6 +37,6 @@ class MCPMediaFileViewSet(viewsets.ModelViewSet):
             raise serializers.ValidationError("'tv_id' is a required argument")
 
         tv_id = request.query_params["tv_id"]
-        mfs = self.queryset.filter(tv=tv_id)
+        mfs = self.queryset.filter(media_path__tv=tv_id)
         serializer = self.serializer_class(mfs, many=True)
         return Response(serializer.data)

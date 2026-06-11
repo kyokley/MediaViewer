@@ -284,8 +284,16 @@ class PosterSerializer(serializers.ModelSerializer):
             "pk",
             "tv",
             "movie",
-            "mediafile",
+            # "mediafile",
             "genres",
+            "actors",
+            "writers",
+            "directors",
+            "episodename",
+            "tmdb",
+            "imdb",
+            "plot",
+            "extendedplot",
         )
         tv = TVSerializer(read_only=True)
         movie = MovieSerializer(read_only=True)

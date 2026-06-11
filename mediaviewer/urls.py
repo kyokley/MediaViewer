@@ -212,7 +212,7 @@ if not conf_settings.IS_SYNCING:
     )
     router.register(
         r"mcp-poster",
-        viewset.PosterByNameViewSet,
+        viewset.PosterViewSet,
         basename="mcp-poster",
     )
     router.register(r"message", viewset.MessageViewSet)

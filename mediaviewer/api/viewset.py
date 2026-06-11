@@ -88,20 +88,35 @@ class CollectionViewSet(viewsets.ModelViewSet):
 
 class GenreViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.order_by("genre")
     serializer_class = GenreSerializer
 
 
-class PosterByNameViewSet(viewsets.ModelViewSet):
+class PosterViewSet(viewsets.ModelViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
     queryset = Poster.objects.all()
     serializer_class = PosterSerializer
 
     def list(self, request):
-        if "name" not in request.query_params:
-            raise serializers.ValidationError("'name' is a required argument")
+        fields = {
+            "episode_name": "episodename",
+            "imdb": "imdb",
+            "tmdb": "tmdb",
+            "tv_id": "tv",
+            "movie_id": "movie",
+            "mf_id": "media_file",
+        }
 
-        name = request.query_params["name"]
-        posters = self.queryset.filter(name__iexact=name)
+        posters = self.queryset
+        at_least_one_filter = False
+        for external_name, internal_name in fields.items():
+            if val := request.query_params.get(external_name, None):
+                posters = posters.filter(**{internal_name: val})
+                at_least_one_filter = True
+
+        if not at_least_one_filter:
+            raise serializers.ValidationError(
+                f"At least one field of '{', '.join(fields.keys())}' is required"
+            )
         serializer = self.serializer_class(posters, many=True)
         return RESTResponse(serializer.data)
