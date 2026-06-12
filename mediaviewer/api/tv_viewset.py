@@ -1,13 +1,13 @@
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
-from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
+from mediaviewer.api.permissions import IsStaffOrReadOnly, IsStaffReadOnlyOrCheckAPIKey
 from mediaviewer.api.serializers import TVSerializer, MCPTVSerializer
 from mediaviewer.models import TV, Genre
 
 
 class TVViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+    permission_classes = (IsStaffOrReadOnly,)
     queryset = TV.objects.filter(hide=False).order_by("id")
     serializer_class = TVSerializer
 
@@ -22,6 +22,21 @@ class TVViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(tv)
         return Response(serializer.data)
 
+
+class MCPTVViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+    queryset = TV.objects.filter(hide=False).order_by("id")
+    serializer_class = MCPTVSerializer
+
+    def _filter_by_genre(self, genre):
+        if not genre:
+            return self.queryset
+
+        if genre_obj := Genre.objects.filter(genre=genre).first():
+            tv_set = genre_obj.poster_set.filter(tv__hide=False).values("tv")
+            return self.queryset.filter(pk__in=tv_set)
+        return self.queryset.none()
+
     def list(self, request):
         fields = {
             "name": "name__icontains",
@@ -29,8 +44,13 @@ class TVViewSet(viewsets.ModelViewSet):
             "tmdb": "_poster__tmdb",
         }
 
-        posters = self.queryset
-        at_least_one_filter = False
+        if "genre" in request.query_params:
+            posters = self._filter_by_genre(request.query_params["genre"])
+            at_least_one_filter = True
+        else:
+            posters = self.queryset
+            at_least_one_filter = False
+
         for external_name, internal_name in fields.items():
             if val := request.query_params.get(external_name, None):
                 posters = posters.filter(**{internal_name: val})
@@ -38,38 +58,7 @@ class TVViewSet(viewsets.ModelViewSet):
 
         if not at_least_one_filter:
             raise serializers.ValidationError(
-                f"At least one field of '{', '.join(fields.keys())}' is required"
+                f"At least one field of 'genre, {', '.join(fields.keys())}' is required"
             )
         serializer = self.serializer_class(posters, many=True)
         return Response(serializer.data)
-
-
-class TVByIMDBViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
-    queryset = TV.objects.filter(hide=False)
-    serializer_class = MCPTVSerializer
-
-    def list(self, request):
-        if "imdb_id" not in request.query_params:
-            raise serializers.ValidationError("'imdb_id' is a required argument")
-        imdb_id = request.query_params["imdb_id"]
-        tvs = self.queryset.filter(_poster__imdb=imdb_id).filter(hide=False)
-        serializer = self.serializer_class(tvs, many=True)
-        return Response(serializer.data)
-
-
-class TVByGenreViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
-    queryset = TV.objects.filter(hide=False)
-    serializer_class = MCPTVSerializer
-
-    def list(self, request):
-        if "genre" not in request.query_params:
-            raise serializers.ValidationError("'genre' is a required argument")
-        genre = request.query_params["genre"]
-        if genre_obj := Genre.objects.filter(genre=genre).first():
-            tv_set = genre_obj.poster_set.filter(tv__hide=False).values("tv")
-            tvs = self.queryset.filter(pk__in=tv_set)
-            serializer = self.serializer_class(tvs, many=True)
-            return Response(serializer.data)
-        raise serializers.ValidationError("Genre not found")

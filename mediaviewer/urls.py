@@ -186,9 +186,9 @@ if not conf_settings.IS_SYNCING:
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"
     )
     router.register(r"movie", movie_viewset.MovieViewSet, basename="movie")
+    router.register(r"mcp-movie", movie_viewset.MCPMovieViewSet, basename="mcp-movie")
     router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
-    router.register(r"tv-imdb", tv_viewset.TVByIMDBViewSet, basename="tv-imdb")
-    router.register(r"tv-genre", tv_viewset.TVByGenreViewSet, basename="tv-genre")
+    router.register(r"mcp-tv", tv_viewset.MCPTVViewSet, basename="mcp-tv")
     router.register(
         r"tvmediapath", media_path_viewset.TVMediaPathViewSet, basename="tvmediapath"
     )
@@ -202,8 +202,13 @@ if not conf_settings.IS_SYNCING:
     )
     router.register(
         r"mcp-autoplay",
-        media_file_viewset.MediaFileAutoplayViewSet,
+        media_file_viewset.MCPMediaFileAutoplayViewSet,
         basename="mcp-autoplay",
+    )
+    router.register(
+        r"mcp-movie-autoplay",
+        media_file_viewset.MCPMovieAutoplayViewSet,
+        basename="mcp-movie-autoplay",
     )
     router.register(
         r"mcp-mediafile",

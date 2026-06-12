@@ -148,7 +148,6 @@ class TVSerializer(serializers.ModelSerializer):
 
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
     media_paths = serializers.SerializerMethodField("get_media_paths")
-    genres = serializers.SerializerMethodField("get_genres")
 
     def unwatched_shows(self, obj):
         request = self.context.get("request")
@@ -163,11 +162,6 @@ class TVSerializer(serializers.ModelSerializer):
             for mp in obj.mediapath_set.order_by("-pk").values("pk", "_path", "skip")
         ]
 
-    def get_genres(self, obj):
-        if obj._poster is None:
-            return []
-        return [g.genre for g in obj._poster.genres.all()]
-
 
 class MCPTVSerializer(TVSerializer):
     class Meta:
@@ -177,6 +171,13 @@ class MCPTVSerializer(TVSerializer):
             "name",
             "genres",
         )
+
+    genres = serializers.SerializerMethodField("get_genres")
+
+    def get_genres(self, obj):
+        if obj._poster is None:
+            return []
+        return [g.genre for g in obj._poster.genres.all()]
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -194,6 +195,15 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_media_path(self, obj):
         mp = obj.media_path
         return dict(pk=mp.pk, path=mp._path)
+
+
+class MCPMovieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = (
+            "pk",
+            "name",
+        )
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
@@ -226,7 +236,7 @@ class MediaFileSerializer(serializers.ModelSerializer):
         return False
 
 
-class MCPMediaFileSerializer(MediaFileSerializer):
+class MCPMediaFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = MediaFile
         fields = (

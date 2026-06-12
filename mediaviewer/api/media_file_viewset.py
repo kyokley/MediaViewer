@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework import serializers
 
 from rest_framework.response import Response
-from mediaviewer.models import MediaFile
+from mediaviewer.models import MediaFile, Movie
 from mediaviewer.models.downloadtoken import DownloadToken
 from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
 from mediaviewer.api.serializers import MediaFileSerializer, MCPMediaFileSerializer
@@ -15,7 +15,7 @@ class MediaFileViewSet(viewsets.ModelViewSet):
     serializer_class = MediaFileSerializer
 
 
-class MediaFileAutoplayViewSet(viewsets.ViewSet):
+class MCPMediaFileAutoplayViewSet(viewsets.ViewSet):
     permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
 
     def retrieve(self, request, pk=None):
@@ -24,6 +24,18 @@ class MediaFileAutoplayViewSet(viewsets.ViewSet):
         dt = DownloadToken.objects.from_media_file(user, mf)
 
         downloadlink = mf.autoplayDownloadLink(dt.guid)
+        return Response({"link": downloadlink})
+
+
+class MCPMovieAutoplayViewSet(viewsets.ViewSet):
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+
+    def retrieve(self, request, pk=None):
+        user = request.user
+        movie = get_object_or_404(Movie, pk=pk)
+        dt = DownloadToken.objects.from_movie(user, movie)
+
+        downloadlink = movie.downloadLink(dt.guid)
         return Response({"link": downloadlink})
 
 
