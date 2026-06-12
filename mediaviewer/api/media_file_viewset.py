@@ -21,7 +21,7 @@ class MCPMediaFileAutoplayViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         user = request.user
         mf = get_object_or_404(MediaFile, pk=pk)
-        dt = DownloadToken.objects.from_media_file(user, mf)
+        dt = DownloadToken.objects.from_media_file(user, mf, is_mcp=True)
 
         downloadlink = mf.autoplayDownloadLink(dt.guid)
         return Response({"link": downloadlink})
@@ -33,7 +33,7 @@ class MCPMovieAutoplayViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         user = request.user
         movie = get_object_or_404(Movie, pk=pk)
-        dt = DownloadToken.objects.from_movie(user, movie)
+        dt = DownloadToken.objects.from_movie(user, movie, is_mcp=True)
 
         downloadlink = movie.downloadLink(dt.guid)
         return Response({"link": downloadlink})
