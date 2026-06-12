@@ -53,6 +53,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "download_link",
             "theme",
             "tv_id",
+            "is_mcp",
         )
 
     userid = serializers.IntegerField(required=True, source="user.id")
