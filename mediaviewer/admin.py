@@ -16,6 +16,7 @@ from mediaviewer.models import (
     SiteGreeting,
     UserSettings,
     VideoProgress,
+    ApiKey,
 )
 
 
@@ -313,6 +314,16 @@ class CollectionAdmin(admin.ModelAdmin):
         "name",
     )
     search_fields = ("name",)
+
+
+@admin.register(ApiKey)
+class ApiKeyAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "key",
+        "user",
+    )
+    search_fields = ("user",)
 
 
 admin.site.site_url = "/mediaviewer"

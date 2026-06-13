@@ -20,6 +20,7 @@ class DownloadTokenManager(models.Manager):
         self,
         user,
         media_file,
+        is_mcp=False,
     ):
         dt = self.create(
             user=user,
@@ -27,6 +28,7 @@ class DownloadTokenManager(models.Manager):
             path=media_file.media_path.path,
             displayname=media_file.full_name,
             media_file=media_file,
+            is_mcp=is_mcp,
         )
         return self._post_token_create(dt, user)
 
@@ -34,6 +36,7 @@ class DownloadTokenManager(models.Manager):
         self,
         user,
         movie,
+        is_mcp=False,
     ):
         dt = self.create(
             user=user,
@@ -41,6 +44,7 @@ class DownloadTokenManager(models.Manager):
             path=movie.mediapath_set.first().path,
             displayname=movie.full_name,
             movie=movie,
+            is_mcp=is_mcp,
         )
         return self._post_token_create(dt, user)
 
@@ -54,7 +58,8 @@ class DownloadTokenManager(models.Manager):
             if old_token:
                 old_token.delete()
 
-        Message.createLastWatchedMessage(user, dt.movie or dt.media_file)
+        if not dt.is_mcp:
+            Message.createLastWatchedMessage(user, dt.movie or dt.media_file)
         settings = user.settings()
         if dt.movie:
             settings.last_watched_movie = dt.movie
@@ -89,6 +94,7 @@ class DownloadToken(models.Model):
         null=True,
         blank=True,
     )
+    is_mcp = models.BooleanField(default=False)
 
     objects = DownloadTokenManager()
 

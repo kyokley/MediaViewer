@@ -186,7 +186,9 @@ if not conf_settings.IS_SYNCING:
         r"downloadtoken", viewset.DownloadTokenViewSet, basename="downloadtoken"
     )
     router.register(r"movie", movie_viewset.MovieViewSet, basename="movie")
+    router.register(r"mcp-movie", movie_viewset.MCPMovieViewSet, basename="mcp-movie")
     router.register(r"tv", tv_viewset.TVViewSet, basename="tv")
+    router.register(r"mcp-tv", tv_viewset.MCPTVViewSet, basename="mcp-tv")
     router.register(
         r"tvmediapath", media_path_viewset.TVMediaPathViewSet, basename="tvmediapath"
     )
@@ -198,7 +200,28 @@ if not conf_settings.IS_SYNCING:
     router.register(
         r"mediafile", media_file_viewset.MediaFileViewSet, basename="mediafile"
     )
+    router.register(
+        r"mcp-autoplay",
+        media_file_viewset.MCPMediaFileAutoplayViewSet,
+        basename="mcp-autoplay",
+    )
+    router.register(
+        r"mcp-movie-autoplay",
+        media_file_viewset.MCPMovieAutoplayViewSet,
+        basename="mcp-movie-autoplay",
+    )
+    router.register(
+        r"mcp-mediafile",
+        media_file_viewset.MCPMediaFileViewSet,
+        basename="mcp-mediafile",
+    )
+    router.register(
+        r"mcp-poster",
+        viewset.PosterViewSet,
+        basename="mcp-poster",
+    )
     router.register(r"message", viewset.MessageViewSet)
+    router.register(r"genre", viewset.GenreViewSet)
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
     router.register(r"comment", viewset.CommentViewSet)
     router.register(r"collection", collection_viewset.CollectionViewSet)

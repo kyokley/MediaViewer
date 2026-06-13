@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, views, viewsets
 from rest_framework.response import Response as RESTResponse
+from rest_framework import serializers
+from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
 
 from mediaviewer.api.serializers import (
     CollectionSerializer,
@@ -8,6 +10,8 @@ from mediaviewer.api.serializers import (
     DownloadTokenSerializer,
     FilenameScrapeFormatSerializer,
     MessageSerializer,
+    GenreSerializer,
+    MCPPosterSerializer,
 )
 from mediaviewer.log import log
 from mediaviewer.models import (
@@ -17,6 +21,8 @@ from mediaviewer.models import (
     FilenameScrapeFormat,
     MediaFile,
     Message,
+    Genre,
+    Poster,
 )
 
 
@@ -77,4 +83,40 @@ class CollectionViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         obj = get_object_or_404(Collection.objects.all(), pk=pk)
         serializer = self.serializer_class(obj)
+        return RESTResponse(serializer.data)
+
+
+class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+    queryset = Genre.objects.order_by("genre")
+    serializer_class = GenreSerializer
+
+
+class PosterViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
+    queryset = Poster.objects.all()
+    serializer_class = MCPPosterSerializer
+
+    def list(self, request):
+        fields = {
+            "episode_name": "episodename",
+            "imdb": "imdb",
+            "tmdb": "tmdb",
+            "tv_id": "tv",
+            "movie_id": "movie",
+            "mf_id": "media_file",
+        }
+
+        posters = self.queryset
+        at_least_one_filter = False
+        for external_name, internal_name in fields.items():
+            if val := request.query_params.get(external_name, None):
+                posters = posters.filter(**{internal_name: val})
+                at_least_one_filter = True
+
+        if not at_least_one_filter:
+            raise serializers.ValidationError(
+                f"At least one field of '{', '.join(fields.keys())}' is required"
+            )
+        serializer = self.serializer_class(posters, many=True)
         return RESTResponse(serializer.data)

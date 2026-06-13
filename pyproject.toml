@@ -14,6 +14,10 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 addopts = "--disable-socket --disable-warnings"
+DJANGO_SETTINGS_MODULE = "mysite.settings"
+filterwarnings = [
+    "ignore::pytest.PytestCacheWarning",
+]
 
 [tool.bandit]
 exclude_dirs = ["mediaviewer/tests", ".venv"]

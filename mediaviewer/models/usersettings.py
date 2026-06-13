@@ -10,6 +10,7 @@ from django.db.utils import IntegrityError
 
 from mediaviewer.forms import FormlessPasswordReset
 from mediaviewer.utils import make_random_password
+from mediaviewer.models import ApiKey
 
 TIMESTAMP_SORT = "timestamp_sort"
 FILENAME_SORT = "filename_sort"
@@ -115,6 +116,7 @@ class UserSettings(models.Model):
         email,
         is_staff=False,
         is_superuser=False,
+        is_mcp=False,
         default_sort=FILENAME_SORT,
         can_download=True,
         send_email=True,
@@ -143,6 +145,9 @@ class UserSettings(models.Model):
         # Create a random password for the time being
         newUser.set_password(make_random_password())
         newUser.save()
+
+        if is_mcp:
+            ApiKey.objects.create(user=newUser)
 
         cls.create_user_setting(
             newUser,
