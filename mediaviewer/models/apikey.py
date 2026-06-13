@@ -17,4 +17,4 @@ class ApiKey(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user.username} - ...{self.key[:4]}"
+        return f"{self.user.username} - {self.key[:4]}"

@@ -37,7 +37,7 @@ class TestApiKey:
     def test_str_representation(self):
         """String representation shows username and truncated key."""
         key = ApiKey.objects.create(user=self.user)
-        expected = f"{self.user.username} - ...{key.key[:4]}"
+        expected = f"{self.user.username} - {key.key[:4]}"
         assert str(key) == expected
 
     def test_cascade_delete_user(self):
