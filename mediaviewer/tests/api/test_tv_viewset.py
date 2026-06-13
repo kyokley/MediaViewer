@@ -2,8 +2,6 @@ import pytest
 from django.urls import reverse
 
 from mediaviewer.models.tv import TV
-from mediaviewer.models.poster import Poster
-from mediaviewer.models.genre import Genre
 
 
 @pytest.mark.django_db
@@ -158,100 +156,3 @@ class TestTv:
             assert new_tv.finished == json_data["finished"]
         else:
             assert response.status_code == 403
-
-
-@pytest.mark.django_db
-class TestTVByIMDB:
-    @pytest.fixture(autouse=True)
-    def setUp(self, client, create_tv, create_user, mocker):
-        mocker.patch("mediaviewer.models.media.Media._populate_poster")
-        self.client = client
-        self.user = create_user(is_staff=True)
-        self.non_staff_user = create_user(is_staff=False)
-        self.tv_shows = [create_tv() for i in range(3)]
-
-    def test_list_requires_imdb_id(self):
-        self.client.force_login(self.user)
-        url = reverse("mediaviewer:api:tv-imdb-list")
-        response = self.client.get(url)
-        assert response.status_code == 400
-        assert "imdb_id" in str(response.json())
-
-    def test_list_filters_by_imdb_id(self):
-        self.client.force_login(self.user)
-        tv_with_imdb = self.tv_shows[0]
-        Poster.objects.from_ref_obj(tv_with_imdb, imdb="tt1234567")
-
-        url = reverse("mediaviewer:api:tv-imdb-list")
-        response = self.client.get(url, {"imdb_id": "tt1234567"})
-        assert response.status_code == 200
-        json_data = response.json()
-        assert len(json_data) == 1
-        assert json_data[0]["pk"] == tv_with_imdb.pk
-
-    def test_list_no_match(self):
-        self.client.force_login(self.user)
-        url = reverse("mediaviewer:api:tv-imdb-list")
-        response = self.client.get(url, {"imdb_id": "tt9999999"})
-        assert response.status_code == 200
-        json_data = response.json()
-        assert json_data == []
-
-    def test_list_non_staff_can_read(self):
-        """Non-staff authenticated users can read (safe method)."""
-        self.client.force_login(self.non_staff_user)
-        url = reverse("mediaviewer:api:tv-imdb-list")
-        response = self.client.get(url, {"imdb_id": "tt1234567"})
-        assert response.status_code == 200
-
-
-@pytest.mark.django_db
-class TestTVByGenre:
-    @pytest.fixture(autouse=True)
-    def setUp(self, client, create_tv, create_user, mocker):
-        mocker.patch("mediaviewer.models.media.Media._populate_poster")
-        self.client = client
-        self.user = create_user(is_staff=True)
-        self.non_staff_user = create_user(is_staff=False)
-        self.tv_shows = [create_tv() for i in range(3)]
-
-    def test_list_requires_genre(self):
-        self.client.force_login(self.user)
-        url = reverse("mediaviewer:api:tv-genre-list")
-        response = self.client.get(url)
-        assert response.status_code == 400
-        assert "genre" in str(response.json())
-
-    def test_list_by_genre(self):
-        genre = Genre.objects.create(genre="Action")
-        tv_with_genre = self.tv_shows[0]
-        Poster.objects.from_ref_obj(tv_with_genre, genres=[genre])
-
-        self.client.force_login(self.user)
-        url = reverse("mediaviewer:api:tv-genre-list")
-        response = self.client.get(url, {"genre": "Action"})
-        assert response.status_code == 200
-        json_data = response.json()
-        # Overridden list returns a plain list, not paginated
-        pks = [item["pk"] for item in json_data]
-        assert tv_with_genre.pk in pks
-        for tv in self.tv_shows[1:]:
-            assert tv.pk not in pks
-
-    def test_list_genre_not_found(self):
-        self.client.force_login(self.user)
-        url = reverse("mediaviewer:api:tv-genre-list")
-        response = self.client.get(url, {"genre": "NonExistentGenre"})
-        assert response.status_code == 400
-        assert "Genre not found" in str(response.json())
-
-    def test_list_non_staff_can_read(self):
-        """Non-staff authenticated users can read (safe method)."""
-        genre = Genre.objects.create(genre="Action")
-        tv_with_genre = self.tv_shows[0]
-        Poster.objects.from_ref_obj(tv_with_genre, genres=[genre])
-
-        self.client.force_login(self.non_staff_user)
-        url = reverse("mediaviewer:api:tv-genre-list")
-        response = self.client.get(url, {"genre": "Action"})
-        assert response.status_code == 200

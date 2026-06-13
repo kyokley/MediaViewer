@@ -144,7 +144,6 @@ class TVSerializer(serializers.ModelSerializer):
             "number_of_unwatched_shows",
             "media_paths",
             "finished",
-            "genres",
         )
 
     number_of_unwatched_shows = serializers.SerializerMethodField("unwatched_shows")
@@ -351,5 +350,5 @@ class MCPPosterSerializer(serializers.ModelSerializer):
             "extendedplot",
         )
         tv = MCPTVSerializer(read_only=True)
-        movie = MovieSerializer(read_only=True)
+        movie = MCPMovieSerializer(read_only=True)
         media_file = MCPMediaFileSerializer(read_only=True)

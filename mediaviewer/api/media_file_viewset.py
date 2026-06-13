@@ -5,13 +5,13 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from mediaviewer.models import MediaFile, Movie
 from mediaviewer.models.downloadtoken import DownloadToken
-from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey
+from mediaviewer.api.permissions import IsStaffReadOnlyOrCheckAPIKey, IsStaffOrReadOnly
 from mediaviewer.api.serializers import MediaFileSerializer, MCPMediaFileSerializer
 
 
 class MediaFileViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsStaffReadOnlyOrCheckAPIKey,)
-    queryset = MediaFile.objects.order_by("id")
+    permission_classes = (IsStaffOrReadOnly,)
+    queryset = MediaFile.objects.filter(hide=False).order_by("id")
     serializer_class = MediaFileSerializer
 
 
