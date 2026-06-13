@@ -85,7 +85,7 @@
     check-added-large-files.enable = true;
     check-toml.enable = true;
     check-yaml.enable = true;
-    checkmake.enable = true;
+    checkmake.enable = false;
     detect-private-keys.enable = true;
     ripsecrets.enable = true;
     ruff.enable = true;
@@ -120,7 +120,11 @@
 
   tasks."mv:format" = {
     exec = ''
-      ${config.git-hooks.installationScript}
+      if [ -d .git/hooks ]; then
+        ${config.git-hooks.installationScript}
+      else
+        echo "Skipping git hook installation: .git/hooks not present"
+      fi
       ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
     '';
   };

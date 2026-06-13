@@ -14,6 +14,10 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 addopts = "--disable-socket --disable-warnings"
+DJANGO_SETTINGS_MODULE = "mysite.settings"
+filterwarnings = [
+    "ignore::pytest.PytestCacheWarning",
+]
 
 [tool.bandit]
 exclude_dirs = ["mediaviewer/tests", ".venv"]
@@ -34,7 +38,7 @@ dependencies = [
     "django-grappelli<4.0.0,>=3.0.3",
     "pillow>=10.3.0,<13.0.0",
     "gunicorn<24.0.0,>=23.0.0",
-    "django>=5.2.5",
+    "django>=5.2.14",
     "psycopg2-binary>=2.9.11",
 ]
 name = "mediaviewer"
@@ -53,7 +57,7 @@ dev = [
     "coverage<5.0,>=4.5",
     "pytest-mock<4.0.0,>=3.6.1",
     "Faker<11.0.0,>=10.0.0",
-    "black<25.0.0,>=24.3.0",
+    "black>=26.3.1,<27.0.0",
     "isort<6.0.0,>=5.12.0",
     "pytest-socket<1.0.0,>=0.6.0",
     "pytest-random<1.0,>=0.2",

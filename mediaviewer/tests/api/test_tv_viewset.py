@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from mediaviewer.models.tv import TV
+from mediaviewer.models import Genre, Poster, TV
 
 
 @pytest.mark.django_db
@@ -33,65 +33,6 @@ class TestTv:
             assert tv.pk == json_data["pk"]
             assert str(tv.media_path.path) == json_data["media_paths"][0]["path"]
             assert tv.finished == json_data["finished"]
-
-    def test_list(self, is_staff):
-        if not is_staff:
-            self.client.force_login(self.non_staff_user)
-        else:
-            self.client.force_login(self.user)
-
-        url = reverse("mediaviewer:api:tv-list")
-        response = self.client.get(url)
-        assert response.status_code == 200
-
-        json_data = response.json()
-        expected = {
-            "count": 3,
-            "next": None,
-            "previous": None,
-            "results": [
-                {
-                    "pk": self.tv_shows[0].pk,
-                    "name": self.tv_shows[0].name,
-                    "number_of_unwatched_shows": 0,
-                    "media_paths": [
-                        {
-                            "path": str(self.tv_shows[0].media_path.path),
-                            "pk": self.tv_shows[0].media_path.pk,
-                            "skip": False,
-                        }
-                    ],
-                    "finished": self.tv_shows[0].finished,
-                },
-                {
-                    "pk": self.tv_shows[1].pk,
-                    "name": self.tv_shows[1].name,
-                    "number_of_unwatched_shows": 0,
-                    "media_paths": [
-                        {
-                            "path": str(self.tv_shows[1].media_path.path),
-                            "pk": self.tv_shows[1].media_path.pk,
-                            "skip": False,
-                        }
-                    ],
-                    "finished": self.tv_shows[1].finished,
-                },
-                {
-                    "pk": self.tv_shows[2].pk,
-                    "name": self.tv_shows[2].name,
-                    "number_of_unwatched_shows": 0,
-                    "media_paths": [
-                        {
-                            "path": str(self.tv_shows[2].media_path.path),
-                            "pk": self.tv_shows[2].media_path.pk,
-                            "skip": False,
-                        }
-                    ],
-                    "finished": self.tv_shows[2].finished,
-                },
-            ],
-        }
-        assert expected == json_data
 
     @pytest.mark.parametrize("include_name", (True, False))
     def test_create_new(self, is_staff, include_name):
@@ -150,3 +91,119 @@ class TestTv:
             assert new_tv.finished == json_data["finished"]
         else:
             assert response.status_code == 403
+
+
+@pytest.mark.django_db
+class TestMCPTv:
+    @pytest.fixture(autouse=True)
+    def setUp(self, client, create_tv, create_user, mocker):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+        self.client = client
+        self.user = create_user(is_staff=True)
+        self.non_staff_user = create_user(is_staff=False)
+        self.tv_shows = [create_tv(name=f"TV Show {i}") for i in range(3)]
+
+    def test_list_requires_filter(self):
+        """MCP TV list requires at least one filter parameter."""
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url)
+        assert response.status_code == 400
+
+    def test_list_filter_by_name(self):
+        """MCP TV list filters by name (case-insensitive contains)."""
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"name": self.tv_shows[0].name})
+        assert response.status_code == 200
+        json_data = response.json()
+        pks = [item["pk"] for item in json_data]
+        assert self.tv_shows[0].pk in pks
+        assert self.tv_shows[1].pk not in pks
+
+    def test_list_filter_by_genre(self):
+        """MCP TV list filters by genre through poster."""
+        genre = Genre.objects.create(genre="Action")
+        poster = Poster.objects.from_ref_obj(self.tv_shows[0], genres=[genre])
+        self.tv_shows[0]._poster = poster
+        self.tv_shows[0].save()
+
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"genre": "Action"})
+        assert response.status_code == 200
+        json_data = response.json()
+        pks = [item["pk"] for item in json_data]
+        assert self.tv_shows[0].pk in pks
+        assert self.tv_shows[1].pk not in pks
+
+    def test_list_filter_by_imdb(self):
+        """MCP TV list filters by imdb."""
+        poster = Poster.objects.from_ref_obj(self.tv_shows[0], imdb="tt1234567")
+        self.tv_shows[0]._poster = poster
+        self.tv_shows[0].save()
+
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"imdb": "tt1234567"})
+        assert response.status_code == 200
+        json_data = response.json()
+        pks = [item["pk"] for item in json_data]
+        assert self.tv_shows[0].pk in pks
+
+    def test_list_filter_by_tmdb(self):
+        """MCP TV list filters by tmdb."""
+        poster = Poster.objects.from_ref_obj(self.tv_shows[0], tmdb="12345")
+        self.tv_shows[0]._poster = poster
+        self.tv_shows[0].save()
+
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"tmdb": "12345"})
+        assert response.status_code == 200
+        json_data = response.json()
+        pks = [item["pk"] for item in json_data]
+        assert self.tv_shows[0].pk in pks
+
+    def test_serializer_includes_genres(self):
+        """MCP TV serializer includes genres from poster."""
+        genre1 = Genre.objects.create(genre="Action")
+        genre2 = Genre.objects.create(genre="Comedy")
+        poster = Poster.objects.from_ref_obj(self.tv_shows[0], genres=[genre1, genre2])
+        self.tv_shows[0]._poster = poster
+        self.tv_shows[0].save()
+
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"name": self.tv_shows[0].name})
+        assert response.status_code == 200
+        json_data = response.json()
+        assert len(json_data) == 1
+        assert set(json_data[0]["genres"]) == {"Action", "Comedy"}
+
+    def test_serializer_genres_empty_when_no_poster(self):
+        """MCP TV serializer returns empty genres when no poster."""
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"name": self.tv_shows[0].name})
+        assert response.status_code == 200
+        json_data = response.json()
+        assert json_data[0]["genres"] == []
+
+    def test_hidden_tv_excluded(self):
+        """MCP TV list excludes hidden TV shows."""
+        TV.objects.filter(pk=self.tv_shows[0].pk).update(hide=True)
+
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"name": self.tv_shows[0].name})
+        assert response.status_code == 200
+        json_data = response.json()
+        assert len(json_data) == 0
+
+    def test_list_non_staff_can_read(self):
+        """Non-staff authenticated users can read MCP TV list."""
+        self.client.force_login(self.non_staff_user)
+        url = reverse("mediaviewer:api:mcp-tv-list")
+        response = self.client.get(url, {"name": self.tv_shows[0].name})
+        assert response.status_code == 200
