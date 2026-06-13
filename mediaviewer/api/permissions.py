@@ -19,9 +19,7 @@ class IsStaffReadOnlyOrCheckAPIKey(IsStaffOrReadOnly):
             api_key := request.META.get("HTTP_API_KEY")
         ):
             if user := (
-                User.objects.filter(apikey__key__iexact=api_key.strip())
-                .distinct()
-                .get()
+                User.objects.filter(apikey__key__iexact=api_key.strip()).first()
             ):
                 if user.is_active:
                     login(
