@@ -29,6 +29,10 @@ class DownloadTokenManager(models.Manager):
             displayname=media_file.full_name,
             media_file=media_file,
             is_mcp=is_mcp,
+            og_title=media_file.full_name,
+            og_type="video.tv_show" if media_file.tv else "video.movie",
+            og_url=media_file.external_url(),
+            og_image=media_file.poster.external_url(),
         )
         return self._post_token_create(dt, user)
 
@@ -45,6 +49,10 @@ class DownloadTokenManager(models.Manager):
             displayname=movie.full_name,
             movie=movie,
             is_mcp=is_mcp,
+            og_title=movie.full_name,
+            og_type="video.movie",
+            og_url=movie.external_url(),
+            og_image=movie.poster.external_url(),
         )
         return self._post_token_create(dt, user)
 
@@ -95,6 +103,15 @@ class DownloadToken(models.Model):
         blank=True,
     )
     is_mcp = models.BooleanField(default=False)
+
+    og_title = models.TextField(
+        db_column="og_title", null=False, blank=True, default=""
+    )
+    og_type = models.TextField(db_column="og_type", null=False, blank=True, default="")
+    og_url = models.TextField(db_column="og_url", null=False, blank=True, default="")
+    og_image = models.TextField(
+        db_column="og_image", null=False, blank=True, default=""
+    )
 
     objects = DownloadTokenManager()
 

@@ -1,4 +1,5 @@
 from django.conf import settings as conf_settings
+from django.contrib.sites.models import Site
 from django.db import models
 
 
@@ -92,3 +93,7 @@ class ViewableObjectMixin:
 
     def previous(self):
         raise NotImplementedError("Method must be implemented by child classes")
+
+    def external_url(self):
+        current_site = Site.objects.get_current()
+        return f"{current_site.domain}{self.url()}"
