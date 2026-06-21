@@ -275,6 +275,7 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 os.environ["HTTPS"] = "on"
 os.environ["wsgi.url_scheme"] = "https"
+HTTP_PROTOCOL = "http"
 
 # For SecurityMiddleware in django 3.0
 SECURE_REFERRER_POLICY = "same-origin"

@@ -96,4 +96,4 @@ class ViewableObjectMixin:
 
     def external_url(self):
         current_site = Site.objects.get_current()
-        return f"{current_site.domain}{self.url()}"
+        return f"{conf_settings.HTTP_PROTOCOL}://{current_site.domain}{self.url()}"

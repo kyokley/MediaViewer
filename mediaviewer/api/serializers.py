@@ -54,6 +54,10 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "theme",
             "tv_id",
             "is_mcp",
+            "og_title",
+            "og_type",
+            "og_url",
+            "og_image",
         )
 
     userid = serializers.IntegerField(required=True, source="user.id")

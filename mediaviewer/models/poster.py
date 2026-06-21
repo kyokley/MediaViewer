@@ -214,7 +214,7 @@ class Poster(TimeStampModel):
 
     def external_url(self):
         current_site = Site.objects.get_current()
-        return f"{current_site.domain}{self.image.url}"
+        return f"{settings.HTTP_PROTOCOL}://{current_site.domain}{self.image.url}"
 
     @admin.display(boolean=True, description="Image")
     def has_image(self):
