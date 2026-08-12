@@ -6,7 +6,10 @@
   ...
 }: {
   # https://devenv.sh/basics/
-  # env.GREET = "MV";
+  env = {
+    GREET = "MV";
+    PYTHONDONTWRITEBYTECODE = 1;
+  };
 
   # https://devenv.sh/packages/
   packages = [
