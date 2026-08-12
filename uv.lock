@@ -579,7 +579,7 @@ requires-dist = [
     { name = "django-widget-tweaks", specifier = ">=1.4,<2.0" },
     { name = "djangorestframework", specifier = ">=3.9,<4.0" },
     { name = "gunicorn", specifier = ">=23.0.0,<24.0.0" },
-    { name = "pillow", specifier = ">=10.3.0,<13.0.0" },
+    { name = "pillow", specifier = ">=12.3.0,<13.0.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "python-dateutil", specifier = ">=2.7,<3.0" },
     { name = "pytz", specifier = ">=2018.9,<2019.0" },
