@@ -12,7 +12,9 @@ from mediaviewer.views.detail import ajaxsuperviewed
 @pytest.mark.django_db
 class TestAjaxSuperViewed:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_tv_media_file, create_movie, create_user, client):
+    def setUp(self, mocker, create_tv_media_file, create_movie, create_user, client):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+
         self.user = create_user()
         self.client = client
 
@@ -162,7 +164,9 @@ class TestAjaxViewed:
 @pytest.mark.parametrize("use_movie", (True, False))
 class TestAjaxDownloadButton:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_user, create_tv_media_file, create_movie, client):
+    def setUp(self, mocker, create_user, create_tv_media_file, create_movie, client):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+
         self.client = client
 
         self.tv_mf = create_tv_media_file()

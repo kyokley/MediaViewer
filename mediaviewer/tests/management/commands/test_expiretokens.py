@@ -11,7 +11,9 @@ from mediaviewer.models import DownloadToken
 @pytest.mark.django_db
 class TestExpireTokens:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_user):
+    def setUp(self, mocker, create_user):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+
         self.user = create_user()
         self.command_name = "expiretokens"
 

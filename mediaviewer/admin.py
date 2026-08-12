@@ -28,6 +28,10 @@ class DownloadTokenAdmin(admin.ModelAdmin):
         "displayname",
         "ismovie",
         "date_created",
+        "og_title",
+        "og_type",
+        "og_url",
+        "og_image",
     )
     search_fields = (
         "id",

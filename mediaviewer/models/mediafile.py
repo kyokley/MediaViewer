@@ -204,13 +204,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
 
     def url(self):
         if self.is_tv():
-            return '<a href="{}">{}</a>'.format(
-                reverse("mediaviewer:tvdetail", args=(self.id,)), self.media.name
-            )
+            return reverse("mediaviewer:tvdetail", args=(self.id,))
         else:
-            return '<a href="{}">{}</a>'.format(
-                reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
-            )
+            return reverse("mediaviewer:moviedetail", args=(self.id,))
 
     def last_watched_url(self):
         if self.is_tv():
@@ -274,7 +270,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             else ""
         )
 
-        name_html = f'<a class="img-preview" href="/mediaviewer/tvdetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.display_name}</a>'
+        name_html = f'<a class="img-preview" href="{reverse("mediaviewer:tvdetail", args=(self.id,))}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.display_name}</a>'
         timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime("%b %d, %Y")}</center>"""
 
         if can_download:

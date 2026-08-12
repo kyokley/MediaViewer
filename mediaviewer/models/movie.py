@@ -83,9 +83,7 @@ class Movie(Media, ViewableObjectMixin):
         return False
 
     def url(self):
-        return '<a href="{}">{}</a>'.format(
-            reverse("mediaviewer:moviedetail", args=(self.id,)), self.full_name
-        )
+        return reverse("mediaviewer:moviedetail", args=(self.id,))
 
     def next(self):
         return None
@@ -94,7 +92,7 @@ class Movie(Media, ViewableObjectMixin):
         return None
 
     def last_watched_url(self):
-        return self.url()
+        return f'<a href="{self.url()}">{self.full_name}</a>'
 
     def ajax_row_payload(self, can_download, waiterstatus, user):
         poster = self.poster
@@ -104,7 +102,7 @@ class Movie(Media, ViewableObjectMixin):
             else ""
         )
 
-        name_html = f'<a class="img-preview" href="/mediaviewer/moviedetail/{self.id}/" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.name}</a>'
+        name_html = f'<a class="img-preview" href="{reverse("mediaviewer:moviedetail", args=(self.id,))}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-container="body" data-bs-placement="auto" data-bs-custom-class="preview-tooltip" {tooltip_img}>{self.name}</a>'
         timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime("%b %d, %Y")}</center>"""
 
         if can_download:
