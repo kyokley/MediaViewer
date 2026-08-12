@@ -51,8 +51,8 @@ class DownloadTokenManager(models.Manager):
             is_mcp=is_mcp,
             og_title=movie.full_name,
             og_type="video.movie",
-            og_url=movie.external_url(),
-            og_image=movie.poster.external_url(),
+            og_url=movie.external_url() if movie else "",
+            og_image=movie.poster.external_url() if movie and movie.poster else "",
         )
         return self._post_token_create(dt, user)
 
