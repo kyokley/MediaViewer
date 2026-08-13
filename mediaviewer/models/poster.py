@@ -213,12 +213,14 @@ class Poster(TimeStampModel):
         return self.ref_obj.full_name if self.ref_obj else ""
 
     def external_url(self):
-        current_site = Site.objects.get_current()
-        return (
-            f"{settings.HTTP_PROTOCOL}://{current_site.domain}{self.image.url}"
-            if self.image
-            else ""
-        )
+        if not self.image:
+            return ""
+
+        if settings.OG_BASE_URL:
+            return f"{settings.OG_BASE_URL}/{self.image.url}"
+        else:
+            current_site = Site.objects.get_current()
+            return f"{settings.HTTP_PROTOCOL}://{current_site.domain}{self.image.url}"
 
     @admin.display(boolean=True, description="Image")
     def has_image(self):
