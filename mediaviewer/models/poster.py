@@ -220,9 +220,7 @@ class Poster(TimeStampModel):
             return f"{settings.OG_BASE_URL}/{self.image.url}"
         else:
             current_site = Site.objects.get_current()
-            return (
-                f"{settings.HTTP_PROTOCOL}://{current_site.domain}{self.image.url}"
-            )
+            return f"{settings.HTTP_PROTOCOL}://{current_site.domain}{self.image.url}"
 
     @admin.display(boolean=True, description="Image")
     def has_image(self):
