@@ -364,3 +364,5 @@ if DEBUG:
     MIDDLEWARE += ("debug_toolbar.middleware.DebugToolbarMiddleware",)
 
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+OG_BASE_URL = ""

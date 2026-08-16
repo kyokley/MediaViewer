@@ -20,6 +20,7 @@ class DownloadTokenManager(models.Manager):
         self,
         user,
         media_file,
+        is_mcp=False,
     ):
         dt = self.create(
             user=user,
@@ -27,6 +28,11 @@ class DownloadTokenManager(models.Manager):
             path=media_file.media_path.path,
             displayname=media_file.full_name,
             media_file=media_file,
+            is_mcp=is_mcp,
+            og_title=media_file.full_name,
+            og_type="video.tv_show" if media_file.tv else "video.movie",
+            og_url=media_file.external_url(),
+            og_image=media_file.poster.external_url(),
         )
         return self._post_token_create(dt, user)
 
@@ -34,6 +40,7 @@ class DownloadTokenManager(models.Manager):
         self,
         user,
         movie,
+        is_mcp=False,
     ):
         dt = self.create(
             user=user,
@@ -41,6 +48,11 @@ class DownloadTokenManager(models.Manager):
             path=movie.mediapath_set.first().path,
             displayname=movie.full_name,
             movie=movie,
+            is_mcp=is_mcp,
+            og_title=movie.full_name,
+            og_type="video.movie",
+            og_url=movie.external_url() if movie else "",
+            og_image=movie.poster.external_url() if movie and movie.poster else "",
         )
         return self._post_token_create(dt, user)
 
@@ -54,7 +66,8 @@ class DownloadTokenManager(models.Manager):
             if old_token:
                 old_token.delete()
 
-        Message.createLastWatchedMessage(user, dt.movie or dt.media_file)
+        if not dt.is_mcp:
+            Message.createLastWatchedMessage(user, dt.movie or dt.media_file)
         settings = user.settings()
         if dt.movie:
             settings.last_watched_movie = dt.movie
@@ -88,6 +101,16 @@ class DownloadToken(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+    )
+    is_mcp = models.BooleanField(default=False)
+
+    og_title = models.TextField(
+        db_column="og_title", null=False, blank=True, default=""
+    )
+    og_type = models.TextField(db_column="og_type", null=False, blank=True, default="")
+    og_url = models.TextField(db_column="og_url", null=False, blank=True, default="")
+    og_image = models.TextField(
+        db_column="og_image", null=False, blank=True, default=""
     )
 
     objects = DownloadTokenManager()

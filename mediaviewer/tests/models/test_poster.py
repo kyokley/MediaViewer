@@ -1,4 +1,10 @@
+from typing import cast
+
 import pytest
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.db.models.fields.files import FieldFile
+from django.test import override_settings
 
 from mediaviewer.models import Poster
 
@@ -262,3 +268,35 @@ class TestStoreRated:
 
         self.test_obj._store_rated(self.test_data)
         assert self.test_obj.rated == ""
+
+
+@pytest.mark.django_db
+class TestExternalUrl:
+    IMAGE_NAME = "uploads/2026/08/13/test.png"
+
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        self.test_obj = Poster()
+
+    def test_no_image(self):
+        assert self.test_obj.external_url() == ""
+
+    @override_settings(OG_BASE_URL="https://media.example.com")
+    def test_uses_og_base_url(self):
+        self.test_obj.image = self.IMAGE_NAME
+        image = cast(FieldFile, self.test_obj.image)
+
+        expected = f"{settings.OG_BASE_URL}/{image.url}"
+
+        assert self.test_obj.external_url() == expected
+
+    @override_settings(OG_BASE_URL="")
+    def test_falls_back_to_site_domain(self):
+        self.test_obj.image = self.IMAGE_NAME
+        image = cast(FieldFile, self.test_obj.image)
+        site = Site.objects.create(domain="mytest.example.com", name="test site")
+
+        with override_settings(SITE_ID=site.pk):
+            expected = f"{settings.HTTP_PROTOCOL}://{site.domain}{image.url}"
+
+            assert self.test_obj.external_url() == expected

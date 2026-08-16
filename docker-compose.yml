@@ -37,8 +37,6 @@ services:
       - mediaviewer-backend
   mediaviewer-migrate:
     !!merge <<: *default-mediaviewer
-    depends_on:
-      - "postgres"
     command: /bin/manage migrate
   mediaviewer:
     !!merge <<: *default-mediaviewer

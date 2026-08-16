@@ -3,6 +3,7 @@ import logging
 from rest_framework import serializers
 
 from mediaviewer.models import (
+    Poster,
     TV,
     Collection,
     Comment,
@@ -15,9 +16,16 @@ from mediaviewer.models import (
     Movie,
     UserSettings,
     VideoProgress,
+    Genre,
 )
 
 logger = logging.getLogger(__name__)
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ("genre",)
 
 
 class DonationSiteSerializer(serializers.ModelSerializer):
@@ -49,6 +57,11 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "download_link",
             "theme",
             "tv_id",
+            "is_mcp",
+            "og_title",
+            "og_type",
+            "og_url",
+            "og_image",
         )
 
     userid = serializers.IntegerField(required=True, source="user.id")
@@ -166,6 +179,23 @@ class TVSerializer(serializers.ModelSerializer):
         ]
 
 
+class MCPTVSerializer(TVSerializer):
+    class Meta:
+        model = TV
+        fields = (
+            "pk",
+            "name",
+            "genres",
+        )
+
+    genres = serializers.SerializerMethodField("get_genres")
+
+    def get_genres(self, obj):
+        if obj._poster is None:
+            return []
+        return [g.genre for g in obj._poster.genres.all()]
+
+
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
@@ -181,6 +211,15 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_media_path(self, obj):
         mp = obj.media_path
         return dict(pk=mp.pk, path=mp._path)
+
+
+class MCPMovieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = (
+            "pk",
+            "name",
+        )
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
@@ -211,6 +250,15 @@ class MediaFileSerializer(serializers.ModelSerializer):
             if uc and uc.viewed:
                 return True
         return False
+
+
+class MCPMediaFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaFile
+        fields = (
+            "pk",
+            "display_name",
+        )
 
 
 class FilenameScrapeFormatSerializer(serializers.ModelSerializer):
@@ -274,3 +322,49 @@ class CollectionSerializer(serializers.ModelSerializer):
             "name",
         )
         pk = serializers.ReadOnlyField()
+
+
+class PosterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Poster
+        fields = (
+            "pk",
+            "tv",
+            "movie",
+            "media_file",
+            "genres",
+            "actors",
+            "writers",
+            "directors",
+            "episodename",
+            "tmdb",
+            "imdb",
+            "plot",
+            "extendedplot",
+        )
+        tv = TVSerializer(read_only=True)
+        movie = MovieSerializer(read_only=True)
+        mediafile = MediaFileSerializer(read_only=True)
+
+
+class MCPPosterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Poster
+        fields = (
+            "pk",
+            "tv",
+            "movie",
+            "media_file",
+            "genres",
+            "actors",
+            "writers",
+            "directors",
+            "episodename",
+            "tmdb",
+            "imdb",
+            "plot",
+            "extendedplot",
+        )
+        tv = MCPTVSerializer(read_only=True)
+        movie = MCPMovieSerializer(read_only=True)
+        media_file = MCPMediaFileSerializer(read_only=True)

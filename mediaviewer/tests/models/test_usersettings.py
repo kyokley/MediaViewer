@@ -2,6 +2,7 @@ import mock
 import pytest
 from django.db.utils import IntegrityError
 from django.http import HttpRequest
+from django.contrib.auth.models import Group
 
 from mediaviewer.models.usersettings import UserSettings, case_insensitive_authenticate
 from mediaviewer.tests import helpers
@@ -135,3 +136,46 @@ class TestCaseInsensitiveAuthenticate:
         )
 
         assert expected == actual
+
+
+@pytest.mark.django_db
+class TestMCPUser:
+    @pytest.fixture(autouse=True)
+    def setUp(self):
+        self.group, _ = Group.objects.get_or_create(name="MediaViewer")
+
+    def test_create_mcp_user_creates_api_key(self):
+        """Creating a user with is_mcp=True also creates an ApiKey."""
+        user = UserSettings.new(
+            "mcp_user",
+            "mcp@test.com",
+            send_email=False,
+            is_mcp=True,
+            group=self.group,
+        )
+        assert user.apikey_set.count() == 1
+        api_key = user.apikey_set.first()
+        assert api_key.key is not None
+
+    def test_non_mcp_user_does_not_get_api_key(self):
+        """Creating a user without is_mcp does not create an ApiKey."""
+        user = UserSettings.new(
+            "regular_user",
+            "regular@test.com",
+            send_email=False,
+            is_mcp=False,
+            group=self.group,
+        )
+        assert user.apikey_set.count() == 0
+
+    def test_create_mcp_user_defaults(self):
+        """MCP user is created with correct default fields."""
+        user = UserSettings.new(
+            "mcp_user2",
+            "mcp2@test.com",
+            send_email=False,
+            is_mcp=True,
+            group=self.group,
+        )
+        assert user.is_staff is False
+        assert user.apikey_set.count() == 1

@@ -16,6 +16,7 @@ from mediaviewer.models import (
     SiteGreeting,
     UserSettings,
     VideoProgress,
+    ApiKey,
 )
 
 
@@ -27,6 +28,10 @@ class DownloadTokenAdmin(admin.ModelAdmin):
         "displayname",
         "ismovie",
         "date_created",
+        "og_title",
+        "og_type",
+        "og_url",
+        "og_image",
     )
     search_fields = (
         "id",
@@ -313,6 +318,16 @@ class CollectionAdmin(admin.ModelAdmin):
         "name",
     )
     search_fields = ("name",)
+
+
+@admin.register(ApiKey)
+class ApiKeyAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "key",
+        "user",
+    )
+    search_fields = ("user",)
 
 
 admin.site.site_url = "/mediaviewer"

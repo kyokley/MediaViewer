@@ -8,6 +8,7 @@ from io import BytesIO
 import requests
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.sites.models import Site
 from django.core.files.images import ImageFile
 from django.db import models
 
@@ -212,6 +213,16 @@ class Poster(TimeStampModel):
     @property
     def name(self):
         return self.ref_obj.full_name if self.ref_obj else ""
+
+    def external_url(self):
+        if not self.image:
+            return ""
+
+        if settings.OG_BASE_URL:
+            return f"{settings.OG_BASE_URL}/{self.image.url}"
+        else:
+            current_site = Site.objects.get_current()
+            return f"{settings.HTTP_PROTOCOL}://{current_site.domain}{self.image.url}"
 
     @admin.display(boolean=True, description="Image")
     def has_image(self):

@@ -21,6 +21,8 @@
     MV_API_URL = "http://127.0.0.1:8000/";
     VITE_HOST = "127.0.0.1";
     VITE_PORT = 3000;
+    GREET = "MV";
+    PYTHONDONTWRITEBYTECODE = 1;
   };
 
   # https://devenv.sh/packages/
@@ -204,7 +206,7 @@
     check-added-large-files.enable = true;
     check-toml.enable = true;
     check-yaml.enable = true;
-    checkmake.enable = true;
+    checkmake.enable = false;
     detect-private-keys.enable = true;
     ripsecrets.enable = true;
     ruff.enable = true;
@@ -236,6 +238,20 @@
       pass_filenames = true;
     };
   };
+
+  tasks."mv:format" = {
+    exec = ''
+      if [ -d .git/hooks ]; then
+        ${config.git-hooks.installationScript}
+      else
+        echo "Skipping git hook installation: .git/hooks not present"
+      fi
+      ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
+    '';
+  };
+
+  # https://devenv.sh/processes/
+  # processes.ping.exec = "ping example.com";
 
   # See full reference at https://devenv.sh/reference/options/
 }

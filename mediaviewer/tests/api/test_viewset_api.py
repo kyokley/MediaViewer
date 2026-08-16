@@ -9,7 +9,9 @@ from mediaviewer.models.downloadtoken import DownloadToken
 @pytest.mark.parametrize("use_regular_user", (True, False))
 class TestDownloadToken:
     @pytest.fixture(autouse=True)
-    def setUp(self, create_user):
+    def setUp(self, create_user, mocker):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+
         self.user = create_user(is_staff=True)
         self.regular_user = create_user()
 
