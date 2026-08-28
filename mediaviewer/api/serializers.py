@@ -125,6 +125,7 @@ class MediaPathSerializer(serializers.ModelSerializer):
         fields = (
             "pk",
             "path",
+            "filename",
             "tv",
             "movie",
             "media_files",

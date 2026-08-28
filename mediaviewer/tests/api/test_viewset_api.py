@@ -3,6 +3,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
+from mediaviewer.models import MediaPath, Movie, TV
 from mediaviewer.models.downloadtoken import DownloadToken
 
 
@@ -69,3 +70,84 @@ class TestDownloadToken:
 
         assert response.status_code == 200
         assert response.json()["download_link"] is None
+
+
+@pytest.mark.django_db
+class TestMediaPathCreate:
+    @pytest.fixture(autouse=True)
+    def setUp(self, create_user, mocker):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+        self.user = create_user(is_staff=True)
+
+    def test_create_tv_media_path_with_s3_path(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:tvmediapath-list")
+        response = client.post(url, {"path": "s3://mybucket/tv/Show.Name/"})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["path"] == "s3://mybucket/tv/Show.Name/"
+        assert data["filename"] is None
+        assert TV.objects.count() == 1
+        mp = MediaPath.objects.get(_path="s3://mybucket/tv/Show.Name/")
+        assert mp.tv is not None
+
+    def test_create_movie_media_path_with_s3_path_and_filename(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:moviemediapath-list")
+        response = client.post(
+            url,
+            {"path": "s3://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mp4"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["path"] == "s3://mybucket/movies/Movie.Name/"
+        assert data["filename"] == "Movie.Name.mp4"
+        assert Movie.objects.count() == 1
+        mp = MediaPath.objects.get(_path="s3://mybucket/movies/Movie.Name/")
+        assert mp.movie is not None
+        assert mp.filename == "Movie.Name.mp4"
+
+    def test_create_media_path_with_s3_path_missing_bucket(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:tvmediapath-list")
+        response = client.post(url, {"path": "s3:///tv/Show.Name/"})
+
+        assert response.status_code == 400
+
+    def test_create_media_path_with_s3_path_missing_key(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:tvmediapath-list")
+        response = client.post(url, {"path": "s3://mybucket/"})
+
+        assert response.status_code == 400
+
+    def test_create_media_path_is_idempotent(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:tvmediapath-list")
+        first = client.post(url, {"path": "s3://mybucket/tv/Show.Name/"})
+        second = client.post(url, {"path": "s3://mybucket/tv/Show.Name/"})
+
+        assert first.status_code == 200
+        assert second.status_code == 200
+        assert first.json()["pk"] == second.json()["pk"]
+        assert TV.objects.count() == 1
+        assert MediaPath.objects.count() == 1
+
+    def test_create_media_path_updates_filename_on_repost(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:moviemediapath-list")
+        first = client.post(
+            url,
+            {"path": "s3://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mp4"},
+        )
+        second = client.post(
+            url,
+            {"path": "s3://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mkv"},
+        )
+
+        assert first.status_code == 200
+        assert second.status_code == 200
+        assert first.json()["pk"] == second.json()["pk"]
+        assert second.json()["filename"] == "Movie.Name.mkv"

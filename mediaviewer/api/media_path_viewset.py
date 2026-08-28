@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.api.serializers import MediaPathSerializer
 from mediaviewer.models import TV, MediaPath, Movie
+from mediaviewer.models.mediapath import S3_URI_PREFIX
 
 
 class _MediaPathViewSet(viewsets.ModelViewSet):
@@ -18,12 +19,24 @@ class _MediaPathViewSet(viewsets.ModelViewSet):
         path = request.POST["path"]
         tv_id = request.POST.get("tv")
         movie_id = request.POST.get("movie")
+        filename = request.POST.get("filename")
+
+        if path.startswith(S3_URI_PREFIX):
+            bucket, _, key = path[len(S3_URI_PREFIX) :].partition("/")
+            if not bucket:
+                raise serializers.ValidationError("S3 path must include a bucket name")
+            if not key:
+                raise serializers.ValidationError("S3 path must include a key")
 
         mp = MediaPath.objects.filter(_path=path).first()
 
         if not mp:
             media_class.objects.from_path(path, tv_id=tv_id, movie_id=movie_id)
             mp = MediaPath.objects.get(_path=path)
+
+        if filename and mp.filename != filename:
+            mp.filename = filename
+            mp.save()
 
         serializer = self.serializer_class(mp)
         return Response(serializer.data)
