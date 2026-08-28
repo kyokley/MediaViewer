@@ -71,6 +71,100 @@ class TestDownloadToken:
         assert response.status_code == 200
         assert response.json()["download_link"] is None
 
+    def test_local_token_has_no_subtitle_files(
+        self, client, use_movie, use_regular_user, create_movie, create_tv_media_file
+    ):
+        test_user = self.user
+        client.force_login(test_user)
+
+        if use_movie:
+            movie = create_movie()
+            dt = DownloadToken.objects.from_movie(test_user, movie)
+        else:
+            mf = create_tv_media_file()
+            dt = DownloadToken.objects.from_media_file(test_user, mf)
+
+        url = reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.json()["subtitle_files"] == []
+
+
+@pytest.mark.django_db
+class TestDownloadTokenS3Subtitles:
+    @pytest.fixture(autouse=True)
+    def setUp(self, create_user, mocker):
+        mocker.patch("mediaviewer.models.media.Media._populate_poster")
+        self.user = create_user(is_staff=True)
+        self.mock_s3_client = mocker.patch("mediaviewer.s3.get_s3_client")
+        self.mock_s3_client.return_value.generate_presigned_url.side_effect = (
+            lambda bucket, key, expires_in: (
+                f"https://s3.example.com/{bucket}/{key}?sig=abc"
+            )
+        )
+
+    def test_s3_movie_token_has_subtitle_files(self, client, create_movie):
+        client.force_login(self.user)
+        movie = create_movie()
+        mp = movie.mediapath_set.first()
+        mp._path = "s3://mybucket/movies/Movie.Name/"
+        mp.filename = "Movie.Name.mp4"
+        mp.subtitle_files = [
+            "Movie.Name.mp4.mv-encoded.mp4-0.vtt",
+            "Movie.Name.mp4.mv-encoded.mp4-1.vtt",
+        ]
+        mp.save()
+
+        dt = DownloadToken.objects.from_movie(self.user, movie)
+        url = reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.json()["subtitle_files"] == [
+            "https://s3.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-0.vtt?sig=abc",
+            "https://s3.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-1.vtt?sig=abc",
+        ]
+
+    def test_s3_tv_token_has_subtitle_files(self, client, create_tv_media_file):
+        client.force_login(self.user)
+        mf = create_tv_media_file(filename="Show.Name.S01E01.mv-encoded.mp4")
+        mp = mf.media_path
+        mp._path = "s3://mybucket/tv/Show.Name/"
+        mp.save()
+        mf.subtitle_files = ["Show.Name.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt"]
+        mf.save()
+
+        dt = DownloadToken.objects.from_media_file(self.user, mf)
+        url = reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.json()["subtitle_files"] == [
+            "https://s3.example.com/mybucket/tv/Show.Name/Show.Name.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt?sig=abc",
+        ]
+
+    def test_expired_s3_token_has_no_subtitle_files(self, client, create_movie):
+        client.force_login(self.user)
+        movie = create_movie()
+        mp = movie.mediapath_set.first()
+        mp._path = "s3://mybucket/movies/Movie.Name/"
+        mp.filename = "Movie.Name.mp4"
+        mp.subtitle_files = ["Movie.Name.mp4.mv-encoded.mp4-0.vtt"]
+        mp.save()
+
+        dt = DownloadToken.objects.from_movie(self.user, movie)
+        dt.date_created = dt.date_created - timezone.timedelta(
+            hours=settings.TOKEN_VALIDITY_LENGTH
+        )
+        dt.save()
+
+        url = reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.json()["subtitle_files"] == []
+
 
 @pytest.mark.django_db
 class TestMediaPathCreate:
@@ -151,3 +245,54 @@ class TestMediaPathCreate:
         assert second.status_code == 200
         assert first.json()["pk"] == second.json()["pk"]
         assert second.json()["filename"] == "Movie.Name.mkv"
+
+    def test_create_movie_media_path_with_subtitle_files(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:moviemediapath-list")
+        response = client.post(
+            url,
+            {
+                "path": "s3://mybucket/movies/Movie.Name/",
+                "filename": "Movie.Name.mp4",
+                "subtitle_files": '["Movie.Name.mp4.mv-encoded.mp4-0.vtt", "Movie.Name.mp4.mv-encoded.mp4-1.vtt"]',
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["subtitle_files"] == [
+            "Movie.Name.mp4.mv-encoded.mp4-0.vtt",
+            "Movie.Name.mp4.mv-encoded.mp4-1.vtt",
+        ]
+        mp = MediaPath.objects.get(_path="s3://mybucket/movies/Movie.Name/")
+        assert mp.subtitle_files == [
+            "Movie.Name.mp4.mv-encoded.mp4-0.vtt",
+            "Movie.Name.mp4.mv-encoded.mp4-1.vtt",
+        ]
+
+    def test_create_media_path_updates_subtitle_files_on_repost(self, client):
+        client.force_login(self.user)
+        url = reverse("mediaviewer:api:moviemediapath-list")
+        first = client.post(
+            url,
+            {
+                "path": "s3://mybucket/movies/Movie.Name/",
+                "filename": "Movie.Name.mp4",
+                "subtitle_files": '["Movie.Name.mp4.mv-encoded.mp4-0.vtt"]',
+            },
+        )
+        second = client.post(
+            url,
+            {
+                "path": "s3://mybucket/movies/Movie.Name/",
+                "filename": "Movie.Name.mp4",
+                "subtitle_files": '["Movie.Name.mp4.mv-encoded.mp4-1.vtt"]',
+            },
+        )
+
+        assert first.status_code == 200
+        assert second.status_code == 200
+        assert first.json()["pk"] == second.json()["pk"]
+        assert second.json()["subtitle_files"] == [
+            "Movie.Name.mp4.mv-encoded.mp4-1.vtt"
+        ]

@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
@@ -20,6 +22,14 @@ class _MediaPathViewSet(viewsets.ModelViewSet):
         tv_id = request.POST.get("tv")
         movie_id = request.POST.get("movie")
         filename = request.POST.get("filename")
+        subtitle_files = request.POST.get("subtitle_files")
+        if subtitle_files:
+            try:
+                subtitle_files = json.loads(subtitle_files)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError(
+                    "subtitle_files must be a valid JSON list"
+                )
 
         if path.startswith(S3_URI_PREFIX):
             bucket, _, key = path[len(S3_URI_PREFIX) :].partition("/")
@@ -36,6 +46,10 @@ class _MediaPathViewSet(viewsets.ModelViewSet):
 
         if filename and mp.filename != filename:
             mp.filename = filename
+            mp.save()
+
+        if subtitle_files and mp.subtitle_files != subtitle_files:
+            mp.subtitle_files = subtitle_files
             mp.save()
 
         serializer = self.serializer_class(mp)

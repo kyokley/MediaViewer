@@ -51,6 +51,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "binge_mode",
             "donation_site",
             "download_link",
+            "subtitle_files",
             "theme",
             "tv_id",
             "is_mcp",
@@ -70,6 +71,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     binge_mode = serializers.SerializerMethodField()
     donation_site = serializers.SerializerMethodField()
     download_link = serializers.SerializerMethodField()
+    subtitle_files = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
     tv_id = serializers.SerializerMethodField()
 
@@ -110,6 +112,26 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         movie_or_media_file = obj.movie or obj.media_file
         return movie_or_media_file.downloadLink(obj.guid)
 
+    def get_subtitle_files(self, obj):
+        if not obj.isvalid:
+            return []
+        if obj.media_file:
+            media_file = obj.media_file
+            media_path = media_file.media_path
+            if media_path.is_s3:
+                return [
+                    media_path.presigned_url(filename)
+                    for filename in (media_file.subtitle_files or [])
+                ]
+        elif obj.movie:
+            media_path = obj.movie.mediapath_set.first()
+            if media_path and media_path.is_s3:
+                return [
+                    media_path.presigned_url(filename)
+                    for filename in (media_path.subtitle_files or [])
+                ]
+        return []
+
     def get_theme(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
         return user_settings.theme
@@ -126,6 +148,7 @@ class MediaPathSerializer(serializers.ModelSerializer):
             "pk",
             "path",
             "filename",
+            "subtitle_files",
             "tv",
             "movie",
             "media_files",
@@ -222,6 +245,7 @@ class MediaFileSerializer(serializers.ModelSerializer):
             "filename",
             "display_name",
             "size",
+            "subtitle_files",
             "ismovie",
             "watched",
         )
