@@ -1,5 +1,7 @@
 import pytest
+from django.conf import settings
 from django.urls import reverse
+from django.utils import timezone
 
 from mediaviewer.models.downloadtoken import DownloadToken
 
@@ -43,3 +45,27 @@ class TestDownloadToken:
             assert dt.ref_obj.full_name == json_data["displayname"]
         else:
             assert response.status_code == 403
+
+    def test_expired_token_has_no_download_link(
+        self, client, use_movie, use_regular_user, create_movie, create_tv_media_file
+    ):
+        test_user = self.user
+        client.force_login(test_user)
+
+        if use_movie:
+            movie = create_movie()
+            dt = DownloadToken.objects.from_movie(test_user, movie)
+        else:
+            mf = create_tv_media_file()
+            dt = DownloadToken.objects.from_media_file(test_user, mf)
+
+        dt.date_created = dt.date_created - timezone.timedelta(
+            hours=settings.TOKEN_VALIDITY_LENGTH
+        )
+        dt.save()
+
+        url = reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert response.json()["download_link"] is None

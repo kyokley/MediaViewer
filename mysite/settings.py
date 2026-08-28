@@ -320,3 +320,15 @@ WAITER_PASSWORD_HASH = (
 SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1
 
 OG_BASE_URL = ""
+
+# S3-compatible storage settings
+S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "")
+S3_ACCESS_KEY_ID = os.environ.get("S3_ACCESS_KEY_ID", "")
+S3_SECRET_ACCESS_KEY = os.environ.get("S3_SECRET_ACCESS_KEY", "")
+S3_REGION_NAME = os.environ.get("S3_REGION_NAME", "us-east-1")
+S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "")
+S3_KEY_PREFIX = os.environ.get("S3_KEY_PREFIX", "")
+# Presigned URL lifetime in seconds. Defaults to 3h to match
+# TOKEN_VALIDITY_LENGTH; keep it >= TOKEN_VALIDITY_LENGTH so URLs minted
+# alongside a token do not expire before the token does.
+S3_PRESIGNED_URL_EXPIRY = int(os.environ.get("S3_PRESIGNED_URL_EXPIRY", "10800"))

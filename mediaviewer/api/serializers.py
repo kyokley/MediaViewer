@@ -105,6 +105,8 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         return DonationSiteSerializer(donation_site).data
 
     def get_download_link(self, obj):
+        if not obj.isvalid:
+            return None
         movie_or_media_file = obj.movie or obj.media_file
         return movie_or_media_file.downloadLink(obj.guid)
 

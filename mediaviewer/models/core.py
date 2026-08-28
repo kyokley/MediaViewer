@@ -72,6 +72,21 @@ class ViewableObjectMixin:
         return comment, was_created
 
     def downloadLink(self, guid):
+        media_path = self.media_path
+        if media_path and media_path.is_s3:
+            from mediaviewer.models import MediaFile
+
+            if isinstance(self, MediaFile):
+                filename = self.filename
+            else:
+                filename = media_path.filename
+                if not filename:
+                    raise ValueError(
+                        f"S3 movie {self} has no MediaPath.filename; "
+                        "cannot build a presigned URL"
+                    )
+            return media_path.presigned_url(filename)
+
         if self.is_movie():
             waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_MOVIES}{guid}/"
         else:
@@ -82,6 +97,11 @@ class ViewableObjectMixin:
     def autoplayDownloadLink(self, guid):
         if self.is_movie():
             return None
+
+        media_path = self.media_path
+        if media_path and media_path.is_s3:
+            # Presigned URLs are already directly streamable
+            return self.downloadLink(guid)
         else:
             return f"{self.downloadLink(guid)}autoplay"
 
