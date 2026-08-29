@@ -92,23 +92,23 @@ class TestDownloadToken:
 
 
 @pytest.mark.django_db
-class TestDownloadTokenS3Subtitles:
+class TestDownloadTokenB2Subtitles:
     @pytest.fixture(autouse=True)
     def setUp(self, create_user, mocker):
         mocker.patch("mediaviewer.models.media.Media._populate_poster")
         self.user = create_user(is_staff=True)
-        self.mock_s3_client = mocker.patch("mediaviewer.s3.get_s3_client")
-        self.mock_s3_client.return_value.generate_presigned_url.side_effect = (
+        self.mock_b2_client = mocker.patch("mediaviewer.b2.get_b2_client")
+        self.mock_b2_client.return_value.generate_presigned_url.side_effect = (
             lambda bucket, key, expires_in: (
-                f"https://s3.example.com/{bucket}/{key}?sig=abc"
+                f"https://b2.example.com/{bucket}/{key}?sig=abc"
             )
         )
 
-    def test_s3_movie_token_has_subtitle_files(self, client, create_movie):
+    def test_b2_movie_token_has_subtitle_files(self, client, create_movie):
         client.force_login(self.user)
         movie = create_movie()
         mp = movie.mediapath_set.first()
-        mp._path = "s3://mybucket/movies/Movie.Name/"
+        mp._path = "b2://mybucket/movies/Movie.Name/"
         mp.filename = "Movie.Name.mp4"
         mp.subtitle_files = [
             "Movie.Name.mp4.mv-encoded.mp4-0.vtt",
@@ -122,15 +122,15 @@ class TestDownloadTokenS3Subtitles:
 
         assert response.status_code == 200
         assert response.json()["subtitle_files"] == [
-            "https://s3.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-0.vtt?sig=abc",
-            "https://s3.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-1.vtt?sig=abc",
+            "https://b2.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-0.vtt?sig=abc",
+            "https://b2.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-1.vtt?sig=abc",
         ]
 
-    def test_s3_tv_token_has_subtitle_files(self, client, create_tv_media_file):
+    def test_b2_tv_token_has_subtitle_files(self, client, create_tv_media_file):
         client.force_login(self.user)
         mf = create_tv_media_file(filename="Show.Name.S01E01.mv-encoded.mp4")
         mp = mf.media_path
-        mp._path = "s3://mybucket/tv/Show.Name/"
+        mp._path = "b2://mybucket/tv/Show.Name/"
         mp.save()
         mf.subtitle_files = ["Show.Name.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt"]
         mf.save()
@@ -141,14 +141,14 @@ class TestDownloadTokenS3Subtitles:
 
         assert response.status_code == 200
         assert response.json()["subtitle_files"] == [
-            "https://s3.example.com/mybucket/tv/Show.Name/Show.Name.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt?sig=abc",
+            "https://b2.example.com/mybucket/tv/Show.Name/Show.Name.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt?sig=abc",
         ]
 
-    def test_expired_s3_token_has_no_subtitle_files(self, client, create_movie):
+    def test_expired_b2_token_has_no_subtitle_files(self, client, create_movie):
         client.force_login(self.user)
         movie = create_movie()
         mp = movie.mediapath_set.first()
-        mp._path = "s3://mybucket/movies/Movie.Name/"
+        mp._path = "b2://mybucket/movies/Movie.Name/"
         mp.filename = "Movie.Name.mp4"
         mp.subtitle_files = ["Movie.Name.mp4.mv-encoded.mp4-0.vtt"]
         mp.save()
@@ -173,55 +173,55 @@ class TestMediaPathCreate:
         mocker.patch("mediaviewer.models.media.Media._populate_poster")
         self.user = create_user(is_staff=True)
 
-    def test_create_tv_media_path_with_s3_path(self, client):
+    def test_create_tv_media_path_with_b2_path(self, client):
         client.force_login(self.user)
         url = reverse("mediaviewer:api:tvmediapath-list")
-        response = client.post(url, {"path": "s3://mybucket/tv/Show.Name/"})
+        response = client.post(url, {"path": "b2://mybucket/tv/Show.Name/"})
 
         assert response.status_code == 200
         data = response.json()
-        assert data["path"] == "s3://mybucket/tv/Show.Name/"
+        assert data["path"] == "b2://mybucket/tv/Show.Name/"
         assert data["filename"] is None
         assert TV.objects.count() == 1
-        mp = MediaPath.objects.get(_path="s3://mybucket/tv/Show.Name/")
+        mp = MediaPath.objects.get(_path="b2://mybucket/tv/Show.Name/")
         assert mp.tv is not None
 
-    def test_create_movie_media_path_with_s3_path_and_filename(self, client):
+    def test_create_movie_media_path_with_b2_path_and_filename(self, client):
         client.force_login(self.user)
         url = reverse("mediaviewer:api:moviemediapath-list")
         response = client.post(
             url,
-            {"path": "s3://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mp4"},
+            {"path": "b2://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mp4"},
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data["path"] == "s3://mybucket/movies/Movie.Name/"
+        assert data["path"] == "b2://mybucket/movies/Movie.Name/"
         assert data["filename"] == "Movie.Name.mp4"
         assert Movie.objects.count() == 1
-        mp = MediaPath.objects.get(_path="s3://mybucket/movies/Movie.Name/")
+        mp = MediaPath.objects.get(_path="b2://mybucket/movies/Movie.Name/")
         assert mp.movie is not None
         assert mp.filename == "Movie.Name.mp4"
 
-    def test_create_media_path_with_s3_path_missing_bucket(self, client):
+    def test_create_media_path_with_b2_path_missing_bucket(self, client):
         client.force_login(self.user)
         url = reverse("mediaviewer:api:tvmediapath-list")
-        response = client.post(url, {"path": "s3:///tv/Show.Name/"})
+        response = client.post(url, {"path": "b2:///tv/Show.Name/"})
 
         assert response.status_code == 400
 
-    def test_create_media_path_with_s3_path_missing_key(self, client):
+    def test_create_media_path_with_b2_path_missing_key(self, client):
         client.force_login(self.user)
         url = reverse("mediaviewer:api:tvmediapath-list")
-        response = client.post(url, {"path": "s3://mybucket/"})
+        response = client.post(url, {"path": "b2://mybucket/"})
 
         assert response.status_code == 400
 
     def test_create_media_path_is_idempotent(self, client):
         client.force_login(self.user)
         url = reverse("mediaviewer:api:tvmediapath-list")
-        first = client.post(url, {"path": "s3://mybucket/tv/Show.Name/"})
-        second = client.post(url, {"path": "s3://mybucket/tv/Show.Name/"})
+        first = client.post(url, {"path": "b2://mybucket/tv/Show.Name/"})
+        second = client.post(url, {"path": "b2://mybucket/tv/Show.Name/"})
 
         assert first.status_code == 200
         assert second.status_code == 200
@@ -234,11 +234,11 @@ class TestMediaPathCreate:
         url = reverse("mediaviewer:api:moviemediapath-list")
         first = client.post(
             url,
-            {"path": "s3://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mp4"},
+            {"path": "b2://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mp4"},
         )
         second = client.post(
             url,
-            {"path": "s3://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mkv"},
+            {"path": "b2://mybucket/movies/Movie.Name/", "filename": "Movie.Name.mkv"},
         )
 
         assert first.status_code == 200
@@ -252,7 +252,7 @@ class TestMediaPathCreate:
         response = client.post(
             url,
             {
-                "path": "s3://mybucket/movies/Movie.Name/",
+                "path": "b2://mybucket/movies/Movie.Name/",
                 "filename": "Movie.Name.mp4",
                 "subtitle_files": '["Movie.Name.mp4.mv-encoded.mp4-0.vtt", "Movie.Name.mp4.mv-encoded.mp4-1.vtt"]',
             },
@@ -264,7 +264,7 @@ class TestMediaPathCreate:
             "Movie.Name.mp4.mv-encoded.mp4-0.vtt",
             "Movie.Name.mp4.mv-encoded.mp4-1.vtt",
         ]
-        mp = MediaPath.objects.get(_path="s3://mybucket/movies/Movie.Name/")
+        mp = MediaPath.objects.get(_path="b2://mybucket/movies/Movie.Name/")
         assert mp.subtitle_files == [
             "Movie.Name.mp4.mv-encoded.mp4-0.vtt",
             "Movie.Name.mp4.mv-encoded.mp4-1.vtt",
@@ -276,7 +276,7 @@ class TestMediaPathCreate:
         first = client.post(
             url,
             {
-                "path": "s3://mybucket/movies/Movie.Name/",
+                "path": "b2://mybucket/movies/Movie.Name/",
                 "filename": "Movie.Name.mp4",
                 "subtitle_files": '["Movie.Name.mp4.mv-encoded.mp4-0.vtt"]',
             },
@@ -284,7 +284,7 @@ class TestMediaPathCreate:
         second = client.post(
             url,
             {
-                "path": "s3://mybucket/movies/Movie.Name/",
+                "path": "b2://mybucket/movies/Movie.Name/",
                 "filename": "Movie.Name.mp4",
                 "subtitle_files": '["Movie.Name.mp4.mv-encoded.mp4-1.vtt"]',
             },

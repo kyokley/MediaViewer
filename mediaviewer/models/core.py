@@ -73,7 +73,7 @@ class ViewableObjectMixin:
 
     def downloadLink(self, guid):
         media_path = self.media_path
-        if media_path and media_path.is_s3:
+        if media_path and media_path.is_b2:
             from mediaviewer.models import MediaFile
 
             if isinstance(self, MediaFile):
@@ -82,7 +82,7 @@ class ViewableObjectMixin:
                 filename = media_path.filename
                 if not filename:
                     raise ValueError(
-                        f"S3 movie {self} has no MediaPath.filename; "
+                        f"B2 movie {self} has no MediaPath.filename; "
                         "cannot build a presigned URL"
                     )
             return media_path.presigned_url(filename)
@@ -99,7 +99,7 @@ class ViewableObjectMixin:
             return None
 
         media_path = self.media_path
-        if media_path and media_path.is_s3:
+        if media_path and media_path.is_b2:
             # Presigned URLs are already directly streamable
             return self.downloadLink(guid)
         else:

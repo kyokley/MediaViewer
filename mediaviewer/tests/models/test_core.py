@@ -4,13 +4,13 @@ from mediaviewer.models import MediaFile
 
 
 @pytest.mark.django_db
-class TestDownloadLinkS3:
+class TestDownloadLinkB2:
     def test_tv_media_file_uses_presigned_url(self, create_tv_media_file, mocker):
         mf = create_tv_media_file()
         mp = mf.media_path
-        mp._path = "s3://mybucket/tv/ShowName/"
+        mp._path = "b2://mybucket/tv/ShowName/"
         mp.save()
-        mock_client = mocker.patch("mediaviewer.s3.get_s3_client")
+        mock_client = mocker.patch("mediaviewer.b2.get_b2_client")
         mock_client.return_value.generate_presigned_url.return_value = (
             "https://presigned/url"
         )
@@ -25,10 +25,10 @@ class TestDownloadLinkS3:
     def test_movie_uses_stored_filename(self, create_movie, mocker):
         movie = create_movie()
         mp = movie.media_path
-        mp._path = "s3://mybucket/movies/Movie Name/"
+        mp._path = "b2://mybucket/movies/Movie Name/"
         mp.filename = "The.Movie.2024.mkv"
         mp.save()
-        mock_client = mocker.patch("mediaviewer.s3.get_s3_client")
+        mock_client = mocker.patch("mediaviewer.b2.get_b2_client")
         mock_client.return_value.generate_presigned_url.return_value = (
             "https://presigned/url"
         )
@@ -45,9 +45,9 @@ class TestDownloadLinkS3:
     def test_movie_without_filename_raises(self, create_movie, mocker):
         movie = create_movie()
         mp = movie.media_path
-        mp._path = "s3://mybucket/movies/Movie Name/"
+        mp._path = "b2://mybucket/movies/Movie Name/"
         mp.save()
-        mocker.patch("mediaviewer.s3.get_s3_client")
+        mocker.patch("mediaviewer.b2.get_b2_client")
 
         with pytest.raises(ValueError, match="no MediaPath.filename"):
             movie.downloadLink("guid")
@@ -68,15 +68,15 @@ class TestDownloadLinkS3:
 
 
 @pytest.mark.django_db
-class TestAutoPlayDownloadLinkS3:
-    def test_s3_returns_presigned_url_without_suffix(
+class TestAutoPlayDownloadLinkB2:
+    def test_b2_returns_presigned_url_without_suffix(
         self, create_tv_media_file, mocker
     ):
         mf = create_tv_media_file()
         mp = mf.media_path
-        mp._path = "s3://mybucket/tv/ShowName/"
+        mp._path = "b2://mybucket/tv/ShowName/"
         mp.save()
-        mock_client = mocker.patch("mediaviewer.s3.get_s3_client")
+        mock_client = mocker.patch("mediaviewer.b2.get_b2_client")
         mock_client.return_value.generate_presigned_url.return_value = (
             "https://presigned/url"
         )
@@ -99,11 +99,11 @@ class TestAutoPlayDownloadLinkS3:
 
 
 @pytest.mark.django_db
-class TestMediaFileS3:
-    def test_media_file_is_s3(self, create_tv_media_file):
+class TestMediaFileB2:
+    def test_media_file_is_b2(self, create_tv_media_file):
         mf = create_tv_media_file()
-        mf.media_path._path = "s3://mybucket/tv/ShowName/"
+        mf.media_path._path = "b2://mybucket/tv/ShowName/"
         mf.media_path.save()
 
-        assert mf.media_path.is_s3
+        assert mf.media_path.is_b2
         assert isinstance(mf, MediaFile)

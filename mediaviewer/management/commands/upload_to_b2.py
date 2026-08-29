@@ -3,9 +3,9 @@ import logging
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from mediaviewer import s3
+from mediaviewer import b2
 from mediaviewer.models import MediaPath
-from mediaviewer.models.mediapath import S3_URI_PREFIX
+from mediaviewer.models.mediapath import B2_URI_PREFIX
 
 logger = logging.getLogger(__name__)
 
@@ -26,20 +26,20 @@ VIDEO_EXTENSIONS = {
 
 class Command(BaseCommand):
     help = (
-        "Upload media files from local storage to an S3-compatible bucket and "
-        "update the corresponding MediaPath records to point at S3."
+        "Upload media files from local storage to a Backblaze B2 bucket and "
+        "update the corresponding MediaPath records to point at B2."
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--bucket",
             default=None,
-            help="Bucket name (default: settings.S3_BUCKET_NAME)",
+            help="Bucket name (default: settings.B2_BUCKET_NAME)",
         )
         parser.add_argument(
             "--prefix",
             default=None,
-            help="Base key prefix (default: settings.S3_KEY_PREFIX)",
+            help="Base name prefix (default: settings.B2_NAME_PREFIX)",
         )
         parser.add_argument(
             "--delete-local",
@@ -54,33 +54,33 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        bucket = options["bucket"] or settings.S3_BUCKET_NAME
+        bucket = options["bucket"] or settings.B2_BUCKET_NAME
         if not bucket:
             raise CommandError(
-                "No bucket specified. Pass --bucket or set S3_BUCKET_NAME."
+                "No bucket specified. Pass --bucket or set B2_BUCKET_NAME."
             )
 
         prefix = (
             options["prefix"]
             if options["prefix"] is not None
-            else settings.S3_KEY_PREFIX
+            else settings.B2_NAME_PREFIX
         )
         if prefix and not prefix.endswith("/"):
             prefix = f"{prefix}/"
 
-        qs = MediaPath.objects.exclude(_path__startswith=S3_URI_PREFIX).filter(
+        qs = MediaPath.objects.exclude(_path__startswith=B2_URI_PREFIX).filter(
             skip=False
         )
         if options["media_path"]:
             qs = qs.filter(pk=options["media_path"])
             if not qs.exists():
                 logger.warning(
-                    "MediaPath %s not found or already on S3; nothing to do",
+                    "MediaPath %s not found or already on B2; nothing to do",
                     options["media_path"],
                 )
                 return
 
-        client = s3.get_s3_client()
+        client = b2.get_b2_client()
         for mp in qs:
             self._upload_media_path(client, mp, bucket, prefix, options["delete_local"])
 
@@ -104,7 +104,7 @@ class Command(BaseCommand):
             return
 
         # Include the pk so MediaPaths sharing a directory basename cannot
-        # collide on the same S3 key prefix.
+        # collide on the same B2 name prefix.
         key_prefix = f"{prefix}{mp.pk}/{mp.path.name}/"
         uploaded = []
         for filename, local_path in files:
@@ -119,7 +119,7 @@ class Command(BaseCommand):
             logger.warning("Nothing uploaded for MediaPath %s", mp)
             return
 
-        mp._path = f"s3://{bucket}/{key_prefix}"
+        mp._path = f"b2://{bucket}/{key_prefix}"
         if mp.movie:
             mp.filename = uploaded[0][0]
         mp.save()

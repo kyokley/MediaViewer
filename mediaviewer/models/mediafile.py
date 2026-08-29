@@ -75,7 +75,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     )
     hide = models.BooleanField(null=False, blank=True, default=False)
     size = models.BigIntegerField(null=True, blank=True)
-    # Subtitle file names stored alongside this media file in S3 (e.g. "Show.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt").
+    # Subtitle file names stored alongside this media file in B2 (e.g. "Show.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt").
     subtitle_files = models.JSONField(null=True, blank=True, default=list)
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()

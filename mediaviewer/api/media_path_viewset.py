@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from mediaviewer.api.permissions import IsStaffOrReadOnly
 from mediaviewer.api.serializers import MediaPathSerializer
 from mediaviewer.models import TV, MediaPath, Movie
-from mediaviewer.models.mediapath import S3_URI_PREFIX
+from mediaviewer.models.mediapath import B2_URI_PREFIX
 
 
 class _MediaPathViewSet(viewsets.ModelViewSet):
@@ -31,12 +31,12 @@ class _MediaPathViewSet(viewsets.ModelViewSet):
                     "subtitle_files must be a valid JSON list"
                 )
 
-        if path.startswith(S3_URI_PREFIX):
-            bucket, _, key = path[len(S3_URI_PREFIX) :].partition("/")
+        if path.startswith(B2_URI_PREFIX):
+            bucket, _, key = path[len(B2_URI_PREFIX) :].partition("/")
             if not bucket:
-                raise serializers.ValidationError("S3 path must include a bucket name")
+                raise serializers.ValidationError("B2 path must include a bucket name")
             if not key:
-                raise serializers.ValidationError("S3 path must include a key")
+                raise serializers.ValidationError("B2 path must include a key")
 
         mp = MediaPath.objects.filter(_path=path).first()
 

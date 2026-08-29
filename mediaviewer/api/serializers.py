@@ -118,14 +118,14 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
         if obj.media_file:
             media_file = obj.media_file
             media_path = media_file.media_path
-            if media_path.is_s3:
+            if media_path.is_b2:
                 return [
                     media_path.presigned_url(filename)
                     for filename in (media_file.subtitle_files or [])
                 ]
         elif obj.movie:
             media_path = obj.movie.mediapath_set.first()
-            if media_path and media_path.is_s3:
+            if media_path and media_path.is_b2:
                 return [
                     media_path.presigned_url(filename)
                     for filename in (media_path.subtitle_files or [])
