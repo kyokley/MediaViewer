@@ -45,6 +45,7 @@ class TestDownloadToken:
         else:
             assert response.status_code == 403
 
+
 @pytest.mark.django_db
 class TestMediaPathCreate:
     @pytest.fixture(autouse=True)
