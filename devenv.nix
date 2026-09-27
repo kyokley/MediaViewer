@@ -5,6 +5,10 @@
   inputs,
   ...
 }: {
+  cachix = {
+    pull = ["horus"];
+  };
+
   # https://devenv.sh/basics/
   env = {
     GREET = "MV";
