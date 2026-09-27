@@ -14,6 +14,9 @@ class MediaPath(TimeStampModel):
     # For B2-stored movies, the actual video file name within the path.
     # TV episodes already track their file name via MediaFile.filename.
     filename = models.CharField(null=True, blank=True, max_length=1024)
+    # Subtitle file names stored alongside the media in B2 (movies only;
+    # TV episodes track subtitles via MediaFile.subtitle_files).
+    subtitle_files = models.JSONField(null=True, blank=True, default=list)
     skip = models.BooleanField(null=False, blank=True, default=False)
     tv = models.ForeignKey(
         "mediaviewer.TV", null=True, on_delete=models.CASCADE, blank=True
