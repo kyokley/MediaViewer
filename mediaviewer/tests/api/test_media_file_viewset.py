@@ -34,6 +34,7 @@ class TestMediaFile:
             "filename": "test_filename",
             "media_path": ref_media.media_path.pk,
             "size": 100,
+            "subtitle_files": '["test_filename.mv-encoded.mp4-0.vtt"]',
         }
         response = self.client.post(url, data=payload)
 
@@ -49,6 +50,7 @@ class TestMediaFile:
             else:
                 assert json_data["ismovie"]
             assert json_data["size"] == 100
+            assert json_data["subtitle_files"] == ["test_filename.mv-encoded.mp4-0.vtt"]
         else:
             assert response.status_code == 403
 
