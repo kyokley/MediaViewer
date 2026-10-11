@@ -22,6 +22,7 @@ from .tvdbconfiguration import getJSONData, getTVDBEpisodeInfo, tvdbConfig
 from .writer import Writer
 
 SENTINEL = object()
+POSTER_PATH_BASE_URL = "https://image.tmdb.org/t/p/original/"
 
 
 def _getDataFromIMDBBySearchString(searchString, is_movie=True):
@@ -342,7 +343,7 @@ class Poster(TimeStampModel):
         poster_url = (
             getattr(self, "poster_url", None)
             or data.get("Poster")
-            or data.get("poster_path")
+            or f'{POSTER_PATH_BASE_URL}{data.get("poster_path")}'
         )
         poster_name = poster_url.rpartition("/")[-1] if poster_url else None
 
@@ -384,7 +385,7 @@ class Poster(TimeStampModel):
         if tvinfo:
             self.poster_url = (
                 tvinfo.get("still_path")
-                or tvinfo.get("poster_path")
+                or f'{POSTER_PATH_BASE_URL}{tvinfo.get("poster_path")}'
                 or getattr(self, "poster_url", None)
             )
             self.extendedplot = tvinfo.get("overview", "")
