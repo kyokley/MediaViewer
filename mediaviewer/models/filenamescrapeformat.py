@@ -1,5 +1,7 @@
 import re
+from pathlib import Path
 
+from django.conf import settings
 from django.db import models
 
 
@@ -92,7 +94,7 @@ class FilenameScrapeFormat(models.Model):
                 return None
 
         # Filenames containing 264 are most likely not right
-        if int(season) == 2 and int(episode) == 64:
+        if int(season) == 2 and int(episode) in (64, 65):
             return None
 
         return (tv, name, season, episode)
@@ -110,12 +112,122 @@ class FilenameScrapeFormat(models.Model):
 
     @classmethod
     def tv_for_filename(cls, filename):
-        paths = []
+        from mediaviewer.models import MediaPath, TV
+        from mediaviewer.thetvdb import parse_tv_filename, resolve_series_name
 
-        for scraper in FilenameScrapeFormat.objects.all():
-            path = scraper.valid_for_filename(filename)
-            if path:
-                paths.append(path)
+        parsed = parse_tv_filename(filename)
+        if parsed is None:
+            parsed = cls._parse_configured_filename(filename)
+        if parsed is None:
+            return None
 
-        paths.sort(key=lambda x: len(x[1]), reverse=True)
-        return paths[0][0] if paths else ""
+        title, season, episode = parsed
+        if (
+            not isinstance(title, str)
+            or not title.strip()
+            or type(season) is not int
+            or season < 0
+            or type(episode) is not int
+            or episode <= 0
+        ):
+            return None
+
+        series_name = resolve_series_name(title)
+        if not isinstance(series_name, str) or not series_name.strip():
+            return None
+
+        matching_tvs = list(TV.objects.filter(name__iexact=series_name.strip())[:2])
+        if not matching_tvs:
+            tv = TV.objects.create(name=series_name.strip())
+        else:
+            tv = matching_tvs[0]
+
+        media_paths = tv.mediapath_set.order_by("-pk")
+        current_path = media_paths.first()
+        if current_path is not None and current_path.is_b2:
+            return current_path
+
+        existing_b2_path = media_paths.filter(_path__startswith="b2://").first()
+        if existing_b2_path is not None:
+            return existing_b2_path
+
+        bucket = getattr(settings, "B2_BUCKET_NAME", "")
+        prefix = getattr(settings, "B2_NAME_PREFIX", "")
+        if (
+            not isinstance(bucket, str)
+            or not bucket.strip()
+            or "/" in bucket
+            or "\\" in bucket
+            or bucket != bucket.strip()
+            or not isinstance(prefix, str)
+            or any(ord(character) < 32 for character in prefix)
+        ):
+            return None
+
+        try:
+            directory_name = Path(current_path._path).name if current_path else ""
+        except (TypeError, ValueError, OSError):
+            return None
+        if not directory_name:
+            directory_name = tv.name
+        if (
+            not isinstance(directory_name, str)
+            or not directory_name.strip()
+            or directory_name in (".", "..")
+            or "/" in directory_name
+            or "\\" in directory_name
+            or any(ord(character) < 32 for character in directory_name)
+        ):
+            return None
+
+        uri = f"b2://{bucket}/{prefix}{directory_name}/"
+        if len(uri) > MediaPath._meta.get_field("_path").max_length:
+            return None
+
+        media_path, _ = MediaPath.objects.get_or_create(
+            _path=uri, defaults={"tv": tv}
+        )
+        if media_path.tv_id != tv.pk or media_path.movie_id is not None:
+            return None
+        return media_path
+
+    @classmethod
+    def _parse_configured_filename(cls, filename):
+        if not isinstance(filename, str) or not filename.strip():
+            return None
+
+        for scraper in cls.objects.all():
+            candidate = filename.replace(".", " ") if scraper.subPeriods else filename
+            try:
+                name_matches = re.findall(scraper.nameRegex or "", candidate)
+                season_matches = re.findall(scraper.seasonRegex or "", candidate)
+                episode_matches = re.findall(scraper.episodeRegex or "", candidate)
+            except re.error:
+                continue
+
+            if not name_matches or not season_matches or not episode_matches:
+                continue
+            name = cls._first_regex_value(name_matches[0])
+            season = cls._first_regex_value(season_matches[0])
+            episode = cls._first_regex_value(episode_matches[0])
+            if not isinstance(name, str) or len(name.strip()) <= 1:
+                continue
+            if (
+                not isinstance(season, str)
+                or not season.strip().isdigit()
+                or not isinstance(episode, str)
+                or not episode.strip().isdigit()
+            ):
+                continue
+            season_number = int(season.strip())
+            episode_number = int(episode.strip())
+            if season_number < 0 or episode_number <= 0:
+                continue
+            return name.strip(), season_number, episode_number
+        return None
+
+    @staticmethod
+    def _first_regex_value(value):
+        if isinstance(value, tuple):
+            return next((part for part in value if part), "")
+        return value
