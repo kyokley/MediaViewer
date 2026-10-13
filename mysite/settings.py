@@ -283,6 +283,8 @@ SECURE_HSTS_SECONDS = 300
 SECURE_BROWSER_XSS_FILTER = True
 
 API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
+THETVDB_API_KEY = os.environ.get("THETVDB_API_KEY", "")
+THETVDB_PIN = os.environ.get("THETVDB_PIN", "")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 20
