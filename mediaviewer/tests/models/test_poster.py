@@ -3,10 +3,12 @@ from typing import cast
 import pytest
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db import DatabaseError
 from django.db.models.fields.files import FieldFile
 from django.test import override_settings
 
 from mediaviewer.models import Poster
+from mediaviewer.models.poster import _get_cast_data
 
 sample_good_result = {
     "backdrop_path": "/asdfasdf.jpg",
@@ -57,6 +59,287 @@ sample_good_crew = {
 }
 
 sample_bad_result = {"page": 1, "results": [], "total_pages": 1, "total_results": 0}
+
+
+@pytest.mark.django_db
+def test_episode_metadata_enrichment_uses_integer_coordinates(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 0
+    media_file.episode = 1
+    media_file.save()
+    poster = Poster.objects.get(pk=media_file.poster.pk)
+    poster.tmdb = "123"
+    get_episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        return_value={"name": "Episode title", "id": 456},
+    )
+
+    poster._tmdb_episode_info()
+
+    media_file.refresh_from_db()
+    get_episode_info.assert_called_once_with("123", 0, 1)
+    assert poster.episodename == "Episode title"
+    assert media_file.display_name.endswith("Episode title")
+
+
+def test_cast_data_uses_season_zero_episode_url(mocker):
+    get_json = mocker.patch("mediaviewer.models.poster.getJSONData", return_value={})
+
+    _get_cast_data("123", season=0, episode=1, is_movie=False)
+
+    assert "/season/0/episode/1/credits" in get_json.call_args_list[0].args[0]
+
+
+@pytest.mark.django_db
+def test_tv_media_file_population_uses_parent_id_and_keeps_core_data_on_optional_failures(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 0
+    media_file.episode = 1
+    media_file.save()
+    parent_poster = Poster.objects.from_ref_obj(media_file.tv)
+    parent_poster.tmdb = "series-123"
+    parent_poster.save()
+    poster = Poster.objects.get(pk=media_file.poster.pk)
+    poster.image = "uploads/existing.jpg"
+    poster.save()
+
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        return_value={
+            "name": "Episode title",
+            "overview": "Episode overview",
+            "air_date": "2024-01-02",
+            "id": 789,
+            "still_path": "/still.jpg",
+        },
+    )
+    mocker.patch("mediaviewer.models.poster.requests.get", side_effect=RuntimeError)
+    mocker.patch("mediaviewer.models.poster._get_extended_info", side_effect=RuntimeError)
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value=["malformed"])
+
+    poster.populate_data()
+
+    episode_info.assert_called_once_with("series-123", 0, 1)
+    poster.refresh_from_db()
+    parent_poster.refresh_from_db()
+    assert poster.episodename == "Episode title"
+    assert poster.extendedplot == "Episode overview"
+    assert poster.release_date.isoformat() == "2024-01-02"
+    assert poster.tmdb == "789"
+    assert poster.image.name == "uploads/existing.jpg"
+    assert parent_poster.tmdb == "series-123"
+    media_file.refresh_from_db()
+    assert media_file.display_name.endswith("Episode title")
+
+
+@pytest.mark.django_db
+def test_tv_media_file_retry_never_uses_episode_id_as_series_id(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    parent_poster = Poster.objects.from_ref_obj(media_file.tv)
+    parent_poster.tmdb = "series-123"
+    parent_poster.save()
+    poster = media_file.poster
+    poster.tmdb = "episode-789"
+    poster.save()
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        side_effect=[
+            {"name": "Episode title", "id": "episode-789"},
+            {"name": "Episode title", "id": "episode-789"},
+        ],
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+    series_detail = mocker.patch(
+        "mediaviewer.models.poster.getJSONData", side_effect=RuntimeError
+    )
+
+    poster.populate_data()
+    poster.populate_data()
+
+    assert [call.args[0] for call in episode_info.call_args_list] == [
+        "series-123",
+        "series-123",
+    ]
+    assert all("/tv/episode-789?" not in call.args[0] for call in series_detail.call_args_list)
+
+
+@pytest.mark.django_db
+def test_tv_media_file_resolves_missing_parent_id_without_parent_population(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    tv = media_file.tv
+    assert tv._poster_id is None
+    search = mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={"results": [{"id": 456, "name": tv.name}]},
+    )
+    parent_populate = mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo", return_value={}
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+    mocker.patch.object(Poster, "_populate_tv_series_details")
+
+    media_file.poster.populate_data()
+
+    assert "search/tv" in search.call_args.args[0]
+    tv.refresh_from_db()
+    parent_poster = Poster.objects.get(pk=tv._poster_id)
+    assert parent_poster.tmdb == "456"
+    parent_populate.assert_not_called()
+    episode_info.assert_called_once_with("456", 1, 2)
+
+
+@pytest.mark.django_db
+def test_tv_name_search_uses_unique_exact_match_not_first_result(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    tv = media_file.tv
+    mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={
+            "results": [
+                {"id": 111, "name": "Unrelated Show"},
+                {"id": 456, "original_name": tv.name.lower()},
+            ]
+        },
+    )
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo", return_value={}
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+    mocker.patch.object(Poster, "_populate_tv_series_details")
+
+    media_file.poster.populate_data()
+
+    tv.refresh_from_db()
+    assert Poster.objects.get(pk=tv._poster_id).tmdb == "456"
+    episode_info.assert_called_once_with("456", 1, 2)
+
+
+@pytest.mark.django_db
+def test_tv_name_search_rejects_duplicate_exact_matches(create_tv_media_file, mocker):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    tv = media_file.tv
+    mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={
+            "results": [
+                {"id": 111, "name": tv.name},
+                {"id": 456, "original_name": tv.name},
+            ]
+        },
+    )
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo"
+    )
+
+    media_file.poster.populate_data()
+
+    tv.refresh_from_db()
+    assert Poster.objects.get(pk=tv._poster_id).tmdb == ""
+    episode_info.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_parent_identity_database_error_propagates_without_name_search(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    Poster.objects.from_ref_obj(media_file.tv)
+    search = mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={"results": [{"id": 456, "name": media_file.tv.name}]},
+    )
+    mocker.patch.object(Poster, "_populate_tv_series_details")
+    original_save = Poster.save
+
+    def fail_identity_save(poster, *args, **kwargs):
+        if kwargs.get("update_fields") == ["tmdb"]:
+            raise DatabaseError("db failure")
+        return original_save(poster, *args, **kwargs)
+
+    mocker.patch.object(Poster, "save", autospec=True, side_effect=fail_identity_save)
+
+    with pytest.raises(DatabaseError, match="db failure"):
+        media_file.poster.populate_data()
+
+    search.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_tv_episode_http_population_persists_episode_and_image(
+    create_tv_media_file, mocker, tmp_path
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 0
+    media_file.episode = 1
+    media_file.save()
+    parent_poster = Poster.objects.from_ref_obj(media_file.tv)
+    parent_poster.tmdb = "series-123"
+    parent_poster.save()
+    poster = media_file.poster
+    mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        return_value={
+            "name": "Episode title",
+            "overview": "Episode overview",
+            "air_date": "2024-01-02",
+            "id": 789,
+            "still_path": "/still.jpg",
+        },
+    )
+    series_request = mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={"overview": "Series overview", "genres": []},
+    )
+    response = mocker.Mock(status_code=200)
+    response.iter_content.return_value = [b"image-bytes"]
+    image_request = mocker.patch(
+        "mediaviewer.models.poster.requests.get", return_value=response
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+
+    with override_settings(MEDIA_ROOT=str(tmp_path)):
+        poster.populate_data()
+        loaded = Poster.objects.get(pk=poster.pk)
+
+        assert loaded.episodename == "Episode title"
+        assert loaded.extendedplot == "Episode overview"
+        assert loaded.plot == "Series overview"
+        assert loaded.tmdb == "789"
+        assert loaded.image.storage.exists(loaded.image.name)
+
+    image_request.assert_called_once()
+    assert image_request.call_args.args[0].endswith("/still.jpg")
+    assert "/tv/series-123?" in series_request.call_args.args[0]
 
 
 @pytest.mark.django_db

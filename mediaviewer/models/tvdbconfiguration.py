@@ -126,12 +126,15 @@ def getTVDBEpisodeInfo(tvdb_id, season, episode):
 
     urls = []
 
-    if episode and season:
-        urls.append(
-            f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={settings.API_KEY}"
-        )
+    if episode is not None and season is not None:
+        url = f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}/episode/{episode}?api_key={settings.API_KEY}"
+        try:
+            return getJSONData(url) or {}
+        except Exception as e:
+            log.debug(e)
+            return {}
 
-    if season:
+    if season is not None:
         urls.append(
             f"https://api.themoviedb.org/3/tv/{tvdb_id}/season/{season}?api_key={settings.API_KEY}"
         )

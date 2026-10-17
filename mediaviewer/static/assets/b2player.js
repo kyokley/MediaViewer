@@ -185,7 +185,7 @@
       resumeReady = true;
       setStatus(
         retryOffset > 0
-          ? "Resume position ready. Press play when you’re ready."
+          ? "Position loaded. Press play when you’re ready."
           : "Ready to play.",
         expectedGeneration,
       );

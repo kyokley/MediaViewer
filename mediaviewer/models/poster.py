@@ -4,16 +4,18 @@ Re-implementation of PosterFile
 
 from datetime import date
 from io import BytesIO
+from urllib.parse import quote_plus
 
 import requests
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.sites.models import Site
 from django.core.files.images import ImageFile
-from django.db import models
+from django.db import DatabaseError, models
 
 from mediaviewer.log import log
 
+from ..thetvdb import _normalize
 from .actor import Actor
 from .core import TimeStampModel
 from .director import Director
@@ -58,6 +60,10 @@ def _search_TVDB_by_name(name):
     return getJSONData(url)
 
 
+def _valid_tmdb_id(value):
+    return isinstance(value, (str, int)) and not isinstance(value, bool) and bool(str(value))
+
+
 def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     log.info("Getting data from TVDb using %s" % (tmdb_id,))
     if not tmdb_id:
@@ -67,12 +73,12 @@ def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     urls = []
 
     if not is_movie:
-        if episode and season:
+        if episode is not None and season is not None:
             urls.append(
                 f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/episode/{episode}/credits?api_key={settings.API_KEY}"
             )
 
-        if season:
+        if season is not None:
             urls.append(
                 f"https://api.themoviedb.org/3/tv/{tmdb_id}/season/{season}/credits?api_key={settings.API_KEY}"
             )
@@ -321,6 +327,9 @@ class Poster(TimeStampModel):
         if clear:
             self.clear()
 
+        if self.ref_obj.is_media_file() and self.ref_obj.is_tv():
+            return self._populate_tv_episode_data()
+
         data = self._get_data_from_imdb()
 
         if not data:
@@ -375,6 +384,228 @@ class Poster(TimeStampModel):
         self.save()
 
         return data
+
+    def _get_tv_series_tmdb_id(self, tv):
+        parent_poster = tv._poster if tv._poster_id else None
+        if parent_poster and parent_poster.tmdb:
+            return str(parent_poster.tmdb), parent_poster
+
+        if parent_poster and parent_poster.imdb:
+            url = (
+                f"https://api.themoviedb.org/3/find/{parent_poster.imdb}"
+                f"?api_key={settings.API_KEY}&external_source=imdb_id"
+            )
+            try:
+                data = getJSONData(url)
+                results = data.get("tv_results") if isinstance(data, dict) else None
+                if (
+                    isinstance(results, list)
+                    and results
+                    and isinstance(results[0], dict)
+                    and _valid_tmdb_id(results[0].get("id"))
+                ):
+                    tmdb_id = str(results[0]["id"])
+                    if parent_poster:
+                        parent_poster.tmdb = tmdb_id
+                        parent_poster.save(update_fields=["tmdb"])
+                    return tmdb_id, parent_poster
+            except DatabaseError:
+                raise
+            except Exception as e:
+                log.debug(e)
+
+        if parent_poster is None:
+            parent_poster = Poster.objects.from_ref_obj(tv)
+
+        try:
+            url = (
+                "https://api.themoviedb.org/3/search/tv?query={}"
+                "&api_key={}"
+            ).format(quote_plus(tv.name), settings.API_KEY)
+            data = getJSONData(url)
+            results = data.get("results") if isinstance(data, dict) else None
+            target_name = _normalize(tv.name)
+            matches = []
+            if isinstance(results, list) and target_name:
+                for result in results:
+                    if not isinstance(result, dict):
+                        continue
+                    names = (result.get("name"), result.get("original_name"))
+                    if any(
+                        isinstance(name, str) and _normalize(name) == target_name
+                        for name in names
+                    ):
+                        matches.append(result)
+            if len(matches) == 1 and _valid_tmdb_id(matches[0].get("id")):
+                tmdb_id = str(matches[0]["id"])
+                parent_poster.tmdb = tmdb_id
+                parent_poster.save(update_fields=["tmdb"])
+                return tmdb_id, parent_poster
+        except DatabaseError:
+            raise
+        except Exception as e:
+            log.debug(e)
+
+        return "", parent_poster
+
+    def _populate_tv_episode_data(self):
+        media_file = self.ref_obj
+        if media_file.season is None or media_file.episode is None:
+            return None
+
+        series_id, _ = self._get_tv_series_tmdb_id(media_file.tv)
+        if not series_id:
+            return None
+
+        try:
+            tvinfo = getTVDBEpisodeInfo(series_id, media_file.season, media_file.episode)
+        except DatabaseError:
+            raise
+        except Exception as e:
+            log.warning("Episode metadata not found")
+            log.warning(e)
+            return None
+
+        if not isinstance(tvinfo, dict) or not tvinfo:
+            return None
+
+        changed_fields = []
+        title = tvinfo.get("name")
+        if isinstance(title, str) and title.strip():
+            self.episodename = title
+            changed_fields.append("episodename")
+        overview = tvinfo.get("overview")
+        if isinstance(overview, str):
+            self.extendedplot = overview
+            changed_fields.append("extendedplot")
+        release_date = tvinfo.get("air_date")
+        if isinstance(release_date, str) and release_date:
+            try:
+                self.release_date = date.fromisoformat(release_date)
+                changed_fields.append("release_date")
+            except ValueError:
+                log.debug("Invalid episode air date: %s", release_date)
+        if tvinfo.get("id") is not None:
+            self.tmdb = str(tvinfo["id"])
+            changed_fields.append("tmdb")
+        if changed_fields:
+            self.save(update_fields=changed_fields)
+
+        if "episodename" in changed_fields:
+            media_file.populate_display_name()
+            media_file.save(update_fields=["display_name"])
+
+        self._populate_tv_episode_optional_data(tvinfo, series_id)
+        self._populate_tv_series_details(series_id)
+        return tvinfo
+
+    def _populate_tv_series_details(self, series_id):
+        url = (
+            f"https://api.themoviedb.org/3/tv/{series_id}"
+            f"?language=en-US&api_key={settings.API_KEY}"
+        )
+        try:
+            data = getJSONData(url)
+            if not isinstance(data, dict):
+                return
+            changed_fields = []
+            if data.get("Plot") or data.get("overview"):
+                self._store_plot(data)
+                changed_fields.append("plot")
+            if "Rated" in data:
+                self._store_rated(data)
+                changed_fields.append("rated")
+            if changed_fields:
+                self.save(update_fields=changed_fields)
+            if data.get("genres") or data.get("genre_ids") or data.get("results"):
+                try:
+                    self._store_genres(data)
+                except DatabaseError:
+                    raise
+                except Exception as e:
+                    log.debug(e)
+        except DatabaseError:
+            raise
+        except Exception as e:
+            log.debug(e)
+
+    def _populate_tv_episode_optional_data(self, tvinfo, series_id):
+        image_path = tvinfo.get("still_path") or tvinfo.get("poster_path")
+        if isinstance(image_path, str) and image_path:
+            try:
+                if image_path.startswith(("http://", "https://")):
+                    image_url = image_path
+                else:
+                    image_size = (
+                        tvdbConfig.still_size
+                        if tvinfo.get("still_path")
+                        else tvdbConfig.poster_size
+                    )
+                    image_url = f"{tvdbConfig.url}{image_size}{image_path}"
+                response = requests.get(
+                    image_url, stream=True, timeout=settings.REQUEST_TIMEOUT
+                )
+                response.raise_for_status()
+                if response.status_code == 200:
+                    image_data = BytesIO()
+                    for chunk in response.iter_content(1024):
+                        image_data.write(chunk)
+                    image_data.seek(0)
+                    self.image = ImageFile(image_data, name=image_path.rpartition("/")[-1])
+                    self.save(update_fields=["image"])
+            except DatabaseError:
+                raise
+            except Exception as e:
+                log.warning("Episode image not found")
+                log.debug(e)
+
+        try:
+            extended_info = _get_extended_info(series_id, is_movie=False)
+            if isinstance(extended_info, dict):
+                changed_fields = []
+                rating = extended_info.get("imdbRating") or extended_info.get(
+                    "vote_average"
+                )
+                if isinstance(rating, (str, int, float)) and rating != "undefined":
+                    self.rating = str(rating)
+                    changed_fields.append("rating")
+                tagline = extended_info.get("tagline")
+                if isinstance(tagline, str) and tagline and tagline != "undefined":
+                    self.tagline = tagline
+                    changed_fields.append("tagline")
+                if changed_fields:
+                    self.save(update_fields=changed_fields)
+        except DatabaseError:
+            raise
+        except Exception as e:
+            log.debug(e)
+
+        try:
+            cast_and_crew = _get_cast_data(
+                series_id,
+                season=self.season,
+                episode=self.episode,
+                is_movie=False,
+            )
+            if not isinstance(cast_and_crew, dict):
+                return
+            for actor in cast_and_crew.get("cast", []):
+                if isinstance(actor, dict) and actor.get("name"):
+                    actor_obj = Actor.objects.create(
+                        name=actor["name"], order=actor.get("order")
+                    )
+                    self.actors.add(actor_obj)
+            for job in cast_and_crew.get("crew", []):
+                if not isinstance(job, dict) or not job.get("name"):
+                    continue
+                if job.get("job") == "Writer":
+                    self.writers.add(Writer.objects.create(name=job["name"]))
+                elif job.get("job") == "Director":
+                    self.directors.add(Director.objects.create(name=job["name"]))
+        except DatabaseError:
+            raise
+        except Exception as e:
+            log.debug(e)
 
     def _tmdb_episode_info(self):
         if not self.tmdb:
