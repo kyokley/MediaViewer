@@ -307,6 +307,30 @@ class MediaFileSerializer(serializers.ModelSerializer):
     ismovie = serializers.SerializerMethodField("get_ismovie")
     watched = serializers.SerializerMethodField("get_watched")
 
+    @staticmethod
+    def _schedule_episode_enrichment(media_file):
+        from django.db import transaction
+
+        if (
+            not media_file.is_tv()
+            or media_file.season is None
+            or media_file.episode is None
+            or media_file._poster_id is None
+        ):
+            return
+
+        poster = Poster.objects.get(pk=media_file._poster_id)
+        if poster.episodename and poster.extendedplot and poster.release_date:
+            return
+
+        poster_id = poster.pk
+
+        def enrich_episode_metadata():
+            Poster.objects.get(pk=poster_id).populate_data()
+            media_file.refresh_from_db(fields=("display_name",))
+
+        transaction.on_commit(enrich_episode_metadata, robust=True)
+
     def create(self, validated_data):
         from django.db import IntegrityError, transaction
         from rest_framework.exceptions import ValidationError
@@ -370,6 +394,8 @@ class MediaFileSerializer(serializers.ModelSerializer):
                     match.size = validated_data.get("size")
                     match.subtitle_files = validated_data.get("subtitle_files") or []
                     match.save(update_fields=("b2_uuid", "size", "subtitle_files"))
+                    match.ensure_episode_fields()
+                    self._schedule_episode_enrichment(match)
                     return match
                 if match:
                     raise ValidationError(
@@ -377,7 +403,10 @@ class MediaFileSerializer(serializers.ModelSerializer):
                             "filename": "A UUID upload is already published for this filename."
                         }
                     )
-                return super().create(validated_data)
+                media_file = super().create(validated_data)
+                media_file.ensure_episode_fields()
+                self._schedule_episode_enrichment(media_file)
+                return media_file
         except IntegrityError as error:
             raise ValidationError(
                 {"b2_uuid": "UUID conflicts with another upload."}

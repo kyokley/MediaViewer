@@ -1,7 +1,11 @@
 import pytest
 from django.test import override_settings
 
-from mediaviewer.models.tvdbconfiguration import TVDBConfiguration, getJSONData
+from mediaviewer.models.tvdbconfiguration import (
+    TVDBConfiguration,
+    getJSONData,
+    getTVDBEpisodeInfo,
+)
 
 
 class TestGetJSONData:
@@ -44,6 +48,31 @@ class TestGetJSONData:
 
         assert expected == actual
         self.mock_sleep.assert_called_once_with(1)
+
+
+def test_episode_info_uses_season_zero_urls(mocker):
+    get_json = mocker.patch(
+        "mediaviewer.models.tvdbconfiguration.getJSONData", return_value={}
+    )
+    mocker.patch("mediaviewer.models.tvdbconfiguration.tvdbConfig.connected", True)
+
+    getTVDBEpisodeInfo("123", season=0, episode=1)
+
+    urls = [call.args[0] for call in get_json.call_args_list]
+    assert len(urls) == 1
+    assert "/season/0/episode/1?" in urls[0]
+
+
+def test_episode_info_does_not_fall_back_when_exact_episode_is_missing(mocker):
+    get_json = mocker.patch(
+        "mediaviewer.models.tvdbconfiguration.getJSONData", return_value={}
+    )
+    mocker.patch("mediaviewer.models.tvdbconfiguration.tvdbConfig.connected", True)
+
+    assert getTVDBEpisodeInfo("123", season=1, episode=2) == {}
+
+    get_json.assert_called_once()
+    assert "/season/1/episode/2?" in get_json.call_args.args[0]
 
 
 class TestTVDBConfigurationInit:
