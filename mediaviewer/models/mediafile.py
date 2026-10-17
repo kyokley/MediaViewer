@@ -276,10 +276,12 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime("%b %d, %Y")}</center>"""
 
         if can_download:
-            if waiterstatus:
+            if waiterstatus or self.media_path.is_b2:
                 link_html = f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}')">Open</a></center>"""
             else:
                 link_html = "Alfred is down"
+        else:
+            link_html = ""
 
         cell = """<center>"""
 

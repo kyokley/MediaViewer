@@ -44,7 +44,7 @@
     </div>
     <div class="row">
         {% block open_button %}
-            {% if can_download and waiterstatus %}
+            {% if can_download and is_b2 or can_download and waiterstatus %}
                 <div class="d-grid gap-2 col-4 mx-auto">
                     <a class='btn btn-info btn-lg btn-block'
                        name='download-btn'
