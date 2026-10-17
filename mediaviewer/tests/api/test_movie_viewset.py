@@ -47,10 +47,37 @@ class TestMovies:
             assert movie.name == json_data["name"]
             assert movie.pk == json_data["pk"]
             assert (
-                dict(path=str(movie.media_path.path), pk=movie.media_path.pk)
+                dict(
+                    path=str(movie.media_path.path),
+                    pk=movie.media_path.pk,
+                    filename=movie.media_path.filename,
+                    b2_upload_prefix=movie.media_path.b2_upload_prefix,
+                    bucket=movie.media_path.bucket,
+                )
                 == json_data["media_path"]
             )
             assert movie.finished == json_data["finished"]
+
+    def test_b2_movie_path_exposes_converter_fields(self, is_staff):
+        self.client.force_login(self.user if is_staff else self.non_staff_user)
+        movie = self.movies[0]
+        mp = movie.media_path
+        mp._path = f"b2://bucket/archive/nested/{mp.pk}/Movie/"
+        mp.filename = None
+        mp.save()
+
+        response = self.client.get(
+            reverse("mediaviewer:api:movie-detail", args=[movie.pk])
+        )
+
+        assert response.status_code == 200
+        assert response.json()["media_path"] == {
+            "pk": mp.pk,
+            "path": mp._path,
+            "filename": None,
+            "b2_upload_prefix": f"archive/nested/{mp.pk}/",
+            "bucket": "bucket",
+        }
 
     def test_list(self, is_staff):
         if not is_staff:
@@ -74,6 +101,9 @@ class TestMovies:
                     "media_path": dict(
                         path=str(self.movies[0].media_path.path),
                         pk=self.movies[0].media_path.pk,
+                        filename=self.movies[0].media_path.filename,
+                        b2_upload_prefix=self.movies[0].media_path.b2_upload_prefix,
+                        bucket=self.movies[0].media_path.bucket,
                     ),
                     "finished": self.movies[0].finished,
                 },
@@ -83,6 +113,9 @@ class TestMovies:
                     "media_path": dict(
                         path=str(self.movies[1].media_path.path),
                         pk=self.movies[1].media_path.pk,
+                        filename=self.movies[1].media_path.filename,
+                        b2_upload_prefix=self.movies[1].media_path.b2_upload_prefix,
+                        bucket=self.movies[1].media_path.bucket,
                     ),
                     "finished": self.movies[1].finished,
                 },
@@ -92,6 +125,9 @@ class TestMovies:
                     "media_path": dict(
                         path=str(self.movies[2].media_path.path),
                         pk=self.movies[2].media_path.pk,
+                        filename=self.movies[2].media_path.filename,
+                        b2_upload_prefix=self.movies[2].media_path.b2_upload_prefix,
+                        bucket=self.movies[2].media_path.bucket,
                     ),
                     "finished": self.movies[2].finished,
                 },
@@ -156,7 +192,13 @@ class TestMovies:
             assert new_movie.pk == json_data["pk"]
             assert new_movie.name == json_data["name"]
             assert (
-                dict(path=str(new_movie.media_path.path), pk=new_movie.media_path.pk)
+                dict(
+                    path=str(new_movie.media_path.path),
+                    pk=new_movie.media_path.pk,
+                    filename=new_movie.media_path.filename,
+                    b2_upload_prefix=new_movie.media_path.b2_upload_prefix,
+                    bucket=new_movie.media_path.bucket,
+                )
                 == json_data["media_path"]
             )
             assert new_movie.finished == json_data["finished"]

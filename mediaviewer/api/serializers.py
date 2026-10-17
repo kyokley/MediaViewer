@@ -39,6 +39,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             "username",
             "path",
             "filename",
+            "original_filename",
             "ismovie",
             "date_created",
             "tokenid",
@@ -72,6 +73,7 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
     donation_site = serializers.SerializerMethodField()
     download_link = serializers.SerializerMethodField()
     subtitle_files = serializers.SerializerMethodField()
+    original_filename = serializers.SerializerMethodField()
     theme = serializers.SerializerMethodField()
     tv_id = serializers.SerializerMethodField()
 
@@ -119,18 +121,42 @@ class DownloadTokenSerializer(serializers.ModelSerializer):
             media_file = obj.media_file
             media_path = media_file.media_path
             if media_path.is_b2:
+                if media_file.b2_uuid:
+                    return [
+                        media_path.b2_filename_presigned_url(filename)
+                        for filename in (media_file.subtitle_files or [])
+                    ]
                 return [
                     media_path.presigned_url(filename)
                     for filename in (media_file.subtitle_files or [])
                 ]
         elif obj.movie:
-            media_path = obj.movie.mediapath_set.first()
+            media_path = obj.movie.mediapath_set.order_by("-pk").first()
             if media_path and media_path.is_b2:
+                media_files = MediaFile.objects.filter(
+                    media_path=media_path,
+                    filename=media_path.filename,
+                    b2_uuid__isnull=False,
+                )
+                if media_files.count() == 1:
+                    media_file = media_files.get()
+                    return [
+                        media_path.b2_filename_presigned_url(filename)
+                        for filename in (media_file.subtitle_files or [])
+                    ]
                 return [
                     media_path.presigned_url(filename)
                     for filename in (media_path.subtitle_files or [])
                 ]
         return []
+
+    def get_original_filename(self, obj):
+        if obj.media_file:
+            return obj.media_file.filename
+        if obj.movie:
+            media_path = obj.movie.mediapath_set.order_by("-pk").first()
+            return media_path.filename if media_path else obj.movie.name
+        return None
 
     def get_theme(self, obj):
         user_settings = UserSettings.getSettings(obj.user)
@@ -147,6 +173,8 @@ class MediaPathSerializer(serializers.ModelSerializer):
         fields = (
             "pk",
             "path",
+            "b2_upload_prefix",
+            "bucket",
             "filename",
             "subtitle_files",
             "tv",
@@ -156,6 +184,8 @@ class MediaPathSerializer(serializers.ModelSerializer):
         )
 
     path = serializers.SerializerMethodField("get_path")
+    b2_upload_prefix = serializers.ReadOnlyField()
+    bucket = serializers.ReadOnlyField()
     media_files = serializers.SerializerMethodField("get_media_files")
 
     def get_path(self, obj):
@@ -163,6 +193,18 @@ class MediaPathSerializer(serializers.ModelSerializer):
 
     def get_media_files(self, obj):
         return obj.mediafile_set.values_list("filename", flat=True)
+
+    def update(self, instance, validated_data):
+        filename = validated_data.get("filename", instance.filename)
+        if (
+            instance.movie_id
+            and filename != instance.filename
+            and instance.mediafile_set.filter(b2_uuid__isnull=False).exists()
+        ):
+            raise serializers.ValidationError(
+                {"filename": "Cannot change filename for a published UUID movie."}
+            )
+        return super().update(instance, validated_data)
 
 
 class TVSerializer(serializers.ModelSerializer):
@@ -224,7 +266,13 @@ class MovieSerializer(serializers.ModelSerializer):
 
     def get_media_path(self, obj):
         mp = obj.media_path
-        return dict(pk=mp.pk, path=mp._path)
+        return dict(
+            pk=mp.pk,
+            path=mp._path,
+            filename=mp.filename,
+            b2_upload_prefix=mp.b2_upload_prefix,
+            bucket=mp.bucket,
+        )
 
 
 class MCPMovieSerializer(serializers.ModelSerializer):
@@ -237,23 +285,128 @@ class MCPMovieSerializer(serializers.ModelSerializer):
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
+    b2_uuid = serializers.UUIDField(required=False, allow_null=True, validators=[])
+
     class Meta:
         model = MediaFile
         fields = (
             "pk",
             "media_path",
             "filename",
+            "b2_uuid",
             "display_name",
             "size",
             "subtitle_files",
             "ismovie",
             "watched",
         )
+        validators = []
 
     display_name = serializers.CharField(required=False)
     size = serializers.IntegerField(required=False)
     ismovie = serializers.SerializerMethodField("get_ismovie")
     watched = serializers.SerializerMethodField("get_watched")
+
+    def create(self, validated_data):
+        from django.db import IntegrityError, transaction
+        from rest_framework.exceptions import ValidationError
+
+        b2_uuid = validated_data.get("b2_uuid")
+        if b2_uuid is None:
+            return super().create(validated_data)
+        try:
+            with transaction.atomic():
+                media_path = MediaPath.objects.select_for_update().get(
+                    pk=validated_data["media_path"].pk
+                )
+                validated_data["media_path"] = media_path
+                filename = validated_data["filename"]
+                existing = MediaFile.objects.filter(b2_uuid=b2_uuid).first()
+                if existing:
+                    expected = {
+                        "media_path_id": media_path.pk,
+                        "filename": filename,
+                        "size": validated_data.get("size"),
+                        "subtitle_files": validated_data.get("subtitle_files") or [],
+                    }
+                    if all(
+                        getattr(existing, key) == value
+                        for key, value in expected.items()
+                    ):
+                        return existing
+                    raise ValidationError(
+                        {"b2_uuid": "UUID already belongs to another upload."}
+                    )
+
+                matches = MediaFile.objects.filter(
+                    media_path=media_path, filename=filename
+                )
+                if matches.count() > 1:
+                    raise ValidationError(
+                        {
+                            "filename": "Multiple MediaFiles match this path and filename."
+                        }
+                    )
+                if media_path.movie_id:
+                    if media_path.filename and media_path.filename != filename:
+                        raise ValidationError(
+                            {"filename": "Movie path already published."}
+                        )
+                    if MediaFile.objects.filter(
+                        media_path=media_path, b2_uuid__isnull=False
+                    ).exists():
+                        raise ValidationError(
+                            {"b2_uuid": "Movie already has a primary UUID file."}
+                        )
+                    media_path.filename = filename
+                    media_path.subtitle_files = (
+                        validated_data.get("subtitle_files") or []
+                    )
+                    media_path.save(update_fields=("filename", "subtitle_files"))
+
+                match = matches.first()
+                if match and match.b2_uuid is None:
+                    match.b2_uuid = b2_uuid
+                    match.size = validated_data.get("size")
+                    match.subtitle_files = validated_data.get("subtitle_files") or []
+                    match.save(update_fields=("b2_uuid", "size", "subtitle_files"))
+                    return match
+                if match:
+                    raise ValidationError(
+                        {
+                            "filename": "A UUID upload is already published for this filename."
+                        }
+                    )
+                return super().create(validated_data)
+        except IntegrityError as error:
+            raise ValidationError(
+                {"b2_uuid": "UUID conflicts with another upload."}
+            ) from error
+
+    def update(self, instance, validated_data):
+        if instance.b2_uuid is None and validated_data.get("b2_uuid") is not None:
+            raise serializers.ValidationError(
+                {"b2_uuid": "Use POST to publish a UUID B2 upload."}
+            )
+        if instance.b2_uuid:
+            for field in ("b2_uuid", "media_path", "filename"):
+                if field not in validated_data:
+                    continue
+                current = (
+                    instance.media_path_id
+                    if field == "media_path"
+                    else getattr(instance, field)
+                )
+                value = (
+                    validated_data[field].pk
+                    if field == "media_path"
+                    else validated_data[field]
+                )
+                if value != current:
+                    raise serializers.ValidationError(
+                        {field: "Cannot change identity of a published B2 upload."}
+                    )
+        return super().update(instance, validated_data)
 
     def get_ismovie(self, obj):
         return bool(obj.movie)

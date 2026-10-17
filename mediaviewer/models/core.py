@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.conf import settings as conf_settings
 from django.contrib.sites.models import Site
 from django.db import models
@@ -77,6 +79,10 @@ class ViewableObjectMixin:
             from mediaviewer.models import MediaFile
 
             if isinstance(self, MediaFile):
+                if self.b2_uuid:
+                    return media_path.b2_uuid_presigned_url(
+                        self.b2_uuid, Path(self.filename).suffix
+                    )
                 filename = self.filename
             else:
                 filename = media_path.filename
@@ -84,6 +90,18 @@ class ViewableObjectMixin:
                     raise ValueError(
                         f"B2 movie {self} has no MediaPath.filename; "
                         "cannot build a presigned URL"
+                    )
+                media_files = MediaFile.objects.filter(
+                    media_path=media_path, filename=filename, b2_uuid__isnull=False
+                )
+                if media_files.count() == 1:
+                    media_file = media_files.get()
+                    return media_path.b2_uuid_presigned_url(
+                        media_file.b2_uuid, Path(media_file.filename).suffix
+                    )
+                if media_files.count() > 1:
+                    raise ValueError(
+                        f"B2 movie {self} has multiple UUID files for {filename}"
                     )
             return media_path.presigned_url(filename)
 

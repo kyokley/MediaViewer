@@ -67,6 +67,31 @@ class MediaPath(TimeStampModel):
             key = f"{key}/"
         return f"{key}{filename}"
 
+    @property
+    def b2_upload_prefix(self):
+        if not self.is_b2:
+            return None
+        raw_key = self.key or ""
+        stripped_key = raw_key.rstrip("/")
+        has_parent_separator = "/" in stripped_key
+        parent = stripped_key.rsplit("/", 1)[0] if has_parent_separator else ""
+        if parent.split("/")[-1] == str(self.pk):
+            return f"{parent}/"
+        separator = "/" if parent or has_parent_separator else ""
+        return f"{parent}{separator}{self.pk}/"
+
+    def b2_uuid_presigned_url(self, object_uuid, suffix=""):
+        return self.b2_filename_presigned_url(f"{object_uuid}{suffix}")
+
+    def b2_filename_presigned_url(self, filename):
+        from mediaviewer.b2 import get_b2_client
+
+        return get_b2_client().generate_presigned_url(
+            bucket=self.bucket,
+            key=f"{self.b2_upload_prefix}{filename}",
+            expires_in=None,
+        )
+
     def presigned_url(self, filename, expires_in=None):
         from mediaviewer.b2 import get_b2_client
 

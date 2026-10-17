@@ -1,10 +1,44 @@
 import pytest
+import uuid
 
 from mediaviewer.models import MediaFile
 
 
 @pytest.mark.django_db
 class TestDownloadLinkB2:
+    def test_uuid_video_uses_numeric_prefix_and_original_suffix(
+        self, create_tv_media_file, mocker
+    ):
+        mf = create_tv_media_file(filename="Actual Name.mkv")
+        mf.b2_uuid = uuid.uuid4()
+        mf.save()
+        mf.media_path._path = f"b2://mybucket/archive/{mf.media_path.pk}/Show/"
+        mf.media_path.save()
+        client = mocker.patch("mediaviewer.b2.get_b2_client").return_value
+        mf.downloadLink("guid")
+        client.generate_presigned_url.assert_called_once_with(
+            bucket="mybucket",
+            key=f"archive/{mf.media_path.pk}/{mf.b2_uuid}.mkv",
+            expires_in=None,
+        )
+
+    def test_uuid_movie_uses_matching_mediafile(self, create_movie, mocker):
+        movie = create_movie()
+        mp = movie.media_path
+        mp._path = f"b2://mybucket/movies/{mp.pk}/Movie/"
+        mp.filename = "Movie.Name.mp4"
+        mp.save()
+        mf = MediaFile.objects.create(
+            media_path=mp, filename=mp.filename, b2_uuid=uuid.uuid4()
+        )
+        client = mocker.patch("mediaviewer.b2.get_b2_client").return_value
+        movie.downloadLink("guid")
+        client.generate_presigned_url.assert_called_once_with(
+            bucket="mybucket",
+            key=f"movies/{mp.pk}/{mf.b2_uuid}.mp4",
+            expires_in=None,
+        )
+
     def test_tv_media_file_uses_presigned_url(self, create_tv_media_file, mocker):
         mf = create_tv_media_file()
         mp = mf.media_path

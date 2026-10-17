@@ -1,4 +1,5 @@
 import pytest
+import uuid
 from django.urls import reverse
 from mediaviewer.models import MediaFile
 from mediaviewer.models.apikey import ApiKey
@@ -53,6 +54,122 @@ class TestMediaFile:
             assert json_data["subtitle_files"] == ["test_filename.mv-encoded.mp4-0.vtt"]
         else:
             assert response.status_code == 403
+
+    def test_uuid_upload_replay_and_movie_publication(self, is_staff):
+        if not is_staff:
+            pytest.skip("UUID upload requires staff write access")
+        self.client.force_login(self.user)
+        mp = self.movie.media_path
+        mp._path = f"b2://bucket/movies/{mp.pk}/"
+        mp.filename = None
+        mp.save()
+        object_uuid = str(uuid.uuid4())
+        payload = {
+            "filename": "Original.Movie.mkv",
+            "media_path": mp.pk,
+            "b2_uuid": object_uuid,
+            "size": 123,
+            "subtitle_files": '["sub-id.vtt"]',
+        }
+        url = reverse("mediaviewer:api:mediafile-list")
+        first = self.client.post(url, data=payload, format="json")
+        replay = self.client.post(url, data=payload, format="json")
+
+        assert first.status_code == 201, first.json()
+        assert replay.status_code == 201
+        assert replay.json()["pk"] == first.json()["pk"]
+        mp.refresh_from_db()
+        assert mp.filename == "Original.Movie.mkv"
+        assert mp.subtitle_files == ["sub-id.vtt"]
+
+    def test_uuid_validation_and_conflicting_owner(self, is_staff):
+        if not is_staff:
+            pytest.skip("UUID upload requires staff write access")
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mediafile-list")
+        payload = {
+            "filename": "episode.mp4",
+            "media_path": self.tv.media_path.pk,
+            "b2_uuid": "not-a-uuid",
+        }
+        assert self.client.post(url, data=payload, format="json").status_code == 400
+
+        payload["b2_uuid"] = str(uuid.uuid4())
+        first = self.client.post(url, data=payload, format="json")
+        assert first.status_code == 201
+        payload["media_path"] = self.movie.media_path.pk
+        assert self.client.post(url, data=payload, format="json").status_code == 400
+
+    def test_movie_uuid_upload_rejects_second_primary(self, is_staff):
+        if not is_staff:
+            pytest.skip("UUID upload requires staff write access")
+        self.client.force_login(self.user)
+        mp = self.movie.media_path
+        url = reverse("mediaviewer:api:mediafile-list")
+        first = {
+            "filename": "Movie.mkv",
+            "media_path": mp.pk,
+            "b2_uuid": str(uuid.uuid4()),
+        }
+        assert self.client.post(url, data=first, format="json").status_code == 201
+        second = {**first, "b2_uuid": str(uuid.uuid4())}
+        assert self.client.post(url, data=second, format="json").status_code == 400
+
+    def test_uuid_upload_identity_cannot_be_changed(self, is_staff):
+        if not is_staff:
+            pytest.skip("UUID upload requires staff write access")
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mediafile-list")
+        created = self.client.post(
+            url,
+            {
+                "filename": "episode.mp4",
+                "media_path": self.tv.media_path.pk,
+                "b2_uuid": str(uuid.uuid4()),
+            },
+            format="json",
+        )
+        assert created.status_code == 201
+        from mediaviewer.api.serializers import MediaFileSerializer
+        from rest_framework.exceptions import ValidationError
+
+        instance = MediaFile.objects.get(pk=created.json()["pk"])
+        serializer = MediaFileSerializer(
+            instance, data={"filename": "episode.mkv"}, partial=True
+        )
+        assert serializer.is_valid()
+        with pytest.raises(ValidationError, match="identity of a published B2 upload"):
+            serializer.save()
+
+    def test_update_cannot_acquire_uuid(self, is_staff):
+        if not is_staff:
+            pytest.skip("UUID upload requires staff write access")
+        from mediaviewer.api.serializers import MediaFileSerializer
+        from rest_framework.exceptions import ValidationError
+
+        self.client.force_login(self.user)
+        url = reverse("mediaviewer:api:mediafile-list")
+        owner = self.client.post(
+            url,
+            {
+                "filename": "owner.mp4",
+                "media_path": self.tv.media_path.pk,
+                "b2_uuid": str(uuid.uuid4()),
+            },
+            format="json",
+        )
+        assert owner.status_code == 201
+        untracked = MediaFile.objects.create(
+            media_path=self.movie.media_path, filename="untracked.mp4"
+        )
+        serializer = MediaFileSerializer(
+            untracked, data={"b2_uuid": owner.json()["b2_uuid"]}, partial=True
+        )
+        assert serializer.is_valid()
+        with pytest.raises(ValidationError, match="Use POST"):
+            serializer.save()
+        untracked.refresh_from_db()
+        assert untracked.b2_uuid is None
 
 
 @pytest.mark.django_db

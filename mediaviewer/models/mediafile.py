@@ -1,5 +1,4 @@
 import re
-
 from django.db import models
 from django.urls import reverse
 
@@ -77,6 +76,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     size = models.BigIntegerField(null=True, blank=True)
     # Subtitle file names stored alongside this media file in B2 (e.g. "Show.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt").
     subtitle_files = models.JSONField(null=True, blank=True, default=list)
+    b2_uuid = models.UUIDField(null=True, blank=True, unique=True)
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 

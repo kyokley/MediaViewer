@@ -3,6 +3,25 @@ import pytest
 
 @pytest.mark.django_db
 class TestMediaPathB2:
+    @pytest.mark.parametrize(
+        ("path_template", "expected_template"),
+        [
+            ("b2://bucket/tv/Show/", "tv/{pk}/"),
+            ("b2://bucket/archive/nested/Show/", "archive/nested/{pk}/"),
+            ("b2://bucket/archive/{pk}/Show/", "archive/{pk}/"),
+            ("b2://bucket/Show/", "{pk}/"),
+            ("b2://bucket//Show/", "/{pk}/"),
+        ],
+    )
+    def test_b2_upload_prefix(
+        self, create_media_path, create_tv, path_template, expected_template
+    ):
+        mp = create_media_path(path=path_template.format(pk="TEMP"), tv=create_tv())
+        mp._path = path_template.format(pk=mp.pk)
+        mp.save()
+        expected = expected_template.format(pk=mp.pk)
+        assert mp.b2_upload_prefix == expected
+
     def test_is_b2_false_for_local_path(self, create_media_path, create_tv):
         mp = create_media_path(tv=create_tv())
 

@@ -1,10 +1,12 @@
 import logging
+import uuid
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from mediaviewer import b2
-from mediaviewer.models import MediaPath
+from mediaviewer.models import MediaFile, MediaPath
 from mediaviewer.models.mediapath import B2_URI_PREFIX
 
 logger = logging.getLogger(__name__)
@@ -89,8 +91,8 @@ class Command(BaseCommand):
             logger.warning("MediaPath %s has no path; skipping", mp)
             return
         if mp.tv:
-            files = [
-                (mf.filename, mp.path / mf.filename)
+            videos = [
+                (mf, mf.filename, mp.path / mf.filename, mf.subtitle_files or [])
                 for mf in mp.mediafile_set.filter(hide=False)
             ]
         elif mp.movie:
@@ -98,36 +100,82 @@ class Command(BaseCommand):
             if video_file is None:
                 logger.warning("No video file found in %s; skipping", mp.path)
                 return
-            files = [(video_file.name, video_file)]
+            videos = [(None, video_file.name, video_file, mp.subtitle_files or [])]
         else:
             logger.warning("MediaPath %s has no tv or movie; skipping", mp)
             return
 
-        # Include the pk so MediaPaths sharing a directory basename cannot
-        # collide on the same B2 name prefix.
-        key_prefix = f"{prefix}{mp.pk}/{mp.path.name}/"
+        key_prefix = f"{prefix}{mp.pk}/"
+        logical_key_prefix = f"{key_prefix}{mp.path.name}/"
+        missing_videos = [
+            local_path for _, _, local_path, _ in videos if not local_path.exists()
+        ]
+        if missing_videos:
+            logger.warning(
+                "Missing video files for MediaPath %s; skipping upload: %s",
+                mp,
+                missing_videos,
+            )
+            return
         uploaded = []
-        for filename, local_path in files:
-            if not local_path.exists():
-                logger.warning("File %s does not exist; skipping", local_path)
-                continue
-            key = f"{key_prefix}{filename}"
+        for media_file, filename, local_path, subtitles in videos:
+            object_uuid = uuid.uuid4()
+            key = f"{key_prefix}{object_uuid}{local_path.suffix}"
             client.upload_file(local_path, bucket, key)
-            uploaded.append((filename, local_path))
+            subtitle_uploads = []
+            for subtitle in subtitles:
+                subtitle_path = mp.path / subtitle
+                if not subtitle_path.exists():
+                    raise CommandError(f"Subtitle file {subtitle_path} does not exist")
+                subtitle_uuid = uuid.uuid4()
+                client.upload_file(
+                    subtitle_path, bucket, f"{key_prefix}{subtitle_uuid}.vtt"
+                )
+                subtitle_uploads.append((subtitle, subtitle_path, subtitle_uuid))
+            uploaded.append(
+                (media_file, filename, local_path, object_uuid, subtitle_uploads)
+            )
 
         if not uploaded:
             logger.warning("Nothing uploaded for MediaPath %s", mp)
             return
 
-        mp._path = f"b2://{bucket}/{key_prefix}"
-        if mp.movie:
-            mp.filename = uploaded[0][0]
-        mp.save()
+        with transaction.atomic():
+            mp._path = f"b2://{bucket}/{logical_key_prefix}"
+            if mp.movie:
+                mp.filename = uploaded[0][1]
+                mp.subtitle_files = [
+                    f"{subtitle_uuid}.vtt" for _, _, subtitle_uuid in uploaded[0][4]
+                ]
+            mp.save()
+
+            for (
+                media_file,
+                filename,
+                local_path,
+                object_uuid,
+                subtitle_uploads,
+            ) in uploaded:
+                if media_file is None:
+                    media_file = MediaFile.objects.create(
+                        media_path=mp, filename=filename
+                    )
+                media_file.b2_uuid = object_uuid
+                media_file.size = local_path.stat().st_size
+                media_file.subtitle_files = [
+                    f"{subtitle_uuid}.vtt" for _, _, subtitle_uuid in subtitle_uploads
+                ]
+                media_file.save(
+                    update_fields=("b2_uuid", "size", "subtitle_files", "date_edited")
+                )
 
         if delete_local:
-            for _, local_path in uploaded:
+            for _, _, local_path, _, subtitles in uploaded:
                 local_path.unlink()
                 logger.info("Deleted %s", local_path)
+                for _, subtitle_path, _ in subtitles:
+                    subtitle_path.unlink()
+                    logger.info("Deleted %s", subtitle_path)
 
     @staticmethod
     def _find_video_file(directory):
