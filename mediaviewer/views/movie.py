@@ -76,6 +76,7 @@ def moviedetail(request, movie_id):
     )
 
     settings = user.settings()
+    media_path = movie.mediapath_set.order_by("-pk").first()
     context = {
         "movie": movie,
         "display_name": movie.name,
@@ -83,6 +84,7 @@ def moviedetail(request, movie_id):
         "viewed": comment.viewed,
         "can_download": settings and settings.can_download or False,
         "obj_type": "movie",
+        "is_b2": bool(media_path and media_path.is_b2),
     }
     context["active_page"] = "movies"
     context["title"] = movie.name

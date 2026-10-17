@@ -5,10 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 from mediaviewer.models import Comment, MediaFile, Movie
 from mediaviewer.models.downloadtoken import DownloadToken
+from mediaviewer.views.b2player_utils import b2_media_path, has_b2_source
 from mediaviewer.models.message import Message
 from mediaviewer.utils import logAccessInfo
 
@@ -119,12 +121,23 @@ def ajaxdownloadbutton(request):
     if not user.is_authenticated:
         response = {"errmsg": "User not authenticated. Refresh and try again."}
     elif obj and user:
+        media_path = b2_media_path(obj)
+        is_b2 = bool(media_path)
+        user_settings = user.settings()
+        if is_b2 and (not user_settings or not user_settings.can_download):
+            return JsonResponse({"errmsg": "Download is not permitted."}, status=403)
+        if is_b2 and (not media_path.path or not has_b2_source(obj, media_path)):
+            return HttpResponse("B2 media is not playable", status=404)
         if isinstance(obj, MediaFile):
             dt = DownloadToken.objects.from_media_file(user, obj)
         else:
             dt = DownloadToken.objects.from_movie(user, obj)
 
-        downloadlink = obj.downloadLink(dt.guid)
+        downloadlink = (
+            reverse("mediaviewer:b2player", kwargs={"guid": dt.guid})
+            if is_b2
+            else obj.downloadLink(dt.guid)
+        )
         response = {
             "guid": dt.guid,
             "isMovie": dt.ismovie,
@@ -143,6 +156,14 @@ def ajaxdownloadbutton(request):
 def autoplaydownloadlink(request, mf_id):
     user = request.user
     mf = get_object_or_404(MediaFile, pk=mf_id)
+    if mf.media_path and mf.media_path.is_b2:
+        user_settings = user.settings()
+        if not user_settings or not user_settings.can_download:
+            return HttpResponse(status=403)
+        if not (mf.b2_uuid or mf.filename):
+            return HttpResponse(status=404)
+        dt = DownloadToken.objects.from_media_file(user, mf)
+        return redirect(reverse("mediaviewer:b2player", kwargs={"guid": dt.guid}))
     dt = DownloadToken.objects.from_media_file(user, mf)
 
     downloadlink = mf.autoplayDownloadLink(dt.guid)
