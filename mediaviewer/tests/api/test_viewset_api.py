@@ -1,9 +1,13 @@
+import json
+import uuid
+from pathlib import Path
+
 import pytest
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
-from mediaviewer.models import MediaPath, Movie, TV
+from mediaviewer.models import MediaFile, MediaPath, Movie, TV
 from mediaviewer.models.downloadtoken import DownloadToken
 
 
@@ -44,6 +48,8 @@ class TestDownloadToken:
             assert dt.user.username == json_data["username"]
 
             assert dt.ref_obj.full_name == json_data["displayname"]
+            if not use_movie:
+                assert json_data["original_filename"] == dt.media_file.filename
         else:
             assert response.status_code == 403
 
@@ -125,6 +131,10 @@ class TestDownloadTokenB2Subtitles:
             "https://b2.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-0.vtt?sig=abc",
             "https://b2.example.com/mybucket/movies/Movie.Name/Movie.Name.mp4.mv-encoded.mp4-1.vtt?sig=abc",
         ]
+        assert response.json()["original_filename"] == "Movie.Name.mp4"
+        assert response.json()["download_link"].endswith(
+            "movies/Movie.Name/Movie.Name.mp4?sig=abc"
+        )
 
     def test_b2_tv_token_has_subtitle_files(self, client, create_tv_media_file):
         client.force_login(self.user)
@@ -142,6 +152,127 @@ class TestDownloadTokenB2Subtitles:
         assert response.status_code == 200
         assert response.json()["subtitle_files"] == [
             "https://b2.example.com/mybucket/tv/Show.Name/Show.Name.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt?sig=abc",
+        ]
+
+    def test_uuid_tv_token_links_video_subtitle_and_original_name(
+        self, client, create_tv_media_file
+    ):
+        client.force_login(self.user)
+        mf = create_tv_media_file(filename="Original.Name.mkv")
+        mf.b2_uuid = uuid.uuid4()
+        mf.subtitle_files = ["subtitle-uuid.vtt"]
+        mf.save()
+        mp = mf.media_path
+        mp._path = f"b2://mybucket/tv/{mp.pk}/Show/"
+        mp.save()
+        dt = DownloadToken.objects.from_media_file(self.user, mf)
+        response = client.get(
+            reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["original_filename"] == "Original.Name.mkv"
+        assert data["download_link"].endswith(f"tv/{mp.pk}/{mf.b2_uuid}.mkv?sig=abc")
+        assert data["subtitle_files"] == [
+            f"https://b2.example.com/mybucket/tv/{mp.pk}/subtitle-uuid.vtt?sig=abc"
+        ]
+
+    def test_form_upload_replay_keeps_subtitles_associated_per_video(
+        self, client, create_tv_media_file
+    ):
+        client.force_login(self.user)
+        first = create_tv_media_file(filename="Original.One.mp4")
+        mp = first.media_path
+        second = MediaFile.objects.create(
+            media_path=mp, filename="Original.Two.mkv", display_name="Episode two"
+        )
+        mp._path = f"b2://mybucket/archive/{mp.pk}/Show/"
+        mp.save()
+        uploaded = [
+            (first, uuid.uuid4(), [f"{uuid.uuid4()}.vtt", f"{uuid.uuid4()}.vtt"]),
+            (second, uuid.uuid4(), [f"{uuid.uuid4()}.vtt"]),
+        ]
+        upload_url = reverse("mediaviewer:api:mediafile-list")
+        for media_file, object_uuid, subtitles in uploaded:
+            payload = {
+                "filename": media_file.filename,
+                "media_path": mp.pk,
+                "b2_uuid": str(object_uuid),
+                "size": 456,
+                "subtitle_files": json.dumps(subtitles),
+            }
+            created = client.post(upload_url, data=payload)
+            replay = client.post(upload_url, data=payload)
+
+            assert created.status_code == 201, created.json()
+            assert replay.status_code == 201
+            assert replay.json()["pk"] == created.json()["pk"]
+            assert created.json()["filename"] == media_file.filename
+            assert created.json()["b2_uuid"] == str(object_uuid)
+            assert created.json()["subtitle_files"] == subtitles
+
+        assert set(uploaded[0][2]).isdisjoint(uploaded[1][2])
+        for media_file, object_uuid, subtitles in uploaded:
+            media_file.refresh_from_db()
+            assert media_file.filename in ("Original.One.mp4", "Original.Two.mkv")
+            assert str(media_file.b2_uuid) == str(object_uuid)
+            assert media_file.subtitle_files == subtitles
+
+            token = DownloadToken.objects.from_media_file(self.user, media_file)
+            self.mock_b2_client.return_value.generate_presigned_url.reset_mock()
+            response = client.get(
+                reverse("mediaviewer:api:downloadtoken-detail", args=[token.guid])
+            )
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["original_filename"] == media_file.filename
+            assert data["download_link"] == (
+                f"https://b2.example.com/mybucket/archive/{mp.pk}/"
+                f"{object_uuid}{Path(media_file.filename).suffix}?sig=abc"
+            )
+            assert data["subtitle_files"] == [
+                f"https://b2.example.com/mybucket/archive/{mp.pk}/{name}?sig=abc"
+                for name in subtitles
+            ]
+            assert [
+                call.kwargs["key"]
+                for call in self.mock_b2_client.return_value.generate_presigned_url.call_args_list
+            ] == [
+                f"archive/{mp.pk}/{object_uuid}{Path(media_file.filename).suffix}",
+                *[f"archive/{mp.pk}/{name}" for name in subtitles],
+            ]
+
+    def test_uuid_movie_token_links_selected_file_and_keeps_token_filename(
+        self, client, create_movie
+    ):
+        client.force_login(self.user)
+        movie = create_movie()
+        mp = movie.media_path
+        mp._path = f"b2://mybucket/movies/{mp.pk}/Movie/"
+        mp.filename = "Original.Movie.mkv"
+        mp.save()
+        mf = MediaFile.objects.create(
+            media_path=mp,
+            filename=mp.filename,
+            b2_uuid=uuid.uuid4(),
+            subtitle_files=["movie-subtitle.vtt"],
+        )
+        dt = DownloadToken.objects.from_movie(self.user, movie)
+        response = client.get(
+            reverse("mediaviewer:api:downloadtoken-detail", args=[dt.guid])
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["filename"] == movie.name
+        assert data["original_filename"] == "Original.Movie.mkv"
+        assert data["download_link"].endswith(
+            f"movies/{mp.pk}/{mf.b2_uuid}.mkv?sig=abc"
+        )
+        assert data["subtitle_files"] == [
+            f"https://b2.example.com/mybucket/movies/{mp.pk}/movie-subtitle.vtt?sig=abc"
         ]
 
     def test_expired_b2_token_has_no_subtitle_files(self, client, create_movie):
@@ -181,6 +312,8 @@ class TestMediaPathCreate:
         assert response.status_code == 200
         data = response.json()
         assert data["path"] == "b2://mybucket/tv/Show.Name/"
+        assert data["bucket"] == "mybucket"
+        assert data["b2_upload_prefix"] == f"tv/{data['pk']}/"
         assert data["filename"] is None
         assert TV.objects.count() == 1
         mp = MediaPath.objects.get(_path="b2://mybucket/tv/Show.Name/")
@@ -296,3 +429,58 @@ class TestMediaPathCreate:
         assert second.json()["subtitle_files"] == [
             "Movie.Name.mp4.mv-encoded.mp4-1.vtt"
         ]
+
+    def test_uuid_movie_filename_cannot_change_via_path_post(
+        self, client, create_movie, mocker
+    ):
+        client.force_login(self.user)
+        movie = create_movie()
+        mp = movie.media_path
+        mp._path = f"b2://bucket/movies/{mp.pk}/Movie/"
+        mp.filename = "Original.Movie.mkv"
+        mp.save()
+        MediaFile.objects.create(
+            media_path=mp, filename=mp.filename, b2_uuid=uuid.uuid4()
+        )
+        client_mock = mocker.patch("mediaviewer.b2.get_b2_client").return_value
+        client_mock.generate_presigned_url.return_value = "https://video"
+        url = reverse("mediaviewer:api:moviemediapath-list")
+
+        same = client.post(url, {"path": mp._path, "filename": "Original.Movie.mkv"})
+        changed = client.post(url, {"path": mp._path, "filename": "Renamed.mkv"})
+
+        assert same.status_code == 200
+        assert changed.status_code == 400
+        mp.refresh_from_db()
+        assert mp.filename == "Original.Movie.mkv"
+        mp.movie.downloadLink("guid")
+        client_mock.generate_presigned_url.assert_called_once_with(
+            bucket="bucket",
+            key=f"movies/{mp.pk}/{mp.mediafile_set.get().b2_uuid}.mkv",
+            expires_in=None,
+        )
+
+    def test_uuid_movie_filename_cannot_change_via_serializer_update(
+        self, client, create_movie
+    ):
+        client.force_login(self.user)
+        movie = create_movie()
+        mp = movie.media_path
+        mp._path = f"b2://bucket/movies/{mp.pk}/Movie/"
+        mp.filename = "Original.Movie.mkv"
+        mp.save()
+        MediaFile.objects.create(
+            media_path=mp, filename=mp.filename, b2_uuid=uuid.uuid4()
+        )
+        url = reverse("mediaviewer:api:moviemediapath-detail", args=[mp.pk])
+
+        for method in (client.patch, client.put):
+            response = method(
+                url,
+                data={"filename": "Renamed.mkv"},
+                content_type="application/json",
+            )
+            assert response.status_code == 400
+            assert "Cannot change filename" in str(response.json())
+            mp.refresh_from_db()
+            assert mp.filename == "Original.Movie.mkv"

@@ -18,7 +18,7 @@ class TestUploadToB2:
     def test_upload_tv_media_path(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
         mp = mf.media_path
-        dir_name = mp.path.name
+        dirname = mp.path.name
         local_file = mp.path / "S01E01.mp4"
         local_file.parent.mkdir(parents=True, exist_ok=True)
         local_file.write_bytes(b"data")
@@ -26,17 +26,18 @@ class TestUploadToB2:
         call_command("upload_to_b2", "--bucket", "mybucket", "--prefix", "tv/")
 
         mp.refresh_from_db()
-        assert mp._path == f"b2://mybucket/tv/{mp.pk}/{dir_name}/"
+        mf = mp.mediafile_set.get()
+        assert mp._path == f"b2://mybucket/tv/{mp.pk}/{dirname}/"
         assert mp.is_b2
         assert mp.filename is None
         self.mock_client.upload_file.assert_called_once_with(
-            local_file, "mybucket", f"tv/{mp.pk}/{dir_name}/S01E01.mp4"
+            local_file, "mybucket", f"tv/{mp.pk}/{mf.b2_uuid}.mp4"
         )
 
     def test_upload_movie_media_path(self, create_movie):
         movie = create_movie()
         mp = movie.media_path
-        dir_name = mp.path.name
+        dirname = mp.path.name
         video_file = mp.path / "The.Movie.2024.mkv"
         video_file.parent.mkdir(parents=True, exist_ok=True)
         video_file.write_bytes(b"data")
@@ -44,16 +45,16 @@ class TestUploadToB2:
         call_command("upload_to_b2", "--bucket", "mybucket")
 
         mp.refresh_from_db()
-        assert mp._path == f"b2://mybucket/{mp.pk}/{dir_name}/"
+        assert mp._path == f"b2://mybucket/{mp.pk}/{dirname}/"
         assert mp.filename == "The.Movie.2024.mkv"
         self.mock_client.upload_file.assert_called_once_with(
-            video_file, "mybucket", f"{mp.pk}/{dir_name}/The.Movie.2024.mkv"
+            video_file, "mybucket", f"{mp.pk}/{mp.mediafile_set.get().b2_uuid}.mkv"
         )
 
     def test_prefix_normalization(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
         mp = mf.media_path
-        dir_name = mp.path.name
+        dirname = mp.path.name
         local_file = mp.path / "S01E01.mp4"
         local_file.parent.mkdir(parents=True, exist_ok=True)
         local_file.write_bytes(b"data")
@@ -61,7 +62,8 @@ class TestUploadToB2:
         call_command("upload_to_b2", "--bucket", "mybucket", "--prefix", "tv")
 
         mp.refresh_from_db()
-        assert mp._path == f"b2://mybucket/tv/{mp.pk}/{dir_name}/"
+        mf.refresh_from_db()
+        assert mp._path == f"b2://mybucket/tv/{mp.pk}/{dirname}/"
 
     def test_same_basename_media_paths_do_not_collide(
         self, create_tv_media_file, tmp_path
@@ -86,8 +88,8 @@ class TestUploadToB2:
         mp1.refresh_from_db()
         mp2.refresh_from_db()
         assert mp1._path != mp2._path
-        assert mp1._path == f"b2://mybucket/{mp1.pk}/{dir_name1}/"
-        assert mp2._path == f"b2://mybucket/{mp2.pk}/{dir_name1}/"
+        assert mp1.key == f"{mp1.pk}/{dir_name1}/"
+        assert mp2.key == f"{mp2.pk}/{dir_name1}/"
 
     def test_skips_missing_files(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
@@ -97,8 +99,33 @@ class TestUploadToB2:
         call_command("upload_to_b2", "--bucket", "mybucket")
 
         mp.refresh_from_db()
+        mf.refresh_from_db()
         assert mp._path == original_path
         assert not mp.is_b2
+        self.mock_client.upload_file.assert_not_called()
+
+    def test_missing_visible_episode_prevents_partial_publish_and_deletion(
+        self, create_tv_media_file
+    ):
+        first = create_tv_media_file(filename="S01E01.mp4")
+        mp = first.media_path
+        second = type(first).objects.create(
+            media_path=mp, filename="S01E02.mp4", display_name="episode 2"
+        )
+        first_local = mp.path / first.filename
+        first_local.parent.mkdir(parents=True, exist_ok=True)
+        first_local.write_bytes(b"episode 1")
+        original_path = mp._path
+
+        call_command("upload_to_b2", "--bucket", "mybucket", "--delete-local")
+
+        mp.refresh_from_db()
+        first.refresh_from_db()
+        second.refresh_from_db()
+        assert mp._path == original_path
+        assert first.b2_uuid is None
+        assert second.b2_uuid is None
+        assert first_local.exists()
         self.mock_client.upload_file.assert_not_called()
 
     def test_skips_b2_media_paths(self, create_tv_media_file):
@@ -130,7 +157,7 @@ class TestUploadToB2:
         hidden_mf.hide = True
         hidden_mf.save()
         mp = mf.media_path
-        dir_name = mp.path.name
+        dirname = mp.path.name
         local_file = mp.path / "S01E01.mp4"
         local_file.parent.mkdir(parents=True, exist_ok=True)
         local_file.write_bytes(b"data")
@@ -139,9 +166,10 @@ class TestUploadToB2:
         call_command("upload_to_b2", "--bucket", "mybucket")
 
         mp.refresh_from_db()
-        assert mp._path == f"b2://mybucket/{mp.pk}/{dir_name}/"
+        mf.refresh_from_db()
+        assert mp._path == f"b2://mybucket/{mp.pk}/{dirname}/"
         self.mock_client.upload_file.assert_called_once_with(
-            local_file, "mybucket", f"{mp.pk}/{dir_name}/S01E01.mp4"
+            local_file, "mybucket", f"{mp.pk}/{mf.b2_uuid}.mp4"
         )
 
     def test_upload_failure_does_not_flip_path(self, create_tv_media_file):
@@ -156,7 +184,54 @@ class TestUploadToB2:
             call_command("upload_to_b2", "--bucket", "mybucket")
 
         mp.refresh_from_db()
+        mf.refresh_from_db()
         assert not mp.is_b2
+
+    def test_uploads_subtitles_with_uuid_names(self, create_tv_media_file):
+        mf = create_tv_media_file(filename="S01E01.mp4")
+        mf.subtitle_files = ["S01E01.en.vtt"]
+        mf.save()
+        mp = mf.media_path
+        video = mp.path / mf.filename
+        subtitle = mp.path / "S01E01.en.vtt"
+        video.parent.mkdir(parents=True, exist_ok=True)
+        video.write_bytes(b"video")
+        subtitle.write_bytes(b"subtitle")
+
+        call_command("upload_to_b2", "--bucket", "mybucket")
+
+        mf.refresh_from_db()
+        assert mf.subtitle_files[0].endswith(".vtt")
+        assert mf.subtitle_files[0] != subtitle.name
+        assert self.mock_client.upload_file.call_count == 2
+        assert self.mock_client.upload_file.call_args_list[1].args == (
+            subtitle,
+            "mybucket",
+            f"{mp.pk}/{mf.subtitle_files[0]}",
+        )
+
+    def test_subtitle_failure_does_not_publish_b2_path(self, create_tv_media_file):
+        mf = create_tv_media_file(filename="S01E01.mp4")
+        mf.subtitle_files = ["S01E01.en.vtt"]
+        mf.save()
+        mp = mf.media_path
+        video = mp.path / mf.filename
+        subtitle = mp.path / "S01E01.en.vtt"
+        video.parent.mkdir(parents=True, exist_ok=True)
+        video.write_bytes(b"video")
+        subtitle.write_bytes(b"subtitle")
+        self.mock_client.upload_file.side_effect = [
+            None,
+            RuntimeError("subtitle failed"),
+        ]
+
+        with pytest.raises(RuntimeError, match="subtitle failed"):
+            call_command("upload_to_b2", "--bucket", "mybucket")
+
+        mp.refresh_from_db()
+        mf.refresh_from_db()
+        assert not mp.is_b2
+        assert mf.b2_uuid is None
 
     def test_delete_local(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
@@ -172,7 +247,7 @@ class TestUploadToB2:
     def test_media_path_option(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
         mp = mf.media_path
-        dir_name = mp.path.name
+        dirname = mp.path.name
         local_file = mp.path / "S01E01.mp4"
         local_file.parent.mkdir(parents=True, exist_ok=True)
         local_file.write_bytes(b"data")
@@ -180,9 +255,10 @@ class TestUploadToB2:
         call_command("upload_to_b2", "--bucket", "mybucket", "--media-path", str(mp.pk))
 
         mp.refresh_from_db()
-        assert mp._path == f"b2://mybucket/{mp.pk}/{dir_name}/"
+        mf.refresh_from_db()
+        assert mp._path == f"b2://mybucket/{mp.pk}/{dirname}/"
         self.mock_client.upload_file.assert_called_once_with(
-            local_file, "mybucket", f"{mp.pk}/{dir_name}/S01E01.mp4"
+            local_file, "mybucket", f"{mp.pk}/{mf.b2_uuid}.mp4"
         )
 
     def test_media_path_option_already_b2(self, create_tv_media_file):

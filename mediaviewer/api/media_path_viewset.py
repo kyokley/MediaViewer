@@ -44,6 +44,16 @@ class _MediaPathViewSet(viewsets.ModelViewSet):
             media_class.objects.from_path(path, tv_id=tv_id, movie_id=movie_id)
             mp = MediaPath.objects.get(_path=path)
 
+        if (
+            filename
+            and mp.filename != filename
+            and mp.movie_id
+            and mp.mediafile_set.filter(b2_uuid__isnull=False).exists()
+        ):
+            raise serializers.ValidationError(
+                {"filename": "Cannot change filename for a published UUID movie."}
+            )
+
         if filename and mp.filename != filename:
             mp.filename = filename
             mp.save()

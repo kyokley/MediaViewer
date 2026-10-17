@@ -42,10 +42,11 @@ class DownloadTokenManager(models.Manager):
         movie,
         is_mcp=False,
     ):
+        media_path = movie.mediapath_set.order_by("-pk").first()
         dt = self.create(
             user=user,
             filename=movie.name,
-            path=movie.mediapath_set.first().path,
+            path=media_path.path,
             displayname=movie.full_name,
             movie=movie,
             is_mcp=is_mcp,
