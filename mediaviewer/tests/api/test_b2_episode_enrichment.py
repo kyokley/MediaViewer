@@ -69,7 +69,13 @@ def _mock_successful_metadata(mocker, settings):
 
 @pytest.mark.django_db
 def test_uuid_tv_upload_enriches_episode_metadata_immediately(
-    client, create_user, create_tv, mocker, settings, django_capture_on_commit_callbacks
+    client,
+    create_user,
+    create_tv,
+    mocker,
+    settings,
+    django_capture_on_commit_callbacks,
+    tmp_path,
 ):
     user = create_user(is_staff=True)
     client.force_login(user)
@@ -107,6 +113,9 @@ def test_uuid_tv_upload_enriches_episode_metadata_immediately(
     assert poster.extendedplot == "Episode overview"
     assert poster.release_date == date(2024, 1, 2)
     assert media_file.display_name == "S01 E02: Pilot"
+    assert poster.image.storage.location == str(tmp_path / "media")
+    with poster.image.open("rb") as image:
+        assert image.read() == b"fixture-image"
 
     episode_url = (
         "https://api.themoviedb.org/3/tv/4242/season/1/episode/2"

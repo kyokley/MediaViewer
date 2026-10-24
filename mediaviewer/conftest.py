@@ -32,6 +32,12 @@ _count = _counter_gen()
 
 
 @pytest.fixture(autouse=True)
+def temporary_media_root(settings, tmp_path):
+    """Keep uploaded files out of deployment storage and isolate each test."""
+    settings.MEDIA_ROOT = str(tmp_path / "media")
+
+
+@pytest.fixture(autouse=True)
 def mock_requests(mocker):
     mock = mocker.patch("mediaviewer.models.tvdbconfiguration.requests.get")
     mock.side_effect = Exception("Failing external requests on purpose")
