@@ -113,7 +113,9 @@ def test_uuid_tv_upload_enriches_episode_metadata_immediately(
         "?api_key=fixture-api-key"
     )
     assert any(call.args[0] == episode_url for call in tvdb_get_json.call_args_list)
-    assert any("/episode/2/credits?" in call.args[0] for call in get_json.call_args_list)
+    assert any(
+        "/episode/2/credits?" in call.args[0] for call in get_json.call_args_list
+    )
     assert any("/external_ids?" in call.args[0] for call in get_json.call_args_list)
     image_get.assert_called_once_with(
         "https://images.example.test/episode-still.jpg",

@@ -184,9 +184,7 @@ class FilenameScrapeFormat(models.Model):
         if len(uri) > MediaPath._meta.get_field("_path").max_length:
             return None
 
-        media_path, _ = MediaPath.objects.get_or_create(
-            _path=uri, defaults={"tv": tv}
-        )
+        media_path, _ = MediaPath.objects.get_or_create(_path=uri, defaults={"tv": tv})
         if media_path.tv_id != tv.pk or media_path.movie_id is not None:
             return None
         return media_path

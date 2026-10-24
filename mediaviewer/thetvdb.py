@@ -116,7 +116,9 @@ def resolve_series_name(title):
             continue
 
         candidate_names = [name, *(aliases or [])]
-        if any(_normalize(candidate) == normalized_title for candidate in candidate_names):
+        if any(
+            _normalize(candidate) == normalized_title for candidate in candidate_names
+        ):
             matches.setdefault(result_id, set()).add(name.strip())
 
     if len(matches) != 1 or len(next(iter(matches.values()))) != 1:

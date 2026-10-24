@@ -53,9 +53,7 @@ class InferScrapersView(views.APIView):
     def get(self, request, *args, **kwargs):
         filename = request.GET["title"]
         media_path = FilenameScrapeFormat.tv_for_filename(filename)
-        return RESTResponse(
-            {"path": str(media_path.path) if media_path else ""}
-        )
+        return RESTResponse({"path": str(media_path.path) if media_path else ""})
 
     def post(self, request, *args, **kwargs):
         try:

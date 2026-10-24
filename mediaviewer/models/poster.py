@@ -61,7 +61,11 @@ def _search_TVDB_by_name(name):
 
 
 def _valid_tmdb_id(value):
-    return isinstance(value, (str, int)) and not isinstance(value, bool) and bool(str(value))
+    return (
+        isinstance(value, (str, int))
+        and not isinstance(value, bool)
+        and bool(str(value))
+    )
 
 
 def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
@@ -352,7 +356,7 @@ class Poster(TimeStampModel):
         poster_url = (
             getattr(self, "poster_url", None)
             or data.get("Poster")
-            or f'{POSTER_PATH_BASE_URL}{data.get("poster_path")}'
+            or f"{POSTER_PATH_BASE_URL}{data.get('poster_path')}"
         )
         poster_name = poster_url.rpartition("/")[-1] if poster_url else None
 
@@ -418,10 +422,9 @@ class Poster(TimeStampModel):
             parent_poster = Poster.objects.from_ref_obj(tv)
 
         try:
-            url = (
-                "https://api.themoviedb.org/3/search/tv?query={}"
-                "&api_key={}"
-            ).format(quote_plus(tv.name), settings.API_KEY)
+            url = ("https://api.themoviedb.org/3/search/tv?query={}&api_key={}").format(
+                quote_plus(tv.name), settings.API_KEY
+            )
             data = getJSONData(url)
             results = data.get("results") if isinstance(data, dict) else None
             target_name = _normalize(tv.name)
@@ -458,7 +461,9 @@ class Poster(TimeStampModel):
             return None
 
         try:
-            tvinfo = getTVDBEpisodeInfo(series_id, media_file.season, media_file.episode)
+            tvinfo = getTVDBEpisodeInfo(
+                series_id, media_file.season, media_file.episode
+            )
         except DatabaseError:
             raise
         except Exception as e:
@@ -551,7 +556,9 @@ class Poster(TimeStampModel):
                     for chunk in response.iter_content(1024):
                         image_data.write(chunk)
                     image_data.seek(0)
-                    self.image = ImageFile(image_data, name=image_path.rpartition("/")[-1])
+                    self.image = ImageFile(
+                        image_data, name=image_path.rpartition("/")[-1]
+                    )
                     self.save(update_fields=["image"])
             except DatabaseError:
                 raise
@@ -616,7 +623,7 @@ class Poster(TimeStampModel):
         if tvinfo:
             self.poster_url = (
                 tvinfo.get("still_path")
-                or f'{POSTER_PATH_BASE_URL}{tvinfo.get("poster_path")}'
+                or f"{POSTER_PATH_BASE_URL}{tvinfo.get('poster_path')}"
                 or getattr(self, "poster_url", None)
             )
             self.extendedplot = tvinfo.get("overview", "")

@@ -132,9 +132,7 @@ class TestTvForFilename:
         self, mocker, create_tv, create_media_path
     ):
         tv = create_tv(name="Example Show")
-        older_b2 = create_media_path(
-            path="b2://older-bucket/tv/Example Show/", tv=tv
-        )
+        older_b2 = create_media_path(path="b2://older-bucket/tv/Example Show/", tv=tv)
         create_media_path(path="/newer/local/path", tv=tv)
         self._mock_tvdb(mocker)
         create = mocker.patch(
@@ -178,9 +176,7 @@ class TestTvForFilename:
         assert tv.mediapath_set.count() == 1
         create.assert_not_called()
 
-    def test_custom_regex_fallback_resolves_canonical_name(
-        self, mocker, create_tv
-    ):
+    def test_custom_regex_fallback_resolves_canonical_name(self, mocker, create_tv):
         tv = create_tv(name="Example Show")
         local_path = tv.media_path
         local_path._path = "/library/Example Show"
@@ -267,9 +263,7 @@ class TestTvForFilename:
         assert tv.mediapath_set.count() == 1
 
     @pytest.mark.parametrize("season,episode", [(-1, 1), (0, 0), (1, -1)])
-    def test_invalid_episode_numbers_fail_closed(
-        self, mocker, season, episode
-    ):
+    def test_invalid_episode_numbers_fail_closed(self, mocker, season, episode):
         self._mock_tvdb(mocker, season=season, episode=episode)
         resolve = mocker.patch("mediaviewer.thetvdb.resolve_series_name")
 

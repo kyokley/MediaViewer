@@ -118,7 +118,9 @@ def test_tv_media_file_population_uses_parent_id_and_keeps_core_data_on_optional
         },
     )
     mocker.patch("mediaviewer.models.poster.requests.get", side_effect=RuntimeError)
-    mocker.patch("mediaviewer.models.poster._get_extended_info", side_effect=RuntimeError)
+    mocker.patch(
+        "mediaviewer.models.poster._get_extended_info", side_effect=RuntimeError
+    )
     mocker.patch("mediaviewer.models.poster._get_cast_data", return_value=["malformed"])
 
     poster.populate_data()
@@ -170,7 +172,9 @@ def test_tv_media_file_retry_never_uses_episode_id_as_series_id(
         "series-123",
         "series-123",
     ]
-    assert all("/tv/episode-789?" not in call.args[0] for call in series_detail.call_args_list)
+    assert all(
+        "/tv/episode-789?" not in call.args[0] for call in series_detail.call_args_list
+    )
 
 
 @pytest.mark.django_db
@@ -253,9 +257,7 @@ def test_tv_name_search_rejects_duplicate_exact_matches(create_tv_media_file, mo
             ]
         },
     )
-    episode_info = mocker.patch(
-        "mediaviewer.models.poster.getTVDBEpisodeInfo"
-    )
+    episode_info = mocker.patch("mediaviewer.models.poster.getTVDBEpisodeInfo")
 
     media_file.poster.populate_data()
 

@@ -180,7 +180,9 @@ class TestResolveSeriesName:
         get.return_value.json = lambda: (_ for _ in ()).throw(ValueError("bad json"))
         assert resolve_series_name("My Show") is None
 
-    def test_skips_network_when_credentials_or_title_are_missing(self, mocker, settings):
+    def test_skips_network_when_credentials_or_title_are_missing(
+        self, mocker, settings
+    ):
         post = mocker.patch("mediaviewer.thetvdb.requests.post")
         settings.THETVDB_API_KEY = ""
         assert resolve_series_name("My Show") is None
