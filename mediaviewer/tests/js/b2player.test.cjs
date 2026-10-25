@@ -28,8 +28,9 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     });
     const video = {
         currentTime: 0, duration: 100, paused: true, readyState: 0, children: [], loadCalls: 0,
-        append(child) { this.children.push(child); },
+        append(child) { child.remove = () => { this.children = this.children.filter((item) => item !== child); }; this.children.push(child); },
         querySelector(tag) { return this.children.find((child) => child.tagName === tag); },
+        querySelectorAll(selector) { return this.children.filter((child) => selector.split(", ").includes(child.tagName)); },
         addEventListener(type, fn, options = {}) { const entries = listeners.get(type) || []; entries.push({ fn, once: options.once }); listeners.set(type, entries); },
         dispatch(type) {
             if (type === "play") this.paused = false;
@@ -46,7 +47,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     };
     elements["b2-video"] = video;
     elements["b2-player-config"] = { textContent: JSON.stringify({
-        source_url: "https://bucket.example/video.mp4", subtitle_urls: [], progress_url: "/progress",
+        media_url: "/media", progress_url: "/progress",
         viewed_url: "/viewed", guid: "guid-1", binge_mode: true, next_url: "/next", ...configPatch,
     }) };
     const requests = [];
@@ -63,7 +64,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             addEventListener(type, fn) { documentListeners[type] = fn; },
         },
         window: { addEventListener(type, fn) { windowListeners[type] = fn; }, location: { assign(url) { navigations.push(url); } } },
-        fetch: (url, options = {}) => { requests.push({ url, options }); return fetcher(url, options, requests.length - 1); },
+        fetch: (url, options = {}) => { requests.push({ url, options }); return url === "/media" && !configPatch.testMediaFetch ? Promise.resolve(media()) : fetcher(url, options, requests.length - 1); },
         URLSearchParams,
         setInterval(fn) { const id = nextInterval++; intervals.set(id, fn); return id; },
         clearInterval(id) { intervals.delete(id); },
@@ -73,10 +74,12 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
+const media = () => ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: [] });
 const requestBody = (request) => Object.fromEntries(new URLSearchParams(request.options.body || ""));
 
 test("zero offset is ready; completion at 95% does not navigate; ended obeys binge toggle", async () => {
     const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? ok({ offset: 0 }) : ok());
+    await tick();
     player.video.readyState = 1;
     player.video.dispatch("loadedmetadata");
     await tick();
@@ -98,6 +101,7 @@ test("zero offset is ready; completion at 95% does not navigate; ended obeys bin
 
 test("pause and play at 96% continues without recreating progress", async () => {
     const player = createPlayer(async () => ok());
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 95;
@@ -113,6 +117,7 @@ test("pause and play at 96% continues without recreating progress", async () => 
 
 test("native replay from the beginning resets completion and starts one save timer", async () => {
     const player = createPlayer(async () => ok());
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 95;
@@ -133,6 +138,7 @@ test("native replay from the beginning resets completion and starts one save tim
 test("Start Over invalidates an unresolved initial GET and leaves position at zero", async () => {
     const get = deferred();
     const player = createPlayer((url, options) => options.method === "GET" ? get.promise : Promise.resolve(ok()));
+    await tick();
     player.video.dispatch("loadedmetadata");
     const restart = player.elements["start-over"].click();
     await tick();
@@ -151,6 +157,7 @@ test("pending old save is skipped at restart; threshold and subsequent play save
         if (options.method === "POST" && !held) { held = true; return post.promise; }
         return Promise.resolve(ok());
     });
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 94.9;
@@ -178,6 +185,7 @@ test("pending old save is skipped at restart; threshold and subsequent play save
 test("old completion is invalidated by restart and cannot mark viewed or overwrite status", async () => {
     const deletion = deferred();
     const player = createPlayer((url, options) => options.method === "DELETE" ? deletion.promise : Promise.resolve(ok()));
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 95;
@@ -198,6 +206,7 @@ test("tracking failures are handled; ended navigation is consistent and no rejec
     const player = createPlayer(async (url, options) => ({
         ok: !(options.method === "DELETE" || url === "/viewed"), json: async () => ({ offset: null }),
     }));
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 95;
@@ -216,6 +225,7 @@ test("tracking failures are handled; ended navigation is consistent and no rejec
 test("retry before and after metadata reloads with selected position; stale GET is ignored", async () => {
     const firstGet = deferred();
     const player = createPlayer((url, options) => options.method === "GET" ? firstGet.promise : Promise.resolve(ok()));
+    await tick();
     player.video.dispatch("loadedmetadata");
     player.video.dispatch("error");
     player.context.document.getElementById("retry-video").click();
@@ -237,6 +247,7 @@ test("retry before and after metadata reloads with selected position; stale GET 
 test("page exit serializes a keepalive save behind pending writes", async () => {
     const pending = deferred();
     const player = createPlayer((url, options) => options.method === "GET" ? Promise.resolve(ok({ offset: null })) : options.method === "POST" ? pending.promise : Promise.resolve(ok()));
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 31;
@@ -254,6 +265,7 @@ test("page exit serializes a keepalive save behind pending writes", async () => 
 
 test("failed Start Over clear remains visible and playback can continue", async () => {
     const player = createPlayer(async (_url, options) => options.method === "DELETE" ? { ok: false } : ok());
+    await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     const restart = player.elements["start-over"].click();
@@ -263,4 +275,84 @@ test("failed Start Over clear remains visible and playback can continue", async 
     player.video.paused = false;
     player.video.dispatch("play");
     assert.equal(player.intervals.size, 1);
+});
+
+test("media URL fetch defers source attachment and load until success", async () => {
+    const pending = deferred();
+    const player = createPlayer((url) => url === "/media" ? pending.promise : Promise.resolve(ok()), { testMediaFetch: true });
+    assert.equal(player.video.children.length, 0);
+    assert.equal(player.video.loadCalls, 0);
+    assert.match(player.elements["player-status"].textContent, /Loading video/);
+    pending.resolve(media());
+    await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
+    assert.equal(player.video.loadCalls, 1);
+});
+
+test("media URL failures show safe retry and retry without duplicate source or tracks", async () => {
+    let count = 0;
+    const player = createPlayer((url) => url === "/media" ? Promise.resolve(++count === 1 ? { ok: false, status: 502 } : ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: ["https://bucket.example/en.vtt"] })) : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    assert.match(player.elements["player-status"]._html, /could not be loaded/i);
+    player.context.document.getElementById("retry-video").click();
+    await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
+    assert.equal(player.video.children.filter((child) => child.tagName === "track").length, 1);
+    assert.equal(player.video.loadCalls, 1);
+});
+
+test("network and malformed media responses fail without exposing response details", async () => {
+    for (const fetcher of [() => Promise.reject(new Error("secret signed URL")), () => Promise.resolve(ok({ source_url: "" }))]) {
+        const player = createPlayer((url) => url === "/media" ? fetcher() : Promise.resolve(ok()), { testMediaFetch: true });
+        await tick();
+        assert.match(player.elements["player-status"]._html, /could not be loaded/i);
+        assert.doesNotMatch(player.elements["player-status"]._html, /secret|bucket\.example/);
+        assert.equal(player.video.children.length, 0);
+        assert.equal(player.video.loadCalls, 0);
+    }
+});
+
+test("double retry clicks during a pending media request do not duplicate requests", async () => {
+    const pending = deferred();
+    let mediaCalls = 0;
+    const player = createPlayer((url) => {
+        if (url !== "/media") return Promise.resolve(ok());
+        mediaCalls += 1;
+        return mediaCalls === 1 ? Promise.resolve({ ok: false }) : pending.promise;
+    }, { testMediaFetch: true });
+    await tick();
+    player.context.document.getElementById("retry-video").click();
+    await tick();
+    player.context.document.getElementById("retry-video").click();
+    assert.equal(mediaCalls, 2);
+    pending.resolve(media());
+    await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
+});
+
+test("malformed JSON shows safe retry without attaching media", async () => {
+    const player = createPlayer((url) => url === "/media"
+        ? Promise.resolve({ ok: true, json: async () => { throw new Error("private response data"); } })
+        : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    assert.match(player.elements["player-status"]._html, /could not be loaded/i);
+    assert.doesNotMatch(player.elements["player-status"]._html, /private response data/);
+    assert.equal(player.video.children.length, 0);
+    assert.equal(player.video.loadCalls, 0);
+});
+
+test("media error retry preserves playback position and does not duplicate subtitle tracks", async () => {
+    const player = createPlayer((url) => url === "/media"
+        ? Promise.resolve(ok({
+            source_url: "https://bucket.example/video.mp4",
+            subtitle_urls: ["https://bucket.example/en.vtt", "https://bucket.example/fr.vtt"],
+        }))
+        : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    player.video.currentTime = 42;
+    player.video.dispatch("error");
+    player.context.document.getElementById("retry-video").click();
+    assert.equal(player.video.currentTime, 42);
+    assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
+    assert.equal(player.video.children.filter((child) => child.tagName === "track").length, 2);
 });

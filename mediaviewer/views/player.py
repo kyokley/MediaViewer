@@ -1,8 +1,14 @@
+from functools import wraps
+
+import requests
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseForbidden
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.shortcuts import render
 from django.urls import reverse
+from django.views.decorators.http import require_GET
+
 from mediaviewer.api.serializers import DownloadTokenSerializer
+from mediaviewer.b2 import B2Error
 from mediaviewer.models import DownloadToken
 from mediaviewer.views.b2player_utils import (
     b2_media_path,
@@ -12,10 +18,9 @@ from mediaviewer.views.b2player_utils import (
 from mediaviewer.views.views_utils import setSiteWideContext
 
 
-@login_required(login_url="/mediaviewer/login/")
-def b2player(request, guid):
-    token = get_object_or_404(DownloadToken, guid=guid)
-    if token.user_id != request.user.pk or not token.isvalid:
+def _b2_player_access(request, guid):
+    token = DownloadToken.objects.filter(guid=guid).first()
+    if not token or token.user_id != request.user.pk or not token.isvalid:
         return HttpResponse(status=404)
 
     user_settings = request.user.settings()
@@ -28,15 +33,29 @@ def b2player(request, guid):
     media_path = b2_media_path(obj)
     if not media_path or not has_b2_source(obj, media_path):
         return HttpResponse(status=404)
+    return token, obj, media_path, user_settings
 
-    try:
-        source_url = obj.downloadLink(token.guid)
-        subtitle_urls = DownloadTokenSerializer().get_subtitle_files(token)
-    except (ValueError, TypeError, AttributeError):
-        return HttpResponse(status=404)
 
-    if not source_url:
-        return HttpResponse(status=404)
+def _sensitive_response(response):
+    response["Cache-Control"] = "private, no-store"
+    response["Referrer-Policy"] = "no-referrer"
+    return response
+
+
+def _sensitive_view(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        return _sensitive_response(view(*args, **kwargs))
+
+    return wrapped
+
+
+@login_required(login_url="/mediaviewer/login/")
+def b2player(request, guid):
+    access = _b2_player_access(request, guid)
+    if isinstance(access, HttpResponse):
+        return access
+    token, obj, media_path, user_settings = access
 
     linked_movie = token.movie or (token.media_file.movie if token.media_file else None)
     is_movie = linked_movie is not None
@@ -66,8 +85,7 @@ def b2player(request, guid):
         },
     )
     player_config = {
-        "source_url": source_url,
-        "subtitle_urls": subtitle_urls,
+        "media_url": reverse("mediaviewer:b2playermedia", args=(token.guid,)),
         "progress_url": progress_url,
         "viewed_url": reverse("mediaviewer:ajaxsuperviewed"),
         "guid": token.guid,
@@ -85,6 +103,26 @@ def b2player(request, guid):
     }
     setSiteWideContext(context, request)
     response = render(request, "mediaviewer/b2player.html", context)
-    response["Cache-Control"] = "private, no-store"
-    response["Referrer-Policy"] = "no-referrer"
-    return response
+    return _sensitive_response(response)
+
+
+@_sensitive_view
+@require_GET
+@login_required(login_url="/mediaviewer/login/")
+def b2playermedia(request, guid):
+    access = _b2_player_access(request, guid)
+    if isinstance(access, HttpResponse):
+        return access
+    token, obj, _media_path, _user_settings = access
+
+    try:
+        source_url = obj.downloadLink(token.guid)
+        subtitle_urls = DownloadTokenSerializer().get_subtitle_files(token)
+    except (ValueError, TypeError, AttributeError):
+        return HttpResponse(status=404)
+    except (requests.RequestException, B2Error):
+        return HttpResponse("Media URL generation failed", status=502)
+
+    if not source_url:
+        return HttpResponse(status=404)
+    return JsonResponse({"source_url": source_url, "subtitle_urls": subtitle_urls})

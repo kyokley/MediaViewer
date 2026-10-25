@@ -21,14 +21,6 @@
                        playsinline
                        preload="metadata"
                        aria-label="{{ display_name }}">
-                    {% if player_config.source_url %}<source src="{{ player_config.source_url }}" type="video/mp4">{% endif %}
-                    {% for subtitle_url in player_config.subtitle_urls %}
-                        <track kind="subtitles"
-                               srclang="en"
-                               label="English{% if forloop.counter > 1 %} {{ forloop.counter }}{% endif %}"
-                               src="{{ subtitle_url }}"
-                               {% if forloop.first %} default{% endif %}>
-                    {% endfor %}
                     <p>Your browser does not support HTML video. Try a current version of Chrome, Firefox, Safari, or Edge.</p>
                 </video>
                 <div class="b2-player-status"

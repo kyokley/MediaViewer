@@ -3,8 +3,10 @@ import uuid
 from unittest.mock import call
 
 import pytest
+import requests
 from django.urls import reverse
 
+from mediaviewer.b2 import B2Error
 from mediaviewer.models import DownloadToken, MediaFile, VideoProgress
 
 
@@ -18,7 +20,7 @@ def _set_b2(media_path, key, filename=None, subtitles=None):
 @pytest.mark.django_db
 @pytest.mark.parametrize("use_uuid", (True, False))
 @pytest.mark.parametrize("is_movie", (True, False))
-def test_b2_player_renders_signed_media_and_subtitles(
+def test_b2_player_defers_signed_media_and_subtitles(
     mocker,
     client,
     create_user,
@@ -60,7 +62,8 @@ def test_b2_player_renders_signed_media_and_subtitles(
         obj.subtitle_files = [subtitle_name]
         obj.save()
 
-    b2_client = mocker.patch("mediaviewer.b2.get_b2_client").return_value
+    get_b2_client = mocker.patch("mediaviewer.b2.get_b2_client")
+    b2_client = get_b2_client.return_value
     b2_client.generate_presigned_url.side_effect = lambda bucket, key, expires_in: (
         f"https://signed.example/{key}"
     )
@@ -74,10 +77,16 @@ def test_b2_player_renders_signed_media_and_subtitles(
     response = client.get(reverse("mediaviewer:b2player", args=(token.guid,)))
 
     assert response.status_code == 200
-    assert "no-store" in response["Cache-Control"]
-    assert "no-referrer" in response["Referrer-Policy"]
-    assert "https://signed.example/" in response.content.decode()
-    assert "https://signed.example/archive/" in response.content.decode()
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
+    assert b2_client.generate_presigned_url.call_count == 0
+    get_b2_client.assert_not_called()
+    assert "https://signed.example/" not in response.content.decode()
+    assert response.context["player_config"]["media_url"] == reverse(
+        "mediaviewer:b2playermedia", args=(token.guid,)
+    )
+    assert "source_url" not in response.context["player_config"]
+    assert "subtitle_urls" not in response.context["player_config"]
     b2_prefix = f"archive/{media_path.pk}/"
     if use_uuid:
         padded_id = f"{media_path.pk:09d}"
@@ -93,11 +102,21 @@ def test_b2_player_renders_signed_media_and_subtitles(
     else:
         expected_source = f"{b2_prefix}{filename}"
     expected_subtitle = f"{b2_prefix}{subtitle_name}"
+    media_response = client.get(
+        reverse("mediaviewer:b2playermedia", args=(token.guid,))
+    )
+    assert media_response.status_code == 200
+    assert media_response["Cache-Control"] == "private, no-store"
+    assert media_response["Referrer-Policy"] == "no-referrer"
+    assert set(media_response.json()) == {"source_url", "subtitle_urls"}
+    assert media_response.json() == {
+        "source_url": f"https://signed.example/{expected_source}",
+        "subtitle_urls": [f"https://signed.example/{expected_subtitle}"],
+    }
     assert b2_client.generate_presigned_url.call_args_list == [
         call(bucket="bucket", key=expected_source, expires_in=None),
         call(bucket="bucket", key=expected_subtitle, expires_in=None),
     ]
-    assert f"https://signed.example/{expected_subtitle}" in response.content.decode()
     media_identity = f"mediafile:{obj.pk}" if not is_movie else f"movie:{obj.pk}"
     expected_progress_hash = hashlib.sha256(
         f"b2:{media_path.pk}:{media_identity}:{filename}".encode("utf-8")
@@ -107,6 +126,136 @@ def test_b2_player_renders_signed_media_and_subtitles(
         kwargs={"guid": token.guid, "hashed_filename": expected_progress_hash},
     )
     assert response.context["player_config"]["progress_url"] == expected_progress_url
+
+
+@pytest.mark.django_db
+def test_b2_player_media_denies_invalid_requests_before_presigning(
+    client, create_user, create_tv_media_file, mocker
+):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    other_user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    valid_token = DownloadToken.objects.from_media_file(user, media_file)
+    expired_token = DownloadToken.objects.from_media_file(user, media_file)
+    expired_token.date_created = timezone.now() - timedelta(days=1)
+    expired_token.save(update_fields=("date_created",))
+    local_file = create_tv_media_file()
+    local_token = DownloadToken.objects.from_media_file(user, local_file)
+    presign = mocker.patch("mediaviewer.b2.get_b2_client")
+
+    def media_url(guid):
+        return reverse("mediaviewer:b2playermedia", args=(guid,))
+
+    anonymous_response = client.get(media_url(valid_token.guid))
+    client.force_login(other_user)
+    owner_response = client.get(media_url(valid_token.guid))
+    client.force_login(user)
+    expired_response = client.get(media_url(expired_token.guid))
+    unknown_response = client.get(media_url("missing"))
+    local_response = client.get(media_url(local_token.guid))
+    user_settings = user.settings()
+    user_settings.can_download = False
+    user_settings.save()
+    capability_response = client.get(media_url(valid_token.guid))
+
+    assert anonymous_response.status_code == 302
+    assert owner_response.status_code == 404
+    assert expired_response.status_code == 404
+    assert unknown_response.status_code == 404
+    assert local_response.status_code == 404
+    assert capability_response.status_code == 403
+    presign.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_b2_player_media_rejects_incomplete_source_before_presigning(
+    client, create_user, create_movie, mocker
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    movie = create_movie()
+    _set_b2(movie.media_path, "archive/Movie/")
+    token = DownloadToken.objects.from_movie(user, movie)
+    presign = mocker.patch("mediaviewer.b2.get_b2_client")
+    client.force_login(user)
+
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
+
+    assert response.status_code == 404
+    presign.assert_not_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "error", (B2Error("B2 authorization failed"), requests.ConnectionError("offline"))
+)
+def test_b2_player_media_sanitizes_presign_errors(
+    client, create_user, create_tv_media_file, mocker, error
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    client.force_login(user)
+    mocker.patch(
+        "mediaviewer.b2.get_b2_client"
+    ).return_value.generate_presigned_url.side_effect = error
+
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
+
+    assert response.status_code == 502
+    assert response.content == b"Media URL generation failed"
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
+    assert str(error).encode() not in response.content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("error", (ValueError, TypeError, AttributeError))
+def test_b2_player_media_preserves_invalid_media_404(
+    client, create_user, create_tv_media_file, mocker, error
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    client.force_login(user)
+    mocker.patch.object(
+        type(media_file), "downloadLink", side_effect=error("invalid media")
+    )
+
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
+
+    assert response.status_code == 404
+    assert b"invalid media" not in response.content
+
+
+@pytest.mark.django_db
+def test_b2_player_media_rejects_non_get_without_presigning(
+    client, create_user, create_tv_media_file, mocker
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    client.force_login(user)
+    get_b2_client = mocker.patch("mediaviewer.b2.get_b2_client")
+
+    response = client.post(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
+
+    assert response.status_code == 405
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
+    get_b2_client.assert_not_called()
 
 
 @pytest.mark.django_db

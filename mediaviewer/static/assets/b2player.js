@@ -53,31 +53,6 @@
     );
   const progressClear = () => request(config.progress_url, "DELETE");
 
-  if (typeof config.source_url !== "string" || !config.source_url) {
-    status.textContent =
-      "Video source is unavailable. Reload this page to try again.";
-    return;
-  }
-  if (!video.querySelector("source")) {
-    const source = document.createElement("source");
-    source.src = config.source_url;
-    source.type = "video/mp4";
-    video.append(source);
-  }
-  if (!video.querySelector("track"))
-    (Array.isArray(config.subtitle_urls) ? config.subtitle_urls : []).forEach(
-      (url, index) => {
-        if (typeof url !== "string" || !url) return;
-        const track = document.createElement("track");
-        track.kind = "subtitles";
-        track.srclang = "en";
-        track.label = `English${index ? ` ${index + 1}` : ""}`;
-        track.src = url;
-        if (index === 0) track.default = true;
-        video.append(track);
-      },
-    );
-
   let resumeReady = false;
   let suspended = false;
   let finished = false;
@@ -89,11 +64,66 @@
   let mutationQueue = Promise.resolve();
   let completionPromise = null;
   let retryOffset = 0;
+  let mediaRequest = null;
   const bingeButton = document.getElementById("binge-toggle");
   const updateBingeButton = () => {
     if (!bingeButton) return;
     bingeButton.textContent = `Binge mode: ${bingeEnabled ? "On" : "Off"}`;
     bingeButton.setAttribute("aria-pressed", String(bingeEnabled));
+  };
+  const loadMedia = () => {
+    if (mediaRequest) return mediaRequest;
+    status.textContent = "Loading video…";
+    mediaRequest = Promise.resolve().then(async () => {
+      try {
+        if (typeof config.media_url !== "string" || !config.media_url)
+          throw new Error("Invalid media URL");
+        const response = await fetch(config.media_url, {
+          method: "GET",
+          credentials: "same-origin",
+        });
+        if (!response.ok) throw new Error("Media request failed");
+        const result = await response.json();
+        if (
+          !result ||
+          typeof result.source_url !== "string" ||
+          !result.source_url ||
+          !Array.isArray(result.subtitle_urls) ||
+          result.subtitle_urls.some((url) => typeof url !== "string" || !url)
+        )
+          throw new Error("Invalid media response");
+        video
+          .querySelectorAll("source, track")
+          .forEach((child) => child.remove());
+        const source = document.createElement("source");
+        source.src = result.source_url;
+        source.type = "video/mp4";
+        video.append(source);
+        result.subtitle_urls.forEach((url, index) => {
+          const track = document.createElement("track");
+          track.kind = "subtitles";
+          track.srclang = "en";
+          track.label = `English${index ? ` ${index + 1}` : ""}`;
+          track.src = url;
+          if (index === 0) track.default = true;
+          video.append(track);
+        });
+        video.load();
+      } catch (_) {
+        status.innerHTML =
+          'Video could not be loaded. <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
+        document
+          .getElementById("retry-video")
+          ?.addEventListener("click", () => {
+            if (mediaRequest) return;
+            mediaRequest = null;
+            loadMedia();
+          });
+      } finally {
+        mediaRequest = null;
+      }
+    });
+    return mediaRequest;
   };
   const setStatus = (message, ownerGeneration = generation) => {
     if (ownerGeneration === generation) status.textContent = message;
@@ -330,5 +360,5 @@
     if (document.visibilityState === "hidden") flushOnExit();
   });
   window.addEventListener("pagehide", flushOnExit);
-  video.load();
+  loadMedia();
 })();
