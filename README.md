@@ -36,3 +36,18 @@ been performed here. Local episode inference preserves existing coordinates and
 poster contents; unrecognized filenames still need manual correction. Avoid
 `infer_scraper()` for this repair because it deletes the existing poster before
 inference.
+
+## B2 object key layout
+
+Under the configured prefix, each B2 key adds exactly three MediaPath ID
+directories. The positive MediaPath ID is padded to nine decimal digits and
+split into three-digit segments: ID `1` uses
+`000/000/001/`, ID `1234567` uses `001/234/567/`, and ID `999999999` uses
+`999/999/999/`. IDs outside `1` through `999999999` fail closed. Files for a
+MediaPath stay together below that three-directory prefix. Files are not
+sharded by UUID, and the number of files within a MediaPath directory is not
+capped.
+
+The bulk `upload_to_b2` command stores its logical
+`<configured-prefix>/<MediaPath-ID>/<local-directory>/` URI unchanged; the
+nested object prefix is derived from that URI when files are uploaded or read.

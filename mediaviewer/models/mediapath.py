@@ -5,6 +5,7 @@ from django.db import models
 from .core import TimeStampModel
 
 B2_URI_PREFIX = "b2://"
+MAX_B2_MEDIA_PATH_ID = 999_999_999
 
 
 class MediaPath(TimeStampModel):
@@ -74,11 +75,24 @@ class MediaPath(TimeStampModel):
         raw_key = self.key or ""
         stripped_key = raw_key.rstrip("/")
         has_parent_separator = "/" in stripped_key
+        leading_slashes = len(raw_key) - len(raw_key.lstrip("/"))
         parent = stripped_key.rsplit("/", 1)[0] if has_parent_separator else ""
+        media_path_id = self.pk
+        if isinstance(media_path_id, bool) or not isinstance(media_path_id, int):
+            media_path_id = 0
+        if not 0 < media_path_id <= MAX_B2_MEDIA_PATH_ID:
+            raise ValueError(
+                "B2 object keys require a MediaPath ID from 1 through 999999999"
+            )
+
+        base = parent
         if parent.split("/")[-1] == str(self.pk):
-            return f"{parent}/"
-        separator = "/" if parent or has_parent_separator else ""
-        return f"{parent}{separator}{self.pk}/"
+            base = parent.rsplit("/", 1)[0] if "/" in parent else ""
+        padded_id = f"{media_path_id:09d}"
+        id_prefix = "/".join(padded_id[index : index + 3] for index in range(0, 9, 3))
+        if base:
+            return f"{base}/{id_prefix}/"
+        return f"{'/' * leading_slashes}{id_prefix}/"
 
     def b2_uuid_presigned_url(self, object_uuid, suffix=""):
         return self.b2_filename_presigned_url(f"{object_uuid}{suffix}")

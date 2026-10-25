@@ -11,6 +11,12 @@ from mediaviewer.models import MediaFile, MediaPath, Movie, TV
 from mediaviewer.models.downloadtoken import DownloadToken
 
 
+def nested_key_prefix(media_path_id, parent=""):
+    padded_id = f"{media_path_id:09d}"
+    segments = "/".join(padded_id[index : index + 3] for index in range(0, 9, 3))
+    return f"{parent}{segments}/"
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize("use_movie", (True, False))
 @pytest.mark.parametrize("use_regular_user", (True, False))
@@ -173,9 +179,10 @@ class TestDownloadTokenB2Subtitles:
         assert response.status_code == 200
         data = response.json()
         assert data["original_filename"] == "Original.Name.mkv"
-        assert data["download_link"].endswith(f"tv/{mp.pk}/{mf.b2_uuid}.mkv?sig=abc")
+        key_prefix = nested_key_prefix(mp.pk, "tv/")
+        assert data["download_link"].endswith(f"{key_prefix}{mf.b2_uuid}.mkv?sig=abc")
         assert data["subtitle_files"] == [
-            f"https://b2.example.com/mybucket/tv/{mp.pk}/subtitle-uuid.vtt?sig=abc"
+            f"https://b2.example.com/mybucket/{key_prefix}subtitle-uuid.vtt?sig=abc"
         ]
 
     def test_form_upload_replay_keeps_subtitles_associated_per_video(
@@ -228,20 +235,21 @@ class TestDownloadTokenB2Subtitles:
             assert response.status_code == 200
             data = response.json()
             assert data["original_filename"] == media_file.filename
+            key_prefix = nested_key_prefix(mp.pk, "archive/")
             assert data["download_link"] == (
-                f"https://b2.example.com/mybucket/archive/{mp.pk}/"
+                f"https://b2.example.com/mybucket/{key_prefix}"
                 f"{object_uuid}{Path(media_file.filename).suffix}?sig=abc"
             )
             assert data["subtitle_files"] == [
-                f"https://b2.example.com/mybucket/archive/{mp.pk}/{name}?sig=abc"
+                f"https://b2.example.com/mybucket/{key_prefix}{name}?sig=abc"
                 for name in subtitles
             ]
             assert [
                 call.kwargs["key"]
                 for call in self.mock_b2_client.return_value.generate_presigned_url.call_args_list
             ] == [
-                f"archive/{mp.pk}/{object_uuid}{Path(media_file.filename).suffix}",
-                *[f"archive/{mp.pk}/{name}" for name in subtitles],
+                f"{key_prefix}{object_uuid}{Path(media_file.filename).suffix}",
+                *[f"{key_prefix}{name}" for name in subtitles],
             ]
 
     def test_uuid_movie_token_links_selected_file_and_keeps_token_filename(
@@ -268,11 +276,10 @@ class TestDownloadTokenB2Subtitles:
         data = response.json()
         assert data["filename"] == movie.name
         assert data["original_filename"] == "Original.Movie.mkv"
-        assert data["download_link"].endswith(
-            f"movies/{mp.pk}/{mf.b2_uuid}.mkv?sig=abc"
-        )
+        key_prefix = nested_key_prefix(mp.pk, "movies/")
+        assert data["download_link"].endswith(f"{key_prefix}{mf.b2_uuid}.mkv?sig=abc")
         assert data["subtitle_files"] == [
-            f"https://b2.example.com/mybucket/movies/{mp.pk}/movie-subtitle.vtt?sig=abc"
+            f"https://b2.example.com/mybucket/{key_prefix}movie-subtitle.vtt?sig=abc"
         ]
 
     def test_expired_b2_token_has_no_subtitle_files(self, client, create_movie):
@@ -313,7 +320,7 @@ class TestMediaPathCreate:
         data = response.json()
         assert data["path"] == "b2://mybucket/tv/Show.Name/"
         assert data["bucket"] == "mybucket"
-        assert data["b2_upload_prefix"] == f"tv/{data['pk']}/"
+        assert data["b2_upload_prefix"] == nested_key_prefix(data["pk"], "tv/")
         assert data["filename"] is None
         assert TV.objects.count() == 1
         mp = MediaPath.objects.get(_path="b2://mybucket/tv/Show.Name/")
@@ -335,6 +342,7 @@ class TestMediaPathCreate:
         mp = MediaPath.objects.get(_path="b2://mybucket/movies/Movie.Name/")
         assert mp.movie is not None
         assert mp.filename == "Movie.Name.mp4"
+        assert data["b2_upload_prefix"] == nested_key_prefix(mp.pk, "movies/")
 
     def test_create_media_path_with_b2_path_missing_bucket(self, client):
         client.force_login(self.user)
@@ -456,7 +464,9 @@ class TestMediaPathCreate:
         mp.movie.downloadLink("guid")
         client_mock.generate_presigned_url.assert_called_once_with(
             bucket="bucket",
-            key=f"movies/{mp.pk}/{mp.mediafile_set.get().b2_uuid}.mkv",
+            key=(
+                f"movies/{nested_key_prefix(mp.pk)}{mp.mediafile_set.get().b2_uuid}.mkv"
+            ),
             expires_in=None,
         )
 

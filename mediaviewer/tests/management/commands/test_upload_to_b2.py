@@ -9,6 +9,12 @@ class TestUploadToB2:
     def setUp(self, mocker):
         self.mock_client = mocker.patch("mediaviewer.b2.get_b2_client").return_value
 
+    @staticmethod
+    def nested_prefix(media_path_id, base=""):
+        padded_id = f"{media_path_id:09d}"
+        segments = "/".join(padded_id[index : index + 3] for index in range(0, 9, 3))
+        return f"{base}{segments}/"
+
     def test_requires_bucket(self, monkeypatch):
         monkeypatch.delenv("B2_BUCKET_NAME", raising=False)
 
@@ -31,7 +37,9 @@ class TestUploadToB2:
         assert mp.is_b2
         assert mp.filename is None
         self.mock_client.upload_file.assert_called_once_with(
-            local_file, "mybucket", f"tv/{mp.pk}/{mf.b2_uuid}.mp4"
+            local_file,
+            "mybucket",
+            f"{self.nested_prefix(mp.pk, 'tv/')}{mf.b2_uuid}.mp4",
         )
 
     def test_upload_movie_media_path(self, create_movie):
@@ -48,7 +56,9 @@ class TestUploadToB2:
         assert mp._path == f"b2://mybucket/{mp.pk}/{dirname}/"
         assert mp.filename == "The.Movie.2024.mkv"
         self.mock_client.upload_file.assert_called_once_with(
-            video_file, "mybucket", f"{mp.pk}/{mp.mediafile_set.get().b2_uuid}.mkv"
+            video_file,
+            "mybucket",
+            f"{self.nested_prefix(mp.pk)}{mp.mediafile_set.get().b2_uuid}.mkv",
         )
 
     def test_prefix_normalization(self, create_tv_media_file):
@@ -169,12 +179,15 @@ class TestUploadToB2:
         mf.refresh_from_db()
         assert mp._path == f"b2://mybucket/{mp.pk}/{dirname}/"
         self.mock_client.upload_file.assert_called_once_with(
-            local_file, "mybucket", f"{mp.pk}/{mf.b2_uuid}.mp4"
+            local_file,
+            "mybucket",
+            f"{self.nested_prefix(mp.pk)}{mf.b2_uuid}.mp4",
         )
 
     def test_upload_failure_does_not_flip_path(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
         mp = mf.media_path
+        original_path = mp._path
         local_file = mp.path / "S01E01.mp4"
         local_file.parent.mkdir(parents=True, exist_ok=True)
         local_file.write_bytes(b"data")
@@ -185,7 +198,7 @@ class TestUploadToB2:
 
         mp.refresh_from_db()
         mf.refresh_from_db()
-        assert not mp.is_b2
+        assert mp._path == original_path
 
     def test_uploads_subtitles_with_uuid_names(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
@@ -200,6 +213,7 @@ class TestUploadToB2:
 
         call_command("upload_to_b2", "--bucket", "mybucket")
 
+        mp.refresh_from_db()
         mf.refresh_from_db()
         assert mf.subtitle_files[0].endswith(".vtt")
         assert mf.subtitle_files[0] != subtitle.name
@@ -207,8 +221,21 @@ class TestUploadToB2:
         assert self.mock_client.upload_file.call_args_list[1].args == (
             subtitle,
             "mybucket",
-            f"{mp.pk}/{mf.subtitle_files[0]}",
+            f"{self.nested_prefix(mp.pk)}{mf.subtitle_files[0]}",
         )
+        mock_client = self.mock_client
+        mock_client.generate_presigned_url.reset_mock()
+
+        mf.downloadLink("guid")
+        mp.b2_filename_presigned_url(mf.subtitle_files[0])
+
+        assert [
+            call.kwargs["key"]
+            for call in mock_client.generate_presigned_url.call_args_list
+        ] == [
+            f"{self.nested_prefix(mp.pk)}{mf.b2_uuid}.mp4",
+            f"{self.nested_prefix(mp.pk)}{mf.subtitle_files[0]}",
+        ]
 
     def test_subtitle_failure_does_not_publish_b2_path(self, create_tv_media_file):
         mf = create_tv_media_file(filename="S01E01.mp4")
@@ -258,7 +285,7 @@ class TestUploadToB2:
         mf.refresh_from_db()
         assert mp._path == f"b2://mybucket/{mp.pk}/{dirname}/"
         self.mock_client.upload_file.assert_called_once_with(
-            local_file, "mybucket", f"{mp.pk}/{mf.b2_uuid}.mp4"
+            local_file, "mybucket", f"{self.nested_prefix(mp.pk)}{mf.b2_uuid}.mp4"
         )
 
     def test_media_path_option_already_b2(self, create_tv_media_file):
