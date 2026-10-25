@@ -4,6 +4,11 @@ from django.urls import reverse
 from mediaviewer.models import Movie, Genre, Poster
 
 
+def nested_media_path_id(media_path_id):
+    padded_id = f"{media_path_id:09d}"
+    return f"{padded_id[:3]}/{padded_id[3:6]}/{padded_id[6:]}"
+
+
 @pytest.fixture
 def create_movie_genre(genre_name="Action"):
     """Creates a Genre and links it to a movie via Poster."""
@@ -71,11 +76,12 @@ class TestMovies:
         )
 
         assert response.status_code == 200
+        nested_id = nested_media_path_id(mp.pk)
         assert response.json()["media_path"] == {
             "pk": mp.pk,
             "path": mp._path,
             "filename": None,
-            "b2_upload_prefix": f"archive/nested/{mp.pk}/",
+            "b2_upload_prefix": f"archive/nested/{nested_id}/",
             "bucket": "bucket",
         }
 

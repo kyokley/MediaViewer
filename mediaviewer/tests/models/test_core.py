@@ -4,9 +4,14 @@ import uuid
 from mediaviewer.models import MediaFile
 
 
+def nested_media_path_id(media_path_id):
+    padded_id = f"{media_path_id:09d}"
+    return f"{padded_id[:3]}/{padded_id[3:6]}/{padded_id[6:]}"
+
+
 @pytest.mark.django_db
 class TestDownloadLinkB2:
-    def test_uuid_video_uses_numeric_prefix_and_original_suffix(
+    def test_uuid_video_uses_nested_prefix_and_original_suffix(
         self, create_tv_media_file, mocker
     ):
         mf = create_tv_media_file(filename="Actual Name.mkv")
@@ -18,7 +23,7 @@ class TestDownloadLinkB2:
         mf.downloadLink("guid")
         client.generate_presigned_url.assert_called_once_with(
             bucket="mybucket",
-            key=f"archive/{mf.media_path.pk}/{mf.b2_uuid}.mkv",
+            key=(f"archive/{nested_media_path_id(mf.media_path.pk)}/{mf.b2_uuid}.mkv"),
             expires_in=None,
         )
 
@@ -35,7 +40,7 @@ class TestDownloadLinkB2:
         movie.downloadLink("guid")
         client.generate_presigned_url.assert_called_once_with(
             bucket="mybucket",
-            key=f"movies/{mp.pk}/{mf.b2_uuid}.mp4",
+            key=f"movies/{nested_media_path_id(mp.pk)}/{mf.b2_uuid}.mp4",
             expires_in=None,
         )
 
@@ -134,6 +139,23 @@ class TestAutoPlayDownloadLinkB2:
 
 @pytest.mark.django_db
 class TestMediaFileB2:
+    def test_video_url_uses_nested_layout(self, create_tv_media_file, mocker):
+        mf = create_tv_media_file(filename="episode.mp4")
+        media_path = mf.media_path
+        media_path._path = "b2://mybucket/tv/Show/"
+        media_path.save()
+        mf.b2_uuid = "12345678-1234-5678-1234-567812345678"
+        mf.save()
+        mock_client = mocker.patch("mediaviewer.b2.get_b2_client")
+
+        mf.downloadLink("guid")
+
+        mock_client.return_value.generate_presigned_url.assert_called_once_with(
+            bucket="mybucket",
+            key=f"{media_path.b2_upload_prefix}{mf.b2_uuid}.mp4",
+            expires_in=None,
+        )
+
     def test_media_file_is_b2(self, create_tv_media_file):
         mf = create_tv_media_file()
         mf.media_path._path = "b2://mybucket/tv/ShowName/"

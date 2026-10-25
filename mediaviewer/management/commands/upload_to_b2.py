@@ -90,23 +90,23 @@ class Command(BaseCommand):
         if not mp._path:
             logger.warning("MediaPath %s has no path; skipping", mp)
             return
+        local_root = mp.path
         if mp.tv:
             videos = [
-                (mf, mf.filename, mp.path / mf.filename, mf.subtitle_files or [])
+                (mf, mf.filename, local_root / mf.filename, mf.subtitle_files or [])
                 for mf in mp.mediafile_set.filter(hide=False)
             ]
         elif mp.movie:
-            video_file = self._find_video_file(mp.path)
+            video_file = self._find_video_file(local_root)
             if video_file is None:
-                logger.warning("No video file found in %s; skipping", mp.path)
+                logger.warning("No video file found in %s; skipping", local_root)
                 return
             videos = [(None, video_file.name, video_file, mp.subtitle_files or [])]
         else:
             logger.warning("MediaPath %s has no tv or movie; skipping", mp)
             return
 
-        key_prefix = f"{prefix}{mp.pk}/"
-        logical_key_prefix = f"{key_prefix}{mp.path.name}/"
+        logical_key_prefix = f"{prefix}{mp.pk}/{local_root.name}/"
         missing_videos = [
             local_path for _, _, local_path, _ in videos if not local_path.exists()
         ]
@@ -117,6 +117,8 @@ class Command(BaseCommand):
                 missing_videos,
             )
             return
+        mp._path = f"b2://{bucket}/{logical_key_prefix}"
+        key_prefix = mp.b2_upload_prefix
         uploaded = []
         for media_file, filename, local_path, subtitles in videos:
             object_uuid = uuid.uuid4()
@@ -124,7 +126,7 @@ class Command(BaseCommand):
             client.upload_file(local_path, bucket, key)
             subtitle_uploads = []
             for subtitle in subtitles:
-                subtitle_path = mp.path / subtitle
+                subtitle_path = local_root / subtitle
                 if not subtitle_path.exists():
                     raise CommandError(f"Subtitle file {subtitle_path} does not exist")
                 subtitle_uuid = uuid.uuid4()
@@ -141,7 +143,6 @@ class Command(BaseCommand):
             return
 
         with transaction.atomic():
-            mp._path = f"b2://{bucket}/{logical_key_prefix}"
             if mp.movie:
                 mp.filename = uploaded[0][1]
                 mp.subtitle_files = [

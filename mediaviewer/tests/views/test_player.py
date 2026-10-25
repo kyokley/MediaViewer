@@ -80,6 +80,10 @@ def test_b2_player_renders_signed_media_and_subtitles(
     assert "https://signed.example/archive/" in response.content.decode()
     b2_prefix = f"archive/{media_path.pk}/"
     if use_uuid:
+        padded_id = f"{media_path.pk:09d}"
+        segments = "/".join(padded_id[index : index + 3] for index in range(0, 9, 3))
+        b2_prefix = f"archive/{segments}/"
+    if use_uuid:
         uuid_file = (
             obj
             if not is_movie
