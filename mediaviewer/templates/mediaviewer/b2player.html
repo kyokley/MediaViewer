@@ -1,0 +1,73 @@
+{% extends "home.html" %}
+{% load static %}
+{% block title %}<title>{{ display_name }} - MediaViewer</title>{% endblock %}
+{% block css %}
+    {{ block.super }}
+    <link href="{% static 'assets/b2player.css' %}" rel="stylesheet">
+{% endblock %}
+{% block jumbotron %}{% endblock %}
+{% block main %}
+    <main class="container b2-player-page">
+        <div class="b2-player-heading">
+            <a class="btn btn-outline-secondary" href="{{ details_url }}"><i class="bi-arrow-left"></i> Back to details</a>
+            <p class="text-uppercase small text-primary-emphasis mb-2">Now playing</p>
+            <h1>{{ display_name }}</h1>
+        </div>
+        <section class="b2-player-card" aria-label="Video player">
+            <div class="b2-video-frame">
+                <video id="b2-video"
+                       controls
+                       crossorigin="anonymous"
+                       playsinline
+                       preload="metadata"
+                       aria-label="{{ display_name }}">
+                    {% if player_config.source_url %}<source src="{{ player_config.source_url }}" type="video/mp4">{% endif %}
+                    {% for subtitle_url in player_config.subtitle_urls %}
+                        <track kind="subtitles"
+                               srclang="en"
+                               label="English{% if forloop.counter > 1 %} {{ forloop.counter }}{% endif %}"
+                               src="{{ subtitle_url }}"
+                               {% if forloop.first %} default{% endif %}>
+                    {% endfor %}
+                    <p>Your browser does not support HTML video. Try a current version of Chrome, Firefox, Safari, or Edge.</p>
+                </video>
+                <div class="b2-player-status"
+                     id="player-status"
+                     role="status"
+                     aria-live="polite">Loading video…</div>
+            </div>
+            <div class="b2-player-tools">
+                <button class="btn btn-outline-secondary"
+                        id="seek-back"
+                        type="button"
+                        aria-label="Back 10 seconds"><i class="bi-skip-backward-fill"></i> 10 sec</button>
+                <button class="btn btn-outline-secondary"
+                        id="seek-forward"
+                        type="button"
+                        aria-label="Forward 10 seconds">10 sec <i class="bi-skip-forward-fill"></i></button>
+                {% if next_url %}<button class="btn btn-outline-secondary"
+        id="binge-toggle"
+        type="button"
+        aria-pressed="{{ player_config.binge_mode|yesno:'true,false' }}">Binge mode: {% if player_config.binge_mode %}On{% else %}Off{% endif %}</button>{% endif %}
+                <button class="btn btn-outline-secondary ms-sm-auto"
+                        id="start-over"
+                        type="button"><i class="bi-arrow-counterclockwise"></i> Start over</button>
+            </div>
+        </section>
+        <nav class="b2-episode-nav" aria-label="Episode navigation">
+            {% if previous_url %}<a class="btn btn-info" href="{{ previous_url }}"><i class="bi-arrow-left-circle-fill"></i> Previous episode</a>{% endif %}
+            {% if next_url %}<a class="btn btn-info" href="{{ next_url }}">Next episode <i class="bi-arrow-right-circle-fill"></i></a>{% endif %}
+        </nav>
+        {% if poster_url %}
+            <img class="b2-poster"
+                 src="{{ poster_url }}"
+                 alt="Poster for {{ display_name }}"
+                 loading="lazy">
+        {% endif %}
+    </main>
+    {{ player_config|json_script:"b2-player-config" }}
+{% endblock %}
+{% block javascript %}
+    {{ block.super }}
+    <script src="{% static 'assets/b2player.js' %}" defer></script>
+{% endblock %}

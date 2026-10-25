@@ -4,11 +4,19 @@ from django.db import models
 
 from .core import TimeStampModel
 
+B2_URI_PREFIX = "b2://"
+
 
 class MediaPath(TimeStampModel):
     _path = models.CharField(
-        null=False, blank=True, max_length=256, unique=True, db_index=True
+        null=False, blank=True, max_length=1024, unique=True, db_index=True
     )
+    # For B2-stored movies, the actual video file name within the path.
+    # TV episodes already track their file name via MediaFile.filename.
+    filename = models.CharField(null=True, blank=True, max_length=1024)
+    # Subtitle file names stored alongside the media in B2 (movies only;
+    # TV episodes track subtitles via MediaFile.subtitle_files).
+    subtitle_files = models.JSONField(null=True, blank=True, default=list)
     skip = models.BooleanField(null=False, blank=True, default=False)
     tv = models.ForeignKey(
         "mediaviewer.TV", null=True, on_delete=models.CASCADE, blank=True
@@ -26,6 +34,8 @@ class MediaPath(TimeStampModel):
     @property
     def path(self):
         if self._path:
+            if self.is_b2:
+                return self._path
             return Path(self._path)
         else:
             return None
@@ -33,3 +43,60 @@ class MediaPath(TimeStampModel):
     @property
     def media(self):
         return self.tv or self.movie
+
+    @property
+    def is_b2(self):
+        return str(self._path or "").startswith(B2_URI_PREFIX)
+
+    @property
+    def bucket(self):
+        if not self.is_b2:
+            return None
+        return self._path[len(B2_URI_PREFIX) :].split("/", 1)[0]
+
+    @property
+    def key(self):
+        if not self.is_b2:
+            return None
+        _, _, key = self._path[len(B2_URI_PREFIX) :].partition("/")
+        return key
+
+    def file_key(self, filename):
+        key = self.key or ""
+        if not key.endswith("/"):
+            key = f"{key}/"
+        return f"{key}{filename}"
+
+    @property
+    def b2_upload_prefix(self):
+        if not self.is_b2:
+            return None
+        raw_key = self.key or ""
+        stripped_key = raw_key.rstrip("/")
+        has_parent_separator = "/" in stripped_key
+        parent = stripped_key.rsplit("/", 1)[0] if has_parent_separator else ""
+        if parent.split("/")[-1] == str(self.pk):
+            return f"{parent}/"
+        separator = "/" if parent or has_parent_separator else ""
+        return f"{parent}{separator}{self.pk}/"
+
+    def b2_uuid_presigned_url(self, object_uuid, suffix=""):
+        return self.b2_filename_presigned_url(f"{object_uuid}{suffix}")
+
+    def b2_filename_presigned_url(self, filename):
+        from mediaviewer.b2 import get_b2_client
+
+        return get_b2_client().generate_presigned_url(
+            bucket=self.bucket,
+            key=f"{self.b2_upload_prefix}{filename}",
+            expires_in=None,
+        )
+
+    def presigned_url(self, filename, expires_in=None):
+        from mediaviewer.b2 import get_b2_client
+
+        return get_b2_client().generate_presigned_url(
+            bucket=self.bucket,
+            key=self.file_key(filename),
+            expires_in=expires_in,
+        )

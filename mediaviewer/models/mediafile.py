@@ -1,5 +1,4 @@
 import re
-
 from django.db import models
 from django.urls import reverse
 
@@ -75,6 +74,9 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
     )
     hide = models.BooleanField(null=False, blank=True, default=False)
     size = models.BigIntegerField(null=True, blank=True)
+    # Subtitle file names stored alongside this media file in B2 (e.g. "Show.S01E01.mv-encoded.mp4.mv-encoded.mp4-0.vtt").
+    subtitle_files = models.JSONField(null=True, blank=True, default=list)
+    b2_uuid = models.UUIDField(null=True, blank=True, unique=True)
 
     objects = MediaFileManager.from_queryset(MediaFileQuerySet)()
 
@@ -155,6 +157,76 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             self.display_name = f"S{self.season:02} E{self.episode:02}: {episode_name}"
             self.save()
 
+    def ensure_episode_fields(self):
+        if not self.is_tv():
+            return
+
+        from mediaviewer.thetvdb import parse_tv_filename
+
+        try:
+            parsed = parse_tv_filename(self.filename)
+        except (AttributeError, OverflowError, TypeError, ValueError, re.error):
+            parsed = None
+
+        if parsed is None:
+            try:
+                parsed = FilenameScrapeFormat._parse_configured_filename(self.filename)
+            except (AttributeError, OverflowError, TypeError, ValueError, re.error):
+                parsed = None
+
+        pair = self._valid_episode_pair(parsed)
+        changed_fields = set()
+        if pair is not None:
+            season, episode = pair
+            if self.season is None and self.episode is None:
+                self.season, self.episode = season, episode
+                changed_fields.update(("season", "episode"))
+            elif self.season == season and self.episode is None:
+                self.episode = episode
+                changed_fields.add("episode")
+            elif self.episode == episode and self.season is None:
+                self.season = season
+                changed_fields.add("season")
+
+        if self._valid_episode_pair((self.season, self.episode)) is None:
+            return
+
+        if self._poster_id is None:
+            self._poster = Poster.objects.create()
+            changed_fields.add("_poster")
+
+        previous_display_name = self.display_name
+        self.populate_display_name()
+        if self.display_name != previous_display_name:
+            changed_fields.add("display_name")
+
+        if changed_fields:
+            self.save(update_fields=tuple(changed_fields))
+
+    @staticmethod
+    def _valid_episode_pair(pair):
+        if not isinstance(pair, (tuple, list)) or len(pair) not in (2, 3):
+            return None
+        season, episode = pair[-2:]
+        if (
+            isinstance(season, bool)
+            or isinstance(episode, bool)
+            or not isinstance(season, (int, str))
+            or not isinstance(episode, (int, str))
+            or isinstance(season, str)
+            and not season.strip().isdigit()
+            or isinstance(episode, str)
+            and not episode.strip().isdigit()
+        ):
+            return None
+        try:
+            season, episode = int(season), int(episode)
+        except (OverflowError, TypeError, ValueError):
+            return None
+        if not 0 <= season <= 32767 or not 1 <= episode <= 32767:
+            return None
+        return season, episode
+
     def infer_scraper(self, scrapers=None):
         if self.movie:
             return
@@ -195,10 +267,11 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         self.save()
 
     def populate_display_name(self):
-        if self.scraper and self.tv:
-            self.display_name = (
-                f"S{self.season:02} E{self.episode:02}: {self.poster.episodename}"
-            )
+        if self.tv and self.season is not None and self.episode is not None:
+            self.display_name = f"S{self.season:02} E{self.episode:02}"
+            episode_name = self._poster.episodename if self._poster_id else ""
+            if episode_name:
+                self.display_name = f"{self.display_name}: {episode_name}"
         else:
             self.display_name = self.media.name
 
@@ -274,10 +347,12 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime("%b %d, %Y")}</center>"""
 
         if can_download:
-            if waiterstatus:
+            if waiterstatus or self.media_path.is_b2:
                 link_html = f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}')">Open</a></center>"""
             else:
                 link_html = "Alfred is down"
+        else:
+            link_html = ""
 
         cell = """<center>"""
 

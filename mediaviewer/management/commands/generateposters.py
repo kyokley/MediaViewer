@@ -33,7 +33,19 @@ class Command(BaseCommand):
         force = kwargs["force"]
 
         poster_qs = (
-            Poster.objects.filter(Q(image="") | Q(release_date__isnull=True))
+            Poster.objects.filter(
+                Q(image="")
+                | Q(release_date__isnull=True)
+                | Q(
+                    media_file__b2_uuid__isnull=False,
+                    media_file__media_path__tv__isnull=False,
+                    media_file__season__isnull=False,
+                    media_file__season__gte=0,
+                    media_file__episode__isnull=False,
+                    media_file__episode__gte=1,
+                    episodename="",
+                )
+            )
             .annotate(
                 obj_created=Coalesce(
                     "movie__date_created",

@@ -283,6 +283,8 @@ SECURE_HSTS_SECONDS = 300
 SECURE_BROWSER_XSS_FILTER = True
 
 API_KEY = os.environ.get("TVDB_API_KEY", "keykeykey")
+THETVDB_API_KEY = os.environ.get("THETVDB_API_KEY", "")
+THETVDB_PIN = os.environ.get("THETVDB_PIN", "")
 IMAGE_PATH = "mediaviewer/static/media/"
 
 REQUEST_TIMEOUT = 20
@@ -320,3 +322,14 @@ WAITER_PASSWORD_HASH = (
 SKIP_LOADING_TVDB_CONFIG = int(os.environ.get("SKIP_LOADING_TVDB_CONFIG", 0)) == 1
 
 OG_BASE_URL = ""
+
+# Backblaze B2 storage settings
+B2_API_URL = os.environ.get("B2_API_URL", "https://api.backblazeb2.com")
+B2_APPLICATION_KEY_ID = os.environ.get("B2_APPLICATION_KEY_ID", "")
+B2_APPLICATION_KEY = os.environ.get("B2_APPLICATION_KEY", "")
+B2_BUCKET_NAME = os.environ.get("B2_BUCKET_NAME", "")
+B2_NAME_PREFIX = os.environ.get("B2_NAME_PREFIX", "")
+# Download authorization token lifetime in seconds. Defaults to 3h to match
+# TOKEN_VALIDITY_LENGTH; keep it >= TOKEN_VALIDITY_LENGTH so URLs minted
+# alongside a token do not expire before the token does.
+B2_PRESIGNED_URL_EXPIRY = int(os.environ.get("B2_PRESIGNED_URL_EXPIRY", "10800"))

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.conf import settings as conf_settings
 from django.contrib.sites.models import Site
 from django.db import models
@@ -72,6 +74,37 @@ class ViewableObjectMixin:
         return comment, was_created
 
     def downloadLink(self, guid):
+        media_path = self.media_path
+        if media_path and media_path.is_b2:
+            from mediaviewer.models import MediaFile
+
+            if isinstance(self, MediaFile):
+                if self.b2_uuid:
+                    return media_path.b2_uuid_presigned_url(
+                        self.b2_uuid, Path(self.filename).suffix
+                    )
+                filename = self.filename
+            else:
+                filename = media_path.filename
+                if not filename:
+                    raise ValueError(
+                        f"B2 movie {self} has no MediaPath.filename; "
+                        "cannot build a presigned URL"
+                    )
+                media_files = MediaFile.objects.filter(
+                    media_path=media_path, filename=filename, b2_uuid__isnull=False
+                )
+                if media_files.count() == 1:
+                    media_file = media_files.get()
+                    return media_path.b2_uuid_presigned_url(
+                        media_file.b2_uuid, Path(media_file.filename).suffix
+                    )
+                if media_files.count() > 1:
+                    raise ValueError(
+                        f"B2 movie {self} has multiple UUID files for {filename}"
+                    )
+            return media_path.presigned_url(filename)
+
         if self.is_movie():
             waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_MOVIES}{guid}/"
         else:
@@ -82,6 +115,11 @@ class ViewableObjectMixin:
     def autoplayDownloadLink(self, guid):
         if self.is_movie():
             return None
+
+        media_path = self.media_path
+        if media_path and media_path.is_b2:
+            # Presigned URLs are already directly streamable
+            return self.downloadLink(guid)
         else:
             return f"{self.downloadLink(guid)}autoplay"
 

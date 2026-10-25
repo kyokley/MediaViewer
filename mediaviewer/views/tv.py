@@ -113,6 +113,7 @@ def tvdetail(request, mf_id):
         "obj_type": "media_file",
         "previous_link": previous_link,
         "next_link": next_link,
+        "is_b2": mf.media_path.is_b2,
     }
     context["active_page"] = "tvshows"
     context["title"] = mf.full_name

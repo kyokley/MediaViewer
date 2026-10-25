@@ -106,7 +106,9 @@ class Movie(Media, ViewableObjectMixin):
         timestamp_html = f"""<center><span class="hidden_span">{self.date_created.isoformat()}</span>{self.date_created.date().strftime("%b %d, %Y")}</center>"""
 
         if can_download:
-            if waiterstatus:
+            media_path = self.mediapath_set.order_by("-pk").first()
+            is_b2 = bool(media_path and media_path.is_b2)
+            if waiterstatus or is_b2:
                 link_html = f"""<center><a class='btn btn-info' name='download-btn' id={self.id} target=_blank rel="noopener noreferrer" onclick="openDownloadWindow('{self.id}', 'movie')">Open</a></center>"""
             else:
                 link_html = "Alfred is down"
