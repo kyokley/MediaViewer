@@ -77,8 +77,8 @@ def test_b2_player_defers_signed_media_and_subtitles(
     response = client.get(reverse("mediaviewer:b2player", args=(token.guid,)))
 
     assert response.status_code == 200
-    assert "no-store" in response["Cache-Control"]
-    assert "no-referrer" in response["Referrer-Policy"]
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
     assert b2_client.generate_presigned_url.call_count == 0
     get_b2_client.assert_not_called()
     assert "https://signed.example/" not in response.content.decode()
@@ -106,7 +106,7 @@ def test_b2_player_defers_signed_media_and_subtitles(
         reverse("mediaviewer:b2playermedia", args=(token.guid,))
     )
     assert media_response.status_code == 200
-    assert media_response["Cache-Control"] == "no-store"
+    assert media_response["Cache-Control"] == "private, no-store"
     assert media_response["Referrer-Policy"] == "no-referrer"
     assert set(media_response.json()) == {"source_url", "subtitle_urls"}
     assert media_response.json() == {
@@ -212,7 +212,7 @@ def test_b2_player_media_sanitizes_presign_errors(
 
     assert response.status_code == 502
     assert response.content == b"Media URL generation failed"
-    assert response["Cache-Control"] == "no-store"
+    assert response["Cache-Control"] == "private, no-store"
     assert response["Referrer-Policy"] == "no-referrer"
     assert str(error).encode() not in response.content
 
@@ -253,7 +253,7 @@ def test_b2_player_media_rejects_non_get_without_presigning(
     response = client.post(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
 
     assert response.status_code == 405
-    assert response["Cache-Control"] == "no-store"
+    assert response["Cache-Control"] == "private, no-store"
     assert response["Referrer-Policy"] == "no-referrer"
     get_b2_client.assert_not_called()
 

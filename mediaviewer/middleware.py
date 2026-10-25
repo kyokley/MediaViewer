@@ -11,7 +11,13 @@ secure_headers = secure.Secure()
 def set_secure_headers(get_response):
     def middleware(request):
         response = get_response(request)
+        cache_control = response.get("Cache-Control")
+        referrer_policy = response.get("Referrer-Policy")
         secure_headers.framework.django(response)
+        if cache_control is not None:
+            response["Cache-Control"] = cache_control
+        if referrer_policy is not None:
+            response["Referrer-Policy"] = referrer_policy
         return response
 
     return middleware
