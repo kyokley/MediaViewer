@@ -49,6 +49,11 @@ urlpatterns = [
         name="autoplaydownloadlink",
     ),
     re_path(r"^b2player/(?P<guid>[0-9A-Za-z]+)/$", player.b2player, name="b2player"),
+    re_path(
+        r"^b2player/(?P<guid>[0-9A-Za-z]+)/media/$",
+        player.b2playermedia,
+        name="b2playermedia",
+    ),
     re_path(r"^settings/", settings.settings, name="settings"),
     re_path(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
     re_path(r"^submitnewuser/", settings.submitnewuser, name="submitnewuser"),
