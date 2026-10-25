@@ -78,12 +78,23 @@
       try {
         if (typeof config.media_url !== "string" || !config.media_url)
           throw new Error("Invalid media URL");
-        const response = await fetch(config.media_url, { method: "GET", credentials: "same-origin" });
+        const response = await fetch(config.media_url, {
+          method: "GET",
+          credentials: "same-origin",
+        });
         if (!response.ok) throw new Error("Media request failed");
         const result = await response.json();
-        if (!result || typeof result.source_url !== "string" || !result.source_url || !Array.isArray(result.subtitle_urls) || result.subtitle_urls.some((url) => typeof url !== "string" || !url))
+        if (
+          !result ||
+          typeof result.source_url !== "string" ||
+          !result.source_url ||
+          !Array.isArray(result.subtitle_urls) ||
+          result.subtitle_urls.some((url) => typeof url !== "string" || !url)
+        )
           throw new Error("Invalid media response");
-        video.querySelectorAll("source, track").forEach((child) => child.remove());
+        video
+          .querySelectorAll("source, track")
+          .forEach((child) => child.remove());
         const source = document.createElement("source");
         source.src = result.source_url;
         source.type = "video/mp4";
@@ -99,12 +110,15 @@
         });
         video.load();
       } catch (_) {
-        status.innerHTML = 'Video could not be loaded. <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
-        document.getElementById("retry-video")?.addEventListener("click", () => {
-          if (mediaRequest) return;
-          mediaRequest = null;
-          loadMedia();
-        });
+        status.innerHTML =
+          'Video could not be loaded. <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
+        document
+          .getElementById("retry-video")
+          ?.addEventListener("click", () => {
+            if (mediaRequest) return;
+            mediaRequest = null;
+            loadMedia();
+          });
       } finally {
         mediaRequest = null;
       }

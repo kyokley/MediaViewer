@@ -106,7 +106,7 @@ def test_b2_player_defers_signed_media_and_subtitles(
         reverse("mediaviewer:b2playermedia", args=(token.guid,))
     )
     assert media_response.status_code == 200
-    assert media_response["Cache-Control"] == "private, no-store"
+    assert media_response["Cache-Control"] == "no-store"
     assert media_response["Referrer-Policy"] == "no-referrer"
     assert set(media_response.json()) == {"source_url", "subtitle_urls"}
     assert media_response.json() == {
@@ -185,9 +185,7 @@ def test_b2_player_media_rejects_incomplete_source_before_presigning(
     presign = mocker.patch("mediaviewer.b2.get_b2_client")
     client.force_login(user)
 
-    response = client.get(
-        reverse("mediaviewer:b2playermedia", args=(token.guid,))
-    )
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
 
     assert response.status_code == 404
     presign.assert_not_called()
@@ -210,13 +208,11 @@ def test_b2_player_media_sanitizes_presign_errors(
         "mediaviewer.b2.get_b2_client"
     ).return_value.generate_presigned_url.side_effect = error
 
-    response = client.get(
-        reverse("mediaviewer:b2playermedia", args=(token.guid,))
-    )
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
 
     assert response.status_code == 502
     assert response.content == b"Media URL generation failed"
-    assert response["Cache-Control"] == "private, no-store"
+    assert response["Cache-Control"] == "no-store"
     assert response["Referrer-Policy"] == "no-referrer"
     assert str(error).encode() not in response.content
 
@@ -236,9 +232,7 @@ def test_b2_player_media_preserves_invalid_media_404(
         type(media_file), "downloadLink", side_effect=error("invalid media")
     )
 
-    response = client.get(
-        reverse("mediaviewer:b2playermedia", args=(token.guid,))
-    )
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
 
     assert response.status_code == 404
     assert b"invalid media" not in response.content
@@ -256,12 +250,10 @@ def test_b2_player_media_rejects_non_get_without_presigning(
     client.force_login(user)
     get_b2_client = mocker.patch("mediaviewer.b2.get_b2_client")
 
-    response = client.post(
-        reverse("mediaviewer:b2playermedia", args=(token.guid,))
-    )
+    response = client.post(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
 
     assert response.status_code == 405
-    assert response["Cache-Control"] == "private, no-store"
+    assert response["Cache-Control"] == "no-store"
     assert response["Referrer-Policy"] == "no-referrer"
     get_b2_client.assert_not_called()
 
