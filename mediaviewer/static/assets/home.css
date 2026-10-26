@@ -199,6 +199,14 @@ li.nav-item > a.btn-outline-primary:hover {
     height: 50vh;
 }
 
+#recent-carousel .carousel-img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(50vh, 450px);
+    object-fit: contain;
+}
+
 .row-highlight {
     background-color: var(--bs-primary) !important;
     transition: all .4s ease-in-out;
