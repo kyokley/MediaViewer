@@ -52,6 +52,49 @@
       keepalive,
     );
   const progressClear = () => request(config.progress_url, "DELETE");
+  let captionsEnabled = config.captions_enabled === true;
+  let captionsReady = false;
+  let captionQueue = Promise.resolve();
+  const captionTracks = () => {
+    const tracks = [];
+    for (let index = 0; index < (video.textTracks?.length || 0); index += 1) {
+      const track = video.textTracks[index];
+      if (track.kind === "subtitles" || track.kind === "captions")
+        tracks.push(track);
+    }
+    return tracks;
+  };
+  const restoreCaptions = () => {
+    const tracks = captionTracks();
+    tracks.forEach((track, index) => {
+      track.mode = captionsEnabled && index === 0 ? "showing" : "disabled";
+    });
+    captionsReady = true;
+  };
+  const persistCaptions = (enabled) => {
+    if (!config.captions_url) return;
+    captionQueue = captionQueue
+      .catch(() => {})
+      .then(() =>
+        request(
+          config.captions_url,
+          "POST",
+          { captions_enabled: String(enabled) },
+          true,
+        ),
+      )
+      .catch(() => {});
+  };
+  const onTextTrackChange = () => {
+    if (!captionsReady) return;
+    const tracks = captionTracks();
+    if (!tracks.length) return;
+    const enabled = tracks.some((track) => track.mode === "showing");
+    if (enabled === captionsEnabled) return;
+    captionsEnabled = enabled;
+    persistCaptions(enabled);
+  };
+  video.textTracks?.addEventListener("change", onTextTrackChange);
 
   let resumeReady = false;
   let suspended = false;
@@ -92,6 +135,7 @@
           result.subtitle_urls.some((url) => typeof url !== "string" || !url)
         )
           throw new Error("Invalid media response");
+        captionsReady = false;
         video
           .querySelectorAll("source, track")
           .forEach((child) => child.remove());
@@ -105,8 +149,10 @@
           track.srclang = "en";
           track.label = `English${index ? ` ${index + 1}` : ""}`;
           track.src = url;
-          if (index === 0) track.default = true;
+          track.default = captionsEnabled && index === 0;
           video.append(track);
+          track.track.mode =
+            captionsEnabled && index === 0 ? "showing" : "disabled";
         });
         video.load();
       } catch (_) {
@@ -237,6 +283,7 @@
   status.textContent = "Loading video…";
   let retryPending = false;
   video.addEventListener("loadedmetadata", () => {
+    restoreCaptions();
     if (suspended || resumeReady || loadGeneration === generation) return;
     const offset = retryPending ? retryOffset : null;
     retryPending = false;
@@ -257,11 +304,13 @@
           : retryOffset;
       resumeReady = false;
       retryPending = true;
+      captionsReady = false;
       loadGeneration = -1;
       status.textContent = "Retrying…";
       video.load();
       if (video.readyState >= 1) {
         retryPending = false;
+        restoreCaptions();
         loadResume(generation, retryOffset);
       }
     });

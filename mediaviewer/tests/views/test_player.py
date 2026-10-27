@@ -4,6 +4,7 @@ from unittest.mock import call
 
 import pytest
 import requests
+from django.test import Client
 from django.urls import reverse
 
 from mediaviewer.b2 import B2Error
@@ -84,6 +85,10 @@ def test_b2_player_defers_signed_media_and_subtitles(
     assert "https://signed.example/" not in response.content.decode()
     assert response.context["player_config"]["media_url"] == reverse(
         "mediaviewer:b2playermedia", args=(token.guid,)
+    )
+    assert response.context["player_config"]["captions_enabled"] is False
+    assert response.context["player_config"]["captions_url"] == reverse(
+        "mediaviewer:b2playercaptions", args=(token.guid,)
     )
     assert "source_url" not in response.context["player_config"]
     assert "subtitle_urls" not in response.context["player_config"]
@@ -630,6 +635,110 @@ def test_local_listing_open_still_requires_waiter_status(
     payload = obj.ajax_row_payload(can_download=True, waiterstatus=False, user=user)
 
     assert payload[2] == "Alfred is down"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(("value", "expected"), (("true", True), ("false", False)))
+def test_b2_player_captions_preference_updates_only_current_user(
+    client, create_user, create_tv_media_file, mocker, value, expected
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    other_user = create_user()
+    user_settings = user.settings()
+    user_settings.captions_enabled = not expected
+    user_settings.save(update_fields=("captions_enabled",))
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    client.force_login(user)
+
+    response = client.post(
+        reverse("mediaviewer:b2playercaptions", args=(token.guid,)),
+        {"captions_enabled": value},
+    )
+
+    assert response.status_code == 204
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
+    user.settings().refresh_from_db()
+    other_user.settings().refresh_from_db()
+    assert user.settings().captions_enabled is expected
+    assert other_user.settings().captions_enabled is False
+
+    player_response = client.get(reverse("mediaviewer:b2player", args=(token.guid,)))
+    assert player_response.status_code == 200
+    assert player_response.context["player_config"]["captions_enabled"] is expected
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "payload", ({}, {"captions_enabled": "TRUE"}, {"captions_enabled": "1"})
+)
+def test_b2_player_captions_rejects_invalid_payload_without_writes(
+    client, create_user, create_tv_media_file, mocker, payload
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    initial_dateedited = user.settings().dateedited
+    client.force_login(user)
+
+    response = client.post(
+        reverse("mediaviewer:b2playercaptions", args=(token.guid,)), payload
+    )
+
+    assert response.status_code == 400
+    user.settings().refresh_from_db()
+    assert user.settings().captions_enabled is False
+    assert user.settings().dateedited == initial_dateedited
+
+
+@pytest.mark.django_db
+def test_b2_player_captions_requires_owner_login_and_post(
+    client, create_user, create_tv_media_file, mocker
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    other_user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    url = reverse("mediaviewer:b2playercaptions", args=(token.guid,))
+
+    anonymous_response = client.post(url, {"captions_enabled": "true"})
+    client.force_login(other_user)
+    owner_mismatch_response = client.post(url, {"captions_enabled": "true"})
+    client.force_login(user)
+    wrong_method_response = client.get(url)
+
+    assert anonymous_response.status_code == 302
+    assert owner_mismatch_response.status_code == 404
+    assert wrong_method_response.status_code == 405
+    user.settings().refresh_from_db()
+    assert user.settings().captions_enabled is False
+
+
+@pytest.mark.django_db
+def test_b2_player_captions_requires_csrf(create_user, create_tv_media_file, mocker):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    csrf_client = Client(enforce_csrf_checks=True)
+    csrf_client.force_login(user)
+
+    response = csrf_client.post(
+        reverse("mediaviewer:b2playercaptions", args=(token.guid,)),
+        {"captions_enabled": "true"},
+    )
+
+    assert response.status_code == 403
+    user.settings().refresh_from_db()
+    assert user.settings().captions_enabled is False
 
 
 @pytest.mark.django_db

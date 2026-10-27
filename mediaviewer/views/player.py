@@ -5,7 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_GET
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_GET, require_POST
 
 from mediaviewer.api.serializers import DownloadTokenSerializer
 from mediaviewer.b2 import B2Error
@@ -99,6 +101,8 @@ def b2player(request, guid):
         "viewed_url": reverse("mediaviewer:ajaxsuperviewed"),
         "guid": token.guid,
         "binge_mode": user_settings.binge_mode,
+        "captions_enabled": user_settings.captions_enabled,
+        "captions_url": reverse("mediaviewer:b2playercaptions", args=(token.guid,)),
         "next_url": next_url,
     }
     context = {
@@ -113,6 +117,26 @@ def b2player(request, guid):
     setSiteWideContext(context, request)
     response = render(request, "mediaviewer/b2player.html", context)
     return _sensitive_response(response)
+
+
+@_sensitive_view
+@login_required(login_url="/mediaviewer/login/")
+@require_POST
+@csrf_protect
+def b2playercaptions(request, guid):
+    access = _b2_player_access(request, guid)
+    if isinstance(access, HttpResponse):
+        return access
+    _token, _obj, _media_path, user_settings = access
+
+    captions_enabled = request.POST.get("captions_enabled")
+    if captions_enabled not in ("true", "false"):
+        return HttpResponse(status=400)
+
+    user_settings.captions_enabled = captions_enabled == "true"
+    user_settings.dateedited = timezone.now()
+    user_settings.save(update_fields=("captions_enabled", "dateedited"))
+    return HttpResponse(status=204)
 
 
 @_sensitive_view

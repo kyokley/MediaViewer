@@ -22,13 +22,38 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         click() { return this.listeners.click?.(); },
     }]));
     const listeners = new Map();
+    const textTrackListeners = {};
+    const textTracks = {
+        tracks: [], length: 0,
+        addEventListener(type, fn) { textTrackListeners[type] = fn; },
+        item(index) { return this.tracks[index] || null; },
+        dispatch(type) { textTrackListeners[type]?.(); },
+        add(track) { this.tracks.push(track); this.length = this.tracks.length; this[this.length - 1] = track; },
+        remove(track) {
+            this.tracks = this.tracks.filter((item) => item !== track);
+            this.length = this.tracks.length;
+            for (let index = 0; index < this.length; index += 1) this[index] = this.tracks[index];
+            delete this[this.length];
+        },
+    };
     const retryButton = { listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, click() { return this.listeners.click?.(); } };
     Object.defineProperty(elements["player-status"], "innerHTML", {
         set(value) { this._html = value; }, get() { return this._html; },
     });
     const video = {
         currentTime: 0, duration: 100, paused: true, readyState: 0, children: [], loadCalls: 0,
-        append(child) { child.remove = () => { this.children = this.children.filter((item) => item !== child); }; this.children.push(child); },
+        textTracks,
+        append(child) {
+            child.remove = () => {
+                this.children = this.children.filter((item) => item !== child);
+                if (child.track) textTracks.remove(child.track);
+            };
+            this.children.push(child);
+            if (child.tagName === "track") {
+                child.track = { kind: child.kind, mode: "disabled", label: child.label, language: child.srclang };
+                textTracks.add(child.track);
+            }
+        },
         querySelector(tag) { return this.children.find((child) => child.tagName === tag); },
         querySelectorAll(selector) { return this.children.filter((child) => selector.split(", ").includes(child.tagName)); },
         addEventListener(type, fn, options = {}) { const entries = listeners.get(type) || []; entries.push({ fn, once: options.once }); listeners.set(type, entries); },
@@ -43,7 +68,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             }
         },
         pause() { this.paused = true; this.dispatch("pause"); },
-        load() { this.loadCalls += 1; },
+        load() { this.loadCalls += 1; queueMicrotask(() => textTracks.dispatch("change")); },
     };
     elements["b2-video"] = video;
     elements["b2-player-config"] = { textContent: JSON.stringify({
@@ -64,7 +89,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             addEventListener(type, fn) { documentListeners[type] = fn; },
         },
         window: { addEventListener(type, fn) { windowListeners[type] = fn; }, location: { assign(url) { navigations.push(url); } } },
-        fetch: (url, options = {}) => { requests.push({ url, options }); return url === "/media" && !configPatch.testMediaFetch ? Promise.resolve(media()) : fetcher(url, options, requests.length - 1); },
+        fetch: (url, options = {}) => { requests.push({ url, options }); return url === "/media" && !configPatch.testMediaFetch ? Promise.resolve(media(configPatch.testMediaResponse)) : fetcher(url, options, requests.length - 1); },
         URLSearchParams,
         setInterval(fn) { const id = nextInterval++; intervals.set(id, fn); return id; },
         clearInterval(id) { intervals.delete(id); },
@@ -74,7 +99,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
-const media = () => ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: [] });
+const media = (body = {}) => ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: [], ...body });
 const requestBody = (request) => Object.fromEntries(new URLSearchParams(request.options.body || ""));
 
 test("zero offset is ready; completion at 95% does not navigate; ended obeys binge toggle", async () => {
@@ -355,4 +380,143 @@ test("media error retry preserves playback position and does not duplicate subti
     assert.equal(player.video.currentTime, 42);
     assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
     assert.equal(player.video.children.filter((child) => child.tagName === "track").length, 2);
+});
+
+const captionTracks = (player) => player.video.textTracks.tracks;
+const captionPosts = (player) => player.requests.filter((request) => request.url === "/captions" && request.options.method === "POST");
+const dispatchTrackChange = (player) => player.video.textTracks.dispatch("change");
+
+test("saved captions-on preference initializes first subtitle without posting", async () => {
+    const player = createPlayer((url, options) => options.method === "GET" ? Promise.resolve(ok({ offset: null })) : Promise.resolve(ok()), {
+        testMediaResponse: { subtitle_urls: ["/en.vtt", "/fr.vtt"] }, captions_url: "/captions", captions_enabled: true,
+    });
+    await tick();
+    assert.equal(captionTracks(player).length, 2);
+    assert.equal(player.video.children.filter((child) => child.tagName === "track")[0].default, true);
+    assert.equal(captionTracks(player)[0].mode, "showing");
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["showing", "disabled"]);
+    dispatchTrackChange(player);
+    await tick();
+    assert.equal(captionPosts(player).length, 0);
+});
+
+test("missing captions preference defaults off without posting initialization", async () => {
+    const player = createPlayer((url, options) => options.method === "GET" ? Promise.resolve(ok({ offset: null })) : Promise.resolve(ok()), {
+        testMediaResponse: { subtitle_urls: ["/en.vtt", "/fr.vtt"] }, captions_url: "/captions",
+    });
+    await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "track")[0].default, false);
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled", "disabled"]);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled", "disabled"]);
+    assert.equal(captionPosts(player).length, 0);
+});
+
+test("saved captions-off preference initializes every subtitle disabled without posting", async () => {
+    const player = createPlayer((url, options) => options.method === "GET" ? Promise.resolve(ok({ offset: null })) : Promise.resolve(ok()), {
+        testMediaResponse: { subtitle_urls: ["/en.vtt", "/fr.vtt"] }, captions_url: "/captions", captions_enabled: false,
+    });
+    await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "track")[0].default, false);
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled", "disabled"]);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled", "disabled"]);
+    assert.equal(captionPosts(player).length, 0);
+});
+
+test("caption menu transitions persist on and off, ignoring language and duplicate changes", async () => {
+    const player = createPlayer((url, options) => url === "/progress" && options.method === "GET" ? Promise.resolve(ok({ offset: null })) : Promise.resolve(ok()), {
+        testMediaResponse: { subtitle_urls: ["/en.vtt", "/fr.vtt"] }, captions_url: "/captions", captions_enabled: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const [english, french] = captionTracks(player);
+    french.mode = "showing";
+    dispatchTrackChange(player);
+    english.mode = "disabled";
+    dispatchTrackChange(player);
+    await tick();
+    assert.equal(captionPosts(player).length, 0, "switching languages while captions stay enabled is not a preference change");
+    french.mode = "disabled";
+    dispatchTrackChange(player);
+    dispatchTrackChange(player);
+    english.mode = "showing";
+    dispatchTrackChange(player);
+    french.mode = "showing";
+    dispatchTrackChange(player);
+    await tick();
+    assert.deepEqual(captionPosts(player).map(requestBody), [
+        { captions_enabled: "false" }, { captions_enabled: "true" },
+    ]);
+});
+
+test("no-subtitle media and failed caption saves do not affect playback", async () => {
+    const player = createPlayer((url, options) => url === "/media"
+        ? Promise.resolve(ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: [] }))
+        : url === "/captions" ? Promise.resolve({ ok: false }) : Promise.resolve(ok({ offset: null })), {
+        captions_url: "/captions", captions_enabled: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(player.video.textTracks.length, 0);
+    assert.equal(captionPosts(player).length, 0);
+    player.video.textTracks.add({ kind: "metadata", mode: "disabled" });
+    dispatchTrackChange(player);
+    await tick();
+    assert.equal(captionPosts(player).length, 0, "unrelated tracks are ignored");
+    player.video.textTracks.tracks[0].mode = "showing";
+    dispatchTrackChange(player);
+    await tick();
+    assert.equal(captionPosts(player).length, 0);
+    player.video.textTracks.add({ kind: "subtitles", mode: "disabled" });
+    dispatchTrackChange(player);
+    await tick();
+    player.video.dispatch("play");
+    assert.equal(player.video.paused, false);
+    assert.equal(captionPosts(player).length, 1);
+});
+
+test("rapid caption choices are serialized and retry restores latest local preference", async () => {
+    const firstPost = deferred();
+    let heldCaptionPost = false;
+    const player = createPlayer((url, options) => url === "/progress" && options.method === "GET"
+        ? Promise.resolve(ok({ offset: null }))
+        : url === "/captions" && !heldCaptionPost ? (heldCaptionPost = true, firstPost.promise) : Promise.resolve(ok()), {
+        testMediaResponse: { subtitle_urls: ["/en.vtt", "/fr.vtt"] }, captions_url: "/captions", captions_enabled: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const [english] = captionTracks(player);
+    english.mode = "disabled";
+    dispatchTrackChange(player);
+    await tick();
+    english.mode = "showing";
+    dispatchTrackChange(player);
+    await tick();
+    assert.deepEqual(captionPosts(player).map(requestBody), [{ captions_enabled: "false" }]);
+    firstPost.resolve(ok());
+    await tick();
+    assert.deepEqual(captionPosts(player).map(requestBody), [{ captions_enabled: "false" }, { captions_enabled: "true" }]);
+    english.mode = "disabled";
+    dispatchTrackChange(player);
+    await tick();
+    assert.deepEqual(captionPosts(player).map(requestBody), [
+        { captions_enabled: "false" }, { captions_enabled: "true" }, { captions_enabled: "false" },
+    ]);
+    player.video.dispatch("error");
+    player.context.document.getElementById("retry-video").click();
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled", "disabled"]);
+    dispatchTrackChange(player);
+    await tick();
+    assert.equal(captionPosts(player).length, 3, "retry initialization does not overwrite or repost preference");
 });
