@@ -9,6 +9,13 @@ from mediaviewer.tests import helpers
 
 
 @pytest.mark.django_db
+def test_captions_enabled_defaults_to_false():
+    user = helpers.create_user()
+
+    assert user.settings().captions_enabled is False
+
+
+@pytest.mark.django_db
 @mock.patch("mediaviewer.forms.PasswordResetForm")
 class TestNewUser:
     @pytest.fixture(autouse=True)

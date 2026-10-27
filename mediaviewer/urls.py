@@ -54,6 +54,11 @@ urlpatterns = [
         player.b2playermedia,
         name="b2playermedia",
     ),
+    re_path(
+        r"^b2player/(?P<guid>[0-9A-Za-z]+)/captions/$",
+        player.b2playercaptions,
+        name="b2playercaptions",
+    ),
     re_path(r"^settings/", settings.settings, name="settings"),
     re_path(r"^submitsettings/", settings.submitsettings, name="submitsettings"),
     re_path(r"^submitnewuser/", settings.submitnewuser, name="submitnewuser"),

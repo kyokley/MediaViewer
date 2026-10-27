@@ -64,6 +64,7 @@ class UserSettings(models.Model):
     )
     jump_to_last_watched = models.BooleanField(blank=False, null=False, default=True)
     allow_password_logins = models.BooleanField(blank=True, null=False, default=True)
+    captions_enabled = models.BooleanField(blank=False, null=False, default=False)
 
     theme = models.CharField(
         max_length=32, blank=False, null=False, default=DARK, choices=THEME_CHOICES
