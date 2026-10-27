@@ -188,7 +188,8 @@ li.nav-item > a.btn-outline-primary:hover {
   filter: none;
 }
 
-.carousel-item {
+#recent-carousel .carousel-item {
+    display: flex;
     margin-left: 25px;
     margin-right: 25px;
     justify-content: center;
