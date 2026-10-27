@@ -199,10 +199,14 @@ li.nav-item > a.btn-outline-primary:hover {
     height: 50vh;
 }
 
+#recent-carousel {
+    container-type: inline-size;
+}
+
 #recent-carousel .carousel-img {
     width: auto;
     height: auto;
-    max-width: 100%;
+    max-width: min(100%, max(0px, calc(100cqi - 150px)));
     max-height: min(50vh, 450px);
     object-fit: contain;
 }
