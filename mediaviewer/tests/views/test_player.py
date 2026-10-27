@@ -275,7 +275,10 @@ def test_b2_player_requires_login_and_token_owner(
     owner_mismatch_response = client.get(url)
 
     assert anonymous_response.status_code == 302
-    assert owner_mismatch_response.status_code == 404
+    assert owner_mismatch_response.status_code == 302
+    assert owner_mismatch_response["Location"] == reverse("mediaviewer:notfound")
+    assert owner_mismatch_response["Cache-Control"] == "private, no-store"
+    assert owner_mismatch_response["Referrer-Policy"] == "no-referrer"
 
 
 @pytest.mark.django_db
@@ -305,9 +308,52 @@ def test_b2_player_rejects_expired_unknown_and_local_tokens(
         reverse("mediaviewer:b2player", args=(local_token.guid,))
     )
 
-    assert expired_response.status_code == 404
-    assert unknown_response.status_code == 404
-    assert local_response.status_code == 404
+    not_found_url = reverse("mediaviewer:notfound")
+    for response in (expired_response, unknown_response, local_response):
+        assert response.status_code == 302
+        assert response["Location"] == not_found_url
+        assert response["Cache-Control"] == "private, no-store"
+        assert response["Referrer-Policy"] == "no-referrer"
+
+
+@pytest.mark.django_db
+def test_b2_player_missing_page_redirects_to_public_themed_404(client, create_user):
+    user = create_user()
+    client.force_login(user)
+    unknown_url = reverse("mediaviewer:b2player", args=("missing",))
+
+    response = client.get(f"{unknown_url}?private=value")
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("mediaviewer:notfound")
+    assert "missing" not in response["Location"]
+    assert "private" not in response["Location"]
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
+    followed_response = client.get(f"{unknown_url}?private=value", follow=True)
+    assert followed_response.status_code == 404
+    assert followed_response.redirect_chain == [(reverse("mediaviewer:notfound"), 302)]
+    assert followed_response.context["title"] == "Page not found"
+    assert "Page not found" in followed_response.content.decode()
+    assert followed_response["Cache-Control"] == "private, no-store"
+    assert followed_response["Referrer-Policy"] == "no-referrer"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("theme", ("light", "dark"))
+def test_notfound_is_public_and_uses_session_theme(client, theme):
+    session = client.session
+    session["theme"] = theme
+    session.save()
+
+    response = client.get(reverse("mediaviewer:notfound"))
+
+    assert response.status_code == 404
+    assert response.context["title"] == "Page not found"
+    assert response.context["theme"] == theme
+    assert response.context["loggedin"] is False
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
 
 
 @pytest.mark.django_db
@@ -414,8 +460,33 @@ def test_b2_player_rejects_incomplete_movie_without_presigning(
 
     response = client.get(reverse("mediaviewer:b2player", args=(token.guid,)))
 
-    assert response.status_code == 404
+    assert response.status_code == 302
+    assert response["Location"] == reverse("mediaviewer:notfound")
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
     presign.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_b2_player_deleted_media_redirects_to_themed_404(
+    client, create_user, create_tv_media_file, mocker
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    media_file = create_tv_media_file()
+    _set_b2(media_file.media_path, "archive/Show/", media_file.filename)
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    guid = token.guid
+    media_file.delete()
+    client.force_login(user)
+
+    response = client.get(reverse("mediaviewer:b2player", args=(guid,)))
+
+    assert response.status_code == 302
+    assert response["Location"] == reverse("mediaviewer:notfound")
+    assert response["Cache-Control"] == "private, no-store"
+    assert response["Referrer-Policy"] == "no-referrer"
+    assert not DownloadToken.objects.filter(guid=guid).exists()
 
 
 @pytest.mark.django_db

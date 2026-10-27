@@ -3,7 +3,7 @@ from functools import wraps
 import requests
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 
@@ -50,10 +50,19 @@ def _sensitive_view(view):
     return wrapped
 
 
+def notfound(request):
+    context = {"title": "Page not found"}
+    setSiteWideContext(context, request)
+    response = render(request, "mediaviewer/404.html", context, status=404)
+    return _sensitive_response(response)
+
+
 @login_required(login_url="/mediaviewer/login/")
 def b2player(request, guid):
     access = _b2_player_access(request, guid)
     if isinstance(access, HttpResponse):
+        if access.status_code == 404:
+            return _sensitive_response(redirect(reverse("mediaviewer:notfound")))
         return access
     token, obj, media_path, user_settings = access
 

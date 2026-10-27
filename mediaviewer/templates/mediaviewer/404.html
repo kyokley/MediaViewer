@@ -1,0 +1,15 @@
+{% extends "home.html" %}
+{% block jumbotron %}{% endblock %}
+{% block main %}
+    <main class="container py-5">
+        <section class="row justify-content-center text-center"
+                 aria-labelledby="not-found-title">
+            <div class="col-12 col-md-9 col-lg-7">
+                <p class="display-1 fw-bold text-primary mb-2" aria-hidden="true">404</p>
+                <h1 id="not-found-title" class="h2 mb-3">Page not found</h1>
+                <p class="lead text-body-secondary mb-4">This page may be unavailable, or the link may have expired.</p>
+                <a class="btn btn-primary btn-lg" href="{% url 'mediaviewer:home' %}">Return to MediaViewer</a>
+            </div>
+        </section>
+    </main>
+{% endblock %}

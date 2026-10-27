@@ -49,6 +49,7 @@ urlpatterns = [
         name="autoplaydownloadlink",
     ),
     re_path(r"^b2player/(?P<guid>[0-9A-Za-z]+)/$", player.b2player, name="b2player"),
+    re_path(r"^404/$", player.notfound, name="notfound"),
     re_path(
         r"^b2player/(?P<guid>[0-9A-Za-z]+)/media/$",
         player.b2playermedia,
