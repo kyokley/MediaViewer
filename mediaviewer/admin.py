@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models.functions import Lower
 from django.db import transaction
 
 from mediaviewer.models import (
@@ -215,6 +216,12 @@ class MediaPathAdmin(admin.ModelAdmin):
     search_fields = ("_path",)
     list_filter = ("skip",)
     inlines = [MediaFileInline]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name in ("tv", "movie"):
+            formfield.queryset = formfield.queryset.order_by(Lower("name"), "pk")
+        return formfield
 
 
 @admin.register(MediaFile)
