@@ -6,12 +6,8 @@ from mediaviewer.models import MediaPath, Movie, TV
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    ("field_name", "media_model"), (("tv", TV), ("movie", Movie))
-)
-def test_media_path_admin_media_choices_are_sorted_and_show_pk(
-    field_name, media_model
-):
+@pytest.mark.parametrize(("field_name", "media_model"), (("tv", TV), ("movie", Movie)))
+def test_media_path_admin_media_choices_are_sorted_and_show_pk(field_name, media_model):
     media_objects = [
         media_model.objects.create(name="beta"),
         media_model.objects.create(name="Alpha"),

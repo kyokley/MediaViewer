@@ -77,7 +77,9 @@ class Media(TimeStampModel):
         return self.mediapath_set.order_by("-pk").first()
 
     def __str__(self):
-        return f"<{self.__class__.__name__} pk:{self.pk} n:{self.name} f:{self.finished}>"
+        return (
+            f"<{self.__class__.__name__} pk:{self.pk} n:{self.name} f:{self.finished}>"
+        )
 
     def __repr__(self):
         return str(self)
