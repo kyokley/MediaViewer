@@ -427,7 +427,7 @@ class Poster(TimeStampModel):
             )
             data = getJSONData(url)
             results = data.get("results") if isinstance(data, dict) else None
-            target_name = _normalize(tv.name)
+            target_name = _normalize(tv.name.replace(":", " "))
             matches = []
             if isinstance(results, list) and target_name:
                 for result in results:
@@ -435,7 +435,8 @@ class Poster(TimeStampModel):
                         continue
                     names = (result.get("name"), result.get("original_name"))
                     if any(
-                        isinstance(name, str) and _normalize(name) == target_name
+                        isinstance(name, str)
+                        and _normalize(name.replace(":", " ")) == target_name
                         for name in names
                     ):
                         matches.append(result)
