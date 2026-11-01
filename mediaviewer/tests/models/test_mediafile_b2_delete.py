@@ -39,7 +39,10 @@ def test_instance_delete_removes_uuid_media_and_subtitle_keys(
 
     client.delete_file.assert_has_calls(
         [
-            mocker.call(bucket="test-bucket", key=f"{prefix}{media_file.b2_uuid}{Path(media_file.filename).suffix}"),
+            mocker.call(
+                bucket="test-bucket",
+                key=f"{prefix}{media_file.b2_uuid}{Path(media_file.filename).suffix}",
+            ),
             mocker.call(bucket="test-bucket", key=f"{prefix}episode-en.vtt"),
             mocker.call(bucket="test-bucket", key=f"{prefix}episode-es.vtt"),
         ],
@@ -50,7 +53,9 @@ def test_instance_delete_removes_uuid_media_and_subtitle_keys(
 
 
 @pytest.mark.django_db(transaction=True)
-def test_queryset_delete_removes_legacy_file_and_subtitles(create_tv_media_file, mocker):
+def test_queryset_delete_removes_legacy_file_and_subtitles(
+    create_tv_media_file, mocker
+):
     client = _mock_client(mocker)
     media_file = create_tv_media_file(filename="legacy episode.mkv")
     media_file.subtitle_files = ["legacy-en.vtt"]
@@ -115,7 +120,9 @@ def test_remote_deletion_waits_for_commit_and_is_skipped_on_rollback(
 
 
 @pytest.mark.django_db(transaction=True)
-def test_local_media_file_delete_does_not_create_b2_client(create_tv_media_file, mocker):
+def test_local_media_file_delete_does_not_create_b2_client(
+    create_tv_media_file, mocker
+):
     get_client = mocker.patch("mediaviewer.b2.get_b2_client")
     media_file = create_tv_media_file(filename="local.mkv")
 
@@ -125,7 +132,9 @@ def test_local_media_file_delete_does_not_create_b2_client(create_tv_media_file,
 
 
 @pytest.mark.django_db(transaction=True)
-def test_file_delete_never_deletes_shared_movie_subtitles(create_movie_media_file, mocker):
+def test_file_delete_never_deletes_shared_movie_subtitles(
+    create_movie_media_file, mocker
+):
     client = _mock_client(mocker)
     media_file = create_movie_media_file(filename="movie.mkv")
     media_path = _use_b2(media_file)

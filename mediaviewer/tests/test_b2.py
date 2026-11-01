@@ -359,23 +359,29 @@ class TestB2ClientDelete:
         mocker.patch.object(client, "_authorize", return_value=AUTH)
         mock_post = mocker.patch("mediaviewer.b2.requests.post")
         mock_post.side_effect = [
-            FakeResponse({
-                "files": [{"fileName": "key", "fileId": "v1", "action": "upload"}],
-                "nextFileName": "key",
-                "nextFileId": "v1",
-            }),
-            FakeResponse({
-                "files": [{"fileName": "key", "fileId": "v2", "action": "upload"}],
-                "nextFileName": "key",
-                "nextFileId": "v1",
-            }),
+            FakeResponse(
+                {
+                    "files": [{"fileName": "key", "fileId": "v1", "action": "upload"}],
+                    "nextFileName": "key",
+                    "nextFileId": "v1",
+                }
+            ),
+            FakeResponse(
+                {
+                    "files": [{"fileName": "key", "fileId": "v2", "action": "upload"}],
+                    "nextFileName": "key",
+                    "nextFileId": "v1",
+                }
+            ),
         ]
 
         with pytest.raises(B2Error, match="repeated its pagination cursor"):
             client.delete_file("mybucket", "key")
 
         assert mock_post.call_count == 2
-        assert all("b2_list_file_versions" in call.args[0] for call in mock_post.call_args_list)
+        assert all(
+            "b2_list_file_versions" in call.args[0] for call in mock_post.call_args_list
+        )
 
     def test_delete_file_collects_all_matching_versions_before_deleting(self, mocker):
         client = B2Client("key-id", "key")
@@ -385,10 +391,26 @@ class TestB2ClientDelete:
             FakeResponse(
                 {
                     "files": [
-                        {"fileName": "folder/movie.mp4", "fileId": "v1", "action": "upload"},
-                        {"fileName": "folder/movie.mp4", "fileId": "v2", "action": "hide"},
-                        {"fileName": "folder/movie.mp4", "fileId": "unfinished", "action": "start"},
-                        {"fileName": "folder/movie.mp4.extra", "fileId": "neighbor", "action": "upload"},
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "v1",
+                            "action": "upload",
+                        },
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "v2",
+                            "action": "hide",
+                        },
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "unfinished",
+                            "action": "start",
+                        },
+                        {
+                            "fileName": "folder/movie.mp4.extra",
+                            "fileId": "neighbor",
+                            "action": "upload",
+                        },
                     ],
                     "nextFileName": "folder/movie.mp4",
                     "nextFileId": "v2",
@@ -397,7 +419,11 @@ class TestB2ClientDelete:
             FakeResponse(
                 {
                     "files": [
-                        {"fileName": "folder/movie.mp4", "fileId": "v3", "action": "upload"},
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "v3",
+                            "action": "upload",
+                        },
                     ],
                 }
             ),
@@ -446,19 +472,25 @@ class TestB2ClientDelete:
         mocker.patch.object(client, "_authorize", return_value=AUTH)
         mock_post = mocker.patch("mediaviewer.b2.requests.post")
         mock_post.side_effect = [
-            FakeResponse({
-                "files": [{"fileName": "key", "fileId": "one", "action": "upload"}],
-                "nextFileName": "key",
-                "nextFileId": "one",
-            }),
-            FakeResponse({"files": [{"fileName": "key", "fileId": "two", "action": "upload"}]}),
+            FakeResponse(
+                {
+                    "files": [{"fileName": "key", "fileId": "one", "action": "upload"}],
+                    "nextFileName": "key",
+                    "nextFileId": "one",
+                }
+            ),
+            FakeResponse(
+                {"files": [{"fileName": "key", "fileId": "two", "action": "upload"}]}
+            ),
             FakeResponse({}),
             FakeResponse({}),
         ]
 
         client.delete_file("mybucket", "key")
 
-        assert [call.kwargs["json"]["fileId"] for call in mock_post.call_args_list[2:]] == [
+        assert [
+            call.kwargs["json"]["fileId"] for call in mock_post.call_args_list[2:]
+        ] == [
             "one",
             "two",
         ]
@@ -496,9 +528,13 @@ class TestB2ClientDelete:
                 mock_post.return_value = FakeResponse(status_code=403)
             else:
                 mock_post.side_effect = [
-                    FakeResponse({
-                        "files": [{"fileName": "key", "fileId": "v1", "action": "upload"}]
-                    }),
+                    FakeResponse(
+                        {
+                            "files": [
+                                {"fileName": "key", "fileId": "v1", "action": "upload"}
+                            ]
+                        }
+                    ),
                     FakeResponse(status_code=403),
                 ]
 

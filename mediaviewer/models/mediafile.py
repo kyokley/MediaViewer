@@ -387,7 +387,9 @@ def capture_mediafile_b2_delete_data(sender, instance, using, **kwargs):
     if instance.b2_uuid:
         prefix = media_path.b2_upload_prefix
         media_key = f"{prefix}{instance.b2_uuid}{Path(instance.filename).suffix}"
-        subtitle_keys = [f"{prefix}{filename}" for filename in instance.subtitle_files or []]
+        subtitle_keys = [
+            f"{prefix}{filename}" for filename in instance.subtitle_files or []
+        ]
     else:
         media_key = media_path.file_key(instance.filename)
         subtitle_keys = [
