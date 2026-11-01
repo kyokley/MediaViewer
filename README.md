@@ -51,3 +51,18 @@ capped.
 The bulk `upload_to_b2` command stores its logical
 `<configured-prefix>/<MediaPath-ID>/<local-directory>/` URI unchanged; the
 nested object prefix is derived from that URI when files are uploaded or read.
+
+## B2 deletion
+
+Deleting a B2-backed `MediaFile`, including queryset and cascade deletions,
+removes its video and its own `subtitle_files` from B2 after the database
+transaction commits. Local files and movie subtitles stored on `MediaPath`
+are not removed. Cleanup uses the native B2 API to list and permanently delete
+all uploaded versions and hide markers for each exact object key; similarly
+prefixed objects are not deleted.
+
+The application key needs `listFiles` and `deleteFiles` capabilities for the
+bucket and object names being deleted. Object Lock retention or legal holds can
+prevent deletion. Cleanup runs synchronously after commit. Failures are logged
+without undoing the database deletion, and there is no automatic retry; failed
+objects require manual cleanup using the bucket and key in the log.

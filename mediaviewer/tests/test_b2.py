@@ -351,3 +351,192 @@ class TestB2ClientGeneratePresignedUrl:
         client.generate_presigned_url("mybucket", "key/foo.mp4", expires_in=60)
 
         assert mock_post.call_args.kwargs["json"]["validDurationInSeconds"] == 60
+
+
+class TestB2ClientDelete:
+    def test_repeated_listing_cursor_raises_without_deleting(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.side_effect = [
+            FakeResponse(
+                {
+                    "files": [{"fileName": "key", "fileId": "v1", "action": "upload"}],
+                    "nextFileName": "key",
+                    "nextFileId": "v1",
+                }
+            ),
+            FakeResponse(
+                {
+                    "files": [{"fileName": "key", "fileId": "v2", "action": "upload"}],
+                    "nextFileName": "key",
+                    "nextFileId": "v1",
+                }
+            ),
+        ]
+
+        with pytest.raises(B2Error, match="repeated its pagination cursor"):
+            client.delete_file("mybucket", "key")
+
+        assert mock_post.call_count == 2
+        assert all(
+            "b2_list_file_versions" in call.args[0] for call in mock_post.call_args_list
+        )
+
+    def test_delete_file_collects_all_matching_versions_before_deleting(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.side_effect = [
+            FakeResponse(
+                {
+                    "files": [
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "v1",
+                            "action": "upload",
+                        },
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "v2",
+                            "action": "hide",
+                        },
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "unfinished",
+                            "action": "start",
+                        },
+                        {
+                            "fileName": "folder/movie.mp4.extra",
+                            "fileId": "neighbor",
+                            "action": "upload",
+                        },
+                    ],
+                    "nextFileName": "folder/movie.mp4",
+                    "nextFileId": "v2",
+                }
+            ),
+            FakeResponse(
+                {
+                    "files": [
+                        {
+                            "fileName": "folder/movie.mp4",
+                            "fileId": "v3",
+                            "action": "upload",
+                        },
+                    ],
+                }
+            ),
+            FakeResponse({}),
+            FakeResponse({}),
+            FakeResponse({}),
+        ]
+
+        client.delete_file("mybucket", "folder/movie.mp4")
+
+        list_url = "https://api123.backblazeb2.com/b2api/v4/b2_list_file_versions"
+        delete_url = "https://api123.backblazeb2.com/b2api/v4/b2_delete_file_version"
+        assert mock_post.call_args_list[0].args == (list_url,)
+        assert mock_post.call_args_list[0].kwargs == {
+            "json": {
+                "bucketId": "bucket-id-1",
+                "prefix": "folder/movie.mp4",
+                "maxFileCount": 1000,
+            },
+            "headers": {"Authorization": "account-token"},
+            "timeout": 30,
+        }
+        assert mock_post.call_args_list[1].kwargs["json"] == {
+            "bucketId": "bucket-id-1",
+            "prefix": "folder/movie.mp4",
+            "maxFileCount": 1000,
+            "startFileName": "folder/movie.mp4",
+            "startFileId": "v2",
+        }
+        delete_calls = mock_post.call_args_list[2:]
+        assert [call.args[0] for call in delete_calls] == [delete_url] * 3
+        assert [call.kwargs["json"] for call in delete_calls] == [
+            {"fileName": "folder/movie.mp4", "fileId": "v1"},
+            {"fileName": "folder/movie.mp4", "fileId": "v2"},
+            {"fileName": "folder/movie.mp4", "fileId": "v3"},
+        ]
+        for call in delete_calls:
+            assert call.kwargs == {
+                "json": call.kwargs["json"],
+                "headers": {"Authorization": "account-token"},
+                "timeout": 30,
+            }
+
+    def test_delete_file_deletes_versions_from_all_pages(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.side_effect = [
+            FakeResponse(
+                {
+                    "files": [{"fileName": "key", "fileId": "one", "action": "upload"}],
+                    "nextFileName": "key",
+                    "nextFileId": "one",
+                }
+            ),
+            FakeResponse(
+                {"files": [{"fileName": "key", "fileId": "two", "action": "upload"}]}
+            ),
+            FakeResponse({}),
+            FakeResponse({}),
+        ]
+
+        client.delete_file("mybucket", "key")
+
+        assert [
+            call.kwargs["json"]["fileId"] for call in mock_post.call_args_list[2:]
+        ] == [
+            "one",
+            "two",
+        ]
+
+    def test_delete_missing_key_is_noop(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.return_value = FakeResponse({"files": []})
+
+        client.delete_file("mybucket", "missing")
+
+        assert mock_post.call_count == 1
+
+    def test_delete_file_unknown_bucket_raises(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+
+        with pytest.raises(B2Error, match="not accessible"):
+            client.delete_file("otherbucket", "key")
+
+        mock_post.assert_not_called()
+
+    @pytest.mark.parametrize("failure_at", ["authorize", "list", "delete"])
+    def test_delete_file_propagates_http_failures(self, mocker, failure_at):
+        client = B2Client("key-id", "key")
+        mock_get = mocker.patch("mediaviewer.b2.requests.get")
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        if failure_at == "authorize":
+            mock_get.return_value = FakeResponse(status_code=403)
+        else:
+            mocker.patch.object(client, "_authorize", return_value=AUTH)
+            if failure_at == "list":
+                mock_post.return_value = FakeResponse(status_code=403)
+            else:
+                mock_post.side_effect = [
+                    FakeResponse(
+                        {
+                            "files": [
+                                {"fileName": "key", "fileId": "v1", "action": "upload"}
+                            ]
+                        }
+                    ),
+                    FakeResponse(status_code=403),
+                ]
+
+        with pytest.raises(RuntimeError, match="HTTP 403"):
+            client.delete_file("mybucket", "key")

@@ -1,5 +1,9 @@
 import re
-from django.db import models
+from pathlib import Path
+
+from django.db import models, transaction
+from django.db.models.signals import post_delete, pre_delete
+from django.dispatch import receiver
 from django.urls import reverse
 
 from mediaviewer.log import log
@@ -371,3 +375,49 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
             report_html,
         ]
         return payload
+
+
+@receiver(pre_delete, sender=MediaFile)
+def capture_mediafile_b2_delete_data(sender, instance, using, **kwargs):
+    media_path = instance.media_path
+    if not media_path.is_b2:
+        instance._b2_delete_data = None
+        return
+
+    if instance.b2_uuid:
+        prefix = media_path.b2_upload_prefix
+        media_key = f"{prefix}{instance.b2_uuid}{Path(instance.filename).suffix}"
+        subtitle_keys = [
+            f"{prefix}{filename}" for filename in instance.subtitle_files or []
+        ]
+    else:
+        media_key = media_path.file_key(instance.filename)
+        subtitle_keys = [
+            media_path.file_key(filename) for filename in instance.subtitle_files or []
+        ]
+
+    instance._b2_delete_data = (
+        media_path.bucket,
+        tuple(dict.fromkeys((media_key, *subtitle_keys))),
+    )
+
+
+@receiver(post_delete, sender=MediaFile)
+def delete_mediafile_b2_objects(sender, instance, using, **kwargs):
+    delete_data = getattr(instance, "_b2_delete_data", None)
+    if not delete_data:
+        return
+
+    bucket, keys = delete_data
+
+    def delete_objects(bucket=bucket, keys=keys):
+        from mediaviewer.b2 import get_b2_client
+
+        for key in keys:
+            try:
+                client = get_b2_client()
+                client.delete_file(bucket=bucket, key=key)
+            except Exception:
+                log.exception("Failed to delete B2 object b2://%s/%s", bucket, key)
+
+    transaction.on_commit(delete_objects, using=using)
