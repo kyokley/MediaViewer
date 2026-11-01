@@ -30,8 +30,8 @@ class B2Client:
     """Minimal Backblaze B2 native API (v4) client.
 
     Implements the subset of the B2 native API needed by MediaViewer:
-    account authorization, single/large file uploads, and download
-    authorization tokens (the B2 equivalent of presigned URLs).
+    account authorization, single/large file uploads, file-version deletion,
+    and download authorization tokens (the B2 equivalent of presigned URLs).
     """
 
     def __init__(self, application_key_id, application_key, api_url=None):
@@ -174,6 +174,61 @@ class B2Client:
         token = resp.json()["authorizationToken"]
         file_name = "/".join(quote(segment) for segment in key.split("/"))
         return f"{auth['downloadUrl']}/file/{quote(bucket)}/{file_name}?Authorization={token}"
+
+    def list_file_versions(self, bucket, key):
+        """Return every B2 file version matching the key prefix."""
+        auth = self._authorize()
+        bucket_id = self._bucket_id(bucket)
+        files = []
+        cursor = None
+        while True:
+            payload = {
+                "bucketId": bucket_id,
+                "prefix": key,
+                "maxFileCount": 1000,
+            }
+            if cursor is not None:
+                payload["startFileName"], payload["startFileId"] = cursor
+            resp = requests.post(
+                f"{auth['apiUrl']}/b2api/{B2_API_VERSION}/b2_list_file_versions",
+                json=payload,
+                headers={"Authorization": auth["authorizationToken"]},
+                timeout=API_TIMEOUT,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            files.extend(data.get("files", []))
+            next_file_name = data.get("nextFileName")
+            next_file_id = data.get("nextFileId")
+            if not next_file_name or not next_file_id:
+                break
+            next_cursor = (next_file_name, next_file_id)
+            if next_cursor == cursor:
+                raise B2Error("B2 file-version listing repeated its pagination cursor")
+            cursor = next_cursor
+        return files
+
+    def delete_file_version(self, bucket, key, file_id):
+        auth = self._authorize()
+        self._bucket_id(bucket)
+        resp = requests.post(
+            f"{auth['apiUrl']}/b2api/{B2_API_VERSION}/b2_delete_file_version",
+            json={"fileName": key, "fileId": file_id},
+            headers={"Authorization": auth["authorizationToken"]},
+            timeout=API_TIMEOUT,
+        )
+        resp.raise_for_status()
+
+    def delete_file(self, bucket, key):
+        versions = self.list_file_versions(bucket, key)
+        deletable_actions = {"upload", "hide"}
+        for version in versions:
+            if (
+                version.get("fileName") == key
+                and version.get("action") in deletable_actions
+                and version.get("fileId")
+            ):
+                self.delete_file_version(bucket, key, version["fileId"])
 
     def _get_upload_url(self, bucket_id, auth):
         resp = requests.get(
