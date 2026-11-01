@@ -203,3 +203,19 @@ def test_populate_display_name_adds_title_only_when_present(
     movie_file = create_movie_media_file(filename="Movie.mkv")
     movie_file.populate_display_name()
     assert movie_file.display_name == movie_file.movie.name
+
+
+@pytest.mark.django_db
+def test_infer_missing_scrapers_skips_uuid_uploads_but_keeps_legacy_files(
+    create_tv_media_file, mocker
+):
+    legacy_file = create_tv_media_file(filename="Legacy.Show.S01E02.mkv")
+    uuid_file = create_tv_media_file(filename="UUID.Show.S01E02.mkv")
+    uuid_file.b2_uuid = "00000000-0000-0000-0000-000000000001"
+    uuid_file.save(update_fields=("b2_uuid",))
+    infer_scraper = mocker.patch.object(MediaFile, "infer_scraper", autospec=True)
+
+    MediaFile.objects.infer_missing_scrapers()
+
+    infer_scraper.assert_called_once()
+    assert infer_scraper.call_args.args == (legacy_file,)

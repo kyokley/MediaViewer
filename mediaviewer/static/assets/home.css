@@ -222,8 +222,14 @@ li.nav-item > a.btn-outline-primary:hover {
 }
 
 a.carousel-link {
+    display: inline-block;
+    position: relative;
     text-decoration: none;
     color: var(--bs-text-white) !important;
+}
+
+#recent-carousel .carousel-link .carousel-img {
+    display: block;
 }
 
 .slick-track

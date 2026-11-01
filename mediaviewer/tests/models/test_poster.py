@@ -267,6 +267,94 @@ def test_tv_name_search_rejects_duplicate_exact_matches(create_tv_media_file, mo
 
 
 @pytest.mark.django_db
+def test_tv_name_search_matches_colon_separator_and_enriches_episode(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 2
+    media_file.episode = 1
+    media_file.save()
+    tv = media_file.tv
+    tv.name = "Dexter Resurrection"
+    tv.save(update_fields=["name"])
+    parent_poster = Poster.objects.from_ref_obj(tv)
+    parent_poster.plot = "Existing series plot"
+    parent_poster.save()
+    poster = media_file.poster
+    poster.tmdb = "259909"
+    poster.save()
+    search = mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={
+            "results": [
+                {
+                    "id": 259909,
+                    "name": "Dexter: Resurrection",
+                    "original_name": "Dexter: Resurrection",
+                }
+            ]
+        },
+    )
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        return_value={
+            "id": 7781685,
+            "name": "Risky Business",
+            "overview": "Episode overview",
+            "air_date": "2026-11-01",
+        },
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+    mocker.patch.object(Poster, "_populate_tv_series_details")
+
+    poster.populate_data()
+
+    parent_poster.refresh_from_db()
+    poster.refresh_from_db()
+    media_file.refresh_from_db()
+    assert len(search.call_args_list) == 1
+    assert parent_poster.tmdb == "259909"
+    episode_info.assert_called_once_with("259909", 2, 1)
+    assert poster.tmdb == "7781685"
+    assert poster.episodename == "Risky Business"
+    assert poster.extendedplot == "Episode overview"
+    assert poster.release_date.isoformat() == "2026-11-01"
+    assert media_file.display_name == "S02 E01: Risky Business"
+
+
+@pytest.mark.django_db
+def test_tv_name_search_rejects_colon_normalized_duplicate_matches(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 2
+    media_file.episode = 1
+    media_file.save()
+    tv = media_file.tv
+    tv.name = "Dexter Resurrection"
+    tv.save(update_fields=["name"])
+    parent_poster = Poster.objects.from_ref_obj(tv)
+    search = mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={
+            "results": [
+                {"id": 259909, "name": "Dexter: Resurrection"},
+                {"id": 300001, "original_name": "Dexter Resurrection"},
+            ]
+        },
+    )
+    episode_info = mocker.patch("mediaviewer.models.poster.getTVDBEpisodeInfo")
+
+    media_file.poster.populate_data()
+
+    parent_poster.refresh_from_db()
+    assert len(search.call_args_list) == 1
+    assert parent_poster.tmdb == ""
+    episode_info.assert_not_called()
+
+
+@pytest.mark.django_db
 def test_parent_identity_database_error_propagates_without_name_search(
     create_tv_media_file, mocker
 ):

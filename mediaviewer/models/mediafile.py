@@ -51,7 +51,7 @@ class MediaFileManager(models.Manager, ViewableManagerMixin):
         self.all().infer_scrapers()
 
     def infer_missing_scrapers(self):
-        self.filter(scraper=None).infer_scrapers()
+        self.filter(scraper=None, b2_uuid__isnull=True).infer_scrapers()
 
 
 class MediaFile(TimeStampModel, ViewableObjectMixin):
