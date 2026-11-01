@@ -67,6 +67,80 @@ class TestB2ClientAuthorize:
 
         assert mock_get.call_count == 1
 
+    def test_authorize_reuses_cache_before_one_hour(self, mocker):
+        client = B2Client("key-id", "key")
+        mock_get = mocker.patch("mediaviewer.b2.requests.get")
+        mock_get.return_value = FakeResponse(AUTHORIZE_RESPONSE)
+        mock_clock = mocker.patch("time.monotonic", side_effect=[100, 3699])
+
+        first_auth = client._authorize()
+        second_auth = client._authorize()
+
+        assert first_auth is second_auth
+        assert mock_get.call_count == 1
+        assert mock_clock.call_count == 2
+
+    @pytest.mark.parametrize("elapsed", [3600, 3601])
+    def test_authorize_refreshes_at_or_after_one_hour(self, mocker, elapsed):
+        client = B2Client("key-id", "key")
+        renewed_response = {
+            **AUTHORIZE_RESPONSE,
+            "authorizationToken": "renewed-account-token",
+        }
+        mock_get = mocker.patch("mediaviewer.b2.requests.get")
+        mock_get.side_effect = [
+            FakeResponse(AUTHORIZE_RESPONSE),
+            FakeResponse(renewed_response),
+        ]
+        mocker.patch("time.monotonic", side_effect=[100, 100 + elapsed, 100 + elapsed])
+
+        client._authorize()
+        renewed_auth = client._authorize()
+
+        assert mock_get.call_count == 2
+        assert renewed_auth["authorizationToken"] == "renewed-account-token"
+
+    def test_presigned_url_uses_renewed_account_token(self, mocker, settings):
+        settings.B2_PRESIGNED_URL_EXPIRY = 1234
+        client = B2Client("key-id", "key")
+        renewed_response = {
+            **AUTHORIZE_RESPONSE,
+            "authorizationToken": "renewed-account-token",
+        }
+        mock_get = mocker.patch("mediaviewer.b2.requests.get")
+        mock_get.side_effect = [
+            FakeResponse(AUTHORIZE_RESPONSE),
+            FakeResponse(renewed_response),
+        ]
+        mocker.patch("time.monotonic", side_effect=[100, 3700, 3700, 3700])
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
+
+        client._authorize()
+        client.generate_presigned_url("mybucket", "key/foo.mp4")
+
+        assert mock_post.call_args.kwargs["headers"] == {
+            "Authorization": "renewed-account-token"
+        }
+
+    def test_failed_authorization_refresh_is_retried(self, mocker):
+        client = B2Client("key-id", "key")
+        mock_get = mocker.patch("mediaviewer.b2.requests.get")
+        mock_get.side_effect = [
+            FakeResponse(AUTHORIZE_RESPONSE),
+            FakeResponse(status_code=500),
+            FakeResponse({**AUTHORIZE_RESPONSE, "authorizationToken": "retried-token"}),
+        ]
+        mocker.patch("time.monotonic", side_effect=[100, 3700, 3701, 3701])
+
+        client._authorize()
+        with pytest.raises(RuntimeError, match="HTTP 500"):
+            client._authorize()
+        retried_auth = client._authorize()
+
+        assert mock_get.call_count == 3
+        assert retried_auth["authorizationToken"] == "retried-token"
+
 
 class TestGetB2Client:
     @pytest.fixture(autouse=True)
