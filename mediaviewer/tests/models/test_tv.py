@@ -3,6 +3,25 @@ from datetime import datetime, timedelta
 import pytest
 from datetime import timezone
 
+from mediaviewer.models import Poster, TV
+
+
+@pytest.mark.django_db
+def test_from_path_preserves_poster_populated_during_tv_creation(mocker):
+    def populate_data(poster):
+        poster.tmdb = "1234"
+        poster.imdb = "tt001234"
+        poster.save()
+
+    mocker.patch.object(
+        Poster, "populate_data", autospec=True, side_effect=populate_data
+    )
+
+    tv = TV.objects.from_path("/library/Example Show", name="Example Show")
+
+    assert tv.poster.tmdb == "1234"
+    assert tv.poster.imdb == "tt001234"
+
 
 @pytest.mark.django_db
 def test_episodes(

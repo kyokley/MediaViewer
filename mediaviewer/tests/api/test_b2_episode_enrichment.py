@@ -7,7 +7,7 @@ import requests
 from django.db import transaction
 from django.urls import reverse
 
-from mediaviewer.models import MediaFile, Poster
+from mediaviewer.models import FilenameScrapeFormat, MediaFile, Poster
 from mediaviewer.models.tvdbconfiguration import tvdbConfig
 
 
@@ -131,6 +131,59 @@ def test_uuid_tv_upload_enriches_episode_metadata_immediately(
         stream=True,
         timeout=settings.REQUEST_TIMEOUT,
     )
+
+
+@pytest.mark.django_db
+def test_infer_scrapers_does_not_replace_enriched_uuid_upload_poster(
+    client,
+    create_user,
+    create_tv,
+    mocker,
+    settings,
+    django_capture_on_commit_callbacks,
+):
+    client.force_login(create_user(is_staff=True))
+    tv = create_tv(name="Original Show")
+    media_path = tv.media_path
+    media_path._path = f"b2://episode-fixtures/tv/{media_path.pk}/"
+    media_path.save(update_fields=("_path",))
+    tv._poster = Poster.objects.create(tmdb="4242")
+    tv.save(update_fields=("_poster",))
+    FilenameScrapeFormat.new(
+        nameRegex=r"^Original Show",
+        seasonRegex=r"S(\d+)E\d+",
+        episodeRegex=r"S\d+E(\d+)",
+    )
+    _mock_successful_metadata(mocker, settings)
+    payload = {
+        "filename": "Original Show S01E02.mv-encoded.mp4",
+        "media_path": media_path.pk,
+        "b2_uuid": str(uuid.uuid4()),
+    }
+
+    with django_capture_on_commit_callbacks(execute=True):
+        upload_response = client.post(
+            reverse("mediaviewer:api:mediafile-list"), data=payload, format="json"
+        )
+
+    assert upload_response.status_code == 201, upload_response.json()
+    media_file = MediaFile.objects.get(pk=upload_response.json()["pk"])
+    poster_id = media_file._poster_id
+    poster = Poster.objects.get(pk=poster_id)
+    assert poster.tmdb == "424202"
+    assert poster.episodename == "Pilot"
+    assert media_file.display_name == "S01 E02: Pilot"
+    poster_data = (poster.tmdb, poster.episodename, poster.extendedplot)
+
+    inference_response = client.post("/mediaviewer/api/inferscrapers/")
+
+    assert inference_response.status_code == 200
+    assert inference_response.json() == {"success": True}
+    media_file.refresh_from_db()
+    poster.refresh_from_db()
+    assert media_file._poster_id == poster_id
+    assert (poster.tmdb, poster.episodename, poster.extendedplot) == poster_data
+    assert media_file.display_name == "S01 E02: Pilot"
 
 
 @pytest.mark.django_db(transaction=True)

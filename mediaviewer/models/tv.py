@@ -29,7 +29,8 @@ class TVManager(MediaManager):
             else:
                 tv = self.get(pk=tv_id)
 
-            Poster.objects.from_ref_obj(tv)
+            if tv._poster_id is None:
+                Poster.objects.from_ref_obj(tv)
             mp = MediaPath.objects.create(_path=path, tv=tv)
 
         return tv
