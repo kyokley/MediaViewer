@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import mimetypes
+import time
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote
@@ -38,9 +39,10 @@ class B2Client:
         self._application_key = application_key
         self._api_url = (api_url or DEFAULT_API_URL).rstrip("/")
         self._auth = None
+        self._auth_at = None
 
     def _authorize(self):
-        if self._auth is not None:
+        if self._auth is not None and time.monotonic() - self._auth_at < 3600:
             return self._auth
         resp = requests.get(
             f"{self._api_url}/b2api/{B2_API_VERSION}/b2_authorize_account",
@@ -50,7 +52,7 @@ class B2Client:
         resp.raise_for_status()
         data = resp.json()
         storage = data["apiInfo"]["storageApi"]
-        self._auth = {
+        auth = {
             "authorizationToken": data["authorizationToken"],
             "apiUrl": storage["apiUrl"],
             "downloadUrl": storage["downloadUrl"],
@@ -60,6 +62,8 @@ class B2Client:
                 if bucket.get("name")
             },
         }
+        self._auth = auth
+        self._auth_at = time.monotonic()
         return self._auth
 
     def _bucket_id(self, bucket_name):
