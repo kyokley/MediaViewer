@@ -352,6 +352,23 @@ class TestB2ClientGeneratePresignedUrl:
 
         assert mock_post.call_args.kwargs["json"]["validDurationInSeconds"] == 60
 
+    def test_generate_presigned_url_sets_matching_content_disposition(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
+        disposition = 'inline; filename="Show.S01E02.mkv"'
+
+        url = client.generate_presigned_url(
+            "mybucket", "key/foo.mp4", content_disposition=disposition
+        )
+
+        assert mock_post.call_args.kwargs["json"]["b2ContentDisposition"] == disposition
+        assert url.endswith(
+            "?Authorization=download-token&b2ContentDisposition="
+            "inline%3B%20filename%3D%22Show.S01E02.mkv%22"
+        )
+
 
 class TestB2ClientDelete:
     def test_repeated_listing_cursor_raises_without_deleting(self, mocker):

@@ -94,23 +94,33 @@ class MediaPath(TimeStampModel):
             return f"{base}/{id_prefix}/"
         return f"{'/' * leading_slashes}{id_prefix}/"
 
-    def b2_uuid_presigned_url(self, object_uuid, suffix=""):
-        return self.b2_filename_presigned_url(f"{object_uuid}{suffix}")
-
-    def b2_filename_presigned_url(self, filename):
-        from mediaviewer.b2 import get_b2_client
-
-        return get_b2_client().generate_presigned_url(
-            bucket=self.bucket,
-            key=f"{self.b2_upload_prefix}{filename}",
-            expires_in=None,
+    def b2_uuid_presigned_url(self, object_uuid, suffix="", content_disposition=None):
+        if content_disposition is None:
+            return self.b2_filename_presigned_url(f"{object_uuid}{suffix}")
+        return self.b2_filename_presigned_url(
+            f"{object_uuid}{suffix}", content_disposition=content_disposition
         )
 
-    def presigned_url(self, filename, expires_in=None):
+    def b2_filename_presigned_url(self, filename, content_disposition=None):
         from mediaviewer.b2 import get_b2_client
 
-        return get_b2_client().generate_presigned_url(
-            bucket=self.bucket,
-            key=self.file_key(filename),
-            expires_in=expires_in,
-        )
+        arguments = {
+            "bucket": self.bucket,
+            "key": f"{self.b2_upload_prefix}{filename}",
+            "expires_in": None,
+        }
+        if content_disposition is not None:
+            arguments["content_disposition"] = content_disposition
+        return get_b2_client().generate_presigned_url(**arguments)
+
+    def presigned_url(self, filename, expires_in=None, content_disposition=None):
+        from mediaviewer.b2 import get_b2_client
+
+        arguments = {
+            "bucket": self.bucket,
+            "key": self.file_key(filename),
+            "expires_in": expires_in,
+        }
+        if content_disposition is not None:
+            arguments["content_disposition"] = content_disposition
+        return get_b2_client().generate_presigned_url(**arguments)
