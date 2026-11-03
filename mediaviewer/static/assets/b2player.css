@@ -56,12 +56,12 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .b2-player-status[data-loading="true"] {
-        animation: loading-breathe 1.8s ease-in-out infinite;
+        animation: loading-breathe 1.35s ease-in-out infinite;
     }
 
     @keyframes loading-breathe {
-        0%, 100% { opacity: .62; }
-        50% { opacity: 1; }
+        0%, 100% { opacity: .9; text-shadow: 0 1px 4px #000; }
+        50% { opacity: 1; text-shadow: 0 1px 4px #000, 0 0 16px rgb(255 255 255 / 75%); }
     }
 }
 
