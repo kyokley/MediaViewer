@@ -17,10 +17,13 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
         id, textContent: "", attributes: {}, listeners: {},
+        classes: new Set(),
+        classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
         setAttribute(name, value) { this.attributes[name] = value; },
         click() { return this.listeners.click?.(); },
     }]));
+    for (const element of Object.values(elements)) element.classList.owner = element;
     const listeners = new Map();
     const textTrackListeners = {};
     const textTracks = {
@@ -101,6 +104,24 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
 const ok = (body = {}) => ({ ok: true, json: async () => body });
 const media = (body = {}) => ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: [], ...body });
 const requestBody = (request) => Object.fromEntries(new URLSearchParams(request.options.body || ""));
+
+test("binge button color follows initial state and each toggle", () => {
+    for (const initial of [true, false]) {
+        const player = createPlayer(async () => ok(), { binge_mode: initial });
+        const button = player.elements["binge-toggle"];
+        const assertState = (enabled) => {
+            assert.equal(button.classes.has("btn-success"), enabled);
+            assert.equal(button.classes.has("btn-danger"), !enabled);
+            assert.equal(button.textContent, `Binge mode: ${enabled ? "On" : "Off"}`);
+            assert.equal(button.attributes["aria-pressed"], String(enabled));
+        };
+        assertState(initial);
+        button.click();
+        assertState(!initial);
+        button.click();
+        assertState(initial);
+    }
+});
 
 test("zero offset is ready; completion at 95% does not navigate; ended obeys binge toggle", async () => {
     const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? ok({ offset: 0 }) : ok());

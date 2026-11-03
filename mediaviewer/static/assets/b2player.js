@@ -113,6 +113,8 @@
     if (!bingeButton) return;
     bingeButton.textContent = `Binge mode: ${bingeEnabled ? "On" : "Off"}`;
     bingeButton.setAttribute("aria-pressed", String(bingeEnabled));
+    bingeButton.classList.toggle("btn-success", bingeEnabled);
+    bingeButton.classList.toggle("btn-danger", !bingeEnabled);
   };
   const loadMedia = () => {
     if (mediaRequest) return mediaRequest;
