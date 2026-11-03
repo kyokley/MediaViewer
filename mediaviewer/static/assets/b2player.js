@@ -9,6 +9,12 @@
     if (loading) status.setAttribute("data-loading", "true");
     else status.removeAttribute("data-loading");
   };
+  const showLoadingMessage = (message = "Loading video…") => {
+    const letters = Array.from(message)
+      .map((letter, index) => `<span class="b2-loading-letter" style="--i:${index}">${letter === " " ? " " : letter}</span>`)
+      .join("");
+    status.innerHTML = `<span class="b2-loading-text"><span aria-hidden="true">${letters}</span><span class="visually-hidden">${message}</span></span>`;
+  };
 
   let config;
   try {
@@ -124,7 +130,7 @@
   const loadMedia = () => {
     if (mediaRequest) return mediaRequest;
     setLoading(true);
-    status.textContent = "Loading video…";
+    showLoadingMessage();
     mediaRequest = Promise.resolve().then(async () => {
       try {
         if (typeof config.media_url !== "string" || !config.media_url)
@@ -289,7 +295,7 @@
     }
   };
 
-  status.textContent = "Loading video…";
+  showLoadingMessage();
   let retryPending = false;
   video.addEventListener("loadedmetadata", () => {
     setLoading(false);
@@ -318,7 +324,7 @@
       captionsReady = false;
       loadGeneration = -1;
       setLoading(true);
-      status.textContent = "Retrying…";
+      showLoadingMessage("Retrying…");
       video.load();
       if (video.readyState >= 1) {
         retryPending = false;
@@ -421,6 +427,5 @@
     if (document.visibilityState === "hidden") flushOnExit();
   });
   window.addEventListener("pagehide", flushOnExit);
-  // Temporary animation-testing delay keeps the loading message visible.
-  setTimeout(loadMedia, 60000);
+  loadMedia();
 })();

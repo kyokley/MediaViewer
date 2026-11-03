@@ -54,14 +54,23 @@
 
 .b2-player-status:empty { display: none; }
 
+.b2-loading-text {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    gap: .04em;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-    .b2-player-status[data-loading="true"] {
-        animation: loading-breathe 1.35s ease-in-out infinite;
+    .b2-player-status[data-loading="true"] .b2-loading-letter {
+        display: inline-block;
+        animation: loading-hop 1.6s ease-in-out infinite;
+        animation-delay: calc(var(--i) * .1s);
     }
 
-    @keyframes loading-breathe {
-        0%, 100% { opacity: .9; text-shadow: 0 1px 4px #000; }
-        50% { opacity: 1; text-shadow: 0 1px 4px #000, 0 0 16px rgb(255 255 255 / 75%); }
+    @keyframes loading-hop {
+        0%, 40%, 100% { filter: brightness(1); transform: translateY(0); }
+        20% { filter: brightness(1.35); transform: translateY(-6px); }
     }
 }
 
