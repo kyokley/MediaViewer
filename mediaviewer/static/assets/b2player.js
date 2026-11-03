@@ -5,11 +5,16 @@
   const status = document.getElementById("player-status");
   const configNode = document.getElementById("b2-player-config");
   if (!video || !status || !configNode) return;
+  const setLoading = (loading) => {
+    if (loading) status.setAttribute("data-loading", "true");
+    else status.removeAttribute("data-loading");
+  };
 
   let config;
   try {
     config = JSON.parse(configNode.textContent);
   } catch (_) {
+    setLoading(false);
     status.textContent =
       "Player setup could not be read. Reload this page to try again.";
     return;
@@ -113,9 +118,12 @@
     if (!bingeButton) return;
     bingeButton.textContent = `Binge mode: ${bingeEnabled ? "On" : "Off"}`;
     bingeButton.setAttribute("aria-pressed", String(bingeEnabled));
+    bingeButton.classList.toggle("btn-success", bingeEnabled);
+    bingeButton.classList.toggle("btn-danger", !bingeEnabled);
   };
   const loadMedia = () => {
     if (mediaRequest) return mediaRequest;
+    setLoading(true);
     status.textContent = "Loading video…";
     mediaRequest = Promise.resolve().then(async () => {
       try {
@@ -156,6 +164,7 @@
         });
         video.load();
       } catch (_) {
+        setLoading(false);
         status.innerHTML =
           'Video could not be loaded. <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
         document
@@ -283,6 +292,7 @@
   status.textContent = "Loading video…";
   let retryPending = false;
   video.addEventListener("loadedmetadata", () => {
+    setLoading(false);
     restoreCaptions();
     if (suspended || resumeReady || loadGeneration === generation) return;
     const offset = retryPending ? retryOffset : null;
@@ -290,6 +300,7 @@
     loadResume(generation, offset);
   });
   video.addEventListener("error", () => {
+    setLoading(false);
     status.innerHTML =
       'Video could not be loaded. Check that this site has access to the B2 bucket’s cross-origin resources, then <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
     document.getElementById("retry-video")?.addEventListener("click", () => {
@@ -306,6 +317,7 @@
       retryPending = true;
       captionsReady = false;
       loadGeneration = -1;
+      setLoading(true);
       status.textContent = "Retrying…";
       video.load();
       if (video.readyState >= 1) {

@@ -1,6 +1,38 @@
 import hashlib
+import re
+import unicodedata
+from pathlib import Path
 
 from mediaviewer.models import MediaFile, VideoProgress
+
+
+def media_content_disposition(obj, filename):
+    media_path = obj.media_path
+    tv = getattr(media_path, "tv", None)
+    if tv:
+        title = tv.name
+        season = getattr(obj, "season", None)
+        episode = getattr(obj, "episode", None)
+    else:
+        movie = getattr(media_path, "movie", None)
+        title = getattr(movie, "name", None) or getattr(obj, "name", None)
+        season = episode = None
+
+    ascii_title = (
+        unicodedata.normalize("NFKD", title or "").encode("ascii", "ignore").decode()
+    )
+    safe_title = re.sub(r'[\\/:*?"<>|\x00-\x1f\x7f]+', ".", ascii_title)
+    safe_title = re.sub(r"\s+", ".", safe_title)
+    safe_title = re.sub(r"\.+", ".", safe_title).strip(".") or "video"
+    episode_name = (
+        f".S{season:02d}E{episode:02d}"
+        if season is not None and episode is not None
+        else ""
+    )
+    suffix = Path(filename).suffix
+    if not suffix or not re.fullmatch(r"\.[A-Za-z0-9._-]+", suffix):
+        suffix = ""
+    return f'inline; filename="{safe_title}{episode_name}{suffix}"'
 
 
 def b2_media_path(obj):

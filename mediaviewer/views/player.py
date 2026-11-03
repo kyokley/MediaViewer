@@ -15,6 +15,7 @@ from mediaviewer.models import DownloadToken
 from mediaviewer.views.b2player_utils import (
     b2_media_path,
     has_b2_source,
+    media_content_disposition,
     progress_identifier,
 )
 from mediaviewer.views.views_utils import setSiteWideContext
@@ -149,7 +150,11 @@ def b2playermedia(request, guid):
     token, obj, _media_path, _user_settings = access
 
     try:
-        source_url = obj.downloadLink(token.guid)
+        source_name = obj.filename if hasattr(obj, "filename") else _media_path.filename
+        source_url = obj.downloadLink(
+            token.guid,
+            content_disposition=media_content_disposition(obj, source_name),
+        )
         subtitle_urls = DownloadTokenSerializer().get_subtitle_files(token)
     except (ValueError, TypeError, AttributeError):
         return HttpResponse(status=404)

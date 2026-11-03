@@ -26,7 +26,8 @@
                 <div class="b2-player-status"
                      id="player-status"
                      role="status"
-                     aria-live="polite">Loading video…</div>
+                     aria-live="polite"
+                     data-loading="true">Loading video…</div>
             </div>
             <div class="b2-player-tools">
                 <button class="btn btn-outline-secondary"
@@ -37,7 +38,7 @@
                         id="seek-forward"
                         type="button"
                         aria-label="Forward 10 seconds">10 sec <i class="bi-skip-forward-fill"></i></button>
-                {% if next_url %}<button class="btn btn-outline-secondary"
+                {% if next_url %}<button class="btn {% if player_config.binge_mode %}btn-success{% else %}btn-danger{% endif %}"
         id="binge-toggle"
         type="button"
         aria-pressed="{{ player_config.binge_mode|yesno:'true,false' }}">Binge mode: {% if player_config.binge_mode %}On{% else %}Off{% endif %}</button>{% endif %}

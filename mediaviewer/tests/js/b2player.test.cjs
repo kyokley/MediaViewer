@@ -5,6 +5,7 @@ const vm = require("node:vm");
 const path = require("node:path");
 
 const source = fs.readFileSync(path.join(__dirname, "../../static/assets/b2player.js"), "utf8");
+const styles = fs.readFileSync(path.join(__dirname, "../../static/assets/b2player.css"), "utf8");
 const tick = async () => { for (let index = 0; index < 12; index += 1) await Promise.resolve(); };
 const deferred = () => {
     let resolve;
@@ -16,11 +17,15 @@ const deferred = () => {
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}) {
     const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: "", attributes: {}, listeners: {},
+        id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {},
+        classes: new Set(),
+        classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
         setAttribute(name, value) { this.attributes[name] = value; },
+        removeAttribute(name) { delete this.attributes[name]; },
         click() { return this.listeners.click?.(); },
     }]));
+    for (const element of Object.values(elements)) element.classList.owner = element;
     const listeners = new Map();
     const textTrackListeners = {};
     const textTracks = {
@@ -101,6 +106,62 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
 const ok = (body = {}) => ({ ok: true, json: async () => body });
 const media = (body = {}) => ok({ source_url: "https://bucket.example/video.mp4", subtitle_urls: [], ...body });
 const requestBody = (request) => Object.fromEntries(new URLSearchParams(request.options.body || ""));
+
+test("loading status has a reduced-motion-aware CSS animation", () => {
+    assert.match(styles, /\.b2-player-status\[data-loading\s*=\s*"true"\]/);
+    assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*no-preference\)/);
+    assert.match(styles, /\.b2-player-status\[data-loading\s*=\s*"true"\][\s\S]*?animation:/);
+});
+
+test("loading animation follows media fetch, metadata, failure, and retry lifecycle", async () => {
+    const pending = deferred();
+    let mediaCalls = 0;
+    const player = createPlayer((url) => {
+        if (url !== "/media") return Promise.resolve(ok());
+        mediaCalls += 1;
+        return mediaCalls === 1 ? pending.promise : Promise.resolve(media());
+    }, { testMediaFetch: true });
+    const status = player.elements["player-status"];
+    assert.equal(status.attributes["data-loading"], "true");
+    await tick();
+    assert.equal(status.attributes["data-loading"], "true");
+    pending.resolve(media());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    assert.equal(status.attributes["data-loading"], undefined);
+
+    player.video.dispatch("error");
+    assert.equal(status.attributes["data-loading"], undefined);
+    player.context.document.getElementById("retry-video").click();
+    assert.equal(status.attributes["data-loading"], "true");
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    assert.equal(status.attributes["data-loading"], undefined);
+});
+
+test("media fetch failure stops loading animation", async () => {
+    const player = createPlayer((url) => url === "/media" ? Promise.resolve({ ok: false }) : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    assert.equal(player.elements["player-status"].attributes["data-loading"], undefined);
+});
+
+test("binge button color follows initial state and each toggle", () => {
+    for (const initial of [true, false]) {
+        const player = createPlayer(async () => ok(), { binge_mode: initial });
+        const button = player.elements["binge-toggle"];
+        const assertState = (enabled) => {
+            assert.equal(button.classes.has("btn-success"), enabled);
+            assert.equal(button.classes.has("btn-danger"), !enabled);
+            assert.equal(button.textContent, `Binge mode: ${enabled ? "On" : "Off"}`);
+            assert.equal(button.attributes["aria-pressed"], String(enabled));
+        };
+        assertState(initial);
+        button.click();
+        assertState(!initial);
+        button.click();
+        assertState(initial);
+    }
+});
 
 test("zero offset is ready; completion at 95% does not navigate; ended obeys binge toggle", async () => {
     const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? ok({ offset: 0 }) : ok());

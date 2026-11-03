@@ -73,15 +73,21 @@ class ViewableObjectMixin:
                 Message.clearLastWatchedMessage(user)
         return comment, was_created
 
-    def downloadLink(self, guid):
+    def downloadLink(self, guid, content_disposition=None):
         media_path = self.media_path
         if media_path and media_path.is_b2:
             from mediaviewer.models import MediaFile
 
             if isinstance(self, MediaFile):
                 if self.b2_uuid:
+                    if content_disposition is None:
+                        return media_path.b2_uuid_presigned_url(
+                            self.b2_uuid, Path(self.filename).suffix
+                        )
                     return media_path.b2_uuid_presigned_url(
-                        self.b2_uuid, Path(self.filename).suffix
+                        self.b2_uuid,
+                        Path(self.filename).suffix,
+                        content_disposition=content_disposition,
                     )
                 filename = self.filename
             else:
@@ -96,14 +102,24 @@ class ViewableObjectMixin:
                 )
                 if media_files.count() == 1:
                     media_file = media_files.get()
+                    if content_disposition is None:
+                        return media_path.b2_uuid_presigned_url(
+                            media_file.b2_uuid, Path(media_file.filename).suffix
+                        )
                     return media_path.b2_uuid_presigned_url(
-                        media_file.b2_uuid, Path(media_file.filename).suffix
+                        media_file.b2_uuid,
+                        Path(media_file.filename).suffix,
+                        content_disposition=content_disposition,
                     )
                 if media_files.count() > 1:
                     raise ValueError(
                         f"B2 movie {self} has multiple UUID files for {filename}"
                     )
-            return media_path.presigned_url(filename)
+            if content_disposition is None:
+                return media_path.presigned_url(filename)
+            return media_path.presigned_url(
+                filename, content_disposition=content_disposition
+            )
 
         if self.is_movie():
             waiter_server = f"{conf_settings.WAITER_HEAD}{conf_settings.WAITER_IP_FORMAT_MOVIES}{guid}/"

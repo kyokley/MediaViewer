@@ -1,5 +1,6 @@
 import hashlib
 import uuid
+from types import SimpleNamespace
 from unittest.mock import call
 
 import pytest
@@ -9,6 +10,7 @@ from django.urls import reverse
 
 from mediaviewer.b2 import B2Error
 from mediaviewer.models import DownloadToken, MediaFile, VideoProgress
+from mediaviewer.views.b2player_utils import media_content_disposition
 
 
 def _set_b2(media_path, key, filename=None, subtitles=None):
@@ -38,6 +40,9 @@ def test_b2_player_defers_signed_media_and_subtitles(
         filename = "The.Movie.mkv"
     else:
         obj = create_tv_media_file(filename="Episode.mkv")
+        obj.season = 1
+        obj.episode = 2
+        obj.save(update_fields=("season", "episode"))
         media_path = obj.media_path
         filename = obj.filename
     subtitle_name = "subtitle.vtt"
@@ -65,8 +70,8 @@ def test_b2_player_defers_signed_media_and_subtitles(
 
     get_b2_client = mocker.patch("mediaviewer.b2.get_b2_client")
     b2_client = get_b2_client.return_value
-    b2_client.generate_presigned_url.side_effect = lambda bucket, key, expires_in: (
-        f"https://signed.example/{key}"
+    b2_client.generate_presigned_url.side_effect = (
+        lambda bucket, key, expires_in, **kwargs: f"https://signed.example/{key}"
     )
     token = (
         DownloadToken.objects.from_movie(user, obj)
@@ -118,8 +123,18 @@ def test_b2_player_defers_signed_media_and_subtitles(
         "source_url": f"https://signed.example/{expected_source}",
         "subtitle_urls": [f"https://signed.example/{expected_subtitle}"],
     }
+    source_call = call(bucket="bucket", key=expected_source, expires_in=None)
+    if is_movie:
+        title = obj.name
+        episode = ""
+    else:
+        title = obj.media_path.tv.name
+        episode = ".S01E02"
+    source_call.kwargs["content_disposition"] = (
+        f'inline; filename="{title.replace(" ", ".")}{episode}.mkv"'
+    )
     assert b2_client.generate_presigned_url.call_args_list == [
-        call(bucket="bucket", key=expected_source, expires_in=None),
+        source_call,
         call(bucket="bucket", key=expected_subtitle, expires_in=None),
     ]
     media_identity = f"mediafile:{obj.pk}" if not is_movie else f"movie:{obj.pk}"
@@ -131,6 +146,72 @@ def test_b2_player_defers_signed_media_and_subtitles(
         kwargs={"guid": token.guid, "hashed_filename": expected_progress_hash},
     )
     assert response.context["player_config"]["progress_url"] == expected_progress_url
+
+
+@pytest.mark.parametrize(
+    ("title", "season", "episode", "filename", "expected"),
+    [
+        ("A Movie", None, None, "source.MKV", 'inline; filename="A.Movie.MKV"'),
+        (
+            "Café: Night/Day?",
+            0,
+            2,
+            "source.mp4",
+            'inline; filename="Cafe.Night.Day.S00E02.mp4"',
+        ),
+        ("東京", None, None, "source.mkv", 'inline; filename="video.mkv"'),
+        (
+            'A\t  "Show\\Name\r\n',
+            1,
+            2,
+            "source.mkv",
+            'inline; filename="A.Show.Name.S01E02.mkv"',
+        ),
+        ("A Show", 1, None, "source.mkv", 'inline; filename="A.Show.mkv"'),
+        ("A Show", None, 2, "source.mkv", 'inline; filename="A.Show.mkv"'),
+    ],
+)
+def test_media_content_disposition_is_safe_and_keeps_extension(
+    title, season, episode, filename, expected
+):
+    obj = SimpleNamespace(
+        name=title,
+        media_path=SimpleNamespace(tv=SimpleNamespace(name=title)),
+        season=season,
+        episode=episode,
+    )
+
+    assert media_content_disposition(obj, filename) == expected
+
+
+@pytest.mark.parametrize("use_uuid", (True, False))
+@pytest.mark.django_db
+def test_movie_media_file_download_uses_movie_title(
+    mocker, client, create_user, create_movie, create_movie_media_file, use_uuid
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    movie = create_movie(name="Readable Movie")
+    media_file = create_movie_media_file(
+        movie=movie, filename="source.mp4", display_name="Original Source Name"
+    )
+    media_path = media_file.media_path
+    _set_b2(media_path, f"archive/{media_path.pk}/", media_file.filename)
+    if use_uuid:
+        media_file.b2_uuid = uuid.uuid4()
+        media_file.save(update_fields=("b2_uuid",))
+    b2_client = mocker.patch("mediaviewer.b2.get_b2_client").return_value
+    b2_client.generate_presigned_url.return_value = "https://signed.example/video"
+    token = DownloadToken.objects.from_media_file(user, media_file)
+    client.force_login(user)
+
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
+
+    assert response.status_code == 200
+    assert (
+        b2_client.generate_presigned_url.call_args.kwargs["content_disposition"]
+        == 'inline; filename="Readable.Movie.mp4"'
+    )
 
 
 @pytest.mark.django_db

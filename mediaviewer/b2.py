@@ -155,25 +155,33 @@ class B2Client:
         )
         resp.raise_for_status()
 
-    def generate_presigned_url(self, bucket, key, expires_in=None):
+    def generate_presigned_url(
+        self, bucket, key, expires_in=None, content_disposition=None
+    ):
         auth = self._authorize()
         bucket_id = self._bucket_id(bucket)
         if expires_in is None:
             expires_in = settings.B2_PRESIGNED_URL_EXPIRY
+        authorization = {
+            "bucketId": bucket_id,
+            "fileNamePrefix": key,
+            "validDurationInSeconds": expires_in,
+        }
+        if content_disposition is not None:
+            authorization["b2ContentDisposition"] = content_disposition
         resp = requests.post(
             f"{auth['apiUrl']}/b2api/{B2_API_VERSION}/b2_get_download_authorization",
-            json={
-                "bucketId": bucket_id,
-                "fileNamePrefix": key,
-                "validDurationInSeconds": expires_in,
-            },
+            json=authorization,
             headers={"Authorization": auth["authorizationToken"]},
             timeout=API_TIMEOUT,
         )
         resp.raise_for_status()
         token = resp.json()["authorizationToken"]
         file_name = "/".join(quote(segment) for segment in key.split("/"))
-        return f"{auth['downloadUrl']}/file/{quote(bucket)}/{file_name}?Authorization={token}"
+        url = f"{auth['downloadUrl']}/file/{quote(bucket)}/{file_name}?Authorization={token}"
+        if content_disposition is not None:
+            url += f"&b2ContentDisposition={quote(content_disposition, safe='')}"
+        return url
 
     def list_file_versions(self, bucket, key):
         """Return every B2 file version matching the key prefix."""
