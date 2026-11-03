@@ -421,5 +421,6 @@
     if (document.visibilityState === "hidden") flushOnExit();
   });
   window.addEventListener("pagehide", flushOnExit);
-  loadMedia();
+  // Temporary animation-testing delay keeps the loading message visible.
+  setTimeout(loadMedia, 60000);
 })();

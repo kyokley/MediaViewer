@@ -82,6 +82,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     }) };
     const requests = [];
     const intervals = new Map();
+    const timeouts = [];
     let nextInterval = 1;
     const navigations = [];
     const documentListeners = {};
@@ -98,9 +99,17 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         URLSearchParams,
         setInterval(fn) { const id = nextInterval++; intervals.set(id, fn); return id; },
         clearInterval(id) { intervals.delete(id); },
+        setTimeout(fn, delay) {
+            if (configPatch.captureTimeouts) {
+                timeouts.push({ fn, delay });
+                return timeouts.length;
+            }
+            fn();
+            return 1;
+        },
     };
     vm.runInNewContext(source, context);
-    return { elements, video, requests, intervals, navigations, documentListeners, windowListeners, context };
+    return { elements, video, requests, intervals, timeouts, navigations, documentListeners, windowListeners, context };
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
@@ -371,6 +380,22 @@ test("media URL fetch defers source attachment and load until success", async ()
     assert.match(player.elements["player-status"].textContent, /Loading video/);
     pending.resolve(media());
     await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
+    assert.equal(player.video.loadCalls, 1);
+});
+
+test("initial media load waits one minute before requesting video", async () => {
+    const player = createPlayer(async () => media(), { captureTimeouts: true, testMediaFetch: true });
+    assert.equal(player.timeouts.length, 1);
+    assert.equal(player.timeouts[0].delay, 60000);
+    assert.equal(player.requests.length, 0);
+    assert.equal(player.video.children.length, 0);
+    assert.equal(player.video.loadCalls, 0);
+    assert.equal(player.elements["player-status"].attributes["data-loading"], "true");
+
+    player.timeouts[0].fn();
+    await tick();
+    assert.equal(player.requests.filter((request) => request.url === "/media").length, 1);
     assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
     assert.equal(player.video.loadCalls, 1);
 });
