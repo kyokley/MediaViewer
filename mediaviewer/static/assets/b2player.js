@@ -222,8 +222,9 @@
         : undefined,
     ).catch(() =>
       setStatus(
-        "Could not save playback position. Playback can continue.",
+        "Could not save playback position",
         saveGeneration,
+        { fadeOut: true },
       ),
     );
   }
@@ -247,11 +248,11 @@
       }
     })
       .then(() => {
-        setStatus("Marked as viewed.", completeGeneration);
+        setStatus("Marked as viewed", completeGeneration);
       })
       .catch(() => {
         setStatus(
-          "Playback finished, but progress or viewing status could not be updated.",
+          "Playback finished but progress or viewing status could not be updated",
           completeGeneration,
         );
       });
@@ -281,10 +282,10 @@
       resumeReady = true;
       setStatus(
         retryOffset > 0
-          ? "Position loaded. Press play when you’re ready."
-          : "Ready to play.",
+          ? "Position loaded"
+          : "Ready to play",
         expectedGeneration,
-        { fadeOut: retryOffset > 0 },
+        { fadeOut: true },
       );
     } catch (_) {
       if (
@@ -295,7 +296,7 @@
         return;
       resumeReady = true;
       setStatus(
-        "Position could not be loaded. Press play to start; playback will continue.",
+        "Position could not be loaded",
         expectedGeneration,
       );
     }
