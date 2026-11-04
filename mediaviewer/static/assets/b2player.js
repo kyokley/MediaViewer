@@ -187,7 +187,12 @@
     return mediaRequest;
   };
   const setStatus = (message, ownerGeneration = generation) => {
-    if (ownerGeneration === generation) status.textContent = message;
+    if (ownerGeneration !== generation) return;
+    if (message === "Position loaded. Press play when you’re ready.") {
+      status.innerHTML = `<span class="b2-resume-notice">${message}</span>`;
+      return;
+    }
+    status.textContent = message;
   };
   const enqueueMutation = (callback) => {
     mutationQueue = mutationQueue.catch(() => {}).then(callback);

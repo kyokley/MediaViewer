@@ -54,6 +54,32 @@
 
 .b2-player-status:empty { display: none; }
 
+.b2-resume-notice {
+    display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .b2-resume-notice {
+        animation: resume-notice-fade 20.5s linear forwards;
+    }
+
+    @keyframes resume-notice-fade {
+        0%, 97.56% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .b2-resume-notice {
+        animation: resume-notice-dismiss 20s steps(1, end) forwards;
+    }
+
+    @keyframes resume-notice-dismiss {
+        from { opacity: 1; }
+        to { opacity: 0; visibility: hidden; }
+    }
+}
+
 .b2-loading-text {
     position: relative;
     display: inline-flex;

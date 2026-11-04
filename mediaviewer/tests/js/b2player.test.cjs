@@ -45,7 +45,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     Object.defineProperty(elements["player-status"], "innerHTML", {
         set(value) {
             this._html = value;
-            this.textContent = value.match(/class="visually-hidden">([^<]*)<\/span>/)?.[1] || value;
+            this.textContent = value.match(/class="visually-hidden">([^<]*)<\/span>/)?.[1] || value.replace(/<[^>]*>/g, "");
         },
         get() { return this._html; },
     });
@@ -118,6 +118,28 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.match(styles, /\.b2-player-status\[data-loading\s*=\s*"true"\] \.b2-loading-letter[\s\S]*?animation: loading-hop/);
     assert.doesNotMatch(styles, /loading-progress|\.b2-loading-text::after/);
     assert.doesNotMatch(styles, /loading-scroll|text-indent/);
+    assert.match(styles, /\.b2-resume-notice\s*\{\s*animation:\s*resume-notice-fade 20\.5s/);
+    assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
+});
+
+test("saved-position notice is isolated for timed dismissal and replacement", async () => {
+    const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? ok({ offset: 30 }) : ok());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const status = player.elements["player-status"];
+    assert.equal(status.textContent, "Position loaded. Press play when you’re ready.");
+    assert.match(status._html, /class="b2-resume-notice"/);
+
+    player.video.dispatch("error");
+    assert.doesNotMatch(status._html, /b2-resume-notice/);
+    player.context.document.getElementById("retry-video").click();
+    assert.equal(status.textContent, "Retrying…");
+    assert.doesNotMatch(status._html, /b2-resume-notice/);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(status.textContent, "Position loaded. Press play when you’re ready.");
+    assert.match(status._html, /class="b2-resume-notice"/);
 });
 
 test("loading animation follows media fetch, metadata, failure, and retry lifecycle", async () => {
@@ -183,6 +205,7 @@ test("zero offset is ready; completion at 95% does not navigate; ended obeys bin
     await tick();
     assert.equal(player.video.currentTime, 0);
     assert.match(player.elements["player-status"].textContent, /Ready to play/);
+    assert.doesNotMatch(player.elements["player-status"]._html, /b2-resume-notice/);
     player.video.currentTime = 95;
     player.video.dispatch("timeupdate");
     await tick();
