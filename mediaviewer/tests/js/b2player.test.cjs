@@ -43,7 +43,11 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     };
     const retryButton = { listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, click() { return this.listeners.click?.(); } };
     Object.defineProperty(elements["player-status"], "innerHTML", {
-        set(value) { this._html = value; }, get() { return this._html; },
+        set(value) {
+            this._html = value;
+            this.textContent = value.match(/class="visually-hidden">([^<]*)<\/span>/)?.[1] || value.replace(/<[^>]*>/g, "");
+        },
+        get() { return this._html; },
     });
     const video = {
         currentTime: 0, duration: 100, paused: true, readyState: 0, children: [], loadCalls: 0,
@@ -110,7 +114,55 @@ const requestBody = (request) => Object.fromEntries(new URLSearchParams(request.
 test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.match(styles, /\.b2-player-status\[data-loading\s*=\s*"true"\]/);
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*no-preference\)/);
-    assert.match(styles, /\.b2-player-status\[data-loading\s*=\s*"true"\][\s\S]*?animation:/);
+    assert.match(styles, /\.b2-loading-letter[\s\S]*?--i/);
+    assert.match(styles, /\.b2-player-status\[data-loading\s*=\s*"true"\] \.b2-loading-letter[\s\S]*?animation: loading-hop/);
+    assert.doesNotMatch(styles, /loading-progress|\.b2-loading-text::after/);
+    assert.doesNotMatch(styles, /loading-scroll|text-indent/);
+    assert.match(styles, /\.b2-resume-notice\s*\{\s*animation:\s*resume-notice-fade 20\.5s/);
+    assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
+});
+
+test("saved-position notice is isolated for timed dismissal and replacement", async () => {
+    const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? ok({ offset: 30 }) : ok());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const status = player.elements["player-status"];
+    assert.equal(status.textContent, "Position loaded");
+    assert.match(status._html, /class="b2-resume-notice"/);
+
+    player.video.dispatch("error");
+    assert.doesNotMatch(status._html, /b2-resume-notice/);
+    player.context.document.getElementById("retry-video").click();
+    assert.equal(status.textContent, "Retrying…");
+    assert.doesNotMatch(status._html, /b2-resume-notice/);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(status.textContent, "Position loaded");
+    assert.match(status._html, /class="b2-resume-notice"/);
+});
+
+test("failed saved-position lookup does not create a fading notice", async () => {
+    const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? Promise.reject(new Error("offline")) : ok());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const status = player.elements["player-status"];
+    assert.equal(status.textContent, "Position could not be loaded");
+    assert.doesNotMatch(status._html, /b2-resume-notice/);
+});
+
+test("failed playback-position save shows a fading notice", async () => {
+    const player = createPlayer(async (_url, options) => options.method === "POST" ? { ok: false } : ok({ offset: null }));
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.currentTime = 10;
+    player.video.dispatch("pause");
+    await tick();
+    const status = player.elements["player-status"];
+    assert.equal(status.textContent, "Could not save playback position");
+    assert.match(status._html, /class="b2-resume-notice"/);
 });
 
 test("loading animation follows media fetch, metadata, failure, and retry lifecycle", async () => {
@@ -125,6 +177,11 @@ test("loading animation follows media fetch, metadata, failure, and retry lifecy
     assert.equal(status.attributes["data-loading"], "true");
     await tick();
     assert.equal(status.attributes["data-loading"], "true");
+    const loadingMarkup = status._html;
+    const visualLetters = [...loadingMarkup.matchAll(/class="b2-loading-letter"[^>]*>(.*?)<\/span>/g)].map((match) => match[1]).join("");
+    assert.equal(visualLetters, "Loading video…");
+    assert.match(loadingMarkup, /aria-hidden="true"/);
+    assert.match(loadingMarkup, /class="visually-hidden">Loading video…<\/span>/);
     pending.resolve(media());
     await tick();
     player.video.dispatch("loadedmetadata");
@@ -171,6 +228,7 @@ test("zero offset is ready; completion at 95% does not navigate; ended obeys bin
     await tick();
     assert.equal(player.video.currentTime, 0);
     assert.match(player.elements["player-status"].textContent, /Ready to play/);
+    assert.match(player.elements["player-status"]._html, /class="b2-resume-notice"/);
     player.video.currentTime = 95;
     player.video.dispatch("timeupdate");
     await tick();
@@ -233,6 +291,7 @@ test("Start Over invalidates an unresolved initial GET and leaves position at ze
     await restart;
     assert.equal(player.video.currentTime, 0);
     assert.doesNotMatch(player.elements["player-status"].textContent, /Resume position ready/);
+    assert.doesNotMatch(player.elements["player-status"]._html, /b2-resume-notice/);
 });
 
 test("pending old save is skipped at restart; threshold and subsequent play save normally", async () => {
@@ -328,6 +387,10 @@ test("retry before and after metadata reloads with selected position; stale GET 
     player.video.dispatch("error");
     player.context.document.getElementById("retry-video").click();
     assert.equal(player.video.currentTime, 23);
+    assert.equal(player.elements["player-status"].textContent, "Retrying…");
+    const retryMarkup = player.elements["player-status"]._html;
+    assert.match(retryMarkup, /class="b2-loading-letter"/);
+    assert.match(retryMarkup, /class="visually-hidden">Retrying…<\/span>/);
 });
 
 test("page exit serializes a keepalive save behind pending writes", async () => {
@@ -371,6 +434,15 @@ test("media URL fetch defers source attachment and load until success", async ()
     assert.match(player.elements["player-status"].textContent, /Loading video/);
     pending.resolve(media());
     await tick();
+    assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
+    assert.equal(player.video.loadCalls, 1);
+});
+
+test("initial media load starts immediately without scheduling a timeout", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    assert.equal(player.elements["player-status"].attributes["data-loading"], "true");
+    await tick();
+    assert.equal(player.requests.filter((request) => request.url === "/media").length, 1);
     assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
     assert.equal(player.video.loadCalls, 1);
 });

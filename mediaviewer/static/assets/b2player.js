@@ -9,6 +9,15 @@
     if (loading) status.setAttribute("data-loading", "true");
     else status.removeAttribute("data-loading");
   };
+  const showLoadingMessage = (message = "Loading video…") => {
+    const letters = Array.from(message)
+      .map(
+        (letter, index) =>
+          `<span class="b2-loading-letter" style="--i:${index}">${letter === " " ? " " : letter}</span>`,
+      )
+      .join("");
+    status.innerHTML = `<span class="b2-loading-text"><span aria-hidden="true">${letters}</span><span class="visually-hidden">${message}</span></span>`;
+  };
 
   let config;
   try {
@@ -124,7 +133,7 @@
   const loadMedia = () => {
     if (mediaRequest) return mediaRequest;
     setLoading(true);
-    status.textContent = "Loading video…";
+    showLoadingMessage();
     mediaRequest = Promise.resolve().then(async () => {
       try {
         if (typeof config.media_url !== "string" || !config.media_url)
@@ -180,8 +189,17 @@
     });
     return mediaRequest;
   };
-  const setStatus = (message, ownerGeneration = generation) => {
-    if (ownerGeneration === generation) status.textContent = message;
+  const setStatus = (
+    message,
+    ownerGeneration = generation,
+    { fadeOut = false } = {},
+  ) => {
+    if (ownerGeneration !== generation) return;
+    if (fadeOut) {
+      status.innerHTML = `<span class="b2-resume-notice">${message}</span>`;
+      return;
+    }
+    status.textContent = message;
   };
   const enqueueMutation = (callback) => {
     mutationQueue = mutationQueue.catch(() => {}).then(callback);
@@ -210,10 +228,9 @@
         ? progressSave(offset, keepalive)
         : undefined,
     ).catch(() =>
-      setStatus(
-        "Could not save playback position. Playback can continue.",
-        saveGeneration,
-      ),
+      setStatus("Could not save playback position", saveGeneration, {
+        fadeOut: true,
+      }),
     );
   }
   const complete = () => {
@@ -236,11 +253,11 @@
       }
     })
       .then(() => {
-        setStatus("Marked as viewed.", completeGeneration);
+        setStatus("Marked as viewed", completeGeneration);
       })
       .catch(() => {
         setStatus(
-          "Playback finished, but progress or viewing status could not be updated.",
+          "Playback finished but progress or viewing status could not be updated",
           completeGeneration,
         );
       });
@@ -269,10 +286,9 @@
       retryOffset = offset !== null && offset < video.duration ? offset : 0;
       resumeReady = true;
       setStatus(
-        retryOffset > 0
-          ? "Position loaded. Press play when you’re ready."
-          : "Ready to play.",
+        retryOffset > 0 ? "Position loaded" : "Ready to play",
         expectedGeneration,
+        { fadeOut: true },
       );
     } catch (_) {
       if (
@@ -282,14 +298,11 @@
       )
         return;
       resumeReady = true;
-      setStatus(
-        "Position could not be loaded. Press play to start; playback will continue.",
-        expectedGeneration,
-      );
+      setStatus("Position could not be loaded", expectedGeneration);
     }
   };
 
-  status.textContent = "Loading video…";
+  showLoadingMessage();
   let retryPending = false;
   video.addEventListener("loadedmetadata", () => {
     setLoading(false);
@@ -318,7 +331,7 @@
       captionsReady = false;
       loadGeneration = -1;
       setLoading(true);
-      status.textContent = "Retrying…";
+      showLoadingMessage("Retrying…");
       video.load();
       if (video.readyState >= 1) {
         retryPending = false;

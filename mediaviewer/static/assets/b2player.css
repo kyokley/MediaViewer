@@ -54,14 +54,49 @@
 
 .b2-player-status:empty { display: none; }
 
+.b2-resume-notice {
+    display: inline-block;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-    .b2-player-status[data-loading="true"] {
-        animation: loading-breathe 1.8s ease-in-out infinite;
+    .b2-resume-notice {
+        animation: resume-notice-fade 20.5s linear forwards;
     }
 
-    @keyframes loading-breathe {
-        0%, 100% { opacity: .62; }
-        50% { opacity: 1; }
+    @keyframes resume-notice-fade {
+        0%, 97.56% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .b2-resume-notice {
+        animation: resume-notice-dismiss 20s steps(1, end) forwards;
+    }
+
+    @keyframes resume-notice-dismiss {
+        from { opacity: 1; }
+        to { opacity: 0; visibility: hidden; }
+    }
+}
+
+.b2-loading-text {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    gap: .04em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .b2-player-status[data-loading="true"] .b2-loading-letter {
+        display: inline-block;
+        animation: loading-hop 1.6s ease-in-out infinite;
+        animation-delay: calc(var(--i) * .1s);
+    }
+
+    @keyframes loading-hop {
+        0%, 40%, 100% { filter: brightness(1); transform: translateY(0); }
+        20% { filter: brightness(1.35); transform: translateY(-6px); }
     }
 }
 
