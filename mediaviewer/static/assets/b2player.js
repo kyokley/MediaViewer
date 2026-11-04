@@ -186,9 +186,9 @@
     });
     return mediaRequest;
   };
-  const setStatus = (message, ownerGeneration = generation) => {
+  const setStatus = (message, ownerGeneration = generation, { fadeOut = false } = {}) => {
     if (ownerGeneration !== generation) return;
-    if (message === "Position loaded. Press play when you’re ready.") {
+    if (fadeOut) {
       status.innerHTML = `<span class="b2-resume-notice">${message}</span>`;
       return;
     }
@@ -284,6 +284,7 @@
           ? "Position loaded. Press play when you’re ready."
           : "Ready to play.",
         expectedGeneration,
+        { fadeOut: retryOffset > 0 },
       );
     } catch (_) {
       if (

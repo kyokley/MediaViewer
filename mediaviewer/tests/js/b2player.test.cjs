@@ -142,6 +142,16 @@ test("saved-position notice is isolated for timed dismissal and replacement", as
     assert.match(status._html, /class="b2-resume-notice"/);
 });
 
+test("failed saved-position lookup does not create a fading notice", async () => {
+    const player = createPlayer(async (url, options) => url === "/progress" && options.method === "GET" ? Promise.reject(new Error("offline")) : ok());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const status = player.elements["player-status"];
+    assert.equal(status.textContent, "Position could not be loaded. Press play to start; playback will continue.");
+    assert.doesNotMatch(status._html, /b2-resume-notice/);
+});
+
 test("loading animation follows media fetch, metadata, failure, and retry lifecycle", async () => {
     const pending = deferred();
     let mediaCalls = 0;
@@ -268,6 +278,7 @@ test("Start Over invalidates an unresolved initial GET and leaves position at ze
     await restart;
     assert.equal(player.video.currentTime, 0);
     assert.doesNotMatch(player.elements["player-status"].textContent, /Resume position ready/);
+    assert.doesNotMatch(player.elements["player-status"]._html, /b2-resume-notice/);
 });
 
 test("pending old save is skipped at restart; threshold and subsequent play save normally", async () => {
