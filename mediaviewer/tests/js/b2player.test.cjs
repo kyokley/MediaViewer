@@ -128,7 +128,7 @@ test("saved-position notice is isolated for timed dismissal and replacement", as
     player.video.dispatch("loadedmetadata");
     await tick();
     const status = player.elements["player-status"];
-    assert.equal(status.textContent, "Position loaded. Press play when you’re ready.");
+    assert.equal(status.textContent, "Position loaded");
     assert.match(status._html, /class="b2-resume-notice"/);
 
     player.video.dispatch("error");
@@ -138,7 +138,7 @@ test("saved-position notice is isolated for timed dismissal and replacement", as
     assert.doesNotMatch(status._html, /b2-resume-notice/);
     player.video.dispatch("loadedmetadata");
     await tick();
-    assert.equal(status.textContent, "Position loaded. Press play when you’re ready.");
+    assert.equal(status.textContent, "Position loaded");
     assert.match(status._html, /class="b2-resume-notice"/);
 });
 
@@ -148,8 +148,21 @@ test("failed saved-position lookup does not create a fading notice", async () =>
     player.video.dispatch("loadedmetadata");
     await tick();
     const status = player.elements["player-status"];
-    assert.equal(status.textContent, "Position could not be loaded. Press play to start; playback will continue.");
+    assert.equal(status.textContent, "Position could not be loaded");
     assert.doesNotMatch(status._html, /b2-resume-notice/);
+});
+
+test("failed playback-position save shows a fading notice", async () => {
+    const player = createPlayer(async (_url, options) => options.method === "POST" ? { ok: false } : ok({ offset: null }));
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.currentTime = 10;
+    player.video.dispatch("pause");
+    await tick();
+    const status = player.elements["player-status"];
+    assert.equal(status.textContent, "Could not save playback position");
+    assert.match(status._html, /class="b2-resume-notice"/);
 });
 
 test("loading animation follows media fetch, metadata, failure, and retry lifecycle", async () => {
@@ -215,7 +228,7 @@ test("zero offset is ready; completion at 95% does not navigate; ended obeys bin
     await tick();
     assert.equal(player.video.currentTime, 0);
     assert.match(player.elements["player-status"].textContent, /Ready to play/);
-    assert.doesNotMatch(player.elements["player-status"]._html, /b2-resume-notice/);
+    assert.match(player.elements["player-status"]._html, /class="b2-resume-notice"/);
     player.video.currentTime = 95;
     player.video.dispatch("timeupdate");
     await tick();

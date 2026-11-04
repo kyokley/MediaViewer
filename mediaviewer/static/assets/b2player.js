@@ -11,7 +11,10 @@
   };
   const showLoadingMessage = (message = "Loading video…") => {
     const letters = Array.from(message)
-      .map((letter, index) => `<span class="b2-loading-letter" style="--i:${index}">${letter === " " ? " " : letter}</span>`)
+      .map(
+        (letter, index) =>
+          `<span class="b2-loading-letter" style="--i:${index}">${letter === " " ? " " : letter}</span>`,
+      )
       .join("");
     status.innerHTML = `<span class="b2-loading-text"><span aria-hidden="true">${letters}</span><span class="visually-hidden">${message}</span></span>`;
   };
@@ -186,7 +189,11 @@
     });
     return mediaRequest;
   };
-  const setStatus = (message, ownerGeneration = generation, { fadeOut = false } = {}) => {
+  const setStatus = (
+    message,
+    ownerGeneration = generation,
+    { fadeOut = false } = {},
+  ) => {
     if (ownerGeneration !== generation) return;
     if (fadeOut) {
       status.innerHTML = `<span class="b2-resume-notice">${message}</span>`;
@@ -221,11 +228,9 @@
         ? progressSave(offset, keepalive)
         : undefined,
     ).catch(() =>
-      setStatus(
-        "Could not save playback position",
-        saveGeneration,
-        { fadeOut: true },
-      ),
+      setStatus("Could not save playback position", saveGeneration, {
+        fadeOut: true,
+      }),
     );
   }
   const complete = () => {
@@ -281,9 +286,7 @@
       retryOffset = offset !== null && offset < video.duration ? offset : 0;
       resumeReady = true;
       setStatus(
-        retryOffset > 0
-          ? "Position loaded"
-          : "Ready to play",
+        retryOffset > 0 ? "Position loaded" : "Ready to play",
         expectedGeneration,
         { fadeOut: true },
       );
@@ -295,10 +298,7 @@
       )
         return;
       resumeReady = true;
-      setStatus(
-        "Position could not be loaded",
-        expectedGeneration,
-      );
+      setStatus("Position could not be loaded", expectedGeneration);
     }
   };
 
