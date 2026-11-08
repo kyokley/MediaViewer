@@ -111,7 +111,9 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             SessionState: { SESSION_STARTING: "SESSION_STARTING", SESSION_STARTED: "SESSION_STARTED", SESSION_RESUMING: "SESSION_RESUMING", SESSION_RESUMED: "SESSION_RESUMED", SESSION_ENDING: "SESSION_ENDING", SESSION_ENDED: "SESSION_ENDED" } },
     };
     const chromeApi = { cast: { AutoJoinPolicy: { ORIGIN_SCOPED: "ORIGIN_SCOPED" },
-        media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
+        media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", TrackType: { TEXT: "TEXT" }, TextTrackType: { SUBTITLES: "SUBTITLES" },
+            Track: class { constructor(trackId, trackType) { this.trackId = trackId; this.trackType = trackType; } },
+            MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
             LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } } } } };
     const window = { addEventListener(type, fn) { windowListeners[type] = fn; }, location: { assign(url) { navigations.push(url); } } };
     window.__mockProvideCast = () => { window.cast = castApi; window.chrome = chromeApi; };
@@ -523,6 +525,64 @@ test("Cast SDK initializes receiver before playback and loads the signed source 
     assert.equal(player.video.playCalls || 0, 0);
     cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
     assert.equal(player.video.controls, true);
+});
+
+test("Cast load includes signed subtitle tracks and activates first track when captions are enabled", async () => {
+    const urls = ["https://bucket.example/en.vtt?signature=one", "https://bucket.example/en-alt.vtt?signature=two"];
+    const player = createPlayer(async () => media({ subtitle_urls: urls }), { testMediaFetch: true, captions_enabled: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const { media: castMedia, activeTrackIds } = cast.session.request;
+    assert.deepEqual(castMedia.tracks.map((track) => ({
+        trackId: track.trackId, trackType: track.trackType, trackContentId: track.trackContentId,
+        trackContentType: track.trackContentType, subtype: track.subtype, language: track.language, name: track.name,
+    })), [
+        { trackId: 1, trackType: "TEXT", trackContentId: urls[0], trackContentType: "text/vtt", subtype: "SUBTITLES", language: "en", name: "English" },
+        { trackId: 2, trackType: "TEXT", trackContentId: urls[1], trackContentType: "text/vtt", subtype: "SUBTITLES", language: "en", name: "English 2" },
+    ]);
+    assert.deepEqual(Array.from(activeTrackIds), [1]);
+});
+
+test("Cast includes selectable subtitle tracks but activates none when captions are disabled", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), { testMediaFetch: true, captions_enabled: false });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.equal(cast.session.request.media.tracks.length, 1);
+    assert.deepEqual(Array.from(cast.session.request.activeTrackIds), []);
+});
+
+test("Cast safely loads without subtitle tracks", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, captions_enabled: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.deepEqual(Array.from(cast.session.request.media.tracks), []);
+    assert.deepEqual(Array.from(cast.session.request.activeTrackIds), []);
+});
+
+test("Cast honors local caption preference toggled before casting", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), { testMediaFetch: true, captions_enabled: false });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.textTracks.tracks[0].mode = "showing";
+    dispatchTrackChange(player);
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.deepEqual(Array.from(cast.session.request.activeTrackIds), [1]);
 });
 
 test("Cast resume reuses matching media and ignores other media and intermediate states", async () => {
