@@ -111,6 +111,7 @@
   video.textTracks?.addEventListener("change", onTextTrackChange);
 
   let castSourceUrl = null;
+  let castSubtitleUrls = [];
   let castSession = null;
   let castLoadKey = null;
   let castLoadSequence = 0;
@@ -142,7 +143,21 @@
         castSourceUrl,
         "video/mp4",
       );
+      media.tracks = castSubtitleUrls.map((url, index) => {
+        const track = new window.chrome.cast.media.Track(
+          index + 1,
+          window.chrome.cast.media.TrackType.TEXT,
+        );
+        track.trackContentId = url;
+        track.trackContentType = "text/vtt";
+        track.subtype = window.chrome.cast.media.TextTrackType.SUBTITLES;
+        track.language = "en";
+        track.name = `English${index ? ` ${index + 1}` : ""}`;
+        return track;
+      });
       const request = new window.chrome.cast.media.LoadRequest(media);
+      request.activeTrackIds =
+        captionsEnabled && media.tracks.length ? [1] : [];
       request.currentTime = Number.isFinite(video.currentTime)
         ? video.currentTime
         : 0;
@@ -310,6 +325,7 @@
           throw new Error("Invalid media response");
         captionsReady = false;
         castSourceUrl = result.source_url;
+        castSubtitleUrls = result.subtitle_urls;
         video
           .querySelectorAll("source, track")
           .forEach((child) => child.remove());
