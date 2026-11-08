@@ -6,6 +6,7 @@ const path = require("node:path");
 
 const source = fs.readFileSync(path.join(__dirname, "../../static/assets/b2player.js"), "utf8");
 const styles = fs.readFileSync(path.join(__dirname, "../../static/assets/b2player.css"), "utf8");
+const template = fs.readFileSync(path.join(__dirname, "../../templates/mediaviewer/b2player.html"), "utf8");
 const tick = async () => { for (let index = 0; index < 12; index += 1) await Promise.resolve(); };
 const deferred = () => {
     let resolve;
@@ -15,9 +16,9 @@ const deferred = () => {
 };
 
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}) {
-    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle"];
+    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "airplay-video"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {},
+        id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
@@ -66,19 +67,23 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         querySelector(tag) { return this.children.find((child) => child.tagName === tag); },
         querySelectorAll(selector) { return this.children.filter((child) => selector.split(", ").includes(child.tagName)); },
         addEventListener(type, fn, options = {}) { const entries = listeners.get(type) || []; entries.push({ fn, once: options.once }); listeners.set(type, entries); },
-        dispatch(type) {
+        dispatch(type, event = {}) {
             if (type === "play") this.paused = false;
             if (type === "pause" || type === "ended") this.paused = true;
             if (type === "ended") this.currentTime = this.duration;
             const entries = listeners.get(type) || [];
             for (const entry of [...entries]) {
-                entry.fn();
+                entry.fn(event);
                 if (entry.once) entries.splice(entries.indexOf(entry), 1);
             }
         },
         pause() { this.paused = true; this.dispatch("pause"); },
         load() { this.loadCalls += 1; queueMicrotask(() => textTracks.dispatch("change")); },
     };
+    if (configPatch.airplaySupported) {
+        video.pickerCalls = 0;
+        video.webkitShowPlaybackTargetPicker = () => { video.pickerCalls += 1; };
+    }
     elements["b2-video"] = video;
     elements["b2-player-config"] = { textContent: JSON.stringify({
         media_url: "/media", progress_url: "/progress",
@@ -90,14 +95,35 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const navigations = [];
     const documentListeners = {};
     const windowListeners = {};
+    const castSession = { request: null, mediaSession: configPatch.currentCastMedia ? { media: { contentId: configPatch.currentCastMedia } } : null,
+        loadCalls: 0, getMediaSession() { return this.mediaSession; },
+        loadMedia(request) { this.loadCalls += 1; this.request = request; return configPatch.castLoadDeferred?.promise || (configPatch.castLoadFailure ? Promise.reject(new Error("failed")) : Promise.resolve()); } };
+    const castContext = {
+        sessionListener: null,
+        setOptions(options) { this.options = options; this.setOptionsCalls = (this.setOptionsCalls || 0) + 1; },
+        addEventListener(_type, listener) { this.sessionListener = listener; },
+        getCurrentSession() { return castSession; },
+    };
+    const castApi = {
+        context: castContext, session: castSession,
+        framework: { CastContext: { getInstance: () => castContext },
+            CastContextEventType: { SESSION_STATE_CHANGED: "session-state" },
+            SessionState: { SESSION_STARTING: "SESSION_STARTING", SESSION_STARTED: "SESSION_STARTED", SESSION_RESUMING: "SESSION_RESUMING", SESSION_RESUMED: "SESSION_RESUMED", SESSION_ENDING: "SESSION_ENDING", SESSION_ENDED: "SESSION_ENDED" } },
+    };
+    const chromeApi = { cast: { AutoJoinPolicy: { ORIGIN_SCOPED: "ORIGIN_SCOPED" },
+        media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
+            LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } } } } };
+    const window = { addEventListener(type, fn) { windowListeners[type] = fn; }, location: { assign(url) { navigations.push(url); } } };
+    window.__mockProvideCast = () => { window.cast = castApi; window.chrome = chromeApi; };
     const context = {
         document: {
             cookie: "", visibilityState: "visible",
+            head: { append(script) { this.script = script; this.callbackAtAppend = window.__onGCastApiAvailable; if (!configPatch.castApiLate) queueMicrotask(() => { if (!configPatch.castUnavailable) window.__mockProvideCast(); window.__onGCastApiAvailable?.(!configPatch.castUnavailable); if (configPatch.castNoDevices) elements["cast-video"].style.display = "none"; }); } },
             getElementById(id) { return id === "retry-video" ? retryButton : elements[id] || null; },
             createElement(tag) { return { tagName: tag }; },
             addEventListener(type, fn) { documentListeners[type] = fn; },
         },
-        window: { addEventListener(type, fn) { windowListeners[type] = fn; }, location: { assign(url) { navigations.push(url); } } },
+        window,
         fetch: (url, options = {}) => { requests.push({ url, options }); return url === "/media" && !configPatch.testMediaFetch ? Promise.resolve(media(configPatch.testMediaResponse)) : fetcher(url, options, requests.length - 1); },
         URLSearchParams,
         setInterval(fn) { const id = nextInterval++; intervals.set(id, fn); return id; },
@@ -120,6 +146,11 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.doesNotMatch(styles, /loading-scroll|text-indent/);
     assert.match(styles, /\.b2-resume-notice\s*\{\s*animation:\s*resume-notice-fade 20\.5s/);
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
+});
+
+test("Cast launcher is SDK-managed, hidden before initialization, and sized as a usable control", () => {
+    assert.match(template, /<google-cast-launcher[^>]*id="cast-video"[^>]*hidden/);
+    assert.match(styles, /google-cast-launcher\s*\{[^}]*width:\s*2\.75rem[^}]*height:\s*2\.5rem/);
 });
 
 test("saved-position notice is isolated for timed dismissal and replacement", async () => {
@@ -445,6 +476,196 @@ test("initial media load starts immediately without scheduling a timeout", async
     assert.equal(player.requests.filter((request) => request.url === "/media").length, 1);
     assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
     assert.equal(player.video.loadCalls, 1);
+});
+
+test("AirPlay option appears on availability before playback and opens picker on click", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, airplaySupported: true });
+    const button = player.elements["airplay-video"];
+    assert.equal(button.hidden, true);
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    assert.equal(player.video.paused, true);
+    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "available" });
+    assert.equal(button.hidden, false);
+    button.click();
+    assert.equal(player.video.pickerCalls, 1);
+    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "not-available" });
+    assert.equal(button.hidden, true);
+});
+
+test("AirPlay option stays hidden when native picker is unsupported", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    assert.equal(player.elements["airplay-video"].hidden, true);
+});
+
+test("Cast SDK initializes receiver before playback and loads the signed source after session start", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    const script = player.context.document.head.script;
+    assert.equal(typeof player.context.document.head.callbackAtAppend, "function");
+    assert.equal(script.src, "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1");
+    assert.equal(player.elements["cast-video"].hidden, true);
+    await tick();
+    const cast = player.context.window.cast;
+    assert.equal(cast.context.setOptionsCalls, 1);
+    assert.equal(cast.context.options.receiverApplicationId, "CC1AD845");
+    assert.equal(player.elements["cast-video"].hidden, false);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.currentTime = 24;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.equal(cast.session.request.media.contentId, "https://bucket.example/video.mp4");
+    assert.equal(cast.session.request.currentTime, 24);
+    assert.equal(player.video.paused, true);
+    assert.equal(player.video.controls, false);
+    assert.equal(player.video.playCalls || 0, 0);
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    assert.equal(player.video.controls, true);
+});
+
+test("Cast resume reuses matching media and ignores other media and intermediate states", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, currentCastMedia: "https://bucket.example/video.mp4" });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const { session, context: castContext } = player.context.window.cast;
+    castContext.sessionListener({ sessionState: "SESSION_RESUMING" });
+    assert.equal(player.elements["player-status"].textContent, "Ready to play");
+    castContext.sessionListener({ sessionState: "SESSION_RESUMED" });
+    assert.equal(session.loadCalls, 0);
+    assert.equal(player.video.controls, false);
+    castContext.sessionListener({ sessionState: "SESSION_ENDED" });
+    assert.equal(player.elements["player-status"].textContent, "Casting ended. Press play to continue here.");
+
+    const other = createPlayer(async () => media(), { testMediaFetch: true, currentCastMedia: "https://other.example/movie.mp4" });
+    await tick();
+    const otherCast = other.context.window.cast;
+    otherCast.context.sessionListener({ sessionState: "SESSION_RESUMED" });
+    assert.equal(otherCast.session.loadCalls, 0);
+    assert.equal(other.video.controls, true);
+});
+
+test("Cast waits for saved resume position before loading and ignores stale callbacks after disconnect", async () => {
+    const progress = deferred();
+    const load = deferred();
+    const player = createPlayer((url, options) => url === "/media" ? Promise.resolve(media()) : url === "/progress" && options.method === "GET" ? progress.promise : Promise.resolve(ok()), {
+        testMediaFetch: true, castLoadDeferred: load,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(cast.session.loadCalls, 0);
+    progress.resolve(ok({ offset: 30 }));
+    await tick();
+    assert.equal(cast.session.loadCalls, 1);
+    assert.equal(cast.session.request.currentTime, 30);
+    assert.equal(player.elements["player-status"].textContent, "Connecting to Chromecast");
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    load.resolve();
+    await tick();
+    assert.equal(player.video.controls, true);
+    assert.equal(player.elements["player-status"].textContent, "Casting ended. Press play to continue here.");
+});
+
+test("Cast loads from zero when saved-position lookup fails", async () => {
+    const player = createPlayer((url, options) => url === "/media" ? Promise.resolve(media()) : url === "/progress" && options.method === "GET" ? Promise.reject(new Error("offline")) : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.equal(cast.session.loadCalls, 1);
+    assert.equal(cast.session.request.currentTime, 0);
+});
+
+test("Cast active state gates local playback and tools; duplicate session events do not reload", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(cast.session.loadCalls, 1);
+    assert.equal(player.elements["seek-back"].disabled, true);
+    player.video.dispatch("play");
+    assert.equal(player.video.paused, true);
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    assert.equal(player.elements["seek-back"].disabled, false);
+});
+
+test("Cast session waits for media source and loads it once when ready", async () => {
+    const pending = deferred();
+    const player = createPlayer((url) => url === "/media" ? pending.promise : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(cast.session.request, null);
+    pending.resolve(media());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(cast.session.request.media.contentId, "https://bucket.example/video.mp4");
+    assert.equal(cast.session.request.currentTime, 0);
+});
+
+test("Cast media failure restores local controls without exposing SDK errors", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castLoadFailure: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.equal(player.video.controls, true);
+    assert.match(player.elements["player-status"].textContent, /Could not start casting/);
+    assert.doesNotMatch(player.elements["player-status"].textContent, /failed/);
+});
+
+test("Cast SDK becoming available after media load remains supported", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castApiLate: true });
+    await tick();
+    assert.equal(typeof player.context.window.__onGCastApiAvailable, "function");
+    player.context.window.__mockProvideCast();
+    player.context.window.__onGCastApiAvailable(true);
+    assert.equal(player.context.window.cast.context.setOptionsCalls, 1);
+    player.context.window.__onGCastApiAvailable(true);
+    assert.equal(player.context.window.cast.context.setOptionsCalls, 1);
+});
+
+test("unavailable Cast SDK leaves launcher hidden and local playback usable", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castUnavailable: true });
+    await tick();
+    assert.equal(player.elements["cast-video"].hidden, true);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.dispatch("play");
+    assert.equal(player.video.paused, false);
+});
+
+test("Cast launcher visibility remains under SDK control when no receivers are available", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castNoDevices: true });
+    await tick();
+    assert.equal(typeof player.context.document.head.callbackAtAppend, "function");
+    assert.equal(player.elements["cast-video"].style.display, "none");
+});
+
+test("Cast initialization failure leaves local player usable", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castApiLate: true });
+    await tick();
+    player.context.window.__mockProvideCast();
+    player.context.window.__onGCastApiAvailable(false);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.dispatch("play");
+    assert.equal(player.video.paused, false);
+    assert.equal(player.elements["player-status"].textContent, "");
 });
 
 test("media URL failures show safe retry and retry without duplicate source or tracks", async () => {

@@ -110,6 +110,162 @@
   };
   video.textTracks?.addEventListener("change", onTextTrackChange);
 
+  let castSourceUrl = null;
+  let castSession = null;
+  let castLoadKey = null;
+  let castLoadSequence = 0;
+  let castReady = false;
+  let castRemoteActive = false;
+  const castButton = document.getElementById("cast-video");
+  const setLocalPlaybackEnabled = (enabled) => {
+    video.controls = enabled;
+    [
+      "seek-back",
+      "seek-forward",
+      "start-over",
+      "binge-toggle",
+      "airplay-video",
+    ].forEach((id) => {
+      const control = document.getElementById(id);
+      if (control) control.disabled = !enabled;
+    });
+  };
+  const loadCastMedia = () => {
+    if (!castReady || !castSession || !castSourceUrl || !resumeReady) return;
+    const key = castSourceUrl;
+    if (castLoadKey === key) return;
+    castLoadKey = key;
+    const session = castSession;
+    const operation = ++castLoadSequence;
+    try {
+      const media = new window.chrome.cast.media.MediaInfo(
+        castSourceUrl,
+        "video/mp4",
+      );
+      const request = new window.chrome.cast.media.LoadRequest(media);
+      request.currentTime = Number.isFinite(video.currentTime)
+        ? video.currentTime
+        : 0;
+      session.loadMedia(request).then(
+        () => {
+          if (castSession !== session || castLoadSequence !== operation) return;
+          video.pause();
+          setLocalPlaybackEnabled(false);
+          setStatus("Playing on Chromecast");
+        },
+        () => {
+          if (castSession !== session || castLoadSequence !== operation) return;
+          castLoadKey = null;
+          castRemoteActive = false;
+          setLocalPlaybackEnabled(true);
+          setStatus(
+            "Could not start casting. Local playback is still available.",
+          );
+        },
+      );
+    } catch (_) {
+      if (castSession !== session || castLoadSequence !== operation) return;
+      castLoadKey = null;
+      castRemoteActive = false;
+      setLocalPlaybackEnabled(true);
+      setStatus("Could not start casting. Local playback is still available.");
+    }
+  };
+  const initializeCast = (available) => {
+    if (
+      !available ||
+      castReady ||
+      !window.cast?.framework ||
+      !window.chrome?.cast?.media
+    )
+      return;
+    try {
+      const castContext = window.cast.framework.CastContext.getInstance();
+      const sessionStates = window.cast.framework.SessionState;
+      castContext.setOptions({
+        receiverApplicationId:
+          window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+      });
+      castContext.addEventListener(
+        window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        (event) => {
+          if (event.sessionState === sessionStates.SESSION_STARTED) {
+            const session = castContext.getCurrentSession();
+            if (!session) return;
+            if (castSession !== session) {
+              castLoadSequence += 1;
+              castLoadKey = null;
+            }
+            castSession = session;
+            castRemoteActive = true;
+            setLocalPlaybackEnabled(false);
+            setStatus("Connecting to Chromecast");
+            loadCastMedia();
+            return;
+          }
+          if (event.sessionState === sessionStates.SESSION_RESUMED) {
+            const session = castContext.getCurrentSession();
+            const currentMedia = session?.getMediaSession?.()?.media;
+            if (session && currentMedia?.contentId === castSourceUrl) {
+              castSession = session;
+              castRemoteActive = true;
+              castLoadKey = castSourceUrl;
+              setLocalPlaybackEnabled(false);
+              setStatus("Playing on Chromecast");
+            } else {
+              castLoadSequence += 1;
+              castSession = null;
+              castRemoteActive = false;
+              castLoadKey = null;
+              setLocalPlaybackEnabled(true);
+            }
+            return;
+          }
+          if (event.sessionState === sessionStates.SESSION_ENDED) {
+            if (!castSession) return;
+            castLoadSequence += 1;
+            castSession = null;
+            castRemoteActive = false;
+            castLoadKey = null;
+            setLocalPlaybackEnabled(true);
+            setStatus("Casting ended. Press play to continue here.");
+            return;
+          }
+        },
+      );
+      castReady = true;
+      if (castButton) castButton.hidden = false;
+    } catch (_) {
+      castReady = false;
+    }
+  };
+  window.__onGCastApiAvailable = initializeCast;
+  const castSdk = document.createElement("script");
+  castSdk.src =
+    "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1";
+  castSdk.async = true;
+  castSdk.onerror = () => {
+    castReady = false;
+  };
+  document.head?.append(castSdk);
+
+  const airplayButton = document.getElementById("airplay-video");
+  if (
+    airplayButton &&
+    typeof video.webkitShowPlaybackTargetPicker === "function"
+  ) {
+    video.addEventListener(
+      "webkitplaybacktargetavailabilitychanged",
+      (event) => {
+        airplayButton.hidden = event.availability !== "available";
+      },
+    );
+    airplayButton.addEventListener("click", () =>
+      video.webkitShowPlaybackTargetPicker(),
+    );
+  }
+
   let resumeReady = false;
   let suspended = false;
   let finished = false;
@@ -153,6 +309,7 @@
         )
           throw new Error("Invalid media response");
         captionsReady = false;
+        castSourceUrl = result.source_url;
         video
           .querySelectorAll("source, track")
           .forEach((child) => child.remove());
@@ -172,6 +329,7 @@
             captionsEnabled && index === 0 ? "showing" : "disabled";
         });
         video.load();
+        loadCastMedia();
       } catch (_) {
         setLoading(false);
         status.innerHTML =
@@ -195,6 +353,12 @@
     { fadeOut = false } = {},
   ) => {
     if (ownerGeneration !== generation) return;
+    if (
+      castRemoteActive &&
+      message !== "Connecting to Chromecast" &&
+      message !== "Playing on Chromecast"
+    )
+      return;
     if (fadeOut) {
       status.innerHTML = `<span class="b2-resume-notice">${message}</span>`;
       return;
@@ -285,6 +449,7 @@
         video.currentTime = offset;
       retryOffset = offset !== null && offset < video.duration ? offset : 0;
       resumeReady = true;
+      loadCastMedia();
       setStatus(
         retryOffset > 0 ? "Position loaded" : "Ready to play",
         expectedGeneration,
@@ -298,6 +463,7 @@
       )
         return;
       resumeReady = true;
+      loadCastMedia();
       setStatus("Position could not be loaded", expectedGeneration);
     }
   };
@@ -341,6 +507,10 @@
     });
   });
   video.addEventListener("play", () => {
+    if (castRemoteActive) {
+      video.pause();
+      return;
+    }
     if (
       finished &&
       video.duration > 0 &&
@@ -373,15 +543,18 @@
   });
   video.addEventListener("ended", ended);
   document.getElementById("seek-back").addEventListener("click", () => {
+    if (castRemoteActive) return;
     video.currentTime = Math.max(0, video.currentTime - 10);
   });
   document.getElementById("seek-forward").addEventListener("click", () => {
+    if (castRemoteActive) return;
     video.currentTime = Math.min(
       video.duration || Infinity,
       video.currentTime + 10,
     );
   });
   document.getElementById("start-over").addEventListener("click", async () => {
+    if (castRemoteActive) return;
     suspended = true;
     generation += 1;
     loadGeneration = generation;
