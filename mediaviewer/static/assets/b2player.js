@@ -110,6 +110,14 @@
   };
   video.textTracks?.addEventListener("change", onTextTrackChange);
 
+  const castButton = document.getElementById("cast-video");
+  if (castButton && typeof video.webkitShowPlaybackTargetPicker === "function") {
+    video.addEventListener("webkitplaybacktargetavailabilitychanged", (event) => {
+      castButton.hidden = event.availability !== "available";
+    });
+    castButton.addEventListener("click", () => video.webkitShowPlaybackTargetPicker());
+  }
+
   let resumeReady = false;
   let suspended = false;
   let finished = false;

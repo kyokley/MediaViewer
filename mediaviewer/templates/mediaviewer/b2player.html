@@ -38,6 +38,11 @@
                         id="seek-forward"
                         type="button"
                         aria-label="Forward 10 seconds">10 sec <i class="bi-skip-forward-fill"></i></button>
+                <button class="btn btn-outline-secondary"
+                        id="cast-video"
+                        type="button"
+                        aria-label="Choose AirPlay device"
+                        hidden><i class="bi-broadcast-pin"></i> AirPlay</button>
                 {% if next_url %}<button class="btn {% if player_config.binge_mode %}btn-success{% else %}btn-danger{% endif %}"
         id="binge-toggle"
         type="button"

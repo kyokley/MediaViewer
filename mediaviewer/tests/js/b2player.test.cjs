@@ -15,9 +15,9 @@ const deferred = () => {
 };
 
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}) {
-    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle"];
+    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {},
+        id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {}, hidden: id === "cast-video",
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
@@ -66,19 +66,23 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         querySelector(tag) { return this.children.find((child) => child.tagName === tag); },
         querySelectorAll(selector) { return this.children.filter((child) => selector.split(", ").includes(child.tagName)); },
         addEventListener(type, fn, options = {}) { const entries = listeners.get(type) || []; entries.push({ fn, once: options.once }); listeners.set(type, entries); },
-        dispatch(type) {
+        dispatch(type, event = {}) {
             if (type === "play") this.paused = false;
             if (type === "pause" || type === "ended") this.paused = true;
             if (type === "ended") this.currentTime = this.duration;
             const entries = listeners.get(type) || [];
             for (const entry of [...entries]) {
-                entry.fn();
+                entry.fn(event);
                 if (entry.once) entries.splice(entries.indexOf(entry), 1);
             }
         },
         pause() { this.paused = true; this.dispatch("pause"); },
         load() { this.loadCalls += 1; queueMicrotask(() => textTracks.dispatch("change")); },
     };
+    if (configPatch.castSupported) {
+        video.pickerCalls = 0;
+        video.webkitShowPlaybackTargetPicker = () => { video.pickerCalls += 1; };
+    }
     elements["b2-video"] = video;
     elements["b2-player-config"] = { textContent: JSON.stringify({
         media_url: "/media", progress_url: "/progress",
@@ -445,6 +449,28 @@ test("initial media load starts immediately without scheduling a timeout", async
     assert.equal(player.requests.filter((request) => request.url === "/media").length, 1);
     assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
     assert.equal(player.video.loadCalls, 1);
+});
+
+test("AirPlay option appears on availability before playback and opens picker on click", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castSupported: true });
+    const button = player.elements["cast-video"];
+    assert.equal(button.hidden, true);
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    assert.equal(player.video.paused, true);
+    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "available" });
+    assert.equal(button.hidden, false);
+    button.click();
+    assert.equal(player.video.pickerCalls, 1);
+    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "not-available" });
+    assert.equal(button.hidden, true);
+});
+
+test("AirPlay option stays hidden when native picker is unsupported", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    assert.equal(player.elements["cast-video"].hidden, true);
 });
 
 test("media URL failures show safe retry and retry without duplicate source or tracks", async () => {
