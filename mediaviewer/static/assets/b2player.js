@@ -119,7 +119,13 @@
   const castButton = document.getElementById("cast-video");
   const setLocalPlaybackEnabled = (enabled) => {
     video.controls = enabled;
-    ["seek-back", "seek-forward", "start-over", "binge-toggle", "airplay-video"].forEach((id) => {
+    [
+      "seek-back",
+      "seek-forward",
+      "start-over",
+      "binge-toggle",
+      "airplay-video",
+    ].forEach((id) => {
       const control = document.getElementById(id);
       if (control) control.disabled = !enabled;
     });
@@ -132,9 +138,14 @@
     const session = castSession;
     const operation = ++castLoadSequence;
     try {
-      const media = new window.chrome.cast.media.MediaInfo(castSourceUrl, "video/mp4");
+      const media = new window.chrome.cast.media.MediaInfo(
+        castSourceUrl,
+        "video/mp4",
+      );
       const request = new window.chrome.cast.media.LoadRequest(media);
-      request.currentTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+      request.currentTime = Number.isFinite(video.currentTime)
+        ? video.currentTime
+        : 0;
       session.loadMedia(request).then(
         () => {
           if (castSession !== session || castLoadSequence !== operation) return;
@@ -147,7 +158,9 @@
           castLoadKey = null;
           castRemoteActive = false;
           setLocalPlaybackEnabled(true);
-          setStatus("Could not start casting. Local playback is still available.");
+          setStatus(
+            "Could not start casting. Local playback is still available.",
+          );
         },
       );
     } catch (_) {
@@ -159,12 +172,19 @@
     }
   };
   const initializeCast = (available) => {
-    if (!available || castReady || !window.cast?.framework || !window.chrome?.cast?.media) return;
+    if (
+      !available ||
+      castReady ||
+      !window.cast?.framework ||
+      !window.chrome?.cast?.media
+    )
+      return;
     try {
       const castContext = window.cast.framework.CastContext.getInstance();
       const sessionStates = window.cast.framework.SessionState;
       castContext.setOptions({
-        receiverApplicationId: window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        receiverApplicationId:
+          window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
         autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
       });
       castContext.addEventListener(
@@ -222,17 +242,28 @@
   };
   window.__onGCastApiAvailable = initializeCast;
   const castSdk = document.createElement("script");
-  castSdk.src = "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1";
+  castSdk.src =
+    "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1";
   castSdk.async = true;
-  castSdk.onerror = () => { castReady = false; };
+  castSdk.onerror = () => {
+    castReady = false;
+  };
   document.head?.append(castSdk);
 
   const airplayButton = document.getElementById("airplay-video");
-  if (airplayButton && typeof video.webkitShowPlaybackTargetPicker === "function") {
-    video.addEventListener("webkitplaybacktargetavailabilitychanged", (event) => {
-      airplayButton.hidden = event.availability !== "available";
-    });
-    airplayButton.addEventListener("click", () => video.webkitShowPlaybackTargetPicker());
+  if (
+    airplayButton &&
+    typeof video.webkitShowPlaybackTargetPicker === "function"
+  ) {
+    video.addEventListener(
+      "webkitplaybacktargetavailabilitychanged",
+      (event) => {
+        airplayButton.hidden = event.availability !== "available";
+      },
+    );
+    airplayButton.addEventListener("click", () =>
+      video.webkitShowPlaybackTargetPicker(),
+    );
   }
 
   let resumeReady = false;
