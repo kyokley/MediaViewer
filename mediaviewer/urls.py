@@ -239,7 +239,9 @@ if not conf_settings.IS_SYNCING:
     router.register(r"filenamescrapeformat", viewset.FilenameScrapeFormatViewSet)
     router.register(r"comment", viewset.CommentViewSet)
     router.register(r"collection", collection_viewset.CollectionViewSet)
-    router.register(r"migrations", migration_viewset.MigrationViewSet, basename="migrations")
+    router.register(
+        r"migrations", migration_viewset.MigrationViewSet, basename="migrations"
+    )
 
     urlpatterns += [
         re_path(r"^api/", include((router.urls, "mediaviewer"), namespace="api")),

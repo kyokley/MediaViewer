@@ -14,7 +14,11 @@ class MigrationOwnership(models.Model):
     class Meta:
         verbose_name = "migration ownership"
         verbose_name_plural = "migration ownership"
-        constraints = [models.CheckConstraint(condition=models.Q(id=1), name="migrationownership_singleton_pk")]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(id=1), name="migrationownership_singleton_pk"
+            )
+        ]
 
     def save(self, *args, **kwargs):
         self.pk = 1
