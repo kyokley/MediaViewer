@@ -20,6 +20,7 @@
                        crossorigin="anonymous"
                        playsinline
                        preload="metadata"
+                       {% if poster_url %}poster="{{ poster_url }}"{% endif %}
                        aria-label="{{ display_name }}">
                     <p>Your browser does not support HTML video. Try a current version of Chrome, Firefox, Safari, or Edge.</p>
                 </video>
@@ -57,12 +58,6 @@
             {% if previous_url %}<a class="btn btn-info" href="{{ previous_url }}"><i class="bi-arrow-left-circle-fill"></i> Previous episode</a>{% endif %}
             {% if next_url %}<a class="btn btn-info" href="{{ next_url }}">Next episode <i class="bi-arrow-right-circle-fill"></i></a>{% endif %}
         </nav>
-        {% if poster_url %}
-            <img class="b2-poster"
-                 src="{{ poster_url }}"
-                 alt="Poster for {{ display_name }}"
-                 loading="lazy">
-        {% endif %}
     </main>
     {{ player_config|json_script:"b2-player-config" }}
 {% endblock %}
