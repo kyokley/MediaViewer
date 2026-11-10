@@ -148,6 +148,42 @@ def test_b2_player_defers_signed_media_and_subtitles(
     assert response.context["player_config"]["progress_url"] == expected_progress_url
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize("is_movie", (True, False))
+@pytest.mark.parametrize("has_poster", (True, False))
+def test_b2_player_uses_poster_as_video_placeholder(
+    client,
+    create_user,
+    create_movie,
+    create_tv_media_file,
+    mocker,
+    is_movie,
+    has_poster,
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    obj = create_movie() if is_movie else create_tv_media_file()
+    media_path = obj.media_path
+    _set_b2(media_path, "archive/", obj.name if is_movie else obj.filename)
+    token = (
+        DownloadToken.objects.from_movie(user, obj)
+        if is_movie
+        else DownloadToken.objects.from_media_file(user, obj)
+    )
+    token.og_image = "https://images.example/poster.jpg" if has_poster else ""
+    token.save(update_fields=("og_image",))
+    client.force_login(user)
+
+    response = client.get(reverse("mediaviewer:b2player", args=(token.guid,)))
+
+    assert response.status_code == 200
+    video = response.content.decode().split("<video", 1)[1].split(">", 1)[0]
+    if has_poster:
+        assert 'poster="https://images.example/poster.jpg"' in video
+    else:
+        assert "poster=" not in video
+
+
 @pytest.mark.parametrize(
     ("title", "season", "episode", "filename", "expected"),
     [
