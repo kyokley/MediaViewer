@@ -12,6 +12,7 @@ from .media import Media
 from .mediafile import MediaFile
 from .mediapath import MediaPath
 from .message import Message
+from .migrationownership import MigrationOwnership
 from .movie import Movie
 from .person import Person
 from .poster import Poster
