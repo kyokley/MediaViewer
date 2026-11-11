@@ -1,26 +1,66 @@
-# file: flake.nix
 {
-  description = "Python application packaged using poetry2nix";
+  description = "MediaViewer checks";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.poetry2nix.url = "github:nix-community/poetry2nix";
+  inputs = {
+    nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling";
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
   outputs = {
     self,
     nixpkgs,
-    poetry2nix,
+    git-hooks,
   }: let
-    system = "x86_64-linux";
-    pkgs = nixpkgs.legacyPackages.${system};
-    # create a custom "mkPoetryApplication" API function that under the hood uses
-    # the packages and versions (python3, poetry etc.) from our pinned nixpkgs above:
-    inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication;
-    myPythonApp = mkPoetryApplication {projectDir = ./.;};
+    systems = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
+    forAllSystems = nixpkgs.lib.genAttrs systems;
   in {
-    apps.${system}.default = {
-      type = "app";
-      # replace <script> with the name in the [tool.poetry.scripts] section of your pyproject.toml
-      program = "${myPythonApp}/bin/<script>";
-    };
+    checks = forAllSystems (system: {
+      pre-commit-check = git-hooks.lib.${system}.run {
+        src = ./.;
+        hooks = {
+          alejandra.enable = true;
+          check-merge-conflicts.enable = true;
+          check-added-large-files.enable = true;
+          check-toml.enable = true;
+          check-yaml.enable = true;
+          detect-private-keys.enable = true;
+          ripsecrets.enable = true;
+          ruff.enable = true;
+          ruff-format.enable = true;
+          trim-trailing-whitespace.enable = true;
+          yamlfmt.enable = true;
+          prettier = {
+            enable = true;
+            files = "\\.js$";
+            excludes = [
+              "mediaviewer/static/passwordless/passwordless.v1.1.0.umd.min.js"
+            ];
+          };
+          djlint = {
+            enable = true;
+            files = "\\.html$";
+            stages = ["pre-commit"];
+            pass_filenames = true;
+            entry = "${nixpkgs.legacyPackages.${system}.djlint}/bin/djlint --reformat";
+          };
+          bandit = {
+            enable = true;
+            name = "bandit-security-checks";
+            entry = "${nixpkgs.legacyPackages.${system}.bandit}/bin/bandit -c ./pyproject.toml";
+            files = "\\.py$";
+            stages = ["pre-commit"];
+            pass_filenames = true;
+          };
+        };
+      };
+    });
   };
 }

@@ -84,55 +84,9 @@
     };
   };
 
-  # https://devenv.sh/pre-commit-hooks/
-  git-hooks.hooks = {
-    alejandra.enable = true;
-    hadolint.enable = false;
-    check-merge-conflicts.enable = true;
-    check-added-large-files.enable = true;
-    check-toml.enable = true;
-    check-yaml.enable = true;
-    checkmake.enable = false;
-    detect-private-keys.enable = true;
-    ripsecrets.enable = true;
-    ruff.enable = true;
-    ruff-format.enable = true;
-    trim-trailing-whitespace.enable = true;
-    yamlfmt.enable = true;
-    yamllint.enable = false;
-    prettier = {
-      enable = true;
-      files = "\\.js$";
-      excludes = [
-        "mediaviewer/static/passwordless/passwordless.v1.1.0.umd.min.js"
-      ];
-    };
-    djlint = {
-      enable = true;
-      files = "\\.html$";
-      stages = ["pre-commit"];
-      pass_filenames = true;
-      entry = "${pkgs.djlint}/bin/djlint --reformat";
-    };
-
-    bandit = {
-      enable = true;
-      name = "bandit-security-checks";
-      entry = "${pkgs.uv}/bin/uvx bandit -c ${config.devenv.root}/pyproject.toml";
-      files = "\\.py$";
-      stages = ["pre-commit"];
-      pass_filenames = true;
-    };
-  };
-
   tasks."mv:format" = {
     exec = ''
-      if [ -d .git/hooks ]; then
-        ${config.git-hooks.installationScript}
-      else
-        echo "Skipping git hook installation: .git/hooks not present"
-      fi
-      ${pkgs.pre-commit}/bin/pre-commit run --all-files --show-diff-on-failure
+      ${pkgs.nix}/bin/nix flake check --print-build-logs
     '';
   };
 
