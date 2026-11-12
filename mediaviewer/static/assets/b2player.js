@@ -349,7 +349,7 @@
       } catch (_) {
         setLoading(false);
         status.innerHTML =
-          'Video could not be loaded. <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
+          'Video could not be loaded <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>';
         document
           .getElementById("retry-video")
           ?.addEventListener("click", () => {
@@ -497,7 +497,7 @@
   video.addEventListener("error", () => {
     setLoading(false);
     status.innerHTML =
-      'Video could not be loaded. Check that this site has access to the B2 bucket’s cross-origin resources, then <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>.';
+      'Video could not be loaded <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>';
     document.getElementById("retry-video")?.addEventListener("click", () => {
       generation += 1;
       suspended = false;
