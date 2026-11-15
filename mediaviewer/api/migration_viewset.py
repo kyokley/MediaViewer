@@ -1,11 +1,6 @@
-import copy
-import json
-import re
 import uuid
 from pathlib import PurePath
 
-from django.conf import settings
-from django.core.serializers.json import DjangoJSONEncoder
 from django.core import signing
 from django.db import IntegrityError, models, transaction
 from django.shortcuts import get_object_or_404
@@ -14,126 +9,21 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from mediaviewer.models import MediaFile, MediaPath, MigrationOwnership
-
-MAX_CANDIDATES = 1000
-SNAPSHOT_SALT = "mediaviewer.migration.snapshot.v1"
-VIDEO_EXTENSIONS = {
-    ".mp4",
-    ".mkv",
-    ".avi",
-    ".mov",
-    ".m4v",
-    ".wmv",
-    ".webm",
-    ".mpeg",
-    ".mpg",
-    ".mpe",
-    ".mpv",
-    ".m2v",
-    ".ts",
-    ".m2ts",
-    ".mts",
-    ".3gp",
-    ".flv",
-    ".ogv",
-    ".vob",
-    ".divx",
-    ".f4v",
-    ".mxf",
-}
-UUID_FILENAME = re.compile(
-    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.vtt$"
+from .file_migration import (
+    FileMigrationMixin,
+    MAX_CANDIDATES,
+    SNAPSHOT_SALT,
+    SnapshotSerializer,
+    VIDEO_EXTENSIONS,
+    _children,
+    _eligible,
+    _snapshot_payload,
+    _subtitle_list,
+    _target,
 )
 
 
-class SnapshotSerializer(signing.JSONSerializer):
-    def dumps(self, obj):
-        return json.dumps(
-            obj, cls=DjangoJSONEncoder, sort_keys=True, separators=(",", ":")
-        ).encode("latin-1")
-
-    def loads(self, data):
-        return json.loads(data.decode("latin-1"))
-
-
-def _eligible(parent):
-    return (
-        not parent.skip
-        and bool(parent._path)
-        and not parent.is_b2
-        and (bool(parent.tv_id) ^ bool(parent.movie_id))
-    )
-
-
-def _children(parent):
-    return list(MediaFile.objects.filter(media_path_id=parent.pk).order_by("pk"))
-
-
-def _target(parent, bucket, prefix):
-    bucket = bucket or getattr(settings, "B2_BUCKET_NAME", "")
-    prefix = prefix if prefix is not None else getattr(settings, "B2_NAME_PREFIX", "")
-    if not isinstance(bucket, str) or not bucket.strip():
-        raise ValueError("Set B2_BUCKET_NAME or provide a bucket query parameter")
-    if (
-        not isinstance(prefix, str)
-        or prefix.startswith("/")
-        or ".." in prefix.split("/")
-    ):
-        raise ValueError("Provide a relative B2 prefix without '..' path segments")
-    normalized_prefix = prefix.strip("/")
-    directory = PurePath(str(parent._path).rstrip("/\\")).name
-    if not directory:
-        raise ValueError("Source path must include a directory name")
-    key = (
-        "/".join(
-            part for part in (normalized_prefix, str(parent.pk), directory) if part
-        )
-        + "/"
-    )
-    staged = copy.copy(parent)
-    staged._path = f"b2://{bucket}/{key}"
-    return {
-        "bucket": bucket,
-        "path": staged._path,
-        "b2_upload_prefix": staged.b2_upload_prefix,
-    }
-
-
-def _parent_state(parent):
-    return _model_state(parent)
-
-
-def _child_state(child):
-    return _model_state(child)
-
-
-def _model_state(instance):
-    state = {}
-    for field in instance._meta.concrete_fields:
-        value = getattr(instance, field.attname)
-        state[field.attname] = json.loads(json.dumps(value, cls=DjangoJSONEncoder))
-    return state
-
-
-def _snapshot_payload(parent, children, target):
-    return {
-        "parent": _parent_state(parent),
-        "children": [_child_state(c) for c in children],
-        "target": target,
-    }
-
-
-def _subtitle_list(value):
-    if not isinstance(value, list) or any(
-        not isinstance(x, str) or not UUID_FILENAME.fullmatch(x) for x in value
-    ):
-        raise ValueError("subtitle_files must contain UUID.vtt filenames")
-    if len(value) != len(set(value)):
-        raise ValueError("subtitle_files cannot contain duplicates")
-    return value
-
-
-class MigrationViewSet(viewsets.ViewSet):
+class MigrationViewSet(FileMigrationMixin, viewsets.ViewSet):
     permission_classes = (permissions.IsAdminUser,)
 
     @action(detail=False, methods=["get", "post", "delete"], url_path="run")
