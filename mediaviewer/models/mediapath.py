@@ -25,6 +25,13 @@ class MediaPath(TimeStampModel):
     movie = models.ForeignKey(
         "mediaviewer.Movie", null=True, on_delete=models.CASCADE, blank=True
     )
+    migration_source = models.OneToOneField(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="migration_target",
+    )
 
     def __str__(self):
         return f"<MediaPath {self.path}>"

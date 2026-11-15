@@ -66,3 +66,41 @@ bucket and object names being deleted. Object Lock retention or legal holds can
 prevent deletion. Cleanup runs synchronously after commit. Failures are logged
 without undoing the database deletion, and there is no automatic retry; failed
 objects require manual cleanup using the bucket and key in the log.
+
+## File-by-file migration from MediaWaiter
+
+MediaWaiter's `migrate_to_b2.py` requires the staff-only file-migration API.
+Deploy this backend and apply database migrations, including
+`0075_mediapath_migration_source`, before running the client. Configure
+`B2_BUCKET_NAME` and `B2_NAME_PREFIX` on MediaViewer; clients must use the returned
+bucket and upload prefix unchanged.
+
+The file-level actions are under `/mediaviewer/api/migrations/`:
+
+- `GET file-candidates/`: cursor-paginated local TV episode and current movie
+  candidates with signed source snapshots. `limit` counts videos; each page
+  includes `version`, `candidates`, and `next_cursor` (null on the final page).
+- `POST {source_pk}/prepare-file/`: validates the source snapshot and complete
+  video/subtitle manifest, reserves a TV destination when needed, and returns a
+  signed publication token, destination ID, bucket, and upload prefix.
+- `POST {source_pk}/publish-file/`: consumes that token after successful uploads,
+  publishes atomically, and accepts an exact replay after a lost response.
+
+Check `python manage.py show_urls` in the deployed runtime for all three actions.
+The older whole-path `candidates/` and `publish/` actions remain available but are
+not interchangeable with this protocol.
+
+The actions use the existing `run/` ownership lock. Pause ordinary writers
+externally; the lock does not stop MediaConverter, scrubbing, or other API writes.
+The API trusts the authorized client's upload manifest and does not contact B2
+to verify object contents. MediaWaiter verifies uploads before publication and
+deletes local sources only after confirmed publication and source checks. It has
+no persistent journal or automatic crash recovery; keep ordinary writers paused
+while investigating failures and inspect publication and ownership before cleanup.
+
+TV preparation creates an unattached B2 MediaPath reservation. Publication
+attaches it to the series and moves only the selected existing MediaFile, keeping
+its ID and episode metadata. Unselected siblings remain local; later episodes
+reuse the reservation. Movies publish their existing MediaPath in place.
+Preparation alone does not change playback. Interrupted preparations can leave
+unused reservations; those reservations do not represent published videos.
