@@ -104,3 +104,23 @@ its ID and episode metadata. Unselected siblings remain local; later episodes
 reuse the reservation. Movies publish their existing MediaPath in place.
 Preparation alone does not change playback. Interrupted preparations can leave
 unused reservations; those reservations do not represent published videos.
+
+## Duplicate local episode cleanup
+
+Data migration `0076_remove_duplicate_local_mediafiles` targets the two audited
+duplicate groups only. It removes MediaFile `7999`, retaining `8001` under
+MediaPath `288` (The Chi S01E05), and removes `9955`, retaining `9956` under
+MediaPath `378` (Harley Quinn S02E04). The smaller primary key determines which
+duplicate is removed; unrelated duplicate groups are not changed.
+Targets are identified by record IDs, without hard-coded local filenames. Each
+pair must still have matching filenames.
+
+The migration deletes the removed rows' comments/viewed flags, watch progress,
+download tokens, and unreferenced episode posters with their metadata links.
+Shared posters, users, MediaPaths, TV series, scraper definitions, and metadata
+entities remain. It does not delete local media, poster image files, or B2 objects.
+
+Already-absent pairs are left alone. If both rows exist but no longer match the
+expected local duplicate group, the migration aborts instead of deleting them.
+This data deletion is irreversible: back up the database and pause ordinary
+writers before applying it through `python manage.py migrate`.
