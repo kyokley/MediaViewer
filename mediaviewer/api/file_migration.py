@@ -16,6 +16,7 @@ from mediaviewer.models import MediaFile, MediaPath, MigrationOwnership
 
 MAX_CANDIDATES = 1000
 SNAPSHOT_SALT = "mediaviewer.migration.snapshot.v1"
+FILE_CURSOR_SALT = "mediaviewer.file-cursor.v2"
 VIDEO_EXTENSIONS = {
     ".mp4",
     ".mkv",
@@ -246,9 +247,9 @@ class FileMigrationMixin:
             if not 1 <= limit <= MAX_CANDIDATES:
                 raise ValueError
             cursor = request.query_params.get("cursor")
-            after, after_child = 0, 0
+            after = after_child = None
             if cursor:
-                decoded = signing.loads(cursor, salt="mediaviewer.file-cursor.v1")
+                decoded = signing.loads(cursor, salt=FILE_CURSOR_SALT)
                 after, after_child = decoded["after"], decoded["child"]
                 if any(
                     isinstance(v, bool) or not isinstance(v, int) or v < 0
@@ -258,8 +259,11 @@ class FileMigrationMixin:
         except (TypeError, ValueError, signing.BadSignature, KeyError):
             return Response({"error": "Invalid limit or cursor"}, status=400)
         candidates = []
-        last = (after, after_child)
-        parents = MediaPath.objects.filter(pk__gte=after).order_by("pk")
+        last = (after, after_child) if cursor else None
+        parents = MediaPath.objects.all()
+        if after is not None:
+            parents = parents.filter(pk__lte=after)
+        parents = parents.order_by("-pk")
         for parent in parents.iterator():
             if not _eligible(parent):
                 continue
@@ -267,7 +271,11 @@ class FileMigrationMixin:
                 continue
             children = _children(parent)
             if parent.tv_id:
-                rows = [(child, "tv") for child in children if child.b2_uuid is None]
+                rows = [
+                    (child, "tv")
+                    for child in reversed(children)
+                    if child.b2_uuid is None
+                ]
             else:
                 if len(children) > 1:
                     return Response(
@@ -294,13 +302,13 @@ class FileMigrationMixin:
                     }
                 )
                 candidate_key = (parent.pk, child.pk if child else 0)
-                if candidate_key <= last:
+                if last is not None and candidate_key >= last:
                     candidates.pop()
                     continue
                 if len(candidates) == limit:
                     next_cursor = signing.dumps(
                         {"after": candidate_key[0], "child": candidate_key[1]},
-                        salt="mediaviewer.file-cursor.v1",
+                        salt=FILE_CURSOR_SALT,
                     )
                     return Response(
                         {
