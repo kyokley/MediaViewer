@@ -172,7 +172,7 @@ def test_migration_repairs_exact_44_filenames_without_changing_other_data():
     assert MediaPath.objects.filter(pk__in=paths).count() == len(TARGETS)
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_migration_skips_missing_and_already_corrected_targets_and_is_repeatable():
     paths, _ = _create_targets()
     MediaFile.objects.filter(pk=4278).delete()
@@ -194,7 +194,7 @@ def test_migration_skips_missing_and_already_corrected_targets_and_is_repeatable
     assert already_corrected.media_path_id != paths[52].pk
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 @pytest.mark.parametrize(
     "scenario",
     ["wrong-parent", "remote-path", "empty-path", "remote-child", "movie"],
