@@ -163,3 +163,20 @@ Only the stale source's `skip` flag changes. All other fields, timestamps, viewi
 history, tokens, posters, and media files remain unchanged. The migration has no
 automatic reverse operation; back up the database and pause ordinary writers
 before applying it. Review any future catalog merge separately.
+
+## Exclude an unavailable movie source
+
+Data migration `0079_skip_unavailable_movie_source` sets only MediaPath `432`'s
+`skip` flag. Its movie, Movie `37`, and all related records remain intact. This
+is an explicitly approved exclusion from migration and conversion, not recovery
+of the missing media.
+
+The migration checks the audited path fingerprint, local ownership, and absence
+of sibling paths, media files, and migration associations before changing an
+active source. Unexpected changes abort the operation. Missing, already-skipped,
+or already-published sources are left alone. No private path is embedded in code,
+and no media files are accessed or changed.
+
+Back up the database and pause ordinary writers before application. There is no
+automatic reverse operation. After locating or restoring the media, verify its
+path and ownership before deliberately re-enabling the source.
