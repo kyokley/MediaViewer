@@ -124,3 +124,24 @@ Already-absent pairs are left alone. If both rows exist but no longer match the
 expected local duplicate group, the migration aborts instead of deleting them.
 This data deletion is irreversible: back up the database and pause ordinary
 writers before applying it through `python manage.py migrate`.
+
+## Repair legacy apostrophe filename mismatches
+
+Data migration `0077_repair_local_mediafile_filenames` repairs only the 44 audited
+MediaFile IDs under MediaPaths `52`, `55`, `112`, `115`, `116`, and `181`. It
+removes ASCII apostrophes from their stored filenames to match the confirmed
+existing files. No local filenames are embedded in the migration.
+
+Only `MediaFile.filename` changes. Record IDs, timestamps, posters, comments,
+watch progress and its hashes, download tokens, and parent associations remain
+unchanged. The migration does not rename, read, upload, or delete media files.
+
+Missing or already-corrected targets are skipped. Targets still needing repair
+must remain on their expected local TV paths without B2 UUIDs. Existing filename
+collisions and collisions between planned repairs abort the entire operation
+before any update. Unrelated records are never normalized automatically.
+
+This is an irreversible metadata repair: removing apostrophes loses their
+original positions. Back up the database and pause ordinary writers before
+applying it through `python manage.py migrate`. The migration trusts the prior
+filesystem audit; it does not inspect the media host during deployment.
