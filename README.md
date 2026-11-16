@@ -145,3 +145,38 @@ This is an irreversible metadata repair: removing apostrophes loses their
 original positions. Back up the database and pause ordinary writers before
 applying it through `python manage.py migrate`. The migration trusts the prior
 filesystem audit; it does not inspect the media host during deployment.
+
+## Exclude a duplicate legacy movie source
+
+Data migration `0078_skip_duplicate_movie_source` marks only stale MediaPath
+`560` as skipped. Active MediaPath `723`, owned by Movie `328`, already represents
+the same film. Movie `165` and its history remain intact; this repair does not
+merge or delete either movie or create a second owner for the valid directory.
+
+The migration checks ownership, audited path fingerprints, the enabled current
+source, and matching poster film identifiers and release dates. Changed or
+unexpectedly associated records abort the operation. Missing, already-skipped,
+or already-published stale sources are left alone. No private filenames or paths
+are embedded in code.
+
+Only the stale source's `skip` flag changes. All other fields, timestamps, viewing
+history, tokens, posters, and media files remain unchanged. The migration has no
+automatic reverse operation; back up the database and pause ordinary writers
+before applying it. Review any future catalog merge separately.
+
+## Exclude an unavailable movie source
+
+Data migration `0079_skip_unavailable_movie_source` sets only MediaPath `432`'s
+`skip` flag. Its movie, Movie `37`, and all related records remain intact. This
+is an explicitly approved exclusion from migration and conversion, not recovery
+of the missing media.
+
+The migration checks the audited path fingerprint, local ownership, and absence
+of sibling paths, media files, and migration associations before changing an
+active source. Unexpected changes abort the operation. Missing, already-skipped,
+or already-published sources are left alone. No private path is embedded in code,
+and no media files are accessed or changed.
+
+Back up the database and pause ordinary writers before application. There is no
+automatic reverse operation. After locating or restoring the media, verify its
+path and ownership before deliberately re-enabling the source.
