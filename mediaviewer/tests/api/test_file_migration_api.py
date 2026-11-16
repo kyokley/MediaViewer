@@ -10,6 +10,51 @@ from mediaviewer.models import MediaFile, MediaPath, MigrationOwnership
 
 
 @pytest.mark.django_db
+def test_remaining_files_counts_unmigrated_mediafile_records(
+    client, create_user, create_tv_media_file, create_movie
+):
+    first = create_tv_media_file(filename="Show.S01E01.mp4")
+    second = MediaFile.objects.create(
+        media_path=first.media_path,
+        filename="Show.S01E02.mp4",
+        hide=True,
+    )
+    skipped = create_tv_media_file(filename="Skipped.S01E01.mp4")
+    MediaPath.objects.filter(pk=skipped.media_path_id).update(skip=True)
+    migrated = create_tv_media_file(filename="Migrated.S01E01.mp4")
+    MediaFile.objects.filter(pk=migrated.pk).update(b2_uuid=uuid.uuid4())
+    create_movie()
+
+    client.force_login(create_user(is_staff=True))
+    response = client.get(reverse("mediaviewer:api:migrations-remaining-files"))
+
+    assert response.status_code == 200
+    assert response.json() == {"version": 1, "remaining_mediafiles": 3}
+    assert first.media_path_id == second.media_path_id
+
+
+@pytest.mark.django_db
+def test_remaining_files_rejects_anonymous_and_nonstaff(client, create_user):
+    url = reverse("mediaviewer:api:migrations-remaining-files")
+    assert client.get(url).status_code in (401, 403)
+    client.force_login(create_user(is_staff=False))
+    assert client.get(url).status_code in (401, 403)
+
+
+@pytest.mark.django_db
+def test_waiter_basic_auth_backend_can_access_remaining_files(client, settings):
+    settings.WAITER_LOGIN = "waiter"
+    settings.WAITER_PASSWORD_HASH = make_password("test-secret")
+    credentials = base64.b64encode(b"waiter:test-secret").decode("ascii")
+    client.defaults["HTTP_AUTHORIZATION"] = f"Basic {credentials}"
+
+    response = client.get(reverse("mediaviewer:api:migrations-remaining-files"))
+
+    assert response.status_code == 200
+    assert response.json() == {"version": 1, "remaining_mediafiles": 0}
+
+
+@pytest.mark.django_db
 def test_new_file_routes_reject_anonymous_and_nonstaff(client, create_user):
     routes = (
         reverse("mediaviewer:api:migrations-file-candidates"),
