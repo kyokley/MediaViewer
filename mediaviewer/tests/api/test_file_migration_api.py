@@ -2,6 +2,7 @@ import uuid
 import base64
 
 import pytest
+from django.core import signing
 from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 
@@ -66,7 +67,55 @@ def test_file_candidates_paginate_individual_hidden_tv_children(
     while page["next_cursor"]:
         page = client.get(url, {"limit": 1, "cursor": page["next_cursor"]}).json()
         ids.extend(row["mediafile_pk"] for row in page["candidates"])
-    assert ids == [first.pk, second.pk, third.pk]
+    assert ids == [third.pk, second.pk, first.pk]
+
+
+@pytest.mark.django_db
+def test_file_candidates_order_newest_first_across_paths_and_pages(
+    client, create_user, create_tv_media_file, create_movie, settings
+):
+    settings.B2_BUCKET_NAME = "archive"
+    older = create_tv_media_file(filename="Older.S01E01.mp4")
+    older_hidden = MediaFile.objects.create(
+        media_path=older.media_path, filename="Older.S01E02.mp4", hide=True
+    )
+    newer = create_tv_media_file(filename="Newer.S01E01.mp4")
+    movie_parent = create_movie().mediapath_set.get()
+    client.force_login(create_user(is_staff=True))
+
+    url = reverse("mediaviewer:api:migrations-file-candidates")
+    page = client.get(url, {"limit": 2}).json()
+    rows = list(page["candidates"])
+    while page["next_cursor"]:
+        page = client.get(url, {"limit": 2, "cursor": page["next_cursor"]}).json()
+        rows.extend(page["candidates"])
+
+    assert [row["source_pk"] for row in rows] == [
+        movie_parent.pk,
+        newer.media_path_id,
+        older.media_path_id,
+        older.media_path_id,
+    ]
+    assert [row["mediafile_pk"] for row in rows] == [
+        None,
+        newer.pk,
+        older_hidden.pk,
+        older.pk,
+    ]
+    assert len({(row["source_pk"], row["mediafile_pk"]) for row in rows}) == len(rows)
+
+
+@pytest.mark.django_db
+def test_file_candidates_reject_ascending_direction_cursor(client, create_user):
+    client.force_login(create_user(is_staff=True))
+    legacy_cursor = signing.dumps(
+        {"after": 10, "child": 10}, salt="mediaviewer.file-cursor.v1"
+    )
+    response = client.get(
+        reverse("mediaviewer:api:migrations-file-candidates"),
+        {"cursor": legacy_cursor},
+    )
+    assert response.status_code == 400
 
 
 @pytest.mark.django_db
