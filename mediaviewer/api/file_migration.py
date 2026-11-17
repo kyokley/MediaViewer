@@ -240,6 +240,11 @@ def _subtitle_list(value):
 class FileMigrationMixin:
     permission_classes = ()
 
+    @action(detail=False, methods=["get"], url_path="remaining-files")
+    def remaining_files(self, request):
+        remaining = MediaFile.objects.filter(b2_uuid__isnull=True).count()
+        return Response({"version": 1, "remaining_mediafiles": remaining})
+
     @action(detail=False, methods=["get"], url_path="file-candidates")
     def file_candidates(self, request):
         try:
