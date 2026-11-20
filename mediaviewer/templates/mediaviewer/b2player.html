@@ -8,6 +8,17 @@
 {% block jumbotron %}{% endblock %}
 {% block main %}
     <main class="container b2-player-page">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/mediaviewer/">Home</a></li>
+                {% if is_movie %}
+                    <li class="breadcrumb-item"><a href="/mediaviewer/movies/">Movies</a></li>
+                {% else %}
+                    <li class="breadcrumb-item"><a href="/mediaviewer/tvshows/summary/">TV Shows</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active" aria-current="page">{{ display_name }}</li>
+            </ol>
+        </nav>
         <div class="b2-player-heading">
             <a class="btn btn-outline-secondary" href="{{ details_url }}"><i class="bi-arrow-left"></i> Back to details</a>
             <p class="text-uppercase small text-primary-emphasis mb-2">Now playing</p>

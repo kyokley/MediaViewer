@@ -85,6 +85,19 @@ def test_b2_player_defers_signed_media_and_subtitles(
     assert response.status_code == 200
     assert response["Cache-Control"] == "private, no-store"
     assert response["Referrer-Policy"] == "no-referrer"
+    content = response.content.decode()
+    assert content.index('aria-label="breadcrumb"') < content.index(
+        'aria-label="Video player"'
+    )
+    assert 'href="/mediaviewer/">Home</a>' in content
+    if is_movie:
+        assert 'href="/mediaviewer/movies/">Movies</a>' in content
+    else:
+        assert 'href="/mediaviewer/tvshows/summary/">TV Shows</a>' in content
+    assert (
+        f'<li class="breadcrumb-item active" aria-current="page">{token.displayname}</li>'
+        in content
+    )
     assert b2_client.generate_presigned_url.call_count == 0
     get_b2_client.assert_not_called()
     assert "https://signed.example/" not in response.content.decode()
