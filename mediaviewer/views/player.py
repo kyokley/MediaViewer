@@ -109,7 +109,7 @@ def b2player(request, guid):
     context = {
         "display_name": token.displayname,
         "details_url": details_url,
-        "is_movie": is_movie,
+        "tv_show": token.media_file.media if not is_movie else None,
         "previous_url": previous_url,
         "next_url": next_url,
         "poster_url": token.og_image or None,

@@ -2,7 +2,6 @@
 import os
 import re
 import smtplib
-import telnetlib  # nosec
 import secrets
 import string
 
@@ -158,6 +157,8 @@ def send_test_mail(to_addr):
 
 def checkSMTPServer():
     if not settings.BYPASS_SMTPD_CHECK:
+        import telnetlib  # nosec
+
         smtp_server = telnetlib.Telnet(  # nosec
             host=settings.EMAIL_HOST, port=settings.EMAIL_PORT
         )

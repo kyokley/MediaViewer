@@ -116,6 +116,7 @@ class BaseSMTPServerTestCase:
         self.mock_settings.EMAIL_PORT = "test_port"
 
 
+@pytest.mark.skipif(settings.BYPASS_SMTPD_CHECK, reason="bypassing SMTPD checks")
 class TestCheckSMTPServer(BaseSMTPServerTestCase):
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
@@ -132,6 +133,7 @@ class TestCheckSMTPServer(BaseSMTPServerTestCase):
         self.mock_Telnet.return_value.close.assert_called_once_with()
 
 
+@pytest.mark.skipif(settings.BYPASS_SMTPD_CHECK, reason="bypassing SMTPD checks")
 class TestSkipCheckSMTPServer(BaseSMTPServerTestCase):
     @pytest.fixture(autouse=True)
     def setUp(self, mocker):
