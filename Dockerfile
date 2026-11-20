@@ -1,6 +1,6 @@
-ARG BASE_IMAGE=python:3.12-slim
+ARG BASE_IMAGE=python:3.14-slim
 
-FROM node:alpine3.20 AS static-builder
+FROM node:alpine AS static-builder
 WORKDIR /code/static
 
 COPY package.json package-lock.json /code/
