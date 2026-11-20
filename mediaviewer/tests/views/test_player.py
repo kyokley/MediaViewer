@@ -7,6 +7,7 @@ import pytest
 import requests
 from django.test import Client
 from django.urls import reverse
+from django.utils.html import escape
 
 from mediaviewer.b2 import B2Error
 from mediaviewer.models import DownloadToken, MediaFile, VideoProgress
@@ -92,12 +93,20 @@ def test_b2_player_defers_signed_media_and_subtitles(
     assert 'href="/mediaviewer/">Home</a>' in content
     if is_movie:
         assert 'href="/mediaviewer/movies/">Movies</a>' in content
+        assert (
+            f'<li class="breadcrumb-item active" aria-current="page">{token.displayname}</li>'
+            in content
+        )
     else:
         assert 'href="/mediaviewer/tvshows/summary/">TV Shows</a>' in content
-    assert (
-        f'<li class="breadcrumb-item active" aria-current="page">{token.displayname}</li>'
-        in content
-    )
+        tv_show = response.context["tv_show"]
+        assert tv_show == obj.media
+        assert (
+            '<li class="breadcrumb-item active" aria-current="page">'
+            f'<a href="/mediaviewer/tvshows/{tv_show.id}/">{escape(tv_show.name)}</a>'
+            "</li>" in content
+        )
+        assert f"<h1>{escape(token.displayname)}</h1>" in content
     assert b2_client.generate_presigned_url.call_count == 0
     get_b2_client.assert_not_called()
     assert "https://signed.example/" not in response.content.decode()
@@ -701,7 +710,12 @@ def test_movie_backed_mediafile_uses_movie_detail_route_and_movie_context(
     response = client.get(reverse("mediaviewer:b2player", args=(token.guid,)))
 
     assert response.status_code == 200
-    assert response.context["is_movie"] is True
+    assert response.context["tv_show"] is None
+    assert 'href="/mediaviewer/movies/">Movies</a>' in response.content.decode()
+    assert (
+        f'<li class="breadcrumb-item active" aria-current="page">{escape(token.displayname)}</li>'
+        in response.content.decode()
+    )
     assert response.context["details_url"] == reverse(
         "mediaviewer:moviedetail", args=(media_file.movie.pk,)
     )
