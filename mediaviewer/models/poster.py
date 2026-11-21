@@ -68,6 +68,11 @@ def _valid_tmdb_id(value):
     )
 
 
+def _normalize_tv_series_name(name):
+    name = name.replace(":", " ").translate(str.maketrans("", "", "'’‘"))
+    return _normalize(name)
+
+
 def _get_cast_data(tmdb_id, season=None, episode=None, is_movie=True):
     log.info("Getting data from TVDb using %s" % (tmdb_id,))
     if not tmdb_id:
@@ -427,7 +432,7 @@ class Poster(TimeStampModel):
             )
             data = getJSONData(url)
             results = data.get("results") if isinstance(data, dict) else None
-            target_name = _normalize(tv.name.replace(":", " "))
+            target_name = _normalize_tv_series_name(tv.name)
             matches = []
             if isinstance(results, list) and target_name:
                 for result in results:
@@ -436,7 +441,7 @@ class Poster(TimeStampModel):
                     names = (result.get("name"), result.get("original_name"))
                     if any(
                         isinstance(name, str)
-                        and _normalize(name.replace(":", " ")) == target_name
+                        and _normalize_tv_series_name(name) == target_name
                         for name in names
                     ):
                         matches.append(result)

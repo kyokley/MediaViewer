@@ -355,6 +355,150 @@ def test_tv_name_search_rejects_colon_normalized_duplicate_matches(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "result_name",
+    ["Clarkson's Farm", "Clarkson’s Farm", "Clarkson‘s Farm"],
+)
+def test_tv_name_search_ignores_apostrophe_style_and_enriches_episode(
+    create_tv_media_file, mocker, result_name
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 2
+    media_file.episode = 3
+    media_file.save()
+    tv = media_file.tv
+    tv.name = "Clarksons Farm"
+    tv.save(update_fields=["name"])
+    parent_poster = Poster.objects.from_ref_obj(tv)
+    search = mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={"results": [{"id": 117648, "name": result_name}]},
+    )
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        return_value={
+            "id": 4224469,
+            "name": "Schmoozing",
+            "overview": "Episode overview",
+            "air_date": "2023-02-10",
+        },
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+    mocker.patch.object(Poster, "_populate_tv_series_details")
+
+    media_file.poster.populate_data()
+
+    parent_poster.refresh_from_db()
+    poster = Poster.objects.get(pk=media_file.poster.pk)
+    media_file.refresh_from_db()
+    assert parent_poster.tmdb == "117648"
+    episode_info.assert_called_once_with("117648", 2, 3)
+    assert poster.tmdb == "4224469"
+    assert poster.episodename == "Schmoozing"
+    assert poster.extendedplot == "Episode overview"
+    assert poster.release_date.isoformat() == "2023-02-10"
+    assert media_file.display_name == "S02 E03: Schmoozing"
+    search.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_tv_name_search_matches_apostrophe_variant_in_original_name(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    tv = media_file.tv
+    tv.name = "Clarksons Farm"
+    tv.save(update_fields=["name"])
+    parent_poster = Poster.objects.from_ref_obj(tv)
+    mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={
+            "results": [
+                {
+                    "id": 117648,
+                    "name": "Unrelated Name",
+                    "original_name": "Clarkson's Farm",
+                }
+            ]
+        },
+    )
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo", return_value={}
+    )
+
+    media_file.poster.populate_data()
+
+    parent_poster.refresh_from_db()
+    assert parent_poster.tmdb == "117648"
+    episode_info.assert_called_once_with("117648", 1, 2)
+
+
+@pytest.mark.django_db
+def test_tv_episode_population_uses_cached_parent_id_for_apostrophe_name(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 2
+    media_file.episode = 3
+    media_file.save()
+    tv = media_file.tv
+    tv.name = "Clarksons Farm"
+    tv.save(update_fields=["name"])
+    parent_poster = Poster.objects.from_ref_obj(tv)
+    parent_poster.tmdb = "117648"
+    parent_poster.save()
+    search = mocker.patch("mediaviewer.models.poster.getJSONData")
+    episode_info = mocker.patch(
+        "mediaviewer.models.poster.getTVDBEpisodeInfo",
+        return_value={"id": 4224469, "name": "Schmoozing"},
+    )
+    mocker.patch("mediaviewer.models.poster._get_extended_info", return_value={})
+    mocker.patch("mediaviewer.models.poster._get_cast_data", return_value={})
+    mocker.patch.object(Poster, "_populate_tv_series_details")
+
+    media_file.poster.populate_data()
+
+    search.assert_not_called()
+    episode_info.assert_called_once_with("117648", 2, 3)
+    media_file.refresh_from_db()
+    assert media_file.display_name == "S02 E03: Schmoozing"
+
+
+@pytest.mark.django_db
+def test_tv_name_search_rejects_apostrophe_normalized_duplicate_matches(
+    create_tv_media_file, mocker
+):
+    media_file = create_tv_media_file(filename="show.mp4")
+    media_file.season = 1
+    media_file.episode = 2
+    media_file.save()
+    tv = media_file.tv
+    tv.name = "Clarksons Farm"
+    tv.save(update_fields=["name"])
+    parent_poster = Poster.objects.from_ref_obj(tv)
+    mocker.patch(
+        "mediaviewer.models.poster.getJSONData",
+        return_value={
+            "results": [
+                {"id": 117648, "name": "Clarkson's Farm"},
+                {"id": 200001, "original_name": "Clarkson’s Farm"},
+            ]
+        },
+    )
+    episode_info = mocker.patch("mediaviewer.models.poster.getTVDBEpisodeInfo")
+
+    media_file.poster.populate_data()
+
+    parent_poster.refresh_from_db()
+    assert parent_poster.tmdb == ""
+    episode_info.assert_not_called()
+
+
+@pytest.mark.django_db
 def test_parent_identity_database_error_propagates_without_name_search(
     create_tv_media_file, mocker
 ):
