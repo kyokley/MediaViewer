@@ -304,7 +304,7 @@ MINIMUM_PASSWORD_LENGTH = 6
 MAXIMUM_NUMBER_OF_STORED_LOGIN_EVENTS = 10000
 MAXIMUM_NUMBER_OF_STORED_DOWNLOAD_TOKENS = 10000
 
-TOKEN_VALIDITY_LENGTH = 3  # In hours
+TOKEN_VALIDITY_LENGTH = 4  # In hours
 TOKEN_HOLDING_PERIOD = 168  # In hours
 VIDEO_PROGRESS_HOLDING_PERIOD = 2160  # In hours
 
@@ -329,7 +329,7 @@ B2_APPLICATION_KEY_ID = os.environ.get("B2_APPLICATION_KEY_ID", "")
 B2_APPLICATION_KEY = os.environ.get("B2_APPLICATION_KEY", "")
 B2_BUCKET_NAME = os.environ.get("B2_BUCKET_NAME", "")
 B2_NAME_PREFIX = os.environ.get("B2_NAME_PREFIX", "")
-# Download authorization token lifetime in seconds. Defaults to 3h to match
-# TOKEN_VALIDITY_LENGTH; keep it >= TOKEN_VALIDITY_LENGTH so URLs minted
+# Download authorization token lifetime in seconds. Defaults to 4h;
+# keep it >= TOKEN_VALIDITY_LENGTH so URLs minted
 # alongside a token do not expire before the token does.
-B2_PRESIGNED_URL_EXPIRY = int(os.environ.get("B2_PRESIGNED_URL_EXPIRY", "10800"))
+B2_PRESIGNED_URL_EXPIRY = int(os.environ.get("B2_PRESIGNED_URL_EXPIRY", "14400"))
