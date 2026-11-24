@@ -1,6 +1,32 @@
 # MediaViewer [![Docker Image CI](https://github.com/kyokley/MediaViewer/actions/workflows/publish.yml/badge.svg)](https://github.com/kyokley/MediaViewer/actions/workflows/publish.yml)
 Website to track tv shows and movies
 
+## Single-page navigation
+
+MediaViewer uses [django-htmx](https://django-htmx.readthedocs.io/en/latest/)
+for server-rendered single-page navigation. Catalog, detail, request, settings,
+and player pages keep their existing URLs. Direct visits still render complete
+pages; HTMX navigation replaces the application content without reloading shared
+assets. Existing DataTables search, sorting, and scrolling remain AJAX-backed.
+
+Authentication, passkeys, downloads, and external links retain native browser
+navigation. Form submissions retain Django CSRF protection and do not add write
+endpoints to browser history. HTMX history snapshots are disabled so rendered
+account and playback information is not stored in its local-storage cache.
+History restoration fetches the page again.
+
+The application shell lives in `mediaviewer/templates/mediaviewer/home.html`.
+`mediaviewer/static/assets/navigation.js` owns page transitions. Page scripts
+register their initializers with `window.MediaViewerNavigation.registerPageInit()`
+rather than initializing on document readiness. Widgets release listeners and resources
+before their content is replaced. The player lifecycle is exposed through
+`window.MediaViewerPlayer`; progress writes are ordered across player instances.
+Navigation failures leave the current content visible.
+
+Install Python dependencies from `uv.lock` and run `collectstatic` during
+deployment so django-htmx's bundled JavaScript is served with the other assets.
+No separate frontend framework or database migration is required.
+
 ## TheTVDB filename inference
 
 TV filename inference parses the title and `SxxEyy` episode marker locally, then
