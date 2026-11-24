@@ -27,6 +27,7 @@ class TestNewUserView:
 
         self.request = HttpRequest()
         self.request.user = self.user
+        self.request.method = "POST"
         self.request.POST = {"new_user_email": self.new_user_email}
 
     def test_newUserWithNonStaffer(
@@ -221,6 +222,7 @@ class TestSubmitSettings:
 
         self.request = mock.MagicMock(HttpRequest)
         self.request.user = self.user
+        self.request.method = "POST"
         self.request.POST = {"theme": UserSettings.LIGHT}
         self.request.session = {}
 
@@ -272,3 +274,14 @@ class TestSubmitSettings:
         assert self.settings.binge_mode is True
         assert self.settings.jump_to_last_watched is True
         assert self.user.email == "test_new_email"
+
+    def test_get_does_not_mutate_settings(self):
+        self.request.method = "GET"
+        self.request.path = "/mediaviewer/submitsettings/"
+        self.user.is_authenticated = True
+
+        response = submitsettings(self.request)
+
+        assert response.status_code == 405
+        self.user.settings.assert_not_called()
+        self.user.save.assert_not_called()

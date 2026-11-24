@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import render
 from datetime import timezone
+from django.views.decorators.http import require_POST
 
 from mediaviewer.log import log
 from mediaviewer.models.sitegreeting import SiteGreeting
@@ -42,6 +43,7 @@ def settings(request):
     return render(request, "mediaviewer/settings.html", context)
 
 
+@require_POST
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
 def submitsettings(request):
@@ -94,6 +96,7 @@ def submitsettings(request):
     return render(request, "mediaviewer/settingsresults.html", context)
 
 
+@require_POST
 @login_required(login_url="/mediaviewer/login/")
 @logAccessInfo
 def submitnewuser(request):
