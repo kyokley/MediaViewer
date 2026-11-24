@@ -39,6 +39,7 @@ dependencies = [
     "pillow>=12.3.0,<14.0.0",
     "gunicorn<24.0.0,>=23.0.0",
     "django>=5.2.14",
+    "django-htmx>=1.29,<2",
     "psycopg2-binary>=2.9.11",
 ]
 name = "mediaviewer"
