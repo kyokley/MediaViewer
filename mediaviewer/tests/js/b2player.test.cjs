@@ -21,6 +21,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), disabled: ["cast-captions-toggle", "play-pause"].includes(id), style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
+        querySelector(selector) { return this.children?.[selector] || null; },
         addEventListener(type, fn) { this.listeners[type] = fn; },
         removeEventListener(type, fn) { if (this.listeners[type] === fn) delete this.listeners[type]; },
         setAttribute(name, value) { this.attributes[name] = value; },
@@ -28,6 +29,38 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         click() { return this.listeners.click?.(); },
     }]));
     for (const element of Object.values(elements)) element.classList.owner = element;
+    for (const id of ["play-pause", "cast-captions-toggle", "binge-toggle"]) {
+        const element = elements[id];
+        if (!element) continue;
+        const label = { setAttribute() {} };
+        Object.defineProperty(label, "textContent", {
+            get() { return this._textContent; },
+            set(value) {
+                this._textContent = value;
+                element.textContent = value;
+                if (id === "play-pause") {
+                    element.iconClass = this.innerHTML.match(/class="([^"]+)"/)?.[1] || "";
+                    element.iconAriaHidden = this.innerHTML.includes('aria-hidden="true"');
+                }
+            },
+        });
+        Object.defineProperty(label, "innerHTML", {
+            get() { return this._innerHTML || ""; },
+            set(value) {
+                this._innerHTML = value;
+                this.textContent = value.replace(/<[^>]*>/g, "").trim();
+                if (id === "play-pause") {
+                    element.iconClass = value.match(/class="([^"]+)"/)?.[1] || "";
+                    element.iconAriaHidden = value.includes('aria-hidden="true"');
+                }
+            },
+        });
+        label.textContent = id === "play-pause" ? "Play" : id === "cast-captions-toggle" ? "Captions: Off" : "";
+        element.children = {
+            ".b2-control-label": label,
+            ".b2-control-size": { textContent: "", hidden: true },
+        };
+    }
     const listeners = new Map();
     const textTrackListeners = {};
     const textTracks = {
@@ -215,7 +248,15 @@ test("playback button sits between seek controls and keeps its state icon", asyn
     assert.ok(controls.indexOf('id="seek-back"') < controls.indexOf('id="play-pause"'));
     assert.ok(controls.indexOf('id="play-pause"') < controls.indexOf('id="seek-forward"'));
     const markup = controls.match(/<button\b[^>]*id="play-pause"[^>]*>([\s\S]*?)<\/button>/)[0];
-    assert.match(markup, /<i class="bi-play-fill" aria-hidden="true"><\/i>\s*Play/);
+    assert.match(markup, /class="b2-control-label"><i class="bi-play-fill" aria-hidden="true"><\/i>\s*Play<\/span>/);
+    assert.match(markup, /class="b2-control-size" aria-hidden="true"><i class="bi-play-fill"><\/i>\s*Play<\/span>/);
+    assert.match(markup, /class="b2-control-size" aria-hidden="true"><i class="bi-pause-fill"><\/i>\s*Pause<\/span>/);
+    assert.match(styles, /\.b2-player-tools > button\.btn\s*\{[^}]*display:\s*inline-grid[^}]*flex:\s*0 0 max-content[^}]*width:\s*max-content/);
+    assert.match(styles, /\.b2-control-label,\s*\.b2-control-size\s*\{[^}]*grid-area:\s*control-label/);
+    assert.match(controls, /b2-control-size" aria-hidden="true">Captions: Off/);
+    assert.match(controls, /b2-control-size" aria-hidden="true">Captions: On/);
+    assert.match(template, /b2-control-size" aria-hidden="true">Binge mode: On/);
+    assert.match(template, /b2-control-size" aria-hidden="true">Binge mode: Off/);
 
     const player = createPlayer(async () => media(), { testMediaFetch: true });
     const button = player.elements["play-pause"];
@@ -436,12 +477,15 @@ test("Cast launcher is visible for SDK initialization and sized as a usable cont
 });
 
 test("Captions toggle is accessible, always visible, and initially unavailable", () => {
-    const button = template.match(/<button\b[^>]*id="cast-captions-toggle"[^>]*>Captions: Off<\/button>/);
+    const button = template.match(/<button\b[^>]*id="cast-captions-toggle"[^>]*>([\s\S]*?)<\/button>/);
     assert(button);
     assert.match(button[0], /type="button"/);
     assert.match(button[0], /aria-pressed="false"/);
     assert.doesNotMatch(button[0], /\shidden(?:\s|>)/);
     assert.match(button[0], /\sdisabled(?:\s|>)/);
+    assert.match(button[1], /class="b2-control-label">Captions: Off<\/span>/);
+    assert.match(button[1], /class="b2-control-size" aria-hidden="true">Captions: Off<\/span>/);
+    assert.match(button[1], /class="b2-control-size" aria-hidden="true">Captions: On<\/span>/);
 });
 
 test("saved-position notice is isolated for timed dismissal and replacement", async () => {

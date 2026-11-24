@@ -42,34 +42,34 @@
                 <button class="btn btn-outline-secondary"
                         id="seek-back"
                         type="button"
-                        aria-label="Back 10 seconds"><i class="bi-skip-backward-fill"></i> 10 sec</button>
+                        aria-label="Back 10 seconds"><span class="b2-control-label"><i class="bi-skip-backward-fill"></i> 10 sec</span></button>
                 <button class="btn btn-outline-secondary"
                         id="play-pause"
                         type="button"
                         aria-label="Play video"
-                        disabled><i class="bi-play-fill" aria-hidden="true"></i> Play</button>
+                        disabled><span class="b2-control-label"><i class="bi-play-fill" aria-hidden="true"></i> Play</span><span class="b2-control-size" aria-hidden="true"><i class="bi-play-fill"></i> Play</span><span class="b2-control-size" aria-hidden="true"><i class="bi-pause-fill"></i> Pause</span></button>
                 <button class="btn btn-outline-secondary"
                         id="seek-forward"
                         type="button"
-                        aria-label="Forward 10 seconds">10 sec <i class="bi-skip-forward-fill"></i></button>
+                        aria-label="Forward 10 seconds"><span class="b2-control-label">10 sec <i class="bi-skip-forward-fill"></i></span></button>
                 <button class="btn btn-outline-secondary"
                         id="cast-captions-toggle"
                         type="button"
                         aria-pressed="false"
-                        disabled>Captions: Off</button>
+                        disabled><span class="b2-control-label">Captions: Off</span><span class="b2-control-size" aria-hidden="true">Captions: Off</span><span class="b2-control-size" aria-hidden="true">Captions: On</span></button>
                 <google-cast-launcher id="cast-video" class="btn btn-outline-secondary" aria-label="Cast video"></google-cast-launcher>
                 <button class="btn btn-outline-secondary"
                         id="airplay-video"
                         type="button"
                         aria-label="Choose AirPlay device"
-                        hidden><i class="bi-broadcast-pin"></i> AirPlay</button>
+                        hidden><span class="b2-control-label"><i class="bi-broadcast-pin"></i> AirPlay</span></button>
                 {% if next_url %}<button class="btn {% if player_config.binge_mode %}btn-success{% else %}btn-danger{% endif %}"
         id="binge-toggle"
         type="button"
-        aria-pressed="{{ player_config.binge_mode|yesno:'true,false' }}">Binge mode: {% if player_config.binge_mode %}On{% else %}Off{% endif %}</button>{% endif %}
+        aria-pressed="{{ player_config.binge_mode|yesno:'true,false' }}"><span class="b2-control-label">Binge mode: {% if player_config.binge_mode %}On{% else %}Off{% endif %}</span><span class="b2-control-size" aria-hidden="true">Binge mode: On</span><span class="b2-control-size" aria-hidden="true">Binge mode: Off</span></button>{% endif %}
                 <button class="btn btn-outline-secondary ms-sm-auto"
                         id="start-over"
-                        type="button"><i class="bi-arrow-counterclockwise"></i> Start over</button>
+                        type="button"><span class="b2-control-label"><i class="bi-arrow-counterclockwise"></i> Start over</span></button>
             </div>
         </section>
         <nav class="b2-episode-nav" aria-label="Episode navigation">

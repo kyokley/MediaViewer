@@ -172,12 +172,15 @@
     let localPlaySequence = 0;
     const castButton = document.getElementById("cast-video");
     const playPauseButton = document.getElementById("play-pause");
+    const playPauseLabel = playPauseButton?.querySelector(".b2-control-label");
     const castCaptionsButton = document.getElementById("cast-captions-toggle");
+    const castCaptionsLabel =
+      castCaptionsButton?.querySelector(".b2-control-label");
     const renderPlaybackButton = (playing) => {
-      if (!playPauseButton) return;
+      if (!playPauseButton || !playPauseLabel) return;
       const label = playing ? "Pause" : "Play";
       const icon = playing ? "pause" : "play";
-      playPauseButton.innerHTML = `<i class="bi-${icon}-fill" aria-hidden="true"></i> ${label}`;
+      playPauseLabel.innerHTML = `<i class="bi-${icon}-fill" aria-hidden="true"></i> ${label}`;
       playPauseButton.setAttribute(
         "aria-label",
         playing ? "Pause video" : "Play video",
@@ -189,7 +192,7 @@
     }
     if (castCaptionsButton) {
       castCaptionsButton.disabled = true;
-      castCaptionsButton.textContent = "Captions: Off";
+      if (castCaptionsLabel) castCaptionsLabel.textContent = "Captions: Off";
       castCaptionsButton.setAttribute("aria-pressed", "false");
     }
     const getRemoteMedia = () => {
@@ -249,14 +252,16 @@
         const enabled = activeRemoteTextTracks(media).length > 0;
         castCaptionsButton.disabled =
           !media || tracks.length === 0 || captionsPending;
-        castCaptionsButton.textContent = `Captions: ${enabled ? "On" : "Off"}`;
+        if (castCaptionsLabel)
+          castCaptionsLabel.textContent = `Captions: ${enabled ? "On" : "Off"}`;
         castCaptionsButton.setAttribute("aria-pressed", String(enabled));
         return;
       }
       const tracks = captionTracks();
       const enabled = tracks.some((track) => track.mode === "showing");
       castCaptionsButton.disabled = !captionsReady || tracks.length === 0;
-      castCaptionsButton.textContent = `Captions: ${enabled ? "On" : "Off"}`;
+      if (castCaptionsLabel)
+        castCaptionsLabel.textContent = `Captions: ${enabled ? "On" : "Off"}`;
       castCaptionsButton.setAttribute("aria-pressed", String(enabled));
     };
     const updateCastControls = () => {
@@ -557,9 +562,10 @@
     let retryOffset = 0;
     let mediaRequest = null;
     const bingeButton = document.getElementById("binge-toggle");
+    const bingeButtonLabel = bingeButton?.querySelector(".b2-control-label");
     const updateBingeButton = () => {
-      if (!bingeButton) return;
-      bingeButton.textContent = `Binge mode: ${bingeEnabled ? "On" : "Off"}`;
+      if (!bingeButton || !bingeButtonLabel) return;
+      bingeButtonLabel.textContent = `Binge mode: ${bingeEnabled ? "On" : "Off"}`;
       bingeButton.setAttribute("aria-pressed", String(bingeEnabled));
       bingeButton.classList.toggle("btn-success", bingeEnabled);
       bingeButton.classList.toggle("btn-danger", !bingeEnabled);

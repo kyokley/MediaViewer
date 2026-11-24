@@ -110,7 +110,27 @@
     padding: 1rem;
 }
 
+.b2-player-tools > button.btn {
+    display: inline-grid;
+    grid-template-areas: "control-label";
+    flex: 0 0 max-content;
+    width: max-content;
+    min-width: max-content;
+}
+
+.b2-control-label,
+.b2-control-size {
+    grid-area: control-label;
+    justify-self: center;
+    white-space: nowrap;
+}
+
+.b2-control-size {
+    visibility: hidden;
+}
+
 google-cast-launcher {
+    flex: 0 0 2.75rem;
     width: 2.75rem;
     min-width: 2.75rem;
     height: 2.5rem;
@@ -134,7 +154,6 @@ google-cast-launcher {
 @media (max-width: 575.98px) {
     .b2-player-heading .btn { justify-self: stretch; }
     .b2-player-tools { gap: .5rem; }
-    .b2-player-tools .btn { flex: 1 1 auto; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
