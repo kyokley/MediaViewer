@@ -122,6 +122,7 @@
         track.mode = captionsEnabled && index === 0 ? "showing" : "disabled";
       });
       captionsReady = true;
+      updateCaptionsButton();
     };
     const persistCaptions = (enabled) => {
       if (!config.captions_url) return;
@@ -141,11 +142,16 @@
     const onTextTrackChange = () => {
       if (!captionsReady) return;
       const tracks = captionTracks();
-      if (!tracks.length) return;
+      if (castRemoteActive) {
+        updateCaptionsButton();
+        return;
+      }
       const enabled = tracks.some((track) => track.mode === "showing");
-      if (enabled === captionsEnabled) return;
-      captionsEnabled = enabled;
-      persistCaptions(enabled);
+      if (tracks.length && enabled !== captionsEnabled) {
+        captionsEnabled = enabled;
+        persistCaptions(enabled);
+      }
+      updateCaptionsButton();
     };
     listen(video.textTracks, "change", onTextTrackChange);
 
@@ -164,7 +170,6 @@
     const castButton = document.getElementById("cast-video");
     const castCaptionsButton = document.getElementById("cast-captions-toggle");
     if (castCaptionsButton) {
-      castCaptionsButton.hidden = true;
       castCaptionsButton.disabled = true;
       castCaptionsButton.textContent = "Captions: Off";
       castCaptionsButton.setAttribute("aria-pressed", "false");
@@ -189,16 +194,29 @@
         ids.includes(track.trackId),
       );
     };
+    const updateCaptionsButton = () => {
+      if (!castCaptionsButton) return;
+      if (castRemoteActive) {
+        const media = getRemoteMedia();
+        const tracks = remoteTextTracks(media);
+        const enabled = activeRemoteTextTracks(media).length > 0;
+        castCaptionsButton.disabled =
+          !media || tracks.length === 0 || captionsPending;
+        castCaptionsButton.textContent = `Captions: ${enabled ? "On" : "Off"}`;
+        castCaptionsButton.setAttribute("aria-pressed", String(enabled));
+        return;
+      }
+      const tracks = captionTracks();
+      const enabled = tracks.some((track) => track.mode === "showing");
+      castCaptionsButton.disabled = !captionsReady || tracks.length === 0;
+      castCaptionsButton.textContent = `Captions: ${enabled ? "On" : "Off"}`;
+      castCaptionsButton.setAttribute("aria-pressed", String(enabled));
+    };
     const updateCastControls = () => {
       const media = getRemoteMedia();
       const sdkMedia = window.chrome?.cast?.media;
       if (!castRemoteActive) {
-        if (castCaptionsButton) {
-          castCaptionsButton.hidden = true;
-          castCaptionsButton.disabled = true;
-          castCaptionsButton.textContent = "Captions: Off";
-          castCaptionsButton.setAttribute("aria-pressed", "false");
-        }
+        updateCaptionsButton();
         return;
       }
       const seekSupported = Boolean(
@@ -210,15 +228,7 @@
         const button = document.getElementById(id);
         if (button) button.disabled = !media || !seekSupported || seekPending;
       });
-      const tracks = remoteTextTracks(media);
-      if (castCaptionsButton) {
-        castCaptionsButton.hidden = !media || tracks.length === 0;
-        castCaptionsButton.disabled =
-          !media || tracks.length === 0 || captionsPending;
-        const enabled = activeRemoteTextTracks(media).length > 0;
-        castCaptionsButton.textContent = `Captions: ${enabled ? "On" : "Off"}`;
-        castCaptionsButton.setAttribute("aria-pressed", String(enabled));
-      }
+      updateCaptionsButton();
     };
     const clearCurrentMedia = () => {
       if (castMediaSession && castMediaUpdate)
@@ -524,6 +534,7 @@
           )
             throw new Error("Invalid media response");
           captionsReady = false;
+          updateCaptionsButton();
           clearCurrentMedia();
           castSourceUrl = result.source_url;
           castSubtitleUrls = result.subtitle_urls;
@@ -851,6 +862,19 @@
       }
     }
     listen(castCaptionsButton, "click", () => {
+      if (!alive()) return;
+      if (!castRemoteActive) {
+        const tracks = captionTracks();
+        if (!captionsReady || !tracks.length) return;
+        const enabled = !tracks.some((track) => track.mode === "showing");
+        tracks.forEach((track, index) => {
+          track.mode = enabled && index === 0 ? "showing" : "disabled";
+        });
+        captionsEnabled = enabled;
+        persistCaptions(enabled);
+        updateCaptionsButton();
+        return;
+      }
       const media = getRemoteMedia();
       const sdkMedia = window.chrome?.cast?.media;
       if (

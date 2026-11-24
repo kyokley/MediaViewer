@@ -18,7 +18,7 @@ const deferred = () => {
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
     const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "airplay-video"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video", "cast-captions-toggle"].includes(id), disabled: id === "cast-captions-toggle", style: {},
+        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), disabled: id === "cast-captions-toggle", style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
@@ -200,12 +200,12 @@ test("Cast launcher is visible for SDK initialization and sized as a usable cont
     assert.match(styles, /google-cast-launcher\s*\{[^}]*width:\s*2\.75rem[^}]*height:\s*2\.5rem/);
 });
 
-test("Cast captions toggle is accessible and unavailable before remote media is ready", () => {
+test("Captions toggle is accessible, always visible, and initially unavailable", () => {
     const button = template.match(/<button\b[^>]*id="cast-captions-toggle"[^>]*>Captions: Off<\/button>/);
     assert(button);
     assert.match(button[0], /type="button"/);
     assert.match(button[0], /aria-pressed="false"/);
-    assert.match(button[0], /\shidden(?:\s|>)/);
+    assert.doesNotMatch(button[0], /\shidden(?:\s|>)/);
     assert.match(button[0], /\sdisabled(?:\s|>)/);
 });
 
@@ -830,7 +830,7 @@ test("Cast caption toggle selects subtitle tracks, preserves non-text tracks, an
     assert.equal(button.textContent, "Captions: Off");
 });
 
-test("Cast caption toggle hides without text tracks and reports failed commands without persisting", async () => {
+test("Cast caption toggle stays visible without text tracks and reports failed commands", async () => {
     const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
         testMediaFetch: true, captions_url: "/captions", captionFailure: true,
     });
@@ -852,7 +852,7 @@ test("Cast caption toggle hides without text tracks and reports failed commands 
     await tick();
     noTracks.context.window.cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
     await tick();
-    assert.equal(noTracks.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(noTracks.elements["cast-captions-toggle"].hidden, false);
     assert.equal(noTracks.elements["cast-captions-toggle"].disabled, true);
 });
 
@@ -909,7 +909,7 @@ test("Cast readiness, pending commands, and disposal clean listeners and reject 
     await tick();
     const cast = player.context.window.cast;
     cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
-    assert.equal(player.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, false);
     await tick();
     const remote = cast.session.getMediaSession();
     assert.equal(player.elements["cast-captions-toggle"].hidden, false);
@@ -923,7 +923,7 @@ test("Cast readiness, pending commands, and disposal clean listeners and reject 
     remote.seekSuccess?.();
     remote.editSuccess?.();
     await tick();
-    assert.equal(player.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, false);
     assert.equal(player.requests.some((request) => request.url === "/captions"), false);
 
     const resumed = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
@@ -936,13 +936,53 @@ test("Cast readiness, pending commands, and disposal clean listeners and reject 
     resumed.video.paused = false;
     resumeCast.context.sessionListener({ sessionState: "SESSION_RESUMED" });
     assert.equal(resumed.video.paused, true);
-    assert.equal(resumed.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(resumed.elements["cast-captions-toggle"].hidden, false);
     const resumedMedia = resumeCast.session.getMediaSession();
     assert.equal(typeof resumedMedia.updateListener, "function");
     resumed.context.window.MediaViewerPlayer.dispose();
     assert.equal(resumedMedia.updateListener, null);
     assert.equal(resumeCast.session.eventListeners["media-session"], undefined);
-    assert.equal(resumed.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(resumed.elements["cast-captions-toggle"].hidden, false);
+});
+
+test("Cast end restores the captions button to local track state", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["/en.vtt"] }), {
+        testMediaFetch: true, captions_enabled: false,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const button = player.elements["cast-captions-toggle"];
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    button.click();
+    assert.equal(button.textContent, "Captions: On");
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, false);
+    assert.equal(button.textContent, "Captions: On");
+    assert.equal(button.attributes["aria-pressed"], "true");
+});
+
+test("connecting Cast caption control cannot change local tracks", async () => {
+    const load = deferred();
+    const player = createPlayer(async () => media({ subtitle_urls: ["/en.vtt"] }), {
+        testMediaFetch: true, captions_url: "/captions", castLoadDeferred: load,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const button = player.elements["cast-captions-toggle"];
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(button.disabled, true);
+    button.click();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled"]);
+    assert.equal(player.requests.some((request) => request.url === "/captions"), false);
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    load.reject(new Error("finish test"));
+    await tick();
 });
 
 test("Cast stale command callbacks after receiver media replacement do not persist choices", async () => {
@@ -1130,6 +1170,66 @@ test("media error retry preserves playback position and does not duplicate subti
 const captionTracks = (player) => player.video.textTracks.tracks;
 const captionPosts = (player) => player.requests.filter((request) => request.url === "/captions" && request.options.method === "POST");
 const dispatchTrackChange = (player) => player.video.textTracks.dispatch("change");
+
+test("local captions button toggles subtitle tracks and persists each user choice", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["/en.vtt", "/fr.vtt"] }), {
+        testMediaFetch: true, captions_url: "/captions", captions_enabled: false,
+    });
+    const button = player.elements["cast-captions-toggle"];
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, true);
+    await tick();
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, true);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(button.disabled, false);
+    button.click();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["showing", "disabled"]);
+    assert.equal(button.textContent, "Captions: On");
+    assert.equal(button.attributes["aria-pressed"], "true");
+    button.click();
+    assert.deepEqual(captionTracks(player).map((track) => track.mode), ["disabled", "disabled"]);
+    assert.equal(button.textContent, "Captions: Off");
+    await tick();
+    assert.deepEqual(captionPosts(player).map(requestBody), [
+        { captions_enabled: "true" }, { captions_enabled: "false" },
+    ]);
+});
+
+test("native caption-menu changes synchronize the always-visible button without duplicate posts", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["/en.vtt"] }), {
+        testMediaFetch: true, captions_url: "/captions",
+    });
+    const button = player.elements["cast-captions-toggle"];
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, false);
+    captionTracks(player)[0].mode = "showing";
+    dispatchTrackChange(player);
+    await tick();
+    assert.equal(button.textContent, "Captions: On");
+    assert.equal(button.attributes["aria-pressed"], "true");
+    assert.equal(captionPosts(player).length, 1);
+    player.elements["cast-captions-toggle"].click();
+    await tick();
+    assert.equal(button.textContent, "Captions: Off");
+    assert.equal(captionPosts(player).length, 2);
+});
+
+test("captions button stays visible but disabled when local media has no subtitles", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    await tick();
+    const button = player.elements["cast-captions-toggle"];
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, true);
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, true);
+});
 
 test("saved captions-on preference initializes first subtitle without posting", async () => {
     const player = createPlayer((url, options) => options.method === "GET" ? Promise.resolve(ok({ offset: null })) : Promise.resolve(ok()), {
