@@ -127,11 +127,13 @@ STATICFILES_FINDERS = (
 
 MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "mediaviewer.middleware.app_html_responses",
     "mediaviewer.middleware.AutoLogout",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "mediaviewer.middleware.set_secure_headers",
@@ -152,6 +154,7 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_htmx",
     "django_extensions",
     "grappelli",  # Required to come before django.contrib.admin
     # Uncomment the next line to enable the admin:
