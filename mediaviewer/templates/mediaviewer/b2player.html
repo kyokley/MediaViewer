@@ -62,7 +62,19 @@
                         type="button"
                         aria-label="Choose playback device"
                         title="Choose playback device"
-                        disabled><span class="b2-control-label"><i class="bi-broadcast-pin" aria-hidden="true"></i> Connect</span><span class="b2-control-size" aria-hidden="true"><i class="bi-broadcast-pin"></i> Connect</span><span class="b2-control-size" aria-hidden="true"><i class="bi-cast"></i> Cast video</span><span class="b2-control-size" aria-hidden="true"><i class="bi-broadcast-pin"></i> AirPlay video</span><span class="b2-control-size" aria-hidden="true"><i class="bi-cast"></i> Chromecast connected</span><span class="b2-control-size" aria-hidden="true"><i class="bi-broadcast-pin"></i> AirPlay connected</span></button>
+                        disabled>
+                    <span class="b2-control-label">
+                        <svg class="b2-chromecast-icon"
+                             viewBox="0 0 24 24"
+                             aria-hidden="true"
+                             focusable="false">
+                            <rect x="9" y="3" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"></rect>
+                            <path d="M3 14a9 9 0 0 1 9 9M3 19a4 4 0 0 1 4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+                            </path>
+                            <circle cx="3" cy="23" r="1" fill="currentColor"></circle>
+                        </svg>
+                    </span>
+                </button>
                 {% if next_url %}<button class="btn {% if player_config.binge_mode %}btn-success{% else %}btn-danger{% endif %}"
         id="binge-toggle"
         type="button"

@@ -208,25 +208,26 @@
     const updateWirelessButton = () => {
       if (!castButton) return;
       const route = getWirelessRoute();
-      let label = "Connect";
       let accessibleLabel = "Choose playback device";
-      let icon = "bi-broadcast-pin";
+      let connected = false;
       if (route === "cast") {
-        const connected =
+        connected =
           castState === window.cast?.framework?.CastState?.CONNECTED ||
           Boolean(castContext?.getCurrentSession?.());
-        label = connected ? "Chromecast connected" : "Cast video";
-        accessibleLabel = label;
-        icon = "bi-cast";
+        accessibleLabel = connected ? "Chromecast connected" : "Cast video";
       } else if (route === "airplay") {
-        const connected = isAirplayActive();
-        label = connected ? "AirPlay connected" : "AirPlay video";
-        accessibleLabel = label;
+        connected = isAirplayActive();
+        accessibleLabel = connected ? "AirPlay connected" : "AirPlay video";
       }
-      if (castButtonLabel)
-        castButtonLabel.innerHTML = `<i class="${icon}" aria-hidden="true"></i> ${label}`;
+      if (castButtonLabel) {
+        castButtonLabel.innerHTML =
+          route === "airplay"
+            ? '<svg class="b2-airplay-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="M12 14 3 23h18z" fill="currentColor"></path></svg>'
+            : '<svg class="b2-chromecast-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="3" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"></rect><path d="M3 14a9 9 0 0 1 9 9M3 19a4 4 0 0 1 4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path><circle cx="3" cy="23" r="1" fill="currentColor"></circle></svg>';
+      }
       castButton.setAttribute("aria-label", accessibleLabel);
       castButton.setAttribute("title", accessibleLabel);
+      castButton.classList.toggle("active", connected);
       const castConnecting =
         castState === window.cast?.framework?.CastState?.CONNECTING;
       castButton.disabled =

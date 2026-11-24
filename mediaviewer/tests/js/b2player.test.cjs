@@ -18,7 +18,7 @@ const deferred = () => {
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
     const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : id === "cast-video" ? "Connect" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : id === "cast-video" ? { "aria-label": "Choose playback device", title: "Choose playback device" } : {}, listeners: {}, hidden: false, disabled: ["cast-captions-toggle", "play-pause", "cast-video"].includes(id), style: {},
+        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : id === "cast-video" ? { "aria-label": "Choose playback device", title: "Choose playback device" } : {}, listeners: {}, hidden: false, disabled: ["cast-captions-toggle", "play-pause", "cast-video"].includes(id), style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         querySelector(selector) { return this.children?.[selector] || null; },
@@ -38,7 +38,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             set(value) {
                 this._textContent = value;
                 element.textContent = value;
-                if (id === "play-pause") {
+                if (id === "play-pause" || id === "cast-video") {
                     element.iconClass = this.innerHTML.match(/class="([^"]+)"/)?.[1] || "";
                     element.iconAriaHidden = this.innerHTML.includes('aria-hidden="true"');
                 }
@@ -49,13 +49,13 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             set(value) {
                 this._innerHTML = value;
                 this.textContent = value.replace(/<[^>]*>/g, "").trim();
-                if (id === "play-pause") {
+                if (id === "play-pause" || id === "cast-video") {
                     element.iconClass = value.match(/class="([^"]+)"/)?.[1] || "";
                     element.iconAriaHidden = value.includes('aria-hidden="true"');
                 }
             },
         });
-        label.textContent = id === "play-pause" ? "Play" : id === "cast-captions-toggle" ? "Captions: Off" : id === "cast-video" ? "Connect" : "";
+        label.textContent = id === "play-pause" ? "Play" : id === "cast-captions-toggle" ? "Captions: Off" : "";
         element.children = {
             ".b2-control-label": label,
             ".b2-control-size": { textContent: "", hidden: true },
@@ -493,7 +493,7 @@ test("Cast play pause callbacks from replaced media cannot alter current control
     assert.equal(player.video.playCalls || 0, 0);
 });
 
-test("shared wireless control is a regular always-visible button with reserved labels", () => {
+test("shared wireless control is a compact icon-only regular button", () => {
     const button = template.match(/<button\b[^>]*id="cast-video"[^>]*>([\s\S]*?)<\/button>/);
     assert(button);
     assert.match(button[0], /type="button"/);
@@ -501,11 +501,12 @@ test("shared wireless control is a regular always-visible button with reserved l
     assert.match(button[0], /title="Choose playback device"/);
     assert.match(button[0], /\sdisabled(?:\s|>)/);
     assert.doesNotMatch(button[0], /\shidden(?:\s|>)/);
-    assert.match(button[1], /class="b2-control-label">/);
+    assert.match(button[1], /class="b2-control-label">\s*<svg\s+class="b2-chromecast-icon"\s+viewBox="0 0 24 24"\s+aria-hidden="true"\s+focusable="false">/);
+    assert.match(button[1], /<path d="M3 14a9 9 0 0 1 9 9M3 19a4 4 0 0 1 4 4"/);
+    assert.doesNotMatch(button[1], /b2-control-size|Connect|Cast video|AirPlay/);
+    assert.match(styles, /#cast-video\s*\{[^}]*flex:\s*0 0 2\.75rem[^}]*width:\s*2\.75rem[^}]*min-width:\s*2\.75rem/);
+    assert.match(styles, /\.b2-airplay-icon,\s*\.b2-chromecast-icon\s*\{[^}]*width:\s*1\.25rem[^}]*height:\s*1\.25rem/);
     assert.doesNotMatch(template, /google-cast-launcher|id="airplay-video"/);
-    for (const label of ["Connect", "Cast video", "AirPlay video", "Chromecast connected", "AirPlay connected"]) {
-        assert.match(button[1], new RegExp(`class="b2-control-size" aria-hidden="true">[\\s\\S]*?${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
-    }
 });
 
 test("Captions toggle is accessible, always visible, and initially unavailable", () => {
@@ -853,7 +854,8 @@ test("Cast availability drives the shared button and requestSession runs from cl
     await tick();
     const { context: castContext } = player.context.window.cast;
     assert.equal(button.disabled, false);
-    assert.equal(button.textContent, "Cast video");
+    assert.equal(button.textContent, "");
+    assert.equal(button.iconClass, "b2-chromecast-icon");
     assert.equal(button.attributes["aria-label"], "Cast video");
     assert.equal(button.attributes.title, "Cast video");
     assert.equal(typeof castContext.eventListeners["session-state"], "function");
@@ -863,10 +865,16 @@ test("Cast availability drives the shared button and requestSession runs from cl
     assert.equal(button.disabled, true, "request pending disables duplicate requests");
     await tick();
     castContext.emitCastState("CONNECTED");
-    assert.equal(button.textContent, "Chromecast connected");
+    assert.equal(button.textContent, "");
+    assert.equal(button.attributes["aria-label"], "Chromecast connected");
+    assert.equal(button.classes.has("active"), true);
     assert.equal(button.disabled, false);
     button.click();
     assert.equal(castContext.requestSessionCalls, 2, "connected Cast can reopen its native picker");
+    await tick();
+    castContext.emitCastState("NOT_CONNECTED");
+    assert.equal(button.attributes["aria-label"], "Cast video");
+    assert.equal(button.classes.has("active"), false);
 });
 
 test("AirPlay-only shared control works before availability is reported and follows wireless state", async () => {
@@ -877,7 +885,10 @@ test("AirPlay-only shared control works before availability is reported and foll
     assert.equal(button.disabled, false, "picker is allowed before availability is reported");
     await tick();
     assert.equal(button.disabled, false);
-    assert.equal(button.textContent, "AirPlay video");
+    assert.equal(button.textContent, "");
+    assert.equal(button.iconClass, "b2-airplay-icon");
+    assert.equal(button.iconAriaHidden, true);
+    assert.equal(button.attributes["aria-label"], "AirPlay video");
     assert.equal(button.attributes.title, "AirPlay video");
     button.click();
     assert.equal(player.video.pickerCalls, 1, "picker is invoked synchronously on the gesture");
@@ -885,12 +896,16 @@ test("AirPlay-only shared control works before availability is reported and foll
     assert.equal(button.disabled, true);
     player.video.webkitCurrentPlaybackTargetIsWireless = true;
     player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
-    assert.equal(button.textContent, "AirPlay connected");
+    assert.equal(button.textContent, "");
+    assert.equal(button.iconClass, "b2-airplay-icon");
+    assert.equal(button.attributes["aria-label"], "AirPlay connected");
+    assert.equal(button.classes.has("active"), true);
     assert.equal(button.disabled, false);
     button.click();
     assert.equal(player.video.pickerCalls, 2);
     player.video.webkitCurrentPlaybackTargetIsWireless = false;
     player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
+    assert.equal(button.classes.has("active"), false);
     assert.equal(button.disabled, true);
 });
 
@@ -922,18 +937,24 @@ test("shared wireless button honors active routes then Cast and AirPlay availabi
     await tick();
     const button = player.elements["cast-video"];
     const { context: castContext } = player.context.window.cast;
-    assert.equal(button.textContent, "Cast video");
+    assert.equal(button.attributes["aria-label"], "Cast video");
+    assert.equal(button.iconClass, "b2-chromecast-icon");
     player.video.webkitCurrentPlaybackTargetIsWireless = true;
     player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
-    assert.equal(button.textContent, "AirPlay connected");
+    assert.equal(button.attributes["aria-label"], "AirPlay connected");
+    assert.equal(button.iconClass, "b2-airplay-icon");
+    assert.equal(button.classes.has("active"), true);
     castContext.emitCastState("CONNECTED");
-    assert.equal(button.textContent, "Chromecast connected");
+    assert.equal(button.attributes["aria-label"], "Chromecast connected");
+    assert.equal(button.iconClass, "b2-chromecast-icon");
+    assert.equal(button.classes.has("active"), true);
     castContext.emitCastState("NO_DEVICES_AVAILABLE");
-    assert.equal(button.textContent, "AirPlay connected");
+    assert.equal(button.attributes["aria-label"], "AirPlay connected");
+    assert.equal(button.iconClass, "b2-airplay-icon");
     player.video.webkitCurrentPlaybackTargetIsWireless = false;
     player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
     player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "available" });
-    assert.equal(button.textContent, "AirPlay video", "explicit AirPlay availability is used when Cast is unavailable");
+    assert.equal(button.attributes["aria-label"], "AirPlay video", "explicit AirPlay availability is used when Cast is unavailable");
 });
 
 test("shared wireless button is disabled when neither Cast nor AirPlay is available", async () => {
