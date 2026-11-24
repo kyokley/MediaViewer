@@ -1,0 +1,30 @@
+workflows:
+  test:
+    when:
+      - event: pull_request
+        branch: ["**"]
+    engine: microvm
+    image: nixos
+    dependencies:
+      - gnumake
+      - docker
+      - docker-compose
+    virtualisation:
+      docker: true
+    steps:
+      # Match the container user to the microVM checkout owner.
+      - name: Check migrations
+        command: make UID="$(id -u)" check-migrations
+      - name: Run pytest
+        command: make UID="$(id -u)" pytest
+      - name: Run bandit
+        command: make UID="$(id -u)" bandit
+  format-checks:
+    when:
+      - event: pull_request
+        branch: ["**"]
+    engine: microvm
+    image: nixos
+    steps:
+      - name: Run nix flake checks
+        command: nix flake check --no-update-lock-file --print-build-logs
