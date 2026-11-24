@@ -160,7 +160,15 @@
     let castMediaUpdate = null;
     let castSessionUpdate = null;
     let seekPending = false;
+    let captionsPending = false;
     const castButton = document.getElementById("cast-video");
+    const castCaptionsButton = document.getElementById("cast-captions-toggle");
+    if (castCaptionsButton) {
+      castCaptionsButton.hidden = true;
+      castCaptionsButton.disabled = true;
+      castCaptionsButton.textContent = "Captions: Off";
+      castCaptionsButton.setAttribute("aria-pressed", "false");
+    }
     const getRemoteMedia = () => {
       const media = castMediaSession;
       return alive() &&
@@ -171,10 +179,28 @@
         ? media
         : null;
     };
+    const remoteTextTracks = (media) =>
+      (media?.media?.tracks || []).filter(
+        (track) => track.type === window.chrome?.cast?.media?.TrackType?.TEXT,
+      );
+    const activeRemoteTextTracks = (media) => {
+      const ids = media?.activeTrackIds || [];
+      return remoteTextTracks(media).filter((track) =>
+        ids.includes(track.trackId),
+      );
+    };
     const updateCastControls = () => {
-      if (!castRemoteActive) return;
       const media = getRemoteMedia();
       const sdkMedia = window.chrome?.cast?.media;
+      if (!castRemoteActive) {
+        if (castCaptionsButton) {
+          castCaptionsButton.hidden = true;
+          castCaptionsButton.disabled = true;
+          castCaptionsButton.textContent = "Captions: Off";
+          castCaptionsButton.setAttribute("aria-pressed", "false");
+        }
+        return;
+      }
       const seekSupported = Boolean(
         media &&
           sdkMedia?.MediaCommand &&
@@ -184,6 +210,15 @@
         const button = document.getElementById(id);
         if (button) button.disabled = !media || !seekSupported || seekPending;
       });
+      const tracks = remoteTextTracks(media);
+      if (castCaptionsButton) {
+        castCaptionsButton.hidden = !media || tracks.length === 0;
+        castCaptionsButton.disabled =
+          !media || tracks.length === 0 || captionsPending;
+        const enabled = activeRemoteTextTracks(media).length > 0;
+        castCaptionsButton.textContent = `Captions: ${enabled ? "On" : "Off"}`;
+        castCaptionsButton.setAttribute("aria-pressed", String(enabled));
+      }
     };
     const clearCurrentMedia = () => {
       if (castMediaSession && castMediaUpdate)
@@ -191,6 +226,7 @@
       castMediaSession = null;
       castMediaUpdate = null;
       seekPending = false;
+      captionsPending = false;
       updateCastControls();
     };
     const clearRemoteMedia = () => {
@@ -540,7 +576,8 @@
         castRemoteActive &&
         message !== "Connecting to Chromecast" &&
         message !== "Playing on Chromecast" &&
-        message !== "Could not seek on Chromecast"
+        message !== "Could not seek on Chromecast" &&
+        message !== "Could not change Chromecast captions"
       )
         return;
       if (fadeOut) {
@@ -813,6 +850,60 @@
         fail();
       }
     }
+    listen(castCaptionsButton, "click", () => {
+      const media = getRemoteMedia();
+      const sdkMedia = window.chrome?.cast?.media;
+      if (
+        !media ||
+        captionsPending ||
+        !remoteTextTracks(media).length ||
+        !sdkMedia?.EditTracksInfoRequest
+      )
+        return;
+      const active = media.activeTrackIds || [];
+      const activeText = remoteTextTracks(media).filter((track) =>
+        active.includes(track.trackId),
+      );
+      const preserve = active.filter(
+        (id) => !remoteTextTracks(media).some((track) => track.trackId === id),
+      );
+      const next = activeText.length
+        ? preserve
+        : [...preserve, remoteTextTracks(media)[0].trackId];
+      const request = new sdkMedia.EditTracksInfoRequest(next);
+      captionsPending = true;
+      updateCastControls();
+      const session = castSession;
+      const fail = () => {
+        if (castSession !== session || getRemoteMedia() !== media) return;
+        captionsPending = false;
+        updateCastControls();
+        setStatus("Could not change Chromecast captions");
+      };
+      try {
+        media.editTracksInfo(
+          request,
+          () => {
+            if (castSession !== session || getRemoteMedia() !== media) return;
+            captionsPending = false;
+            captionsEnabled = next.some((id) =>
+              remoteTextTracks(media).some((track) => track.trackId === id),
+            );
+            persistCaptions(captionsEnabled);
+            captionTracks().forEach((track, index) => {
+              track.mode =
+                captionsEnabled && index === 0 ? "showing" : "disabled";
+            });
+            updateCastControls();
+            if (status.textContent === "Could not change Chromecast captions")
+              setStatus("Playing on Chromecast");
+          },
+          fail,
+        );
+      } catch (_) {
+        fail();
+      }
+    });
     listen(document.getElementById("start-over"), "click", async () => {
       if (!alive()) return;
       if (castRemoteActive) return;

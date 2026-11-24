@@ -16,9 +16,9 @@ const deferred = () => {
 };
 
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
-    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "airplay-video"];
+    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "airplay-video"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), style: {},
+        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video", "cast-captions-toggle"].includes(id), disabled: id === "cast-captions-toggle", style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
@@ -104,6 +104,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         supportsCommand(command) { return command === "SEEK" && !configPatch.seekUnsupported; }, getEstimatedTime() { return configPatch.estimatedTime ?? 20; },
         addUpdateListener(fn) { this.updateListener = fn; }, removeUpdateListener(fn) { if (this.updateListener === fn) this.updateListener = null; },
         seek(request, success, failure) { this.seekCalls = (this.seekCalls || []); this.seekCalls.push(request); this.seekSuccess = success; this.seekFailureCallback = failure; if (configPatch.seekThrow) throw new Error("secret seek error"); if (configPatch.seekFailure) failure?.(); else if (!configPatch.seekPending) success?.(); },
+        editTracksInfo(request, success, failure) { this.editCalls = (this.editCalls || []); this.editCalls.push(request); this.editSuccess = success; this.editFailureCallback = failure; if (configPatch.captionThrow) throw new Error("secret caption error"); if (configPatch.captionFailure) failure?.(); else if (!configPatch.captionPending) { this.activeTrackIds = request.activeTrackIds; success?.(); } },
     });
     const castSession = { request: null, mediaSession: configPatch.currentCastMedia ? makeMediaSession(configPatch.currentCastMedia) : null,
         loadCalls: 0, getMediaSession() { return this.mediaSession; },
@@ -146,7 +147,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
             LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } },
             SeekRequest: class {},
-            } } };
+            EditTracksInfoRequest: class { constructor(activeTrackIds) { this.activeTrackIds = activeTrackIds; } } } } };
     const nextAnchor = configPatch.nextAnchor ? {
         href: new URL(configPatch.nextAnchor, "https://example.test/player/").href,
         click() { nextAnchorClicks.push(this.href); },
@@ -197,6 +198,15 @@ test("Cast launcher is visible for SDK initialization and sized as a usable cont
     assert.doesNotMatch(launcher[0], /\shidden(?:\s|=|>)/);
     assert.doesNotMatch(launcher[0], /display\s*:\s*none/i);
     assert.match(styles, /google-cast-launcher\s*\{[^}]*width:\s*2\.75rem[^}]*height:\s*2\.5rem/);
+});
+
+test("Cast captions toggle is accessible and unavailable before remote media is ready", () => {
+    const button = template.match(/<button\b[^>]*id="cast-captions-toggle"[^>]*>Captions: Off<\/button>/);
+    assert(button);
+    assert.match(button[0], /type="button"/);
+    assert.match(button[0], /aria-pressed="false"/);
+    assert.match(button[0], /\shidden(?:\s|>)/);
+    assert.match(button[0], /\sdisabled(?:\s|>)/);
 });
 
 test("saved-position notice is isolated for timed dismissal and replacement", async () => {
@@ -782,6 +792,7 @@ test("Cast attaches receiver media after late source load and after media-alive 
     firstMedia.media.tracks = cast.session.request.media.tracks;
     cast.session.emitMediaSession(firstMedia);
     assert.equal(player.elements["seek-back"].disabled, false);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, false);
 
     firstMedia.updateListener(false);
     assert.equal(player.elements["seek-back"].disabled, true);
@@ -789,11 +800,65 @@ test("Cast attaches receiver media after late source load and after media-alive 
     replacement.media.tracks = cast.session.request.media.tracks;
     cast.session.emitMediaSession(replacement);
     assert.equal(player.elements["seek-back"].disabled, false);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, false);
 });
 
-test("Cast seek failure feedback is safe and clears after successful retry", async () => {
-    const player = createPlayer(async () => media(), {
-        testMediaFetch: true, seekFailure: true,
+test("Cast caption toggle selects subtitle tracks, preserves non-text tracks, and persists success", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
+        testMediaFetch: true, captions_url: "/captions", captions_enabled: false,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const button = player.elements["cast-captions-toggle"];
+    const remote = cast.session.getMediaSession();
+    assert.equal(remote.media.tracks[0].type, "TEXT");
+    assert.equal(button.hidden, false);
+    remote.media.tracks.push({ trackId: 9, type: "AUDIO" });
+    remote.activeTrackIds = [9];
+    button.click();
+    assert.deepEqual(Array.from(remote.editCalls[0].activeTrackIds), [9, 1]);
+    assert.equal(button.getAttribute?.("aria-pressed") || button.attributes["aria-pressed"], "true");
+    await tick();
+    assert.equal(player.requests.some((request) => request.url === "/captions" && requestBody(request).captions_enabled === "true"), true);
+    button.click();
+    assert.deepEqual(Array.from(remote.editCalls[1].activeTrackIds), [9]);
+    await tick();
+    assert.equal(button.textContent, "Captions: Off");
+});
+
+test("Cast caption toggle hides without text tracks and reports failed commands without persisting", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
+        testMediaFetch: true, captions_url: "/captions", captionFailure: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const button = player.elements["cast-captions-toggle"];
+    button.click();
+    assert.match(player.elements["player-status"].textContent, /Could not change Chromecast captions/);
+    await tick();
+    assert.equal(player.requests.some((request) => request.url === "/captions"), false);
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    const noTracks = createPlayer(async () => media(), { testMediaFetch: true });
+    await tick();
+    noTracks.video.dispatch("loadedmetadata");
+    await tick();
+    noTracks.context.window.cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.equal(noTracks.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(noTracks.elements["cast-captions-toggle"].disabled, true);
+});
+
+test("Cast command failure feedback is safe and clears after successful retries", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
+        testMediaFetch: true, seekFailure: true, captionFailure: true,
     });
     await tick();
     player.video.dispatch("loadedmetadata");
@@ -807,11 +872,20 @@ test("Cast seek failure feedback is safe and clears after successful retry", asy
     remote.seek = (_request, success) => success();
     player.elements["seek-back"].click();
     assert.equal(player.elements["player-status"].textContent, "Playing on Chromecast");
+
+    player.elements["cast-captions-toggle"].click();
+    assert.equal(player.elements["player-status"].textContent, "Could not change Chromecast captions");
+    remote.editTracksInfo = (request, success) => {
+        remote.activeTrackIds = request.activeTrackIds;
+        success();
+    };
+    player.elements["cast-captions-toggle"].click();
+    assert.equal(player.elements["player-status"].textContent, "Playing on Chromecast");
 });
 
-test("Cast synchronous seek throws show safe feedback", async () => {
-    const player = createPlayer(async () => media(), {
-        testMediaFetch: true, seekThrow: true,
+test("Cast synchronous seek and caption throws show safe feedback", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
+        testMediaFetch: true, seekThrow: true, captionThrow: true,
     });
     await tick();
     player.video.dispatch("loadedmetadata");
@@ -821,32 +895,38 @@ test("Cast synchronous seek throws show safe feedback", async () => {
     await tick();
     player.elements["seek-back"].click();
     assert.equal(player.elements["player-status"].textContent, "Could not seek on Chromecast");
+    player.elements["cast-captions-toggle"].click();
+    assert.equal(player.elements["player-status"].textContent, "Could not change Chromecast captions");
     assert.doesNotMatch(player.elements["player-status"].textContent, /secret/);
 });
 
-test("Cast seek readiness, pending commands, and disposal clean listeners and reject stale callbacks", async () => {
-    const player = createPlayer(async () => media(), {
-        testMediaFetch: true, seekPending: true,
+test("Cast readiness, pending commands, and disposal clean listeners and reject stale callbacks", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
+        testMediaFetch: true, seekPending: true, captionPending: true, captions_url: "/captions",
     });
     await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     const cast = player.context.window.cast;
     cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
-    assert.equal(player.elements["seek-back"].disabled, true);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, true);
     await tick();
     const remote = cast.session.getMediaSession();
-    assert.equal(player.elements["seek-back"].disabled, false);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, false);
     player.elements["seek-back"].click();
     player.elements["seek-forward"].click();
     assert.equal(remote.seekCalls.length, 1);
-    assert.equal(player.elements["seek-back"].disabled, true);
+    player.elements["cast-captions-toggle"].click();
+    player.elements["cast-captions-toggle"].click();
+    assert.equal(remote.editCalls.length, 1);
     cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
     remote.seekSuccess?.();
+    remote.editSuccess?.();
     await tick();
-    assert.equal(player.elements["seek-back"].disabled, false);
+    assert.equal(player.elements["cast-captions-toggle"].hidden, true);
+    assert.equal(player.requests.some((request) => request.url === "/captions"), false);
 
-    const resumed = createPlayer(async () => media(), {
+    const resumed = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
         testMediaFetch: true, currentCastMedia: "https://bucket.example/video.mp4",
     });
     await tick();
@@ -856,11 +936,34 @@ test("Cast seek readiness, pending commands, and disposal clean listeners and re
     resumed.video.paused = false;
     resumeCast.context.sessionListener({ sessionState: "SESSION_RESUMED" });
     assert.equal(resumed.video.paused, true);
+    assert.equal(resumed.elements["cast-captions-toggle"].hidden, true);
     const resumedMedia = resumeCast.session.getMediaSession();
     assert.equal(typeof resumedMedia.updateListener, "function");
     resumed.context.window.MediaViewerPlayer.dispose();
     assert.equal(resumedMedia.updateListener, null);
     assert.equal(resumeCast.session.eventListeners["media-session"], undefined);
+    assert.equal(resumed.elements["cast-captions-toggle"].hidden, true);
+});
+
+test("Cast stale command callbacks after receiver media replacement do not persist choices", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["https://bucket.example/en.vtt"] }), {
+        testMediaFetch: true, captionPending: true, captions_url: "/captions",
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const oldMedia = cast.session.getMediaSession();
+    player.elements["cast-captions-toggle"].click();
+    const replacement = player.makeMediaSession("https://bucket.example/video.mp4");
+    replacement.media.tracks = oldMedia.media.tracks;
+    cast.session.emitMediaSession(replacement);
+    oldMedia.editSuccess?.();
+    await tick();
+    assert.equal(player.requests.some((request) => request.url === "/captions"), false);
+    assert.equal(player.elements["cast-captions-toggle"].textContent, "Captions: Off");
 });
 
 test("Cast session waits for media source and loads it once when ready", async () => {
