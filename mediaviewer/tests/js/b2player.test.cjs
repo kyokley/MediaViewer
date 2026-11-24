@@ -52,6 +52,15 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         },
         get() { return this._html; },
     });
+    Object.defineProperty(elements["play-pause"], "innerHTML", {
+        set(value) {
+            this._html = value;
+            this.textContent = value.replace(/<[^>]*>/g, "").trim();
+            this.iconClass = value.match(/class="([^"]+)"/)?.[1] || "";
+            this.iconAriaHidden = value.includes('aria-hidden="true"');
+        },
+        get() { return this._html; },
+    });
     const video = {
         currentTime: 0, duration: 100, paused: true, readyState: 0, children: [], loadCalls: 0,
         textTracks,
@@ -201,6 +210,31 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
 });
 
+test("playback button sits between seek controls and keeps its state icon", async () => {
+    const controls = template.match(/<div class="b2-player-tools">([\s\S]*?)<\/div>/)[1];
+    assert.ok(controls.indexOf('id="seek-back"') < controls.indexOf('id="play-pause"'));
+    assert.ok(controls.indexOf('id="play-pause"') < controls.indexOf('id="seek-forward"'));
+    const markup = controls.match(/<button\b[^>]*id="play-pause"[^>]*>([\s\S]*?)<\/button>/)[0];
+    assert.match(markup, /<i class="bi-play-fill" aria-hidden="true"><\/i>\s*Play/);
+
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    const button = player.elements["play-pause"];
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(button.textContent, "Play");
+    assert.equal(button.iconClass, "bi-play-fill");
+    assert.equal(button.iconAriaHidden, true);
+    button.click();
+    await tick();
+    assert.equal(button.textContent, "Pause");
+    assert.equal(button.iconClass, "bi-pause-fill");
+    assert.equal(button.attributes["aria-label"], "Pause video");
+    player.video.dispatch("pause");
+    assert.equal(button.textContent, "Play");
+    assert.equal(button.iconClass, "bi-play-fill");
+});
+
 test("local play button waits for resume readiness and follows native playback events", async () => {
     const pendingMedia = deferred();
     const player = createPlayer((url) => url === "/media" ? pendingMedia.promise : Promise.resolve(ok()), { testMediaFetch: true });
@@ -221,14 +255,18 @@ test("local play button waits for resume readiness and follows native playback e
     await tick();
     assert.equal(button.textContent, "Pause");
     assert.equal(button.attributes["aria-label"], "Pause video");
+    assert.equal(button.iconClass, "bi-pause-fill");
+    assert.equal(button.iconAriaHidden, true);
     player.video.dispatch("pause");
     assert.equal(button.textContent, "Play");
+    assert.equal(button.iconClass, "bi-play-fill");
     player.video.currentTime = player.video.duration;
     player.video.dispatch("ended");
     assert.equal(button.textContent, "Play");
     button.click();
     await tick();
     assert.equal(button.textContent, "Pause");
+    assert.equal(button.iconClass, "bi-pause-fill");
     assert.equal(player.video.currentTime, 0);
 });
 
@@ -266,6 +304,8 @@ test("Cast play pause follows matching receiver state without touching local pla
     const button = player.elements["play-pause"];
     assert.equal(button.disabled, false);
     assert.equal(button.textContent, "Pause");
+    assert.equal(button.iconClass, "bi-pause-fill");
+    assert.equal(button.iconAriaHidden, true);
     assert.equal(button.attributes["aria-label"], "Pause video");
     button.click();
     assert.deepEqual(remote.pauseCalls, [null]);
@@ -273,11 +313,13 @@ test("Cast play pause follows matching receiver state without touching local pla
     remote.playerState = "PAUSED";
     remote.updateListener(true);
     assert.equal(button.textContent, "Play");
+    assert.equal(button.iconClass, "bi-play-fill");
     button.click();
     assert.deepEqual(remote.playCalls, [null]);
     remote.playerState = "BUFFERING";
     remote.updateListener(true);
     assert.equal(button.textContent, "Pause");
+    assert.equal(button.iconClass, "bi-pause-fill");
     assert.equal(player.video.playCalls || 0, 0);
     assert.equal(cast.session.loadCalls, 1);
 });

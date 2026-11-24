@@ -173,10 +173,19 @@
     const castButton = document.getElementById("cast-video");
     const playPauseButton = document.getElementById("play-pause");
     const castCaptionsButton = document.getElementById("cast-captions-toggle");
+    const renderPlaybackButton = (playing) => {
+      if (!playPauseButton) return;
+      const label = playing ? "Pause" : "Play";
+      const icon = playing ? "pause" : "play";
+      playPauseButton.innerHTML = `<i class="bi-${icon}-fill" aria-hidden="true"></i> ${label}`;
+      playPauseButton.setAttribute(
+        "aria-label",
+        playing ? "Pause video" : "Play video",
+      );
+    };
     if (playPauseButton) {
       playPauseButton.disabled = true;
-      playPauseButton.textContent = "Play";
-      playPauseButton.setAttribute("aria-label", "Play video");
+      renderPlaybackButton(false);
     }
     if (castCaptionsButton) {
       castCaptionsButton.disabled = true;
@@ -213,11 +222,7 @@
           state === sdkMedia?.PlayerState?.PLAYING ||
           state === sdkMedia?.PlayerState?.BUFFERING;
         const paused = state === sdkMedia?.PlayerState?.PAUSED;
-        playPauseButton.textContent = playing ? "Pause" : "Play";
-        playPauseButton.setAttribute(
-          "aria-label",
-          playing ? "Pause video" : "Play video",
-        );
+        renderPlaybackButton(playing);
         const canPause = Boolean(
           media &&
             playing &&
@@ -232,11 +237,7 @@
         return;
       }
       const playing = !video.paused;
-      playPauseButton.textContent = playing ? "Pause" : "Play";
-      playPauseButton.setAttribute(
-        "aria-label",
-        playing ? "Pause video" : "Play video",
-      );
+      renderPlaybackButton(playing);
       playPauseButton.disabled =
         !alive() || !resumeReady || suspended || localPlayPending;
     };
