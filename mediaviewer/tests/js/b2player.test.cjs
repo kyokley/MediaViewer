@@ -16,9 +16,9 @@ const deferred = () => {
 };
 
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
-    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "airplay-video"];
+    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), disabled: ["cast-captions-toggle", "play-pause"].includes(id), style: {},
+        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : id === "cast-video" ? "Connect" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : id === "cast-video" ? { "aria-label": "Choose playback device", title: "Choose playback device" } : {}, listeners: {}, hidden: false, disabled: ["cast-captions-toggle", "play-pause", "cast-video"].includes(id), style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         querySelector(selector) { return this.children?.[selector] || null; },
@@ -29,7 +29,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         click() { return this.listeners.click?.(); },
     }]));
     for (const element of Object.values(elements)) element.classList.owner = element;
-    for (const id of ["play-pause", "cast-captions-toggle", "binge-toggle"]) {
+    for (const id of ["play-pause", "cast-captions-toggle", "binge-toggle", "cast-video"]) {
         const element = elements[id];
         if (!element) continue;
         const label = { setAttribute() {} };
@@ -55,7 +55,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
                 }
             },
         });
-        label.textContent = id === "play-pause" ? "Play" : id === "cast-captions-toggle" ? "Captions: Off" : "";
+        label.textContent = id === "play-pause" ? "Play" : id === "cast-captions-toggle" ? "Captions: Off" : id === "cast-video" ? "Connect" : "";
         element.children = {
             ".b2-control-label": label,
             ".b2-control-size": { textContent: "", hidden: true },
@@ -95,7 +95,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         get() { return this._html; },
     });
     const video = {
-        currentTime: 0, duration: 100, paused: true, readyState: 0, children: [], loadCalls: 0,
+        currentTime: 0, duration: 100, paused: true, controls: true, readyState: 0, children: [], loadCalls: 0,
         textTracks,
         append(child) {
             child.remove = () => {
@@ -135,8 +135,12 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     };
     if (configPatch.airplaySupported) {
         video.pickerCalls = 0;
-        video.webkitShowPlaybackTargetPicker = () => { video.pickerCalls += 1; };
+        video.webkitShowPlaybackTargetPicker = () => {
+            video.pickerCalls += 1;
+            if (configPatch.airplayPickerThrows && !video.pickerRetrySucceeded) throw new Error("secret AirPlay picker error");
+        };
     }
+    if (configPatch.airplayActive) video.webkitCurrentPlaybackTargetIsWireless = true;
     elements["b2-video"] = video;
     elements["b2-player-config"] = { textContent: JSON.stringify({
         media_url: "/media", progress_url: "/progress",
@@ -182,18 +186,40 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         } };
     const castContext = {
         sessionListener: null,
+        eventListeners: {},
+        castState: configPatch.castInitialState || (configPatch.castNoDevices ? "NO_DEVICES_AVAILABLE" : "NOT_CONNECTED"),
         setOptions(options) { this.options = options; this.setOptionsCalls = (this.setOptionsCalls || 0) + 1; },
-        addEventListener(_type, listener) { this.sessionListener = listener; },
-        removeEventListener(_type, listener) { if (this.sessionListener === listener) this.sessionListener = null; },
-        getCurrentSession() { return castSession; },
+        addEventListener(type, listener) {
+            this.eventListeners[type] = listener;
+            if (type === "session-state") {
+                this.sessionListener = (event) => {
+                    if (event.sessionState === "SESSION_STARTED" || event.sessionState === "SESSION_RESUMED") this.currentSession = castSession;
+                    if (event.sessionState === "SESSION_ENDED") this.currentSession = null;
+                    listener(event);
+                };
+            }
+        },
+        removeEventListener(type, listener) {
+            if (this.eventListeners[type] === listener) delete this.eventListeners[type];
+            if (type === "session-state") this.sessionListener = null;
+        },
+        getCurrentSession() { return this.currentSession || null; },
+        getCastState() { return this.castState; },
+        emitCastState(castState) { this.castState = castState; if (castState === "NO_DEVICES_AVAILABLE" || castState === "NOT_CONNECTED") this.currentSession = null; this.eventListeners["cast-state"]?.({ castState }); },
+        requestSession() {
+            this.requestSessionCalls = (this.requestSessionCalls || 0) + 1;
+            if (configPatch.castRequestThrows) throw new Error("secret Cast request error");
+            return configPatch.castRequestDeferred?.promise || (configPatch.castRequestFailure ? Promise.reject(configPatch.castRequestFailure === true ? "ERROR" : configPatch.castRequestFailure) : Promise.resolve());
+        },
     };
     const castApi = {
         context: castContext, session: castSession,
         framework: { CastContext: { getInstance: () => castContext },
-            CastContextEventType: { SESSION_STATE_CHANGED: "session-state" }, SessionEventType: { MEDIA_SESSION: "media-session" },
+            CastContextEventType: { SESSION_STATE_CHANGED: "session-state", CAST_STATE_CHANGED: "cast-state" }, CastState: { NO_DEVICES_AVAILABLE: "NO_DEVICES_AVAILABLE", NOT_CONNECTED: "NOT_CONNECTED", CONNECTING: "CONNECTING", CONNECTED: "CONNECTED" }, SessionEventType: { MEDIA_SESSION: "media-session" },
             SessionState: { SESSION_STARTING: "SESSION_STARTING", SESSION_STARTED: "SESSION_STARTED", SESSION_RESUMING: "SESSION_RESUMING", SESSION_RESUMED: "SESSION_RESUMED", SESSION_ENDING: "SESSION_ENDING", SESSION_ENDED: "SESSION_ENDED" } },
     };
     const chromeApi = { cast: { AutoJoinPolicy: { ORIGIN_SCOPED: "ORIGIN_SCOPED" },
+         ErrorCode: { CANCEL: "cancel" },
          media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", TrackType: { TEXT: "TEXT" }, TextTrackType: { SUBTITLES: "SUBTITLES" }, MediaCommand: { SEEK: "SEEK", PAUSE: "PAUSE" }, PlayerState: { PAUSED: "PAUSED", PLAYING: "PLAYING", BUFFERING: "BUFFERING", IDLE: "IDLE" }, ResumeState: { PLAYBACK_PAUSE: "PLAYBACK_PAUSE", PLAYBACK_START: "PLAYBACK_START" },
             Track: class { constructor(trackId, trackType) { this.trackId = trackId; this.type = trackType; } },
             MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
@@ -210,7 +236,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         document: {
             cookie: "", visibilityState: "visible",
             baseURI: "https://example.test/player/",
-            head: { append(script) { this.script = script; this.callbackAtAppend = window.__onGCastApiAvailable; if (!configPatch.castApiLate) queueMicrotask(() => { if (!configPatch.castUnavailable) window.__mockProvideCast(); window.__onGCastApiAvailable?.(!configPatch.castUnavailable); if (configPatch.castNoDevices) elements["cast-video"].style.display = "none"; }); } },
+            head: { append(script) { this.script = script; this.callbackAtAppend = window.__onGCastApiAvailable; if (!configPatch.castApiLate) queueMicrotask(() => { if (!configPatch.castUnavailable) window.__mockProvideCast(); window.__onGCastApiAvailable?.(!configPatch.castUnavailable); }); } },
             getElementById(id) { return id === "retry-video" ? retryButton : elements[id] || null; },
             querySelectorAll(selector) { return selector === ".b2-episode-nav a[href]" && nextAnchor ? [nextAnchor] : []; },
             createElement(tag) { return { tagName: tag }; },
@@ -225,7 +251,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         clearInterval(id) { intervals.delete(id); },
     };
     vm.runInNewContext(source, context);
-    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession };
+    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession, videoListeners: listeners };
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
@@ -467,13 +493,19 @@ test("Cast play pause callbacks from replaced media cannot alter current control
     assert.equal(player.video.playCalls || 0, 0);
 });
 
-test("Cast launcher is visible for SDK initialization and sized as a usable control", () => {
-    const launcher = template.match(/<google-cast-launcher\b[^>]*>/);
-    assert(launcher);
-    assert.match(launcher[0], /id="cast-video"/);
-    assert.doesNotMatch(launcher[0], /\shidden(?:\s|=|>)/);
-    assert.doesNotMatch(launcher[0], /display\s*:\s*none/i);
-    assert.match(styles, /google-cast-launcher\s*\{[^}]*width:\s*2\.75rem[^}]*height:\s*2\.5rem/);
+test("shared wireless control is a regular always-visible button with reserved labels", () => {
+    const button = template.match(/<button\b[^>]*id="cast-video"[^>]*>([\s\S]*?)<\/button>/);
+    assert(button);
+    assert.match(button[0], /type="button"/);
+    assert.match(button[0], /aria-label="Choose playback device"/);
+    assert.match(button[0], /title="Choose playback device"/);
+    assert.match(button[0], /\sdisabled(?:\s|>)/);
+    assert.doesNotMatch(button[0], /\shidden(?:\s|>)/);
+    assert.match(button[1], /class="b2-control-label">/);
+    assert.doesNotMatch(template, /google-cast-launcher|id="airplay-video"/);
+    for (const label of ["Connect", "Cast video", "AirPlay video", "Chromecast connected", "AirPlay connected"]) {
+        assert.match(button[1], new RegExp(`class="b2-control-size" aria-hidden="true">[\\s\\S]*?${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+    }
 });
 
 test("Captions toggle is accessible, always visible, and initially unavailable", () => {
@@ -813,39 +845,240 @@ test("initial media load starts immediately without scheduling a timeout", async
     assert.equal(player.video.loadCalls, 1);
 });
 
-test("AirPlay option appears on availability before playback and opens picker on click", async () => {
-    const player = createPlayer(async () => media(), { testMediaFetch: true, airplaySupported: true });
-    const button = player.elements["airplay-video"];
-    assert.equal(button.hidden, true);
-    await tick();
-    player.video.dispatch("loadedmetadata");
-    assert.equal(player.video.paused, true);
-    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "available" });
-    assert.equal(button.hidden, false);
-    button.click();
-    assert.equal(player.video.pickerCalls, 1);
-    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "not-available" });
-    assert.equal(button.hidden, true);
-});
-
-test("AirPlay option stays hidden when native picker is unsupported", async () => {
+test("Cast availability drives the shared button and requestSession runs from click", async () => {
     const player = createPlayer(async () => media(), { testMediaFetch: true });
+    const button = player.elements["cast-video"];
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, true);
     await tick();
-    player.video.dispatch("loadedmetadata");
-    assert.equal(player.elements["airplay-video"].hidden, true);
+    const { context: castContext } = player.context.window.cast;
+    assert.equal(button.disabled, false);
+    assert.equal(button.textContent, "Cast video");
+    assert.equal(button.attributes["aria-label"], "Cast video");
+    assert.equal(button.attributes.title, "Cast video");
+    assert.equal(typeof castContext.eventListeners["session-state"], "function");
+    assert.equal(typeof castContext.eventListeners["cast-state"], "function");
+    button.click();
+    assert.equal(castContext.requestSessionCalls, 1);
+    assert.equal(button.disabled, true, "request pending disables duplicate requests");
+    await tick();
+    castContext.emitCastState("CONNECTED");
+    assert.equal(button.textContent, "Chromecast connected");
+    assert.equal(button.disabled, false);
+    button.click();
+    assert.equal(castContext.requestSessionCalls, 2, "connected Cast can reopen its native picker");
 });
 
-test("Cast SDK initializes receiver before playback and loads the signed source after session start", async () => {
+test("AirPlay-only shared control works before availability is reported and follows wireless state", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, airplaySupported: true, castUnavailable: true,
+    });
+    const button = player.elements["cast-video"];
+    assert.equal(button.disabled, false, "picker is allowed before availability is reported");
+    await tick();
+    assert.equal(button.disabled, false);
+    assert.equal(button.textContent, "AirPlay video");
+    assert.equal(button.attributes.title, "AirPlay video");
+    button.click();
+    assert.equal(player.video.pickerCalls, 1, "picker is invoked synchronously on the gesture");
+    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "not-available" });
+    assert.equal(button.disabled, true);
+    player.video.webkitCurrentPlaybackTargetIsWireless = true;
+    player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
+    assert.equal(button.textContent, "AirPlay connected");
+    assert.equal(button.disabled, false);
+    button.click();
+    assert.equal(player.video.pickerCalls, 2);
+    player.video.webkitCurrentPlaybackTargetIsWireless = false;
+    player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
+    assert.equal(button.disabled, true);
+});
+
+test("AirPlay selection leaves playback, seek, and captions local", async () => {
+    const player = createPlayer(async () => media({ subtitle_urls: ["/en.vtt"] }), {
+        testMediaFetch: true, airplaySupported: true, castUnavailable: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.elements["cast-video"].click();
+    assert.equal(player.video.pickerCalls, 1);
+    player.video.webkitCurrentPlaybackTargetIsWireless = true;
+    player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
+    player.video.currentTime = 10;
+    player.elements["seek-forward"].click();
+    assert.equal(player.video.currentTime, 20);
+    player.elements["play-pause"].click();
+    await tick();
+    assert.equal(player.video.playCalls, 1);
+    assert.equal(player.context.window.cast, undefined);
+    assert.equal(player.video.controls, true);
+});
+
+test("shared wireless button honors active routes then Cast and AirPlay availability", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, airplaySupported: true,
+    });
+    await tick();
+    const button = player.elements["cast-video"];
+    const { context: castContext } = player.context.window.cast;
+    assert.equal(button.textContent, "Cast video");
+    player.video.webkitCurrentPlaybackTargetIsWireless = true;
+    player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
+    assert.equal(button.textContent, "AirPlay connected");
+    castContext.emitCastState("CONNECTED");
+    assert.equal(button.textContent, "Chromecast connected");
+    castContext.emitCastState("NO_DEVICES_AVAILABLE");
+    assert.equal(button.textContent, "AirPlay connected");
+    player.video.webkitCurrentPlaybackTargetIsWireless = false;
+    player.video.dispatch("webkitcurrentplaybacktargetiswirelesschanged");
+    player.video.dispatch("webkitplaybacktargetavailabilitychanged", { availability: "available" });
+    assert.equal(button.textContent, "AirPlay video", "explicit AirPlay availability is used when Cast is unavailable");
+});
+
+test("shared wireless button is disabled when neither Cast nor AirPlay is available", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, castNoDevices: true,
+    });
+    await tick();
+    const button = player.elements["cast-video"];
+    assert.equal(button.hidden, false);
+    assert.equal(button.disabled, true);
+    button.click();
+    assert.equal(player.context.window.cast.context.requestSessionCalls || 0, 0);
+});
+
+test("Cast CONNECTING disables the shared control despite a current session or AirPlay fallback", async () => {
+    const connected = createPlayer(async () => media(), {
+        testMediaFetch: true, castInitialState: "CONNECTING",
+    });
+    await tick();
+    const connectedButton = connected.elements["cast-video"];
+    connected.context.window.cast.context.currentSession = connected.context.window.cast.session;
+    assert.equal(connectedButton.disabled, true);
+    connectedButton.click();
+    assert.equal(connected.context.window.cast.context.requestSessionCalls || 0, 0);
+
+    const airplay = createPlayer(async () => media(), {
+        testMediaFetch: true, castInitialState: "CONNECTING", airplaySupported: true,
+    });
+    await tick();
+    const airplayButton = airplay.elements["cast-video"];
+    assert.equal(airplayButton.disabled, true);
+    airplayButton.click();
+    assert.equal(airplay.video.pickerCalls, 0);
+});
+
+test("Cast request cancellation is quiet; errors, duplicate clicks, and stale rejection are safe", async () => {
+    const pending = deferred();
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, castRequestDeferred: pending,
+    });
+    await tick();
+    const button = player.elements["cast-video"];
+    const cast = player.context.window.cast.context;
+    button.click();
+    button.click();
+    assert.equal(cast.requestSessionCalls, 1);
+    assert.equal(button.disabled, true);
+    cast.emitCastState("CONNECTING");
+    assert.equal(button.disabled, true);
+    pending.reject(player.context.window.chrome.cast.ErrorCode.CANCEL);
+    await tick();
+    assert.doesNotMatch(player.elements["player-status"].textContent, /Could not connect/);
+
+    cast.emitCastState("NOT_CONNECTED");
+    player.context.window.chrome.cast.ErrorCode.CANCEL = "other-cancel";
+    const next = deferred();
+    cast.requestSession = () => {
+        cast.requestSessionCalls += 1;
+        return next.promise;
+    };
+    button.click();
+    next.reject({ code: "failure-secret" });
+    await tick();
+    assert.match(player.elements["player-status"].textContent, /Could not connect to Chromecast/);
+    assert.doesNotMatch(player.elements["player-status"].textContent, /failure-secret/);
+
+    player.context.window.chrome.cast.ErrorCode.CANCEL = "cancel-property";
+    const propertyCancel = deferred();
+    cast.requestSession = () => propertyCancel.promise;
+    button.click();
+    propertyCancel.reject({ code: "cancel-property" });
+    await tick();
+    assert.equal(player.elements["player-status"].textContent, "Could not connect to Chromecast");
+
+    const stale = deferred();
+    cast.requestSession = () => stale.promise;
+    button.click();
+    player.context.window.MediaViewerPlayer.dispose();
+    stale.reject("failure-secret");
+    await tick();
+    assert.doesNotMatch(player.elements["player-status"].textContent, /failure-secret/);
+});
+
+test("Cast requestSession synchronous throws are safe and reinit cleans stale callbacks", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, castRequestThrows: true,
+    });
+    await tick();
+    player.elements["cast-video"].click();
+    assert.match(player.elements["player-status"].textContent, /Could not connect to Chromecast/);
+    assert.doesNotMatch(player.elements["player-status"].textContent, /secret/);
+
+    const stale = deferred();
+    const castContext = player.context.window.cast.context;
+    castContext.requestSession = () => stale.promise;
+    player.elements["cast-video"].click();
+    player.context.window.MediaViewerPlayer.dispose();
+    assert.equal(castContext.eventListeners["cast-state"], undefined);
+    assert.equal(castContext.eventListeners["session-state"], undefined);
+    assert.equal(player.videoListeners.get("webkitplaybacktargetavailabilitychanged")?.length || 0, 0);
+    player.context.window.MediaViewerPlayer.init();
+    await tick();
+    assert.equal(typeof castContext.eventListeners["cast-state"], "function");
+    assert.equal(player.elements["cast-video"].disabled, false);
+    stale.reject("stale-error");
+    await tick();
+    assert.doesNotMatch(player.elements["player-status"].textContent, /stale-error/);
+});
+
+test("wireless picker retries clear only their matching error feedback", async () => {
+    const cast = createPlayer(async () => media(), {
+        testMediaFetch: true, castRequestFailure: { code: "failure" },
+    });
+    await tick();
+    cast.elements["cast-video"].click();
+    await tick();
+    assert.equal(cast.elements["player-status"].textContent, "Could not connect to Chromecast");
+    cast.context.window.cast.context.requestSession = () => Promise.resolve();
+    cast.elements["cast-video"].click();
+    await tick();
+    assert.equal(cast.elements["player-status"].textContent, "");
+
+    const airplay = createPlayer(async () => media(), {
+        testMediaFetch: true, castUnavailable: true, airplaySupported: true, airplayPickerThrows: true,
+    });
+    await tick();
+    airplay.elements["cast-video"].click();
+    assert.equal(airplay.elements["player-status"].textContent, "Could not open AirPlay picker");
+    airplay.video.webkitShowPlaybackTargetPicker = () => { airplay.video.pickerRetrySucceeded = true; };
+    airplay.elements["cast-video"].click();
+    assert.equal(airplay.elements["player-status"].textContent, "");
+});
+
+test("Cast SDK initializes receiver and enables the shared control before playback", async () => {
     const player = createPlayer(async () => media(), { testMediaFetch: true });
     const script = player.context.document.head.script;
     assert.equal(typeof player.context.document.head.callbackAtAppend, "function");
     assert.equal(script.src, "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1");
-    assert.equal(player.elements["cast-video"].hidden, true);
+    assert.equal(player.elements["cast-video"].hidden, false);
+    assert.equal(player.elements["cast-video"].disabled, true);
     await tick();
     const cast = player.context.window.cast;
     assert.equal(cast.context.setOptionsCalls, 1);
     assert.equal(cast.context.options.receiverApplicationId, "CC1AD845");
-    assert.equal(player.elements["cast-video"].hidden, false);
+    assert.equal(player.elements["cast-video"].disabled, false);
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.currentTime = 24;
@@ -1349,21 +1582,23 @@ test("Cast SDK becoming available after media load remains supported", async () 
     assert.equal(player.context.window.cast.context.setOptionsCalls, 1);
 });
 
-test("unavailable Cast SDK leaves launcher hidden and local playback usable", async () => {
+test("unavailable Cast SDK leaves shared control visible and local playback usable", async () => {
     const player = createPlayer(async () => media(), { testMediaFetch: true, castUnavailable: true });
     await tick();
-    assert.equal(player.elements["cast-video"].hidden, true);
+    assert.equal(player.elements["cast-video"].hidden, false);
+    assert.equal(player.elements["cast-video"].disabled, true);
     player.video.dispatch("loadedmetadata");
     await tick();
     player.video.dispatch("play");
     assert.equal(player.video.paused, false);
 });
 
-test("Cast launcher visibility remains under SDK control when no receivers are available", async () => {
+test("Cast no-device state disables the shared control without hiding it", async () => {
     const player = createPlayer(async () => media(), { testMediaFetch: true, castNoDevices: true });
     await tick();
     assert.equal(typeof player.context.document.head.callbackAtAppend, "function");
-    assert.equal(player.elements["cast-video"].style.display, "none");
+    assert.equal(player.elements["cast-video"].hidden, false);
+    assert.equal(player.elements["cast-video"].disabled, true);
 });
 
 test("Cast initialization failure leaves local player usable", async () => {

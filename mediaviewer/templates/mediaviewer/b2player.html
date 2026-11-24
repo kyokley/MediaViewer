@@ -57,12 +57,12 @@
                         type="button"
                         aria-pressed="false"
                         disabled><span class="b2-control-label">Captions: Off</span><span class="b2-control-size" aria-hidden="true">Captions: Off</span><span class="b2-control-size" aria-hidden="true">Captions: On</span></button>
-                <google-cast-launcher id="cast-video" class="btn btn-outline-secondary" aria-label="Cast video"></google-cast-launcher>
                 <button class="btn btn-outline-secondary"
-                        id="airplay-video"
+                        id="cast-video"
                         type="button"
-                        aria-label="Choose AirPlay device"
-                        hidden><span class="b2-control-label"><i class="bi-broadcast-pin"></i> AirPlay</span></button>
+                        aria-label="Choose playback device"
+                        title="Choose playback device"
+                        disabled><span class="b2-control-label"><i class="bi-broadcast-pin" aria-hidden="true"></i> Connect</span><span class="b2-control-size" aria-hidden="true"><i class="bi-broadcast-pin"></i> Connect</span><span class="b2-control-size" aria-hidden="true"><i class="bi-cast"></i> Cast video</span><span class="b2-control-size" aria-hidden="true"><i class="bi-broadcast-pin"></i> AirPlay video</span><span class="b2-control-size" aria-hidden="true"><i class="bi-cast"></i> Chromecast connected</span><span class="b2-control-size" aria-hidden="true"><i class="bi-broadcast-pin"></i> AirPlay connected</span></button>
                 {% if next_url %}<button class="btn {% if player_config.binge_mode %}btn-success{% else %}btn-danger{% endif %}"
         id="binge-toggle"
         type="button"

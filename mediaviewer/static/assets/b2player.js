@@ -161,6 +161,9 @@
     let castLoadKey = null;
     let castLoadSequence = 0;
     let castReady = false;
+    let castContext = null;
+    let castState = null;
+    let castRequestPending = false;
     let castRemoteActive = false;
     let castMediaSession = null;
     let castMediaUpdate = null;
@@ -171,11 +174,64 @@
     let localPlayPending = false;
     let localPlaySequence = 0;
     const castButton = document.getElementById("cast-video");
+    const castButtonLabel = castButton?.querySelector(".b2-control-label");
     const playPauseButton = document.getElementById("play-pause");
     const playPauseLabel = playPauseButton?.querySelector(".b2-control-label");
     const castCaptionsButton = document.getElementById("cast-captions-toggle");
     const castCaptionsLabel =
       castCaptionsButton?.querySelector(".b2-control-label");
+    let airplayAvailability = null;
+    const airplaySupported =
+      typeof video.webkitShowPlaybackTargetPicker === "function";
+    const isAirplayActive = () =>
+      airplaySupported && video.webkitCurrentPlaybackTargetIsWireless === true;
+    const getWirelessRoute = () => {
+      const castStates = window.cast?.framework?.CastState;
+      const connected =
+        castState === castStates?.CONNECTED ||
+        Boolean(castContext?.getCurrentSession?.());
+      const castAvailable =
+        castReady &&
+        typeof castContext?.requestSession === "function" &&
+        castState != null &&
+        castState !== castStates?.NO_DEVICES_AVAILABLE &&
+        castState !== castStates?.CONNECTING;
+      const airplayAvailable =
+        airplaySupported &&
+        (isAirplayActive() || airplayAvailability !== false);
+      if (connected) return "cast";
+      if (isAirplayActive()) return "airplay";
+      if (castAvailable) return "cast";
+      if (airplayAvailable) return "airplay";
+      return null;
+    };
+    const updateWirelessButton = () => {
+      if (!castButton) return;
+      const route = getWirelessRoute();
+      let label = "Connect";
+      let accessibleLabel = "Choose playback device";
+      let icon = "bi-broadcast-pin";
+      if (route === "cast") {
+        const connected =
+          castState === window.cast?.framework?.CastState?.CONNECTED ||
+          Boolean(castContext?.getCurrentSession?.());
+        label = connected ? "Chromecast connected" : "Cast video";
+        accessibleLabel = label;
+        icon = "bi-cast";
+      } else if (route === "airplay") {
+        const connected = isAirplayActive();
+        label = connected ? "AirPlay connected" : "AirPlay video";
+        accessibleLabel = label;
+      }
+      if (castButtonLabel)
+        castButtonLabel.innerHTML = `<i class="${icon}" aria-hidden="true"></i> ${label}`;
+      castButton.setAttribute("aria-label", accessibleLabel);
+      castButton.setAttribute("title", accessibleLabel);
+      const castConnecting =
+        castState === window.cast?.framework?.CastState?.CONNECTING;
+      castButton.disabled =
+        !alive() || !route || castRequestPending || castConnecting;
+    };
     const renderPlaybackButton = (playing) => {
       if (!playPauseButton || !playPauseLabel) return;
       const label = playing ? "Pause" : "Play";
@@ -333,16 +389,12 @@
         localPlaySequence += 1;
         localPlayPending = false;
       }
-      [
-        "seek-back",
-        "seek-forward",
-        "start-over",
-        "binge-toggle",
-        "airplay-video",
-      ].forEach((id) => {
-        const control = document.getElementById(id);
-        if (control) control.disabled = !enabled;
-      });
+      ["seek-back", "seek-forward", "start-over", "binge-toggle"].forEach(
+        (id) => {
+          const control = document.getElementById(id);
+          if (control) control.disabled = !enabled;
+        },
+      );
       updateCastControls();
     };
     const loadCastMedia = () => {
@@ -434,7 +486,7 @@
       )
         return;
       try {
-        const castContext = window.cast.framework.CastContext.getInstance();
+        castContext = window.cast.framework.CastContext.getInstance();
         const sessionStates = window.cast.framework.SessionState;
         if (!shared.castOptionsConfigured) {
           castContext.setOptions({
@@ -444,20 +496,48 @@
           });
           shared.castOptionsConfigured = true;
         }
-        listen(
-          castContext,
-          window.cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
-          (event) => {
-            if (event.sessionState === sessionStates.SESSION_STARTED) {
-              const session = castContext.getCurrentSession();
-              if (!session) return;
-              if (castSession !== session) {
-                clearRemoteMedia();
-                castLoadSequence += 1;
-                castLoadKey = null;
-              }
+        const castEvents = window.cast.framework.CastContextEventType;
+        listen(castContext, castEvents.CAST_STATE_CHANGED, (event) => {
+          castState = event.castState;
+          updateWirelessButton();
+        });
+        castState = castContext.getCastState();
+        listen(castContext, castEvents.SESSION_STATE_CHANGED, (event) => {
+          if (event.sessionState === sessionStates.SESSION_STARTED) {
+            const session = castContext.getCurrentSession();
+            if (!session) return;
+            if (castSession !== session) {
+              clearRemoteMedia();
+              castLoadSequence += 1;
+              castLoadKey = null;
+            }
+            castSession = session;
+            castRemoteActive = true;
+            if (!castSessionUpdate) {
+              castSessionUpdate = (mediaEvent) => {
+                if (castSession !== session || !castRemoteActive) return;
+                attachRemoteMedia(session, mediaEvent.mediaSession);
+              };
+              session.addEventListener?.(
+                window.cast.framework.SessionEventType?.MEDIA_SESSION,
+                castSessionUpdate,
+              );
+            }
+            setLocalPlaybackEnabled(false);
+            updateCastControls();
+            setStatus("Connecting to Chromecast");
+            updateWirelessButton();
+            loadCastMedia();
+            return;
+          }
+          if (event.sessionState === sessionStates.SESSION_RESUMED) {
+            const session = castContext.getCurrentSession();
+            const currentMedia = session?.getMediaSession?.()?.media;
+            if (session && currentMedia?.contentId === castSourceUrl) {
+              if (castSession !== session) clearRemoteMedia();
               castSession = session;
               castRemoteActive = true;
+              castLoadKey = castSourceUrl;
               if (!castSessionUpdate) {
                 castSessionUpdate = (mediaEvent) => {
                   if (castSession !== session || !castRemoteActive) return;
@@ -468,65 +548,48 @@
                   castSessionUpdate,
                 );
               }
+              attachRemoteMedia(session, session.getMediaSession?.());
+              video.pause();
               setLocalPlaybackEnabled(false);
-              updateCastControls();
-              setStatus("Connecting to Chromecast");
-              loadCastMedia();
-              return;
-            }
-            if (event.sessionState === sessionStates.SESSION_RESUMED) {
-              const session = castContext.getCurrentSession();
-              const currentMedia = session?.getMediaSession?.()?.media;
-              if (session && currentMedia?.contentId === castSourceUrl) {
-                if (castSession !== session) clearRemoteMedia();
-                castSession = session;
-                castRemoteActive = true;
-                castLoadKey = castSourceUrl;
-                if (!castSessionUpdate) {
-                  castSessionUpdate = (mediaEvent) => {
-                    if (castSession !== session || !castRemoteActive) return;
-                    attachRemoteMedia(session, mediaEvent.mediaSession);
-                  };
-                  session.addEventListener?.(
-                    window.cast.framework.SessionEventType?.MEDIA_SESSION,
-                    castSessionUpdate,
-                  );
-                }
-                attachRemoteMedia(session, session.getMediaSession?.());
-                video.pause();
-                setLocalPlaybackEnabled(false);
-                setStatus("Playing on Chromecast");
-              } else {
-                castLoadSequence += 1;
-                clearRemoteMedia();
-                castSession = null;
-                castRemoteActive = false;
-                castLoadKey = null;
-                setLocalPlaybackEnabled(true);
-              }
-              return;
-            }
-            if (event.sessionState === sessionStates.SESSION_ENDED) {
-              if (!castSession) return;
+              setStatus("Playing on Chromecast");
+              updateWirelessButton();
+            } else {
               castLoadSequence += 1;
               clearRemoteMedia();
               castSession = null;
               castRemoteActive = false;
               castLoadKey = null;
               setLocalPlaybackEnabled(true);
-              setStatus("Casting ended. Press play to continue here.");
-              return;
+              updateWirelessButton();
             }
-          },
-        );
+            return;
+          }
+          if (event.sessionState === sessionStates.SESSION_ENDED) {
+            if (!castSession) return;
+            castLoadSequence += 1;
+            clearRemoteMedia();
+            castSession = null;
+            castRemoteActive = false;
+            castLoadKey = null;
+            setLocalPlaybackEnabled(true);
+            setStatus("Casting ended. Press play to continue here.");
+            updateWirelessButton();
+            return;
+          }
+        });
         castReady = true;
-        if (castButton) castButton.hidden = false;
+        updateWirelessButton();
       } catch (_) {
         castReady = false;
+        updateWirelessButton();
       }
     };
     const previousCastCallback = window.__onGCastApiAvailable;
-    const castCallback = (available) => alive() && initializeCast(available);
+    const castCallback = (available) => {
+      if (!alive()) return;
+      initializeCast(available);
+      updateWirelessButton();
+    };
     window.__onGCastApiAvailable = castCallback;
     if (!shared.castScript) {
       const castSdk = document.createElement("script");
@@ -537,18 +600,62 @@
       document.head?.append(castSdk);
     }
 
-    const airplayButton = document.getElementById("airplay-video");
-    if (
-      airplayButton &&
-      typeof video.webkitShowPlaybackTargetPicker === "function"
-    ) {
+    if (airplaySupported) {
       listen(video, "webkitplaybacktargetavailabilitychanged", (event) => {
-        airplayButton.hidden = event.availability !== "available";
+        airplayAvailability = event.availability === "available";
+        updateWirelessButton();
       });
-      listen(airplayButton, "click", () =>
-        video.webkitShowPlaybackTargetPicker(),
+      listen(video, "webkitcurrentplaybacktargetiswirelesschanged", () =>
+        updateWirelessButton(),
       );
     }
+    listen(castButton, "click", () => {
+      if (!alive() || castRequestPending) return;
+      if (castState === window.cast?.framework?.CastState?.CONNECTING) return;
+      const route = getWirelessRoute();
+      if (route === "airplay") {
+        try {
+          video.webkitShowPlaybackTargetPicker();
+          if (status.textContent === "Could not open AirPlay picker")
+            setStatus("");
+        } catch (_) {
+          setStatus("Could not open AirPlay picker");
+        }
+        return;
+      }
+      if (route !== "cast" || typeof castContext?.requestSession !== "function")
+        return;
+      castRequestPending = true;
+      updateWirelessButton();
+      const failed = (error) => {
+        if (!alive()) return;
+        castRequestPending = false;
+        updateWirelessButton();
+        const cancelCode = window.chrome?.cast?.ErrorCode?.CANCEL;
+        if (
+          (cancelCode !== undefined &&
+            (error === cancelCode || error?.code === cancelCode)) ||
+          error === "CANCEL"
+        )
+          return;
+        setStatus("Could not connect to Chromecast");
+      };
+      let request;
+      try {
+        request = castContext.requestSession();
+      } catch (error) {
+        failed(error);
+        return;
+      }
+      Promise.resolve(request).then(() => {
+        if (!alive()) return;
+        castRequestPending = false;
+        updateWirelessButton();
+        if (status.textContent === "Could not connect to Chromecast")
+          setStatus("");
+      }, failed);
+    });
+    updateWirelessButton();
 
     let resumeReady = false;
     let suspended = false;
@@ -651,7 +758,9 @@
         message !== "Could not seek on Chromecast" &&
         message !== "Could not change Chromecast captions" &&
         message !== "Could not play on Chromecast" &&
-        message !== "Could not pause on Chromecast"
+        message !== "Could not pause on Chromecast" &&
+        message !== "Could not connect to Chromecast" &&
+        message !== "Could not open AirPlay picker"
       )
         return;
       if (fadeOut) {

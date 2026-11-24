@@ -129,14 +129,6 @@
     visibility: hidden;
 }
 
-google-cast-launcher {
-    flex: 0 0 2.75rem;
-    width: 2.75rem;
-    min-width: 2.75rem;
-    height: 2.5rem;
-    padding: .5rem;
-}
-
 .b2-player-hint {
     margin: -.25rem 1rem 1rem;
     color: var(--bs-secondary-color);
