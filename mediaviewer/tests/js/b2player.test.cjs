@@ -163,8 +163,12 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
 });
 
-test("Cast launcher is SDK-managed, hidden before initialization, and sized as a usable control", () => {
-    assert.match(template, /<google-cast-launcher[^>]*id="cast-video"[^>]*hidden/);
+test("Cast launcher is visible for SDK initialization and sized as a usable control", () => {
+    const launcher = template.match(/<google-cast-launcher\b[^>]*>/);
+    assert(launcher);
+    assert.match(launcher[0], /id="cast-video"/);
+    assert.doesNotMatch(launcher[0], /\shidden(?:\s|=|>)/);
+    assert.doesNotMatch(launcher[0], /display\s*:\s*none/i);
     assert.match(styles, /google-cast-launcher\s*\{[^}]*width:\s*2\.75rem[^}]*height:\s*2\.5rem/);
 });
 
