@@ -167,8 +167,17 @@
     let castSessionUpdate = null;
     let seekPending = false;
     let captionsPending = false;
+    let playPausePending = false;
+    let localPlayPending = false;
+    let localPlaySequence = 0;
     const castButton = document.getElementById("cast-video");
+    const playPauseButton = document.getElementById("play-pause");
     const castCaptionsButton = document.getElementById("cast-captions-toggle");
+    if (playPauseButton) {
+      playPauseButton.disabled = true;
+      playPauseButton.textContent = "Play";
+      playPauseButton.setAttribute("aria-label", "Play video");
+    }
     if (castCaptionsButton) {
       castCaptionsButton.disabled = true;
       castCaptionsButton.textContent = "Captions: Off";
@@ -194,6 +203,43 @@
         ids.includes(track.trackId),
       );
     };
+    const updatePlaybackButton = () => {
+      if (!playPauseButton) return;
+      const sdkMedia = window.chrome?.cast?.media;
+      if (castRemoteActive) {
+        const media = getRemoteMedia();
+        const state = media?.playerState;
+        const playing =
+          state === sdkMedia?.PlayerState?.PLAYING ||
+          state === sdkMedia?.PlayerState?.BUFFERING;
+        const paused = state === sdkMedia?.PlayerState?.PAUSED;
+        playPauseButton.textContent = playing ? "Pause" : "Play";
+        playPauseButton.setAttribute(
+          "aria-label",
+          playing ? "Pause video" : "Play video",
+        );
+        const canPause = Boolean(
+          media &&
+            playing &&
+            sdkMedia?.MediaCommand?.PAUSE &&
+            media.supportsCommand?.(sdkMedia.MediaCommand.PAUSE),
+        );
+        playPauseButton.disabled =
+          !media ||
+          (!playing && !paused) ||
+          (playing && !canPause) ||
+          playPausePending;
+        return;
+      }
+      const playing = !video.paused;
+      playPauseButton.textContent = playing ? "Pause" : "Play";
+      playPauseButton.setAttribute(
+        "aria-label",
+        playing ? "Pause video" : "Play video",
+      );
+      playPauseButton.disabled =
+        !alive() || !resumeReady || suspended || localPlayPending;
+    };
     const updateCaptionsButton = () => {
       if (!castCaptionsButton) return;
       if (castRemoteActive) {
@@ -216,6 +262,7 @@
       const media = getRemoteMedia();
       const sdkMedia = window.chrome?.cast?.media;
       if (!castRemoteActive) {
+        updatePlaybackButton();
         updateCaptionsButton();
         return;
       }
@@ -228,6 +275,7 @@
         const button = document.getElementById(id);
         if (button) button.disabled = !media || !seekSupported || seekPending;
       });
+      updatePlaybackButton();
       updateCaptionsButton();
     };
     const clearCurrentMedia = () => {
@@ -237,6 +285,7 @@
       castMediaUpdate = null;
       seekPending = false;
       captionsPending = false;
+      playPausePending = false;
       updateCastControls();
     };
     const clearRemoteMedia = () => {
@@ -274,6 +323,10 @@
     };
     const setLocalPlaybackEnabled = (enabled) => {
       video.controls = enabled;
+      if (!enabled) {
+        localPlaySequence += 1;
+        localPlayPending = false;
+      }
       [
         "seek-back",
         "seek-forward",
@@ -587,8 +640,11 @@
         castRemoteActive &&
         message !== "Connecting to Chromecast" &&
         message !== "Playing on Chromecast" &&
+        message !== "" &&
         message !== "Could not seek on Chromecast" &&
-        message !== "Could not change Chromecast captions"
+        message !== "Could not change Chromecast captions" &&
+        message !== "Could not play on Chromecast" &&
+        message !== "Could not pause on Chromecast"
       )
         return;
       if (fadeOut) {
@@ -674,6 +730,7 @@
     };
     const loadResume = async (expectedGeneration, offsetOnLoad = null) => {
       resumeReady = false;
+      updateCastControls();
       loadGeneration = expectedGeneration;
       try {
         const result =
@@ -692,6 +749,7 @@
           video.currentTime = offset;
         retryOffset = offset !== null && offset < video.duration ? offset : 0;
         resumeReady = true;
+        updateCastControls();
         loadCastMedia();
         setStatus(
           retryOffset > 0 ? "Position loaded" : "Ready to play",
@@ -707,6 +765,7 @@
         )
           return;
         resumeReady = true;
+        updateCastControls();
         loadCastMedia();
         setStatus("Position could not be loaded", expectedGeneration);
       }
@@ -725,6 +784,10 @@
     });
     listen(video, "error", () => {
       if (!alive()) return;
+      resumeReady = false;
+      localPlaySequence += 1;
+      localPlayPending = false;
+      updateCastControls();
       setLoading(false);
       status.innerHTML =
         'Video could not be loaded <button class="btn btn-sm btn-outline-light" id="retry-video" type="button">Retry</button>';
@@ -740,6 +803,7 @@
             ? video.currentTime
             : retryOffset;
         resumeReady = false;
+        updateCastControls();
         retryPending = true;
         captionsReady = false;
         loadGeneration = -1;
@@ -759,6 +823,10 @@
         video.pause();
         return;
       }
+      localPlaySequence += 1;
+      localPlayPending = false;
+      updatePlaybackButton();
+      if (status.textContent === "Could not play video") setStatus("");
       if (
         finished &&
         video.duration > 0 &&
@@ -777,7 +845,12 @@
       startTimer();
     });
     listen(video, "pause", () => {
-      if (alive()) saveProgress();
+      if (!alive()) return;
+      localPlaySequence += 1;
+      localPlayPending = false;
+      updatePlaybackButton();
+      if (status.textContent === "Could not pause video") setStatus("");
+      saveProgress();
     });
     listen(video, "timeupdate", () => {
       if (!alive()) return;
@@ -790,7 +863,100 @@
       )
         complete();
     });
-    listen(video, "ended", ended);
+    listen(video, "ended", () => {
+      updatePlaybackButton();
+      ended();
+    });
+    listen(playPauseButton, "click", () => {
+      if (!alive()) return;
+      if (castRemoteActive) {
+        controlRemotePlayback();
+        return;
+      }
+      if (!resumeReady || suspended || localPlayPending) return;
+      if (!video.paused) {
+        localPlaySequence += 1;
+        localPlayPending = false;
+        try {
+          video.pause();
+          updatePlaybackButton();
+          if (status.textContent === "Could not pause video") setStatus("");
+        } catch (_) {
+          updatePlaybackButton();
+          setStatus("Could not pause video");
+        }
+        return;
+      }
+      const operation = ++localPlaySequence;
+      localPlayPending = true;
+      updatePlaybackButton();
+      const fail = () => {
+        if (
+          !alive() ||
+          operation !== localPlaySequence ||
+          castRemoteActive ||
+          !resumeReady ||
+          suspended
+        )
+          return;
+        localPlayPending = false;
+        updatePlaybackButton();
+        setStatus("Could not play video");
+      };
+      try {
+        Promise.resolve(video.play()).then(() => {
+          if (!alive() || operation !== localPlaySequence || castRemoteActive)
+            return;
+          localPlayPending = false;
+          updatePlaybackButton();
+          if (status.textContent === "Could not play video") setStatus("");
+        }, fail);
+      } catch (_) {
+        fail();
+      }
+    });
+    function controlRemotePlayback() {
+      const media = getRemoteMedia();
+      const sdkMedia = window.chrome?.cast?.media;
+      if (!media || playPausePending) return;
+      const state = media.playerState;
+      const isPlaying =
+        state === sdkMedia?.PlayerState?.PLAYING ||
+        state === sdkMedia?.PlayerState?.BUFFERING;
+      const isPaused = state === sdkMedia?.PlayerState?.PAUSED;
+      if (!isPlaying && !isPaused) return;
+      if (
+        isPlaying &&
+        (!sdkMedia?.MediaCommand?.PAUSE ||
+          !media.supportsCommand?.(sdkMedia.MediaCommand.PAUSE))
+      )
+        return;
+      const session = castSession;
+      const action = isPlaying ? "pause" : "play";
+      const fail = () => {
+        if (castSession !== session || getRemoteMedia() !== media) return;
+        playPausePending = false;
+        updateCastControls();
+        setStatus(`Could not ${action} on Chromecast`);
+      };
+      const success = () => {
+        if (castSession !== session || getRemoteMedia() !== media) return;
+        playPausePending = false;
+        updateCastControls();
+        if (
+          status.textContent === "Could not pause on Chromecast" ||
+          status.textContent === "Could not play on Chromecast"
+        )
+          setStatus("");
+      };
+      playPausePending = true;
+      updateCastControls();
+      try {
+        media[action](null, success, fail);
+      } catch (_) {
+        fail();
+      }
+    }
     listen(document.getElementById("seek-back"), "click", () => {
       if (!alive()) return;
       if (castRemoteActive) {
@@ -986,6 +1152,9 @@
       if (disposed) return;
       flushOnExit();
       disposed = true;
+      localPlaySequence += 1;
+      localPlayPending = false;
+      updatePlaybackButton();
       stopTimer();
       listeners.splice(0).forEach((remove) => remove());
       video.pause();

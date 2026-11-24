@@ -16,9 +16,9 @@ const deferred = () => {
 };
 
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
-    const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "airplay-video"];
+    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "airplay-video"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), disabled: id === "cast-captions-toggle", style: {},
+        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), disabled: ["cast-captions-toggle", "play-pause"].includes(id), style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
@@ -81,6 +81,14 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             }
         },
         pause() { this.paused = true; this.dispatch("pause"); },
+        play() {
+            this.playCalls = (this.playCalls || 0) + 1;
+            if (configPatch.localPlayThrows) throw new Error("secret local play error");
+            if (configPatch.localPlayFailure) return Promise.reject(new Error("secret local play error"));
+            if (this.currentTime >= this.duration) this.currentTime = 0;
+            queueMicrotask(() => this.dispatch("play"));
+            return Promise.resolve();
+        },
         load() { this.loadCalls += 1; queueMicrotask(() => textTracks.dispatch("change")); },
     };
     if (configPatch.airplaySupported) {
@@ -100,11 +108,13 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const documentListeners = {};
     const windowListeners = {};
     const makeMediaSession = (contentId) => ({
-        media: { contentId, duration: configPatch.mediaDuration ?? 100, tracks: [] }, activeTrackIds: [], playerState: "PLAYING",
-        supportsCommand(command) { return command === "SEEK" && !configPatch.seekUnsupported; }, getEstimatedTime() { return configPatch.estimatedTime ?? 20; },
+        media: { contentId, duration: configPatch.mediaDuration ?? 100, tracks: [] }, activeTrackIds: [], playerState: configPatch.remotePlayerState || "PLAYING",
+        supportsCommand(command) { return command === "SEEK" ? !configPatch.seekUnsupported : command === "PAUSE" && !configPatch.pauseUnsupported; }, getEstimatedTime() { return configPatch.estimatedTime ?? 20; },
         addUpdateListener(fn) { this.updateListener = fn; }, removeUpdateListener(fn) { if (this.updateListener === fn) this.updateListener = null; },
         seek(request, success, failure) { this.seekCalls = (this.seekCalls || []); this.seekCalls.push(request); this.seekSuccess = success; this.seekFailureCallback = failure; if (configPatch.seekThrow) throw new Error("secret seek error"); if (configPatch.seekFailure) failure?.(); else if (!configPatch.seekPending) success?.(); },
         editTracksInfo(request, success, failure) { this.editCalls = (this.editCalls || []); this.editCalls.push(request); this.editSuccess = success; this.editFailureCallback = failure; if (configPatch.captionThrow) throw new Error("secret caption error"); if (configPatch.captionFailure) failure?.(); else if (!configPatch.captionPending) { this.activeTrackIds = request.activeTrackIds; success?.(); } },
+        play(request, success, failure) { this.playCalls = (this.playCalls || []); this.playCalls.push(request); this.playSuccess = success; this.playFailureCallback = failure; if (configPatch.remotePlayThrow) throw new Error("secret remote play error"); if (configPatch.remotePlayFailure) failure?.(); else if (!configPatch.remotePlayPending) success?.(); },
+        pause(request, success, failure) { this.pauseCalls = (this.pauseCalls || []); this.pauseCalls.push(request); this.pauseSuccess = success; this.pauseFailureCallback = failure; if (configPatch.remotePauseThrow) throw new Error("secret remote pause error"); if (configPatch.remotePauseFailure) failure?.(); else if (!configPatch.remotePausePending) success?.(); },
     });
     const castSession = { request: null, mediaSession: configPatch.currentCastMedia ? makeMediaSession(configPatch.currentCastMedia) : null,
         loadCalls: 0, getMediaSession() { return this.mediaSession; },
@@ -142,7 +152,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             SessionState: { SESSION_STARTING: "SESSION_STARTING", SESSION_STARTED: "SESSION_STARTED", SESSION_RESUMING: "SESSION_RESUMING", SESSION_RESUMED: "SESSION_RESUMED", SESSION_ENDING: "SESSION_ENDING", SESSION_ENDED: "SESSION_ENDED" } },
     };
     const chromeApi = { cast: { AutoJoinPolicy: { ORIGIN_SCOPED: "ORIGIN_SCOPED" },
-        media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", TrackType: { TEXT: "TEXT" }, TextTrackType: { SUBTITLES: "SUBTITLES" }, MediaCommand: { SEEK: "SEEK" }, PlayerState: { PAUSED: "PAUSED", PLAYING: "PLAYING" }, ResumeState: { PLAYBACK_PAUSE: "PLAYBACK_PAUSE", PLAYBACK_START: "PLAYBACK_START" },
+         media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", TrackType: { TEXT: "TEXT" }, TextTrackType: { SUBTITLES: "SUBTITLES" }, MediaCommand: { SEEK: "SEEK", PAUSE: "PAUSE" }, PlayerState: { PAUSED: "PAUSED", PLAYING: "PLAYING", BUFFERING: "BUFFERING", IDLE: "IDLE" }, ResumeState: { PLAYBACK_PAUSE: "PLAYBACK_PAUSE", PLAYBACK_START: "PLAYBACK_START" },
             Track: class { constructor(trackId, trackType) { this.trackId = trackId; this.type = trackType; } },
             MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
             LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } },
@@ -189,6 +199,189 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.doesNotMatch(styles, /loading-scroll|text-indent/);
     assert.match(styles, /\.b2-resume-notice\s*\{\s*animation:\s*resume-notice-fade 20\.5s/);
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
+});
+
+test("local play button waits for resume readiness and follows native playback events", async () => {
+    const pendingMedia = deferred();
+    const player = createPlayer((url) => url === "/media" ? pendingMedia.promise : Promise.resolve(ok()), { testMediaFetch: true });
+    const button = player.elements["play-pause"];
+    assert.equal(button.textContent, "Play");
+    assert.equal(button.attributes["aria-label"], "Play video");
+    assert.equal(button.disabled, true);
+    button.click();
+    assert.equal(player.video.playCalls || 0, 0);
+    pendingMedia.resolve(media());
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(button.disabled, false);
+    button.click();
+    button.click();
+    assert.equal(player.video.playCalls, 1);
+    await tick();
+    assert.equal(button.textContent, "Pause");
+    assert.equal(button.attributes["aria-label"], "Pause video");
+    player.video.dispatch("pause");
+    assert.equal(button.textContent, "Play");
+    player.video.currentTime = player.video.duration;
+    player.video.dispatch("ended");
+    assert.equal(button.textContent, "Play");
+    button.click();
+    await tick();
+    assert.equal(button.textContent, "Pause");
+    assert.equal(player.video.currentTime, 0);
+});
+
+test("local play rejection and throw show safe feedback and recover on playback", async () => {
+    for (const config of [{ localPlayFailure: true }, { localPlayThrows: true }]) {
+        const player = createPlayer(async () => media(), { testMediaFetch: true, ...config });
+        await tick();
+        player.video.dispatch("loadedmetadata");
+        await tick();
+        player.elements["play-pause"].click();
+        await tick();
+        assert.match(player.elements["player-status"].textContent, /Could not play video/);
+        assert.doesNotMatch(player.elements["player-status"].textContent, /secret/);
+        assert.equal(player.elements["play-pause"].textContent, "Play");
+        player.video.play = () => {
+            queueMicrotask(() => player.video.dispatch("play"));
+            return Promise.resolve();
+        };
+        player.elements["play-pause"].click();
+        await tick();
+        assert.equal(player.elements["play-pause"].textContent, "Pause");
+        assert.notEqual(player.elements["player-status"].textContent, "Could not play video");
+    }
+});
+
+test("Cast play pause follows matching receiver state without touching local playback", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, remotePlayerState: "PLAYING" });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const remote = cast.session.getMediaSession();
+    const button = player.elements["play-pause"];
+    assert.equal(button.disabled, false);
+    assert.equal(button.textContent, "Pause");
+    assert.equal(button.attributes["aria-label"], "Pause video");
+    button.click();
+    assert.deepEqual(remote.pauseCalls, [null]);
+    assert.equal(button.textContent, "Pause", "success callback does not optimistically claim receiver state");
+    remote.playerState = "PAUSED";
+    remote.updateListener(true);
+    assert.equal(button.textContent, "Play");
+    button.click();
+    assert.deepEqual(remote.playCalls, [null]);
+    remote.playerState = "BUFFERING";
+    remote.updateListener(true);
+    assert.equal(button.textContent, "Pause");
+    assert.equal(player.video.playCalls || 0, 0);
+    assert.equal(cast.session.loadCalls, 1);
+});
+
+test("Cast play pause is unavailable for unsupported pause, unknown state, or wrong media", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, pauseUnsupported: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const remote = cast.session.getMediaSession();
+    const button = player.elements["play-pause"];
+    assert.equal(button.disabled, true);
+    remote.playerState = "PAUSED";
+    remote.updateListener(true);
+    assert.equal(button.disabled, false, "play does not require a nonexistent PLAY command");
+    remote.playerState = "IDLE";
+    remote.updateListener(true);
+    assert.equal(button.disabled, true);
+    cast.session.emitMediaSession(player.makeMediaSession("https://other.example/video.mp4"));
+    assert.equal(button.disabled, true);
+});
+
+test("Cast play pause protects pending requests and ignores stale callbacks after end or disposal", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, remotePausePending: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const remote = cast.session.getMediaSession();
+    const button = player.elements["play-pause"];
+    button.click();
+    button.click();
+    assert.equal(remote.pauseCalls.length, 1);
+    assert.equal(button.disabled, true);
+    remote.pauseFailureCallback();
+    assert.match(player.elements["player-status"].textContent, /Could not pause on Chromecast/);
+    assert.equal(button.disabled, false);
+    remote.pause = (_request, success) => success();
+    button.click();
+    assert.equal(player.elements["player-status"].textContent, "");
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    remote.pauseSuccess?.();
+    assert.equal(button.disabled, false);
+    assert.equal(button.textContent, "Play");
+    assert.equal(player.video.playCalls || 0, 0);
+    assert.equal(cast.session.loadCalls, 1);
+
+    const disposed = createPlayer(async () => media(), { testMediaFetch: true, remotePausePending: true });
+    await tick();
+    disposed.video.dispatch("loadedmetadata");
+    await tick();
+    const disposedCast = disposed.context.window.cast;
+    disposedCast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const disposedMedia = disposedCast.session.getMediaSession();
+    disposed.elements["play-pause"].click();
+    disposed.context.window.MediaViewerPlayer.dispose();
+    disposedMedia.pauseSuccess?.();
+    assert.equal(disposed.elements["play-pause"].disabled, true);
+});
+
+test("Cast play failure and throw restore controls with safe feedback", async () => {
+    for (const config of [{ remotePlayFailure: true }, { remotePlayThrow: true }]) {
+        const player = createPlayer(async () => media(), {
+            testMediaFetch: true, remotePlayerState: "PAUSED", ...config,
+        });
+        await tick();
+        player.video.dispatch("loadedmetadata");
+        await tick();
+        const cast = player.context.window.cast;
+        cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+        await tick();
+        player.elements["play-pause"].click();
+        assert.match(player.elements["player-status"].textContent, /Could not play on Chromecast/);
+        assert.doesNotMatch(player.elements["player-status"].textContent, /secret/);
+        assert.equal(player.elements["play-pause"].disabled, false);
+    }
+});
+
+test("Cast play pause callbacks from replaced media cannot alter current controls", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, remotePausePending: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const oldMedia = cast.session.getMediaSession();
+    player.elements["play-pause"].click();
+    const staleFailure = oldMedia.pauseFailureCallback;
+    const replacement = player.makeMediaSession("https://bucket.example/video.mp4");
+    replacement.playerState = "PAUSED";
+    cast.session.emitMediaSession(replacement);
+    staleFailure();
+    assert.equal(player.elements["play-pause"].textContent, "Play");
+    assert.equal(player.elements["play-pause"].disabled, false);
+    assert.notEqual(player.elements["player-status"].textContent, "Could not pause on Chromecast");
+    assert.equal(cast.session.loadCalls, 1);
+    assert.equal(player.video.playCalls || 0, 0);
 });
 
 test("Cast launcher is visible for SDK initialization and sized as a usable control", () => {
@@ -1159,9 +1352,14 @@ test("media error retry preserves playback position and does not duplicate subti
         }))
         : Promise.resolve(ok()), { testMediaFetch: true });
     await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(player.elements["play-pause"].disabled, false);
     player.video.currentTime = 42;
     player.video.dispatch("error");
+    assert.equal(player.elements["play-pause"].disabled, true);
     player.context.document.getElementById("retry-video").click();
+    assert.equal(player.elements["play-pause"].disabled, true);
     assert.equal(player.video.currentTime, 42);
     assert.equal(player.video.children.filter((child) => child.tagName === "source").length, 1);
     assert.equal(player.video.children.filter((child) => child.tagName === "track").length, 2);
