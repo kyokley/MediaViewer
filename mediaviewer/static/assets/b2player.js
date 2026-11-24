@@ -156,7 +156,76 @@
     let castLoadSequence = 0;
     let castReady = false;
     let castRemoteActive = false;
+    let castMediaSession = null;
+    let castMediaUpdate = null;
+    let castSessionUpdate = null;
+    let seekPending = false;
     const castButton = document.getElementById("cast-video");
+    const getRemoteMedia = () => {
+      const media = castMediaSession;
+      return alive() &&
+        castRemoteActive &&
+        castSession &&
+        media &&
+        media.media?.contentId === castSourceUrl
+        ? media
+        : null;
+    };
+    const updateCastControls = () => {
+      if (!castRemoteActive) return;
+      const media = getRemoteMedia();
+      const sdkMedia = window.chrome?.cast?.media;
+      const seekSupported = Boolean(
+        media &&
+          sdkMedia?.MediaCommand &&
+          media.supportsCommand?.(sdkMedia.MediaCommand.SEEK),
+      );
+      ["seek-back", "seek-forward"].forEach((id) => {
+        const button = document.getElementById(id);
+        if (button) button.disabled = !media || !seekSupported || seekPending;
+      });
+    };
+    const clearCurrentMedia = () => {
+      if (castMediaSession && castMediaUpdate)
+        castMediaSession.removeUpdateListener?.(castMediaUpdate);
+      castMediaSession = null;
+      castMediaUpdate = null;
+      seekPending = false;
+      updateCastControls();
+    };
+    const clearRemoteMedia = () => {
+      clearCurrentMedia();
+      if (castSession && castSessionUpdate)
+        castSession.removeEventListener?.(
+          window.cast?.framework?.SessionEventType?.MEDIA_SESSION,
+          castSessionUpdate,
+        );
+      castSessionUpdate = null;
+    };
+    const attachRemoteMedia = (session, media) => {
+      if (castSession !== session || !castRemoteActive) return;
+      if (castMediaSession !== media) {
+        clearCurrentMedia();
+        castSession = session;
+        if (media?.media?.contentId === castSourceUrl) {
+          castMediaSession = media;
+          castMediaUpdate = (isAlive) => {
+            if (castSession !== session || castMediaSession !== media) return;
+            if (!isAlive) {
+              clearCurrentMedia();
+              return;
+            }
+            updateCastControls();
+          };
+          media.addUpdateListener?.(castMediaUpdate);
+        }
+      }
+      updateCastControls();
+    };
+    const refreshRemoteMedia = (session) => {
+      if (castSession !== session || !castRemoteActive) return;
+      attachRemoteMedia(session, session.getMediaSession?.());
+    };
     const setLocalPlaybackEnabled = (enabled) => {
       video.controls = enabled;
       [
@@ -169,6 +238,7 @@
         const control = document.getElementById(id);
         if (control) control.disabled = !enabled;
       });
+      updateCastControls();
     };
     const loadCastMedia = () => {
       if (!castReady || !castSession || !castSourceUrl || !resumeReady) return;
@@ -201,16 +271,27 @@
           ? video.currentTime
           : 0;
         session.loadMedia(request).then(
-          () => {
+          (errorCode) => {
             if (
               !alive() ||
               castSession !== session ||
               castLoadSequence !== operation
             )
               return;
+            if (errorCode != null) {
+              castLoadKey = null;
+              clearRemoteMedia();
+              castRemoteActive = false;
+              setLocalPlaybackEnabled(true);
+              setStatus(
+                "Could not start casting. Local playback is still available.",
+              );
+              return;
+            }
             video.pause();
             setLocalPlaybackEnabled(false);
             setStatus("Playing on Chromecast");
+            refreshRemoteMedia(session);
           },
           () => {
             if (
@@ -220,6 +301,7 @@
             )
               return;
             castLoadKey = null;
+            clearRemoteMedia();
             castRemoteActive = false;
             setLocalPlaybackEnabled(true);
             setStatus(
@@ -230,6 +312,7 @@
       } catch (_) {
         if (castSession !== session || castLoadSequence !== operation) return;
         castLoadKey = null;
+        clearRemoteMedia();
         castRemoteActive = false;
         setLocalPlaybackEnabled(true);
         setStatus(
@@ -264,12 +347,24 @@
               const session = castContext.getCurrentSession();
               if (!session) return;
               if (castSession !== session) {
+                clearRemoteMedia();
                 castLoadSequence += 1;
                 castLoadKey = null;
               }
               castSession = session;
               castRemoteActive = true;
+              if (!castSessionUpdate) {
+                castSessionUpdate = (mediaEvent) => {
+                  if (castSession !== session || !castRemoteActive) return;
+                  attachRemoteMedia(session, mediaEvent.mediaSession);
+                };
+                session.addEventListener?.(
+                  window.cast.framework.SessionEventType?.MEDIA_SESSION,
+                  castSessionUpdate,
+                );
+              }
               setLocalPlaybackEnabled(false);
+              updateCastControls();
               setStatus("Connecting to Chromecast");
               loadCastMedia();
               return;
@@ -278,13 +373,27 @@
               const session = castContext.getCurrentSession();
               const currentMedia = session?.getMediaSession?.()?.media;
               if (session && currentMedia?.contentId === castSourceUrl) {
+                if (castSession !== session) clearRemoteMedia();
                 castSession = session;
                 castRemoteActive = true;
                 castLoadKey = castSourceUrl;
+                if (!castSessionUpdate) {
+                  castSessionUpdate = (mediaEvent) => {
+                    if (castSession !== session || !castRemoteActive) return;
+                    attachRemoteMedia(session, mediaEvent.mediaSession);
+                  };
+                  session.addEventListener?.(
+                    window.cast.framework.SessionEventType?.MEDIA_SESSION,
+                    castSessionUpdate,
+                  );
+                }
+                attachRemoteMedia(session, session.getMediaSession?.());
+                video.pause();
                 setLocalPlaybackEnabled(false);
                 setStatus("Playing on Chromecast");
               } else {
                 castLoadSequence += 1;
+                clearRemoteMedia();
                 castSession = null;
                 castRemoteActive = false;
                 castLoadKey = null;
@@ -295,6 +404,7 @@
             if (event.sessionState === sessionStates.SESSION_ENDED) {
               if (!castSession) return;
               castLoadSequence += 1;
+              clearRemoteMedia();
               castSession = null;
               castRemoteActive = false;
               castLoadKey = null;
@@ -378,6 +488,7 @@
           )
             throw new Error("Invalid media response");
           captionsReady = false;
+          clearCurrentMedia();
           castSourceUrl = result.source_url;
           castSubtitleUrls = result.subtitle_urls;
           video
@@ -428,7 +539,8 @@
       if (
         castRemoteActive &&
         message !== "Connecting to Chromecast" &&
-        message !== "Playing on Chromecast"
+        message !== "Playing on Chromecast" &&
+        message !== "Could not seek on Chromecast"
       )
         return;
       if (fadeOut) {
@@ -633,17 +745,74 @@
     listen(video, "ended", ended);
     listen(document.getElementById("seek-back"), "click", () => {
       if (!alive()) return;
-      if (castRemoteActive) return;
+      if (castRemoteActive) {
+        seekRemote(-10);
+        return;
+      }
       video.currentTime = Math.max(0, video.currentTime - 10);
     });
     listen(document.getElementById("seek-forward"), "click", () => {
       if (!alive()) return;
-      if (castRemoteActive) return;
+      if (castRemoteActive) {
+        seekRemote(10);
+        return;
+      }
       video.currentTime = Math.min(
         video.duration || Infinity,
         video.currentTime + 10,
       );
     });
+    function seekRemote(delta) {
+      const media = getRemoteMedia();
+      const sdkMedia = window.chrome?.cast?.media;
+      if (
+        !media ||
+        seekPending ||
+        !sdkMedia?.MediaCommand ||
+        !media.supportsCommand?.(sdkMedia.MediaCommand.SEEK)
+      )
+        return;
+      const duration = media.media?.duration;
+      const estimated = media.getEstimatedTime?.();
+      if (!Number.isFinite(estimated)) return;
+      const request = new sdkMedia.SeekRequest();
+      request.currentTime = Math.max(
+        0,
+        Math.min(
+          Number.isFinite(duration) ? duration : Infinity,
+          estimated + delta,
+        ),
+      );
+      const state = media.playerState;
+      if (state === sdkMedia.PlayerState?.PAUSED)
+        request.resumeState = sdkMedia.ResumeState?.PLAYBACK_PAUSE;
+      else if (state === sdkMedia.PlayerState?.PLAYING)
+        request.resumeState = sdkMedia.ResumeState?.PLAYBACK_START;
+      seekPending = true;
+      updateCastControls();
+      const session = castSession;
+      const fail = () => {
+        if (castSession !== session || getRemoteMedia() !== media) return;
+        seekPending = false;
+        updateCastControls();
+        setStatus("Could not seek on Chromecast");
+      };
+      try {
+        media.seek(
+          request,
+          () => {
+            if (castSession !== session || getRemoteMedia() !== media) return;
+            seekPending = false;
+            updateCastControls();
+            if (status.textContent === "Could not seek on Chromecast")
+              setStatus("Playing on Chromecast");
+          },
+          fail,
+        );
+      } catch (_) {
+        fail();
+      }
+    }
     listen(document.getElementById("start-over"), "click", async () => {
       if (!alive()) return;
       if (castRemoteActive) return;
@@ -711,6 +880,7 @@
         .forEach((child) => child.remove());
       video.load();
       castLoadSequence += 1;
+      clearRemoteMedia();
       castSession = null;
       castRemoteActive = false;
       if (window.__onGCastApiAvailable === castCallback)

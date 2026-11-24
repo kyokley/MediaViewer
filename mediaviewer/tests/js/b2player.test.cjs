@@ -99,9 +99,34 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const nextAnchorClicks = [];
     const documentListeners = {};
     const windowListeners = {};
-    const castSession = { request: null, mediaSession: configPatch.currentCastMedia ? { media: { contentId: configPatch.currentCastMedia } } : null,
+    const makeMediaSession = (contentId) => ({
+        media: { contentId, duration: configPatch.mediaDuration ?? 100, tracks: [] }, activeTrackIds: [], playerState: "PLAYING",
+        supportsCommand(command) { return command === "SEEK" && !configPatch.seekUnsupported; }, getEstimatedTime() { return configPatch.estimatedTime ?? 20; },
+        addUpdateListener(fn) { this.updateListener = fn; }, removeUpdateListener(fn) { if (this.updateListener === fn) this.updateListener = null; },
+        seek(request, success, failure) { this.seekCalls = (this.seekCalls || []); this.seekCalls.push(request); this.seekSuccess = success; this.seekFailureCallback = failure; if (configPatch.seekThrow) throw new Error("secret seek error"); if (configPatch.seekFailure) failure?.(); else if (!configPatch.seekPending) success?.(); },
+    });
+    const castSession = { request: null, mediaSession: configPatch.currentCastMedia ? makeMediaSession(configPatch.currentCastMedia) : null,
         loadCalls: 0, getMediaSession() { return this.mediaSession; },
-        loadMedia(request) { this.loadCalls += 1; this.request = request; return configPatch.castLoadDeferred?.promise || (configPatch.castLoadFailure ? Promise.reject(new Error("failed")) : Promise.resolve()); } };
+        emitMediaSession(mediaSession) {
+            this.mediaSession = mediaSession;
+            this.eventListeners["media-session"]?.({ mediaSession });
+        },
+        eventListeners: {},
+        addEventListener(type, listener) { this.eventListeners[type] = listener; },
+        removeEventListener(type, listener) { if (this.eventListeners[type] === listener) delete this.eventListeners[type]; },
+        loadMedia(request) {
+            if (configPatch.castLoadThrows) throw new Error("secret load error");
+            this.loadCalls += 1; this.request = request;
+            const result = configPatch.castLoadDeferred?.promise || (configPatch.castLoadFailure ? Promise.reject(new Error("failed")) : Promise.resolve(configPatch.castLoadErrorCode));
+            return result.then((value) => {
+                if (!this.mediaSession && !configPatch.mediaSessionLate) {
+                    this.mediaSession = makeMediaSession(request.media.contentId);
+                    this.mediaSession.media.tracks = request.media.tracks;
+                    this.mediaSession.activeTrackIds = request.activeTrackIds;
+                }
+                return value;
+            });
+        } };
     const castContext = {
         sessionListener: null,
         setOptions(options) { this.options = options; this.setOptionsCalls = (this.setOptionsCalls || 0) + 1; },
@@ -112,14 +137,16 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const castApi = {
         context: castContext, session: castSession,
         framework: { CastContext: { getInstance: () => castContext },
-            CastContextEventType: { SESSION_STATE_CHANGED: "session-state" },
+            CastContextEventType: { SESSION_STATE_CHANGED: "session-state" }, SessionEventType: { MEDIA_SESSION: "media-session" },
             SessionState: { SESSION_STARTING: "SESSION_STARTING", SESSION_STARTED: "SESSION_STARTED", SESSION_RESUMING: "SESSION_RESUMING", SESSION_RESUMED: "SESSION_RESUMED", SESSION_ENDING: "SESSION_ENDING", SESSION_ENDED: "SESSION_ENDED" } },
     };
     const chromeApi = { cast: { AutoJoinPolicy: { ORIGIN_SCOPED: "ORIGIN_SCOPED" },
-        media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", TrackType: { TEXT: "TEXT" }, TextTrackType: { SUBTITLES: "SUBTITLES" },
-            Track: class { constructor(trackId, trackType) { this.trackId = trackId; this.trackType = trackType; } },
+        media: { DEFAULT_MEDIA_RECEIVER_APP_ID: "CC1AD845", TrackType: { TEXT: "TEXT" }, TextTrackType: { SUBTITLES: "SUBTITLES" }, MediaCommand: { SEEK: "SEEK" }, PlayerState: { PAUSED: "PAUSED", PLAYING: "PLAYING" }, ResumeState: { PLAYBACK_PAUSE: "PLAYBACK_PAUSE", PLAYBACK_START: "PLAYBACK_START" },
+            Track: class { constructor(trackId, trackType) { this.trackId = trackId; this.type = trackType; } },
             MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
-            LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } } } } };
+            LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } },
+            SeekRequest: class {},
+            } } };
     const nextAnchor = configPatch.nextAnchor ? {
         href: new URL(configPatch.nextAnchor, "https://example.test/player/").href,
         click() { nextAnchorClicks.push(this.href); },
@@ -145,7 +172,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         clearInterval(id) { intervals.delete(id); },
     };
     vm.runInNewContext(source, context);
-    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context };
+    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession };
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
@@ -555,11 +582,11 @@ test("Cast load includes signed subtitle tracks and activates first track when c
     await tick();
     const { media: castMedia, activeTrackIds } = cast.session.request;
     assert.deepEqual(castMedia.tracks.map((track) => ({
-        trackId: track.trackId, trackType: track.trackType, trackContentId: track.trackContentId,
+        trackId: track.trackId, type: track.type, trackContentId: track.trackContentId,
         trackContentType: track.trackContentType, subtype: track.subtype, language: track.language, name: track.name,
     })), [
-        { trackId: 1, trackType: "TEXT", trackContentId: urls[0], trackContentType: "text/vtt", subtype: "SUBTITLES", language: "en", name: "English" },
-        { trackId: 2, trackType: "TEXT", trackContentId: urls[1], trackContentType: "text/vtt", subtype: "SUBTITLES", language: "en", name: "English 2" },
+        { trackId: 1, type: "TEXT", trackContentId: urls[0], trackContentType: "text/vtt", subtype: "SUBTITLES", language: "en", name: "English" },
+        { trackId: 2, type: "TEXT", trackContentId: urls[1], trackContentType: "text/vtt", subtype: "SUBTITLES", language: "en", name: "English 2" },
     ]);
     assert.deepEqual(Array.from(activeTrackIds), [1]);
 });
@@ -670,11 +697,170 @@ test("Cast active state gates local playback and tools; duplicate session events
     await tick();
     cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
     assert.equal(cast.session.loadCalls, 1);
-    assert.equal(player.elements["seek-back"].disabled, true);
+    assert.equal(player.elements["seek-back"].disabled, false);
     player.video.dispatch("play");
     assert.equal(player.video.paused, true);
     cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
     assert.equal(player.elements["seek-back"].disabled, false);
+});
+
+test("Cast seek buttons command matching receiver media and preserve local seek behavior", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, estimatedTime: 95 });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const remote = cast.session.getMediaSession();
+    remote.playerState = "PAUSED";
+    player.elements["seek-forward"].click();
+    assert.equal(remote.seekCalls[0].currentTime, 100);
+    assert.equal(remote.seekCalls[0].resumeState, player.context.window.chrome.cast.media.ResumeState.PLAYBACK_PAUSE);
+    player.elements["seek-back"].click();
+    assert.equal(remote.seekCalls[1].currentTime, 85);
+    remote.playerState = "PLAYING";
+    player.elements["seek-back"].click();
+    assert.equal(remote.seekCalls[2].resumeState, player.context.window.chrome.cast.media.ResumeState.PLAYBACK_START);
+    assert.equal(player.video.currentTime, 0);
+    assert.equal(cast.session.loadCalls, 1);
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    player.video.currentTime = 20;
+    player.elements["seek-back"].click();
+    assert.equal(player.video.currentTime, 10);
+});
+
+test("Cast seek handles unknown duration and ignores nonfinite receiver time", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, mediaDuration: Infinity, estimatedTime: 0,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const remote = cast.session.getMediaSession();
+    player.elements["seek-back"].click();
+    player.elements["seek-forward"].click();
+    assert.deepEqual(remote.seekCalls.map((request) => request.currentTime), [0, 10]);
+    remote.getEstimatedTime = () => Infinity;
+    player.elements["seek-forward"].click();
+    assert.equal(remote.seekCalls.length, 2);
+});
+
+test("Cast seek stays unavailable without ready matching media or receiver seek support", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, seekUnsupported: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(player.elements["seek-back"].disabled, true);
+    await tick();
+    assert.equal(player.elements["seek-back"].disabled, true);
+    player.elements["seek-back"].click();
+    assert.equal(cast.session.getMediaSession().seekCalls, undefined);
+});
+
+test("Cast attaches receiver media after late source load and after media-alive transitions", async () => {
+    const pending = deferred();
+    const player = createPlayer((url) => url === "/media" ? pending.promise : Promise.resolve(ok()), {
+        testMediaFetch: true, mediaSessionLate: true,
+    });
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(typeof cast.session.eventListeners["media-session"], "function");
+    pending.resolve(media({ subtitle_urls: ["https://bucket.example/en.vtt"] }));
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(cast.session.loadCalls, 1);
+    assert.equal(player.elements["seek-back"].disabled, true);
+    const firstMedia = player.makeMediaSession("https://bucket.example/video.mp4");
+    firstMedia.media.tracks = cast.session.request.media.tracks;
+    cast.session.emitMediaSession(firstMedia);
+    assert.equal(player.elements["seek-back"].disabled, false);
+
+    firstMedia.updateListener(false);
+    assert.equal(player.elements["seek-back"].disabled, true);
+    const replacement = player.makeMediaSession("https://bucket.example/video.mp4");
+    replacement.media.tracks = cast.session.request.media.tracks;
+    cast.session.emitMediaSession(replacement);
+    assert.equal(player.elements["seek-back"].disabled, false);
+});
+
+test("Cast seek failure feedback is safe and clears after successful retry", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, seekFailure: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const remote = cast.session.getMediaSession();
+    player.elements["seek-back"].click();
+    assert.equal(player.elements["player-status"].textContent, "Could not seek on Chromecast");
+    remote.seek = (_request, success) => success();
+    player.elements["seek-back"].click();
+    assert.equal(player.elements["player-status"].textContent, "Playing on Chromecast");
+});
+
+test("Cast synchronous seek throws show safe feedback", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, seekThrow: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    player.elements["seek-back"].click();
+    assert.equal(player.elements["player-status"].textContent, "Could not seek on Chromecast");
+    assert.doesNotMatch(player.elements["player-status"].textContent, /secret/);
+});
+
+test("Cast seek readiness, pending commands, and disposal clean listeners and reject stale callbacks", async () => {
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true, seekPending: true,
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(player.elements["seek-back"].disabled, true);
+    await tick();
+    const remote = cast.session.getMediaSession();
+    assert.equal(player.elements["seek-back"].disabled, false);
+    player.elements["seek-back"].click();
+    player.elements["seek-forward"].click();
+    assert.equal(remote.seekCalls.length, 1);
+    assert.equal(player.elements["seek-back"].disabled, true);
+    cast.context.sessionListener({ sessionState: "SESSION_ENDED" });
+    remote.seekSuccess?.();
+    await tick();
+    assert.equal(player.elements["seek-back"].disabled, false);
+
+    const resumed = createPlayer(async () => media(), {
+        testMediaFetch: true, currentCastMedia: "https://bucket.example/video.mp4",
+    });
+    await tick();
+    resumed.video.dispatch("loadedmetadata");
+    await tick();
+    const resumeCast = resumed.context.window.cast;
+    resumed.video.paused = false;
+    resumeCast.context.sessionListener({ sessionState: "SESSION_RESUMED" });
+    assert.equal(resumed.video.paused, true);
+    const resumedMedia = resumeCast.session.getMediaSession();
+    assert.equal(typeof resumedMedia.updateListener, "function");
+    resumed.context.window.MediaViewerPlayer.dispose();
+    assert.equal(resumedMedia.updateListener, null);
+    assert.equal(resumeCast.session.eventListeners["media-session"], undefined);
 });
 
 test("Cast session waits for media source and loads it once when ready", async () => {
@@ -703,6 +889,31 @@ test("Cast media failure restores local controls without exposing SDK errors", a
     assert.equal(player.video.controls, true);
     assert.match(player.elements["player-status"].textContent, /Could not start casting/);
     assert.doesNotMatch(player.elements["player-status"].textContent, /failed/);
+    assert.equal(cast.session.eventListeners["media-session"], undefined);
+});
+
+test("Cast synchronous load throw cleans session listeners and restores local controls", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castLoadThrows: true });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    assert.equal(player.video.controls, true);
+    assert.equal(cast.session.eventListeners["media-session"], undefined);
+    assert.match(player.elements["player-status"].textContent, /Could not start casting/);
+});
+
+test("Cast resolved load error code restores local playback without leaking the code", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true, castLoadErrorCode: "LOAD_FAILED_SECRET" });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.context.window.cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    assert.equal(player.video.controls, true);
+    assert.match(player.elements["player-status"].textContent, /Could not start casting/);
+    assert.doesNotMatch(player.elements["player-status"].textContent, /LOAD_FAILED_SECRET/);
 });
 
 test("Cast SDK becoming available after media load remains supported", async () => {
