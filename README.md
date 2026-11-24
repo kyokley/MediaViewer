@@ -15,6 +15,10 @@ endpoints to browser history. HTMX history snapshots are disabled so rendered
 account and playback information is not stored in its local-storage cache.
 History restoration fetches the page again.
 
+Ordinary pages use a `same-origin` referrer policy so native forms retain their
+request origin for CSRF validation. Player pages use `no-referrer`; navigation
+updates the policy when entering or leaving playback.
+
 The application shell lives in `mediaviewer/templates/mediaviewer/home.html`.
 `mediaviewer/static/assets/navigation.js` owns page transitions. Page scripts
 register their initializers with `window.MediaViewerNavigation.registerPageInit()`

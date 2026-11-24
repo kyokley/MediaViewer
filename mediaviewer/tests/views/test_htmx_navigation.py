@@ -69,6 +69,8 @@ def test_representative_pages_render_full_documents_and_htmx_fragments(
         assert full.status_code == 200, url
         assert "<!doctype html>" in full_body.lower(), url
         assert 'id="app-content"' in full_body, url
+        expected_referrer = "no-referrer" if "b2player" in url else "same-origin"
+        assert f'<meta name="referrer" content="{expected_referrer}">' in full_body
         assert _title(full_body), url
         assert len(re.findall(r'<script[^>]+src="[^"]*assets/mediaviewer\.js"', full_body)) == 1
         assert {"hx-request", "hx-history-restore-request"} <= _vary_headers(full), url
@@ -213,3 +215,49 @@ def test_settings_csrf_and_method_safety_for_htmx_form(create_user):
     assert "<!doctype html>" not in valid_body.lower()
     assert "Settings Saved!" in valid_body
     assert settings.theme == UserSettings.LIGHT
+
+
+@pytest.mark.django_db
+def test_password_reset_keeps_native_csrf_post_origin(create_user, mailoutbox):
+    user = create_user()
+    client = Client(enforce_csrf_checks=True)
+
+    page = client.get(reverse("mediaviewer:password_reset"))
+    page_body = _body(page)
+    parser = _CsrfFormParser()
+    parser.feed(page_body)
+
+    assert page.status_code == 200
+    assert '<meta name="referrer" content="same-origin">' in page_body
+    assert any(form.get("method", "").lower() == "post" and form.get("hx-boost") == "false"
+               for form in parser.form_attrs)
+    assert parser.csrf_token
+
+    missing_token = client.post(
+        reverse("mediaviewer:password_reset"),
+        {"email": user.email},
+        HTTP_ORIGIN="http://testserver",
+    )
+    invalid_token = client.post(
+        reverse("mediaviewer:password_reset"),
+        {"email": user.email, "csrfmiddlewaretoken": "invalid-token"},
+        HTTP_ORIGIN="http://testserver",
+    )
+    assert missing_token.status_code == 403
+    assert invalid_token.status_code == 403
+
+    valid = client.post(
+        reverse("mediaviewer:password_reset"),
+        {"email": user.email, "csrfmiddlewaretoken": parser.csrf_token},
+        HTTP_ORIGIN="http://testserver",
+    )
+    assert valid.status_code == 302
+    assert valid["Location"] == reverse("mediaviewer:password_reset_done")
+    assert len(mailoutbox) == 1
+
+    rejected = client.post(
+        reverse("mediaviewer:password_reset"),
+        {"email": user.email, "csrfmiddlewaretoken": parser.csrf_token},
+        HTTP_ORIGIN="null",
+    )
+    assert rejected.status_code == 403

@@ -15,6 +15,7 @@ NAVIGATION = Path(os.environ.get(
 HTMX = Path(os.environ["HTMX_2_JS"])
 BOOTSTRAP = Path(os.environ["BOOTSTRAP_5_JS"])
 posts = []
+reset_post_origins = []
 history_request_started = Event()
 release_history_request = Event()
 delay_history_request = False
@@ -45,18 +46,21 @@ def page(path):
         "settings": "Settings",
         "media": "Media",
         "settings-extra": "Extra",
+        "player": "Player",
     }[path]
     theme = "light" if path == "one" else "dark"
     modal = ""
     if path == "settings":
         modal = """<div id="missingEmailModal" class="modal fade" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog"><div class="modal-content"><button id="modal-dismiss" type="button">Close</button></div></div></div>"""
-    return f"""<!doctype html><html><head><meta name="htmx-config" content='{{"historyCacheSize":0,"historyRestoreAsHxRequest":false}}'><title>{name} title</title>
+    referrer_policy = "no-referrer" if path == "player" else "same-origin"
+    video = '<video id="b2-video"></video>' if path == "player" else ""
+    return f"""<!doctype html><html><head><meta name="referrer" content="{referrer_policy}"><meta name="htmx-config" content='{{"historyCacheSize":0,"historyRestoreAsHxRequest":false}}'><title>{name} title</title>
 <script src="/bootstrap.js"></script><script src="/htmx.js"></script><script src="/navigation.js"></script>
 <script>
 window.lifecycle = window.lifecycle || [];
 window.sharedAssets = window.sharedAssets || Array.from(document.querySelectorAll('script[src]'));
-window.MediaViewerPlayer = {{init:()=>lifecycle.push('player-init:'+document.querySelector('#app-content').dataset.page),
+window.MediaViewerPlayer = {{init:()=>lifecycle.push('player-init:'+document.querySelector('#app-content').dataset.page+':'+document.querySelector('meta[name="referrer"]').content),
 dispose:()=>lifecycle.push('dispose:'+document.querySelector('#app-content').dataset.page)}};
 document.addEventListener('htmx:afterSettle',e=>lifecycle.push('settle:'+(e.detail.target&&e.detail.target.id)+':event-'+e.target.id));
 document.addEventListener('htmx:historyCacheMissLoad',()=>lifecycle.push('history-load'));
@@ -67,9 +71,10 @@ document.addEventListener('htmx:historyCacheMiss',event=>{{
 <div id="navigation-indicator" hidden></div><div id="navigation-error" class="hidden" hidden><span id="navigation-error-message"></span><button>dismiss</button></div>
 <button id="outside-focus">Outside</button>
 <div id="navigation-status"></div><div id="app-content" data-page="{path}" data-theme="{theme}" data-csrf="{path}-token" hx-boost="true" hx-target="#app-content" hx-select="#app-content" hx-swap="outerHTML" hx-history-elt hx-history="false">
-<h1>{name}</h1><video id="b2-video"></video><a id="two" href="/mediaviewer/tvshows/summary/">Two</a><a id="requests" href="/mediaviewer/requests/">Requests</a><a id="settings" href="/mediaviewer/settings/">Settings</a><a id="media" href="/mediaviewer/media/2024/file">media</a><a id="extra" href="/mediaviewer/settings/extra/">extra</a><a id="fail" href="/mediaviewer/movies/">fail</a><a id="allowed-optout" href="/mediaviewer/requests/" hx-boost="false">Requests</a>
+<h1>{name}</h1>{video}<a id="two" href="/mediaviewer/tvshows/summary/">Two</a><a id="player" href="/mediaviewer/b2player/abcdefgh/">Player</a><a id="requests" href="/mediaviewer/requests/">Requests</a><a id="settings" href="/mediaviewer/settings/">Settings</a><a id="media" href="/mediaviewer/media/2024/file">media</a><a id="extra" href="/mediaviewer/settings/extra/">extra</a><a id="fail" href="/mediaviewer/movies/">fail</a><a id="allowed-optout" href="/mediaviewer/requests/" hx-boost="false">Requests</a>
 <form id="post" method="post" action="/mediaviewer/submitsettings/"><button>Post</button></form>
 <form id="unsafe" method="post" action="/mediaviewer/submitsettings-extra/"><button>Unsafe</button></form>
+<form id="reset" method="post" action="/mediaviewer/user/reset/"><button>Reset</button></form>
 <script>
 MediaViewerNavigation.registerPageInit(() => {{
   lifecycle.push('init:{path}');
@@ -97,13 +102,14 @@ class Handler(BaseHTTPRequestHandler):
             release_history_request.wait(15)
             key = "one"
             body, status = page(key), 200
-        elif self.path in ("/mediaviewer/", "/mediaviewer/tvshows/summary/", "/mediaviewer/requests/", "/mediaviewer/settings/", "/mediaviewer/media/2024/file", "/mediaviewer/settings/extra/"):
+        elif self.path in ("/mediaviewer/", "/mediaviewer/tvshows/summary/", "/mediaviewer/requests/", "/mediaviewer/settings/", "/mediaviewer/media/2024/file", "/mediaviewer/settings/extra/", "/mediaviewer/b2player/abcdefgh/"):
             key = (
                 "one" if self.path == "/mediaviewer/"
                 else "two" if self.path.endswith("/summary/")
                 else "requests" if self.path == "/mediaviewer/requests/"
                 else "settings" if self.path == "/mediaviewer/settings/"
                 else "media" if self.path.startswith("/mediaviewer/media/")
+                else "player" if self.path.startswith("/mediaviewer/b2player/")
                 else "settings-extra"
             )
             body = page(key)
@@ -128,6 +134,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         posts.append(self.path)
+        if self.path == "/mediaviewer/user/reset/":
+            reset_post_origins.append(self.headers.get("Origin"))
         self.send_response(200)
         self.send_header("Content-Type", "text/html")
         self.end_headers()
@@ -158,20 +166,25 @@ def main():
                 else None,
             )
             page_obj.goto(origin + "/mediaviewer/")
+            page_obj.locator("#reset button").click()
+            page_obj.wait_for_load_state("domcontentloaded")
+            assert reset_post_origins[-1] == origin, reset_post_origins[-1]
+            page_obj.goto(origin + "/mediaviewer/")
             page_obj.evaluate("window.__navigationDocument = document.documentElement")
             page_obj.wait_for_function("lifecycle.some(x=>x==='init:one')")
+            assert page_obj.locator('meta[name="referrer"]').get_attribute("content") == "same-origin"
             page_obj.locator("#two").click()
             page_obj.wait_for_function("location.pathname==='/mediaviewer/tvshows/summary/' && lifecycle.includes('init:two')")
             assert page_obj.locator("html").get_attribute("data-bs-theme") == "dark"
             assert page_obj.title() == "Two title"
             assert page_obj.locator("#app-content").get_attribute("data-csrf") == "two-token"
             assert page_obj.evaluate("lifecycle.filter(x=>x==='init:two').length") == 1
-            assert page_obj.evaluate("lifecycle.filter(x=>x==='player-init:two').length") == 1
+            assert page_obj.evaluate("lifecycle.filter(x=>x==='player-init:two').length") == 0
             assert page_obj.evaluate("sharedAssets.every((node,i)=>node===document.querySelectorAll('script[src]')[i])")
             page_obj.go_back()
             page_obj.wait_for_function("location.pathname==='/mediaviewer/' && lifecycle.filter(x=>x==='init:one').length===2")
             assert page_obj.evaluate("lifecycle.filter(x=>x==='dispose:two').length") == 1
-            assert page_obj.evaluate("lifecycle.filter(x=>x==='player-init:one').length") == 2
+            assert page_obj.evaluate("lifecycle.filter(x=>x==='player-init:one').length") == 0
             assert page_obj.locator("html").get_attribute("data-bs-theme") == "light"
             assert page_obj.title() == "One title"
             assert page_obj.locator("#app-content").get_attribute("data-csrf") == "one-token"
@@ -237,8 +250,31 @@ def main():
             page_obj.goto(origin + "/mediaviewer/")
             page_obj.locator("#post button").click()
             page_obj.wait_for_function("document.querySelector('#app-content').dataset.page==='two'")
-            assert posts == ["/mediaviewer/submitsettings/"]
+            assert posts == [
+                "/mediaviewer/user/reset/",
+                "/mediaviewer/submitsettings/",
+            ]
             assert page_obj.evaluate("location.pathname") == "/mediaviewer/"
+            page_obj.locator("#player").click()
+            page_obj.wait_for_function(
+                "location.pathname==='/mediaviewer/b2player/abcdefgh/' && lifecycle.includes('player-init:player:no-referrer')"
+            )
+            assert page_obj.locator('meta[name="referrer"]').get_attribute("content") == "no-referrer"
+            page_obj.locator("#two").click()
+            page_obj.wait_for_function(
+                "location.pathname==='/mediaviewer/tvshows/summary/' && lifecycle.filter(x=>x==='init:two').length>=2"
+            )
+            assert page_obj.locator('meta[name="referrer"]').get_attribute("content") == "same-origin"
+            page_obj.go_back()
+            page_obj.wait_for_function(
+                "location.pathname==='/mediaviewer/b2player/abcdefgh/' && lifecycle.filter(x=>x==='player-init:player:no-referrer').length===2"
+            )
+            assert page_obj.locator('meta[name="referrer"]').get_attribute("content") == "no-referrer"
+            page_obj.go_forward()
+            page_obj.wait_for_function(
+                "location.pathname==='/mediaviewer/tvshows/summary/' && lifecycle.filter(x=>x==='init:two').length>=3"
+            )
+            assert page_obj.locator('meta[name="referrer"]').get_attribute("content") == "same-origin"
             race_page = browser.new_page()
             race_page.on("pageerror", lambda error: page_errors.append(str(error)))
             race_page.on(
@@ -264,19 +300,24 @@ def main():
                 timeout=10_000,
             )
             assert history_request_started.is_set(), "Back history request did not reach the delayed fixture"
-            race_page.locator("#requests").click()
-            race_page.wait_for_function("location.pathname==='/mediaviewer/requests/' && lifecycle.includes('init:requests')")
+            race_page.locator("#player").click()
+            race_page.wait_for_function(
+                "location.pathname==='/mediaviewer/b2player/abcdefgh/' && lifecycle.includes('player-init:player:no-referrer')"
+            )
             assert race_page.evaluate("lifecycle.includes('history-abort-attempt')")
             release_history_request.set()
             race_page.wait_for_function("lifecycle.includes('history-load')")
             race_page.wait_for_timeout(100)
             assert race_page.evaluate("window.__raceDocument === document.documentElement")
-            assert race_page.url.endswith("/mediaviewer/requests/")
-            assert race_page.title() == "Requests title"
-            assert race_page.locator("#app-content").get_attribute("data-page") == "requests"
-            assert race_page.evaluate("lifecycle.filter(x=>x==='player-init:requests').length") == 1
-            assert race_page.evaluate("lifecycle.filter(x=>x==='dispose:requests').length") == 0
-            assert race_page.evaluate("sessionStorage.getItem('htmx-current-path-for-history')==='/mediaviewer/requests/'")
+            assert race_page.url.endswith("/mediaviewer/b2player/abcdefgh/")
+            assert race_page.title() == "Player title"
+            assert race_page.locator("#app-content").get_attribute("data-page") == "player"
+            assert race_page.evaluate("lifecycle.filter(x=>x==='player-init:player:no-referrer').length") == 1
+            assert race_page.evaluate("lifecycle.filter(x=>x==='dispose:player').length") == 0
+            session_path = race_page.evaluate(
+                "sessionStorage.getItem('htmx-current-path-for-history')"
+            )
+            assert session_path == "/mediaviewer/b2player/abcdefgh/"
             assert not page_errors[race_page_error_start:], page_errors[race_page_error_start:]
             assert not console_errors[race_console_error_start:], console_errors[race_console_error_start:]
             assert not blocked_external_requests, blocked_external_requests

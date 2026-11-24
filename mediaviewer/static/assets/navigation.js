@@ -111,6 +111,10 @@
         else target.setAttribute(attribute.name, attribute.value);
       });
     }
+    var referrerPolicy = document.querySelector('meta[name="referrer"]');
+    if (referrerPolicy) {
+      referrerPolicy.content = target.querySelector("#b2-video") ? "no-referrer" : "same-origin";
+    }
     var theme = target.dataset.theme || "";
     document.documentElement.dataset.bsTheme = theme;
     document.documentElement.classList.toggle("light", theme === "light");
