@@ -52,7 +52,7 @@
                         id="seek-forward"
                         type="button"
                         aria-label="Forward 10 seconds"><span class="b2-control-label">10 sec <i class="bi-skip-forward-fill"></i></span></button>
-                <button class="btn btn-outline-secondary"
+                <button class="btn btn-outline-secondary ms-sm-auto"
                         id="cast-captions-toggle"
                         type="button"
                         aria-pressed="false"
@@ -67,9 +67,7 @@
         id="binge-toggle"
         type="button"
         aria-pressed="{{ player_config.binge_mode|yesno:'true,false' }}"><span class="b2-control-label">Binge mode: {% if player_config.binge_mode %}On{% else %}Off{% endif %}</span><span class="b2-control-size" aria-hidden="true">Binge mode: On</span><span class="b2-control-size" aria-hidden="true">Binge mode: Off</span></button>{% endif %}
-                <button class="btn btn-outline-secondary ms-sm-auto"
-                        id="start-over"
-                        type="button"><span class="b2-control-label"><i class="bi-arrow-counterclockwise"></i> Start over</span></button>
+                <button class="btn btn-outline-secondary" id="start-over" type="button"><span class="b2-control-label"><i class="bi-arrow-counterclockwise"></i> Start over</span></button>
             </div>
         </section>
         <nav class="b2-episode-nav" aria-label="Episode navigation">
