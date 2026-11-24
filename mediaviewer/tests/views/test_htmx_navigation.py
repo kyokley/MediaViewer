@@ -14,7 +14,9 @@ def _body(response):
 
 
 def _title(content):
-    match = re.search(r"<title[^>]*>(.*?)</title>", content, flags=re.IGNORECASE | re.DOTALL)
+    match = re.search(
+        r"<title[^>]*>(.*?)</title>", content, flags=re.IGNORECASE | re.DOTALL
+    )
     assert match is not None
     return " ".join(match.group(1).split())
 
@@ -72,7 +74,10 @@ def test_representative_pages_render_full_documents_and_htmx_fragments(
         expected_referrer = "no-referrer" if "b2player" in url else "same-origin"
         assert f'<meta name="referrer" content="{expected_referrer}">' in full_body
         assert _title(full_body), url
-        assert len(re.findall(r'<script[^>]+src="[^"]*assets/mediaviewer\.js"', full_body)) == 1
+        assert (
+            len(re.findall(r'<script[^>]+src="[^"]*assets/mediaviewer\.js"', full_body))
+            == 1
+        )
         assert {"hx-request", "hx-history-restore-request"} <= _vary_headers(full), url
 
         fragment = client.get(url, HTTP_HX_REQUEST="true")
@@ -101,7 +106,9 @@ def test_history_restore_request_returns_full_document_even_with_hx_request(
     assert "<html" in content
     assert 'id="app-content"' in content
     assert _title(content)
-    assert len(re.findall(r'<script[^>]+src="[^"]*assets/mediaviewer\.js"', content)) == 1
+    assert (
+        len(re.findall(r'<script[^>]+src="[^"]*assets/mediaviewer\.js"', content)) == 1
+    )
 
 
 @pytest.mark.django_db
@@ -154,7 +161,7 @@ def test_unauthorized_htmx_navigation_uses_client_redirect(client):
     assert response.status_code == 200
     assert response["HX-Redirect"].startswith("/mediaviewer/login/")
     assert "Location" not in response
-    assert "id=\"app-content\"" not in _body(response)
+    assert 'id="app-content"' not in _body(response)
 
 
 @pytest.mark.django_db
@@ -229,8 +236,10 @@ def test_password_reset_keeps_native_csrf_post_origin(create_user, mailoutbox):
 
     assert page.status_code == 200
     assert '<meta name="referrer" content="same-origin">' in page_body
-    assert any(form.get("method", "").lower() == "post" and form.get("hx-boost") == "false"
-               for form in parser.form_attrs)
+    assert any(
+        form.get("method", "").lower() == "post" and form.get("hx-boost") == "false"
+        for form in parser.form_attrs
+    )
     assert parser.csrf_token
 
     missing_token = client.post(

@@ -29,7 +29,9 @@
             </div>
         </div>
     </div>
-    <form action="{% url 'mediaviewer:submitsettings' %}" method="post" hx-push-url="false">
+    <form action="{% url 'mediaviewer:submitsettings' %}"
+          method="post"
+          hx-push-url="false">
         {% csrf_token %}
         <div class="row">
             <h2 class="col">Account Settings</h2>
@@ -129,7 +131,9 @@
         </ul>
     </form>
     {% if user.is_staff %}
-        <form action="{% url 'mediaviewer:submitnewuser' %}" method="post" hx-push-url="false">
+        <form action="{% url 'mediaviewer:submitnewuser' %}"
+              method="post"
+              hx-push-url="false">
             {% csrf_token %}
             <div class="container py-5">
                 <h1>New User</h1>
