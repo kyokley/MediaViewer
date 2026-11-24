@@ -8,26 +8,33 @@ var didScroll;
 var lastScrollTop = 0;
 var delta = 10;
 var viewedCheckboxColumn = 3;
+window.__mediaViewerPageEpoch = window.__mediaViewerPageEpoch || 0;
+
+function pageEpochCurrent(epoch) {
+  return epoch === window.__mediaViewerPageEpoch;
+}
 
 function bindAlertMessage($) {
-  $(".alert").bind("closed.bs.alert", function () {
-    $.ajax({
-      url: "/mediaviewer/ajaxclosemessage/",
-      type: "POST",
-      dataType: "json",
-      data: {
-        messageid: this.id,
-        csrfmiddlewaretoken: csrf_token,
-      },
-      success: function (json) {},
-      error: function (xhr, errmsg, err) {},
+  $(".alert")
+    .off("closed.bs.alert.mediaViewer")
+    .on("closed.bs.alert.mediaViewer", function () {
+      $.ajax({
+        url: "/mediaviewer/ajaxclosemessage/",
+        type: "POST",
+        dataType: "json",
+        data: {
+          messageid: this.id,
+          csrfmiddlewaretoken: csrf_token,
+        },
+        success: function (json) {},
+        error: function (xhr, errmsg, err) {},
+      });
     });
-  });
 }
 
 function preparePage($) {
   bindAlertMessage($);
-  $(".carousel").slick({
+  $(".carousel:not(.slick-initialized)").slick({
     adaptiveHeight: false,
     arrows: true,
     autoplay: true,
@@ -60,6 +67,9 @@ function sleep(time) {
 }
 
 function prepareDataTable($, sortOrder, table_data_page, filter_id) {
+  if ($.fn.DataTable && $.fn.DataTable.isDataTable("#myTable")) {
+    return;
+  }
   if (filter_id) {
     var ajax_path =
       "/mediaviewer/ajax/" + table_data_page + "/" + String(filter_id) + "/";
@@ -73,6 +83,7 @@ function prepareDataTable($, sortOrder, table_data_page, filter_id) {
 }
 
 function dataTableConfig($, sortOrder, table_data_page, ajax_path) {
+  var drawEpoch = window.__mediaViewerPageEpoch;
   dt_config = {
     order: sortOrder,
     autoWidth: true,
@@ -83,8 +94,13 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path) {
       },
     ],
     drawCallback: function (settings) {
+      if (window.htmx) {
+        window.htmx.process(settings.nTable);
+      }
       sleep(2000).then(() => {
-        configureTooltips($);
+        if (pageEpochCurrent(drawEpoch)) {
+          configureTooltips($);
+        }
       });
     },
     stateSave: true,
@@ -107,7 +123,9 @@ function dataTableConfig($, sortOrder, table_data_page, ajax_path) {
     url: ajax_path,
     dataSrc: function (json) {
       sleep(2000).then(() => {
-        configureTooltips($);
+        if (pageEpochCurrent(drawEpoch)) {
+          configureTooltips($);
+        }
       });
       return json.data;
     },
@@ -182,8 +200,8 @@ function configureTooltips($) {
     delay: 200,
   };
   $(function () {
-    $(".img-preview").popover(options);
-    $(".skip-btn").popover();
+    $(".img-preview").popover("dispose").popover(options);
+    $(".skip-btn").popover("dispose").popover();
   });
 }
 
@@ -209,6 +227,9 @@ function placePopover(popover_node, trigger_node) {
 function prepareTableForRequests($) {
   tableElement = $("#myTable");
 
+  if ($.fn.DataTable && $.fn.DataTable.isDataTable(tableElement[0])) {
+    return;
+  }
   tableElement.dataTable({
     stateSave: true,
     autoWidth: true,
@@ -619,6 +640,10 @@ function hasScrolled() {
 }
 
 function scrollSetup() {
+  if (window.__mediaViewerScrollSetup) {
+    return;
+  }
+  window.__mediaViewerScrollSetup = true;
   $(window).scroll(function (event) {
     didScroll = true;
   });
