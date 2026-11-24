@@ -15,13 +15,14 @@ const deferred = () => {
     return { promise, resolve, reject };
 };
 
-function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}) {
+function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
     const ids = ["player-status", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "airplay-video"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
         id, textContent: "", attributes: id === "player-status" ? { "data-loading": "true" } : {}, listeners: {}, hidden: ["airplay-video", "cast-video"].includes(id), style: {},
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
         addEventListener(type, fn) { this.listeners[type] = fn; },
+        removeEventListener(type, fn) { if (this.listeners[type] === fn) delete this.listeners[type]; },
         setAttribute(name, value) { this.attributes[name] = value; },
         removeAttribute(name) { delete this.attributes[name]; },
         click() { return this.listeners.click?.(); },
@@ -32,6 +33,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const textTracks = {
         tracks: [], length: 0,
         addEventListener(type, fn) { textTrackListeners[type] = fn; },
+        removeEventListener(type, fn) { if (textTrackListeners[type] === fn) delete textTrackListeners[type]; },
         item(index) { return this.tracks[index] || null; },
         dispatch(type) { textTrackListeners[type]?.(); },
         add(track) { this.tracks.push(track); this.length = this.tracks.length; this[this.length - 1] = track; },
@@ -67,6 +69,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         querySelector(tag) { return this.children.find((child) => child.tagName === tag); },
         querySelectorAll(selector) { return this.children.filter((child) => selector.split(", ").includes(child.tagName)); },
         addEventListener(type, fn, options = {}) { const entries = listeners.get(type) || []; entries.push({ fn, once: options.once }); listeners.set(type, entries); },
+        removeEventListener(type, fn) { listeners.set(type, (listeners.get(type) || []).filter((entry) => entry.fn !== fn)); },
         dispatch(type, event = {}) {
             if (type === "play") this.paused = false;
             if (type === "pause" || type === "ended") this.paused = true;
@@ -93,6 +96,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const intervals = new Map();
     let nextInterval = 1;
     const navigations = [];
+    const nextAnchorClicks = [];
     const documentListeners = {};
     const windowListeners = {};
     const castSession = { request: null, mediaSession: configPatch.currentCastMedia ? { media: { contentId: configPatch.currentCastMedia } } : null,
@@ -102,6 +106,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         sessionListener: null,
         setOptions(options) { this.options = options; this.setOptionsCalls = (this.setOptionsCalls || 0) + 1; },
         addEventListener(_type, listener) { this.sessionListener = listener; },
+        removeEventListener(_type, listener) { if (this.sessionListener === listener) this.sessionListener = null; },
         getCurrentSession() { return castSession; },
     };
     const castApi = {
@@ -115,24 +120,32 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
             Track: class { constructor(trackId, trackType) { this.trackId = trackId; this.trackType = trackType; } },
             MediaInfo: class { constructor(contentId, contentType) { this.contentId = contentId; this.contentType = contentType; } },
             LoadRequest: class { constructor(mediaInfo) { this.media = mediaInfo; } } } } };
-    const window = { addEventListener(type, fn) { windowListeners[type] = fn; }, location: { assign(url) { navigations.push(url); } } };
+    const nextAnchor = configPatch.nextAnchor ? {
+        href: new URL(configPatch.nextAnchor, "https://example.test/player/").href,
+        click() { nextAnchorClicks.push(this.href); },
+    } : null;
+    const window = { __mediaViewerPlayerShared: sharedRuntime, ...(configPatch.htmx ? { htmx: {} } : {}), addEventListener(type, fn) { windowListeners[type] = fn; }, removeEventListener(type, fn) { if (windowListeners[type] === fn) delete windowListeners[type]; }, location: { assign(url) { navigations.push(url); } } };
     window.__mockProvideCast = () => { window.cast = castApi; window.chrome = chromeApi; };
     const context = {
         document: {
             cookie: "", visibilityState: "visible",
+            baseURI: "https://example.test/player/",
             head: { append(script) { this.script = script; this.callbackAtAppend = window.__onGCastApiAvailable; if (!configPatch.castApiLate) queueMicrotask(() => { if (!configPatch.castUnavailable) window.__mockProvideCast(); window.__onGCastApiAvailable?.(!configPatch.castUnavailable); if (configPatch.castNoDevices) elements["cast-video"].style.display = "none"; }); } },
             getElementById(id) { return id === "retry-video" ? retryButton : elements[id] || null; },
+            querySelectorAll(selector) { return selector === ".b2-episode-nav a[href]" && nextAnchor ? [nextAnchor] : []; },
             createElement(tag) { return { tagName: tag }; },
             addEventListener(type, fn) { documentListeners[type] = fn; },
+            removeEventListener(type, fn) { if (documentListeners[type] === fn) delete documentListeners[type]; },
         },
         window,
         fetch: (url, options = {}) => { requests.push({ url, options }); return url === "/media" && !configPatch.testMediaFetch ? Promise.resolve(media(configPatch.testMediaResponse)) : fetcher(url, options, requests.length - 1); },
         URLSearchParams,
+        URL,
         setInterval(fn) { const id = nextInterval++; intervals.set(id, fn); return id; },
         clearInterval(id) { intervals.delete(id); },
     };
     vm.runInNewContext(source, context);
-    return { elements, video, requests, intervals, navigations, documentListeners, windowListeners, context };
+    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context };
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
@@ -933,4 +946,178 @@ test("rapid caption choices are serialized and retry restores latest local prefe
     dispatchTrackChange(player);
     await tick();
     assert.equal(captionPosts(player).length, 3, "retry initialization does not overwrite or repost preference");
+});
+
+test("player init is idempotent and dispose clears timers and page listeners", async () => {
+    const player = createPlayer(async () => ok());
+    const api = player.context.window.MediaViewerPlayer;
+    assert.equal(typeof api.init, "function");
+    assert.equal(typeof api.dispose, "function");
+    api.init();
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.dispatch("play");
+    assert.equal(player.intervals.size, 1);
+    api.dispose();
+    assert.equal(player.intervals.size, 0);
+    assert.equal(typeof player.documentListeners.visibilitychange, "undefined");
+    assert.equal(typeof player.windowListeners.pagehide, "undefined");
+    api.dispose();
+});
+
+test("disposed page ignores an in-flight media response", async () => {
+    const pending = deferred();
+    const player = createPlayer((url) => url === "/media" ? pending.promise : Promise.resolve(ok()), { testMediaFetch: true });
+    await tick();
+    player.context.window.MediaViewerPlayer.dispose();
+    pending.resolve(media());
+    await tick();
+    assert.equal(player.video.children.length, 0);
+    assert.equal(player.video.loadCalls, 1, "dispose releases media element");
+});
+
+test("disposed ended callback cannot navigate after pending completion", async () => {
+    const deletion = deferred();
+    const player = createPlayer((url, options) => options.method === "DELETE" ? deletion.promise : Promise.resolve(ok()));
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.currentTime = 100;
+    player.video.dispatch("ended");
+    await tick();
+    player.context.window.MediaViewerPlayer.dispose();
+    deletion.resolve(ok());
+    await tick();
+    assert.deepEqual(player.navigations, []);
+});
+
+test("binge navigation clicks the boosted episode anchor", async () => {
+    const player = createPlayer(async () => ok(), { htmx: true, nextAnchor: "/next" });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    player.video.dispatch("ended");
+    await player.context.window.MediaViewerPlayer.ready;
+    await tick();
+    assert.deepEqual(player.nextAnchorClicks, ["https://example.test/next"]);
+    assert.deepEqual(player.navigations, []);
+});
+
+test("Cast reinitializes on an already-loaded SDK without duplicate options", async () => {
+    const player = createPlayer(async () => media(), { testMediaFetch: true });
+    await tick();
+    const api = player.context.window.MediaViewerPlayer;
+    const cast = player.context.window.cast;
+    const firstListener = cast.context.sessionListener;
+    assert.equal(cast.context.setOptionsCalls, 1);
+    api.dispose();
+    assert.equal(cast.context.sessionListener, null);
+    api.init();
+    assert.notEqual(cast.context.sessionListener, null);
+    assert.notEqual(cast.context.sessionListener, firstListener);
+    assert.equal(cast.context.setOptionsCalls, 1);
+});
+
+test("returning player waits for prior page progress writes before resume lookup", async () => {
+    const firstPost = deferred();
+    let firstPostHeld = false;
+    const outgoing = createPlayer((url, options) => {
+        if (url === "/progress" && options.method === "POST" && !firstPostHeld) {
+            firstPostHeld = true;
+            return firstPost.promise;
+        }
+        return Promise.resolve(url === "/progress" && options.method === "GET" ? ok({ offset: 0 }) : ok());
+    });
+    await tick();
+    outgoing.video.dispatch("loadedmetadata");
+    await tick();
+    outgoing.video.currentTime = 19;
+    outgoing.video.dispatch("pause");
+    await tick();
+    outgoing.context.window.MediaViewerPlayer.dispose();
+
+    const returning = createPlayer(async (url, options) =>
+        url === "/progress" && options.method === "GET" ? ok({ offset: 42 }) : ok(),
+    {}, outgoing.context.window.__mediaViewerPlayerShared);
+    await tick();
+    returning.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(returning.requests.some((request) => request.url === "/progress" && request.options.method === "GET"), false);
+    firstPost.resolve(ok());
+    await tick();
+    await tick();
+    assert.equal(returning.requests.some((request) => request.url === "/progress" && request.options.method === "GET"), true);
+    assert.equal(returning.video.currentTime, 42);
+});
+
+test("returning player waits for a prior completion DELETE and viewing write", async () => {
+    const deletion = deferred();
+    const outgoing = createPlayer((url, options) =>
+        options.method === "DELETE" ? deletion.promise : Promise.resolve(ok()),
+    );
+    await tick();
+    outgoing.video.dispatch("loadedmetadata");
+    await tick();
+    outgoing.video.currentTime = 95;
+    outgoing.video.dispatch("timeupdate");
+    await tick();
+    outgoing.context.window.MediaViewerPlayer.dispose();
+
+    const returning = createPlayer(async (url, options) =>
+        url === "/progress" && options.method === "GET" ? ok({ offset: 12 }) : ok(),
+    {}, outgoing.context.window.__mediaViewerPlayerShared);
+    await tick();
+    returning.video.dispatch("loadedmetadata");
+    await tick();
+    assert.equal(returning.requests.some((request) => request.url === "/progress" && request.options.method === "GET"), false);
+    deletion.resolve(ok());
+    await tick();
+    await tick();
+    assert.equal(outgoing.requests.some((request) => request.url === "/viewed"), true);
+    assert.equal(returning.requests.some((request) => request.url === "/progress" && request.options.method === "GET"), true);
+    assert.equal(returning.video.currentTime, 12);
+});
+
+test("returning player keeps latest caption preference and serializes its save", async () => {
+    const heldCaption = deferred();
+    let holdFirstCaption = true;
+    const outgoing = createPlayer((url) => url === "/captions" && holdFirstCaption
+        ? (holdFirstCaption = false, heldCaption.promise)
+        : Promise.resolve(ok()), {
+        captions_url: "/captions",
+        captions_enabled: true,
+        testMediaResponse: { subtitle_urls: ["/en.vtt"] },
+    });
+    await tick();
+    outgoing.video.dispatch("loadedmetadata");
+    await tick();
+    const outgoingTrack = outgoing.video.textTracks[0];
+    outgoingTrack.mode = "disabled";
+    outgoing.video.textTracks.dispatch("change");
+    await tick();
+    outgoing.context.window.MediaViewerPlayer.dispose();
+
+    const returning = createPlayer(async () => ok(), {
+        captions_url: "/captions",
+        captions_enabled: true,
+        testMediaResponse: { subtitle_urls: ["/en.vtt"] },
+    }, outgoing.context.window.__mediaViewerPlayerShared);
+    await tick();
+    assert.equal(returning.video.textTracks[0].mode, "disabled");
+    returning.video.dispatch("loadedmetadata");
+    await tick();
+    returning.video.textTracks[0].mode = "showing";
+    returning.video.textTracks.dispatch("change");
+    await tick();
+    assert.equal(returning.requests.some((request) => request.url === "/captions"), false);
+    let readySettled = false;
+    returning.context.window.MediaViewerPlayer.ready.then(() => { readySettled = true; });
+    await tick();
+    assert.equal(readySettled, false);
+    heldCaption.resolve(ok());
+    await returning.context.window.MediaViewerPlayer.ready;
+    await tick();
+    assert.equal(readySettled, true);
+    assert.equal(returning.requests.filter((request) => request.url === "/captions").length, 1);
 });
