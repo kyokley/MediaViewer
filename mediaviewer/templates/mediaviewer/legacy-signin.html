@@ -5,6 +5,7 @@
     {% if not loggedin %}
         {{ error_message }}
         <form action="{% url 'mediaviewer:legacy-signin' %}"
+              hx-boost="false"
               class="form-signin"
               role="form"
               method='post'>
@@ -30,7 +31,7 @@
                 <input type="hidden" name="password" value="" id="password" />
             </div>
             <!-- TODO: Reactivate this at some point?
-            <a href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
+            <a href="{% url 'mediaviewer:password_reset' %}" hx-boost="false">Forgot password?</a>
 -->
             <div class="row justify-content-center">
                 <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"

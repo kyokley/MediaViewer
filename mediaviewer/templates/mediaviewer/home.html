@@ -1,22 +1,27 @@
+{% load static django_htmx %}
+{% if not request.htmx or request.htmx.history_restore_request %}
 <!DOCTYPE html>
-{% load static %}
 <html lang="en" class="{{ theme }}" data-bs-theme="{{ theme }}">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="referrer" content="no-referrer">
         <meta name="description" content="">
         <meta name="author" content="">
+        <meta name="htmx-config" content='{"historyCacheSize": 0, "historyRestoreAsHxRequest": false}'>
         <link rel="shortcut icon"
               type="image/png"
               href="{% static "assets/favicon.ico" %}" />
-        {% block title %}
-            {% if title == '' or title == None %}
-                <title>MediaViewer</title>
-            {% else %}
-                <title>{{ title }} - MediaViewer</title>
-            {% endif %}
-        {% endblock %}
+{% endif %}
+{% block title %}
+    {% if title == '' or title == None %}
+        <title>MediaViewer</title>
+    {% else %}
+        <title>{{ title }} - MediaViewer</title>
+    {% endif %}
+{% endblock %}
+{% if not request.htmx or request.htmx.history_restore_request %}
         {% block css %}
             <link href="{% static "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css" %}"
                   rel="stylesheet">
@@ -32,9 +37,51 @@
             <link href="{% static "slick-carousel/slick/slick-theme.css" %}"
                   rel="stylesheet">
             <link href="{% static "assets/home.css" %}" rel="stylesheet">
+            <link href="{% static 'assets/b2player.css' %}" rel="stylesheet">
         {% endblock %}
+        {% htmx_script %}
     </head>
     <body>
+        {% block javascript_include %}
+            <!-- Bootstrap core JavaScript
+    ================================================== -->
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
+            <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
+            <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+            <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
+            <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
+            <script src="{% static "datatables.net-scroller/js/dataTables.scroller.min.js" %}"></script>
+            <script src="{% static "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js" %}"></script>
+            <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
+            <script src="{% static "datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js" %}"></script>
+            <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
+            <script src="{% static "passwordless/passwordless.v1.1.0.umd.min.js" %}"></script>
+            <script src="{% static "slick-carousel/slick/slick.js" %}"></script>
+            <script src="{% static "jquery-migrate/dist/jquery-migrate.min.js" %}"></script>
+            <script src="{% static "assets/mediaviewer.js" %}"></script>
+            <script src="{% static "assets/navigation.js" %}"></script>
+            <script src="{% static 'assets/b2player.js' %}"></script>
+        {% endblock %}
+{% endif %}
+{% if not request.htmx or request.htmx.history_restore_request %}
+        <div id="navigation-indicator" class="htmx-indicator" aria-hidden="true">Loading…</div>
+        <div id="navigation-status" class="visually-hidden" role="status" aria-live="polite"></div>
+        <div id="navigation-error" class="alert alert-danger alert-dismissible hidden" role="alert" aria-live="assertive">
+            <span id="navigation-error-message">This page could not be loaded. Please try again.</span>
+            <button type="button" class="btn-close" aria-label="Dismiss error" onclick="this.parentElement.classList.add('hidden')"></button>
+        </div>
+{% endif %}
+    <div id="app-content"
+         data-theme="{{ theme }}"
+         hx-boost="true"
+         hx-target="#app-content"
+         hx-select="#app-content"
+         hx-swap="outerHTML"
+         hx-indicator="#navigation-indicator"
+         hx-history-elt
+         hx-history="false"
+         hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
         <nav id="top-navbar"
              class="navbar navbar-expand-md fixed-top bg-body-tertiary nav-show"
              role="navigation">
@@ -156,9 +203,9 @@
                                 </li>
                                 <li class="navbar-right">
                                     {% if loggedin %}
-                                        <a class="nav-link" href="/mediaviewer/logout/">Log out</a>
+                                        <a class="nav-link" href="/mediaviewer/logout/" hx-boost="false">Log out</a>
                                     {% else %}
-                                        <a class="nav-link" href="/mediaviewer/login/">Log In</a>
+                                        <a class="nav-link" href="/mediaviewer/login/" hx-boost="false">Log In</a>
                                     {% endif %}
                                 </li>
                             </ul>
@@ -168,7 +215,7 @@
                         {% else %}
                             <nav class="nav navbar-nav">
                                 <div class="navbar-right">
-                                    <a class="nav-link" href="/mediaviewer/login/">Log In</a>
+                                    <a class="nav-link" href="/mediaviewer/login/" hx-boost="false">Log In</a>
                                 </div>
                             </nav>
                         {% endif %}
@@ -177,12 +224,13 @@
                 {% endblock %}
             </div>
         </nav>
-        <div class="container py-2">
-            {% block jumbotron %}
-                <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
-                <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
-            {% endblock %}
-        </div>
+        <div id="page-content" tabindex="-1">
+            <div class="container py-2">
+                {% block jumbotron %}
+                    <h1 class="display-5 fw-bold">Welcome to the MediaViewer</h1>
+                    <p class="col-md-8 fs-4">{{ greeting | safe }}</p>
+                {% endblock %}
+            </div>
         {% block messages %}
             <div class="container py-2">
                 {% for message in messages %}
@@ -233,6 +281,7 @@
                     {% endblock %}
                 {% else %}
                     <form action="{% url 'mediaviewer:legacy-signin' %}"
+                          hx-boost="false"
                           class="form-signin"
                           role="form"
                           method='post'>
@@ -258,7 +307,7 @@
                                     <button class="col-6 btn btn-lg btn-primary btn-block login-submit-btn"
                                             type="submit">Sign In</button>
                                     <div class="row justify-content-center">
-                                        <a class="col-auto" href="{% url 'mediaviewer:password_reset' %}">Forgot password?</a>
+                                        <a class="col-auto" href="{% url 'mediaviewer:password_reset' %}" hx-boost="false">Forgot password?</a>
                                     </div>
                                     <div class="row justify-content-center text-danger" id="error-div">{{ error_message }}</div>
                                 </div>
@@ -278,6 +327,7 @@
                 {% endif %}
             {% endblock %}
         </div>
+        </div>
         {% block footer %}
             <nav id="bottom-navbar"
                  class="navbar navbar-text navbar-expand-md fixed-bottom bg-body-tertiary nav-show">
@@ -292,37 +342,16 @@
                         </div>
                         <div class="col-7">
                             {% if donation_site_name and donation_site_url %}
-                                <span class="navbar-text">If you can, please consider donating to <a class="link-primary" href="{{ donation_site_url }}">{{ donation_site_name }}</a></span>
+                                <span class="navbar-text">If you can, please consider donating to <a class="link-primary" href="{{ donation_site_url }}" hx-boost="false">{{ donation_site_name }}</a></span>
                             {% endif %}
                         </div>
                     </div>
                 </div>
             </nav>
         {% endblock %}
-    </body>
-    <footer>
-        {% block javascript_include %}
-            <!-- Bootstrap core JavaScript
-    ================================================== -->
-            <!-- Placed at the end of the document so the pages load faster -->
-            <script src="{% static "@popperjs/core/dist/umd/popper.min.js" %}"></script>
-            <script src="{% static "jquery/dist/jquery.min.js" %}"></script>
-            <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
-            <script src="{% static "datatables.net/js/dataTables.min.js" %}"></script>
-            <script src="{% static "datatables.net-bs5/js/dataTables.bootstrap5.min.js" %}"></script>
-            <script src="{% static "datatables.net-scroller/js/dataTables.scroller.min.js" %}"></script>
-            <script src="{% static "datatables.net-scroller-bs5/js/scroller.bootstrap5.min.js" %}"></script>
-            <script src="{% static "datatables.net-buttons/js/dataTables.buttons.min.js" %}"></script>
-            <script src="{% static "datatables.net-buttons-bs5/js/buttons.bootstrap5.min.js" %}"></script>
-            <script src="{% static "jquery.shorten/src/jquery.shorten.min.js" %}"></script>
-            <script src="{% static "passwordless/passwordless.v1.1.0.umd.min.js" %}"></script>
-            <script src="{% static "slick-carousel/slick/slick.js" %}"></script>
-            <script src="{% static "jquery-migrate/dist/jquery-migrate.min.js" %}"></script>
-            <script src="{% static "assets/mediaviewer.js" %}"></script>
-        {% endblock %}
         {% block javascript %}
             <script type="text/javascript">
-                $(document).ready(function(){
+                window.MediaViewerNavigation.registerPageInit(function(){
                     csrf_token = '{{ csrf_token }}';
                     preparePage($);
                     setHomeFormSubmit($);
@@ -332,5 +361,8 @@
                 });
             </script>
         {% endblock %}
-    </footer>
+    </div>
+{% if not request.htmx or request.htmx.history_restore_request %}
+    </body>
 </html>
+{% endif %}

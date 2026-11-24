@@ -37,7 +37,7 @@
                                data-bs-custom-class="preview-tooltip"
                                data-bs-content=" <img class='tooltip-img' src='{{ media.poster.image.url }}' /> ">
                         {% else %}
-                            <a href="{{ media.url }}">
+                            <a href="{{ media.url }}" hx-boost="false">
                         {% endif %}
                             {{ media.name }}
                         </a>
@@ -53,7 +53,7 @@
 {% endblock %}
 {% block javascript %}
     <script type="text/javascript">
-        $(document).ready(function(){
+        window.MediaViewerNavigation.registerPageInit(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
 

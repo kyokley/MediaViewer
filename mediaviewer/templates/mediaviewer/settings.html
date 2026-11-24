@@ -29,7 +29,7 @@
             </div>
         </div>
     </div>
-    <form action="{% url 'mediaviewer:submitsettings' %}" method="post">
+    <form action="{% url 'mediaviewer:submitsettings' %}" method="post" hx-push-url="false">
         {% csrf_token %}
         <div class="row">
             <h2 class="col">Account Settings</h2>
@@ -129,7 +129,7 @@
         </ul>
     </form>
     {% if user.is_staff %}
-        <form action="{% url 'mediaviewer:submitnewuser' %}" method="post">
+        <form action="{% url 'mediaviewer:submitnewuser' %}" method="post" hx-push-url="false">
             {% csrf_token %}
             <div class="container py-5">
                 <h1>New User</h1>
@@ -158,7 +158,7 @@
 {% endblock %}
 {% block javascript %}
     <script type="text/javascript">
-        $(document).ready(function(){
+        window.MediaViewerNavigation.registerPageInit(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
 

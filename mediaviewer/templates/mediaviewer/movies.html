@@ -33,7 +33,7 @@
 {% endblock %}
 {% block javascript %}
     <script type="text/javascript">
-        $(document).ready(function(){
+        window.MediaViewerNavigation.registerPageInit(function(){
             csrf_token = '{{ csrf_token }}';
             preparePage($);
             {% if view == 'movies' %}
