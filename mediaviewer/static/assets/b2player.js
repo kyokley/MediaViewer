@@ -285,9 +285,9 @@
         renderPlaybackButton(playing);
         const canPause = Boolean(
           media &&
-            playing &&
-            sdkMedia?.MediaCommand?.PAUSE &&
-            media.supportsCommand?.(sdkMedia.MediaCommand.PAUSE),
+          playing &&
+          sdkMedia?.MediaCommand?.PAUSE &&
+          media.supportsCommand?.(sdkMedia.MediaCommand.PAUSE),
         );
         playPauseButton.disabled =
           !media ||
@@ -331,8 +331,8 @@
       }
       const seekSupported = Boolean(
         media &&
-          sdkMedia?.MediaCommand &&
-          media.supportsCommand?.(sdkMedia.MediaCommand.SEEK),
+        sdkMedia?.MediaCommand &&
+        media.supportsCommand?.(sdkMedia.MediaCommand.SEEK),
       );
       ["seek-back", "seek-forward"].forEach((id) => {
         const button = document.getElementById(id);
