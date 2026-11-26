@@ -332,7 +332,7 @@ B2_APPLICATION_KEY_ID = os.environ.get("B2_APPLICATION_KEY_ID", "")
 B2_APPLICATION_KEY = os.environ.get("B2_APPLICATION_KEY", "")
 B2_BUCKET_NAME = os.environ.get("B2_BUCKET_NAME", "")
 B2_NAME_PREFIX = os.environ.get("B2_NAME_PREFIX", "")
-# Download authorization token lifetime in seconds. Defaults to 4h;
-# keep it >= TOKEN_VALIDITY_LENGTH so URLs minted
+# S3-presigned download URL lifetime in seconds (1 through 604800). Defaults to 4h;
+# keep it >= TOKEN_VALIDITY_LENGTH * 3600 so URLs minted
 # alongside a token do not expire before the token does.
 B2_PRESIGNED_URL_EXPIRY = int(os.environ.get("B2_PRESIGNED_URL_EXPIRY", "14400"))

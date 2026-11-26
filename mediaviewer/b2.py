@@ -1,12 +1,16 @@
 import hashlib
 import logging
 import mimetypes
+import re
 import time
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote
 
+import boto3
 import requests
+from botocore.config import Config
+from botocore.exceptions import BotoCoreError
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -27,11 +31,11 @@ class B2Error(Exception):
 
 
 class B2Client:
-    """Minimal Backblaze B2 native API (v4) client.
+    """Backblaze B2 native API (v4) client with S3 download URL signing.
 
     Implements the subset of the B2 native API needed by MediaViewer:
     account authorization, single/large file uploads, file-version deletion,
-    and download authorization tokens (the B2 equivalent of presigned URLs).
+    and S3-presigned download URLs for range-compatible playback.
     """
 
     def __init__(self, application_key_id, application_key, api_url=None):
@@ -40,6 +44,7 @@ class B2Client:
         self._api_url = (api_url or DEFAULT_API_URL).rstrip("/")
         self._auth = None
         self._auth_at = None
+        self._s3_client = None
 
     def _authorize(self):
         if self._auth is not None and time.monotonic() - self._auth_at < 3600:
@@ -56,6 +61,7 @@ class B2Client:
             "authorizationToken": data["authorizationToken"],
             "apiUrl": storage["apiUrl"],
             "downloadUrl": storage["downloadUrl"],
+            "s3ApiUrl": storage.get("s3ApiUrl"),
             "buckets": {
                 bucket["name"]: bucket["id"]
                 for bucket in storage.get("allowed", {}).get("buckets", [])
@@ -159,29 +165,45 @@ class B2Client:
         self, bucket, key, expires_in=None, content_disposition=None
     ):
         auth = self._authorize()
-        bucket_id = self._bucket_id(bucket)
+        self._bucket_id(bucket)
         if expires_in is None:
             expires_in = settings.B2_PRESIGNED_URL_EXPIRY
-        authorization = {
-            "bucketId": bucket_id,
-            "fileNamePrefix": key,
-            "validDurationInSeconds": expires_in,
-        }
-        if content_disposition is not None:
-            authorization["b2ContentDisposition"] = content_disposition
-        resp = requests.post(
-            f"{auth['apiUrl']}/b2api/{B2_API_VERSION}/b2_get_download_authorization",
-            json=authorization,
-            headers={"Authorization": auth["authorizationToken"]},
-            timeout=API_TIMEOUT,
+        if type(expires_in) is not int or not 1 <= expires_in <= 604800:
+            raise B2Error("B2 S3 URL expiry must be between 1 and 604800 seconds")
+        endpoint_url = auth.get("s3ApiUrl")
+        endpoint = (
+            re.fullmatch(r"https://s3\.([a-z0-9-]+)\.backblazeb2\.com", endpoint_url)
+            if isinstance(endpoint_url, str)
+            else None
         )
-        resp.raise_for_status()
-        token = resp.json()["authorizationToken"]
-        file_name = "/".join(quote(segment) for segment in key.split("/"))
-        url = f"{auth['downloadUrl']}/file/{quote(bucket)}/{file_name}?Authorization={token}"
+        if endpoint is None:
+            raise B2Error("B2 authorization returned an invalid S3 endpoint")
+        parameters = {"Bucket": bucket, "Key": key}
         if content_disposition is not None:
-            url += f"&b2ContentDisposition={quote(content_disposition, safe='')}"
-        return url
+            parameters["ResponseContentDisposition"] = content_disposition
+        try:
+            if (
+                self._s3_client is None
+                or self._s3_client.meta.endpoint_url != endpoint_url
+            ):
+                self._s3_client = boto3.client(
+                    "s3",
+                    endpoint_url=endpoint_url,
+                    region_name=endpoint.group(1),
+                    aws_access_key_id=self._application_key_id,
+                    aws_secret_access_key=self._application_key,
+                    config=Config(
+                        signature_version="s3v4", s3={"addressing_style": "path"}
+                    ),
+                )
+            return self._s3_client.generate_presigned_url(
+                "get_object",
+                Params=parameters,
+                ExpiresIn=expires_in,
+                HttpMethod="GET",
+            )
+        except BotoCoreError:
+            raise B2Error("B2 S3 download URL signing failed") from None
 
     def list_file_versions(self, bucket, key):
         """Return every B2 file version matching the key prefix."""

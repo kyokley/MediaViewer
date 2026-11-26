@@ -2,6 +2,7 @@ import hashlib
 import uuid
 from types import SimpleNamespace
 from unittest.mock import call
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import requests
@@ -9,7 +10,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
 
-from mediaviewer.b2 import B2Error
+from mediaviewer.b2 import B2Client, B2Error
 from mediaviewer.models import DownloadToken, MediaFile, VideoProgress
 from mediaviewer.views.b2player_utils import media_content_disposition
 
@@ -19,6 +20,69 @@ def _set_b2(media_path, key, filename=None, subtitles=None):
     media_path.filename = filename
     media_path.subtitle_files = subtitles or []
     media_path.save()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("use_uuid", (True, False))
+@pytest.mark.parametrize("is_movie", (True, False))
+def test_player_media_returns_s3_signed_video_and_subtitles(
+    mocker, client, create_user, create_movie, create_tv_media_file, use_uuid, is_movie
+):
+    mocker.patch("mediaviewer.models.media.Media._populate_poster")
+    user = create_user()
+    obj = create_movie() if is_movie else create_tv_media_file(filename="Episode.mp4")
+    media_path = obj.media_path
+    filename = "Movie.mp4" if is_movie else obj.filename
+    _set_b2(media_path, f"archive/{media_path.pk}/", filename, ["captions.vtt"])
+    if use_uuid and is_movie:
+        media_file = MediaFile.objects.create(
+            media_path=media_path,
+            filename=filename,
+            b2_uuid=uuid.uuid4(),
+            subtitle_files=["captions.vtt"],
+        )
+    elif not is_movie:
+        obj.b2_uuid = uuid.uuid4() if use_uuid else None
+        obj.subtitle_files = ["captions.vtt"]
+        obj.save()
+        media_file = obj
+    b2_client = B2Client("key-id", "key")
+    mocker.patch.object(
+        b2_client,
+        "_authorize",
+        return_value={
+            "buckets": {"bucket": "bucket-id"},
+            "s3ApiUrl": "https://s3.us-east-005.backblazeb2.com",
+        },
+    )
+    mocker.patch("mediaviewer.b2.get_b2_client", return_value=b2_client)
+    token = (
+        DownloadToken.objects.from_movie(user, obj)
+        if is_movie
+        else DownloadToken.objects.from_media_file(user, obj)
+    )
+    client.force_login(user)
+
+    response = client.get(reverse("mediaviewer:b2playermedia", args=(token.guid,)))
+
+    assert response.status_code == 200
+    body = response.json()
+    prefix = media_path.b2_upload_prefix if use_uuid else f"archive/{media_path.pk}/"
+    source_name = f"{media_file.b2_uuid}.mp4" if use_uuid else filename
+    source_url = urlsplit(body["source_url"])
+    assert source_url.path == f"/bucket/{prefix}{source_name}"
+    assert urlsplit(body["subtitle_urls"][0]).path == f"/bucket/{prefix}captions.vtt"
+    assert parse_qs(source_url.query)["response-content-disposition"] == [
+        media_content_disposition(obj, filename)
+    ]
+    for url in [body["source_url"], *body["subtitle_urls"]]:
+        parsed = urlsplit(url)
+        assert parsed.netloc == "s3.us-east-005.backblazeb2.com"
+        assert parse_qs(parsed.query)["X-Amz-Signature"]
+    stored_path = media_path._path
+    media_path.refresh_from_db()
+    assert media_path._path == stored_path
+    assert media_path._path.startswith("b2://")
 
 
 @pytest.mark.django_db

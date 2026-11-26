@@ -1,5 +1,7 @@
 import hashlib
+from urllib.parse import parse_qs, urlsplit
 
+import boto3
 import pytest
 
 from mediaviewer.b2 import B2Client, B2Error, get_b2_client
@@ -24,6 +26,7 @@ AUTHORIZE_RESPONSE = {
         "storageApi": {
             "apiUrl": "https://api123.backblazeb2.com",
             "downloadUrl": "https://f123.backblazeb2.com",
+            "s3ApiUrl": "https://s3.us-east-005.backblazeb2.com",
             "allowed": {
                 "buckets": [{"id": "bucket-id-1", "name": "mybucket"}],
             },
@@ -35,6 +38,7 @@ AUTH = {
     "authorizationToken": "account-token",
     "apiUrl": "https://api123.backblazeb2.com",
     "downloadUrl": "https://f123.backblazeb2.com",
+    "s3ApiUrl": "https://s3.us-east-005.backblazeb2.com",
     "buckets": {"mybucket": "bucket-id-1"},
 }
 
@@ -55,6 +59,7 @@ class TestB2ClientAuthorize:
         assert auth["authorizationToken"] == "account-token"
         assert auth["apiUrl"] == "https://api123.backblazeb2.com"
         assert auth["downloadUrl"] == "https://f123.backblazeb2.com"
+        assert auth["s3ApiUrl"] == "https://s3.us-east-005.backblazeb2.com"
         assert auth["buckets"] == {"mybucket": "bucket-id-1"}
 
     def test_authorize_is_cached(self, mocker):
@@ -100,12 +105,18 @@ class TestB2ClientAuthorize:
         assert mock_get.call_count == 2
         assert renewed_auth["authorizationToken"] == "renewed-account-token"
 
-    def test_presigned_url_uses_renewed_account_token(self, mocker, settings):
+    def test_presigned_url_uses_refreshed_s3_endpoint(self, mocker, settings):
         settings.B2_PRESIGNED_URL_EXPIRY = 1234
         client = B2Client("key-id", "key")
         renewed_response = {
             **AUTHORIZE_RESPONSE,
             "authorizationToken": "renewed-account-token",
+            "apiInfo": {
+                "storageApi": {
+                    **AUTHORIZE_RESPONSE["apiInfo"]["storageApi"],
+                    "s3ApiUrl": "https://s3.us-west-004.backblazeb2.com",
+                },
+            },
         }
         mock_get = mocker.patch("mediaviewer.b2.requests.get")
         mock_get.side_effect = [
@@ -113,15 +124,13 @@ class TestB2ClientAuthorize:
             FakeResponse(renewed_response),
         ]
         mocker.patch("time.monotonic", side_effect=[100, 3700, 3700, 3700])
-        mock_post = mocker.patch("mediaviewer.b2.requests.post")
-        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
-
         client._authorize()
-        client.generate_presigned_url("mybucket", "key/foo.mp4")
+        url = urlsplit(client.generate_presigned_url("mybucket", "key/foo.mp4"))
 
-        assert mock_post.call_args.kwargs["headers"] == {
-            "Authorization": "renewed-account-token"
-        }
+        assert url.netloc == "s3.us-west-004.backblazeb2.com"
+        assert (
+            "/us-west-004/s3/aws4_request" in parse_qs(url.query)["X-Amz-Credential"][0]
+        )
 
     def test_failed_authorization_refresh_is_retried(self, mocker):
         client = B2Client("key-id", "key")
@@ -299,75 +308,186 @@ class TestB2ClientUpload:
 
 
 class TestB2ClientGeneratePresignedUrl:
+    def test_signs_s3_get_without_native_download_authorization(self, mocker, settings):
+        settings.B2_PRESIGNED_URL_EXPIRY = 14400
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mock_post = mocker.patch("mediaviewer.b2.requests.post")
+        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
+
+        url = urlsplit(client.generate_presigned_url("mybucket", "key/foo.mp4"))
+        query = parse_qs(url.query)
+
+        assert url.scheme == "https"
+        assert url.netloc == "s3.us-east-005.backblazeb2.com"
+        assert url.path == "/mybucket/key/foo.mp4"
+        assert query["X-Amz-Algorithm"] == ["AWS4-HMAC-SHA256"]
+        assert query["X-Amz-Credential"][0].startswith("key-id/")
+        assert "/us-east-005/s3/aws4_request" in query["X-Amz-Credential"][0]
+        assert query["X-Amz-Expires"] == ["14400"]
+        assert query["X-Amz-SignedHeaders"] == ["host"]
+        assert query["X-Amz-Signature"]
+        assert "Authorization" not in query
+        mock_post.assert_not_called()
+
     def test_generate_presigned_url(self, mocker, settings):
         settings.B2_PRESIGNED_URL_EXPIRY = 1234
         client = B2Client("key-id", "key")
         mocker.patch.object(client, "_authorize", return_value=AUTH)
-        mock_post = mocker.patch("mediaviewer.b2.requests.post")
-        mock_post.return_value = FakeResponse(
-            {
-                "bucketId": "bucket-id-1",
-                "fileNamePrefix": "key/foo.mp4",
-                "authorizationToken": "download-token",
-            }
-        )
-
         url = client.generate_presigned_url("mybucket", "key/foo.mp4")
 
-        assert (
-            url
-            == "https://f123.backblazeb2.com/file/mybucket/key/foo.mp4?Authorization=download-token"
-        )
-        mock_post.assert_called_once_with(
-            "https://api123.backblazeb2.com/b2api/v4/b2_get_download_authorization",
-            json={
-                "bucketId": "bucket-id-1",
-                "fileNamePrefix": "key/foo.mp4",
-                "validDurationInSeconds": 1234,
-            },
-            headers={"Authorization": "account-token"},
-            timeout=30,
-        )
+        assert parse_qs(urlsplit(url).query)["X-Amz-Expires"] == ["1234"]
 
     def test_generate_presigned_url_encodes_spaces(self, mocker):
         client = B2Client("key-id", "key")
         mocker.patch.object(client, "_authorize", return_value=AUTH)
-        mock_post = mocker.patch("mediaviewer.b2.requests.post")
-        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
-
         url = client.generate_presigned_url("mybucket", "movies/Movie Name/foo.mp4")
 
-        assert (
-            url
-            == "https://f123.backblazeb2.com/file/mybucket/movies/Movie%20Name/foo.mp4?Authorization=download-token"
-        )
+        assert urlsplit(url).path == "/mybucket/movies/Movie%20Name/foo.mp4"
 
     def test_generate_presigned_url_with_custom_expiry(self, mocker):
         client = B2Client("key-id", "key")
         mocker.patch.object(client, "_authorize", return_value=AUTH)
-        mock_post = mocker.patch("mediaviewer.b2.requests.post")
-        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
+        url = client.generate_presigned_url("mybucket", "key/foo.mp4", expires_in=60)
 
-        client.generate_presigned_url("mybucket", "key/foo.mp4", expires_in=60)
+        assert parse_qs(urlsplit(url).query)["X-Amz-Expires"] == ["60"]
 
-        assert mock_post.call_args.kwargs["json"]["validDurationInSeconds"] == 60
-
-    def test_generate_presigned_url_sets_matching_content_disposition(self, mocker):
+    def test_generate_presigned_url_signs_content_disposition(self, mocker):
         client = B2Client("key-id", "key")
         mocker.patch.object(client, "_authorize", return_value=AUTH)
-        mock_post = mocker.patch("mediaviewer.b2.requests.post")
-        mock_post.return_value = FakeResponse({"authorizationToken": "download-token"})
         disposition = 'inline; filename="Show.S01E02.mkv"'
 
         url = client.generate_presigned_url(
             "mybucket", "key/foo.mp4", content_disposition=disposition
         )
 
-        assert mock_post.call_args.kwargs["json"]["b2ContentDisposition"] == disposition
-        assert url.endswith(
-            "?Authorization=download-token&b2ContentDisposition="
-            "inline%3B%20filename%3D%22Show.S01E02.mkv%22"
+        query = parse_qs(urlsplit(url).query)
+        assert query["response-content-disposition"] == [disposition]
+        assert "b2ContentDisposition" not in query
+        assert query["X-Amz-Signature"]
+
+    @pytest.mark.parametrize(
+        ("key", "path"),
+        [
+            ("nested/000/001/234/video.mp4", "/mybucket/nested/000/001/234/video.mp4"),
+            ("a+b%20?#.mp4", "/mybucket/a%2Bb%2520%3F%23.mp4"),
+            (
+                "日本語/épisode.mp4",
+                "/mybucket/%E6%97%A5%E6%9C%AC%E8%AA%9E/%C3%A9pisode.mp4",
+            ),
+            ("/leading//slashes.mp4", "/mybucket//leading//slashes.mp4"),
+        ],
+    )
+    def test_preserves_exact_object_key(self, mocker, key, path):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+
+        assert urlsplit(client.generate_presigned_url("mybucket", key)).path == path
+
+    @pytest.mark.parametrize("expiry", [0, -1, 604801, True, 1.5, "60"])
+    def test_rejects_invalid_expiry(self, mocker, expiry):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+
+        with pytest.raises(B2Error, match="expiry must be between"):
+            client.generate_presigned_url("mybucket", "key", expires_in=expiry)
+
+    @pytest.mark.parametrize(
+        "endpoint",
+        [None, "", "http://s3.us-east-005.backblazeb2.com", "https://s3.example.com"],
+    )
+    def test_rejects_missing_or_untrusted_endpoint(self, mocker, endpoint):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(
+            client, "_authorize", return_value={**AUTH, "s3ApiUrl": endpoint}
         )
+
+        with pytest.raises(B2Error, match="invalid S3 endpoint"):
+            client.generate_presigned_url("mybucket", "key")
+
+    def test_reuses_client_with_explicit_b2_credentials(self, mocker, monkeypatch):
+        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "unrelated-aws-key")
+        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "unrelated-aws-secret")
+        monkeypatch.setenv("AWS_SESSION_TOKEN", "unrelated-session-token")
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        create_client = mocker.spy(boto3, "client")
+
+        first = client.generate_presigned_url("mybucket", "one.mp4")
+        second = client.generate_presigned_url("mybucket", "two.mp4")
+
+        assert create_client.call_count == 1
+        kwargs = create_client.call_args.kwargs
+        assert kwargs["aws_access_key_id"] == "key-id"
+        assert kwargs["aws_secret_access_key"] == "key"
+        assert kwargs["region_name"] == "us-east-005"
+        assert kwargs["config"].signature_version == "s3v4"
+        assert kwargs["config"].s3 == {"addressing_style": "path"}
+        for url in (first, second):
+            query = parse_qs(urlsplit(url).query)
+            assert query["X-Amz-Credential"][0].startswith("key-id/")
+            assert "X-Amz-Security-Token" not in query
+
+    def test_sdk_signing_error_is_safe(self, mocker):
+        from botocore.exceptions import ParamValidationError
+
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        mocker.patch(
+            "mediaviewer.b2.boto3.client",
+            side_effect=ParamValidationError(report="private signing details"),
+        )
+
+        with pytest.raises(B2Error, match="^B2 S3 download URL signing failed$"):
+            client.generate_presigned_url("mybucket", "key")
+
+    def test_recreates_client_when_authorized_endpoint_changes(self, mocker):
+        client = B2Client("key-id", "key")
+        authorize = mocker.patch.object(client, "_authorize", return_value=AUTH)
+        client.generate_presigned_url("mybucket", "one.mp4")
+        original_client = client._s3_client
+        authorize.return_value = {
+            **AUTH,
+            "s3ApiUrl": "https://s3.us-west-004.backblazeb2.com",
+        }
+
+        url = urlsplit(client.generate_presigned_url("mybucket", "two.mp4"))
+
+        assert client._s3_client is not original_client
+        assert url.netloc == "s3.us-west-004.backblazeb2.com"
+        assert (
+            "/us-west-004/s3/aws4_request" in parse_qs(url.query)["X-Amz-Credential"][0]
+        )
+
+    @pytest.mark.parametrize("expiry", [1, 604800])
+    def test_accepts_expiry_boundaries(self, mocker, expiry):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+
+        url = client.generate_presigned_url("mybucket", "key", expires_in=expiry)
+
+        assert parse_qs(urlsplit(url).query)["X-Amz-Expires"] == [str(expiry)]
+
+    def test_keeps_dotted_bucket_in_path(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(
+            client, "_authorize", return_value={**AUTH, "buckets": {"my.bucket": "id"}}
+        )
+
+        url = urlsplit(client.generate_presigned_url("my.bucket", "key"))
+
+        assert url.netloc == "s3.us-east-005.backblazeb2.com"
+        assert url.path == "/my.bucket/key"
+
+    def test_rejects_bucket_outside_authorized_scope(self, mocker):
+        client = B2Client("key-id", "key")
+        mocker.patch.object(client, "_authorize", return_value=AUTH)
+        create_client = mocker.patch("mediaviewer.b2.boto3.client")
+
+        with pytest.raises(B2Error, match="not accessible"):
+            client.generate_presigned_url("other-bucket", "key")
+
+        create_client.assert_not_called()
 
 
 class TestB2ClientDelete:
