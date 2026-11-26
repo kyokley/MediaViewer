@@ -365,7 +365,7 @@ class MediaFile(TimeStampModel, ViewableObjectMixin):
         else:
             cell = f"""{cell}<input class="viewed-checkbox" name="{self.id}" type="checkbox" onclick="ajaxTVCheckBox(['{self.id}'], false)" />"""
         viewed_html = f'{cell}<span id="saved-{self.id}"></span></center>'
-        report_html = f"""<center><input class='report' name='report-{self.id}' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'mediafile')"/></center>"""
+        report_html = f"""<center><input class='report' name='report-{self.id}' value='Report' type='button' onclick="reportButtonClick('{self.id}', 'media_file')"/></center>"""
 
         payload = [
             viewed_html,
