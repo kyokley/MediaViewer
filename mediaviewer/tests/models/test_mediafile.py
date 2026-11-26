@@ -5,7 +5,9 @@ from mediaviewer.models import FilenameScrapeFormat, MediaFile, Poster
 
 
 @pytest.mark.django_db
-def test_tv_episode_report_button_uses_media_file_type(create_tv_media_file, create_user):
+def test_tv_episode_report_button_uses_media_file_type(
+    create_tv_media_file, create_user
+):
     media_file = create_tv_media_file()
     user = create_user()
 
