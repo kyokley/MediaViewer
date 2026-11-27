@@ -28,6 +28,7 @@ authors = [
 ]
 requires-python = "<4.0,>=3.12"
 dependencies = [
+    "boto3>=1.42,<2",
     "python-dateutil<3.0,>=2.7",
     "djangorestframework<4.0,>=3.9",
     "pytz<2019.0,>=2018.9",
