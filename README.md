@@ -82,6 +82,40 @@ The bulk `upload_to_b2` command stores its logical
 `<configured-prefix>/<MediaPath-ID>/<local-directory>/` URI unchanged; the
 nested object prefix is derived from that URI when files are uploaded or read.
 
+## B2 playback and download URLs
+
+MediaViewer signs video, subtitle, and direct-download URLs with B2's
+S3-compatible API using `boto3`. This preserves partial-content responses for
+full-file range requests such as `Range: bytes=0-`, unlike the Native download
+API. The S3 endpoint and region come from the cached Native
+`b2_authorize_account` response; no separate endpoint or AWS credentials setting
+is required.
+
+Keep using `B2_APPLICATION_KEY_ID` and `B2_APPLICATION_KEY`. The application key
+must be a regular B2 application key, not the master key, and must have
+`readFiles` access to the relevant bucket and object prefix. A key with only
+`shareFiles` cannot authorize these downloads. Upload and deletion capabilities
+remain separate and unchanged.
+
+The bucket's **S3 CORS rules** must permit `GET` from the deployed player origins
+and allow the `Range` request header. Include any MediaWaiter playback origin
+that uses the signed URLs. Native-only download CORS rules do not authorize
+S3 requests. Preserve existing rules when updating bucket configuration; the
+application does not change CORS settings automatically.
+
+`B2_PRESIGNED_URL_EXPIRY` still controls URL lifetime in seconds, defaulting to
+14,400 (four hours). Supported values are 1 through 604,800 (seven days).
+Content-disposition filenames and exact object keys are included in the signed
+request. Signed URLs grant temporary access; keep them out of logs and shared
+reports. Signing failures do not fall back to Native download URLs.
+
+Install the updated `uv.lock` dependencies or rebuild the deployment image.
+Stored `b2://` paths, object layouts, Native uploads and deletions, and migration
+publication behavior are unchanged. No database migration or media reupload is
+needed. After deployment, verify embedded Safari playback, subtitles, seeking,
+and AirPlay separately; direct-URL playback does not establish CORS or receiver
+compatibility.
+
 ## B2 deletion
 
 Deleting a B2-backed `MediaFile`, including queryset and cascade deletions,
