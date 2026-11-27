@@ -110,12 +110,31 @@
     padding: 1rem;
 }
 
-.b2-player-tools > button.btn {
+.b2-player-tools {
+    justify-content: space-between;
+    gap: 1rem 1.5rem;
+    padding: .875rem 1.25rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.b2-control-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+}
+
+.b2-control-group > button.btn {
     display: inline-grid;
     grid-template-areas: "control-label";
     flex: 0 0 max-content;
     width: max-content;
     min-width: max-content;
+}
+
+.b2-transport-controls #play-pause {
+    min-height: 2.75rem;
 }
 
 .b2-control-label,
@@ -160,7 +179,31 @@
 
 @media (max-width: 575.98px) {
     .b2-player-heading .btn { justify-self: stretch; }
-    .b2-player-tools { gap: .5rem; }
+    .b2-player-tools { justify-content: center; }
+    .b2-control-group { flex: 1 1 100%; }
+    .b2-transport-controls {
+        display: grid;
+        grid-template-columns: repeat(2, max-content);
+        justify-content: center;
+    }
+    .b2-transport-controls #play-pause {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        justify-self: center;
+    }
+    .b2-transport-controls #seek-back,
+    .b2-transport-controls #seek-forward {
+        grid-row: 2;
+        justify-self: center;
+    }
+    .b2-transport-controls #seek-back { grid-column: 1; }
+    .b2-transport-controls #seek-forward { grid-column: 2; }
+    .b2-transport-controls #start-over {
+        grid-column: 1 / -1;
+        grid-row: 3;
+        justify-self: center;
+    }
+    .b2-option-controls { padding-top: .75rem; border-top: 1px solid var(--bs-border-color); }
 }
 
 @media (prefers-reduced-motion: no-preference) {

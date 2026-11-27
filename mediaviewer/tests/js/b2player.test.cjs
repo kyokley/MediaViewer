@@ -270,14 +270,17 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
 });
 
 test("playback button sits between seek controls and keeps its state icon", async () => {
-    const controls = template.match(/<div class="b2-player-tools">([\s\S]*?)<\/div>/)[1];
+    const controls = template.match(/<div class="b2-player-tools">([\s\S]*?)<\/section>/)[1];
+    assert.match(controls, /class="b2-control-group b2-transport-controls" role="group" aria-label="Playback controls"/);
+    assert.match(controls, /class="b2-control-group b2-option-controls" role="group" aria-label="Playback options"/);
     assert.ok(controls.indexOf('id="seek-back"') < controls.indexOf('id="play-pause"'));
     assert.ok(controls.indexOf('id="play-pause"') < controls.indexOf('id="seek-forward"'));
+    assert.ok(controls.indexOf('id="start-over"') < controls.indexOf('id="cast-captions-toggle"'));
     const markup = controls.match(/<button\b[^>]*id="play-pause"[^>]*>([\s\S]*?)<\/button>/)[0];
     assert.match(markup, /class="b2-control-label"><i class="bi-play-fill" aria-hidden="true"><\/i>\s*Play<\/span>/);
     assert.match(markup, /class="b2-control-size" aria-hidden="true"><i class="bi-play-fill"><\/i>\s*Play<\/span>/);
     assert.match(markup, /class="b2-control-size" aria-hidden="true"><i class="bi-pause-fill"><\/i>\s*Pause<\/span>/);
-    assert.match(styles, /\.b2-player-tools > button\.btn\s*\{[^}]*display:\s*inline-grid[^}]*flex:\s*0 0 max-content[^}]*width:\s*max-content/);
+    assert.match(styles, /\.b2-control-group > button\.btn\s*\{[^}]*display:\s*inline-grid[^}]*flex:\s*0 0 max-content[^}]*width:\s*max-content/);
     assert.match(styles, /\.b2-control-label,\s*\.b2-control-size\s*\{[^}]*grid-area:\s*control-label/);
     assert.match(controls, /b2-control-size" aria-hidden="true">Captions: Off/);
     assert.match(controls, /b2-control-size" aria-hidden="true">Captions: On/);
