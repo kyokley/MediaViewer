@@ -15,8 +15,57 @@ const deferred = () => {
     return { promise, resolve, reject };
 };
 
+function createNode(tagName = "div") {
+    const node = {
+        tagName, childNodes: [], children: [], parentNode: null, style: {}, attributes: [],
+        append(...nodes) { for (const node of nodes) this.appendChild(node); },
+        appendChild(node) {
+            node.remove?.();
+            node.parentNode = this;
+            this.childNodes.push(node);
+            if (node.nodeType !== 8) this.children.push(node);
+            return node;
+        },
+        insertBefore(node, reference) {
+            node.remove?.();
+            const index = reference ? this.childNodes.indexOf(reference) : -1;
+            node.parentNode = this;
+            this.childNodes.splice(index < 0 ? this.childNodes.length : index, 0, node);
+            if (node.nodeType !== 8) {
+                const childIndex = reference ? this.children.indexOf(reference) : -1;
+                this.children.splice(childIndex < 0 ? this.children.length : childIndex, 0, node);
+            }
+            return node;
+        },
+        remove() {
+            if (!this.parentNode) return;
+            const parent = this.parentNode;
+            parent.childNodes = parent.childNodes.filter((child) => child !== this);
+            parent.children = parent.children.filter((child) => child !== this);
+            this.parentNode = null;
+        },
+        replaceWith(node) { this.parentNode?.insertBefore(node, this); this.remove(); },
+        get nextSibling() {
+            if (!this.parentNode) return null;
+            const siblings = this.parentNode.childNodes;
+            return siblings[siblings.indexOf(this) + 1] || null;
+        },
+        addEventListener(type, fn) { this.listeners ||= {}; this.listeners[type] = fn; },
+        removeEventListener(type, fn) { if (this.listeners?.[type] === fn) delete this.listeners[type]; },
+        dispatch(type, event = {}) { this.listeners?.[type]?.(event); },
+        cloneNode() {
+            const clone = createNode(tagName);
+            for (const key of ["href", "rel", "type", "textContent"]) if (key in this) clone[key] = this[key];
+            return clone;
+        },
+        setAttribute(name, value) { this.attributes.push({ name, value }); },
+    };
+    node.classList = { values: new Set(), add(value) { this.values.add(value); }, remove(value) { this.values.delete(value); }, contains(value) { return this.values.has(value); } };
+    return node;
+}
+
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
-    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle"];
+    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "picture-in-picture"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
         id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : id === "cast-video" ? { "aria-label": "Choose playback device", title: "Choose playback device" } : {}, listeners: {}, hidden: false, disabled: ["cast-captions-toggle", "play-pause", "cast-video"].includes(id), style: {},
         classes: new Set(),
@@ -29,7 +78,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         click() { return this.listeners.click?.(); },
     }]));
     for (const element of Object.values(elements)) element.classList.owner = element;
-    for (const id of ["play-pause", "cast-captions-toggle", "binge-toggle", "cast-video"]) {
+    for (const id of ["play-pause", "cast-captions-toggle", "binge-toggle", "cast-video", "picture-in-picture"]) {
         const element = elements[id];
         if (!element) continue;
         const label = { setAttribute() {} };
@@ -146,6 +195,44 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         media_url: "/media", progress_url: "/progress",
         viewed_url: "/viewed", guid: "guid-1", binge_mode: true, next_url: "/next", ...configPatch,
     }) };
+    const main = createNode("main");
+    const card = createNode("section");
+    card.className = "b2-player-card";
+    const frame = createNode("div");
+    const tools = createNode("div");
+    main.appendChild(card);
+    const followingMainNode = createNode("aside");
+    main.appendChild(followingMainNode);
+    card.append(frame, tools);
+    frame.appendChild(video);
+    video.closest = (selector) => selector === ".b2-player-card" ? card : null;
+    for (const id of ["player-status"]) frame.appendChild(elements[id]);
+    for (const id of ["seek-back", "play-pause", "seek-forward", "start-over", "cast-captions-toggle", "cast-video", "binge-toggle", "picture-in-picture"]) {
+        if (elements[id]) tools.appendChild(elements[id]);
+    }
+    const documentNode = createNode("document");
+    const body = createNode("body");
+    const head = createNode("head");
+    const documentElement = createNode("html");
+    documentElement.lang = "en";
+    documentElement.className = "test-page";
+    documentElement.attributes = [];
+    documentElement.setAttribute = (name, value) => documentElement.attributes.push({ name, value });
+    documentNode.appendChild(documentElement);
+    documentElement.append(head, body);
+    const stylesheet = createNode("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "/static/player.css";
+    const inaccessibleStylesheet = createNode("link");
+    inaccessibleStylesheet.cloneNode = () => { throw new Error("cross-origin stylesheet"); };
+    body.appendChild(main);
+    const originalParent = card.parentNode;
+    const originalNextSibling = card.nextSibling;
+    const pipWindow = configPatch.pipWindow || {
+        document: { documentElement: createNode("html"), body: createNode("body"), head: createNode("head"), styleSheets: [], createElement(tag) { return createNode(tag); } },
+        listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; },
+        closeCalls: 0, close() { this.closeCalls += 1; },
+    };
     const requests = [];
     const intervals = new Map();
     let nextInterval = 1;
@@ -230,16 +317,20 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         href: new URL(configPatch.nextAnchor, "https://example.test/player/").href,
         click() { nextAnchorClicks.push(this.href); },
     } : null;
-    const window = { __mediaViewerPlayerShared: sharedRuntime, ...(configPatch.htmx ? { htmx: {} } : {}), addEventListener(type, fn) { windowListeners[type] = fn; }, removeEventListener(type, fn) { if (windowListeners[type] === fn) delete windowListeners[type]; }, location: { assign(url) { navigations.push(url); } } };
+    const window = { __mediaViewerPlayerShared: sharedRuntime, ...(configPatch.htmx ? { htmx: {} } : {}), ...(configPatch.documentPictureInPicture ? { documentPictureInPicture: configPatch.documentPictureInPicture } : {}), addEventListener(type, fn) { windowListeners[type] = fn; }, removeEventListener(type, fn) { if (windowListeners[type] === fn) delete windowListeners[type]; }, location: { assign(url) { navigations.push(url); } } };
     window.__mockProvideCast = () => { window.cast = castApi; window.chrome = chromeApi; };
     const context = {
         document: {
             cookie: "", visibilityState: "visible",
             baseURI: "https://example.test/player/",
-            head: { append(script) { this.script = script; this.callbackAtAppend = window.__onGCastApiAvailable; if (!configPatch.castApiLate) queueMicrotask(() => { if (!configPatch.castUnavailable) window.__mockProvideCast(); window.__onGCastApiAvailable?.(!configPatch.castUnavailable); }); } },
+            head: Object.assign(head, { querySelectorAll() { return [stylesheet, inaccessibleStylesheet]; }, append(script) { this.appendChild(script); this.script = script; this.callbackAtAppend = window.__onGCastApiAvailable; if (!configPatch.castApiLate) queueMicrotask(() => { if (!configPatch.castUnavailable) window.__mockProvideCast(); window.__onGCastApiAvailable?.(!configPatch.castUnavailable); }); } }),
+            body,
+            documentElement,
             getElementById(id) { return id === "retry-video" ? retryButton : elements[id] || null; },
             querySelectorAll(selector) { return selector === ".b2-episode-nav a[href]" && nextAnchor ? [nextAnchor] : []; },
-            createElement(tag) { return { tagName: tag }; },
+            querySelector() { return null; },
+            createElement(tag) { return createNode(tag); },
+            createComment(text) { return Object.assign(createNode("#comment"), { nodeType: 8, textContent: text }); },
             addEventListener(type, fn) { documentListeners[type] = fn; },
             removeEventListener(type, fn) { if (documentListeners[type] === fn) delete documentListeners[type]; },
         },
@@ -247,11 +338,12 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         fetch: (url, options = {}) => { requests.push({ url, options }); return url === "/media" && !configPatch.testMediaFetch ? Promise.resolve(media(configPatch.testMediaResponse)) : fetcher(url, options, requests.length - 1); },
         URLSearchParams,
         URL,
+        getComputedStyle() { return { backgroundColor: "rgb(0, 0, 0)" }; },
         setInterval(fn) { const id = nextInterval++; intervals.set(id, fn); return id; },
         clearInterval(id) { intervals.delete(id); },
     };
     vm.runInNewContext(source, context);
-    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession, videoListeners: listeners };
+    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession, videoListeners: listeners, card, main, originalParent, originalNextSibling, pipWindow, stylesheet };
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
@@ -269,10 +361,130 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
 });
 
+test("Document Picture-in-Picture keeps a minimum content height and scrollable controls", () => {
+    const cardStyles = styles.match(/\.b2-pip-document \.b2-player-card-pip\s*\{([^}]+)\}/)[1];
+    assert.match(cardStyles, /min-height:\s*340px/);
+    assert.match(cardStyles, /overflow:\s*auto/);
+});
+
+test("Document Picture-in-Picture moves the existing player and restores it on close or pagehide", async () => {
+    assert.match(template, /<button\b[^>]*id="picture-in-picture"/);
+    const pipWindow = {
+        document: { documentElement: createNode("html"), body: createNode("body"), head: createNode("head"), createElement(tag) { return createNode(tag); } },
+        listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; },
+        closeCalls: 0, close() { this.closeCalls += 1; },
+    };
+    let requests = 0;
+    const player = createPlayer(async () => media({ subtitle_urls: ["/en.vtt"] }), {
+        testMediaFetch: true,
+        documentPictureInPicture: { requestWindow() { requests += 1; return Promise.resolve(pipWindow); } },
+    });
+    const button = player.elements["picture-in-picture"];
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    const track = player.video.textTracks[0];
+    track.mode = "showing";
+    player.video.currentTime = 37;
+    player.video.paused = false;
+
+    await button.click();
+    assert.equal(requests, 1);
+    assert.equal(button.hidden, false);
+    assert.equal(player.card.parentNode, pipWindow.document.body);
+    assert.equal(player.card.children[0].children[0], player.video);
+    assert.equal(player.video.textTracks[0], track);
+    assert.equal(track.mode, "showing");
+    assert.equal(player.video.currentTime, 37);
+    assert.equal(player.video.paused, false);
+    assert.equal(player.card.classList.contains("b2-player-card-pip"), true);
+    assert.equal(player.elements["cast-captions-toggle"].disabled, false);
+    assert.equal(pipWindow.document.head.children.some((node) => node.href === "/static/player.css"), true);
+    assert.equal(pipWindow.document.head.children.some((node) => node.tagName === "base"), true);
+
+    await button.click();
+    assert.equal(pipWindow.closeCalls, 1);
+    assert.equal(player.card.parentNode, player.originalParent);
+    assert.equal(player.card.nextSibling, player.originalNextSibling);
+    assert.equal(player.card.classList.contains("b2-player-card-pip"), false);
+    assert.equal(player.video.textTracks[0], track);
+    assert.equal(track.mode, "showing");
+
+    await button.click();
+    pipWindow.listeners.pagehide();
+    assert.equal(player.card.parentNode, player.originalParent);
+    assert.equal(player.card.nextSibling, player.originalNextSibling);
+});
+
+test("Document Picture-in-Picture is hidden without API and tolerates rejection and rapid clicks", async () => {
+    const unsupported = createPlayer(async () => ok());
+    assert.equal(unsupported.elements["picture-in-picture"].hidden, true);
+    const incomplete = createPlayer(async () => ok(), { documentPictureInPicture: {} });
+    assert.equal(incomplete.elements["picture-in-picture"].hidden, true);
+
+    const pending = deferred();
+    let calls = 0;
+    const rejected = createPlayer(async () => ok(), {
+        documentPictureInPicture: { requestWindow() { calls += 1; return pending.promise; } },
+    });
+    const button = rejected.elements["picture-in-picture"];
+    const first = button.click();
+    button.click();
+    assert.equal(calls, 1, "duplicate clicks do not open concurrent PiP windows");
+    pending.reject(new Error("PiP unavailable"));
+    await first;
+    await tick();
+    assert.equal(rejected.card.parentNode, rejected.originalParent);
+    assert.match(rejected.elements["player-status"].textContent, /Could not open picture-in-picture/);
+
+    const partialWindow = {
+        document: { documentElement: createNode("html"), body: Object.assign(createNode("body"), { append() { throw new Error("partial PiP setup"); } }), head: createNode("head"), createElement(tag) { return createNode(tag); } },
+        addEventListener() {}, closeCalls: 0, close() { this.closeCalls += 1; },
+    };
+    const partial = createPlayer(async () => ok(), {
+        documentPictureInPicture: { requestWindow: () => Promise.resolve(partialWindow) },
+    });
+    await partial.elements["picture-in-picture"].click();
+    assert.equal(partialWindow.closeCalls, 1);
+    assert.equal(partial.card.parentNode, partial.originalParent);
+    assert.equal(partial.card.nextSibling, partial.originalNextSibling);
+});
+
+test("Document Picture-in-Picture restores and closes on main pagehide or disposal, including late resolution", async () => {
+    for (const ending of ["pagehide", "dispose"]) {
+        const pipWindow = {
+            document: { documentElement: createNode("html"), body: createNode("body"), head: createNode("head"), createElement(tag) { return createNode(tag); } },
+            listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, closeCalls: 0,
+            close() { this.closeCalls += 1; },
+        };
+        const player = createPlayer(async () => ok(), {
+            documentPictureInPicture: { requestWindow: () => Promise.resolve(pipWindow) },
+        });
+        await player.elements["picture-in-picture"].click();
+        if (ending === "pagehide") player.windowListeners.pagehide();
+        else player.context.window.MediaViewerPlayer.dispose();
+        assert.equal(pipWindow.closeCalls, 1);
+        assert.equal(player.card.parentNode, player.originalParent);
+        assert.equal(player.card.nextSibling, player.originalNextSibling);
+    }
+
+    const late = deferred();
+    const lateWindow = { closeCalls: 0, close() { this.closeCalls += 1; } };
+    const pendingPlayer = createPlayer(async () => ok(), {
+        documentPictureInPicture: { requestWindow: () => late.promise },
+    });
+    const opening = pendingPlayer.elements["picture-in-picture"].click();
+    pendingPlayer.context.window.MediaViewerPlayer.dispose();
+    late.resolve(lateWindow);
+    await opening;
+    assert.equal(lateWindow.closeCalls, 1);
+    assert.equal(pendingPlayer.card.parentNode, pendingPlayer.originalParent);
+});
+
 test("playback button sits between seek controls and keeps its state icon", async () => {
     const controls = template.match(/<div class="b2-player-tools">([\s\S]*?)<\/section>/)[1];
-    assert.match(controls, /class="b2-control-group b2-transport-controls" role="group" aria-label="Playback controls"/);
-    assert.match(controls, /class="b2-control-group b2-option-controls" role="group" aria-label="Playback options"/);
+    assert.match(controls, /class="b2-control-group b2-transport-controls"\s+role="group"\s+aria-label="Playback controls"/);
+    assert.match(controls, /class="b2-control-group b2-option-controls"\s+role="group"\s+aria-label="Playback options"/);
     assert.ok(controls.indexOf('id="seek-back"') < controls.indexOf('id="play-pause"'));
     assert.ok(controls.indexOf('id="play-pause"') < controls.indexOf('id="seek-forward"'));
     assert.ok(controls.indexOf('id="start-over"') < controls.indexOf('id="cast-captions-toggle"'));

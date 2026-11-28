@@ -29,6 +29,80 @@
     if (!video || !status || !configNode) return null;
     let disposed = false;
     const listeners = [];
+    const playerCard = video.closest(".b2-player-card");
+    const pipButton = document.getElementById("picture-in-picture");
+    const pipApi = window.documentPictureInPicture;
+    let pipWindow = null;
+    let pipPlaceholder = null;
+    let pipRequestPending = false;
+    const pipSupported =
+      typeof pipApi?.requestWindow === "function" && Boolean(playerCard);
+    if (pipButton) pipButton.hidden = !pipSupported;
+    if (pipSupported) video.disablePictureInPicture = true;
+    const updatePipButton = (inPip) => {
+      if (!pipButton) return;
+      const label = inPip ? "Return player to page" : "Enter picture-in-picture";
+      pipButton.setAttribute("aria-label", label);
+      pipButton.setAttribute("title", label);
+      pipButton.setAttribute("aria-pressed", String(inPip));
+      const text = pipButton.querySelector(".b2-control-label");
+      if (text) text.textContent = inPip ? "Return to page" : "Picture in picture";
+    };
+    const restorePip = () => {
+      if (!pipPlaceholder) return;
+      pipPlaceholder.parentNode?.insertBefore(playerCard, pipPlaceholder);
+      pipPlaceholder.remove();
+      pipPlaceholder = null;
+      playerCard.classList.remove("b2-player-card-pip");
+      pipWindow = null;
+      updatePipButton(false);
+    };
+    const enterPip = async () => {
+      if (!alive() || pipRequestPending || !pipSupported) return;
+      if (pipWindow && !pipWindow.closed) {
+        pipWindow.close();
+        restorePip();
+        return;
+      }
+      pipRequestPending = true;
+      let nextWindow;
+      try {
+        nextWindow = await pipApi.requestWindow({ width: 480, height: 420 });
+        if (!alive()) { nextWindow.close(); return; }
+        pipWindow = nextWindow;
+        const doc = nextWindow.document;
+        doc.title = document.title;
+        doc.documentElement.lang = document.documentElement.lang;
+        doc.documentElement.className = document.documentElement.className;
+        for (const attribute of document.documentElement.attributes)
+          doc.documentElement.setAttribute(attribute.name, attribute.value);
+        const base = doc.createElement("base");
+        base.href = document.baseURI;
+        doc.head.append(base);
+        const referrer = document.querySelector('meta[name="referrer"]');
+        if (referrer) doc.head.append(referrer.cloneNode(true));
+        for (const node of document.head.querySelectorAll('link[rel="stylesheet"], style')) {
+          try { doc.head.append(node.cloneNode(true)); } catch (_) { /* stylesheet may be cross-origin */ }
+        }
+        const bodyStyle = getComputedStyle(document.body);
+        doc.body.style.margin = "0";
+        doc.body.style.padding = "0";
+        doc.body.style.background = bodyStyle.backgroundColor;
+        doc.body.classList.add("b2-pip-document");
+        pipPlaceholder = document.createComment("B2 player location");
+        playerCard.parentNode.insertBefore(pipPlaceholder, playerCard);
+        doc.body.append(playerCard);
+        playerCard.classList.add("b2-player-card-pip");
+        updatePipButton(true);
+        nextWindow.addEventListener("pagehide", restorePip, { once: true });
+      } catch (_) {
+        try { nextWindow?.close(); } catch (_) { /* window may already be closed */ }
+        restorePip();
+        if (alive()) setStatus("Could not open picture-in-picture");
+      } finally {
+        pipRequestPending = false;
+      }
+    };
     const listen = (target, type, handler, options) => {
       if (!target?.addEventListener) return;
       target.addEventListener(type, handler, options);
@@ -36,6 +110,7 @@
         target.removeEventListener?.(type, handler, options),
       );
     };
+    listen(pipButton, "click", enterPip);
     const alive = () => !disposed;
     const setLoading = (loading) => {
       if (loading) status.setAttribute("data-loading", "true");
@@ -1262,11 +1337,17 @@
       if (document.visibilityState === "hidden") flushOnExit();
     });
     listen(window, "pagehide", flushOnExit);
+    listen(window, "pagehide", () => {
+      if (pipWindow && !pipWindow.closed) pipWindow.close();
+      restorePip();
+    });
     loadMedia();
     if (window.cast?.framework && window.chrome?.cast?.media)
       initializeCast(true);
     return () => {
       if (disposed) return;
+      if (pipWindow && !pipWindow.closed) pipWindow.close();
+      restorePip();
       flushOnExit();
       disposed = true;
       localPlaySequence += 1;
