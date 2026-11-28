@@ -30,10 +30,23 @@
     let disposed = false;
     const listeners = [];
     const playerCard = video.closest(".b2-player-card");
+    const playerTools = playerCard?.querySelector?.(".b2-player-tools");
+    const playerFrame = video.parentNode;
     const pipButton = document.getElementById("picture-in-picture");
+    const pipTimeline = document.getElementById("pip-timeline");
+    const pipTimelineLabel = pipTimeline?.closest(".b2-pip-timeline");
+    const pipMuteButton = document.getElementById("pip-mute");
+    const pipVolume = document.getElementById("pip-volume");
+    const pipVolumeLabel = pipVolume?.closest(".b2-pip-volume");
     const pipApi = window.documentPictureInPicture;
     let pipWindow = null;
     let pipPlaceholder = null;
+    let pipToolsPlaceholder = null;
+    let pipTimelinePlaceholder = null;
+    let previousVideoControls = video.controls;
+    let lastNonzeroVolume = Number.isFinite(video.volume) && video.volume > 0
+      ? video.volume
+      : 1;
     let pipRequestPending = false;
     const pipSupported =
       typeof pipApi?.requestWindow === "function" && Boolean(playerCard);
@@ -53,6 +66,20 @@
       pipPlaceholder.parentNode?.insertBefore(playerCard, pipPlaceholder);
       pipPlaceholder.remove();
       pipPlaceholder = null;
+      if (pipToolsPlaceholder) {
+        pipToolsPlaceholder.parentNode?.insertBefore(playerTools, pipToolsPlaceholder);
+        pipToolsPlaceholder.remove();
+        pipToolsPlaceholder = null;
+      }
+      if (pipTimelinePlaceholder) {
+        pipTimelinePlaceholder.parentNode?.insertBefore(pipTimelineLabel, pipTimelinePlaceholder);
+        pipTimelinePlaceholder.remove();
+        pipTimelinePlaceholder = null;
+      }
+      video.controls = previousVideoControls;
+      if (pipTimelineLabel) pipTimelineLabel.hidden = true;
+      if (pipMuteButton) pipMuteButton.hidden = true;
+      if (pipVolumeLabel) pipVolumeLabel.hidden = true;
       playerCard.classList.remove("b2-player-card-pip");
       pipWindow = null;
       updatePipButton(false);
@@ -92,7 +119,25 @@
         pipPlaceholder = document.createComment("B2 player location");
         playerCard.parentNode.insertBefore(pipPlaceholder, playerCard);
         doc.body.append(playerCard);
+        if (playerTools) {
+          pipToolsPlaceholder = document.createComment("B2 player controls location");
+          playerTools.parentNode.insertBefore(pipToolsPlaceholder, playerTools);
+          playerFrame.append(playerTools);
+          if (pipTimelineLabel) {
+            pipTimelinePlaceholder = document.createComment("B2 timeline location");
+            pipTimelineLabel.parentNode.insertBefore(pipTimelinePlaceholder, pipTimelineLabel);
+            playerTools.insertBefore(pipTimelineLabel, playerTools.children[0] || null);
+          }
+        }
         playerCard.classList.add("b2-player-card-pip");
+        previousVideoControls = video.controls;
+        video.controls = false;
+        if (pipTimelineLabel) pipTimelineLabel.hidden = false;
+        if (pipMuteButton) pipMuteButton.hidden = false;
+        if (pipVolumeLabel) pipVolumeLabel.hidden = false;
+        if (pipVolume) pipVolume.value = String(video.volume);
+        updatePipTimeline();
+        updatePipMuteButton();
         updatePipButton(true);
         nextWindow.addEventListener("pagehide", restorePip, { once: true });
       } catch (_) {
@@ -112,6 +157,61 @@
     };
     listen(pipButton, "click", enterPip);
     const alive = () => !disposed;
+    const updatePipTimeline = () => {
+      if (!pipTimeline) return;
+      const duration = video.duration;
+      const usableDuration = Number.isFinite(duration) && duration > 0;
+      pipTimeline.disabled = castRemoteActive || !usableDuration;
+      pipTimeline.max = usableDuration ? String(duration) : "0";
+      pipTimeline.value = usableDuration && Number.isFinite(video.currentTime)
+        ? String(Math.min(duration, Math.max(0, video.currentTime)))
+        : "0";
+    };
+    const updatePipMuteButton = () => {
+      if (Number.isFinite(video.volume) && video.volume > 0)
+        lastNonzeroVolume = video.volume;
+      if (pipVolume && Number.isFinite(video.volume))
+        pipVolume.value = String(video.volume);
+      if (!pipMuteButton) return;
+      const muted = video.muted || video.volume === 0;
+      pipMuteButton.disabled = castRemoteActive;
+      pipMuteButton.textContent = muted ? "Unmute" : "Mute";
+      pipMuteButton.setAttribute("aria-label", muted ? "Unmute video" : "Mute video");
+      pipMuteButton.setAttribute("aria-pressed", String(muted));
+      if (pipVolume) pipVolume.disabled = castRemoteActive;
+    };
+    const updatePipLocalControls = () => {
+      updatePipTimeline();
+      updatePipMuteButton();
+    };
+    listen(pipTimeline, "input", () => {
+      const duration = video.duration;
+      const requestedTime = Number(pipTimeline.value);
+      if (alive() && !castRemoteActive && Number.isFinite(duration) && duration > 0 && Number.isFinite(requestedTime))
+        video.currentTime = Math.min(duration, Math.max(0, requestedTime));
+    });
+    listen(pipMuteButton, "click", () => {
+      if (!alive() || castRemoteActive) return;
+      if (video.muted || video.volume === 0) {
+        if (video.volume === 0) video.volume = lastNonzeroVolume;
+        video.muted = false;
+      } else {
+        if (video.volume > 0) lastNonzeroVolume = video.volume;
+        video.muted = true;
+      }
+      updatePipMuteButton();
+    });
+    listen(pipVolume, "input", () => {
+      if (!alive() || castRemoteActive) return;
+      const requestedVolume = Number(pipVolume.value);
+      if (!Number.isFinite(requestedVolume)) return;
+      video.volume = Math.max(0, Math.min(1, requestedVolume));
+      if (video.volume > 0) video.muted = false;
+      updatePipMuteButton();
+    });
+    listen(video, "volumechange", updatePipMuteButton);
+    listen(video, "timeupdate", updatePipTimeline);
+    listen(video, "durationchange", updatePipTimeline);
     const setLoading = (loading) => {
       if (loading) status.setAttribute("data-loading", "true");
       else status.removeAttribute("data-loading");
@@ -397,6 +497,7 @@
       castCaptionsButton.setAttribute("aria-pressed", String(enabled));
     };
     const updateCastControls = () => {
+      updatePipLocalControls();
       const media = getRemoteMedia();
       const sdkMedia = window.chrome?.cast?.media;
       if (!castRemoteActive) {

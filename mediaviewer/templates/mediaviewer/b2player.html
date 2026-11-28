@@ -37,6 +37,10 @@
                      role="status"
                      aria-live="polite"
                      data-loading="true">Loading video…</div>
+                <label class="b2-pip-timeline" for="pip-timeline" hidden>
+                    <span class="visually-hidden">Seek video</span>
+                    <input id="pip-timeline" type="range" min="0" max="0" value="0" step="0.1" disabled aria-label="Seek video">
+                </label>
             </div>
             <div class="b2-player-tools">
                 <div class="b2-control-group b2-transport-controls"
@@ -51,6 +55,11 @@
                             type="button"
                             aria-label="Play video"
                             disabled><span class="b2-control-label"><i class="bi-play-fill" aria-hidden="true"></i> Play</span><span class="b2-control-size" aria-hidden="true"><i class="bi-play-fill"></i> Play</span><span class="b2-control-size" aria-hidden="true"><i class="bi-pause-fill"></i> Pause</span></button>
+                    <button class="btn btn-outline-secondary" id="pip-mute" type="button" aria-label="Mute video" hidden>Mute</button>
+                    <label class="b2-pip-volume" for="pip-volume" hidden>
+                        <span class="visually-hidden">Volume</span>
+                        <input id="pip-volume" type="range" min="0" max="1" value="1" step="0.05" aria-label="Volume">
+                    </label>
                     <button class="btn btn-outline-secondary"
                             id="seek-forward"
                             type="button"

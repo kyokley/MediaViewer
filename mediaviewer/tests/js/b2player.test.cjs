@@ -65,15 +65,23 @@ function createNode(tagName = "div") {
 }
 
 function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ offset: null }) }), configPatch = {}, sharedRuntime = null) {
-    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "picture-in-picture"];
+    const ids = ["player-status", "play-pause", "seek-back", "seek-forward", "start-over", "binge-toggle", "cast-video", "cast-captions-toggle", "picture-in-picture", "pip-timeline", "pip-mute", "pip-volume"];
     const elements = Object.fromEntries(ids.map((id) => [id, {
-        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : id === "cast-video" ? { "aria-label": "Choose playback device", title: "Choose playback device" } : {}, listeners: {}, hidden: false, disabled: ["cast-captions-toggle", "play-pause", "cast-video"].includes(id), style: {},
+        id, textContent: id === "cast-captions-toggle" ? "Captions: Off" : id === "play-pause" ? "Play" : id === "pip-mute" ? "Mute" : "", attributes: id === "player-status" ? { "data-loading": "true" } : id === "cast-captions-toggle" ? { "aria-pressed": "false" } : id === "play-pause" ? { "aria-label": "Play video" } : id === "cast-video" ? { "aria-label": "Choose playback device", title: "Choose playback device" } : {}, listeners: {}, hidden: id === "pip-mute", disabled: ["cast-captions-toggle", "play-pause", "cast-video"].includes(id), style: {}, value: id === "pip-volume" ? "1" : "0", max: id === "pip-volume" ? "1" : "0",
         classes: new Set(),
         classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
-        querySelector(selector) { return this.children?.[selector] || null; },
-        addEventListener(type, fn) { this.listeners[type] = fn; },
-        removeEventListener(type, fn) { if (this.listeners[type] === fn) delete this.listeners[type]; },
-        setAttribute(name, value) { this.attributes[name] = value; },
+         querySelector(selector) { return this.children?.[selector] || null; },
+         addEventListener(type, fn) { this.listeners[type] = fn; },
+         removeEventListener(type, fn) { if (this.listeners[type] === fn) delete this.listeners[type]; },
+         dispatch(type, event = {}) { return this.listeners[type]?.(event); },
+         remove() {
+             if (!this.parentNode) return;
+             const parent = this.parentNode;
+             parent.childNodes = parent.childNodes.filter((child) => child !== this);
+             parent.children = parent.children.filter((child) => child !== this);
+             this.parentNode = null;
+         },
+         setAttribute(name, value) { this.attributes[name] = value; },
         removeAttribute(name) { delete this.attributes[name]; },
         click() { return this.listeners.click?.(); },
     }]));
@@ -144,7 +152,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         get() { return this._html; },
     });
     const video = {
-        currentTime: 0, duration: 100, paused: true, controls: true, readyState: 0, children: [], loadCalls: 0,
+        currentTime: 0, duration: 100, paused: true, controls: true, muted: false, volume: 1, readyState: 0, children: [], loadCalls: 0,
         textTracks,
         append(child) {
             child.remove = () => {
@@ -199,17 +207,45 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     const card = createNode("section");
     card.className = "b2-player-card";
     const frame = createNode("div");
+    const timelineLabel = createNode("label");
+    timelineLabel.hidden = true;
+    timelineLabel.className = "b2-pip-timeline";
+    elements["pip-timeline"].closest = () => timelineLabel;
+    timelineLabel.appendChild(elements["pip-timeline"]);
+    const volumeLabel = createNode("label");
+    volumeLabel.hidden = true;
+    volumeLabel.className = "b2-pip-volume";
+    elements["pip-volume"].closest = () => volumeLabel;
+    volumeLabel.appendChild(elements["pip-volume"]);
     const tools = createNode("div");
+    const transportControls = createNode("div");
+    transportControls.className = "b2-transport-controls";
+    const optionControls = createNode("div");
+    optionControls.className = "b2-option-controls";
     main.appendChild(card);
     const followingMainNode = createNode("aside");
     main.appendChild(followingMainNode);
     card.append(frame, tools);
+    card.querySelector = (selector) => selector === ".b2-player-tools" ? tools : null;
     frame.appendChild(video);
     video.closest = (selector) => selector === ".b2-player-card" ? card : null;
     for (const id of ["player-status"]) frame.appendChild(elements[id]);
-    for (const id of ["seek-back", "play-pause", "seek-forward", "start-over", "cast-captions-toggle", "cast-video", "binge-toggle", "picture-in-picture"]) {
-        if (elements[id]) tools.appendChild(elements[id]);
+    frame.appendChild(timelineLabel);
+    const afterTimeline = createNode("div");
+    frame.appendChild(afterTimeline);
+    tools.append(transportControls, optionControls);
+    for (const id of ["seek-back", "play-pause", "pip-mute"]) {
+        if (elements[id]) transportControls.appendChild(elements[id]);
     }
+    transportControls.appendChild(volumeLabel);
+    for (const id of ["seek-forward", "start-over"]) {
+        if (elements[id]) transportControls.appendChild(elements[id]);
+    }
+    for (const id of ["cast-captions-toggle", "picture-in-picture", "cast-video", "binge-toggle"]) {
+        if (elements[id]) optionControls.appendChild(elements[id]);
+    }
+    const afterTools = createNode("div");
+    card.appendChild(afterTools);
     const documentNode = createNode("document");
     const body = createNode("body");
     const head = createNode("head");
@@ -228,6 +264,9 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
     body.appendChild(main);
     const originalParent = card.parentNode;
     const originalNextSibling = card.nextSibling;
+    const originalToolsNextSibling = tools.nextSibling;
+    const originalTimelineNextSibling = timelineLabel.nextSibling;
+    const originalVolumeNextSibling = volumeLabel.nextSibling;
     const pipWindow = configPatch.pipWindow || {
         document: { documentElement: createNode("html"), body: createNode("body"), head: createNode("head"), styleSheets: [], createElement(tag) { return createNode(tag); } },
         listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; },
@@ -343,7 +382,7 @@ function createPlayer(fetcher = async () => ({ ok: true, json: async () => ({ of
         clearInterval(id) { intervals.delete(id); },
     };
     vm.runInNewContext(source, context);
-    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession, videoListeners: listeners, card, main, originalParent, originalNextSibling, pipWindow, stylesheet };
+    return { elements, video, requests, intervals, navigations, nextAnchorClicks, documentListeners, windowListeners, context, makeMediaSession, videoListeners: listeners, card, frame, tools, timelineLabel, volumeLabel, transportControls, main, originalParent, originalNextSibling, originalToolsNextSibling, originalTimelineNextSibling, originalVolumeNextSibling, pipWindow, stylesheet };
 }
 
 const ok = (body = {}) => ({ ok: true, json: async () => body });
@@ -361,10 +400,12 @@ test("loading status has a reduced-motion-aware CSS animation", () => {
     assert.match(styles, /@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?resume-notice-dismiss 20s steps\(1, end\)/);
 });
 
-test("Document Picture-in-Picture keeps a minimum content height and scrollable controls", () => {
-    const cardStyles = styles.match(/\.b2-pip-document \.b2-player-card-pip\s*\{([^}]+)\}/)[1];
-    assert.match(cardStyles, /min-height:\s*340px/);
-    assert.match(cardStyles, /overflow:\s*auto/);
+test("Document Picture-in-Picture custom controls and stylesheet hooks exist", () => {
+    assert.match(styles, /\.b2-pip-document/);
+    assert.match(styles, /\.b2-player-card-pip/);
+    assert.match(template, /id="pip-timeline" type="range"/);
+    assert.match(template, /id="pip-mute"[^>]*hidden/);
+    assert.match(template, /id="pip-volume"[^>]*type="range"/);
 });
 
 test("Document Picture-in-Picture moves the existing player and restores it on close or pagehide", async () => {
@@ -380,11 +421,22 @@ test("Document Picture-in-Picture moves the existing player and restores it on c
         documentPictureInPicture: { requestWindow() { requests += 1; return Promise.resolve(pipWindow); } },
     });
     const button = player.elements["picture-in-picture"];
+    const timeline = player.elements["pip-timeline"];
+    const mute = player.elements["pip-mute"];
+    const volume = player.elements["pip-volume"];
+    assert.equal(player.video.controls, true, "native controls remain enabled on the page");
+    assert.equal(player.timelineLabel.hidden, true);
+    assert.equal(mute.hidden, true);
+    assert.equal(player.volumeLabel.hidden, true);
+    assert.equal(player.tools.parentNode, player.card);
+    assert.equal(player.timelineLabel.parentNode, player.frame);
+    assert.equal(player.timelineLabel.nextSibling, player.originalTimelineNextSibling);
+    assert.equal(player.volumeLabel.parentNode, player.transportControls);
+    assert.equal(player.volumeLabel.nextSibling, player.originalVolumeNextSibling);
     await tick();
     player.video.dispatch("loadedmetadata");
     await tick();
     const track = player.video.textTracks[0];
-    track.mode = "showing";
     player.video.currentTime = 37;
     player.video.paused = false;
 
@@ -392,18 +444,100 @@ test("Document Picture-in-Picture moves the existing player and restores it on c
     assert.equal(requests, 1);
     assert.equal(button.hidden, false);
     assert.equal(player.card.parentNode, pipWindow.document.body);
-    assert.equal(player.card.children[0].children[0], player.video);
+    assert.equal(player.video.parentNode, player.frame);
     assert.equal(player.video.textTracks[0], track);
-    assert.equal(track.mode, "showing");
+    assert.equal(track.mode, "disabled");
     assert.equal(player.video.currentTime, 37);
     assert.equal(player.video.paused, false);
     assert.equal(player.card.classList.contains("b2-player-card-pip"), true);
+    assert.equal(player.video.controls, false);
+    assert.equal(player.tools.parentNode, player.frame);
+    assert.equal(timeline.disabled, false);
+    timeline.value = "42";
+    timeline.dispatch("input");
+    assert.equal(player.video.currentTime, 42);
+    player.video.currentTime = 140;
+    player.video.dispatch("timeupdate");
+    assert.equal(timeline.value, "100", "timeline display clamps current time to media duration");
+    timeline.value = "-5";
+    timeline.dispatch("input");
+    assert.equal(player.video.currentTime, 0, "seek range clamps below zero");
+    timeline.value = "101";
+    timeline.dispatch("input");
+    assert.equal(player.video.currentTime, 100, "seek range clamps above duration");
+    timeline.value = "not-a-number";
+    timeline.dispatch("input");
+    assert.equal(player.video.currentTime, 100, "invalid timeline input leaves valid playback time unchanged");
+    player.video.duration = Number.NaN;
+    player.video.currentTime = Number.NaN;
+    player.video.dispatch("durationchange");
+    assert.equal(timeline.disabled, true);
+    assert.equal(timeline.max, "0");
+    assert.equal(timeline.value, "0");
+    player.video.duration = 0;
+    player.video.currentTime = 12;
+    player.video.dispatch("durationchange");
+    assert.equal(timeline.disabled, true);
+    player.video.duration = 100;
+    player.video.currentTime = 12;
+    player.video.dispatch("durationchange");
+    assert.equal(timeline.disabled, false);
+
+    player.video.paused = true;
+    player.elements["play-pause"].click();
+    await tick();
+    assert.equal(player.video.paused, false, "existing play control remains active in PiP");
+    player.elements["play-pause"].click();
+    assert.equal(player.video.paused, true, "existing pause control remains active in PiP");
+    player.elements["seek-back"].click();
+    assert.equal(player.video.currentTime, 2, "existing backward seek remains active in PiP");
+    player.elements["seek-forward"].click();
+    assert.equal(player.video.currentTime, 12, "existing forward seek remains active in PiP");
+
+    player.elements["cast-captions-toggle"].click();
+    assert.equal(track.mode, "showing", "existing captions control updates the original native text track");
+    player.video.volume = 0.6;
+    player.video.dispatch("volumechange");
+    assert.equal(volume.value, "0.6", "volume range follows native volumechange events");
+    player.video.volume = 0;
+    player.video.dispatch("volumechange");
+    assert.equal(volume.value, "0");
+    assert.equal(mute.textContent, "Unmute");
+    mute.click();
+    assert.equal(player.video.volume, 0.6, "unmute restores last positive volume after volume reaches zero");
+    assert.equal(player.video.muted, false);
+    volume.value = "1.4";
+    volume.dispatch("input");
+    assert.equal(player.video.volume, 1, "volume range clamps above one");
+    volume.value = "-0.4";
+    volume.dispatch("input");
+    assert.equal(player.video.volume, 0, "volume range clamps below zero");
+    volume.value = "invalid";
+    volume.dispatch("input");
+    assert.equal(Number.isFinite(player.video.volume), true, "invalid volume input never sets a nonfinite volume");
+
+    assert.equal(timeline.hidden, false);
+    assert.equal(player.timelineLabel.hidden, false);
+    assert.equal(mute.hidden, false);
+    assert.equal(player.volumeLabel.hidden, false);
+    assert.equal(player.video.controls, false);
+    assert.equal(player.tools.parentNode, player.frame);
     assert.equal(player.elements["cast-captions-toggle"].disabled, false);
     assert.equal(pipWindow.document.head.children.some((node) => node.href === "/static/player.css"), true);
     assert.equal(pipWindow.document.head.children.some((node) => node.tagName === "base"), true);
 
     await button.click();
     assert.equal(pipWindow.closeCalls, 1);
+    assert.equal(player.video.controls, true);
+    assert.equal(player.tools.parentNode, player.card);
+    assert.equal(player.timelineLabel.hidden, true);
+    assert.equal(player.tools.nextSibling, player.originalToolsNextSibling);
+    assert.equal(player.timelineLabel.parentNode, player.frame);
+    assert.equal(player.timelineLabel.nextSibling, player.originalTimelineNextSibling);
+    assert.equal(player.volumeLabel.parentNode, player.transportControls);
+    assert.equal(player.volumeLabel.nextSibling, player.originalVolumeNextSibling);
+    assert.equal(mute.hidden, true);
+    assert.equal(player.volumeLabel.hidden, true);
     assert.equal(player.card.parentNode, player.originalParent);
     assert.equal(player.card.nextSibling, player.originalNextSibling);
     assert.equal(player.card.classList.contains("b2-player-card-pip"), false);
@@ -414,6 +548,13 @@ test("Document Picture-in-Picture moves the existing player and restores it on c
     pipWindow.listeners.pagehide();
     assert.equal(player.card.parentNode, player.originalParent);
     assert.equal(player.card.nextSibling, player.originalNextSibling);
+    assert.equal(player.tools.parentNode, player.card);
+    assert.equal(player.tools.nextSibling, player.originalToolsNextSibling);
+    assert.equal(player.timelineLabel.parentNode, player.frame);
+    assert.equal(player.timelineLabel.nextSibling, player.originalTimelineNextSibling);
+    assert.equal(player.volumeLabel.parentNode, player.transportControls);
+    assert.equal(player.volumeLabel.nextSibling, player.originalVolumeNextSibling);
+    assert.equal(player.video.controls, true);
 });
 
 test("Document Picture-in-Picture is hidden without API and tolerates rejection and rapid clicks", async () => {
@@ -448,6 +589,12 @@ test("Document Picture-in-Picture is hidden without API and tolerates rejection 
     assert.equal(partialWindow.closeCalls, 1);
     assert.equal(partial.card.parentNode, partial.originalParent);
     assert.equal(partial.card.nextSibling, partial.originalNextSibling);
+    assert.equal(partial.video.controls, true);
+    assert.equal(partial.tools.parentNode, partial.card);
+    assert.equal(partial.timelineLabel.parentNode, partial.frame);
+    assert.equal(partial.timelineLabel.hidden, true);
+    assert.equal(partial.volumeLabel.hidden, true);
+    assert.equal(partial.elements["pip-mute"].hidden, true);
 });
 
 test("Document Picture-in-Picture restores and closes on main pagehide or disposal, including late resolution", async () => {
@@ -466,6 +613,21 @@ test("Document Picture-in-Picture restores and closes on main pagehide or dispos
         assert.equal(pipWindow.closeCalls, 1);
         assert.equal(player.card.parentNode, player.originalParent);
         assert.equal(player.card.nextSibling, player.originalNextSibling);
+        assert.equal(player.tools.parentNode, player.card);
+        assert.equal(player.tools.nextSibling, player.originalToolsNextSibling);
+        assert.equal(player.timelineLabel.parentNode, player.frame);
+        assert.equal(player.timelineLabel.nextSibling, player.originalTimelineNextSibling);
+        assert.equal(player.volumeLabel.parentNode, player.transportControls);
+        assert.equal(player.volumeLabel.nextSibling, player.originalVolumeNextSibling);
+        assert.equal(player.video.controls, true);
+        assert.equal(player.timelineLabel.hidden, true);
+        assert.equal(player.volumeLabel.hidden, true);
+        assert.equal(player.elements["pip-mute"].hidden, true);
+        if (ending === "dispose") {
+            assert.equal(player.videoListeners.get("volumechange")?.length || 0, 0);
+            assert.equal(player.elements["pip-timeline"].listeners.input, undefined);
+            assert.equal(player.elements["pip-volume"].listeners.input, undefined);
+        }
     }
 
     const late = deferred();
@@ -479,6 +641,40 @@ test("Document Picture-in-Picture restores and closes on main pagehide or dispos
     await opening;
     assert.equal(lateWindow.closeCalls, 1);
     assert.equal(pendingPlayer.card.parentNode, pendingPlayer.originalParent);
+});
+
+test("Document Picture-in-Picture local controls do not change hidden playback during Cast", async () => {
+    const pipWindow = {
+        document: { documentElement: createNode("html"), body: createNode("body"), head: createNode("head"), createElement(tag) { return createNode(tag); } },
+        listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; }, close() {},
+    };
+    const player = createPlayer(async () => media(), {
+        testMediaFetch: true,
+        documentPictureInPicture: { requestWindow: () => Promise.resolve(pipWindow) },
+    });
+    await tick();
+    player.video.dispatch("loadedmetadata");
+    await tick();
+    await player.elements["picture-in-picture"].click();
+
+    const cast = player.context.window.cast;
+    cast.context.sessionListener({ sessionState: "SESSION_STARTED" });
+    await tick();
+    const localTime = player.video.currentTime = 17;
+    const localVolume = player.video.volume = 0.65;
+    const localMuted = player.video.muted = false;
+    const timeline = player.elements["pip-timeline"];
+    assert.equal(timeline.disabled, true);
+    assert.equal(player.elements["pip-mute"].disabled, true);
+    assert.equal(player.elements["pip-volume"].disabled, true);
+    timeline.value = "48";
+    timeline.dispatch("input");
+    player.elements["pip-mute"].click();
+    player.elements["pip-volume"].value = "0.2";
+    player.elements["pip-volume"].dispatch("input");
+    assert.equal(player.video.currentTime, localTime, "PiP timeline cannot seek the local video while casting");
+    assert.equal(player.video.volume, localVolume, "PiP volume cannot change local audio while casting");
+    assert.equal(player.video.muted, localMuted, "PiP mute cannot change local audio while casting");
 });
 
 test("playback button sits between seek controls and keeps its state icon", async () => {

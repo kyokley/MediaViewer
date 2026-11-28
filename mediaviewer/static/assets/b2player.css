@@ -31,6 +31,7 @@
 }
 
 #picture-in-picture[hidden] { display: none; }
+#pip-mute[hidden] { display: none; }
 
 .b2-pip-document {
     min-width: 320px;
@@ -46,24 +47,58 @@ body.b2-pip-document {
 .b2-pip-document .b2-player-card-pip {
     width: 100%;
     height: 100vh;
-    min-height: 340px;
-    overflow: auto;
+    overflow: hidden;
     border: 0;
     border-radius: 0;
     box-shadow: none;
 }
 
 .b2-pip-document .b2-video-frame {
-    aspect-ratio: 16 / 9;
+    height: 100vh;
+    aspect-ratio: auto;
 }
 
 .b2-pip-document .b2-player-tools {
-    justify-content: center;
-    gap: .5rem;
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .35rem;
+    max-height: 60vh;
+    overflow-y: auto;
     padding: .5rem;
+    background: linear-gradient(rgb(0 0 0 / 85%), transparent);
 }
 
+.b2-pip-document .b2-video-frame video { object-fit: contain; }
+
+.b2-pip-document .b2-pip-timeline {
+    order: -1;
+    width: 100%;
+    margin: 0;
+}
+
+.b2-pip-document .b2-pip-timeline input {
+    display: block;
+    width: 100%;
+    min-height: 1.5rem;
+    accent-color: var(--bs-primary);
+}
+
+.b2-pip-document .b2-pip-volume input {
+    width: 4.5rem;
+    accent-color: var(--bs-primary);
+}
+
+.b2-pip-document .b2-pip-timeline[hidden] { display: none; }
+.b2-pip-document .b2-pip-volume[hidden] { display: none; }
+
 .b2-pip-document .b2-control-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: .35rem;
 }
 
@@ -76,11 +111,19 @@ body.b2-pip-document {
     display: flex;
 }
 
+.b2-pip-document .b2-transport-controls #seek-back,
+.b2-pip-document .b2-transport-controls #seek-forward,
+.b2-pip-document .b2-transport-controls #start-over {
+    display: none;
+}
+
 .b2-pip-document .b2-control-group > button.btn {
     min-height: 2rem;
     padding: .25rem .5rem;
     font-size: .8rem;
 }
+
+.b2-pip-document #pip-mute { display: inline-grid; }
 
 .b2-pip-document .b2-control-group:not(.b2-transport-controls) > button:not(#cast-captions-toggle):not(#picture-in-picture) {
     display: none;
